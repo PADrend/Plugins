@@ -20,8 +20,10 @@ assert(EScript.VERSION>=607);
 	this file in new code!
 */
 
-var libPath = "EScript.exp/Std";
-loadOnce(libPath+"/basics.escript");
+addSearchPath(__DIR__ + "/../../modules/EScript");
+addSearchPath("EScript.exp");
+loadOnce("Std/basics.escript");
+Std.addModuleSearchPath(__DIR__ + "/../../modules/EScript");
 Std.addModuleSearchPath("EScript.exp");
 
 Std.require('Std/TypeExtensions');
