@@ -19,54 +19,23 @@ declareNamespace($SceneEditor,$ObjectEditor);
 
 //! ---|> Plugin
 SceneEditor.ObjectEditor.plugin := new Plugin({
-    Plugin.NAME : 'SceneEditor/ObjectEditor',
-    Plugin.DESCRIPTION : 'Editor for semantic objects',
-    Plugin.AUTHORS : "Claudius",
-    Plugin.OWNER : "All",
-    Plugin.LICENSE : "Mozilla Public License, v. 2.0",
-    Plugin.REQUIRES : ['NodeEditor','PADrend'],
-    Plugin.EXTENSION_POINTS : []
+	Plugin.NAME : 'SceneEditor/ObjectEditor',
+	Plugin.DESCRIPTION : 'Editor for semantic objects',
+	Plugin.AUTHORS : "Claudius",
+	Plugin.OWNER : "All",
+	Plugin.LICENSE : "Mozilla Public License, v. 2.0",
+	Plugin.REQUIRES : ['NodeEditor','PADrend','ObjectTraits'],
+	Plugin.EXTENSION_POINTS : []
 });
 
 var plugin = SceneEditor.ObjectEditor.plugin;
 
-plugin.objectTraitRegistry := new Map; // displayableName -> trait
-plugin.objectTraitGUIRegistry := new Map; // traitName -> guiProvider(obj)
-
 plugin.init @(override) := fn(){
-    registerExtension('PADrend_Init',this->initGUI);
-    
-//    //! temp
-
-    var t = new MinSG.PersistentNodeTrait("ObjectTraits.Fader");
-    declareNamespace($ObjectTraits);
-    ObjectTraits.Fader := t;
-    t.onInit += fn(node){
-		PADrend.message("Fade...");
-		node.fadeTime := DataWrapper.createFromValue(1);
-		node.fadeTime := DataWrapper.createFromValue(1);
-		node.onClick := fn(evt){
-			this.deactivate();
-			PADrend.planTask(this.fadeTime(),this->activate);
-		};		
-    };
-    this.registerObjectTrait(t);
-    
-    
-    this.registerObjectTraitGUI(t,fn(node){
-		return [ "Fader trait",
-			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
-			{
-				GUI.TYPE : GUI.TYPE_NUMBER,
-				GUI.LABEL : "Time",
-				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
-				GUI.DATA_WRAPPER : node.fadeTime //! \see ObjectTraits.Fader
-			}
-		];
-	});
-    
-    // ----------------
-    
+	registerExtension('PADrend_Init',this->initGUI);
+	
+	
+	// ----------------
+	
 	return true;
 };
 
@@ -172,10 +141,12 @@ plugin.initGUI := fn(){
 			}
 		];
 	});
-	gui.registerComponentProvider('ObjectEditor_ObjectConfig.5_traits',this->fn(MinSG.Node node){
+	static traitRegistry = Std.require('ObjectTraits/ObjectTraitRegistry');
+
+	gui.registerComponentProvider('ObjectEditor_ObjectConfig.5_traits',fn(MinSG.Node node){
 		var entries = [];
 		foreach( MinSG.getLocalPersistentNodeTraitNames(node) as var traitName){
-			var provider = objectTraitGUIRegistry[traitName] ;
+			var provider = traitRegistry.getGUIProvider(traitName);
 			if( provider ){
 				entries += {	GUI.TYPE : GUI.TYPE_NEXT_ROW	};
 				entries += '----';
@@ -185,8 +156,8 @@ plugin.initGUI := fn(){
 		}
 		return entries;
 	});
-
-	gui.registerComponentProvider('ObjectEditor_ObjectConfig.9_addTraits',this->fn(MinSG.Node node){
+	
+	gui.registerComponentProvider('ObjectEditor_ObjectConfig.9_addTraits',fn(MinSG.Node node){
 		return [
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			'----',
@@ -194,11 +165,11 @@ plugin.initGUI := fn(){
 			{
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Add object trait",
-				GUI.MENU_PROVIDER : [node] => this->fn(node){
+				GUI.MENU_PROVIDER : [node] => fn(node){
 					var enabledTraitNames =  new Set(MinSG.getLocalPersistentNodeTraitNames(node));
 					
 					var entries = [];
-					foreach( objectTraitRegistry as var name,var trait ){
+					foreach( traitRegistry.getTraits() as var name,var trait ){
 						if(enabledTraitNames.contains(trait.getName())){
 							entries += name + " (enabled)";
 						}else{
@@ -314,16 +285,6 @@ plugin.initGUI := fn(){
 
 // --------------------------------------------
 
-plugin.registerObjectTrait := fn(MinSG.PersistentNodeTrait trait,String name=""){
-	if(name.empty())
-		name = trait.getName();
-	objectTraitRegistry[name] = trait;
-};
-
-plugin.registerObjectTraitGUI := fn(MinSG.PersistentNodeTrait trait, provider ){
-	Traits.requireTrait(provider, Traits.CallableTrait); //! \see Traits.CallableTrait
-	objectTraitGUIRegistry[trait.getName()] = provider;
-};
 
 
 return plugin;
