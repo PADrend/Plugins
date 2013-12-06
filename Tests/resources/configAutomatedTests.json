@@ -1,0 +1,23 @@
+{
+	"PADrend":{
+		"modules":{
+			"CommandHandling":true,
+			"EventLoop":false,
+			"GUI":false,
+			"Navigation":false,
+			"NodeInteraction":false,
+			"SceneManagement":true,
+			"Serialization":true,
+			"SplashScreen":false,
+			"SystemUI":false,
+			"UITools":false
+		},
+		"plugins":{
+			"Effects":false,
+			"NodeEditor":false,
+			"SceneEditor":false,
+			"Tests":true,
+			"Tools":false
+		}
+	}
+}

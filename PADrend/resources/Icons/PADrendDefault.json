@@ -1,0 +1,47 @@
+[
+{
+	"image" : "PADrendIcons16.png",
+	"icons" : {
+		"#FileSmall" : [0,0,16,16],
+		"#WindowSmall" : [16,0,16,16],
+		"#ToolsSmall" : [32,0,16,16],
+		"#SettingsSmall" : [48,0,16,16],
+		"#ScenesSmall" : [64,0,16,16],
+		"#PluginsSmall" : [80,0,16,16],
+		"#EffectsSmall" : [96,0,16,16],
+		"#SpielereiSmall" : [128,0,16,16],
+		"#NodeSmall" : [0,16,16,16],
+		"#GroupNodeSmall" : [16,16,16,16],
+		"#NodesSmall" : [32,16,16,16],
+		"#StateSmall" : [48,16,16,16],
+		"#StatesSmall" : [64,16,16,16],
+		"#RenderingStateSmall" : [80,16,16,16],
+		"#LightingStateSmall" : [96,16,16,16],
+		"#TextureStateSmall" : [112,16,16,16],
+		"#BlendingStateSmall" : [128,16,16,16],
+		"#ShaderStateSmall" : [144,16,16,16],
+		"#UniformStateSmall" : [160,16,16,16],
+		"#MaterialStateSmall" : [176,16,16,16],
+		"#TransformationSmall" : [208,16,16,16],
+		"#BehaviourSmall" : [224,16,16,16],
+		"#RefreshSmall" : [0,32,16,16],
+		"#AddSmall" : [16,32,16,16],
+		"#NewSmall" : [32,32,16,16],
+		"#RemoveSmall" : [48,32,16,16],
+		"#DestroySmall" : [64,32,16,16],
+		"#UpSmall" : [80,32,16,16],
+		"#RightSmall" : [96,32,16,16],
+		"#DownSmall" : [112,32,16,16],
+		"#LeftSmall" : [128,32,16,16],
+		"#ErrorSmall" : [144,32,16,16],
+		"#WarningSmall" : [160,32,16,16],
+		"#OptionsSmall" : [180,32,8,16],
+		}
+},
+{
+	"image" : "PADrendLogo_small.png",
+	"icons" : {
+		"#PADrendLogoSmall" : [0,0,16,14]
+	}
+}
+]

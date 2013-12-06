@@ -1,0 +1,78 @@
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013 Mouns R. Husan Almarrani
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+/****
+ **	[Plugin:NodeEditor/ObjectPlacer/BuiltinLib]
+ **/
+
+
+//! ---|> Plugin
+var plugin = new Plugin({
+		Plugin.NAME : 'SceneEditor/ObjectPlacer/BuildinLib',
+		Plugin.DESCRIPTION : 'Add standard nodes.',
+		Plugin.VERSION : 1.0,
+		Plugin.AUTHORS : "Claudius",
+		Plugin.OWNER : "All",
+		Plugin.REQUIRES : ['NodeEditor'],
+		Plugin.EXTENSION_POINTS : [	]
+});
+
+plugin.init @(override) := fn(){
+	loadOnce(__DIR__+"/Utils.escript");
+	registerExtension('PADrend_Init',this->this.ex_Init);
+	return true;
+};
+
+//!	[ext:PADrend_Init]
+plugin.ex_Init := fn(){
+
+	//! \see SceneEditor/ObjectPlacer
+	gui.registerComponentProvider('SceneEditor_ObjectProviderEntries.builtIn',this->fn(){
+		var entries = ["BuiltIn"];
+		foreach( {
+					"DirectionalLight" : 	fn(){	return new MinSG.LightNode( MinSG.LightNode.DIRECTIONAL );	},
+					"GenericMetaNode" : 	fn(){	return new MinSG.GenericMetaNode();	},
+					"ListNode" : 			fn(){	return new MinSG.ListNode();	},
+					"Orthographic Camera" : fn(){	return new MinSG.CameraNodeOrtho();	},
+					"Perspective Camera" : 	fn(){	return new MinSG.CameraNode();	},
+					"PointLight" : 			fn(){	return new MinSG.LightNode( MinSG.LightNode.POINT );	},
+					"SpotLight" : 			fn(){	return new MinSG.LightNode( MinSG.LightNode.SPOT );	},
+					"Tree" : 				fn(){	return tree();	}, // amc
+				} as var name,var factory){
+
+			var entry = gui.create({
+				GUI.TYPE : GUI.TYPE_LABEL,
+				GUI.LABEL : name,
+				GUI.DRAGGING_ENABLED : true,
+				GUI.DRAGGING_MARKER : fn(c){	_draggingMarker_relPos.setValue(-5,-5); return "X";},
+				GUI.DRAGGING_CONNECTOR : true,
+			});
+			//! \see DraggableObjectCreatorTrait
+			Traits.addTrait(entry,ObjectPlacer.DraggableObjectCreatorTrait,ObjectPlacer.defaultNodeInserter,factory);
+
+			entries += entry;
+		}
+		return {
+			GUI.TYPE : GUI.TYPE_TREE_GROUP,
+			GUI.FLAGS : GUI.COLLAPSED_ENTRY,
+			GUI.OPTIONS :  entries
+		};
+	});
+};
+
+
+
+//----------------------------------------------------------------------------
+
+
+return plugin;

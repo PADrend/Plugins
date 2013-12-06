@@ -1,0 +1,16 @@
+[
+{
+	"image" : "ToolbarIcons24.png",
+	"icons" : {
+		"#NodeTranslate" : [0,0,24,24],
+		"#NodeRotate" : [24,0,24,24],
+		"#NodeScale" : [48,0,24,24],
+		"#NodeSnap" : [72,0,24,24],
+		"#Anchor" : [96,0,24,24],
+		"#SelectWindowInclude" : [120,0,24,24],
+		"#SelectWindowCrossing" : [144,0,24,24],
+		"#SceneEditorWindow" : [168,0,24,24],
+		"#SceneEditorConfig" : [192,0,24,24],
+		}
+}
+]
