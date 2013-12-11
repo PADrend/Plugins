@@ -21,9 +21,11 @@ assert(EScript.VERSION>=607);
 */
 
 addSearchPath(__DIR__ + "/../../modules/EScript");
+addSearchPath(__DIR__ + "/../../../EScript");
 addSearchPath("EScript.exp");
 loadOnce("Std/basics.escript");
 Std.addModuleSearchPath(__DIR__ + "/../../modules/EScript");
+Std.addModuleSearchPath(__DIR__ + "/../../../EScript");
 Std.addModuleSearchPath("EScript.exp");
 
 Std.require('Std/TypeExtensions');
