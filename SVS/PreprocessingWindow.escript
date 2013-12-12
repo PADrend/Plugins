@@ -198,14 +198,6 @@ SVS.setUpPreprocessingWindow := fn() {
 									selectedNode().unsetNodeAttribute('VisibilitySphere');
 
 									selectedNode().addState(new MinSG.SVS.Renderer);
-									var projSizeFilterState = new MinSG.ProjSizeFilterState;
-									projSizeFilterState.setTargetChannel("NO_CHANNEL");
-									selectedNode().addState(projSizeFilterState);
-									var budgetAnnotationState = new MinSG.BudgetAnnotationState;
-									budgetAnnotationState.setAnnotationAttribute("TriangleBudget");
-									budgetAnnotationState.setBudget(1.0e+7);
-									budgetAnnotationState.setDistributionType(MinSG.BudgetAnnotationState.DISTRIBUTE_PROJECTED_SIZE);
-									selectedNode().addState(budgetAnnotationState);
 
 									if(PADrend.getCurrentScene() == selectedNode()) {
 										PADrend.selectScene(selectedNode());
