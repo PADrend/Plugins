@@ -33,9 +33,9 @@ LogoPlugin.init := fn() {
 		registerExtension('PADrend_Init',	this->fn(){	setLogo(activeLogoName);} );
 	}
 	
-	this.path := "plugins/PADrend/resources/Logos";
+	this.path := __DIR__ + "/../PADrend/resources/Logos";
 	this.enabled := systemConfig.getValue('Effects.Logo.enabled', true); 
-	this.activeLogoName := systemConfig.getValue('Effects.Logo.logo', "file://plugins/PADrend/resources/Logos/logo_padrend_small.png");
+	this.activeLogoName := systemConfig.getValue('Effects.Logo.logo', this.path + "/logo_padrend_small.png");
 	this.whiteBackground := systemConfig.getValue('Effects.Logo.whiteBackground', false);
 	
 	this.logoWindow := void;
