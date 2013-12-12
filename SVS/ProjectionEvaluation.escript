@@ -69,8 +69,8 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 		var nodes = [selectedNode];
 		while(!nodes.empty()) {
 			var node = nodes.popBack();
-			if(MinSG.SphericalSampling.hasSamplingSphere(node)) {
-				samplingSphere(MinSG.SphericalSampling.retrieveSamplingSphere(node));
+			if(MinSG.SVS.hasSamplingSphere(node)) {
+				samplingSphere(MinSG.SVS.retrieveSamplingSphere(node));
 				return;
 			}
 			nodes.append(MinSG.getChildNodes(node));
@@ -130,11 +130,11 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 	panel++;
 
 	var createCamera = fn(MinSG.GroupNode node, 
-						  MinSG.SphericalSampling.SamplingSphere samplingSphere, 
+						  MinSG.SVS.SamplingSphere samplingSphere, 
 						  Geometry.Vec3 viewingDirection, 
 						  Number frustumAngle,
 						  Number resolution) {
-		var worldSphere = MinSG.SphericalSampling.transformSphere(samplingSphere.getSphere(),
+		var worldSphere = MinSG.SVS.transformSphere(samplingSphere.getSphere(),
 																  node.getWorldMatrix());
 		var radius = worldSphere.getRadius();
 		// Make sure that the camera is not exactly on the sphere surface
@@ -185,7 +185,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 								  computeExactVisibleSet,
 								  getVisibleSetStrings,
 								  MinSG.GroupNode node, 
-								  MinSG.SphericalSampling.SamplingSphere samplingSphere,
+								  MinSG.SVS.SamplingSphere samplingSphere,
 								  Number resolution) {
 		var fbo = new Rendering.FBO();
 		var color = Rendering.createStdTexture(resolution, resolution, true);
@@ -228,7 +228,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 									  computeExactVisibleSet,
 									  getVisibleSetStrings,
 									  MinSG.GroupNode node, 
-									  MinSG.SphericalSampling.SamplingSphere samplingSphere,
+									  MinSG.SVS.SamplingSphere samplingSphere,
 									  Number resolution) {
 		var fbo = new Rendering.FBO();
 		var color = Rendering.createStdTexture(resolution, resolution, true);
@@ -253,8 +253,8 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 			var azimuth = Rand.uniform(0.0, 2.0 * Math.PI);
 			var direction = Geometry.Sphere.calcCartesianCoordinateUnitSphere(inclination, azimuth);
 
-			var pvsNearest = samplingSphere.queryValue(direction, MinSG.SphericalSampling.INTERPOLATION_NEAREST);
-			var pvsMax3 = samplingSphere.queryValue(direction, MinSG.SphericalSampling.INTERPOLATION_MAX3);
+			var pvsNearest = samplingSphere.queryValue(direction, MinSG.SVS.INTERPOLATION_NEAREST);
+			var pvsMax3 = samplingSphere.queryValue(direction, MinSG.SVS.INTERPOLATION_MAX3);
 
 			var underestimationOrthoNearest = void;
 			var underestimationOrthoMax3 = void;
@@ -331,7 +331,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 
 	var randomDirectionsEvaluator = fn(createCamera,
 									   MinSG.GroupNode node, 
-									   MinSG.SphericalSampling.SamplingSphere samplingSphere,
+									   MinSG.SVS.SamplingSphere samplingSphere,
 									   Number resolution) {
 		var fbo = new Rendering.FBO();
 		var color = Rendering.createStdTexture(resolution, resolution, true);
@@ -378,7 +378,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 		outln("Data written to file \"", fileName, "\"");
 	}.bindFirstParams(createCamera);
 
-	var outputSamplingSpheretoTSV = fn(MinSG.SphericalSampling.SamplingSphere samplingSphere) {
+	var outputSamplingSpheretoTSV = fn(MinSG.SVS.SamplingSphere samplingSphere) {
 		var samples = samplingSphere.getSamples();
 		var output = "Sample\tBenefits\tCosts\n";
 		foreach(samples as var sampleIndex, var sample) {

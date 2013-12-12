@@ -51,9 +51,9 @@ var dialog = new GUI.FileDialog("Select Directory", "data/SVS/scene", [".minsg"]
 		var nodes = [scene];
 		while(!nodes.empty()) {
 			var node = nodes.popBack();
-			if(MinSG.SphericalSampling.hasSamplingSphere(node)) {
+			if(MinSG.SVS.hasSamplingSphere(node)) {
 				svsNode = node;
-				samplingSphere = MinSG.SphericalSampling.retrieveSamplingSphere(node);
+				samplingSphere = MinSG.SVS.retrieveSamplingSphere(node);
 				break;
 			}
 			nodes.append(MinSG.getChildNodes(node));

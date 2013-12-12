@@ -79,7 +79,7 @@ SVS.getCrossNode := fn() {
 
 //!	[static]
 SVS.setUpRendering := fn(plugin) {
-	var worldSphere = MinSG.SphericalSampling.transformSphere(plugin.sphere, plugin.node.getWorldMatrix());
+	var worldSphere = MinSG.SVS.transformSphere(plugin.sphere, plugin.node.getWorldMatrix());
 	
 	// Calculate the distance in a way that the bounding sphere fits into the viewing frustum.
 	var radius = worldSphere.getRadius();

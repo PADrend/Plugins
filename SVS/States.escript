@@ -14,12 +14,12 @@ declareNamespace($SVS);
 
 SVS.registerStates := fn() {
 	registerExtension('NodeEditor_QueryAvailableStates', fn(states) {
-		states.set("SVS BudgetRenderer", fn() { return new MinSG.SphericalSampling.BudgetRenderer; });
-		states.set("SVS GeometryNodeCollector", fn() { return new MinSG.SphericalSampling.GeometryNodeCollector; });
-		states.set("SVS Renderer", fn() { return new MinSG.SphericalSampling.Renderer; });
-		states.set("SVS SphereVisualizationRenderer", fn() { return new MinSG.SphericalSampling.SphereVisualizationRenderer; });
+		states.set("SVS BudgetRenderer", fn() { return new MinSG.SVS.BudgetRenderer; });
+		states.set("SVS GeometryNodeCollector", fn() { return new MinSG.SVS.GeometryNodeCollector; });
+		states.set("SVS Renderer", fn() { return new MinSG.SVS.Renderer; });
+		states.set("SVS SphereVisualizationRenderer", fn() { return new MinSG.SVS.SphereVisualizationRenderer; });
 	});
-	NodeEditor.registerConfigPanelProvider(MinSG.SphericalSampling.Renderer, fn(MinSG.SphericalSampling.Renderer state, panel) {
+	NodeEditor.registerConfigPanelProvider(MinSG.SVS.Renderer, fn(MinSG.SVS.Renderer state, panel) {
 		panel += "*SVS Renderer*";
 		panel++;
 		panel += {
@@ -27,10 +27,10 @@ SVS.registerStates := fn() {
 			GUI.LABEL			:	"Interpolation",
 			GUI.TOOLTIP			:	"The interpolation method that is used to generate results for queries between spherical sample points.",
 			GUI.OPTIONS			:	[
-										[MinSG.SphericalSampling.INTERPOLATION_NEAREST, "Nearest"],
-										[MinSG.SphericalSampling.INTERPOLATION_MAX3, "Max3"],
-										[MinSG.SphericalSampling.INTERPOLATION_MAXALL, "MaxAll"],
-										[MinSG.SphericalSampling.INTERPOLATION_WEIGHTED3, "Weighted3"]
+										[MinSG.SVS.INTERPOLATION_NEAREST, "Nearest"],
+										[MinSG.SVS.INTERPOLATION_MAX3, "Max3"],
+										[MinSG.SVS.INTERPOLATION_MAXALL, "MaxAll"],
+										[MinSG.SVS.INTERPOLATION_WEIGHTED3, "Weighted3"]
 									],
 			GUI.DATA_PROVIDER	:	state -> state.getInterpolationMethod,
 			GUI.ON_DATA_CHANGED	:	state -> state.setInterpolationMethod,
@@ -68,7 +68,7 @@ SVS.registerStates := fn() {
 		};
 		panel++;
 	});
-	NodeEditor.registerConfigPanelProvider(MinSG.SphericalSampling.BudgetRenderer, fn(MinSG.SphericalSampling.BudgetRenderer state, panel) {
+	NodeEditor.registerConfigPanelProvider(MinSG.SVS.BudgetRenderer, fn(MinSG.SVS.BudgetRenderer state, panel) {
 		panel += "*SVS BudgetRenderer*";
 		panel++;
 

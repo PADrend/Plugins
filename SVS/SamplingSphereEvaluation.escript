@@ -16,7 +16,7 @@ loadOnce(__DIR__ + "/SampleCreation.escript");
 loadOnce(__DIR__ + "/SamplingSphere.escript");
 
 //!	[static]
-SVS.compareSamplingSpheres := fn(MinSG.SphericalSampling.SamplingSphere samplingSphere, MinSG.SphericalSampling.SamplingSphere referenceSamplingSphere, interpolationMethod) {
+SVS.compareSamplingSpheres := fn(MinSG.SVS.SamplingSphere samplingSphere, MinSG.SVS.SamplingSphere referenceSamplingSphere, interpolationMethod) {
 	var diffSamples = [];
 	foreach(referenceSamplingSphere.getSamples() as var refSample) {
 		var value = samplingSphere.queryValue(refSample.getPosition(), interpolationMethod);
@@ -27,19 +27,19 @@ SVS.compareSamplingSpheres := fn(MinSG.SphericalSampling.SamplingSphere sampling
 		} else {
 			diffValue = referenceValue - value;
 		}
-		var samplePoint = new MinSG.SphericalSampling.SamplePoint(refSample.getPosition());
+		var samplePoint = new MinSG.SVS.SamplePoint(refSample.getPosition());
 		samplePoint.setValue(diffValue);
 		samplePoint.description = refSample.description;
 		diffSamples += samplePoint;
 	}
-	return new MinSG.SphericalSampling.SamplingSphere(
+	return new MinSG.SVS.SamplingSphere(
 		samplingSphere.getSphere().clone(), 
 		diffSamples
 	);
 };
 
 //!	[static]
-SVS.saveSamplingSphereValues := fn(MinSG.SphericalSampling.SamplingSphere samplingSphere, String fileName) {
+SVS.saveSamplingSphereValues := fn(MinSG.SVS.SamplingSphere samplingSphere, String fileName) {
 	var values = "PositionX\tPositionY\tPositionZ\tValue\n";
 	foreach(samplingSphere.getSamples() as var sample) {
 		var value = sample.getValue();
@@ -59,7 +59,7 @@ SVS.saveSamplingSphereValues := fn(MinSG.SphericalSampling.SamplingSphere sampli
 };
 
 //!	[static]
-SVS.outputSamplingSphereComparison := fn(MinSG.SphericalSampling.SamplingSphere samplingSphere, 
+SVS.outputSamplingSphereComparison := fn(MinSG.SVS.SamplingSphere samplingSphere, 
 													   MinSG.SVS.SamplingSphere referenceSamplingSphere,
 													   String fileName) {
 	var output = "Interpolation\t";
@@ -69,9 +69,9 @@ SVS.outputSamplingSphereComparison := fn(MinSG.SphericalSampling.SamplingSphere 
 	output += "UnderestimationCardinality\tUnderestimationBenefits\tUnderestimationCosts\n";
 	foreach(referenceSamplingSphere.getSamples() as var refSample) {
 		var exactVisibleSet = refSample.getValue();
-		foreach({	"Nearest"	: MinSG.SphericalSampling.INTERPOLATION_NEAREST, 
-					"Max3"	 	: MinSG.SphericalSampling.INTERPOLATION_MAX3, 
-					"Weighted3"	: MinSG.SphericalSampling.INTERPOLATION_WEIGHTED3} as var interpolationString, var interpolationMethod) {
+		foreach({	"Nearest"	: MinSG.SVS.INTERPOLATION_NEAREST, 
+					"Max3"	 	: MinSG.SVS.INTERPOLATION_MAX3, 
+					"Weighted3"	: MinSG.SVS.INTERPOLATION_WEIGHTED3} as var interpolationString, var interpolationMethod) {
 			var potentiallyVisibleSet = samplingSphere.queryValue(refSample.getPosition(), interpolationMethod);
 			var overestimation = potentiallyVisibleSet.makeDifference(exactVisibleSet);
 			var underestimation = exactVisibleSet.makeDifference(potentiallyVisibleSet);
@@ -102,7 +102,7 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 		$samplingSphere				:	void,
 		$referenceSamplingSphere	:	void,
 		$differenceSamplingSphere	:	void,
-		$interpolationMethod		:	MinSG.SphericalSampling.INTERPOLATION_NEAREST
+		$interpolationMethod		:	MinSG.SVS.INTERPOLATION_NEAREST
 	});
 	var refreshGroup = new GUI.RefreshGroup();
 	
@@ -147,10 +147,10 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 		GUI.LABEL			:	"Interpolation",
 		GUI.TOOLTIP			:	"The interpolation method that is used to generate results for queries between spherical sample points.",
 		GUI.OPTIONS			:	[
-									[MinSG.SphericalSampling.INTERPOLATION_NEAREST, "Nearest"],
-									[MinSG.SphericalSampling.INTERPOLATION_MAX3, "Max3"],
-									[MinSG.SphericalSampling.INTERPOLATION_MAXALL, "MaxAll"],
-									[MinSG.SphericalSampling.INTERPOLATION_WEIGHTED3, "Weighted3"]
+									[MinSG.SVS.INTERPOLATION_NEAREST, "Nearest"],
+									[MinSG.SVS.INTERPOLATION_MAX3, "Max3"],
+									[MinSG.SVS.INTERPOLATION_MAXALL, "MaxAll"],
+									[MinSG.SVS.INTERPOLATION_WEIGHTED3, "Weighted3"]
 								],
 		GUI.DATA_OBJECT		:	config,
 		GUI.DATA_ATTRIBUTE	:	$interpolationMethod,
@@ -174,7 +174,7 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 		GUI.LABEL				:	"New",
 		GUI.TOOLTIP				:	"Create a new sampling sphere with the current set of spherical sampling points.",
 		GUI.ON_CLICK			:	(fn(Geometry.Sphere sphere, Array samples, ExtObject config, GUI.RefreshGroup refreshGroup) {
-										config.samplingSphere = new MinSG.SphericalSampling.SamplingSphere(sphere.clone(), samples.clone());
+										config.samplingSphere = new MinSG.SVS.SamplingSphere(sphere.clone(), samples.clone());
 										config.samplingSphere.description = "SamplingSphere";
 										refreshGroup.refresh();
 									}).bindLastParams(plugin.sphere, plugin.samples, config, refreshGroup),
@@ -203,7 +203,7 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 										fbo.attachColorTexture(renderingContext, color);
 										fbo.attachDepthTexture(renderingContext, depth);
 										
-										var camera = MinSG.SphericalSampling.createSamplingCamera(config.samplingSphere.getSphere(), node.getWorldMatrix(), resolution());
+										var camera = MinSG.SVS.createSamplingCamera(config.samplingSphere.getSphere(), node.getWorldMatrix(), resolution());
 										frameContext.pushCamera();
 										config.samplingSphere.evaluateAllSamples(frameContext, evaluator, camera, node);
 										frameContext.popCamera();
@@ -244,7 +244,7 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 										
 										GLOBALS.showWaitingScreen();
 										
-										textureState.setTexture(MinSG.SphericalSampling.createColorTexture(512, 256, samplingSphere, config.interpolationMethod));
+										textureState.setTexture(MinSG.SVS.createColorTexture(512, 256, samplingSphere, config.interpolationMethod));
 										textureState.activate();
 									}).bindLastParams(config, plugin.sphereTextureState),
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
@@ -390,7 +390,7 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 											return;
 										}
 										var dialog = new GUI.FileDialog("Save Sampling Sphere Values", ".", [".tsv"],
-											(fn(fileName, MinSG.SphericalSampling.SamplingSphere samplingSphere) {
+											(fn(fileName, MinSG.SVS.SamplingSphere samplingSphere) {
 												SVS.saveSamplingSphereValues(samplingSphere, fileName);
 											}).bindLastParams(samplingSphere)
 										);
@@ -450,23 +450,23 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 										fbo.attachColorTexture(renderingContext, color);
 										fbo.attachDepthTexture(renderingContext, depth);
 
-										var camera = MinSG.SphericalSampling.createSamplingCamera(config.referenceSamplingSphere.getSphere(), plugin.node.getWorldMatrix(), resolution());
+										var camera = MinSG.SVS.createSamplingCamera(config.referenceSamplingSphere.getSphere(), plugin.node.getWorldMatrix(), resolution());
 										frameContext.pushCamera();
 
 										foreach(runs as var run) {
 											out("Evaluating \"" + run[0] + "\" ... ");
 											
 											var samples = run[1]();
-											var samplingSphere = new MinSG.SphericalSampling.SamplingSphere(plugin.sphere.clone(), samples);
+											var samplingSphere = new MinSG.SVS.SamplingSphere(plugin.sphere.clone(), samples);
 											samplingSphere.evaluateAllSamples(frameContext, evaluator, camera, plugin.node);
 											//Util.saveFile(outputDir + run[0] + ".samplingsphere", PADrend.serialize(samplingSphere));
 											//SVS.saveSamplingSphereValues(samplingSphere, outputDir + run[0] + ".tsv");
-											//Rendering.saveTexture(GLOBALS.renderingContext, MinSG.SphericalSampling.createColorTexture(512, 256, samplingSphere, config.interpolationMethod), outputDir + run[0] + ".png");
+											//Rendering.saveTexture(GLOBALS.renderingContext, MinSG.SVS.createColorTexture(512, 256, samplingSphere, config.interpolationMethod), outputDir + run[0] + ".png");
 											
 											//var differenceSamplingSphere = SVS.compareSamplingSpheres(samplingSphere, config.referenceSamplingSphere, config.interpolationMethod);
 											//Util.saveFile(outputDir + run[0] + "Diff.samplingsphere", PADrend.serialize(differenceSamplingSphere));
 											//SVS.saveSamplingSphereValues(differenceSamplingSphere, outputDir + run[0] + "Diff.tsv");
-											//Rendering.saveTexture(GLOBALS.renderingContext, MinSG.SphericalSampling.createColorTexture(512, 256, differenceSamplingSphere, config.interpolationMethod), outputDir + run[0] + "Diff.png");
+											//Rendering.saveTexture(GLOBALS.renderingContext, MinSG.SVS.createColorTexture(512, 256, differenceSamplingSphere, config.interpolationMethod), outputDir + run[0] + "Diff.png");
 											
 											SVS.outputSamplingSphereComparison(samplingSphere, config.referenceSamplingSphere, outputDir + run[0] + ".tsv");
 											out("done.\n");
@@ -508,7 +508,7 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 										
 										GLOBALS.showWaitingScreen();
 										
-										var worldSphere = MinSG.SphericalSampling.transformSphere(samplingSphere.getSphere(), worldMatrix);
+										var worldSphere = MinSG.SVS.transformSphere(samplingSphere.getSphere(), worldMatrix);
 										
 										var listNode = samplingSphere.getTriangulationMinSGNodes();
 										listNode.setWorldPosition(worldSphere.getCenter());

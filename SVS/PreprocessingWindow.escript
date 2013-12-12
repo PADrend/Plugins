@@ -76,7 +76,7 @@ SVS.setUpPreprocessingWindow := fn() {
 			numGroupNodes(groupNodes.count());
 			var count = 0;
 			foreach(groupNodes as var groupNode) {
-				if(MinSG.SphericalSampling.hasSamplingSphere(groupNode)) {
+				if(MinSG.SVS.hasSamplingSphere(groupNode)) {
 					++count;
 				}
 			}
@@ -197,7 +197,7 @@ SVS.setUpPreprocessingWindow := fn() {
 									newNode.setNodeAttribute('SamplingSphere', selectedNode().getNodeAttribute('SamplingSphere'));
 									selectedNode().unsetNodeAttribute('SamplingSphere');
 
-									selectedNode().addState(new MinSG.SphericalSampling.Renderer);
+									selectedNode().addState(new MinSG.SVS.Renderer);
 									var projSizeFilterState = new MinSG.ProjSizeFilterState;
 									projSizeFilterState.setTargetChannel("NO_CHANNEL");
 									selectedNode().addState(projSizeFilterState);
@@ -241,7 +241,7 @@ SVS.setUpPreprocessingWindow := fn() {
 		GUI.LABEL			:	"Transform spheres",
 		GUI.TOOLTIP			:	"Transform all spheres from world coordinates to local coordinates.",
 		GUI.ON_CLICK		:	[selectedNode] => fn(selectedNode) {
-									MinSG.SphericalSampling.transformSpheresFromWorldToLocal(selectedNode());
+									MinSG.SVS.transformSpheresFromWorldToLocal(selectedNode());
 								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};

@@ -31,7 +31,7 @@ SVS.preprocessSubtree := fn(MinSG.SceneManager sceneManager,
 										  Number resolution,
 										  Bool useExistingVisibilityResults,
 										  Bool computeTightInnerBoundingSpheres) {
-	var preprocessingContext = new MinSG.SphericalSampling.PreprocessingContext(sceneManager,
+	var preprocessingContext = new MinSG.SVS.PreprocessingContext(sceneManager,
 																				frameContext,
 																				rootNode,
 																				positions,

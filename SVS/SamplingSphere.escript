@@ -16,10 +16,10 @@ loadOnce(__DIR__ + "/Camera.escript");
 loadOnce(__DIR__ + "/SphericalSamplePoint.escript");
 
 //! Human-readable description
-MinSG.SphericalSampling.SamplingSphere.description := "";
+MinSG.SVS.SamplingSphere.description := "";
 
-PADrend.Serialization.registerType(MinSG.SphericalSampling.SamplingSphere, "SVS.SamplingSphere")
-	.addDescriber(fn(ctxt, MinSG.SphericalSampling.SamplingSphere obj, Map desc) {
+PADrend.Serialization.registerType(MinSG.SVS.SamplingSphere, "SVS.SamplingSphere")
+	.addDescriber(fn(ctxt, MinSG.SVS.SamplingSphere obj, Map desc) {
 		desc['sphere'] = ctxt.createDescription(obj.getSphere());
 		desc['samples'] = ctxt.createDescription(obj.getSamples());
 		desc['description'] = obj.description;

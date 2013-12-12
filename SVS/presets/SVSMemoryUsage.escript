@@ -29,8 +29,8 @@ rootNode.traverse([svsSize, memNodes, meshes] => fn(DataWrapper svsSize, DataWra
 			meshes[mesh] = true;
 		}
 	}
-	if(node ---|> MinSG.GroupNode && MinSG.SphericalSampling.hasSamplingSphere(node)) {
-		svsSize(svsSize() + MinSG.SphericalSampling.getSphereMemoryUsage(node));
+	if(node ---|> MinSG.GroupNode && MinSG.SVS.hasSamplingSphere(node)) {
+		svsSize(svsSize() + MinSG.SVS.getSphereMemoryUsage(node));
 	}
 });
 

@@ -123,9 +123,9 @@ MeasurementPlugin.createTab @(private) := fn() {
 														suggestions += "CHC";
 													} else if(state ---|> MinSG.CHCppRenderer) {
 														suggestions += "CHC++";
-													} else if(MinSG.isSet($SphericalSampling) && state ---|> MinSG.SphericalSampling.Renderer) {
+													} else if(MinSG.isSet($SVS) && state ---|> MinSG.SVS.Renderer) {
 														suggestions += "SVS";
-													} else if(MinSG.isSet($SphericalSampling) && state ---|> MinSG.SphericalSampling.BudgetRenderer) {
+													} else if(MinSG.isSet($SVS) && state ---|> MinSG.SVS.BudgetRenderer) {
 														suggestions += "Budget" + state.getBudget().format(0, false);
 													}
 												}

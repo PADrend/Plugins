@@ -25,8 +25,8 @@ var plugin = new Plugin({
 
 //!	---|> Plugin
 plugin.init = fn() {
-	if(!MinSG.isSet($SphericalSampling)) {
-		Runtime.warn("Cannot initialize. MinSG lacks the SphericalSampling extension.");
+	if(!MinSG.isSet($SVS)) {
+		Runtime.warn("Plug-in initialization failed: MinSG lacks the SVS extension.");
 		return false;
 	}
 	{

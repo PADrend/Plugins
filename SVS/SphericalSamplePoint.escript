@@ -13,13 +13,13 @@
 declareNamespace($SVS);
 
 //! Human-readable description
-MinSG.SphericalSampling.SamplePoint.description := "";
+MinSG.SVS.SamplePoint.description := "";
 
 //! GUI selection status
 MinSG.SVS.SamplePoint.selected := false;
 
-PADrend.Serialization.registerType(MinSG.SphericalSampling.SamplePoint, "SVS.SphericalSamplePoint")
-	.addDescriber(fn(ctxt, MinSG.SphericalSampling.SamplePoint obj, Map desc) {
+PADrend.Serialization.registerType(MinSG.SVS.SamplePoint, "SVS.SphericalSamplePoint")
+	.addDescriber(fn(ctxt, MinSG.SVS.SamplePoint obj, Map desc) {
 		desc['position'] = ctxt.createDescription(obj.getPosition());
 		desc['description'] = obj.description;
 		desc['value'] = ctxt.createDescription(obj.getValue());

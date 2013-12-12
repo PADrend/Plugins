@@ -17,13 +17,13 @@ loadOnce(__DIR__ + "/SphericalSamplePoint.escript");
 /**
  * Generate sample from the vertex positions of a mesh.
  * 
- * @return Array of MinSG.SphericalSampling.SamplePoints
+ * @return Array of MinSG.SVS.SamplePoints
  */
 SVS.createSamplesFromMesh := fn(Rendering.Mesh mesh, String sampleName) {
 	var samples = [];
 	var accessor = Rendering.PositionAttributeAccessor.create(mesh, Rendering.VertexAttributeIds.POSITION);
 	for(var i = 0; accessor.checkRange(i); ++i) {
-		var point = new MinSG.SphericalSampling.SamplePoint(accessor.getPosition(i));
+		var point = new MinSG.SVS.SamplePoint(accessor.getPosition(i));
 		point.description = sampleName + " " + i;
 		samples += point;
 	}
@@ -33,27 +33,27 @@ SVS.createSamplesFromMesh := fn(Rendering.Mesh mesh, String sampleName) {
 /**
  * Generate sample positions for the requested number of increments of spherical coordinates.
  * 
- * @return Array of MinSG.SphericalSampling.SamplePoints
+ * @return Array of MinSG.SVS.SamplePoints
  */
 SVS.createSphericalCoordinateSamples := fn(Number inclinationSegments, Number azimuthSegments) {
 	var inclinationIncrement = Math.PI / inclinationSegments;
 	var azimuthIncrement = 2 * Math.PI / azimuthSegments;
 	var samples = [];
 	{
-		var point = new MinSG.SphericalSampling.SamplePoint(new Geometry.Vec3(0, 1, 0));
+		var point = new MinSG.SVS.SamplePoint(new Geometry.Vec3(0, 1, 0));
 		point.description = "Spherical (0, 0) ";
 		samples += point;
 	}
 	for(var inclination = inclinationIncrement; inclination < Math.PI; inclination += inclinationIncrement) {
 		for(var azimuth = 0; azimuth < 2 * Math.PI; azimuth += azimuthIncrement) {
 			var position = Geometry.Sphere.calcCartesianCoordinateUnitSphere(inclination, azimuth);
-			var point = new MinSG.SphericalSampling.SamplePoint(position);
+			var point = new MinSG.SVS.SamplePoint(position);
 			point.description = "Spherical (" + inclination.radToDeg() + ", " + azimuth.radToDeg() + ") ";
 			samples += point;
 		}
 	}
 	{
-		var point = new MinSG.SphericalSampling.SamplePoint(new Geometry.Vec3(0, -1, 0));
+		var point = new MinSG.SVS.SamplePoint(new Geometry.Vec3(0, -1, 0));
 		point.description = "Spherical (180, 0) ";
 		samples += point;
 	}
@@ -63,7 +63,7 @@ SVS.createSphericalCoordinateSamples := fn(Number inclinationSegments, Number az
 /**
  * Generate the requested number of random sample positions by generating random spherical coordinates.
  * 
- * @return Array of MinSG.SphericalSampling.SamplePoints
+ * @return Array of MinSG.SVS.SamplePoints
  */
 SVS.createRandomSphericalCoordinateSamples := fn(Number numSamples) {
 	var samples = [];
@@ -71,7 +71,7 @@ SVS.createRandomSphericalCoordinateSamples := fn(Number numSamples) {
 		var inclination = (1.0 - Rand.uniform(0.0, 2.0)).acos();
 		var azimuth = Rand.uniform(0.0, 2.0 * Math.PI);
 		var position = Geometry.Sphere.calcCartesianCoordinateUnitSphere(inclination, azimuth);
-		var point = new MinSG.SphericalSampling.SamplePoint(position);
+		var point = new MinSG.SVS.SamplePoint(position);
 		point.description = "Spherical (" + inclination.radToDeg() + ", " + azimuth.radToDeg() + ") ";
 		samples += point;
 	}

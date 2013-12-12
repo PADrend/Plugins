@@ -56,7 +56,7 @@ SVS.setUpSphericalSamplePointEvaluation := fn(plugin) {
 										fbo.attachColorTexture(renderingContext, color);
 										fbo.attachDepthTexture(renderingContext, depth);
 										
-										var camera = MinSG.SphericalSampling.createSamplingCamera(sphere, node.getWorldMatrix(), resolution);
+										var camera = MinSG.SVS.createSamplingCamera(sphere, node.getWorldMatrix(), resolution);
 										SVS.configureCameraUsingSamples(camera, sphere, node.getWorldMatrix(), samples);
 										
 										frameContext.pushAndSetCamera(camera);

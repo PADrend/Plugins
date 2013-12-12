@@ -13,15 +13,15 @@
 declareNamespace($SVS);
 
 SVS.createMeasurementCamera := fn(	MinSG.GroupNode node, 
-													MinSG.SphericalSampling.SamplingSphere samplingSphere, 
+													MinSG.SVS.SamplingSphere samplingSphere, 
 													Geometry.Vec3 viewingDirection, 
 													Number resolution) {
 	var sphere = samplingSphere.getSphere();
 	var worldMatrix = node.getWorldMatrix();
-	var camera = MinSG.SphericalSampling.createSamplingCamera(sphere,
+	var camera = MinSG.SVS.createSamplingCamera(sphere,
 																worldMatrix,
 																resolution);
-	MinSG.SphericalSampling.transformCamera(camera,
+	MinSG.SVS.transformCamera(camera,
 											sphere,
 											worldMatrix,
 											viewingDirection);
@@ -43,7 +43,7 @@ SVS.measureExactVisibleSet := fn(	MinSG.GroupNode node,
 };
 
 SVS.measureVisibleSetQuality := fn(	MinSG.GroupNode node, 
-													MinSG.SphericalSampling.SamplingSphere samplingSphere,
+													MinSG.SVS.SamplingSphere samplingSphere,
 													Number resolution) {
 	var fbo = new Rendering.FBO;
 	var color = Rendering.createStdTexture(resolution, resolution, true);
@@ -139,8 +139,8 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 		var nodes = [selectedNode];
 		while(!nodes.empty()) {
 			var node = nodes.popBack();
-			if(MinSG.SphericalSampling.hasSamplingSphere(node)) {
-				samplingSphere(MinSG.SphericalSampling.retrieveSamplingSphere(node));
+			if(MinSG.SVS.hasSamplingSphere(node)) {
+				samplingSphere(MinSG.SVS.retrieveSamplingSphere(node));
 				return;
 			}
 			nodes.append(MinSG.getChildNodes(node));
@@ -178,7 +178,7 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 	panel++;
 
 	var evaluateRandomDirections = fn(MinSG.GroupNode node, 
-									  MinSG.SphericalSampling.SamplingSphere samplingSphere,
+									  MinSG.SVS.SamplingSphere samplingSphere,
 									  Number resolution) {
 		var fbo = new Rendering.FBO;
 		var color = Rendering.createStdTexture(resolution, resolution, true);
@@ -198,8 +198,8 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 			var azimuth = Rand.uniform(0.0, 2.0 * Math.PI);
 			var direction = Geometry.Sphere.calcCartesianCoordinateUnitSphere(inclination, azimuth);
 
-			var pvsNearest = samplingSphere.queryValue(direction, MinSG.SphericalSampling.INTERPOLATION_NEAREST);
-			var pvsMax3 = samplingSphere.queryValue(direction, MinSG.SphericalSampling.INTERPOLATION_MAX3);
+			var pvsNearest = samplingSphere.queryValue(direction, MinSG.SVS.INTERPOLATION_NEAREST);
+			var pvsMax3 = samplingSphere.queryValue(direction, MinSG.SVS.INTERPOLATION_MAX3);
 
 			var camera = SVS.createMeasurementCamera(node, samplingSphere, direction, resolution);
 
@@ -240,7 +240,7 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 		outln("Data written to files \"", fileNameNearest, "\" and \"", fileNameMax3, "\".");
 	};
 
-	var outputSamplingSpheretoTSV = fn(MinSG.SphericalSampling.SamplingSphere samplingSphere) {
+	var outputSamplingSpheretoTSV = fn(MinSG.SVS.SamplingSphere samplingSphere) {
 		var samples = samplingSphere.getSamples();
 		var output = "Sample\tBenefits\tCosts\n";
 		foreach(samples as var sampleIndex, var sample) {

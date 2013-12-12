@@ -158,7 +158,7 @@ SVS.VisibleSetEvaluator.createConfigPanel ::= fn() {
 		GUI.DATA_WRAPPER		:	pvsSource,
 		GUI.OPTIONS_PROVIDER	:	fn() {
 										var states = MinSG.collectStates(PADrend.getCurrentScene(), 
-																		 MinSG.SphericalSampling.GeometryNodeCollector);
+																		 MinSG.SVS.GeometryNodeCollector);
 										var options = [];
 										foreach(states as var state) {
 											options += [state, state.toString()];

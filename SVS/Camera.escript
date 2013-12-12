@@ -28,12 +28,12 @@ SVS.configureCameraUsingSamples := fn(MinSG.CameraNodeOrtho camera, Geometry.Sph
 		return;
 	}
 	
-	MinSG.SphericalSampling.transformCamera(camera, sphere, worldMatrix, sample.getPosition());
+	MinSG.SVS.transformCamera(camera, sphere, worldMatrix, sample.getPosition());
 };
 
 //!	[static]
 SVS.setUpCameraWindow := fn(plugin) {
-	var windowCamera = MinSG.SphericalSampling.createSamplingCamera(plugin.sphere, plugin.node.getWorldMatrix(), 512);
+	var windowCamera = MinSG.SVS.createSamplingCamera(plugin.sphere, plugin.node.getWorldMatrix(), 512);
 	
 	registerExtension('PADrend_AfterFrame', this -> (SVS.configureCameraUsingSamples).bindLastParams(windowCamera, plugin.sphere, plugin.node.getWorldMatrix(), plugin.samples));
 	

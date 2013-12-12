@@ -10,7 +10,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-static renderer = new MinSG.SphericalSampling.SphereVisualizationRenderer;
+static renderer = new MinSG.SVS.SphereVisualizationRenderer;
 static oldNodes = [];
 
 static addRendererToNodes = fn(Array nodes) {
