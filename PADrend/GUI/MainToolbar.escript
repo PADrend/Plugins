@@ -1040,8 +1040,10 @@ plugin.registerStdToolbarEntries := fn() {
 			plugins.unset(n);
 
 		var directories = [];
-		foreach(pluginFolders as var folder){
-			directories.append( Util.dir(folder,Util.DIR_DIRECTORIES));
+		foreach(pluginFolders as var folder) {
+			if(Util.isDir(folder)) {
+				directories.append(Util.dir(folder, Util.DIR_DIRECTORIES));
+			}
 		}
 		
 		foreach(directories as var fullPath){
