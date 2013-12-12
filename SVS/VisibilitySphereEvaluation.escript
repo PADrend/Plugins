@@ -13,13 +13,13 @@
 declareNamespace($SVS);
 
 loadOnce(__DIR__ + "/SampleCreation.escript");
-loadOnce(__DIR__ + "/SamplingSphere.escript");
+loadOnce(__DIR__ + "/VisibilitySphere.escript");
 
 //!	[static]
-SVS.compareSamplingSpheres := fn(MinSG.SVS.SamplingSphere samplingSphere, MinSG.SVS.SamplingSphere referenceSamplingSphere, interpolationMethod) {
+SVS.compareVisibilitySpheres := fn(MinSG.SVS.VisibilitySphere visibilitySphere, MinSG.SVS.VisibilitySphere referenceVisibilitySphere, interpolationMethod) {
 	var diffSamples = [];
-	foreach(referenceSamplingSphere.getSamples() as var refSample) {
-		var value = samplingSphere.queryValue(refSample.getPosition(), interpolationMethod);
+	foreach(referenceVisibilitySphere.getSamples() as var refSample) {
+		var value = visibilitySphere.queryValue(refSample.getPosition(), interpolationMethod);
 		var referenceValue = refSample.getValue();
 		var diffValue = void;
 		if(value ---|> MinSG.VisibilityVector) {
@@ -32,16 +32,16 @@ SVS.compareSamplingSpheres := fn(MinSG.SVS.SamplingSphere samplingSphere, MinSG.
 		samplePoint.description = refSample.description;
 		diffSamples += samplePoint;
 	}
-	return new MinSG.SVS.SamplingSphere(
-		samplingSphere.getSphere().clone(), 
+	return new MinSG.SVS.VisibilitySphere(
+		visibilitySphere.getSphere().clone(), 
 		diffSamples
 	);
 };
 
 //!	[static]
-SVS.saveSamplingSphereValues := fn(MinSG.SVS.SamplingSphere samplingSphere, String fileName) {
+SVS.saveVisibilitySphereValues := fn(MinSG.SVS.VisibilitySphere visibilitySphere, String fileName) {
 	var values = "PositionX\tPositionY\tPositionZ\tValue\n";
-	foreach(samplingSphere.getSamples() as var sample) {
+	foreach(visibilitySphere.getSamples() as var sample) {
 		var value = sample.getValue();
 		
 		if(value ---|> MinSG.VisibilityVector) {
@@ -59,20 +59,20 @@ SVS.saveSamplingSphereValues := fn(MinSG.SVS.SamplingSphere samplingSphere, Stri
 };
 
 //!	[static]
-SVS.outputSamplingSphereComparison := fn(MinSG.SVS.SamplingSphere samplingSphere, 
-													   MinSG.SVS.SamplingSphere referenceSamplingSphere,
+SVS.outputVisibilitySphereComparison := fn(MinSG.SVS.VisibilitySphere visibilitySphere, 
+													   MinSG.SVS.VisibilitySphere referenceVisibilitySphere,
 													   String fileName) {
 	var output = "Interpolation\t";
 	output += "EVSCardinality\tEVSBenefits\tEVSCosts\t";
 	output += "PVSCardinality\tPVSBenefits\tPVSCosts\t";
 	output += "OverestimationCardinality\tOverestimationBenefits\tOverestimationCosts\t";
 	output += "UnderestimationCardinality\tUnderestimationBenefits\tUnderestimationCosts\n";
-	foreach(referenceSamplingSphere.getSamples() as var refSample) {
+	foreach(referenceVisibilitySphere.getSamples() as var refSample) {
 		var exactVisibleSet = refSample.getValue();
 		foreach({	"Nearest"	: MinSG.SVS.INTERPOLATION_NEAREST, 
 					"Max3"	 	: MinSG.SVS.INTERPOLATION_MAX3, 
 					"Weighted3"	: MinSG.SVS.INTERPOLATION_WEIGHTED3} as var interpolationString, var interpolationMethod) {
-			var potentiallyVisibleSet = samplingSphere.queryValue(refSample.getPosition(), interpolationMethod);
+			var potentiallyVisibleSet = visibilitySphere.queryValue(refSample.getPosition(), interpolationMethod);
 			var overestimation = potentiallyVisibleSet.makeDifference(exactVisibleSet);
 			var underestimation = exactVisibleSet.makeDifference(potentiallyVisibleSet);
 
@@ -88,8 +88,8 @@ SVS.outputSamplingSphereComparison := fn(MinSG.SVS.SamplingSphere samplingSphere
 };
 
 //!	[static]
-SVS.setUpSamplingSphereEvaluation := fn(plugin) {
-	var window = gui.createWindow(350, 350, "Sampling Sphere Evaluation", GUI.ONE_TIME_WINDOW);
+SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
+	var window = gui.createWindow(350, 350, "Visibility Sphere Evaluation", GUI.ONE_TIME_WINDOW);
 	window.setPosition(GLOBALS.renderingContext.getWindowWidth() - 350, 280);
 	
 	var windowPanel = gui.create({
@@ -99,9 +99,9 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	window += windowPanel;
 	
 	var config = new ExtObject ({
-		$samplingSphere				:	void,
-		$referenceSamplingSphere	:	void,
-		$differenceSamplingSphere	:	void,
+		$visibilitySphere				:	void,
+		$referenceVisibilitySphere	:	void,
+		$differenceVisibilitySphere	:	void,
 		$interpolationMethod		:	MinSG.SVS.INTERPOLATION_NEAREST
 	});
 	var refreshGroup = new GUI.RefreshGroup();
@@ -109,9 +109,9 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_TEXT,
 		GUI.LABEL				:	"Current",
-		GUI.TOOLTIP				:	"Current sampling sphere",
+		GUI.TOOLTIP				:	"Current visibility sphere",
 		GUI.DATA_PROVIDER		:	(fn(ExtObject config) {
-										return config.samplingSphere.toString();
+										return config.visibilitySphere.toString();
 									}).bindLastParams(config),
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0],
@@ -121,9 +121,9 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_TEXT,
 		GUI.LABEL				:	"Reference",
-		GUI.TOOLTIP				:	"Reference sampling sphere",
+		GUI.TOOLTIP				:	"Reference visibility sphere",
 		GUI.DATA_PROVIDER		:	(fn(ExtObject config) {
-										return config.referenceSamplingSphere.toString();
+										return config.referenceVisibilitySphere.toString();
 									}).bindLastParams(config),
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0],
@@ -133,9 +133,9 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_TEXT,
 		GUI.LABEL				:	"Difference",
-		GUI.TOOLTIP				:	"Difference sampling sphere",
+		GUI.TOOLTIP				:	"Difference visibility sphere",
 		GUI.DATA_PROVIDER		:	(fn(ExtObject config) {
-										return config.differenceSamplingSphere.toString();
+										return config.differenceVisibilitySphere.toString();
 									}).bindLastParams(config),
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0],
@@ -172,10 +172,10 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"New",
-		GUI.TOOLTIP				:	"Create a new sampling sphere with the current set of spherical sampling points.",
+		GUI.TOOLTIP				:	"Create a new visibility sphere with the current set of spherical sampling points.",
 		GUI.ON_CLICK			:	(fn(Geometry.Sphere sphere, Array samples, ExtObject config, GUI.RefreshGroup refreshGroup) {
-										config.samplingSphere = new MinSG.SVS.SamplingSphere(sphere.clone(), samples.clone());
-										config.samplingSphere.description = "SamplingSphere";
+										config.visibilitySphere = new MinSG.SVS.VisibilitySphere(sphere.clone(), samples.clone());
+										config.visibilitySphere.description = "VisibilitySphere";
 										refreshGroup.refresh();
 									}).bindLastParams(plugin.sphere, plugin.samples, config, refreshGroup),
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
@@ -186,8 +186,8 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 		GUI.LABEL				:	"Evaluate",
 		GUI.TOOLTIP				:	"Evaluate all sample positions on the sphere.",
 		GUI.ON_CLICK			:	(fn(config, MinSG.Node node, DataWrapper resolution) {
-										if(!config.samplingSphere) {
-											Runtime.warn("Cannot evaluate sampling sphere. Current sampling sphere not available.");
+										if(!config.visibilitySphere) {
+											Runtime.warn("Cannot evaluate visibility sphere. Current visibility sphere not available.");
 											return;
 										}
 										var evaluator = EvaluatorManager.getSelectedEvaluator();
@@ -203,9 +203,9 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 										fbo.attachColorTexture(renderingContext, color);
 										fbo.attachDepthTexture(renderingContext, depth);
 										
-										var camera = MinSG.SVS.createSamplingCamera(config.samplingSphere.getSphere(), node.getWorldMatrix(), resolution());
+										var camera = MinSG.SVS.createSamplingCamera(config.visibilitySphere.getSphere(), node.getWorldMatrix(), resolution());
 										frameContext.pushCamera();
-										config.samplingSphere.evaluateAllSamples(frameContext, evaluator, camera, node);
+										config.visibilitySphere.evaluateAllSamples(frameContext, evaluator, camera, node);
 										frameContext.popCamera();
 										
 										renderingContext.popFBO();
@@ -218,33 +218,33 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 		GUI.LABEL				:	"Add Color",
 		GUI.TOOLTIP				:	"Add a texture to the rendered sphere.",
 		GUI.ON_CLICK			:	(fn(config, MinSG.TextureState textureState) {
-										var samplingSphere = void;
-										if(config.differenceSamplingSphere) {
-											samplingSphere = config.differenceSamplingSphere;
-											out("Using difference sampling sphere.\n");
-										} else if(config.samplingSphere) {
-											samplingSphere = config.samplingSphere;
-											out("Using current sampling sphere.\n");
-										} else if(config.referenceSamplingSphere) {
-											samplingSphere = config.referenceSamplingSphere;
-											out("Using reference sampling sphere.\n");
+										var visibilitySphere = void;
+										if(config.differenceVisibilitySphere) {
+											visibilitySphere = config.differenceVisibilitySphere;
+											out("Using difference visibility sphere.\n");
+										} else if(config.visibilitySphere) {
+											visibilitySphere = config.visibilitySphere;
+											out("Using current visibility sphere.\n");
+										} else if(config.referenceVisibilitySphere) {
+											visibilitySphere = config.referenceVisibilitySphere;
+											out("Using reference visibility sphere.\n");
 										}
-										if(!samplingSphere) {
-											Runtime.warn("Cannot add color to sampling sphere. No sampling sphere available.");
+										if(!visibilitySphere) {
+											Runtime.warn("Cannot add color to visibility sphere. No visibility sphere available.");
 											return;
 										}
-										if(!samplingSphere.getSamples() || samplingSphere.getSamples().empty()) {
-											Runtime.warn("Cannot add color to sampling sphere. No spherical sample points available.");
+										if(!visibilitySphere.getSamples() || visibilitySphere.getSamples().empty()) {
+											Runtime.warn("Cannot add color to visibility sphere. No spherical sample points available.");
 											return;
 										}
-										if(!samplingSphere.getSamples().front().getValue()) {
-											Runtime.warn("Cannot add color to sampling sphere. No values stored in spherical sample points.");
+										if(!visibilitySphere.getSamples().front().getValue()) {
+											Runtime.warn("Cannot add color to visibility sphere. No values stored in spherical sample points.");
 											return;
 										}
 										
 										GLOBALS.showWaitingScreen();
 										
-										textureState.setTexture(MinSG.SVS.createColorTexture(512, 256, samplingSphere, config.interpolationMethod));
+										textureState.setTexture(MinSG.SVS.createColorTexture(512, 256, visibilitySphere, config.interpolationMethod));
 										textureState.activate();
 									}).bindLastParams(config, plugin.sphereTextureState),
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
@@ -293,15 +293,15 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Save",
-		GUI.TOOLTIP				:	"Save the current sampling sphere to a file.",
+		GUI.TOOLTIP				:	"Save the current visibility sphere to a file.",
 		GUI.ON_CLICK			:	(fn(ExtObject config) {
-										if(!config.samplingSphere) {
-											Runtime.warn("Cannot save sampling sphere. Current sampling sphere not available.");
+										if(!config.visibilitySphere) {
+											Runtime.warn("Cannot save visibility sphere. Current visibility sphere not available.");
 											return;
 										}
-										var dialog = new GUI.FileDialog("Save Sampling Sphere", ".", [".samplingsphere"],
+										var dialog = new GUI.FileDialog("Save Visibility Sphere", ".", [".visibilitysphere"],
 											(fn(fileName, ExtObject config) {
-												Util.saveFile(fileName, PADrend.serialize(config.samplingSphere));
+												Util.saveFile(fileName, PADrend.serialize(config.visibilitySphere));
 											}).bindLastParams(config)
 										);
 										dialog.init();
@@ -311,11 +311,11 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Load",
-		GUI.TOOLTIP				:	"Load the current sampling sphere from a file.",
+		GUI.TOOLTIP				:	"Load the current visibility sphere from a file.",
 		GUI.ON_CLICK			:	(fn(ExtObject config, GUI.RefreshGroup refreshGroup) {
-										var dialog = new GUI.FileDialog("Load Sampling Sphere", ".", [".samplingsphere"],
+										var dialog = new GUI.FileDialog("Load Visibility Sphere", ".", [".visibilitysphere"],
 											(fn(fileName, ExtObject config, GUI.RefreshGroup refreshGroup) {
-												config.samplingSphere = PADrend.deserialize(Util.loadFile(fileName));
+												config.visibilitySphere = PADrend.deserialize(Util.loadFile(fileName));
 												refreshGroup.refresh();
 											}).bindLastParams(config, refreshGroup)
 										);
@@ -327,11 +327,11 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Load Reference",
-		GUI.TOOLTIP				:	"Load the reference sampling sphere from a file.",
+		GUI.TOOLTIP				:	"Load the reference visibility sphere from a file.",
 		GUI.ON_CLICK			:	(fn(ExtObject config, GUI.RefreshGroup refreshGroup) {
-										var dialog = new GUI.FileDialog("Load Sampling Sphere", ".", [".samplingsphere"],
+										var dialog = new GUI.FileDialog("Load Visibility Sphere", ".", [".visibilitysphere"],
 											(fn(fileName, ExtObject config, GUI.RefreshGroup refreshGroup) {
-												config.referenceSamplingSphere = PADrend.deserialize(Util.loadFile(fileName));
+												config.referenceVisibilitySphere = PADrend.deserialize(Util.loadFile(fileName));
 												refreshGroup.refresh();
 											}).bindLastParams(config, refreshGroup)
 										);
@@ -343,18 +343,18 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Compare",
-		GUI.TOOLTIP				:	"Compare the current sampling sphere to the reference sampling sphere,\nand store the result in the difference sampling sphere.",
+		GUI.TOOLTIP				:	"Compare the current visibility sphere to the reference visibility sphere,\nand store the result in the difference visibility sphere.",
 		GUI.ON_CLICK			:	(fn(ExtObject config, GUI.RefreshGroup refreshGroup) {
-										if(!config.samplingSphere) {
-											Runtime.warn("Cannot compare sampling spheres. Current sampling sphere not available.");
+										if(!config.visibilitySphere) {
+											Runtime.warn("Cannot compare visibility spheres. Current visibility sphere not available.");
 											return;
 										}
-										if(!config.referenceSamplingSphere) {
-											Runtime.warn("Cannot compare sampling spheres. Reference sampling sphere not available.");
+										if(!config.referenceVisibilitySphere) {
+											Runtime.warn("Cannot compare visibility spheres. Reference visibility sphere not available.");
 											return;
 										}
-										config.differenceSamplingSphere = SVS.compareSamplingSpheres(config.samplingSphere, 
-																												   config.referenceSamplingSphere, 
+										config.differenceVisibilitySphere = SVS.compareVisibilitySpheres(config.visibilitySphere, 
+																												   config.referenceVisibilitySphere, 
 																												   config.interpolationMethod);
 										refreshGroup.refresh();
 									}).bindLastParams(config, refreshGroup),
@@ -364,35 +364,35 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Save Values",
-		GUI.TOOLTIP				:	"Save the values of a sampling sphere to a file.",
+		GUI.TOOLTIP				:	"Save the values of a visibility sphere to a file.",
 		GUI.ON_CLICK			:	(fn(config) {
-										var samplingSphere = void;
-										if(config.differenceSamplingSphere) {
-											samplingSphere = config.differenceSamplingSphere;
-											out("Using difference sampling sphere.\n");
-										} else if(config.samplingSphere) {
-											samplingSphere = config.samplingSphere;
-											out("Using current sampling sphere.\n");
-										} else if(config.referenceSamplingSphere) {
-											samplingSphere = config.referenceSamplingSphere;
-											out("Using reference sampling sphere.\n");
+										var visibilitySphere = void;
+										if(config.differenceVisibilitySphere) {
+											visibilitySphere = config.differenceVisibilitySphere;
+											out("Using difference visibility sphere.\n");
+										} else if(config.visibilitySphere) {
+											visibilitySphere = config.visibilitySphere;
+											out("Using current visibility sphere.\n");
+										} else if(config.referenceVisibilitySphere) {
+											visibilitySphere = config.referenceVisibilitySphere;
+											out("Using reference visibility sphere.\n");
 										}
-										if(!samplingSphere) {
-											Runtime.warn("Cannot save values of a sampling sphere. No sampling sphere available.");
+										if(!visibilitySphere) {
+											Runtime.warn("Cannot save values of a visibility sphere. No visibility sphere available.");
 											return;
 										}
-										if(!samplingSphere.getSamples() || samplingSphere.getSamples().empty()) {
-											Runtime.warn("Cannot save values of a sampling sphere. No spherical sample points available.");
+										if(!visibilitySphere.getSamples() || visibilitySphere.getSamples().empty()) {
+											Runtime.warn("Cannot save values of a visibility sphere. No spherical sample points available.");
 											return;
 										}
-										if(!samplingSphere.getSamples().front().getValue()) {
-											Runtime.warn("Cannot save values of a sampling sphere. No values stored in spherical sample points.");
+										if(!visibilitySphere.getSamples().front().getValue()) {
+											Runtime.warn("Cannot save values of a visibility sphere. No values stored in spherical sample points.");
 											return;
 										}
-										var dialog = new GUI.FileDialog("Save Sampling Sphere Values", ".", [".tsv"],
-											(fn(fileName, MinSG.SVS.SamplingSphere samplingSphere) {
-												SVS.saveSamplingSphereValues(samplingSphere, fileName);
-											}).bindLastParams(samplingSphere)
+										var dialog = new GUI.FileDialog("Save Visibility Sphere Values", ".", [".tsv"],
+											(fn(fileName, MinSG.SVS.VisibilitySphere visibilitySphere) {
+												SVS.saveVisibilitySphereValues(visibilitySphere, fileName);
+											}).bindLastParams(visibilitySphere)
 										);
 										dialog.init();
 										
@@ -403,10 +403,10 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Evaluation Run",
-		GUI.TOOLTIP				:	"Start an evaluation run comparing different sample distributions to the reference sampling sphere.",
+		GUI.TOOLTIP				:	"Start an evaluation run comparing different sample distributions to the reference visibility sphere.",
 		GUI.ON_CLICK			:	(fn(ExtObject config, plugin, GUI.RefreshGroup refreshGroup, DataWrapper resolution) {
-										if(!config.referenceSamplingSphere) {
-											Runtime.warn("Cannot start evaluation run. Reference sampling sphere not available.");
+										if(!config.referenceVisibilitySphere) {
+											Runtime.warn("Cannot start evaluation run. Reference visibility sphere not available.");
 											return;
 										}
 										
@@ -450,25 +450,25 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 										fbo.attachColorTexture(renderingContext, color);
 										fbo.attachDepthTexture(renderingContext, depth);
 
-										var camera = MinSG.SVS.createSamplingCamera(config.referenceSamplingSphere.getSphere(), plugin.node.getWorldMatrix(), resolution());
+										var camera = MinSG.SVS.createSamplingCamera(config.referenceVisibilitySphere.getSphere(), plugin.node.getWorldMatrix(), resolution());
 										frameContext.pushCamera();
 
 										foreach(runs as var run) {
 											out("Evaluating \"" + run[0] + "\" ... ");
 											
 											var samples = run[1]();
-											var samplingSphere = new MinSG.SVS.SamplingSphere(plugin.sphere.clone(), samples);
-											samplingSphere.evaluateAllSamples(frameContext, evaluator, camera, plugin.node);
-											//Util.saveFile(outputDir + run[0] + ".samplingsphere", PADrend.serialize(samplingSphere));
-											//SVS.saveSamplingSphereValues(samplingSphere, outputDir + run[0] + ".tsv");
-											//Rendering.saveTexture(GLOBALS.renderingContext, MinSG.SVS.createColorTexture(512, 256, samplingSphere, config.interpolationMethod), outputDir + run[0] + ".png");
+											var visibilitySphere = new MinSG.SVS.VisibilitySphere(plugin.sphere.clone(), samples);
+											visibilitySphere.evaluateAllSamples(frameContext, evaluator, camera, plugin.node);
+											//Util.saveFile(outputDir + run[0] + ".visibilitysphere", PADrend.serialize(visibilitySphere));
+											//SVS.saveVisibilitySphereValues(visibilitySphere, outputDir + run[0] + ".tsv");
+											//Rendering.saveTexture(GLOBALS.renderingContext, MinSG.SVS.createColorTexture(512, 256, visibilitySphere, config.interpolationMethod), outputDir + run[0] + ".png");
 											
-											//var differenceSamplingSphere = SVS.compareSamplingSpheres(samplingSphere, config.referenceSamplingSphere, config.interpolationMethod);
-											//Util.saveFile(outputDir + run[0] + "Diff.samplingsphere", PADrend.serialize(differenceSamplingSphere));
-											//SVS.saveSamplingSphereValues(differenceSamplingSphere, outputDir + run[0] + "Diff.tsv");
-											//Rendering.saveTexture(GLOBALS.renderingContext, MinSG.SVS.createColorTexture(512, 256, differenceSamplingSphere, config.interpolationMethod), outputDir + run[0] + "Diff.png");
+											//var differenceVisibilitySphere = SVS.compareVisibilitySpheres(visibilitySphere, config.referenceVisibilitySphere, config.interpolationMethod);
+											//Util.saveFile(outputDir + run[0] + "Diff.visibilitysphere", PADrend.serialize(differenceVisibilitySphere));
+											//SVS.saveVisibilitySphereValues(differenceVisibilitySphere, outputDir + run[0] + "Diff.tsv");
+											//Rendering.saveTexture(GLOBALS.renderingContext, MinSG.SVS.createColorTexture(512, 256, differenceVisibilitySphere, config.interpolationMethod), outputDir + run[0] + "Diff.png");
 											
-											SVS.outputSamplingSphereComparison(samplingSphere, config.referenceSamplingSphere, outputDir + run[0] + ".tsv");
+											SVS.outputVisibilitySphereComparison(visibilitySphere, config.referenceVisibilitySphere, outputDir + run[0] + ".tsv");
 											out("done.\n");
 										}
 
@@ -486,31 +486,31 @@ SVS.setUpSamplingSphereEvaluation := fn(plugin) {
 		GUI.LABEL				:	"Triangulation",
 		GUI.TOOLTIP				:	"Build a 3D Delaunay triangulation of the sample points.",
 		GUI.ON_CLICK			:	(fn(config, Geometry.Matrix4x4 worldMatrix) {
-										var samplingSphere = void;
-										if(config.differenceSamplingSphere) {
-											samplingSphere = config.differenceSamplingSphere;
-											out("Using difference sampling sphere.\n");
-										} else if(config.samplingSphere) {
-											samplingSphere = config.samplingSphere;
-											out("Using current sampling sphere.\n");
-										} else if(config.referenceSamplingSphere) {
-											samplingSphere = config.referenceSamplingSphere;
-											out("Using reference sampling sphere.\n");
+										var visibilitySphere = void;
+										if(config.differenceVisibilitySphere) {
+											visibilitySphere = config.differenceVisibilitySphere;
+											out("Using difference visibility sphere.\n");
+										} else if(config.visibilitySphere) {
+											visibilitySphere = config.visibilitySphere;
+											out("Using current visibility sphere.\n");
+										} else if(config.referenceVisibilitySphere) {
+											visibilitySphere = config.referenceVisibilitySphere;
+											out("Using reference visibility sphere.\n");
 										}
-										if(!samplingSphere) {
-											Runtime.warn("Cannot build triangulation. No sampling sphere available.");
+										if(!visibilitySphere) {
+											Runtime.warn("Cannot build triangulation. No visibility sphere available.");
 											return;
 										}
-										if(!samplingSphere.getSamples() || samplingSphere.getSamples().empty()) {
+										if(!visibilitySphere.getSamples() || visibilitySphere.getSamples().empty()) {
 											Runtime.warn("Cannot build triangulation. No spherical sample points available.");
 											return;
 										}
 										
 										GLOBALS.showWaitingScreen();
 										
-										var worldSphere = MinSG.SVS.transformSphere(samplingSphere.getSphere(), worldMatrix);
+										var worldSphere = MinSG.SVS.transformSphere(visibilitySphere.getSphere(), worldMatrix);
 										
-										var listNode = samplingSphere.getTriangulationMinSGNodes();
+										var listNode = visibilitySphere.getTriangulationMinSGNodes();
 										listNode.setWorldPosition(worldSphere.getCenter());
 										listNode.setScale(worldSphere.getRadius());
 										

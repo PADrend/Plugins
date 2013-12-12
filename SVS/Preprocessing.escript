@@ -134,8 +134,8 @@ SVS.multiplePreprocessingRuns := fn(MinSG.SceneManager sceneManager,
 				sceneManager.saveMinSGFile(new Util.FileName(sceneFile), [rootNode]);
 
 				// Remove all results from the current scene
-				foreach(MinSG.collectNodesWithAttribute(rootNode, "SamplingSphere") as var node) {
-					node.unsetNodeAttribute("SamplingSphere");
+				foreach(MinSG.collectNodesWithAttribute(rootNode, "VisibilitySphere") as var node) {
+					node.unsetNodeAttribute("VisibilitySphere");
 				}
 			}
 		}

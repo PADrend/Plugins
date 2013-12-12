@@ -55,9 +55,9 @@ plugin.init = fn() {
 				GUI.LABEL		:	"Projection Evaluation",
 				GUI.ON_CLICK	:	SVS.setUpProjectionEvaluationWindow
 			});
-			gui.registerComponentProvider('SVS.SingleSamplingSphere', {
+			gui.registerComponentProvider('SVS.SingleVisibilitySphere', {
 				GUI.TYPE 		:	GUI.TYPE_BUTTON,
-				GUI.LABEL		:	"Single Sampling Sphere",
+				GUI.LABEL		:	"Single Visibility Sphere",
 				GUI.ON_CLICK	:	this -> this.setUp
 			});
 			gui.registerComponentProvider('SVS.VisibleSetEvaluation', {
@@ -97,7 +97,7 @@ plugin.setUp := fn() {
 	loadOnce(__DIR__ + "/Camera.escript");
 	loadOnce(__DIR__ + "/Rendering.escript");
 	loadOnce(__DIR__ + "/SampleCreationGUI.escript");
-	loadOnce(__DIR__ + "/SamplingSphereEvaluation.escript");
+	loadOnce(__DIR__ + "/VisibilitySphereEvaluation.escript");
 	loadOnce(__DIR__ + "/SphericalSamplePointEvaluation.escript");
 
 	this.node = NodeEditor.getSelectedNode();
@@ -108,7 +108,7 @@ plugin.setUp := fn() {
 	SVS.setUpCameraWindow(this);
 	SVS.setUpSampleCreationGUI(this);
 	SVS.setUpRendering(this);
-	SVS.setUpSamplingSphereEvaluation(this);
+	SVS.setUpVisibilitySphereEvaluation(this);
 	SVS.setUpSphericalSamplePointEvaluation(this);
 };
 

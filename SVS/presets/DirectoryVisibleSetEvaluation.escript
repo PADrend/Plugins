@@ -45,25 +45,25 @@ var dialog = new GUI.FileDialog("Select Directory", "data/SVS/scene", [".minsg"]
 		PADrend.registerScene(scene);
 		PADrend.selectScene(scene);
 
-		// Search a node that has a sampling sphere by traversing the tree
-		var samplingSphere = void;
+		// Search a node that has a visibility sphere by traversing the tree
+		var visibilitySphere = void;
 		var svsNode = void;
 		var nodes = [scene];
 		while(!nodes.empty()) {
 			var node = nodes.popBack();
-			if(MinSG.SVS.hasSamplingSphere(node)) {
+			if(MinSG.SVS.hasVisibilitySphere(node)) {
 				svsNode = node;
-				samplingSphere = MinSG.SVS.retrieveSamplingSphere(node);
+				visibilitySphere = MinSG.SVS.retrieveVisibilitySphere(node);
 				break;
 			}
 			nodes.append(MinSG.getChildNodes(node));
 		}
 
 		if(svsNode != scene) {
-			outln("Warning: Scene root has no SamplingSphere.");
+			outln("Warning: Scene root has no VisibilitySphere.");
 		}
 		var resolution = 8192;
-		SVS.measureVisibleSetQuality(svsNode, samplingSphere, resolution);
+		SVS.measureVisibleSetQuality(svsNode, visibilitySphere, resolution);
 	}
 });
 dialog.init();

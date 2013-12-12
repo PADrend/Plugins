@@ -13,10 +13,10 @@
 declareNamespace($SVS);
 
 SVS.createMeasurementCamera := fn(	MinSG.GroupNode node, 
-													MinSG.SVS.SamplingSphere samplingSphere, 
+													MinSG.SVS.VisibilitySphere visibilitySphere, 
 													Geometry.Vec3 viewingDirection, 
 													Number resolution) {
-	var sphere = samplingSphere.getSphere();
+	var sphere = visibilitySphere.getSphere();
 	var worldMatrix = node.getWorldMatrix();
 	var camera = MinSG.SVS.createSamplingCamera(sphere,
 																worldMatrix,
@@ -43,7 +43,7 @@ SVS.measureExactVisibleSet := fn(	MinSG.GroupNode node,
 };
 
 SVS.measureVisibleSetQuality := fn(	MinSG.GroupNode node, 
-													MinSG.SVS.SamplingSphere samplingSphere,
+													MinSG.SVS.VisibilitySphere visibilitySphere,
 													Number resolution) {
 	var fbo = new Rendering.FBO;
 	var color = Rendering.createStdTexture(resolution, resolution, true);
@@ -52,14 +52,14 @@ SVS.measureVisibleSetQuality := fn(	MinSG.GroupNode node,
 	fbo.attachColorTexture(renderingContext, color);
 	fbo.attachDepthTexture(renderingContext, depth);
 
-	var samples = samplingSphere.getSamples();
+	var samples = visibilitySphere.getSamples();
 	var output = "Sample\t";
 	output += "EVSCardinality\tEVSBenefits\tEVSCosts\t";
 	output += "PVSCardinality\tPVSBenefits\tPVSCosts\t";
 	output += "OverestimationCardinality\tOverestimationBenefits\tOverestimationCosts\t";
 	output += "UnderestimationCardinality\tUnderestimationBenefits\tUnderestimationCosts\n";
 	foreach(samples as var index, var sample) {
-		var camera = SVS.createMeasurementCamera(node, samplingSphere, sample.getPosition(), resolution);
+		var camera = SVS.createMeasurementCamera(node, visibilitySphere, sample.getPosition(), resolution);
 		var exactVisibleSet = SVS.measureExactVisibleSet(node, camera);
 		var potentiallyVisibleSet = sample.getValue();
 		var overestimation = potentiallyVisibleSet.makeDifference(exactVisibleSet);
@@ -114,7 +114,7 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_NUMBER,
 		GUI.LABEL			:	"#SamplingDirections:",
-		GUI.TOOLTIP			:	"Number of sampling directions stored in the sampling sphere.",
+		GUI.TOOLTIP			:	"Number of sampling directions stored in the visibility sphere.",
 		GUI.DATA_WRAPPER	:	numSamplingDirections,
 		GUI.FLAGS			:	GUI.LOCKED,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
@@ -129,18 +129,18 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 	};
 	panel++;
 
-	var samplingSphere = DataWrapper.createFromValue(void);
-	selectedNode.onDataChanged += [samplingSphere] => fn(DataWrapper samplingSphere, selectedNode) {
+	var visibilitySphere = DataWrapper.createFromValue(void);
+	selectedNode.onDataChanged += [visibilitySphere] => fn(DataWrapper visibilitySphere, selectedNode) {
 		if(!selectedNode || !(selectedNode ---|> MinSG.GroupNode)) {
-			samplingSphere(void);
+			visibilitySphere(void);
 			return;
 		}
-		// Search a node that has a sampling sphere by traversing the tree
+		// Search a node that has a visibility sphere by traversing the tree
 		var nodes = [selectedNode];
 		while(!nodes.empty()) {
 			var node = nodes.popBack();
-			if(MinSG.SVS.hasSamplingSphere(node)) {
-				samplingSphere(MinSG.SVS.retrieveSamplingSphere(node));
+			if(MinSG.SVS.hasVisibilitySphere(node)) {
+				visibilitySphere(MinSG.SVS.retrieveVisibilitySphere(node));
 				return;
 			}
 			nodes.append(MinSG.getChildNodes(node));
@@ -153,12 +153,12 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 		dataWrapper.refresh();
 	});
 
-	samplingSphere.onDataChanged += [numSamplingDirections] => fn(DataWrapper numSamplingDirections, samplingSphere) {
-		if(!samplingSphere) {
+	visibilitySphere.onDataChanged += [numSamplingDirections] => fn(DataWrapper numSamplingDirections, visibilitySphere) {
+		if(!visibilitySphere) {
 			numSamplingDirections(0);
 			return;
 		}
-		numSamplingDirections(samplingSphere.getSamples().count());
+		numSamplingDirections(visibilitySphere.getSamples().count());
 	};
 
 	panel += "*Actions*";
@@ -178,7 +178,7 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 	panel++;
 
 	var evaluateRandomDirections = fn(MinSG.GroupNode node, 
-									  MinSG.SVS.SamplingSphere samplingSphere,
+									  MinSG.SVS.VisibilitySphere visibilitySphere,
 									  Number resolution) {
 		var fbo = new Rendering.FBO;
 		var color = Rendering.createStdTexture(resolution, resolution, true);
@@ -198,10 +198,10 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 			var azimuth = Rand.uniform(0.0, 2.0 * Math.PI);
 			var direction = Geometry.Sphere.calcCartesianCoordinateUnitSphere(inclination, azimuth);
 
-			var pvsNearest = samplingSphere.queryValue(direction, MinSG.SVS.INTERPOLATION_NEAREST);
-			var pvsMax3 = samplingSphere.queryValue(direction, MinSG.SVS.INTERPOLATION_MAX3);
+			var pvsNearest = visibilitySphere.queryValue(direction, MinSG.SVS.INTERPOLATION_NEAREST);
+			var pvsMax3 = visibilitySphere.queryValue(direction, MinSG.SVS.INTERPOLATION_MAX3);
 
-			var camera = SVS.createMeasurementCamera(node, samplingSphere, direction, resolution);
+			var camera = SVS.createMeasurementCamera(node, visibilitySphere, direction, resolution);
 
 			var exactVisibleSet = SVS.measureExactVisibleSet(node, camera);
 			{ // NEAREST
@@ -240,8 +240,8 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 		outln("Data written to files \"", fileNameNearest, "\" and \"", fileNameMax3, "\".");
 	};
 
-	var outputSamplingSpheretoTSV = fn(MinSG.SVS.SamplingSphere samplingSphere) {
-		var samples = samplingSphere.getSamples();
+	var outputVisibilitySpheretoTSV = fn(MinSG.SVS.VisibilitySphere visibilitySphere) {
+		var samples = visibilitySphere.getSamples();
 		var output = "Sample\tBenefits\tCosts\n";
 		foreach(samples as var sampleIndex, var sample) {
 			var visibilityVector = sample.getValue();
@@ -254,7 +254,7 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 			}
 		}
 
-		var fileName = Util.createTimeStamp() + "_SVS-SamplingSphere.tsv";
+		var fileName = Util.createTimeStamp() + "_SVS-VisibilitySphere.tsv";
 		Util.saveFile(fileName, output);
 		outln("Data written to file \"", fileName, "\"");
 	};
@@ -263,19 +263,19 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Evaluate at sample points",
 		GUI.TOOLTIP			:	"Evaluate the quality of the visibility information\nin the sample points of the current sphere by using\ndifferent frustum angles.",
-		GUI.ON_CLICK		:	[selectedNode, samplingSphere, resolution] =>
+		GUI.ON_CLICK		:	[selectedNode, visibilitySphere, resolution] =>
 								fn(DataWrapper selectedNode, 
-								   DataWrapper samplingSphere,
+								   DataWrapper visibilitySphere,
 								   DataWrapper resolution) {
 									if(!selectedNode()) {
 										outln("No node is selected.");
 										return;
 									}
-									if(!samplingSphere()) {
-										outln("No sampling sphere found.");
+									if(!visibilitySphere()) {
+										outln("No visibility sphere found.");
 										return;
 									}
-									SVS.measureVisibleSetQuality(selectedNode(), samplingSphere(), resolution());
+									SVS.measureVisibleSetQuality(selectedNode(), visibilitySphere(), resolution());
 								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
@@ -285,20 +285,20 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Evaluate at random points",
 		GUI.TOOLTIP			:	"Evaluate the quality of the visibility information\nfor random viewing directions by using\ndifferent frustum angles.",
-		GUI.ON_CLICK		:	[evaluateRandomDirections, selectedNode, samplingSphere, resolution] =>
+		GUI.ON_CLICK		:	[evaluateRandomDirections, selectedNode, visibilitySphere, resolution] =>
 								fn(evaluateRandomDirections,
 								   DataWrapper selectedNode, 
-								   DataWrapper samplingSphere,
+								   DataWrapper visibilitySphere,
 								   DataWrapper resolution) {
 									if(!selectedNode()) {
 										outln("No node is selected.");
 										return;
 									}
-									if(!samplingSphere()) {
-										outln("No sampling sphere found.");
+									if(!visibilitySphere()) {
+										outln("No visibility sphere found.");
 										return;
 									}
-									evaluateRandomDirections(selectedNode(), samplingSphere(), resolution());
+									evaluateRandomDirections(selectedNode(), visibilitySphere(), resolution());
 								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
@@ -307,14 +307,14 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"TSV output",
-		GUI.TOOLTIP			:	"Output data of the sampling sphere\nto a file with tab-separated values.",
-		GUI.ON_CLICK		:	[outputSamplingSpheretoTSV, samplingSphere] =>
-								fn(outputSamplingSpheretoTSV, DataWrapper samplingSphere) {
-									if(!samplingSphere()) {
-										outln("No sampling sphere found.");
+		GUI.TOOLTIP			:	"Output data of the visibility sphere\nto a file with tab-separated values.",
+		GUI.ON_CLICK		:	[outputVisibilitySpheretoTSV, visibilitySphere] =>
+								fn(outputVisibilitySpheretoTSV, DataWrapper visibilitySphere) {
+									if(!visibilitySphere()) {
+										outln("No visibility sphere found.");
 										return;
 									}
-									outputSamplingSpheretoTSV(samplingSphere());
+									outputVisibilitySpheretoTSV(visibilitySphere());
 								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};

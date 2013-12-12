@@ -44,19 +44,19 @@ SVS.setUpPreprocessingWindow := fn() {
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_NUMBER,
 		GUI.LABEL			:	"#GroupNodes:",
-		GUI.TOOLTIP			:	"Nominal value, because a sampling sphere\nis created for every group node.",
+		GUI.TOOLTIP			:	"Nominal value, because a visibility sphere\nis created for every group node.",
 		GUI.DATA_WRAPPER	:	numGroupNodes,
 		GUI.FLAGS			:	GUI.LOCKED,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	panel++;
 
-	var numSamplingSpheres = DataWrapper.createFromValue(0);
+	var numVisibilitySpheres = DataWrapper.createFromValue(0);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_NUMBER,
-		GUI.LABEL			:	"#SamplingSpheres:",
+		GUI.LABEL			:	"#VisibilitySpheres:",
 		GUI.TOOLTIP			:	"Actual value. Should be equal to the number\nof group nodes after preprocessing.",
-		GUI.DATA_WRAPPER	:	numSamplingSpheres,
+		GUI.DATA_WRAPPER	:	numVisibilitySpheres,
 		GUI.FLAGS			:	GUI.LOCKED,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
@@ -70,20 +70,20 @@ SVS.setUpPreprocessingWindow := fn() {
 	};
 	panel++;
 
-	selectedNode.onDataChanged += [numGroupNodes, numSamplingSpheres] => fn(numGroupNodes, numSamplingSpheres, node) {
+	selectedNode.onDataChanged += [numGroupNodes, numVisibilitySpheres] => fn(numGroupNodes, numVisibilitySpheres, node) {
 		if(node) {
 			var groupNodes = MinSG.collectNodes(node, MinSG.GroupNode);
 			numGroupNodes(groupNodes.count());
 			var count = 0;
 			foreach(groupNodes as var groupNode) {
-				if(MinSG.SVS.hasSamplingSphere(groupNode)) {
+				if(MinSG.SVS.hasVisibilitySphere(groupNode)) {
 					++count;
 				}
 			}
-			numSamplingSpheres(count);
+			numVisibilitySpheres(count);
 		} else {
 			numGroupNodes(0);
-			numSamplingSpheres(0);
+			numVisibilitySpheres(0);
 		}
 	};
 	registerExtension('NodeEditor_OnNodesSelected', [panel, selectedNode] => fn(guiElement, dataWrapper, nodes) {
@@ -194,8 +194,8 @@ SVS.setUpPreprocessingWindow := fn() {
 									}
 
 									selectedNode().addChild(newNode);
-									newNode.setNodeAttribute('SamplingSphere', selectedNode().getNodeAttribute('SamplingSphere'));
-									selectedNode().unsetNodeAttribute('SamplingSphere');
+									newNode.setNodeAttribute('VisibilitySphere', selectedNode().getNodeAttribute('VisibilitySphere'));
+									selectedNode().unsetNodeAttribute('VisibilitySphere');
 
 									selectedNode().addState(new MinSG.SVS.Renderer);
 									var projSizeFilterState = new MinSG.ProjSizeFilterState;
@@ -218,15 +218,15 @@ SVS.setUpPreprocessingWindow := fn() {
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Remove",
-		GUI.TOOLTIP			:	"Remove all sampling spheres from the\nsubtree starting at the selected node.",
+		GUI.TOOLTIP			:	"Remove all visibility spheres from the\nsubtree starting at the selected node.",
 		GUI.ON_CLICK		:	[selectedNode] => fn(selectedNode) {
 									if(!selectedNode() || !(selectedNode() ---|> MinSG.GroupNode)) {
 										outln("A group node is expected as parameter.");
 										return;
 									}
-									var nodesToProcess = MinSG.collectNodesWithAttribute(selectedNode(), "SamplingSphere");
+									var nodesToProcess = MinSG.collectNodesWithAttribute(selectedNode(), "VisibilitySphere");
 									foreach(nodesToProcess as var node) {
-										node.unsetNodeAttribute("SamplingSphere");
+										node.unsetNodeAttribute("VisibilitySphere");
 									}
 									outln("Removed ", nodesToProcess.count(), " visibility spheres.");
 
