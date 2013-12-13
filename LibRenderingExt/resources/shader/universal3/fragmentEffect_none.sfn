@@ -1,0 +1,78 @@
+#version 120
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+// ------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+struct VertexProperties {
+	vec3 position_es, normal_es;
+	float pointSize;
+};
+
+//! \see main.sfn
+void provideFragmentEffectVars(in VertexProperties vert){}
+
+#endif
+// ------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+struct CompositeColor {
+	vec4 ambient, diffuse, specular;
+};
+
+struct SurfaceProperties {
+	vec3 position_es, normal_es, tangent_es;
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+
+
+//vec4 sg_eyeToWorld(in vec4 pos_hms); //! \see sgHelpers.sfn
+
+//! \see main.sfn
+void addFragmentEffect(in SurfaceProperties surface, inout CompositeColor color){
+//////	// sphere map http://www.bluevoid.com/opengl/sig00/advanced00/notes/node184.html
+//////	vec3 dir_ws = normalize(sg_eyeToWorld(vec4(surface.position_es,0.0)).xyz );
+//////	vec3 normal_ws = normalize(sg_eyeToWorld(vec4(surface.normal_es,0.0)).xyz );
+//////	vec3 r = dir_ws - dot(normal_ws,dir_ws) * 2.0 * normal_ws;
+//////	float p = sqrt(r.x*r.x+r.y*r.y+(r.z+1.0)*(r.z+1.0));
+//////	float s = r.x/(2.1*p)+0.5;
+//////	float t = r.y/(2.1*p)+0.5;
+//////
+//////// lookup map
+////////	vec3 dir_ws = normalize(sg_eyeToWorld(vec4(surface.normal_es,0.0)).xyz );
+////////	float s = (dir_ws.x+1.0)*0.499;
+////////	float t = (dir_ws.y+1.0)*0.499;
+//////	
+////////	color.ambient *= vec4(s,t,0.0,1.0);
+//////	vec4 c = texture2D(sg_texture0, vec2(s,t));
+////////	c = vec4(dir_ws,1.0);
+//////	color.ambient = color.ambient*0.5+c*0.5;
+//////	color.diffuse = color.diffuse*0.5+c*0.5;
+////////	color.specular *= c;
+//////
+////////	color.diffuse = color.diffuse *0.0 + c*0.9;
+//////	
+//////	// darken / fog
+////////	color.ambient *= max(0.5,10.0-abs(surface.position_es.z))/10.0;
+////////	color.diffuse *= max(0.5,10.0-abs(surface.position_es.z))/10.0;
+}
+
+
+
+#endif
+// ------------------

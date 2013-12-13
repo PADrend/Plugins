@@ -1,0 +1,203 @@
+#version 120
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+/*	sg_ . uses MinSG constants (uniform or attributes) for the calculation
+	h ... homogenous (vec4)
+	cs .. Clipping Space (frustum is the -1...1 cube)
+	es .. EyeSpace or ViewSpace
+	ms .. ModelSpace
+	ss .. ScreenSpace
+	ws .. WorldSpace
+*/
+
+// -------------------
+
+//! \name Coordinate transformations
+//!	\{
+	uniform mat4 sg_cameraInverseMatrix;
+	uniform mat4 sg_modelViewMatrix;
+	uniform mat4 sg_modelViewProjectionMatrix;
+
+	//! [fs,vs] Convert an homogenous coordinate from Eye(=View)Space into WorldSpace.
+	vec4 sg_eyeToWorld(in vec4 hes)			{	return sg_cameraInverseMatrix  * hes;	}
+
+	//! [fs,vs] Convert an homogenous coordinate from ModelSpace into Eye(=View)Space.
+	vec4 sg_modelToEye(in vec4 hms)			{	return sg_modelViewMatrix * hms;	}
+
+	//! [fs,vs] Convert an homogenous coordinate from ModelSpace into WorldSpace.
+	vec4 sg_modelToWorld(vec4 hms)			{	return sg_cameraInverseMatrix * sg_modelViewMatrix * hms;	}
+
+	//! [fs,vs] Convert an homogenous coordinate from ModelSpace into WorldSpace.
+	vec4 sg_modelToClipping(in vec4 hms)	{	return sg_modelViewProjectionMatrix * hms; }
+//! \}
+
+// -------------------
+
+//! \name Lighting
+//!	\{
+	struct CompositeColor {	vec4 ambient, diffuse, specular;	};
+	const int DIRECTIONAL = 1;
+	const int POINT = 2;
+	const int SPOT = 3;
+
+	struct sg_LightSourceParameters {
+		int type; 							// has to be DIRECTIONAL, POINT or SPOT
+		vec3 position; 						// position of the light  ????????????????????????????????
+		vec3 direction; 					// direction of the light, has to be normalized ????????????????????????????????
+		vec4 ambient, diffuse, specular;	// light colors for all lights
+		float constant, linear, quadratic;	// attenuations for point & spot lights
+		float exponent, cosCutoff;			// spot light parameters
+	};
+	uniform sg_LightSourceParameters	sg_LightSource[8];
+	uniform int							sg_lightCount;
+
+	//! [fs,vs] Add the light of the given light source to lightSum.
+	void addLighting(in sg_LightSourceParameters light, in vec3 position_es, in vec3 normal_es, in float shininess, inout CompositeColor result){
+
+		// for DIRECTIONAL lights
+		float distPixToLight = 0.0; 
+		float attenuation = 1.0;
+		vec3 pixToLight = -light.direction;
+		
+		// for POINT & SPOT lights
+		if(light.type != DIRECTIONAL){ 
+			pixToLight = light.position - position_es;
+			distPixToLight = length(pixToLight); 
+			pixToLight = normalize(pixToLight); 
+			attenuation	/= ( 	light.constant + light.linear * distPixToLight + light.quadratic * distPixToLight * distPixToLight);
+		}
+		// for SPOT lights
+		if(light.type == SPOT){
+			float spotDot = dot(pixToLight, -light.direction);
+			float spotAttenuation;
+			if(spotDot < light.cosCutoff) {
+				spotAttenuation = 0.0;
+			} else {
+				spotAttenuation = pow(spotDot, light.exponent);
+			}
+			attenuation *= spotAttenuation;
+		}
+		// for ALL lights
+		result.ambient += light.ambient * attenuation;
+		
+		float norDotPixToLight = max(0.0, dot(normal_es, pixToLight));
+		if(norDotPixToLight != 0.0){
+			result.diffuse += light.diffuse * norDotPixToLight * attenuation;
+
+			if(shininess>0.0){
+				vec3 pixToEye = normalize(-position_es);
+				vec3 refl = reflect(-pixToLight, normal_es);
+				float eyeDotRefl = dot(pixToEye, refl);
+				if(eyeDotRefl>0.0)
+					result.specular += light.specular * pow(eyeDotRefl, shininess/4.0) * attenuation;
+			}
+		}
+	}
+
+	//! [fs,vs] Add the light of light #sgLightNr to lightSum.
+	void sg_addLight(in int sgLightNr,in vec3 position_es, in vec3 normal_es, in float shininess, inout CompositeColor lightSum){
+		vec3 n_es = normal_es;
+		#ifdef SG_FS
+		if(! gl_FrontFacing) 
+			n_es = -n_es;
+		#endif
+		addLighting(sg_LightSource[sgLightNr],position_es,n_es,shininess,lightSum);
+	}
+
+	//! [fs,vs] Returns the sg_Color attribute.
+	int sg_getLightCount()					{	return sg_lightCount;	}
+//! \}
+
+// -------------------
+
+//! \name Materials and Surface properties
+//!	\{
+	struct SurfaceProperties {
+		vec3 position_es, normal_es, tangent_es;
+		vec4 ambient, diffuse, specular, emission;
+		float shininess;
+	};
+	struct sg_MaterialParameters {
+		vec4 ambient, diffuse, specular; //vec4 emission;?
+		float shininess;
+	};
+
+	uniform sg_MaterialParameters	sg_Material;
+	uniform bool					sg_useMaterials;
+
+	//! [fs,vs] Set a surface's ambient, diffuse and specular value.
+	void initSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c){
+		surface.ambient = c;
+		surface.diffuse = c;
+		surface.specular = c;
+	}
+
+	//! [fs,vs] Multiply a surface's ambient, diffuse and specular value.
+	void multSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c){
+		surface.ambient *= c;
+		surface.diffuse *= c;
+		surface.specular *= c;
+	}
+	
+	//! [fs,vs] Returns if materials are enabled.
+	bool sg_isMaterialEnabled()				{	return sg_useMaterials;	}
+
+	//! [fs] Set the surface color members to those of sg_Material.
+	void sg_initSurfaceFromSGMaterial(inout SurfaceProperties surface){
+		surface.ambient = sg_Material.ambient;
+		surface.diffuse = sg_Material.diffuse;
+		surface.specular = sg_Material.specular;
+		surface.emission = vec4(0.0);
+		surface.shininess = sg_Material.shininess;
+	}
+//! \}
+
+// -------------------
+
+//! \name Point rendering
+//!	\{
+
+	uniform float	sg_pointSize;
+
+	//! [fs,vs] Return the sg_pointSize uniform.
+	float sg_getPointSize()					{	return sg_pointSize;	}
+//! \}
+
+// -------------------
+
+//! \name Vertex attributes
+//!	\{
+#ifdef SG_VERTEX_SHADER
+	attribute vec4 sg_Color;
+	attribute vec3 sg_Normal;
+	attribute vec3 sg_Position;
+	attribute vec3 sg_Tangent;
+
+	//! [vs] Returns the sg_Color attribute.
+	vec4 sg_getVertexColor()						{	return sg_Color;	}
+
+	//! [vs] return the vertex position.
+	vec3 sg_getVertexPosition_ms()					{	return sg_Position;	}
+
+	//! [vs] returns the vertex normal.
+	vec3 sg_getVertexNormal_ms()					{	return sg_Normal;	}
+	
+	//! [vs] returns the vertex tangent vector.
+	vec3 sg_getVertexTangent_ms()					{	return sg_Tangent;	}
+
+#endif
+//! \}
+
+// -------------------

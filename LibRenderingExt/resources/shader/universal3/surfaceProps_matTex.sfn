@@ -1,0 +1,83 @@
+#version 120
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+uniform bool sg_textureEnabled[8];
+
+varying vec4 var_vertexColor;
+varying vec2 var_texCoord0, var_texCoord1;
+
+// ------------------------------------------------------------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+attribute vec2 sg_TexCoord0;
+attribute vec2 sg_TexCoord1;
+
+struct VertexProperties {
+	vec3 position_es, normal_es;
+	float pointSize;
+};
+
+vec4 sg_getVertexColor();	//!	\see sgHelper.sfn
+
+//! \see main.sfn
+void provideSurfaceVars(in VertexProperties vec){
+	var_vertexColor = sg_getVertexColor();
+	if(sg_textureEnabled[0])
+		var_texCoord0 = sg_TexCoord0;
+	if(sg_textureEnabled[1])
+		var_texCoord1 = sg_TexCoord1;
+}
+
+#endif
+
+// ------------------------------------------------------------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+uniform sampler2D sg_texture0, sg_texture1;
+
+struct SurfaceProperties {
+	vec3 position_es, normal_es, tangent_es;
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+
+
+void initSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c);		//!	\see sgHelper.sfn
+void multSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c);		//!	\see sgHelper.sfn
+void sg_initSurfaceFromSGMaterial(inout SurfaceProperties surface);				//!	\see sgHelper.sfn
+bool sg_isMaterialEnabled();													//!	\see sgHelper.sfn
+
+//! \see main.sfn
+void calcSurfaceProperties(inout SurfaceProperties surface){
+
+	// material
+	if(sg_isMaterialEnabled()){
+		sg_initSurfaceFromSGMaterial(surface);
+	}else{
+		initSurfaceColor_AmDiSp(surface,var_vertexColor);
+		surface.emission = vec4(0.0);
+		surface.shininess = 0.0;
+	}
+	// texture
+	if(sg_textureEnabled[0])
+		multSurfaceColor_AmDiSp(surface,texture2D(sg_texture0, var_texCoord0));
+	if(sg_textureEnabled[1])
+		multSurfaceColor_AmDiSp(surface,texture2D(sg_texture1, var_texCoord1));
+
+}
+
+#endif

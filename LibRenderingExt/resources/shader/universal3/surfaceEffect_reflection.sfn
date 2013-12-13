@@ -1,0 +1,222 @@
+#version 120
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+// ------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+struct VertexProperties {
+	vec3 position_es, normal_es;
+	float pointSize;
+};
+
+//! \see main.sfn
+void provideSurfaceEffectVars(in VertexProperties vec){}
+
+#endif
+// ------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+//#extension GL_ARB_gpu_shader5
+
+struct SurfaceProperties {
+	vec3 position_es, normal_es, tangent_es;
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+
+
+vec4 sg_modelToClipping(in vec4 hms);	//! \see sgHelpers.sfn
+vec4 sg_eyeToWorld(in vec4 hes);	//! \see sgHelpers.sfn
+
+	
+uniform sampler2D sg_texture0;
+uniform sampler2D lastColorBuffer;
+uniform sampler2D lastDepthBuffer;
+uniform mat4 sg_projectionMatrix;  // eye->cam move to sg_helper!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+uniform mat4 sg_lastProjectionMatrix;  
+uniform mat4 sg_lastProjectionMatrixInverse;  
+uniform mat4 sg_eyeToLastEye;  
+
+uniform vec2 last_viewportScale = vec2(1,1);
+uniform vec2 last_viewportOffset = vec2(0,0);
+
+//uniform mat4 lastCamMatrix;  //!!!!!!!!!!!!!!!!!!!!!! eye to world
+uniform mat4 invLastCamMatrix;  //!!!!!!!!!!!!!!!!!!!!!! world to eye
+
+vec3 hvec4ToVec3(in vec4 hvec){	return hvec.xyz/hvec.w;	}
+
+
+vec3 lastEyePosToScreenPos(in vec3 pos_es){
+	return (hvec4ToVec3(sg_lastProjectionMatrix*vec4(pos_es,1.0)) + vec3(1.0))*0.5;
+}
+vec3 screenPosToLastEyePos(in vec3 pos_screen){
+	return hvec4ToVec3(sg_lastProjectionMatrixInverse*vec4(pos_screen*2.0-vec3(1.0),1.0));
+}
+
+float lastDepthBufferLookup(in vec2 screenPos){
+	return texture2D(lastDepthBuffer, screenPos*last_viewportScale + last_viewportOffset).r;
+}
+vec4 lastColorBufferLookup(in vec2 screenPos){
+	return texture2D(lastColorBuffer, screenPos*last_viewportScale + last_viewportOffset);
+}
+
+//! \see main.sfn
+void addSurfaceEffects(inout SurfaceProperties surface){
+
+	// project position into last frame's eye space
+	vec3 pos_es = hvec4ToVec3(invLastCamMatrix * sg_eyeToWorld(vec4(surface.position_es,1.0) ));
+
+	// project ray into last frame's eye space
+	vec3 currentRay_es = reflect( normalize(surface.position_es) , surface.normal_es);
+	vec3 ray_es = normalize( (invLastCamMatrix * sg_eyeToWorld(vec4(currentRay_es,0.0) )).xyz);
+
+
+	float f1 = 0.01;
+	float f2 = -1.0;
+	float f = 0.04;
+
+	float closestDiff = -1;
+	float closestF = -1;
+	
+	{	// search intersection range f1...f2
+	//	{
+	//		vec3 pos2_world = camPosToWorldPos(pos_cam+vec3(1/1280.0,1/720.0,0));
+	//		stepSize = length(pos2_world-pos_es)*1.0;
+	//	}
+		float stepSize = 0.10;
+		f = stepSize;
+		
+		for(int i=0;i<25;++i){ //*0.5
+			vec3 sample_screen = lastEyePosToScreenPos(pos_es + ray_es*f);
+			if(sample_screen.y<0.0||sample_screen.y>1.0||sample_screen.x<0.0||sample_screen.x>1.0){
+				return;
+			}
+			
+			float actualDepth_screen = lastDepthBufferLookup(sample_screen.xy);
+			
+			float diff = sample_screen.z-actualDepth_screen;
+			if(diff>0.0002){
+				f2 = f;
+				break;
+			}else{
+				if(diff>closestDiff){
+					closestDiff = diff;
+					closestF = f;
+				}
+
+				f1 = f*0.7;
+				f += stepSize;
+				stepSize *= 1.25;
+	//			}else if(diff<0 && abs(diff*1.01)<abs(maxDiff)){
+	//			
+	//				surface.ambient.g += 0.1;
+	//			}
+				
+			}
+			
+		}
+
+	}
+	if(f2<0.0 && closestF>0.1 && true){ // not found, but chance to just jumped over
+//		surface.ambient.g = 0.5;
+		
+		f1 = closestF*0.9;
+		float f2b = closestF*1.1;
+		float stepSize = (f2b-f1)*0.1;
+		for(f=f1;f<f2b;f+=stepSize){ 
+			vec3 sample_screen = lastEyePosToScreenPos(pos_es + ray_es*f);
+//			if(sample_screen.y<0.0||sample_screen.y>1.0||sample_screen.x<0.0||sample_screen.x>1.0){
+//				return;
+//			}
+			
+			float actualDepth_screen = lastDepthBufferLookup( sample_screen.xy );
+			
+			if(sample_screen.z-actualDepth_screen>0.0001){
+				f2 = f*1.01;
+//				surface.ambient.g = 1.0- closestDiff;
+				break;
+			}
+
+			
+		}
+	}
+	if(f2<0.0){
+		return;
+	}
+	
+	{	// intersection found -> search best point
+		vec3 best = vec3(0);
+		float quality = 0.0;
+		float error = 100.0;
+				
+		f = (f1+f2) * 0.5;
+		
+		float actualDepth_screen;
+		for(int i=0;i<10;++i){
+			vec3 sample_screen = lastEyePosToScreenPos(pos_es + ray_es*f);
+			actualDepth_screen = lastDepthBufferLookup(sample_screen.xy);
+
+			
+			if(actualDepth_screen<sample_screen.z){
+				f2 = f;
+				f = (f1+f2) * 0.5;
+			}else{
+				f1 = f;
+				f = (f1+f2) * 0.5;
+			}
+			float newError = abs(actualDepth_screen-sample_screen.z);
+			if( newError<error){
+				best = sample_screen;
+				error = newError;
+			}
+			if(f2-f1<0.00001){
+//				error = 0.0;
+				break;
+			}
+		}
+//		float sourceDepth_screen = texture2D(lastDepthBuffer, lastEyePosToScreenPos(pos_es).xy);
+//		if(1.0/sourceDepth_screen< 1.0/actualDepth_screen){
+////			surface.ambient.b = 0.5;
+//			error += 0.1;
+//		}
+		vec3 intersection_es = vec3(lastEyePosToScreenPos(pos_es + ray_es*f).xy,actualDepth_screen);
+		vec3 intersectionRay_es = screenPosToLastEyePos(intersection_es)-pos_es;
+		
+		quality = max(dot(normalize(intersectionRay_es),ray_es),0);
+		if(length(intersectionRay_es)<0.2){ // allow lower quality rays near tight corners
+			quality = pow(quality,0.2-length(intersectionRay_es));
+		}
+		
+		// use surface's secular alpha as reflectance value 
+		float amount = min(surface.specular.a *  pow(quality,200.0) *  smoothstep(length(pos_es)*0.75,0.1,f),1.0);
+
+		
+		// reduce reflections when reflecting points near the screen's border
+		float borderDist = min(abs(mod(best.x+0.5,1.0)-0.5),abs(mod(best.y+0.5,1.0)-0.5));
+		if(borderDist<0.15){
+			amount /= pow(1.15-borderDist,50);
+		}
+		 
+		surface.emission = mix(surface.emission,lastColorBufferLookup( best.xy ),amount);
+//			surface.reflectance *  pow(quality,200.0)/max(1,f/length(intersection_es))*0.5 );
+		
+	}
+
+
+}
+
+#endif
+// ------------------
