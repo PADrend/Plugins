@@ -191,7 +191,7 @@ NodeEditorTools.registerMenues_MiscTools := fn() {
 						psn.addState(blendState);
 
 						var textureState = new MinSG.TextureState();
-						var t=Rendering.createTextureFromFile("./resources/Particles/particle.png");
+						var t=Rendering.createTextureFromFile(Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/texture/particle.png");
 						if(t)
 							textureState.setTexture(t);
 						psn.addState(textureState);
@@ -501,18 +501,19 @@ NodeEditorTools.registerMenues_MiscTools := fn() {
 
 									var geometry = new MinSG.GeometryNode(plane);
 
+									var shaderPath = Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/universal2/";
 									var sfn = [
-										"resources/Shader/universal2/sgHelpers.sfn",
-										"resources/Shader/universal2/shading_normalMapped.sfn",
-										"resources/Shader/universal2/texture.sfn",
-										"resources/Shader/universal2/color_mapping.sfn",
-										"resources/Shader/universal2/shadow_disabled.sfn",
-										"resources/Shader/universal2/effect_disabled.sfn"
+										shaderPath + "sgHelpers.sfn",
+										shaderPath + "shading_normalMapped.sfn",
+										shaderPath + "texture.sfn",
+										shaderPath + "color_mapping.sfn",
+										shaderPath + "shadow_disabled.sfn",
+										shaderPath + "effect_disabled.sfn"
 									];
 									var vs = sfn.clone();
-									vs += "resources/Shader/universal2/universal.vs";
+									vs += shaderPath + "universal.vs";
 									var fs = sfn.clone();
-									fs += "resources/Shader/universal2/universal.fs";
+									fs += shaderPath + "universal.fs";
 									var shaderState = new MinSG.ShaderState();
 									MinSG.initShaderState(shaderState, vs, [], fs);
 									geometry.addState(shaderState);

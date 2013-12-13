@@ -22,7 +22,7 @@ var plugin = new Plugin({
             Plugin.DESCRIPTION : "Conversion of Folders to MinSG Scenes",
             Plugin.AUTHORS : "rpetring",
             Plugin.OWNER : "All",
-            Plugin.REQUIRES : ['NodeEditor']
+            Plugin.REQUIRES : ['LibRenderingExt', 'NodeEditor']
 });
 
 plugin.convert := fn(){
@@ -130,7 +130,7 @@ plugin.convert := fn(){
     MinSG.moveStatesIntoLeaves(scene);
     if(addPhong){
         var phong = new MinSG.ShaderState();
-		var path = "resources/Shader/universal2/";
+		var path = Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/universal2/";
 		var vs = [path+"universal.vs",path+"sgHelpers.sfn"];
 		var fs = [path+"universal.fs",path+"sgHelpers.sfn"];
 		foreach(["shading_phong","color_standard","texture","shadow_disabled","effect_disabled"] as var f){

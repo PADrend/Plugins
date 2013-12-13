@@ -100,7 +100,7 @@ m["Shader: Universal2"] = fn(){
 	});
 	p.addAction( "Init Shader",	config->fn(){
 
-		var path = "resources/Shader/universal2/";
+		var path = Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/universal2/";
 		var vs = [path+"universal.vs",path+"sgHelpers.sfn"];
 		var fs = [path+"universal.fs",path+"sgHelpers.sfn"];
 		foreach([this.shading,this.texture,this.shadow,this.effect,this.color] as var f){
@@ -160,7 +160,7 @@ m["Shader: Universal3"] = fn(){
 	
 	p.addAction( "Init Shader",	config->fn(){
 
-		var path = "resources/Shader/universal3/";
+		var path = Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/universal3/";
 		var vs = [path+"main.sfn",path+"sgHelpers.sfn"];
 		var fs = [path+"main.sfn",path+"sgHelpers.sfn"];
 		foreach([this.vertexEffect,this.surfaceProps,this.surfaceEffect,this.lighting,this.fragmentEffect] as var f){

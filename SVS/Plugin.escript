@@ -20,7 +20,7 @@ var plugin = new Plugin({
 			Plugin.AUTHORS		:	"Benjamin Eikel",
 			Plugin.OWNER		:	"Benjamin Eikel",
 			Plugin.LICENSE		:	"Mozilla Public License, v. 2.0",
-			Plugin.REQUIRES		:	['Evaluator', 'NodeEditor', 'Tools', 'PADrend', 'PADrend/GUI', 'PADrend/Serialization']
+			Plugin.REQUIRES		:	['Evaluator', 'LibRenderingExt', 'NodeEditor', 'Tools', 'PADrend', 'PADrend/GUI', 'PADrend/Serialization']
 });
 
 //!	---|> Plugin

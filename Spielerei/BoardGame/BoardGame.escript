@@ -334,7 +334,7 @@ BoardGame.initParticleEmitter ::= fn(Game.GameObject obj, Number duration,red=2,
 	particleNode.addState(blendState);
 
 	var textureState = new MinSG.TextureState;
-	var t = Rendering.createTextureFromFile("./resources/Particles/particle.png");
+	var t = Rendering.createTextureFromFile(Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/texture/particle.png");
 	if(t)
 		textureState.setTexture(t);
 	particleNode.addState(textureState);

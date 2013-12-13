@@ -20,7 +20,7 @@ SVS.getSphereNode := fn(Geometry.Sphere sphere) {
 	sphereNode.setScale(sphere.getRadius());
 	
 	var shaderState = new MinSG.ShaderState();
-	var path = "resources/Shader/universal2/";
+	var path = Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/universal2/";
 	var vs = [path+"universal.vs",path+"sgHelpers.sfn"];
 	var fs = [path+"universal.fs",path+"sgHelpers.sfn"];
 	foreach(["shading_phong","color_standard","texture","shadow_disabled","effect_normalToAlpha"] as var f){
@@ -62,7 +62,7 @@ SVS.getCrossNode := fn() {
 	var crossNode = new MinSG.GeometryNode(crossMesh);
 	
 	var shaderState = new MinSG.ShaderState();
-	var path = "resources/Shader/universal2/";
+	var path = Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/universal2/";
 	var vs = [path+"universal.vs",path+"sgHelpers.sfn"];
 	var fs = [path+"universal.fs",path+"sgHelpers.sfn"];
 	foreach(["shading_phong","color_standard","texture_disabled","shadow_disabled","effect_disabled"] as var f){

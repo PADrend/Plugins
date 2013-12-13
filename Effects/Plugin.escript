@@ -24,7 +24,7 @@ GLOBALS.EffectsPlugin := new Plugin({
 			Plugin.DESCRIPTION : "Container for various effects.",
 			Plugin.AUTHORS : "Claudius Jaehn",
 			Plugin.OWNER : "Claudius Jaehn",
-			Plugin.REQUIRES : []
+			Plugin.REQUIRES : ['LibRenderingExt']
 });
 
 /*! ---|> Plugin	*/
@@ -91,14 +91,16 @@ EffectsPlugin.registerMenus:=fn(){
 									var scene = PADrend.getCurrentScene();
 									
 									var shaderState = new MinSG.ShaderState();
+									
+									var shaderPath = Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/universal3/";
 									var shaderFiles =	[
-															"resources/Shader/universal3/main.sfn",
-															"resources/Shader/universal3/sgHelpers.sfn",
-															"resources/Shader/universal3/vertexEffect_none.sfn",
-															"resources/Shader/universal3/surfaceProps_matTex.sfn",
-															"resources/Shader/universal3/surfaceEffect_none.sfn",
-															"resources/Shader/universal3/lighting_shadow.sfn",
-															"resources/Shader/universal3/fragmentEffect_none.sfn"
+															shaderPath + "main.sfn",
+															shaderPath + "sgHelpers.sfn",
+															shaderPath + "vertexEffect_none.sfn",
+															shaderPath + "surfaceProps_matTex.sfn",
+															shaderPath + "surfaceEffect_none.sfn",
+															shaderPath + "lighting_shadow.sfn",
+															shaderPath + "fragmentEffect_none.sfn"
 														];
 									MinSG.initShaderState(shaderState,
 														  shaderFiles,
