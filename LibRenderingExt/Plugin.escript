@@ -20,4 +20,8 @@ var plugin = new Plugin({
 	Plugin.LICENSE		:	"Mozilla Public License, v. 2.0"
 });
 
+plugin.init @(override) := fn() {
+	return true;
+};
+
 return plugin;
