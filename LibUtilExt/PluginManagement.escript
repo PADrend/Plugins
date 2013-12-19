@@ -108,7 +108,7 @@ Util.ReloadablePluginTrait := new Traits.GenericTrait('Util.ReloadablePluginTrai
 
 // -------------------------------------------------
 // --- Plugin Management
-Util._pluginRegistry := new Map;
+static _pluginRegistry = new Map;
 
 /*! (public) Load plugins.
 	 - If a plugin name instead of a filename is given, "searchPath/PluginName/Plugin.escript" is assumed.
@@ -223,7 +223,7 @@ Util.loadPlugins @(public) := fn( Array filenames, showNotification = true, Arra
 				if(ok){
 					orderedPlugins += plugin;
 					progress = true;
-					Util._pluginRegistry[plugin.getName()] = plugin;
+					_pluginRegistry[plugin.getName()] = plugin;
 				}else {
 					newTodo += plugin;
 				}
@@ -265,6 +265,8 @@ Util.locatePlugin := fn(filename,Array searchPaths){
 	foreach( searchPaths as var searchPath){
 		if( IO.isFile(searchPath+filename+"/Plugin.escript"))
 			return searchPath+filename+"/Plugin.escript";
+		if( IO.isFile(searchPath+filename+".escript"))
+			return searchPath+filename+".escript";
 	}
 	return false;
 	
@@ -275,13 +277,13 @@ Util.reloadPlugin := fn(Util.Plugin plugin){
 	plugin.onRemovePlugin();												//!	\see Util.ReloadablePluginTrait
 	var name = plugin.getName();
 	var filename = plugin.getPluginProperty(Plugin.PLUGIN_FILE);
-	Util._pluginRegistry[name] = void;
+	_pluginRegistry[name] = void;
 	Util.loadPlugins([filename],true);
 };
 
 //! Return the required plugin or throw an exception.
 Util.requirePlugin @(public) := fn(name,minVersion = void) {
-	var p = Util._pluginRegistry[name];
+	var p = _pluginRegistry[name];
 	if (!p) {
 		Runtime.log(Runtime.LOG_ERROR,"Reqired Plugin '"+name+"' was not found!");
 		return void;
@@ -295,7 +297,7 @@ Util.requirePlugin @(public) := fn(name,minVersion = void) {
 
 //! (public)
 Util.queryPlugin @(public) := fn(name,minVersion = void) {
-	var p = Util._pluginRegistry[name];
+	var p = _pluginRegistry[name];
 	if (!p || (!(minVersion===void) && p.getVersion()<minVersion) ) {
 		return false;
 	}
@@ -304,7 +306,7 @@ Util.queryPlugin @(public) := fn(name,minVersion = void) {
 
 //! (public)
 Util.getPluginRegistry @(public) := fn() {
-	return Util._pluginRegistry;
+	return _pluginRegistry;
 };
 
 //----------------------
