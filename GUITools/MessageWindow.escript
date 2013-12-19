@@ -11,13 +11,9 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[PADrend] PADrend/GUI/MessageWindow.escript
- **/
 
-//! ---|> Plugin
 var plugin = new Plugin({
-		Plugin.NAME : 'PADrend/GUI/MessageWindow',
+		Plugin.NAME : 'GUITools/MessageWindow',
 		Plugin.DESCRIPTION : "A window for showing messages.",
 		Plugin.VERSION : 1.0,
 		Plugin.AUTHORS : "Claudius",
@@ -26,8 +22,6 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-
-//! ---|> Plugin
 plugin.init @(override) := fn(){
 
 	registerExtension( 'PADrend_Init',this->fn(){
@@ -83,11 +77,10 @@ plugin.createMessageWindow := fn() {
 		this.newMessageCount++;
 		prevLabel = label;
 
-		PADrend.planTask(3, (fn(messageWindow) {
-			if(--messageWindow.newMessageCount <= 0) {
+		PADrend.planTask(3, [this] => fn(messageWindow) {
+			if(--messageWindow.newMessageCount <= 0)
 				messageWindow.minimize();
-			}
-		}).bindFirstParams(this));
+		});
 	};
 	
 	return window;

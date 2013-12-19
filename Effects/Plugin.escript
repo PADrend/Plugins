@@ -23,7 +23,7 @@ GLOBALS.EffectsPlugin := new Plugin({
 			Plugin.VERSION : "1.0",
 			Plugin.DESCRIPTION : "Container for various effects.",
 			Plugin.AUTHORS : "Claudius Jaehn",
-			Plugin.OWNER : "Claudius Jaehn",
+			Plugin.OWNER : "All",
 			Plugin.REQUIRES : ['LibRenderingExt']
 });
 
@@ -36,9 +36,7 @@ EffectsPlugin.init:=fn() {
 	modules+=__DIR__+"/"+"DynamicSky.escript";
 	modules+=__DIR__+"/"+"InfiniteGround.escript";
 	modules+=__DIR__+"/"+"PostProcessingEffects.escript";
-	modules+=__DIR__+"/"+"Logo.escript";
 	modules+=__DIR__+"/"+"LimitFPS.escript";
-	modules+=__DIR__+"/"+"OSD.escript";
 
 	loadPlugins( modules,false );
 

@@ -12,23 +12,18 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
-**	[Plugin:Effects_Logo] Spielerei/Logo.escript
-** 2009-11 Claudius Urlaubsprojekt...
-**/
 
-//!	LogoPlugin ---|> Plugin
-GLOBALS.LogoPlugin := new Plugin({
-			Plugin.NAME : "Effects_Logo",
-			Plugin.VERSION : "1.1",
+
+var plugin = new Plugin({
+			Plugin.NAME : "GUITools/Logo",
+			Plugin.VERSION : "1.2",
 			Plugin.DESCRIPTION : "Display of a logo image, which can be changed by click.",
 			Plugin.AUTHORS : "Benjamin Eikel, Claudius Jaehn",
 			Plugin.OWNER : "All",
-			Plugin.REQUIRES : []
+			Plugin.REQUIRES : ['PADrend']
 });
 
-//!	---|> Plugin
-LogoPlugin.init := fn() {
+plugin.init @(override) := fn() {
 	{ // Register ExtensionPointHandler:
 		registerExtension('PADrend_Init',	this->fn(){	setLogo(activeLogoName);} );
 	}
@@ -44,7 +39,7 @@ LogoPlugin.init := fn() {
 };
 
 //! (internal)
-LogoPlugin.refresh := fn(){
+plugin.refresh := fn(){
 	if(!enabled)
 		return;
 	
@@ -77,19 +72,19 @@ LogoPlugin.refresh := fn(){
 	logoWindow += c;
 };
 
-LogoPlugin.setLogo := fn(String logoName){
+plugin.setLogo := fn(String logoName){
 	activeLogoName = logoName;
 	systemConfig.setValue('Effects.Logo.logo', logoName);
 	refresh();
 };
 
-LogoPlugin.setWhiteBackround := fn(Bool b){
+plugin.setWhiteBackround := fn(Bool b){
 	whiteBackground = b;
 	systemConfig.setValue('Effects.Logo.whiteBackground', b);
 	refresh();
 };
 
-LogoPlugin.getSelectionMenu := fn(){
+plugin.getSelectionMenu := fn(){
 	
 	var m=[];
 	m+={
@@ -97,7 +92,7 @@ LogoPlugin.getSelectionMenu := fn(){
 		GUI.LABEL : "White background",
 		GUI.DATA_PROVIDER : this->fn(){ return whiteBackground; },
 		GUI.ON_DATA_CHANGED : fn(data){
-			PADrend.executeCommand( (fn(data){ LogoPlugin.setWhiteBackround(data); }).bindLastParams(data) );
+			PADrend.executeCommand( [data] => fn(data){ if(var LogoPlugin=Util.queryPlugin('GUITools/Logo')) LogoPlugin.setWhiteBackround(data); } );
 		},
 		GUI.SIZE : [GUI.WIDTH_REL|GUI.HEIGHT_ABS , 0.9 ,15 ]
 	};
@@ -107,13 +102,13 @@ LogoPlugin.getSelectionMenu := fn(){
 		m+={
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : entry,
-			GUI.ON_CLICK : (fn(entry){
-				PADrend.executeCommand( (fn(logoName){ LogoPlugin.setLogo(logoName); }).bindLastParams(entry) );
-			}).bindLastParams(entry)
+			GUI.ON_CLICK : [entry] => fn(entry){
+				PADrend.executeCommand( [entry] => fn(logoName){ if(var LogoPlugin=Util.queryPlugin('GUITools/Logo')) LogoPlugin.setLogo(logoName); } );
+			}
 		};
 	}
 	return m;
 };
 
-return LogoPlugin;
+return plugin;
 

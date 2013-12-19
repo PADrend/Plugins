@@ -281,9 +281,9 @@ plugin.selectSecondPoint:=fn(Geometry.Vec3 pos){
 		this.measurement.pos2 = pos;
 	}
 	this.infoLabel.setText(measurement.getInfo());
-	if(queryPlugin('Effects/OSD')){
+	if(var OSD = Util.queryPlugin('GUITools/OSD'))
 		OSD.message(measurement.getInfo());
-	}
+	
 };
 
 

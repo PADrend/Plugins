@@ -10,23 +10,15 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:Effects] Effects/OSD.escript
- **/
 
-declareNamespace($OSD);
-
-//!	plugin ---|> Plugin
 var plugin = new Plugin({
-			Plugin.NAME : "Effects/OSD",
-			Plugin.VERSION : "1.0",
+			Plugin.NAME : "GUITools/OSD",
+			Plugin.VERSION : "1.1",
 			Plugin.DESCRIPTION : "On Screen Display\nShow a temporary notification message on all connected clients.",
 			Plugin.AUTHORS : "Claudius",
 			Plugin.OWNER : "All",
 			Plugin.REQUIRES : ['PADrend/GUI', 'PADrend/CommandHandling']
 });
-
-OSD.plugin := plugin;
 
 plugin._enabled := false;
 plugin._duration := false;
@@ -35,8 +27,7 @@ plugin._window := void;
 plugin._label := void;
 plugin._timeout := false;
 
-//!	---|> Plugin
-plugin.init:=fn(){
+plugin.init @(override) := fn(){
 	
 	_duration = systemConfig.getValue("Effects.OSD.duration",3);
 	_enabled = systemConfig.getValue("Effects.OSD.enabled",true);
@@ -104,14 +95,11 @@ plugin._message := fn(	text ){
 	
 };
 
-// --------------------------------------------------------
-
 //! Show the given text on all connected clients (where the OSD is enabled) for some seconds.
-OSD.message := fn( text ){
-	PADrend.executeCommand( (fn(text){OSD.plugin._message(text);}).bindLastParams(text) ) ;
+plugin.message := fn( text ){
+	PADrend.executeCommand( [text] => fn(text){ if(var OSD=Util.queryPlugin('GUITools/OSD')) OSD._message(text);} ) ;
 };
 
-OSD.isActive := plugin->fn(){ return _timeout!=false; };
+plugin.isActive := plugin->fn(){ return _timeout!=false; };
 
-// ---------------------------------------------------------
 return plugin;

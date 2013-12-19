@@ -57,7 +57,6 @@ plugin.init @(override) := fn(){
 			__DIR__+"/ConfigWindow.escript",
 			__DIR__+"/MainToolbar.escript",
 			__DIR__+"/MainWindow.escript",
-			__DIR__+"/MessageWindow.escript",
 			__DIR__+"/ToolsToolbar.escript" ],true);
 
 	return true;

@@ -68,21 +68,18 @@ GLOBALS.Plugin := Util.Plugin; // global alias
 	T._constructor ::= fn( Map properties){
 		_pluginProperties = properties.clone();
 	};
-	T.addExtensionPoint	::= fn(name,ExtensionPoint ep){	extensionPoints[name] = ep;	};
-	T.getBaseFolder		::= fn(){	return this._pluginProperties[Plugin.BASE_FOLDER];	};
+	T.addExtensionPoint		::= fn(name,ExtensionPoint ep){	extensionPoints[name] = ep;	};
+	T.getBaseFolder			::= fn(){	return this._pluginProperties[Plugin.BASE_FOLDER];	};
 	T.getDescription		::= fn(){	return this._pluginProperties[Plugin.DESCRIPTION];	};
 	T.getExtensionPoints	::= fn(){	return this._pluginProperties[Plugin.EXTENSION_POINTS];	};
 	T.getName 				::=	fn(){	return this._pluginProperties[Plugin.NAME];	};
 	T.getPluginProperties 	::= fn(){	return this._pluginProperties;	};
 	T.getVersion 			::= fn(){	return this._pluginProperties[Plugin.VERSION];	};
-	T.getPluginProperty	::= fn(key){	return this._pluginProperties[key];	};
-	T.setPluginProperty	::= fn(key,value){	this._pluginProperties[key] = value;	};
+	T.getPluginProperty		::= fn(key){	return this._pluginProperties[key];	};
+	T.setPluginProperty		::= fn(key,value){	this._pluginProperties[key] = value;	};
 
 	//!	---o
-	T.init := fn(){
-		out(this.getName()+".init() ... please implement.\n");
-		return false;
-	};
+	T.init := fn(){	return true;	};
 
 	info += [T,fn(plugin,Array result){
 		result += "------";

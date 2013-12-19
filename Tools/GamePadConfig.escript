@@ -24,7 +24,7 @@ Tools.GamePadConfig := new Plugin({
 		Plugin.VERSION : 0.2,
 		Plugin.AUTHORS : "Claudius",
 		Plugin.OWNER : "All",
-		Plugin.REQUIRES : ['PADrend','Effects/OSD'],
+		Plugin.REQUIRES : ['PADrend','GUITools/OSD'],
 		Plugin.EXTENSION_POINTS : [ ]
 });
 
@@ -88,6 +88,7 @@ plugin.ex_Init:=fn() {
 		
 		//! \see HID.ControllerHatTrait
 		gamepad.registerHatListener(0,this->fn(hatId,value){
+			var OSD = Util.requirePlugin('GUITools/OSD');
 			if( (value & Util.UI.MASK_HAT_UP) > 0){
 				if(OSD.isActive())
 					currentOption = (++currentOption)%options.count();
