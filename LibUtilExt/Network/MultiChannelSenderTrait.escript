@@ -10,9 +10,21 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-//! Extensions for Util.Network
+ 
+/*! Marks an Object (or Type) as to be able to send data over a channel based connection.
+	Assures the following interface:
+	 + sendValue( channelNr, stringData )
+*/
+var t = new Std.Traits.GenericTrait('MultiChannelSenderTrait');
 
-if(!GLOBALS.isSet($Network))
-	GLOBALS.Network := Util.Network;
-
-//----------------------------
+t.onInit += fn(obj){
+	if(obj---|>Type){
+		if(!obj.isSet($sendValue))
+			obj.sendValue ::= UserFunction.pleaseImplement;
+	}else{
+		if(!obj.isSet($sendValue))
+			obj.sendValue := UserFunction.pleaseImplement;
+	}
+};
+Util.Network.MultiChannelSenderTrait := t;
+return t;

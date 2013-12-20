@@ -10,9 +10,20 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-//! Extensions for Util.Network
-
-if(!GLOBALS.isSet($Network))
-	GLOBALS.Network := Util.Network;
-
-//----------------------------
+ 
+/*! Marks an Object (or Type) as to be able to receive data using a channel handler.
+	Assures the following interface:
+	 + setChannelHandler( channelNr, channelListener )
+*/
+var t = new Std.Traits.GenericTrait('MultiChannelReceiverTrait');
+t.onInit += fn(obj){
+	if(obj---|>Type){
+		if(!obj.isSet($setChannelHandler))
+			obj.setChannelHandler ::= UserFunction.pleaseImplement;
+	}else{
+		if(!obj.isSet($setChannelHandler))
+			obj.setChannelHandler := UserFunction.pleaseImplement;
+	}
+};
+Util.Network.MultiChannelReceiverTrait := t;
+return t;
