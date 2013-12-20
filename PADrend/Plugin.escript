@@ -25,7 +25,7 @@
 GLOBALS.PADrend := new Plugin({
 		Plugin.NAME : 'PADrend',
 		Plugin.DESCRIPTION : 'Main application',
-		Plugin.VERSION : 0.6,
+		Plugin.VERSION : 1.0,
 		Plugin.AUTHORS : "Claudius, Ralf & Benjamin",
 		Plugin.OWNER : "All",
 		Plugin.REQUIRES : ['LibUtilExt'],

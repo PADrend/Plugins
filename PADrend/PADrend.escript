@@ -19,7 +19,7 @@
  **/
 
 out("-"*79,"\n");
-out("PADrend 0.7 (Platform for Algorithm Development and rendering)\n\n");
+out("PADrend 1.0.0 (Platform for Algorithm Development and rendering)\n\n");
 out("http://www.padrend.de/\n");
 out("Libs:\t",EScript.VERSION_STRING,"\n\t",MinSG.VERSION, "\n");
 out("Build:\t", (SIZE_OF_PTR==8?64:32)," bit ", BUILD_TYPE ,"\n");
