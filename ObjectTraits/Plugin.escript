@@ -24,7 +24,8 @@ plugin.init = fn() {
 	
 	foreach([
 				'ObjectTraits/FaderTrait',
-				'ObjectTraits/DynamicBoxTrait'
+				'ObjectTraits/DynamicBoxTrait',
+				'ObjectTraits/MetaObjectTrait',
 			] as var t)
 		Std.require( t );
 	
