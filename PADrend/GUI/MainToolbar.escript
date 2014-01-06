@@ -105,8 +105,18 @@ plugin.registerStdToolbarEntries := fn() {
 		GUI.MENU		:	'PADrend_FileMenu'
 	});
 	
-	
-	var openSaveSceneDialog = fn() {
+	static addToRecentSceneList = fn(filename){
+		var fileList = Std.DataWrapper.createFromEntry( PADrend.configCache, 'PADrend.recentScenes',[] );
+		var arr = [filename].append(fileList().removeValue(filename));
+		if(arr.count()>10)
+			arr = arr.slice(0,10);
+			fileList( arr );
+//						fileList( [filename].append(arr fileList(.removeValue("filename")).slice(0,10) );
+	};
+	static getRecentSceneList = fn(){
+		return PADrend.configCache.get('PADrend.recentScenes',[] );
+	};
+	static openSaveSceneDialog = fn() {
 		var scene = PADrend.getCurrentScene();
 		gui.openDialog({
 			GUI.TYPE :		GUI.TYPE_FILE_DIALOG,
@@ -123,6 +133,8 @@ plugin.registerStdToolbarEntries := fn() {
 						out( PADrend.getSceneManager().saveMinSGFile(filename,[scene])?"ok\n":"failed\n");
 					}
 					scene.filename :=  filename;
+					addToRecentSceneList(filename);
+
 					// Saving the file may alter its properties (e.g. name), so re-select it to provoke an update where necessary.
 					executeExtensions('PADrend_OnSceneSelected',scene );
 				};
@@ -155,7 +167,7 @@ plugin.registerStdToolbarEntries := fn() {
 											MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY)
 				});
 				var f=new GUI.FileDialog("Load Scene",PADrend.getScenePath(),[".minsg", ".dae", ".DAE"],
-					(fn(config,filename){
+					[config] => fn(config,filename){
 						// Collect flags.
 						out("Load Scene \"",filename,"\"...");
 						PADrend.message("Load scene \""+filename+"\"...");
@@ -170,10 +182,11 @@ plugin.registerStdToolbarEntries := fn() {
 							return;
 							
 						var scale=config.scale();
-						if(scale!=1.0){
+						if(scale!=1.0)
 							node.scale(scale);
-						}
-					}).bindFirstParams(config)
+						
+						addToRecentSceneList( filename );
+					}
 				);
 				//sceneLoadOptionPanel
 				var optionPanel=f.createOptionPanel(250);
@@ -239,9 +252,31 @@ plugin.registerStdToolbarEntries := fn() {
 
 		},
 		{
+			GUI.TYPE		: 	GUI.TYPE_MENU,
+			GUI.LABEL		:	"Recent scenes",
+			GUI.MENU_PROVIDER : fn(){
+				var entries = [];
+				foreach( getRecentSceneList() as var filename)
+					entries += {
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : (new Util.FileName(filename)).getFile(),
+						GUI.ON_CLICK : [filename] => fn(filename){
+							var n = PADrend.loadScene(filename,  PADrend.configCache['PADrend.importOptions']);
+							if(n){
+								PADrend.selectScene(n);
+								addToRecentSceneList(filename);
+							}
+						},
+						GUI.TOOLTIP : filename
+					};
+				return entries;
+			}
+									
+		},
+		{
 			GUI.TYPE		:	GUI.TYPE_CRITICAL_BUTTON,
 			GUI.LABEL		:	"Save scene",
-			GUI.ON_CLICK	:	[openSaveSceneDialog] => fn(openSaveSceneDialog) {
+			GUI.ON_CLICK	:	fn() {
 				var scene = PADrend.getCurrentScene();
 				var filename = scene.isSet($filename) ? scene.filename : void;
 				if(filename){
