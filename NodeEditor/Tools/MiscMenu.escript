@@ -274,7 +274,7 @@ NodeEditorTools.registerMenues_MiscTools := fn() {
 				var n = NodeEditor.getSelectedNode();
 
 				var BBState = new Type( MinSG.ScriptedState );
-				BBState.doEnableState := fn(node,params){
+				BBState.doEnableState ::= fn(node,params){
 					if(params.getFlag(MinSG.BOUNDING_BOXES))
 						return MinSG.STATE_OK;
 					params.setFlag(MinSG.BOUNDING_BOXES | MinSG.USE_WORLD_MATRIX);
@@ -298,7 +298,7 @@ NodeEditorTools.registerMenues_MiscTools := fn() {
 
 				var Renderer = new Type( MinSG.ScriptedNodeRendererState );
 				Renderer._constructor ::= fn()@(super(MinSG.FrameContext.DEFAULT_CHANNEL)){};
-				Renderer.displayNode := fn(node,params){
+				Renderer.displayNode @(override) ::= fn(node,params){
 					if(Rand.equilikely(0,10)>8){
 						return MinSG.FrameContext.NODE_HANDLED;
 					}else{

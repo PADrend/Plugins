@@ -165,7 +165,7 @@ BoardGame._constructor ::= fn()@(super(void)){
 	
 	_fields = new Map();
 	_selectionHighlightState = new MinSG.ScriptedState();
-	_selectionHighlightState.doEnableState = fn(node,params){
+	_selectionHighlightState.doEnableState := fn(node,params){
 		if (!isActive())
 			return MinSG.STATE_SKIPPED;
 			
