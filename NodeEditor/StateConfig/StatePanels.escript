@@ -60,6 +60,26 @@ NodeEditor.registerConfigPanelProvider(MinSG.State, fn(MinSG.State state, panel)
 		GUI.ON_CLICK			:	refreshGroup -> refreshGroup.refresh
 	};
 	panel++;
+	panel += {
+    	GUI.TYPE : GUI.TYPE_BOOL,
+    	GUI.LABEL : "is active",
+    	GUI.DATA_VALUE : state.isActive(),
+    	GUI.ON_DATA_CHANGED : [state] => fn(state,data){
+			if(data) {
+				state.activate();
+			} else {
+				state.deactivate();
+			}
+		}
+    };
+    panel += {
+    	GUI.TYPE : GUI.TYPE_BOOL,
+    	GUI.LABEL : "is temporary",
+    	GUI.DATA_VALUE : state.isTempState(),
+    	GUI.ON_DATA_CHANGED : state -> state.setTempState,
+		GUI.TOOLTIP : "If enabled, the state is not saved."
+    };
+	
 });
 
 // ----
