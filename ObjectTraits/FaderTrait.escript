@@ -12,8 +12,6 @@
  */
 
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/Fader');
-declareNamespace($ObjectTraits);
-ObjectTraits.Fader := trait;
 
 trait.onInit += fn(node){
 	PADrend.message("Fade...");
@@ -25,10 +23,27 @@ trait.onInit += fn(node){
 	};		
 };
 
+trait.allowRemoval();
+trait.onRemove += fn(node){
+	node.onClick := fn(evt){};
+};
+
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
-	registry.registerTraitConfigGUI(trait,fn(node){
+	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [ "Fader trait",
+			{
+				GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
+				GUI.FLAGS : GUI.FLAT_BUTTON,
+				GUI.TOOLTIP : "Remove trait",
+				GUI.LABEL : "-",
+				GUI.WIDTH : 20,
+				GUI.ON_CLICK : [node,refreshCallback] => fn(node,refreshCallback){
+					if(Traits.queryTrait(node,trait))
+						Traits.removeTrait(node,trait);
+					refreshCallback();
+				}
+			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
 				GUI.TYPE : GUI.TYPE_NUMBER,

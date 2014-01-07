@@ -43,7 +43,7 @@ plugin.init @(override) := fn(){
 	When the entry is opened, for each contained semantic object a new subentry is created.
 	The sub entries are filled using the registered components 'ObjectEditor_ObjectEntry'.
 	This trait is also applied to all sub entries.
-	\param MinSG.Node 	the node associated with the entry
+	\param MinSG.Node 			the node associated with the entry
 
 	Adds the following attributes:
 	 - entryRegistry 		void if closed; { node -> sub entry } if opened
@@ -60,7 +60,7 @@ SceneEditor.ObjectEditor.SemanticObjectEntryTrait := new Traits.GenericTrait('Sc
 	
 	t.onInit += fn(GUI.TreeViewEntry entry,MinSG.Node node){
 		entry.node = node;
-		entry.entryRegistry = new Map;
+		entry.entryRegistry = new Map; // object->subEntry|void
 		
 		//! \see GUI.TreeViewEntry.DynamicSubentriesTrait
 		Traits.addTrait(entry,	GUI.TreeViewEntry.DynamicSubentriesTrait, [entry] => fn(entry){
@@ -75,13 +75,13 @@ SceneEditor.ObjectEditor.SemanticObjectEntryTrait := new Traits.GenericTrait('Sc
 							GUI.CONTENTS : gui.createComponents({
 																	GUI.TYPE : GUI.TYPE_COMPONENTS,
 																	GUI.PROVIDER : 'ObjectEditor_ObjectEntry',
-																	GUI.CONTEXT  :object,
+																	GUI.CONTEXT  : object
 																}),
 							GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS,1,4 ]
-					}],
+					}], 
 					GUI.FLAGS : GUI.COLLAPSED_ENTRY
 				});
-				
+
 				//! \see SceneEditor.ObjectEditor.SemanticObjectEntryTrait
 				Traits.addTrait(subEntry, SceneEditor.ObjectEditor.SemanticObjectEntryTrait, object);
 				entries += subEntry;
@@ -107,22 +107,27 @@ plugin.initGUI := fn(){
 		if(node.hasParent()&& node.getParent().isInstance() )
 			return [NodeEditor.getString(node)];
 
-		return {
+		var refreshCallback = fn(){ thisFn.collapsibleObjectContainer.refreshContents(); }.clone();
+
+		var collapsibleObjectContainer = gui.create({
 			GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 			GUI.LABEL : NodeEditor.getString(node),
 			GUI.COLLAPSED : true,
-			GUI.CONTENTS : [node] => fn(node){
+			GUI.CONTENTS : [node,refreshCallback] => fn(node,refreshCallback){
 				return gui.createComponents({
 					GUI.TYPE : GUI.TYPE_COMPONENTS,
 					GUI.PROVIDER : 'ObjectEditor_ObjectConfig',
-					GUI.CONTEXT : node
+					GUI.CONTEXT_ARRAY : [node,refreshCallback]
 				});
 			},
 			GUI.TOOLTIP : NodeEditor.getString(node)
-		};
+		});
+		refreshCallback.collapsibleObjectContainer := collapsibleObjectContainer;
+		
+		return collapsibleObjectContainer;
 	});
 	
-	gui.registerComponentProvider('ObjectEditor_ObjectConfig.0_id',fn(MinSG.Node node){
+	gui.registerComponentProvider('ObjectEditor_ObjectConfig.0_id',fn(MinSG.Node node,refreshCallback){
 		var id =  PADrend.getSceneManager().getNameOfRegisteredNode(node);
 		return [
 			{
@@ -130,20 +135,21 @@ plugin.initGUI := fn(){
 				GUI.LABEL : "id",
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS, 2,15.0 ],
 				GUI.DATA_VALUE : id ? id : "",
-				GUI.ON_DATA_CHANGED : [node] => fn(node,id){
+				GUI.ON_DATA_CHANGED : [node,refreshCallback] => fn(node,refreshCallback,id){
 					id = id.trim();
 					if(id.empty()){
 						PADrend.getSceneManager().unregisterNode(node);
 					}else{
 						PADrend.getSceneManager().registerNode(id,node);
 					}
+					refreshCallback();
 				}
 			}
 		];
 	});
 	static traitRegistry = Std.require('ObjectTraits/ObjectTraitRegistry');
 
-	gui.registerComponentProvider('ObjectEditor_ObjectConfig.5_traits',fn(MinSG.Node node){
+	gui.registerComponentProvider('ObjectEditor_ObjectConfig.5_traits',fn(MinSG.Node node,refreshCallback){
 		var entries = [];
 		foreach( MinSG.getLocalPersistentNodeTraitNames(node) as var traitName){
 			var provider = traitRegistry.getGUIProvider(traitName);
@@ -151,13 +157,13 @@ plugin.initGUI := fn(){
 				entries += {	GUI.TYPE : GUI.TYPE_NEXT_ROW	};
 				entries += '----';
 				entries += {	GUI.TYPE : GUI.TYPE_NEXT_ROW	};
-				entries.append(provider(node));
+				entries.append(provider(node,refreshCallback));
 			}
 		}
 		return entries;
 	});
 	
-	gui.registerComponentProvider('ObjectEditor_ObjectConfig.9_addTraits',fn(MinSG.Node node){
+	gui.registerComponentProvider('ObjectEditor_ObjectConfig.9_addTraits',fn(MinSG.Node node,refreshCallback){
 		return [
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			'----',
@@ -165,7 +171,7 @@ plugin.initGUI := fn(){
 			{
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Add object trait",
-				GUI.MENU_PROVIDER : [node] => fn(node){
+				GUI.MENU_PROVIDER : [node,refreshCallback] => fn(node,refreshCallback){
 					var enabledTraitNames =  new Set(MinSG.getLocalPersistentNodeTraitNames(node));
 					
 					var entries = [];
@@ -176,8 +182,11 @@ plugin.initGUI := fn(){
 							entries += {
 								GUI.TYPE : GUI.TYPE_BUTTON,
 								GUI.LABEL : name,
-								GUI.ON_CLICK : [node,trait] => fn(node,trait){
+								GUI.WIDTH : 200,
+								GUI.ON_CLICK : [node,trait,refreshCallback] => fn(node,trait,refreshCallback){
 									Traits.addTrait(node,trait);
+									gui.closeAllMenus();
+									refreshCallback();
 								}
 							};
 						}

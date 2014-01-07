@@ -114,9 +114,6 @@ static highlightState = new MetaNodeState;
 // ----------------------------------
 
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/MetaObjectTrait');
-declareNamespace($ObjectTraits);
-ObjectTraits.MetaObjectTrait := trait;
-
 
 trait.onInit += fn(MinSG.GeometryNode node){
 	node += highlightState;
@@ -129,18 +126,19 @@ trait.onRemove += fn(node){
 };
 
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
-	registry.registerTrait(trait,"MetaObject");
-	registry.registerTraitConfigGUI(trait, fn(node){
+	registry.registerTrait(trait);//,"MetaObject");
+	registry.registerTraitConfigGUI(trait, fn(node,refreshCallback){
 		return [ "MetaObjectTrait",
 			{
-				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
+				GUI.FLAGS : GUI.FLAT_BUTTON,
+				GUI.TOOLTIP : "Remove trait",
 				GUI.LABEL : "-",
 				GUI.WIDTH : 20,
-				GUI.ON_CLICK : [node] => fn(node){
-					if(Traits.queryTrait(node,trait)){
-						outln("!1");
+				GUI.ON_CLICK : [node,refreshCallback] => fn(node,refreshCallback){
+					if(Traits.queryTrait(node,trait))
 						Traits.removeTrait(node,trait);
-					}
+					refreshCallback();
 				}
 			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},

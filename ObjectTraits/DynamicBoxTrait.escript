@@ -12,8 +12,6 @@
  */
 
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/DynamicBoxTrait');
-declareNamespace($ObjectTraits);
-ObjectTraits.DynamicBoxTrait := trait;
 
 trait.onInit += fn(MinSG.GeometryNode node){
 	var dimX = new Std.DataWrapper(node.getBB().getExtentX());
@@ -37,10 +35,24 @@ trait.onInit += fn(MinSG.GeometryNode node){
 	node.dimZ := dimZ;	
 };
 
+trait.allowRemoval();
+
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
-	registry.registerTraitConfigGUI(trait,fn(node){
+	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [ "DynamicBox",
+			{
+				GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
+				GUI.FLAGS : GUI.FLAT_BUTTON,
+				GUI.TOOLTIP : "Remove trait",
+				GUI.LABEL : "-",
+				GUI.WIDTH : 20,
+				GUI.ON_CLICK : [node,refreshCallback] => fn(node,refreshCallback){
+					if(Traits.queryTrait(node,trait))
+						Traits.removeTrait(node,trait);
+					refreshCallback();
+				}
+			},		
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
 				GUI.TYPE : GUI.TYPE_RANGE,
