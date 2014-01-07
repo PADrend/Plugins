@@ -128,9 +128,9 @@ plugin.registerStdToolbarEntries := fn() {
 				var save = [scene,filename] => fn(scene,filename){
 					PADrend.message("Save scene \""+filename+"\"");
 					if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
-						out( PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode())?"ok\n":"failed\n");
+						PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());
 					} else {
-						out( PADrend.getSceneManager().saveMinSGFile(filename,[scene])?"ok\n":"failed\n");
+						PADrend.getSceneManager().saveMinSGFile(filename,[scene]);
 					}
 					scene.filename :=  filename;
 					addToRecentSceneList(filename);
@@ -174,18 +174,19 @@ plugin.registerStdToolbarEntries := fn() {
 
 						PADrend.configCache.setValue('PADrend.importOptions', config.importOptions);
 						var node=PADrend.loadScene(filename, /*sceneNode,*/ config.importOptions);
-						out( node?"ok\n":"failed\n");
-
-						PADrend.message("Scene loaded ("+node.countChildren()+" nodes)");
-						PADrend.selectScene(node);
-						if(!node)
-							return;
+						if(!node){
+							PADrend.message("Loading scene '"+filename+"' failed.");
+						}else{
+							PADrend.message("Scene loaded '"+filename+"'");
+							PADrend.selectScene(node);
+								
+							var scale=config.scale();
+							if(scale!=1.0)
+								node.scale(scale);
 							
-						var scale=config.scale();
-						if(scale!=1.0)
-							node.scale(scale);
-						
-						addToRecentSceneList( filename );
+							addToRecentSceneList( filename );
+						}
+
 					}
 				);
 				//sceneLoadOptionPanel
