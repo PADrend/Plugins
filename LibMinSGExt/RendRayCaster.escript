@@ -55,7 +55,7 @@ T.setup @(private) ::= fn(Geometry.Vec3 source,Geometry.Vec3 target){
 	castCam.rotateLocal_deg(180,new Geometry.Vec3(0,1,0));
 };
 
-/*! Returns the first node (or void) interesecting the line from source to target.
+/*! Returns the first node (or void) intersecting the line from source to target.
 	\note if restrictSearchingDistance is true, the depth component is read and the query is restriced up to that distance.
 			This introduces an additional overhead, but may be significantly faster for huge scenes.
 */
@@ -85,7 +85,7 @@ T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 sourc
 	return nodes[0];
 };
 
-/*! Returns the first node (or void) interesecting a line from the camera through the given pixel.
+/*! Returns the first node (or void) intersecting a line from the camera through the given pixel.
 	\note if restrictSearchingDistance is true, the depth component is read and the query is restricted up to that distance.
 			This introduces an additional overhead, but may be significantly faster for huge scenes. */
 T.queryNodeFromScreen ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec2 screenPos,Bool restrictSearchingDistance=false){
@@ -120,7 +120,7 @@ T.queryIntersection ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Ve
 	return result;
 };
 
-/*! Returns the coordinate (or false) of the first interesection of the line from the camera through the given pixel. */
+/*! Returns the coordinate (or false) of the first intersection of the line from the camera through the given pixel. */
 T.queryIntersectionFromScreen ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec2 screenPos){
 	var cam=fc.getCamera();
 	var source=cam.getWorldPosition();
