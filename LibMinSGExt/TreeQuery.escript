@@ -714,8 +714,9 @@ static createRelativeNodeQuery = fn(MinSG.SceneManager sm, MinSG.Node source, Mi
 		commonRoot = SemObjTools.getCommonSemanticObject(source,target);
 		if(!commonRoot){
 			commonRoot = MinSG.getRootOfCommonSubtree(source,target);
-			if(!commonRoot)
+			if(!commonRoot){
 				return false;
+			}
 		}
 	}
 
@@ -729,6 +730,9 @@ static createRelativeNodeQuery = fn(MinSG.SceneManager sm, MinSG.Node source, Mi
 	else if(target.hasParent() && (id = sm.getNameOfRegisteredNode(target.getParent())) &&
 				target.getParent().countChildren() == 1){
 		query += "/MinSG:collectRefId('" + id + "')/child"; 
+	} // target is only instance of a prototype in the subtree
+	else if(target.isInstance()&&sm.getNameOfRegisteredNode(target.getPrototype())&&MinSG.collectInstances(commonRoot,target.getPrototype()).count()==1)  {
+		query += "/MinSG:collectRefId('" + sm.getNameOfRegisteredNode(target.getPrototype()) + "')";
 	}else{
 		return false;
 	}
