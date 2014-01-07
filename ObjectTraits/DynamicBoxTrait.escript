@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -11,11 +11,11 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static t = new MinSG.PersistentNodeTrait('ObjectTraits.DynamicBoxTrait');
+static trait = new MinSG.PersistentNodeTrait('ObjectTraits/DynamicBoxTrait');
 declareNamespace($ObjectTraits);
-ObjectTraits.DynamicBoxTrait := t;
+ObjectTraits.DynamicBoxTrait := trait;
 
-t.onInit += fn(MinSG.GeometryNode node){
+trait.onInit += fn(MinSG.GeometryNode node){
 	var dimX = new Std.DataWrapper(node.getBB().getExtentX());
 	var dimY = new Std.DataWrapper(node.getBB().getExtentY());
 	var dimZ = new Std.DataWrapper(node.getBB().getExtentZ());
@@ -38,8 +38,8 @@ t.onInit += fn(MinSG.GeometryNode node){
 };
 
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
-	registry.registerTrait(t);
-	registry.registerTraitConfigGUI(t,fn(node){
+	registry.registerTrait(trait);
+	registry.registerTraitConfigGUI(trait,fn(node){
 		return [ "DynamicBox",
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
@@ -71,3 +71,6 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 		];
 	});
 });
+
+return trait;
+

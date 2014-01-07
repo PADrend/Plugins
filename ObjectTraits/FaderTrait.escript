@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -11,11 +11,11 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static t = new MinSG.PersistentNodeTrait('ObjectTraits.Fader');
+static trait = new MinSG.PersistentNodeTrait('ObjectTraits/Fader');
 declareNamespace($ObjectTraits);
-ObjectTraits.Fader := t;
+ObjectTraits.Fader := trait;
 
-t.onInit += fn(node){
+trait.onInit += fn(node){
 	PADrend.message("Fade...");
 	node.fadeTime := DataWrapper.createFromValue(1);
 	node.fadeTime := DataWrapper.createFromValue(1);
@@ -26,8 +26,8 @@ t.onInit += fn(node){
 };
 
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
-	registry.registerTrait(t);
-	registry.registerTraitConfigGUI(t,fn(node){
+	registry.registerTrait(trait);
+	registry.registerTraitConfigGUI(trait,fn(node){
 		return [ "Fader trait",
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
@@ -39,3 +39,5 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 		];
 	});
 });
+
+return trait;

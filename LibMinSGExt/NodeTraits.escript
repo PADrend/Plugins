@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -22,6 +22,47 @@
 
 static ATTR_NODE_TRAITS = 'nodeTraits';
 
+static getLocalPersistentNodeTraitNames = fn(MinSG.Node node){
+	var traitList = node.getNodeAttribute(ATTR_NODE_TRAITS);
+	return traitList ? traitList.split(",") : [];
+};
+
+static setPersistentTraitNames = fn(MinSG.Node node,Array traitNames){
+	if(traitNames.empty())
+		node.unsetNodeAttribute(ATTR_NODE_TRAITS);
+	else					
+		node.setNodeAttribute(ATTR_NODE_TRAITS,traitNames.implode(","));
+};
+
+/*! Call to init all persistent node traits in the given subtree. If a Trait is already initialized, it is skipped.*/
+MinSG.initPersistentNodeTraits := fn(MinSG.Node root){
+	var nodes = MinSG.collectNodesReferencingAttribute(root,ATTR_NODE_TRAITS);
+	foreach(nodes as var node){
+		foreach(MinSG.getPersistentNodeTraitNames(node) as var traitName){
+			try{
+				if(!Traits.queryTrait(node,traitName)){
+					outln("Adding trait ",traitName," to ",node);
+					var trait = Std.require(traitName);
+					Traits.addTrait(node,trait);
+//					Traits.addTraitByName(node,traitName);
+				}
+			}catch(e){
+				PADrend.message("Could not add NodeTrait '"+traitName+"'");
+				Runtime.warn(e);
+			}
+		}
+	}
+};
+
+MinSG.getLocalPersistentNodeTraitNames := getLocalPersistentNodeTraitNames;
+
+MinSG.getPersistentNodeTraitNames := fn(MinSG.Node node){
+	return node.isInstance() ? 
+					MinSG.getLocalPersistentNodeTraitNames(node.getPrototype()).append(MinSG.getLocalPersistentNodeTraitNames(node)) : 
+					MinSG.getLocalPersistentNodeTraitNames(node);
+};
+
+
 /*! The Trait is stored persistently at a MinSG.Node. Internally, the trait's name is stored
 	as node attribute, so that the trait can be re-added when the node is loaded.	*/
 MinSG.PersistentNodeTrait := new Type(Traits.GenericTrait);
@@ -37,72 +78,31 @@ MinSG.PersistentNodeTrait := new Type(Traits.GenericTrait);
 		if(!this.isSet($onRemove))
 			this.onRemove := new Std.MultiProcedure;
 		this.onRemove += fn(node){
-			if(node.isInstance()){
-				var pTraitList = node.getPrototype().getNodeAttribute(ATTR_NODE_TRAITS);
-				if(pTraitList && pTraitList.contains(this.getName())){	// trait is set in prototype
-					Runtime.warn("Can't remove trait defined in prototype.");
-					return $BREAK;
-				}
-			}
-			var localTraitList = node.getNodeAttribute(ATTR_NODE_TRAITS);
 			var tName = this.getName();
-			print_r(localTraitList);
-			if(localTraitList && localTraitList.contains(tName)){
-				localTraitList.removeValue(tName);
-				if(localTraitList.empty())
-					node.unsetNodeAttribute(ATTR_NODE_TRAITS);
-				else					
-					node.setNodeAttribute(ATTR_NODE_TRAITS,localTraitList);
+
+			if(node.isInstance() && getLocalPersistentNodeTraitNames(node.getPrototype()).contains(tName) ){// trait is set in prototype
+				Runtime.warn("Can't remove trait defined in prototype.");
+				return $BREAK;
 			}
+			setPersistentTraitNames( node, getLocalPersistentNodeTraitNames(node).removeValue(tName) );
 		};
 		(this->originalAllowRemoval)();
 	};
 	
 	T._constructor ::= fn(String traitName)@(super(traitName)){
 		this.onInit += fn(MinSG.Node node){
-			if(node.isInstance()){
-				var pTraitList = node.getPrototype().getNodeAttribute(ATTR_NODE_TRAITS);
-				if(pTraitList && pTraitList.contains(this.getName()))	// trait is set in prototype; don't store here
-					return;
-			}
-			var localTraitList = node.getNodeAttribute(ATTR_NODE_TRAITS);
-			if(!localTraitList)
-				localTraitList = [];
 			var tName = this.getName();
-			if(!localTraitList.contains(tName)){
-				localTraitList += tName;
-				node.setNodeAttribute(ATTR_NODE_TRAITS,localTraitList);
+			if(node.isInstance() && MinSG.getLocalPersistentNodeTraitNames(node.getPrototype()).contains(tName) ){// trait is set in prototype; don't store here
+				return;
+			}
+			var localTraitNames = getLocalPersistentNodeTraitNames(node);
+			if(!localTraitNames.contains(tName)){
+				localTraitNames += tName;
+				setPersistentTraitNames(node, localTraitNames);
 			}
 		};
 	};
 }
-/*! Call to init all persistent node traits in the given subtree. If a Trait is already initialized, it is skipped.*/
-MinSG.initPersistentNodeTraits := fn(MinSG.Node root){
-	var nodes = MinSG.collectNodesReferencingAttribute(root,ATTR_NODE_TRAITS);
-	foreach(nodes as var node){
-		foreach(MinSG.getPersistentNodeTraitNames(node) as var traitName){
-			try{
-				if(!Traits.queryTrait(node,traitName)){
-					Traits.addTraitByName(node,traitName);
-					outln("Adding trait ",traitName," to ",node);
-				}
-			}catch(e){
-				PADrend.message(e);
-			}
-		}
-	}
-};
-
-MinSG.getLocalPersistentNodeTraitNames := fn(MinSG.Node node){
-	var traitList = node.getNodeAttribute(ATTR_NODE_TRAITS);
-	return traitList ? traitList : [];
-};
-
-MinSG.getPersistentNodeTraitNames := fn(MinSG.Node node){
-	return node.isInstance() ? 
-					MinSG.getLocalPersistentNodeTraitNames(node.getPrototype()).append(MinSG.getLocalPersistentNodeTraitNames(node)) : 
-					MinSG.getLocalPersistentNodeTraitNames(node);
-};
 
 // -------------------------------------
 
