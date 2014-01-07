@@ -847,7 +847,8 @@ GUI.GUI_Manager._componentFactories ::= {
 			}
 		};		
 
-
+		container.refreshContents := collapsed->collapsed.forceRefresh; // refreshable contents trait??????
+		
 		if(!collapsed())
 			collapsed.forceRefresh();
 

@@ -225,7 +225,7 @@ GUI.TreeViewEntry.DynamicSubentriesTrait ::= new Traits.GenericTrait;
 			entry.refreshSubentries := fn(){
 				if(this.isCollapsed()){
 					this.clearSubentries();
-					entry += "..."; // dummy
+					this += "..."; // dummy
 				}else{
 					this.onOpen();
 				}
