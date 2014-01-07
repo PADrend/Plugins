@@ -237,7 +237,7 @@ GLOBALS.ExtensionPoint := Util.ExtensionPoint; //! \deprecated global alias
 
 	T.removeExtension ::= fn(extOrFun) {
 		var fun = extOrFun---|>Extension ? extOrFun.fun : extOrFun;
-		extensions.filter( (fn(fun,ext){ return ext.fun!=fun;	}).bindFirstParams(fun)  );
+		extensions.filter( [fun] => fn(fun,ext){ return ext.fun!=fun;	} );
 	};
 
 	//! Alias for registerExtension(fun)

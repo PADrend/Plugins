@@ -41,11 +41,11 @@ Util.getFilesInDir := fn(String dir,[Array,String] endings,recursively = false){
         Runtime.warn(e);
         return [];
     }
-	f.filter(fn(name,endings){
+	f.filter([endings] => fn(endings, name){
 		foreach(endings as var e)
 			if(name.endsWith(e)) return true;
 		return false;
-	},endings);	
+	});	
     return f;
 };
 
