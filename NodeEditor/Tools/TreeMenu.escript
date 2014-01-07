@@ -135,6 +135,26 @@ NodeEditorTools.registerMenues_TreeTools := fn() {
 		},
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL:"Group nodes in common subtree",
+			GUI.ON_CLICK:fn(){
+				if(!NodeEditor.getSelectedNodes().empty()){
+					var subtreeRoot = NodeEditor.getSelectedNodes()[0];
+					foreach(NodeEditor.getSelectedNodes() as var node){
+						subtreeRoot = MinSG.getRootOfCommonSubtree(subtreeRoot,node);
+						assert(subtreeRoot);
+					}
+					var newGroup = new MinSG.ListNode;
+					subtreeRoot += newGroup;
+					foreach(NodeEditor.getSelectedNodes() as var node){
+						MinSG.changeParentKeepTransformation(node, newGroup);
+					}
+					NodeEditor.selectNode( newGroup );
+				}
+			},
+			GUI.TOOLTIP: "Place all selected nodes in one common subtree."
+		},
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL:"Open all inner Nodes",
 			GUI.ON_CLICK:fn(){
 				showWaitingScreen();
@@ -166,26 +186,7 @@ NodeEditorTools.registerMenues_TreeTools := fn() {
 			},
 			GUI.TOOLTIP: "If all children have the same states then \nmove these states to the parent"
 		},
-		{
-			GUI.TYPE : GUI.TYPE_BUTTON,
-			GUI.LABEL : "Refresh references",
-			GUI.TOOLTIP : "Replace all node instances in the subtree \nby fresh copies of the original.",
-			GUI.ON_CLICK : fn(){
-				var instanceCounter = 0;
-				var nodes = NodeEditor.getSelectedNodes().clone();
-				while(!nodes.empty()){
-					var node = nodes.popBack();
-
-					if(node.isInstance()){
-						++instanceCounter;
-						MinSG.updatePrototype(node,node.getPrototype());
-					}else{
-						nodes.append(MinSG.getChildNodes(node));
-					}
-				}
-				PADrend.message("Refreshed #"+instanceCounter+" instances.");
-			}
-		},
+	
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL:"Remove all states",
@@ -329,34 +330,7 @@ NodeEditorTools.registerMenues_TreeTools := fn() {
 			},
 			GUI.TOOLTIP: "Remove empty GroupNodes and replace \nGroupNodes with single child by that child."
 		},
-		{
-			GUI.TYPE : GUI.TYPE_BUTTON,
-			GUI.LABEL : "Un-clone subtree",
-			GUI.TOOLTIP : "Remove the reference to prototype nodes\n from the nodes in the selected subtree.",
-			GUI.ON_CLICK : fn(){
-				var nodes = NodeEditor.getSelectedNodes().clone();
-				var counter = [0];
-				while(!nodes.empty()){
-					var node = nodes.popBack();
-					if(node.isInstance()){
-						// up
-						for(var n=node;n&&n.isInstance();n=n.getParent()){
-							++counter[0];
-							n._setPrototype(void);
-						}
-						// down
-						node.traverse( counter->fn(node){
-							if(node.isInstance()){
-								node._setPrototype(void);
-								++this[0];
-							}});
-					}else{
-						nodes.append(MinSG.getChildNodes(node));
-					}
-				}
-				PADrend.message(""+counter[0]+" nodes un-cloned.");
-			}
-		},
+
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL:"Remove State",
@@ -397,6 +371,59 @@ NodeEditorTools.registerMenues_TreeTools := fn() {
 
 			},
 			GUI.TOOLTIP: "Remove the selected state from the scene."
+		},
+	]);
+
+	gui.registerComponentProvider('NodeEditor_TreeToolsMenu.prototypes',[
+		'----',
+		"*Prototypes/Instances*",
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Refresh instances",
+			GUI.TOOLTIP : "Replace all node instances in the subtree \nby fresh copies of the original.",
+			GUI.ON_CLICK : fn(){
+				var instanceCounter = 0;
+				var nodes = NodeEditor.getSelectedNodes().clone();
+				while(!nodes.empty()){
+					var node = nodes.popBack();
+
+					if(node.isInstance()){
+						++instanceCounter;
+						MinSG.updatePrototype(node,node.getPrototype());
+					}else{
+						nodes.append(MinSG.getChildNodes(node));
+					}
+				}
+				PADrend.message("Refreshed #"+instanceCounter+" instances.");
+			}
+		},		
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Un-clone subtree",
+			GUI.TOOLTIP : "Remove the reference to prototype nodes\n from the nodes in the selected subtree.",
+			GUI.ON_CLICK : fn(){
+				var nodes = NodeEditor.getSelectedNodes().clone();
+				var counter = [0];
+				while(!nodes.empty()){
+					var node = nodes.popBack();
+					if(node.isInstance()){
+						// up
+						for(var n=node;n&&n.isInstance();n=n.getParent()){
+							++counter[0];
+							n._setPrototype(void);
+						}
+						// down
+						node.traverse( counter->fn(node){
+							if(node.isInstance()){
+								node._setPrototype(void);
+								++this[0];
+							}});
+					}else{
+						nodes.append(MinSG.getChildNodes(node));
+					}
+				}
+				PADrend.message(""+counter[0]+" nodes un-cloned.");
+			}
 		},
 	]);
 
