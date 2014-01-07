@@ -88,8 +88,8 @@ Effect.begin @(override) := fn(){
 	fbo.attachColorTexture(renderingContext,colorTexture_1);
     fbo.attachDepthTexture(renderingContext,depthTexture);
 
-    renderingContext.pushAndSetTexture(6,colorTexture_2);
-    renderingContext.pushAndSetTexture(7,depthTexture_2);
+    renderingContext.pushAndSetTexture(6, colorTexture_2, Rendering.TexUnitUsageParameter.GENERAL_PURPOSE);
+    renderingContext.pushAndSetTexture(7, depthTexture_2, Rendering.TexUnitUsageParameter.GENERAL_PURPOSE);
     renderingContext.setGlobalUniform('lastColorBuffer',Rendering.Uniform.INT,[6]);
     renderingContext.setGlobalUniform('lastDepthBuffer',Rendering.Uniform.INT,[7]);
     
