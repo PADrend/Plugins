@@ -541,6 +541,17 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 				dataWrapper.onDataChanged += refreshGroup->fn(data){ refresh();	};
 			}
 
+		}else{ // non-input component (label, container, ...)
+			var dataWrapper = description[GUI.DATA_WRAPPER];
+			if(dataWrapper){
+				// If the data is changed, update the component's label.
+				dataWrapper.onDataChanged += component->fn(data){
+					if(this.isDestroyed())
+						return MultiProcedure.REMOVE;
+					this.setText(data);
+				};
+				component.setText(dataWrapper());
+			}
 		}
 
 		// set optional flags
