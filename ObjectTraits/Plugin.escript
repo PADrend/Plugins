@@ -27,6 +27,7 @@ plugin.init = fn() {
 				'ObjectTraits/FaderTrait',
 				'ObjectTraits/DynamicBoxTrait',
 				'ObjectTraits/MetaObjectTrait',
+				'ObjectTraits/NodeLinkTrait',
 			] as var t)
 		Std.require( t );
 	
