@@ -28,6 +28,7 @@ plugin.init = fn() {
 				'ObjectTraits/DynamicBoxTrait',
 				'ObjectTraits/MetaObjectTrait',
 				'ObjectTraits/NodeLinkTrait',
+				'ObjectTraits/RotationTrait',
 			] as var t)
 		Std.require( t );
 	

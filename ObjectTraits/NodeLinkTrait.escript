@@ -71,6 +71,8 @@ trait.onInit += fn(MinSG.Node node){
 			nodes = queryRelNodes(this,query);
 		foreach(this.__linkedNodes as var entry){
 			if(entry.role==role&&entry.query==query){
+				if(!entry.nodes.empty())
+					this.onNodesUnlinked(role,entry.nodes,entry.parameters);
 				entry.nodes = nodes.clone();
 				break;
 			}
@@ -82,22 +84,31 @@ trait.onInit += fn(MinSG.Node node){
 			this.__linkedNodes += entry;
 		}
 		storeEntries(this,this.__linkedNodes);
-		return nodes;
+		if(!nodes.empty())
+			this.onNodesLinked(role,nodes,[]); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! parameters
 	};
 	node.accessLinkedNodes  := fn(){
 		return this.__linkedNodes;
 	};
 	node.removeLinkedNodes := fn(String role,String query){
-		this.__linkedNodes.filter([role,query]=>fn(role,query, entry){return entry.role!=role||entry.query!=query; });
+		this.__linkedNodes.filter( [role,query]=>this->fn(role,query, entry){
+			if(entry.role==role&&entry.query==query){
+				this.onNodesUnlinked(role,entry.nodes,entry.parameters);
+			}else{
+				return true;
+			}
+		});
 		storeEntries(this,this.__linkedNodes);
 	};
-	node.getLinkedNodes := fn(String role){ // parameters!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		var nodes = [];
+	node.getNodeLinks := fn(String role){ 
+		var links = [];
 		foreach(this.__linkedNodes as var entry)
 			if(entry.role==role)
-				nodes.append( entry.nodes );
-		return nodes;
+				links+= [entry.nodes,entry.parameters];
+		return links;
 	};
+	node.onNodesLinked := new MultiProcedure; // role, nodes, parameters
+	node.onNodesUnlinked := new MultiProcedure;  // role, nodes, parameters
 	
 //	node.onNodesLinked(role,nodes,parameters)
 //	node.onNodesUnlinked(role,nodes,parameters)
