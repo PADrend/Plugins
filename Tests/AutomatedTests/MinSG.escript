@@ -416,9 +416,12 @@ tests += new Tests.AutomatedTest( "MinSG: NodeQuery",fn(){
 tests += new Tests.AutomatedTest( "MinSG: Persistent node traits",fn(){
 	var root = new MinSG.ListNode;
 	declareNamespace($MinSG,$_Test);
-	MinSG._Test.PersistentNodeTestTrait := new MinSG.PersistentNodeTrait("MinSG._Test.PersistentNodeTestTrait");
 	
-	var t = MinSG._Test.PersistentNodeTestTrait;
+	var traitName = 'MinSG/_Test/PersistentNodeTestTrait';
+	var t = new MinSG.PersistentNodeTrait(traitName);
+	Std._unregisterModule(traitName);
+	Std._registerModule(traitName,t);
+	
 	t.initCounter := 0;
 	
 	t.attributes.foo @(init) := fn(){	return "bar";	};
