@@ -104,7 +104,7 @@ trait.onInit += fn(MinSG.Node node){
 		var links = [];
 		foreach(this.__linkedNodes as var entry)
 			if(entry.role==role)
-				links+= [entry.nodes,entry.parameters];
+				links += [entry.nodes,entry.parameters];
 		return links;
 	};
 	node.onNodesLinked := new MultiProcedure; // role, nodes, parameters

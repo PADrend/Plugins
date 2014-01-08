@@ -13,6 +13,14 @@
 
 static trait = new Traits.GenericTrait('ObjectTraits/AnimatorBaseTrait');
 
+
+/* \todo
+     stop before saving
+*/
+
+
+
+
 trait.onInit += fn(MinSG.Node node){
 	node.animationCallbacks := new MultiProcedure;
 	

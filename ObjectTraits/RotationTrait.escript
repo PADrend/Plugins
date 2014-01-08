@@ -22,6 +22,41 @@ An AnimatorTrait adds the following interface:
 
 */
 
+static AnimationHandler = new Type;
+AnimationHandler.subject := void;
+AnimationHandler.currentMode := void;
+AnimationHandler.lastTime := void;
+AnimationHandler._constructor ::= fn(_subject){
+	this.subject = _subject;
+};
+AnimationHandler._call ::= fn(caller,mode,time=0){
+	switch(mode){
+	case 'play':
+		if(this.currentMode!=mode){
+			this.subject.animationInit(time);
+			this.currentMode = mode;
+			this.lastTime = time;
+		}
+		this.subject.animationPlay(time,this.lastTime);
+		this.lastTime = time;
+		break;
+	case 'stop':
+		if(this.currentMode!=mode){
+			this.subject.animationStop(time,this.lastTime);
+			this.currentMode = mode;
+			this.lastTime = time;
+		}
+	case 'pause':
+		break;
+	default:
+		Runtime.warn("Unknown mode: "+mode);
+	}
+	
+
+};
+
+
+
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/RotationTrait');
 
 trait.onInit += fn(MinSG.Node node){
@@ -29,14 +64,16 @@ trait.onInit += fn(MinSG.Node node){
 	// --> AnimationBaseTrait
 
 	@(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
-	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/AnimatorBaseTrait'); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/AnimatorBaseTrait');
 
 	if(!Traits.queryTrait(node,NodeLinkTrait))
 		Traits.addTrait(node,NodeLinkTrait);
 	
-	var handler = node->fn(mode,Number t=0){
-		this.animate(mode,t);
-	};
+	var handler = new AnimationHandler(node);
+//	node->fn(mode,Number t=0){
+////		this.
+//		this.animate(mode,t);
+//	};
 
 
 	var connectTo = [node,handler] => fn(node,handler, [MinSG.Node,void] animatorNode){
@@ -74,17 +111,40 @@ trait.onInit += fn(MinSG.Node node){
 	
 	var exisitingLinks = node.getNodeLinks("animator");
 	if(!exisitingLinks.empty()){
-		connectTo(exisitingLinks[0][0]);
-		if(exisitingLinks.count()!=1||exisitingLinks[0].count()!=1){
+		connectTo(exisitingLinks[0][0][0]);
+		if(exisitingLinks.count()!=1||exisitingLinks[0][0].count()!=1){
 			Runtime.warn("AnimationBaseTrait: only one AnimatorNode allowed.");
 			print_r(exisitingLinks);
 		}
 	}
 		
 		
-	node.animate := new MultiProcedure;
-	node.animate += fn(p...){
-		this.rotateLocal_deg(0.1,new Geometry.Vec3(0,1,0));
+	node.animationPlay := new MultiProcedure;
+	node.animationInit := new MultiProcedure;
+	node.animationStop := new MultiProcedure;
+	// <---
+	
+	node.animationInit += fn(time){
+		outln("init");
+		this._rotationStartingTime  := time;
+		this._rotationInitialSRT  := this.getSRT();
+	};
+	node.animationPlay += fn(time,lastTime){
+//		outln("play");
+//		var srt = this._rotationInitialSRT.clone();
+		var srt = this.getSRT();
+		srt.rotateLocal_deg( (time-lastTime)*this.rotationSpeed(),new Geometry.Vec3(0,1,0) );
+		this.setSRT(srt);
+	};
+	node.animationStop += fn(...){
+		outln("stop");
+		this.setSRT( this._rotationInitialSRT );
+	};
+	node.rotationSpeed := new DataWrapper(  node.getNodeAttribute("rotationSpeed"); );
+	if(!node.rotationSpeed())
+		node.rotationSpeed(90.0);
+	node.rotationSpeed.onDataChanged += [node] => fn(node,speed){
+		node.setNodeAttribute("rotationSpeed",speed);
 	};
 };
 
@@ -107,6 +167,13 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				}
 			},		
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+			{
+				GUI.TYPE : GUI.TYPE_RANGE,
+				GUI.RANGE : [-3600,3600],
+				GUI.LABEL : "deg/sek",
+				GUI.WIDTH : 200,
+				GUI.DATA_WRAPPER : node.rotationSpeed
+			},	
 		];
 	});
 });

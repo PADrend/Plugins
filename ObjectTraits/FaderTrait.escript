@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/Fader');
+static trait = new MinSG.PersistentNodeTrait('ObjectTraits/FaderTrait');
 
 trait.onInit += fn(node){
 	PADrend.message("Fade...");
