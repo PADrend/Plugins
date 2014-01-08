@@ -24,17 +24,10 @@
 */
 
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/AnimatorBaseTrait');
+static trait = new Traits.GenericTrait('ObjectTraits/AnimatorBaseTrait');
 
 trait.onInit += fn(MinSG.Node node){
 	node.animationCallbacks := new MultiProcedure;
-	
-	Util.registerExtension( 'PADrend_AfterFrame', node->fn(...){
-		if(this.isDestroyed())
-			return $REMOVE;
-		this.animationCallbacks("play",PADrend.getSyncClock());
-	});
-	
 };
 
 

@@ -16,9 +16,9 @@
 	It handles the registration with a linked animator node.
 	The following members are added to the given Node:
 			
-	- node.animationInit 	MultiProcedure(time)
-	- node.animationPlay 	MultiProcedure(time,lastTime)
-	- node.animationStop	MultiProcedure(time)
+	- node.onAnimationInit 	MultiProcedure(time)
+	- node.onAnimationPlay 	MultiProcedure(time,lastTime)
+	- node.onAnimationStop	MultiProcedure(time)
 	
 	\note add the ObjectTraits/NodeLinkTrait to the given node.
 	\note adds the ObjectTraits/AnimatorBaseTrait to a node linked with the "animator" role.
@@ -34,16 +34,16 @@ AnimationHandler._call ::= fn(caller,mode,time=0){
 	switch(mode){
 	case 'play':
 		if(this.currentMode!=mode){
-			this.subject.animationInit(time);
+			this.subject.onAnimationInit(time);
 			this.currentMode = mode;
 			this.lastTime = time;
 		}
-		this.subject.animationPlay(time,this.lastTime);
+		this.subject.onAnimationPlay(time,this.lastTime);
 		this.lastTime = time;
 		break;
 	case 'stop':
 		if(this.currentMode!=mode){
-			this.subject.animationStop(time,this.lastTime);
+			this.subject.onAnimationStop(time,this.lastTime);
 			this.currentMode = mode;
 			this.lastTime = time;
 		}
@@ -110,17 +110,17 @@ trait.onInit += fn(MinSG.Node node){
 	}
 		
 		
-	node.animationPlay := new MultiProcedure;
-	node.animationInit := new MultiProcedure;
-	node.animationStop := new MultiProcedure;
+	node.onAnimationPlay := new MultiProcedure;
+	node.onAnimationInit := new MultiProcedure;
+	node.onAnimationStop := new MultiProcedure;
 };
 
 trait.allowRemoval();
 trait.onRemove += fn(node){
-	node.animationStop(0);
-	node.animationStop.clear();
-	node.animationPlay.clear();
-	node.animationInit.clear();
+	node.onAnimationStop(0);
+	node.onAnimationStop.clear();
+	node.onAnimationPlay.clear();
+	node.onAnimationInit.clear();
 };
 
 

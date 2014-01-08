@@ -21,13 +21,13 @@ trait.onInit += fn(MinSG.Node node){
 		Traits.addTrait(node,AnimatedBaseTrait);
 	
 	//! \see ObjectTraits/AnimatedBaseTrait
-	node.animationInit += fn(time){
+	node.onAnimationInit += fn(time){
 		outln("init");
 		this._rotationStartingTime  := time;
 		this._rotationInitialSRT  := this.getSRT();
 	};
 	//! \see ObjectTraits/AnimatedBaseTrait
-	node.animationPlay += fn(time,lastTime){
+	node.onAnimationPlay += fn(time,lastTime){
 //		outln("play");
 //		var srt = this._rotationInitialSRT.clone();
 		var srt = this.getSRT();
@@ -35,7 +35,7 @@ trait.onInit += fn(MinSG.Node node){
 		this.setSRT(srt);
 	};
 	//! \see ObjectTraits/AnimatedBaseTrait
-	node.animationStop += fn(...){
+	node.onAnimationStop += fn(...){
 		outln("stop");
 		this.setSRT( this._rotationInitialSRT );
 	};
