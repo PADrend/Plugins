@@ -11,7 +11,12 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new Traits.GenericTrait('ObjectTraits/AnimatorBaseTrait');
+/*! The AnimatorBaseTrait is a helper trait used for Animator Traits.
+	It adds the following members:
+	- animationCallbacks: a MultiProcedure where animated nodes can register their animation handler \see AnimatedBaseTrait
+	
+	\note the specific animator trait is responsible for repeatedly calling the animationCallbacks.
+*/
 
 
 /* \todo
@@ -19,7 +24,7 @@ static trait = new Traits.GenericTrait('ObjectTraits/AnimatorBaseTrait');
 */
 
 
-
+static trait = new MinSG.PersistentNodeTrait('ObjectTraits/AnimatorBaseTrait');
 
 trait.onInit += fn(MinSG.Node node){
 	node.animationCallbacks := new MultiProcedure;
