@@ -305,6 +305,7 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 		GUI.TYPE :				TYPE_LABEL
 		GUI.LABEL : 			text
 		GUI.TEXT_ALIGNMENT : 	(optional) alignment of the text e.g. (GUI.TEXT_ALIGN_LEFT | GUI.TEXT_ALIGN_MIDDLE) or (GUI.TEXT_ALIGN_CENTER | GUI.TEXT_ALIGN_BOTTOM)
+		GUI.DATA_WRAPPER : 		(optional) DataWrapper specifying dynamic text.
 
 	ListView (input)
 		GUI.TYPE :				GUI.TYPE_LIST
