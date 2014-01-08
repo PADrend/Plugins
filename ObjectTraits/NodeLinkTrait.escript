@@ -12,60 +12,102 @@
  */
 //! \todo save scene listener!!!!!!!!!!!!!!!!
 
+
+static TreeQuery = Std.require('LibMinSGExt/TreeQuery');
+static queryRelNodes = fn(MinSG.Node source,String query){
+	return TreeQuery.execute(query,PADrend.getSceneManager(),[source]).toArray();
+};
+static createRelativeNodeQuery = fn(MinSG.Node source,MinSG.Node target){
+	return TreeQuery.createRelativeNodeQuery(PADrend.getSceneManager(),source,target);
+};
+
+// ------------------------------
+
+
+static LinkEntry = new Type;
+LinkEntry.role := "";
+LinkEntry.query := "";
+LinkEntry.nodes @(init) := Array;
+LinkEntry.parameters @(init) := Array;
+LinkEntry.serializeToArray ::= fn(){
+	return [this.role,this.query,this.parameters...];
+};
+LinkEntry.initFromArray ::= fn(Array arr){
+	this.role = arr[0];
+	this.query = arr[1];
+	for(var i=2;i<arr.count();++i)
+		this.parameters += arr[i];
+};
+
+static storeEntries = fn(MinSG.Node node,Array entries){
+	var arr = [];
+	foreach(entries as var e)
+		arr += e.serializeToArray();
+	node.setNodeAttribute('LinkedNodes',toJSON(arr,false));
+};
+
+// ------------------------------
+
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/NodeLinkTrait');
 
-trait.onInit += fn(MinSG.GeometryNode node){
-////////////	var attr = node.getNodeAttribute('LinkedNodes');
+trait.onInit += fn(MinSG.Node node){
 	
-	node.__linkedNodes @(private) := [ ]; //  [Role,Query,Node]
+	var entries = [];
+	var attr = node.getNodeAttribute('LinkedNodes'); // Role,Query,Params*
+	if(attr){
+		foreach(parseJSON(attr) as var arr){
+			var e = new LinkEntry;
+			e.initFromArray(arr);
+			e.nodes = queryRelNodes(node,e.query);
+			entries += e;
+		}
+	}
 	
+	node.__linkedNodes @(private) := entries;  
 
-	static store = fn(node,entries){
-//////////		node.setNodeAttribute('LinkedNodes',toJSON(entries,false));
-	};
 
-	node.addLinkedNode := fn(String role,String query, node){
+	node.addLinkedNodes := fn(String role,String query,[Array,void] nodes=void){
+		if(!nodes)
+			nodes = queryRelNodes(this,query);
 		foreach(this.__linkedNodes as var entry){
-			if(entry[0]==role&&entry[1]==query){
-				entry[2]=node;
+			if(entry.role==role&&entry.query==query){
+				entry.nodes = nodes.clone();
 				break;
 			}
 		}else{
-			this.__linkedNodes += [role,query,node];
+			var entry = new LinkEntry;
+			entry.role = role;
+			entry.query = query;
+			entry.nodes = nodes.clone();
+			this.__linkedNodes += entry;
 		}
-		store(this,this.__linkedNodes);
+		storeEntries(this,this.__linkedNodes);
+		return nodes;
 	};
 	node.accessLinkedNodes  := fn(){
 		return this.__linkedNodes;
 	};
-	node.removeLinkedNode := fn(String role,String query){
-		this.__linkedNodes.filter([role,query]=>fn(role,query, entry){return entry[0]!=role||entry[1]!=query; });
-		store(this,this.__linkedNodes);
+	node.removeLinkedNodes := fn(String role,String query){
+		this.__linkedNodes.filter([role,query]=>fn(role,query, entry){return entry.role!=role||entry.query!=query; });
+		storeEntries(this,this.__linkedNodes);
 	};
-	node.getLinkedNodes := fn(String role){
+	node.getLinkedNodes := fn(String role){ // parameters!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		var nodes = [];
 		foreach(this.__linkedNodes as var entry)
-			if(entry[0]==role)
-				nodes+=entry[2];
+			if(entry.role==role)
+				nodes.append( entry.nodes );
 		return nodes;
 	};
 	
+//	node.onNodesLinked(role,nodes,parameters)
+//	node.onNodesUnlinked(role,nodes,parameters)
 	
-//	node.updateQueries := fn(MinSG.SceneManager sm){
-//		
-//	};
+	
 	
 };
 trait.allowRemoval();
 
 
-static TreeQuery = Std.require('LibMinSGExt/TreeQuery');
-static queryRelNode = fn(MinSG.Node source,String query){
-	return TreeQuery.execute(query,PADrend.getSceneManager(),[source]);
-};
-static getRelativeNodeQuery = fn(MinSG.Node source,MinSG.Node target){
-	return TreeQuery.createRelativeNodeQuery(PADrend.getSceneManager(),source,target);
-};
 
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
@@ -86,9 +128,9 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 		];
 		foreach(node.accessLinkedNodes() as var linkEntry){
-			var role = new Std.DataWrapper(linkEntry[0]);
-			var query = new Std.DataWrapper(linkEntry[1]);
-			var nodeFound = new Std.DataWrapper(true&&linkEntry[2]);
+			var role = new Std.DataWrapper(linkEntry.role);
+			var query = new Std.DataWrapper(linkEntry.query);
+			var nodesFound = new Std.DataWrapper(linkEntry.nodes.count());
 			entries += {
 				GUI.TYPE : GUI.TYPE_TEXT,
 				GUI.WIDTH : 60,
@@ -100,31 +142,63 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				GUI.DATA_WRAPPER : query
 			};			
 			entries += { // locked!
-				GUI.TYPE : GUI.TYPE_BOOL,
-				GUI.WIDTH : 15,
-				GUI.FLAGS : GUI.LOCKED,
-				GUI.LABEL : "Ok",
-				GUI.DATA_WRAPPER : nodeFound
+				GUI.TYPE : GUI.TYPE_LABEL,
+				GUI.WIDTH : 20,
+				GUI.DATA_WRAPPER : nodesFound,
+				GUI.TOOLTIP : "Number of linked nodes"
 			};
 			entries += {
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.WIDTH : 20,
 				GUI.LABEL : "Set",
-				GUI.ON_CLICK : [node,linkEntry,role,query,nodeFound] => fn(node,linkEntry,role,query,nodeFound){
-					node.removeLinkedNode(linkEntry[0],linkEntry[1]);
-					var linkedNodeSet = queryRelNode(node,query());
-					nodeFound( linkedNodeSet.count()==1 );
-					node.addLinkedNode(role(),query(),linkedNodeSet.toArray()[0]);
+				GUI.ON_CLICK : [node,linkEntry,role,query,nodesFound] => fn(node,linkEntry,role,query,nodesFound){
+					node.removeLinkedNodes(linkEntry.role,linkEntry.query);
+					var linkedNodes = queryRelNodes(node,query());
+					nodesFound( linkedNodes.count() );
+					node.addLinkedNodes(role(),query(),linkedNodes);
 				}
 			};
 			entries += {
-				GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
-				GUI.FLAGS : GUI.FLAT_BUTTON,
-				GUI.LABEL : "-",
+				GUI.TYPE : GUI.TYPE_MENU,
+				GUI.LABEL : ">",
 				GUI.WIDTH : 20,
-				GUI.ON_CLICK : [node,linkEntry,refreshCallback] => fn(node,linkEntry,refreshCallback){
-					node.removeLinkedNode(linkEntry[0],linkEntry[1]);
-					refreshCallback();
+				GUI.MENU_PROVIDER : [node,linkEntry,refreshCallback] => fn(node,linkEntry,refreshCallback){
+					var entries = [];
+					entries += {
+						GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
+						GUI.LABEL : "Remove Link",
+						GUI.ON_CLICK : [node,linkEntry,refreshCallback] => fn(node,linkEntry,refreshCallback){
+							node.removeLinkedNodes(linkEntry.role,linkEntry.query);
+							gui.closeAllMenus();
+							refreshCallback();
+						}
+					};
+					entries += {
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Select",
+						GUI.ON_CLICK : [linkEntry] => fn(linkEntry){
+							NodeEditor.selectNodes(linkEntry.nodes);
+						}
+					};
+					entries += {
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Update from selection",
+						GUI.ON_CLICK : [node,linkEntry,refreshCallback] => fn(node,linkEntry,refreshCallback){
+							var target = NodeEditor.getSelectedNode();
+							var query = createRelativeNodeQuery(node,target);
+							if(!query){
+								PADrend.message("Can't create relative node query!");
+								return;
+							}
+							node.removeLinkedNodes(linkEntry.role,linkEntry.query);
+							node.addLinkedNodes(linkEntry.role,query,[target] );
+							gui.closeAllMenus();
+							refreshCallback();
+						}
+					};
+					
+					
+					return entries;
 				}
 			};	
 
@@ -137,16 +211,15 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 			GUI.ON_CLICK : [node,refreshCallback] => fn(node,refreshCallback){
 				var target = NodeEditor.getSelectedNode();
 				if(!target){
-					outln("No target selected!");
-					return;
+					target = self;
 				}
-				var query = getRelativeNodeQuery(node,target);
+				var query = createRelativeNodeQuery(node,target);
 				if(!query){
-					outln("Can't create relative node query!");
+					PADrend.message("Can't create relative node query!");
 					return;
 				}
 				
-				node.addLinkedNode("link",query,target );
+				node.addLinkedNodes("link",query,[target] );
 				refreshCallback();
 			}
 		};
