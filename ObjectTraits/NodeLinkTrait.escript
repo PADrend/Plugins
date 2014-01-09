@@ -53,7 +53,7 @@ static trait = new MinSG.PersistentNodeTrait('ObjectTraits/NodeLinkTrait');
 trait.onInit += fn(MinSG.Node node){
 	
 	var entries = [];
-	var attr = node.getNodeAttribute('LinkedNodes'); // Role,Query,Params*
+	var attr = node.findNodeAttribute('LinkedNodes'); // Role,Query,Params*
 	if(attr){
 		foreach(parseJSON(attr) as var arr){
 			var e = new LinkEntry;

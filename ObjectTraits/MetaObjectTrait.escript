@@ -36,6 +36,7 @@ Renderer.doDisableState  @(override) ::= fn(node,params){// node,params){
 	params.setChannel( "META_OBJECT_CHANNEL" ); //DEFAULT_CHANNEL
 	// push and set blending, depth test, and lighting
 	// depth sort
+	params.setFlag( MinSG.USE_WORLD_MATRIX);
 
 	var blending=new Rendering.BlendingParameters;
 	blending.enable();
