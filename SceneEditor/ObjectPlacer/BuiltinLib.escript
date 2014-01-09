@@ -40,6 +40,11 @@ plugin.ex_Init := fn(){
 	gui.registerComponentProvider('SceneEditor_ObjectProviderEntries.builtIn',this->fn(){
 		var entries = ["BuiltIn"];
 		foreach( {
+					"Cube" : 				fn(){	
+						var mb = new Rendering.MeshBuilder;
+						mb.addBox(new Geometry.Box(0.0, 0.0, 0.0, 0.1, 0.1, 0.1));
+						return new MinSG.GeometryNode( mb.buildMesh() );
+					},
 					"DirectionalLight" : 	fn(){	return new MinSG.LightNode( MinSG.LightNode.DIRECTIONAL );	},
 					"GenericMetaNode" : 	fn(){	return new MinSG.GenericMetaNode();	},
 					"ListNode" : 			fn(){	return new MinSG.ListNode();	},
