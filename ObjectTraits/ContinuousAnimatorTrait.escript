@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla

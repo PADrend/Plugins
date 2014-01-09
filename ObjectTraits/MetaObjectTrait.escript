@@ -32,7 +32,7 @@ Renderer.doEnableState @(override) ::= fn(...){ //node,params){
 	return MinSG.STATE_OK;
 };
 Renderer.doDisableState  @(override) ::= fn(node,params){// node,params){
-	out(this.nodes.count()," ");
+//	out(this.nodes.count()," ");
 	params.setChannel( "META_OBJECT_CHANNEL" ); //DEFAULT_CHANNEL
 	// push and set blending, depth test, and lighting
 	// depth sort

@@ -24,6 +24,7 @@ var plugin = new Plugin({
 plugin.init = fn() {
 	
 	foreach([
+				'ObjectTraits/ButtonTrait',
 				'ObjectTraits/ContinuousAnimatorTrait',
 				'ObjectTraits/FaderTrait',
 				'ObjectTraits/DynamicBoxTrait',
