@@ -110,9 +110,8 @@ trait.onInit += fn(MinSG.Node node){
 	node.onNodesLinked := new MultiProcedure; // role, nodes, parameters
 	node.onNodesUnlinked := new MultiProcedure;  // role, nodes, parameters
 	
-//	node.onNodesLinked(role,nodes,parameters)
-//	node.onNodesUnlinked(role,nodes,parameters)
-	
+	node.availableLinkRoleNames := ["link"];
+
 	
 	
 };
@@ -145,7 +144,8 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 			entries += {
 				GUI.TYPE : GUI.TYPE_TEXT,
 				GUI.WIDTH : 60,
-				GUI.DATA_WRAPPER : role
+				GUI.DATA_WRAPPER : role,
+				GUI.OPTIONS : [role()].append(node.availableLinkRoleNames)
 			};
 			entries += {
 				GUI.TYPE : GUI.TYPE_TEXT,

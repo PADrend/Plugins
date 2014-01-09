@@ -31,6 +31,7 @@ plugin.init = fn() {
 				'ObjectTraits/MetaObjectTrait',
 				'ObjectTraits/NodeLinkTrait',
 				'ObjectTraits/RotationTrait',
+				'ObjectTraits/TransformationProxyTrait',
 			] as var t)
 		Std.require( t );
 	

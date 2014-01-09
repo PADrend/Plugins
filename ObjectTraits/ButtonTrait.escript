@@ -28,7 +28,10 @@ trait.onInit += fn(MinSG.Node node){
 	
 	node.buttonFn1 := node.getNodeAttributeWrapper('buttonFn1', "animationPlay" );
 	node.buttonFn2 := node.getNodeAttributeWrapper('buttonFn2', "animationPause" );
-	node.buttonLinkRole := node.getNodeAttributeWrapper('buttonLinkRole', "link" );
+	node.buttonLinkRole := node.getNodeAttributeWrapper('buttonLinkRole', "switch" );
+	
+	//! \see ObjectTraits/NodeLinkTrait
+	node.availableLinkRoleNames += "switch";
 	
 	node.buttonState := new DataWrapper(false);
 	node.buttonState.onDataChanged += [node]=>fn(node, value){

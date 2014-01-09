@@ -85,6 +85,9 @@ trait.onInit += fn(MinSG.Node node){
 	};
 
 	//! \see ObjectTraits/NodeLinkTrait
+	node.availableLinkRoleNames += "animator";
+	
+	//! \see ObjectTraits/NodeLinkTrait
 	node.onNodesLinked += [connectTo] => fn(connectTo, role,Array nodes,Array parameters){
 		if(role=="animator"){
 			connectTo(nodes[0]);
