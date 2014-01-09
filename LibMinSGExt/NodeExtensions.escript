@@ -149,6 +149,16 @@ MinSG.Node.invalidateAnchor ::= fn(String anchorName){
 
 // -------------
 
+MinSG.Node.getNodeAttributeWrapper ::= fn(String key, defaultValue=void){
+	var wrapper = DataWrapper.createFromFunctions(
+		[this,key] => fn(node,key){			return node.getNodeAttribute(key); },
+		[this,key] => fn(node,key,value){	node.setNodeAttribute(key,value); }
+	);
+	if(void==wrapper() && void!=defaultValue)
+		wrapper(defaultValue);
+	return wrapper;
+};
+
 /*! Calls the given function for every node in the subtree with the node as parameter. 
 	If the function returns $BREAK_TRAVERSAL for a node, the corresponding subtree is skipped.
 	If the funciton returns $EXIT_TRAVERSAL, the traversal is stopped. 
