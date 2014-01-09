@@ -13,10 +13,15 @@
 
 
 static Renderer = new Type( MinSG.ScriptedNodeRendererState );
+Renderer._printableName @(override) ::= "_MetaObjectRenderer(tmp)";
+
 Renderer.nodes @(init) := Array;
 
 //Renderer._constructor ::= fn()@(super(MinSG.FrameContext.APPROXIMATION_CHANNEL)){};
-Renderer._constructor ::= fn()@(super("META_OBJECT_CHANNEL")){};
+Renderer._constructor ::= fn()@(super("META_OBJECT_CHANNEL")){
+	this.setTempState(true);
+
+};
 Renderer.displayNode := fn(node,params){
 	this.nodes += node;
 //	out("+");
@@ -51,20 +56,36 @@ Util.registerExtension('NodeEditor_QueryAvailableStates',fn(map){
 
 
 var MetaNodeState = new Type( MinSG.ScriptedState );
+MetaNodeState._printableName @(override) ::= "_MetaNodeState(tmp)";
+MetaNodeState._constructor ::= fn(){
+	this.setTempState(true);
+
+};
 
 MetaNodeState.doEnableState ::= fn(node,params){
-//	if(params.getFlag(MinSG.BOUNDING_BOXES))
-//		return MinSG.STATE_OK;
 	if(params.getChannel()!="META_OBJECT_CHANNEL"){
 //		out("a");//,params.getChannel());
 		params.setFlag( MinSG.USE_WORLD_MATRIX);
 		params.setChannel( "META_OBJECT_CHANNEL" );
 
-		
 		if(frameContext.displayNode(node,params)) // pass on to other channel
 			return MinSG.STATE_SKIP_RENDERING;
-		else
+		else{ // no (active) Renderer state
+			if(!node.hasParent())
+				return MinSG.STATE_OK;
+			var sceneRoot = node;
+			while(sceneRoot.getParent().hasParent())
+				sceneRoot = sceneRoot.getParent();
+			
+			foreach(sceneRoot.getStates() as var s){
+				if(s---|>Renderer) // renderer found (probably just disabled)
+					break; 
+			}else{ // no renderer found -> add one
+				sceneRoot += new Renderer; 
+			}
+			
 			return MinSG.STATE_OK;
+		}
 	}else{
 		// set Material
 //		out("b");//,params.getChannel());
@@ -74,42 +95,6 @@ MetaNodeState.doEnableState ::= fn(node,params){
 
 
 static highlightState = new MetaNodeState;
-
-
-
-
-//static highlightState = new MinSG.GroupState;
-
-//	{	// add lighting
-//		var defaultLight = new MinSG.LightNode(MinSG.LightNode.DIRECTIONAL);
-//		defaultLight.setAmbientLightColor(new Util.Color4f(0.2,0.2,0.2,1))
-//					.setDiffuseLightColor(new Util.Color4f(0,0,0,0))
-//					.setSpecularLightColor(new Util.Color4f(0,0,0,0));
-//	
-//		highlightState.addState(new MinSG.LightingState(defaultLight));
-//	}
-//	
-//	{	// add blending
-//		var blending = new Rendering.BlendingParameters;
-//		blending.enable();
-//		blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE);
-//		var s = new MinSG.BlendingState;
-//		s.setParameters(blending);
-//		highlightState.addState( s );
-//	}
-//	
-////	{	// depth test
-////		var S = new Type( MinSG.ScriptedState );
-////		S.doEnableState ::= fn(node,params){
-////			renderingContext.pushAndSetDepthBuffer(false, false, Rendering.Comparison.LESS);
-////			return MinSG.STATE_OK;
-////		};
-////		S.doDisableState ::= fn(node,params){
-////			renderingContext.popDepthBuffer();
-////		};
-////		highlightState.addState( new S );
-////	}
-//	
 
 // ----------------------------------
 
@@ -142,16 +127,6 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				}
 			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
-
-//			{
-//				GUI.TYPE : GUI.TYPE_RANGE,
-//				GUI.RANGE : [-3,2],
-//				GUI.RANGE_FN_BASE : 10,
-//				GUI.LABEL : "X",
-//				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
-//				GUI.DATA_WRAPPER : node.dimX
-//			},
-
 		];
 	});
 });
