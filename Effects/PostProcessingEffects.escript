@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2009-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2009-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2009-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Jan Krems
  * Copyright (C) 2010-2013 Ralf Petring <ralf@petring.net>
  * 
@@ -28,6 +28,10 @@ GLOBALS.PPEffectPlugin := new Plugin({
 			Plugin.REQUIRES : []
 });
 
+static defaultEffect = DataWrapper.createFromEntry( PADrend.configCache, 'Effects.ppEffectDefault',false);
+static activeEffectFile = new DataWrapper;
+static plugin = PPEffectPlugin;
+
 /*!	---|> Plugin	*/
 PPEffectPlugin.init:=fn(){
      { // Register ExtensionPointHandler:
@@ -39,7 +43,28 @@ PPEffectPlugin.init:=fn(){
     }
     this.effect:=false;
     this.optionWindow:=false;
+    
+    registerExtension('PADrend_Init',fn(){
+		if(defaultEffect())
+			plugin.loadAndSetEffect(defaultEffect());
+    });
+
     return true;
+};
+
+//! name -> filename
+static scanEffectFiles = fn(){
+	var files = new Map; 
+	foreach(Util.getFilesInDir(__DIR__+"/PPEffects",['.escript']) as var file){
+		var name = file.substr(file.rFind("/")+1);
+		name = name.substr(0,name.rFind("."));
+		if(name.beginsWith("_"))
+			continue;
+		if(file.beginsWith("file://"))
+			file = file.substr(7);
+		files[name] = file;
+	}
+	return files;
 };
 
 PPEffectPlugin.initMenus := fn(){
@@ -51,6 +76,8 @@ PPEffectPlugin.initMenus := fn(){
 	});
 					
 	gui.registerComponentProvider('Effects_PPMenu',this->fn(){
+								
+		var effects = scanEffectFiles();
 		var m=[];
 
 		m+="*PostProcessing*";
@@ -70,24 +97,24 @@ PPEffectPlugin.initMenus := fn(){
 				PADrend.executeCommand(fn(){PPEffectPlugin.setEffect(false);});
 			}
 		};
+		m+={
+			GUI.TYPE : GUI.TYPE_BUTTON, 
+			GUI.LABEL : "Set as default",
+			GUI.ON_CLICK : fn() {
+				defaultEffect(activeEffectFile());
+				gui.closeAllMenus();
+			},
+			GUI.TOOLTIP : "Sets the active effect as default effect.\nThe default effect is loaded when the program is started."
+		};
+
 		m+='----';
-		var files = new Map(); // just to get it sorted alphabetically
-		foreach(Util.getFilesInDir(__DIR__+"/PPEffects",['.escript']) as var file){
-			var name = file.substr(file.rFind("/")+1);
-			name = name.substr(0,name.rFind("."));
-			if(name.beginsWith("_"))
-				continue;
-			if(file.beginsWith("file://"))
-				file = file.substr(7);
-			files[name] = file;
-		}
-		foreach(files as var name, var file){
+		foreach(effects as var name, var file){
 			m+={
 				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : name,
-				GUI.ON_CLICK : (fn(file) {
-					PADrend.executeCommand((fn(file){PPEffectPlugin.loadAndSetEffect(file); }).bindLastParams(file));
-				}).bindLastParams(file)
+				GUI.LABEL : defaultEffect()==file ? name+" (default)" : name,
+				GUI.ON_CLICK : [file] => fn(file) {
+					PADrend.executeCommand( [file]=>fn(file){PPEffectPlugin.loadAndSetEffect(file); });
+				}
 			};
 		}
 		return m;
@@ -155,11 +182,13 @@ PPEffectPlugin.setEffect:=fn(newEffect){
         if(newEffect)
             optionWindow.add(effect.getOptionPanel());
     }
+	activeEffectFile(false);
 };
 
 PPEffectPlugin.loadAndSetEffect := fn(filename){
 	var effect = load(filename);
 	setEffect(effect);
+	activeEffectFile(filename);
 };
 
 /****************************************************************************
