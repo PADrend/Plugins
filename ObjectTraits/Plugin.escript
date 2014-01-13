@@ -26,6 +26,7 @@ plugin.init = fn() {
 	foreach([
 				'ObjectTraits/ButtonTrait',
 				'ObjectTraits/ContinuousAnimatorTrait',
+				'ObjectTraits/DynamicCylinderTrait',
 				'ObjectTraits/FaderTrait',
 				'ObjectTraits/DynamicBoxTrait',
 				'ObjectTraits/MetaObjectTrait',
