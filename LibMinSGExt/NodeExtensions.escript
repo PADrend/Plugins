@@ -151,7 +151,7 @@ MinSG.Node.invalidateAnchor ::= fn(String anchorName){
 
 MinSG.Node.getNodeAttributeWrapper ::= fn(String key, defaultValue=void){
 	var wrapper = DataWrapper.createFromFunctions(
-		[this,key] => fn(node,key){			return node.getNodeAttribute(key); },
+		[this,key] => fn(node,key){			return node.findNodeAttribute(key); },
 		[this,key] => fn(node,key,value){	node.setNodeAttribute(key,value); }
 	);
 	if(void==wrapper() && void!=defaultValue)
