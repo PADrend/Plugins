@@ -14,25 +14,25 @@
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/DynamicBoxTrait');
 
 trait.onInit += fn(MinSG.GeometryNode node){
-	var dimX = new Std.DataWrapper(node.getBB().getExtentX());
-	var dimY = new Std.DataWrapper(node.getBB().getExtentY());
-	var dimZ = new Std.DataWrapper(node.getBB().getExtentZ());
+	var boxDimX = new Std.DataWrapper(node.getBB().getExtentX());
+	var boxDimY = new Std.DataWrapper(node.getBB().getExtentY());
+	var boxDimZ = new Std.DataWrapper(node.getBB().getExtentZ());
 	
-	var regenerate = [node,dimX,dimY,dimZ]=>fn(node,dimX,dimY,dimZ,value){
+	var regenerate = [node,boxDimX,boxDimY,boxDimZ]=>fn(node,boxDimX,boxDimY,boxDimZ,value){
 		var mb = new Rendering.MeshBuilder;
 		mb.color( new Util.Color4f(1,1,1,1) );
-		var x = dimX();
-		var y = dimY();
-		var z = dimZ();
+		var x = boxDimX();
+		var y = boxDimY();
+		var z = boxDimZ();
 		mb.addBox( new Geometry.Box(new Geometry.Vec3(x*0.5,y*0.5,z*0.5),x,y,z) );
 		node.setMesh( mb.buildMesh() );
 	};
-	dimX.onDataChanged += regenerate;
-	dimY.onDataChanged += regenerate;
-	dimZ.onDataChanged += regenerate;
-	node.dimX := dimX;
-	node.dimY := dimY;
-	node.dimZ := dimZ;	
+	boxDimX.onDataChanged += regenerate;
+	boxDimY.onDataChanged += regenerate;
+	boxDimZ.onDataChanged += regenerate;
+	node.boxDimX := boxDimX;
+	node.boxDimY := boxDimY;
+	node.boxDimZ := boxDimZ;	
 };
 
 trait.allowRemoval();
@@ -60,7 +60,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				GUI.RANGE_FN_BASE : 10,
 				GUI.LABEL : "X",
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
-				GUI.DATA_WRAPPER : node.dimX
+				GUI.DATA_WRAPPER : node.boxDimX
 			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
@@ -69,7 +69,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				GUI.RANGE_FN_BASE : 10,
 				GUI.LABEL : "Y",
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
-				GUI.DATA_WRAPPER : node.dimY
+				GUI.DATA_WRAPPER : node.boxDimY
 			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
@@ -78,7 +78,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				GUI.RANGE_FN_BASE : 10,
 				GUI.LABEL : "Z",
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
-				GUI.DATA_WRAPPER : node.dimZ
+				GUI.DATA_WRAPPER : node.boxDimZ
 			},
 		];
 	});
