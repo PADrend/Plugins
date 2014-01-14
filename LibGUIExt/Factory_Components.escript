@@ -430,7 +430,8 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 	}
 
 	// set initial options (even if optionProvider is not supported explicitly)
-	if( description[GUI.OPTIONS_PROVIDER] ){
+	if( description[GUI.OPTIONS_PROVIDER] && 
+			description[GUI.TYPE] != GUI.TYPE_TREE_GROUP ){ // unfortunate special case: options for a closed tree group should only be be created on demand.
 		description[GUI.OPTIONS] = description[GUI.OPTIONS_PROVIDER]();
 	}
 
@@ -1396,6 +1397,12 @@ GUI.GUI_Manager._componentFactories ::= {
 		}
 
 		result.component = this.createTreeViewEntry(this.create(label));
+		
+		// special case: set flags early to prevent unnecessary executing of the optionProvider for a closed entry.
+		if( (input.description.get(GUI.FLAGS,0) & GUI.COLLAPSED_ENTRY) > 0){
+			result.component.setFlag(input.description.get(GUI.FLAGS),true);
+		}
+		
 		result.component.setWidth(300);
 
 		if(options){
