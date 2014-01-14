@@ -77,20 +77,20 @@ plugin.ex_Init := fn(){
 		return {
 			GUI.TYPE : GUI.TYPE_TREE_GROUP,
 			GUI.FLAGS : GUI.COLLAPSED_ENTRY,
-			GUI.OPTIONS :  ["Used prototypes","..."],
-			GUI.ON_OPEN : [plugin] => fn(plugin){
-				this.destroyContents();
-				this += "Used prototypes";
+			GUI.LABEL :  "Used prototypes",
+			GUI.OPTIONS_PROVIDER : [plugin] => fn(plugin){
+				var entries = [];
 				
 				var sm = PADrend.getSceneManager();
 				foreach(sm.getNamesOfRegisteredNodes() as var name){
 					var node = sm.getRegisteredNode(name);
 					var file = node.getNodeAttribute('ObjFileSource');
 					if(file){
-						this += plugin.createObjectEntry(file);
+						entries += plugin.createObjectEntry(file);
 					}
 				}
-				this += '----'; // always add at least one entry.
+				entries += '----'; // always add at least one entry.
+				return entries;
 			},
 			GUI.TOOLTIP : "Contains already added object\n prototypes. Re-open to refresh\n*May take some time for large scenes.*"
 		};
@@ -150,15 +150,15 @@ plugin.createLibEntry @(private) := fn(id, path,scanRecursively,includeMeshes){
 				gui.closeAllMenus();
 			}.bindLastParams(id)
 		}],
-		GUI.OPTIONS :  ["Files ("+path+")","..."],
-		GUI.ON_OPEN : [this,id, path,scanRecursively,includeMeshes] => fn(plugin,id, path,scanRecursively,includeMeshes){
-			this.destroyContents();
-			this += "Files ("+path+")";
+		GUI.LABEL :  "Files ("+path+")",
+		GUI.OPTIONS_PROVIDER : [this,id, path,scanRecursively,includeMeshes] => fn(plugin,id, path,scanRecursively,includeMeshes){
+			var enries = [];
 			foreach(Util.getFilesInDir(path,includeMeshes ? ['.mmf','.minsg'] : ['.minsg'],scanRecursively) as var file){
 				if(file.beginsWith("file://"))
 					file = file.substr(7);
-				this += plugin.createObjectEntry(file);
+				enries += plugin.createObjectEntry(file);
 			}
+			return enries;
 		},
 		GUI.TOOLTIP : "Path: "+path+"\nScanRecursively: "+scanRecursively+"\nIncludeMeshes: "+includeMeshes
 	};

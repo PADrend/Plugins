@@ -405,11 +405,11 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 	TreeView SubGroup
 		GUI.TYPE :				GUI.TYPE_TREE_GROUP
 								\note to create an initially collapsed entry, add GUI.FLAGS : GUI.COLLAPSED_ENTRY
+		GUI.LABEL :				The label of the entry
 		GUI.OPTIONS : 			[ option* ]
-								\note the first option is the representative of the group
-		GUI.ON_OPEN				(optional) function called when the group is opened
-		GUI.ON_CLOSE			(optional) function called when the group is collapsed
-		GUI.COLLAPSED			(optional) default is false
+								\note if no label is given, the first option is the representative of the group
+		or
+		GUI.OPTIONS_PROVIDER : 	function returning an array of options
 
 	Window
 		GUI.TYPE :				GUI.TYPE_WINDOW
@@ -1384,21 +1384,31 @@ GUI.GUI_Manager._componentFactories ::= {
 
 	// tree view sub group
 	GUI.TYPE_TREE_GROUP : fn(input,result){
-		var options = input.description.get(GUI.OPTIONS,[]);
-		result.component =this.createTreeViewEntry(this.createComponent(options[0]));
+		var options = input.description.get(GUI.OPTIONS);
+		var label = input.description[GUI.LABEL];
+		if(!label){
+			if(options && !options.empty()){
+				label = options.front();
+				options = options.slice(1);
+			}else{
+				label = "???";
+			}
+		}
+
+		result.component = this.createTreeViewEntry(this.create(label));
 		result.component.setWidth(300);
-		foreach(options as var index,var option){
-			if(index>0)
+
+		if(options){
+			foreach(options as var option)
 				result.component+=option;
 		}
-		if(input.description[GUI.ON_OPEN]){
-			result.component.onOpen := new MultiProcedure;
-			result.component.onOpen += input.description[GUI.ON_OPEN];
+
+		var optionsProvider = input.description[GUI.OPTIONS_PROVIDER];
+		if(optionsProvider){
+			//! \see GUI.TreeViewEntry.DynamicSubentriesTrait
+			Traits.addTrait( result.component, GUI.TreeViewEntry.DynamicSubentriesTrait,optionsProvider);
 		}
-		if(input.description[GUI.ON_CLOSE]){
-			result.component.onClose := new MultiProcedure;
-			result.component.onClose += input.description[GUI.ON_CLOSE];
-		}
+
 	},
 
 	// radio buttons
