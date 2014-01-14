@@ -31,6 +31,8 @@ AnimationHandler._constructor ::= fn(_subject){
 	this.subject = _subject;
 };
 AnimationHandler._call ::= fn(caller,mode,time=0){
+	if(!subject || !subject.isSet($onAnimationPlay))
+		return;
 	switch(mode){
 	case 'play':
 		if(this.currentMode!=mode){

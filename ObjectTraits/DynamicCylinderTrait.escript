@@ -101,7 +101,7 @@ trait.onInit += fn(MinSG.GeometryNode node){
 	node.cylNumSegments := cylNumSegments;	
 	
 	// guess if the mesh is already a cylinder
-	if(node.getMesh().getVertexCount() != (cylNumSegments().floor()*4 +4) || node.getBB().getHeight().round() != cylHeight().round() )
+	if(!node.getMesh() || node.getMesh().getVertexCount() != (cylNumSegments().floor()*4 +4) || node.getBB().getHeight().round() != cylHeight().round() )
 		regenerate();
 };
 

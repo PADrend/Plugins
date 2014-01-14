@@ -40,7 +40,8 @@ Renderer.doDisableState  @(override) ::= fn(node,params){// node,params){
 
 	var blending=new Rendering.BlendingParameters;
 	blending.enable();
-	blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE);
+//	blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE);
+	blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE_MINUS_SRC_ALPHA);
 	renderingContext.pushAndSetBlending(blending);
 	
 	renderingContext.pushAndSetDepthBuffer(false, false, Rendering.Comparison.ALWAYS);

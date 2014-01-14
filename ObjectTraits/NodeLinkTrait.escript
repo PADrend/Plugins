@@ -65,7 +65,6 @@ trait.onInit += fn(MinSG.Node node){
 	
 	node.__linkedNodes @(private) := entries;  
 
-
 	node.addLinkedNodes := fn(String role,String query,[Array,void] nodes=void){
 		if(!nodes)
 			nodes = queryRelNodes(this,query);
@@ -106,6 +105,13 @@ trait.onInit += fn(MinSG.Node node){
 			if(entry.role==role)
 				links += [entry.nodes,entry.parameters];
 		return links;
+	};
+	node.getLinkedNodes := fn(String role){ 
+		var linkedNodes = [];
+		foreach(this.__linkedNodes as var entry)
+			if(entry.role==role)
+				linkedNodes.append(entry.nodes);
+		return linkedNodes;
 	};
 	node.onNodesLinked := new MultiProcedure; // role, nodes, parameters
 	node.onNodesUnlinked := new MultiProcedure;  // role, nodes, parameters
