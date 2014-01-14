@@ -179,6 +179,10 @@ PADrend.init := fn(){
 		this.pluginFolders = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.plugins',[
 													IO.condensePath(__DIR__+"/../../extPlugins/"),
 													IO.condensePath(__DIR__+"/../")]);
+		// set plugin folders as module search paths
+		foreach( this.pluginFolders() as var folder)
+			Std.addModuleSearchPath(folder);
+		
 		loadPlugins(enabledPluginNames,true, this.pluginFolders() );
     }
     
