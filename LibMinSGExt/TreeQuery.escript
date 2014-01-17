@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -619,6 +619,15 @@ static functionRegistry = {
 		}
 		return output;
 	},
+	// MinSG:tag( 'tagName', [, nodes])   Collect all nodes with the given tag
+	'MinSG:collectByTag' : fn(ctxt, tagName, input=void){
+		@(once) static tagFunctions = Std.require('LibMinSGExt/NodeTagFunctions');
+		var output = new Set;
+		foreach( getInput(ctxt,input) as var subtree){
+			output.merge(tagFunctions.collectNodesByTag(subtree,tagName));
+		}
+		return output;
+	},
 };
 
 // MinSG:baseId
@@ -720,28 +729,30 @@ static createRelativeNodeQuery = fn(MinSG.SceneManager sm, MinSG.Node source, Mi
 		}
 	}
 
-	var query = (source == commonRoot) ? "." : createQueryToAncestor(source,commonRoot);
-	if(!query)
+	var queryToAncestor = (source == commonRoot) ? "." : createQueryToAncestor(source,commonRoot);
+	if(!queryToAncestor)
 		return false;
+		
+	var queryToTarget = false;
 	var id = sm.getNameOfRegisteredNode(target);
 	if(id){ // connects by id?
-		query += "/MinSG:collectRefId('" + id + "')";
+		queryToTarget = "/MinSG:collectRefId('" + id + "')";
 	} // only child of a parent with id?
 	else if(target.hasParent() && (id = sm.getNameOfRegisteredNode(target.getParent())) &&
 				target.getParent().countChildren() == 1){
-		query += "/MinSG:collectRefId('" + id + "')/child"; 
+		queryToTarget = "/MinSG:collectRefId('" + id + "')/child"; 
 	} // target is only instance of a prototype in the subtree
 	else if(target.isInstance()&&sm.getNameOfRegisteredNode(target.getPrototype())&&MinSG.collectInstances(commonRoot,target.getPrototype()).count()==1)  {
-		query += "/MinSG:collectRefId('" + sm.getNameOfRegisteredNode(target.getPrototype()) + "')";
-	}else{
-		return false;
+		queryToTarget = "/MinSG:collectRefId('" + sm.getNameOfRegisteredNode(target.getPrototype()) + "')";
 	}
-	
-//	outln("Query? ",query);
-	var testResult = execute(query,sm,[source]);
-	if( testResult---|>Set && testResult.toArray() == [target] )
-		return query;
-//	outln("Invalid results:", testResult.toArray().implode(",") );
+	if(queryToTarget){
+		var query = queryToAncestor + queryToTarget;
+	//	outln("Query? ",query);
+		var testResult = execute(query,sm,[source]);
+		if( testResult---|>Set && testResult.toArray() == [target] )
+			return query;
+	//	outln("Invalid results:", testResult.toArray().implode(",") );
+	}
 	return false;
 };
 
