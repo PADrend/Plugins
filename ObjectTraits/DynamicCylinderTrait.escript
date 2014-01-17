@@ -27,68 +27,76 @@ trait.onInit += fn(MinSG.GeometryNode node){
 	var cylRadius = node.getNodeAttributeWrapper('cylRadius', node.getBB().getExtentX()*0.5 );
 	var cylHeight =  node.getNodeAttributeWrapper('cylHeight',node.getBB().getExtentY());
 	var cylNumSegments = node.getNodeAttributeWrapper('cylSegments',6);
+	var cylColor = node.getNodeAttributeWrapper('cylColor',"1 1 1 0.5");
 	
-	var regenerate = [node,cylRadius,cylHeight,cylNumSegments]=>fn(node,cylRadius,cylHeight,cylNumSegments,...){
+	var regenerate = [node,cylRadius,cylHeight,cylNumSegments,cylColor]=>fn(node,cylRadius,cylHeight,cylNumSegments,cylColor,...){
 		var radius = cylRadius();
 		var height = cylHeight();
 		var stepDeg = 360/cylNumSegments();
 		
 		var mb = new Rendering.MeshBuilder;
-		mb.color( new Util.Color4f(1,1,1,1) );
+		mb.color( new Util.Color4f(cylColor().split(" ")) );
 		
 		
 		{ // disc 1
-			mb.normal(new Geometry.Vec3(0, -1, 0));
-			mb.position(new Geometry.Vec3(0, 0, 0));
+			mb.normal( [0, -1, 0] );
+			mb.position( [0, 0, 0] );
 			var i_center = mb.addVertex();
 			
-			mb.position(new Geometry.Vec3(-radius, 0, 0));
+			var tCenter = new Geometry.Vec2( 0.25,0.75 );
+			mb.texCoord0( tCenter + [-0.24,0.0] );
+			mb.position( [-radius, 0, 0] );
 			mb.addVertex();
 			for(var d=stepDeg; d<359.999; d+=stepDeg){
 				var rad = d.degToRad();
-				mb.position(new Geometry.Vec3( -rad.cos()*radius, 0, rad.sin()*radius));
+				mb.position( [-rad.cos()*radius, 0, rad.sin()*radius] );
+				mb.texCoord0( tCenter + [-rad.cos()*0.24,rad.sin()*0.24] );
+
 				var i = mb.addVertex();
 				mb.addTriangle(i_center,i,i-1);
 			}
 			mb.addTriangle(i_center,i_center+1,mb.getNextIndex()-1);
 		}
 		{ // disc 2
-			mb.normal(new Geometry.Vec3(0, 1, 0));
-			mb.position(new Geometry.Vec3(0, height, 0));
+			mb.normal( [0, 1, 0] );
+			mb.position( [0, height, 0] );
 			var i_center = mb.addVertex();
-			
-			mb.position(new Geometry.Vec3(-radius, height, 0));
+
+			var tCenter = new Geometry.Vec2( 0.75,0.75 );
+			mb.texCoord0( tCenter + [-0.24,0.0] );
+			mb.position( [-radius, height, 0] );
 			mb.addVertex();
 			for(var d=stepDeg; d<359.999; d+=stepDeg){
 				var rad = d.degToRad();
-				mb.position(new Geometry.Vec3( -rad.cos()*radius ,height, rad.sin()*radius));
+				mb.position( [-rad.cos()*radius ,height, rad.sin()*radius] );
+				mb.texCoord0( tCenter + [-rad.cos()*0.24,rad.sin()*0.24] );
+
 				var i = mb.addVertex();
 				mb.addTriangle(i_center,i-1,i);
 			}
 			mb.addTriangle(i_center,mb.getNextIndex()-1,i_center+1);
 		}
 		{ // cylinder
-			mb.normal(new Geometry.Vec3(-1, 0, 0));
-			mb.position(new Geometry.Vec3(-radius, 0, 0));
-			var i_first = mb.addVertex();
-			mb.position(new Geometry.Vec3(-radius, height, 0));
-			mb.addVertex();
+			var i = mb.getNextIndex();
+			mb.normal( [-1, 0, 0] );
+			mb.texCoord0( [0.0, 0.0] );			mb.position( [-radius, 0, 0] );					mb.addVertex();
+			mb.texCoord0( [0.0, 0.5] );			mb.position( [-radius, height, 0] );			mb.addVertex();
+			i+=2;
 			for(var d=stepDeg; d<359.999; d+=stepDeg){
 				var rad = d.degToRad();
 				var x = -rad.cos();
 				var z = rad.sin();
-				mb.normal( new Geometry.Vec3( x,0,z));
-				mb.position(new Geometry.Vec3( x*radius  ,0, z*radius));
-				mb.addVertex();
-				mb.position(new Geometry.Vec3( x*radius  ,height, z*radius));
-				var i = mb.addVertex();
-
-				mb.addQuad(i,i-2,i-3,i-1);
+				mb.normal( [x,0,z] );				
+				mb.texCoord0( [d/360.0, 0.0] );				mb.position( [x*radius  ,0, z*radius] );				mb.addVertex();
+				mb.texCoord0( [d/360.0, 0.5] );				mb.position( [x*radius  ,height, z*radius] );			mb.addVertex();
+				i+=2;
+				mb.addQuad(i-1,i-3,i-4,i-2);
 			}
-//			i_first
-			mb.addQuad(mb.getNextIndex()-1,mb.getNextIndex()-2,i_first,i_first+1);
-
-//			mb.addTriangle(i_center,mb.getNextIndex()-1,i_center+1);
+			mb.normal( [-1, 0, 0] );
+			mb.texCoord0( [1.0, 0.0] );			mb.position( [-radius, 0, 0] );					mb.addVertex();
+			mb.texCoord0( [1.0, 0.5] );			mb.position( [-radius, height, 0] );			mb.addVertex();
+			i+=2;
+			mb.addQuad(i-1,i-3,i-4,i-2);
 		}
 
 		node.setMesh( mb.buildMesh() );
@@ -99,6 +107,7 @@ trait.onInit += fn(MinSG.GeometryNode node){
 	node.cylRadius := cylRadius;
 	node.cylHeight := cylHeight;
 	node.cylNumSegments := cylNumSegments;	
+	node.cylColor := cylColor;	
 	
 	// guess if the mesh is already a cylinder
 	if(!node.getMesh() || node.getMesh().getVertexCount() != (cylNumSegments().floor()*4 +4) || node.getBB().getHeight().round() != cylHeight().round() )
