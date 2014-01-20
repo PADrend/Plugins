@@ -20,21 +20,18 @@ trait.onInit += fn(MinSG.Node node){
 		Traits.addTrait(node,AnimatorBaseTrait);
 	
 	
-	node.animatorSpeed := new DataWrapper(  node.getNodeAttribute("animatorSpeed"); );
-	if(!node.animatorSpeed())
-		node.animatorSpeed(1.0);
-	node.animatorSpeed.onDataChanged += [node] => fn(node,speed){
-		node.setNodeAttribute("animatorSpeed",speed);
-	};
+	node.animatorSpeed := node.getNodeAttributeWrapper('animatorSpeed',1.0);
 	
 	node._animatorIsActive := false;
 	node._animatorTimer := 0;
-	node.animationPlay := fn(){
+	node.animationPlay := fn( startingTime = void ){
 		if(!this._animatorIsActive){
+			if(!startingTime)
+				startingTime = PADrend.getSyncClock();
 			this._animatorIsActive = true;
 			
-			Util.registerExtension( 'PADrend_AfterFrame', this->fn(...){
-				var lastTime = PADrend.getSyncClock();
+			Util.registerExtension( 'PADrend_AfterFrame', [startingTime] => this->fn(startingTime, ...){
+				var lastTime = startingTime;
 				while( !this.isDestroyed() && this._animatorIsActive){
 					var t = PADrend.getSyncClock();
 					this._animatorTimer += (t-lastTime)*this.animatorSpeed();
@@ -48,12 +45,12 @@ trait.onInit += fn(MinSG.Node node){
 		}
 	};
 	
-	node.animationPause := fn(){
+	node.animationPause := fn( time=void ){
 		this._animatorIsActive = false;
 	};
-	node.animationStop := fn(){
+	node.animationStop := fn( time=void ){
 		this._animatorIsActive = false;
-		this.animationCallbacks("stop",this._animatorTimer);
+		this.animationCallbacks("stop",time ? time : this._animatorTimer);
 		this._animatorTimer = 0;
 	};
 	

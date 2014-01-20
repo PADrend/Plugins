@@ -35,6 +35,8 @@ trait.onInit += fn(MinSG.Node node){
 	
 	node.buttonState := new DataWrapper(false);
 	node.buttonState.onDataChanged += [node]=>fn(node, value){
+		var time = PADrend.getSyncClock();
+		
 		//! \see ObjectTraits/NodeLinkTrait
 		var nodes = node.getLinkedNodes( node.buttonLinkRole() );
 	
@@ -45,7 +47,7 @@ trait.onInit += fn(MinSG.Node node){
 		if(!fnName.empty()){
 			foreach(nodes as var node){
 				try{
-					(node->node.getAttribute(fnName))();
+					(node->node.getAttribute(fnName))(time);
 				}catch(e){
 					Runtime.warn(e);
 				}
