@@ -35,13 +35,9 @@ trait.onInit += fn(MinSG.Node node){
 	
 	node.buttonState := new DataWrapper(false);
 	node.buttonState.onDataChanged += [node]=>fn(node, value){
-		var nodes = [];
-
 		//! \see ObjectTraits/NodeLinkTrait
-		foreach(node.getNodeLinks( node.buttonLinkRole()) as var linkInfo){
-			nodes.append(linkInfo[0]);
-		}
-		
+		var nodes = node.getLinkedNodes( node.buttonLinkRole() );
+	
 		var fnName = value ? node.buttonFn1() : node.buttonFn2();
 		if(node.buttonFn2().empty())
 			fnName = node.buttonFn1();

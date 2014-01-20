@@ -39,7 +39,7 @@ trait.onInit += fn(MinSG.Node node){
 	
 
 	//! \see ObjectTraits/NodeLinkTrait
-	node.onNodesLinked += [connectTo] => fn(connectTo, role,Array nodes,Array parameters){
+	node.onNodesLinked += [connectTo] => fn(connectTo, role,Array nodes){
 		if(role==roleName){
 			foreach(nodes as var node)
 				connectTo(node);
@@ -47,7 +47,7 @@ trait.onInit += fn(MinSG.Node node){
 	};
 	
 	//! \see ObjectTraits/NodeLinkTrait
-	node.onNodesUnlinked += [disconnectFrom] => fn(disconnectFrom, role,Array nodes,Array parameters){
+	node.onNodesUnlinked += [disconnectFrom] => fn(disconnectFrom, role,Array nodes){
 		if(role==roleName){
 			foreach(nodes as var node)
 				disconnectFrom(node);
@@ -55,10 +55,9 @@ trait.onInit += fn(MinSG.Node node){
 	};
 	
 	// connect to existing links
-	var connectedNodes = [];
-	foreach( node.getNodeLinks(roleName) as var linkInfo)//! \see ObjectTraits/NodeLinkTrait
-		connectedNodes.append(linkInfo[0]);
-	foreach(connectedNodes as var cNode)
+	var connectedNodes = node.getLinkedNodes(roleName);
+	//! \see ObjectTraits/NodeLinkTrait
+	foreach(node.getLinkedNodes(roleName) as var cNode)
 		connectTo(cNode);
 		
 	// ------------------

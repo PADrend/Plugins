@@ -28,15 +28,13 @@ static LinkEntry = new Type;
 LinkEntry.role := "";
 LinkEntry.query := "";
 LinkEntry.nodes @(init) := Array;
-LinkEntry.parameters @(init) := Array;
+
 LinkEntry.serializeToArray ::= fn(){
-	return [this.role,this.query,this.parameters...];
+	return [this.role,this.query];
 };
 LinkEntry.initFromArray ::= fn(Array arr){
 	this.role = arr[0];
 	this.query = arr[1];
-	for(var i=2;i<arr.count();++i)
-		this.parameters += arr[i];
 };
 
 static storeEntries = fn(MinSG.Node node,Array entries){
@@ -71,7 +69,7 @@ trait.onInit += fn(MinSG.Node node){
 		foreach(this.__linkedNodes as var entry){
 			if(entry.role==role&&entry.query==query){
 				if(!entry.nodes.empty())
-					this.onNodesUnlinked(role,entry.nodes,entry.parameters);
+					this.onNodesUnlinked(role,entry.nodes);
 				entry.nodes = nodes.clone();
 				break;
 			}
@@ -84,7 +82,7 @@ trait.onInit += fn(MinSG.Node node){
 		}
 		storeEntries(this,this.__linkedNodes);
 		if(!nodes.empty())
-			this.onNodesLinked(role,nodes,[]); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! parameters
+			this.onNodesLinked(role,nodes);
 	};
 	node.accessLinkedNodes  := fn(){
 		return this.__linkedNodes;
@@ -92,19 +90,12 @@ trait.onInit += fn(MinSG.Node node){
 	node.removeLinkedNodes := fn(String role,String query){
 		this.__linkedNodes.filter( [role,query]=>this->fn(role,query, entry){
 			if(entry.role==role&&entry.query==query){
-				this.onNodesUnlinked(role,entry.nodes,entry.parameters);
+				this.onNodesUnlinked(role,entry.nodes);
 			}else{
 				return true;
 			}
 		});
 		storeEntries(this,this.__linkedNodes);
-	};
-	node.getNodeLinks := fn(String role){ 
-		var links = [];
-		foreach(this.__linkedNodes as var entry)
-			if(entry.role==role)
-				links += [entry.nodes,entry.parameters];
-		return links;
 	};
 	node.getLinkedNodes := fn(String role){ 
 		var linkedNodes = [];
@@ -113,8 +104,8 @@ trait.onInit += fn(MinSG.Node node){
 				linkedNodes.append(entry.nodes);
 		return linkedNodes;
 	};
-	node.onNodesLinked := new MultiProcedure; // role, nodes, parameters
-	node.onNodesUnlinked := new MultiProcedure;  // role, nodes, parameters
+	node.onNodesLinked := new MultiProcedure; // role, nodes
+	node.onNodesUnlinked := new MultiProcedure;  // role, nodes
 	
 	node.availableLinkRoleNames := ["link"];
 

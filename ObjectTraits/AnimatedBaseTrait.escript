@@ -90,7 +90,7 @@ trait.onInit += fn(MinSG.Node node){
 	node.availableLinkRoleNames += "animator";
 	
 	//! \see ObjectTraits/NodeLinkTrait
-	node.onNodesLinked += [connectTo] => fn(connectTo, role,Array nodes,Array parameters){
+	node.onNodesLinked += [connectTo] => fn(connectTo, role,Array nodes){
 		if(role=="animator"){
 			connectTo(nodes[0]);
 			if(nodes.count()!=1){
@@ -100,15 +100,15 @@ trait.onInit += fn(MinSG.Node node){
 	};
 	
 	//! \see ObjectTraits/NodeLinkTrait
-	node.onNodesUnlinked += [connectTo] => fn(connectTo, role,Array nodes,Array parameters){
+	node.onNodesUnlinked += [connectTo] => fn(connectTo, role,Array nodes){
 		if(role=="animator")
 			connectTo( void );
 	};
 	
-	var exisitingLinks = node.getNodeLinks("animator");
+	var exisitingLinks = node.getLinkedNodes("animator");
 	if(!exisitingLinks.empty()){
-		connectTo(exisitingLinks[0][0][0]);
-		if(exisitingLinks.count()!=1||exisitingLinks[0][0].count()!=1){
+		connectTo(exisitingLinks.front());
+		if(exisitingLinks.count()!=1){
 			Runtime.warn("AnimationBaseTrait: only one AnimatorNode allowed.");
 			print_r(exisitingLinks);
 		}
