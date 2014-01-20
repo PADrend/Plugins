@@ -14,9 +14,9 @@
 static ATTR_TAGS = "tags";
 
 static getLocalTags = fn(MinSG.Node node){
-	var attr = node.getAttribute(ATTR_TAGS);
+	var attr = node.getNodeAttribute(ATTR_TAGS);
 	return attr---|>String ? attr.split(",") : [];
-}
+};
 
 static setLocalTags = fn(MinSG.Node node,Array tags){
 	if(tags.empty()){
@@ -24,7 +24,7 @@ static setLocalTags = fn(MinSG.Node node,Array tags){
 	}else{
 		node.setNodeAttribute(ATTR_TAGS,tags.implode(","));
 	}
-}
+};
 
 static getTags = fn(MinSG.Node node){
 	var tags = getLocalTags(node);
@@ -39,16 +39,16 @@ static getTags = fn(MinSG.Node node){
 //! { node -> [tag*]}
 static collectTaggedNodes = fn(MinSG.Node root){
 	var taggedNodes = new Map; // node -> tags*
-	foreach( MinGS.collectNodesReferencingAttribute(root,ATTR_TAGS) as var node)
+	foreach( MinSG.collectNodesReferencingAttribute(root,ATTR_TAGS) as var node)
 		taggedNodes[node] = getTags(node);
-	return taggedNodes
+	return taggedNodes;
 };
 
 static collectNodesByTag = fn(MinSG.Node root, String tag){
 	var nodes = [];
 	foreach( collectTaggedNodes(root) as var node,var tags){
 		if(tags.contains(tag))
-			nodes += node
+			nodes += node;
 	}
 	return nodes;
 };

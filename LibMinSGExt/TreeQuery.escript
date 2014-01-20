@@ -623,8 +623,8 @@ static functionRegistry = {
 	'MinSG:collectByTag' : fn(ctxt, tagName, input=void){
 		@(once) static tagFunctions = Std.require('LibMinSGExt/NodeTagFunctions');
 		var output = new Set;
-		foreach( getInput(ctxt,input) as var subtree){
-			output.merge(tagFunctions.collectNodesByTag(subtree,tagName));
+		foreach( getInput(ctxt,input) as var subtreeRoot){
+			output.merge(tagFunctions.collectNodesByTag(subtreeRoot,tagName(ctxt)));
 		}
 		return output;
 	},
@@ -744,6 +744,16 @@ static createRelativeNodeQuery = fn(MinSG.SceneManager sm, MinSG.Node source, Mi
 	} // target is only instance of a prototype in the subtree
 	else if(target.isInstance()&&sm.getNameOfRegisteredNode(target.getPrototype())&&MinSG.collectInstances(commonRoot,target.getPrototype()).count()==1)  {
 		queryToTarget = "/MinSG:collectRefId('" + sm.getNameOfRegisteredNode(target.getPrototype()) + "')";
+	}else{
+		// try to identify tag to connect to target
+		@(once) static tagFunctions = Std.require('LibMinSGExt/NodeTagFunctions');
+		foreach(tagFunctions.getTags(target) as var tag){
+			var nodes = tagFunctions.collectNodesByTag(source,tag);
+			if(nodes.size()==1 && nodes.front()==target){
+				queryToTarget = "/MinSG:collectByTag('"+tag+"')";
+				break;
+			}
+		}
 	}
 	if(queryToTarget){
 		var query = queryToAncestor + queryToTarget;

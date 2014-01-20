@@ -303,9 +303,6 @@ tests += new Tests.AutomatedTest( "MinSG: create/load/save scenes",fn(){
 
 
 tests += new Tests.AutomatedTest( "MinSG: NodeQuery",fn(){
-	if(EScript.VERSION < 607)
-		return true;
-	
 	Std._unregisterModule('LibMinSGExt/TreeQuery'); // force reload
 	
 	var TQuery = Std.require('LibMinSGExt/TreeQuery');
@@ -348,7 +345,7 @@ tests += new Tests.AutomatedTest( "MinSG: NodeQuery",fn(){
 				l0(foo)     l1(bar)
 							|
 							l10
-							|
+							| 
 							g100
 		
 		*/
@@ -370,6 +367,9 @@ tests += new Tests.AutomatedTest( "MinSG: NodeQuery",fn(){
 		l10.setNodeAttribute('name',"dum");
 		l1.setNodeAttribute('name',"di");
 		
+		var tagFunctions = Std.require('LibMinSGExt/NodeTagFunctions');
+		tagFunctions.addTag(g100,"tag1");
+		tagFunctions.addTag(l0,"tag1");
 		
 		ok &= TQuery.execute(".", sm, [root,l1] ) == new Set([root,l1]);
 		ok &= TQuery.execute("/child", sm, [root,root]) == new Set([l0,l1]);
@@ -384,6 +384,7 @@ tests += new Tests.AutomatedTest( "MinSG: NodeQuery",fn(){
 		ok &= TQuery.execute("./MinSG:collectRefId('foo')", sm, [root] ) == new Set([l0]);
 		ok &= TQuery.execute("/MinSG:collectRefId('foo')", sm, [g100] ) == new Set([l0]);
 		ok &= TQuery.execute("./../../..", sm, [g100] ) == new Set([root]);
+		ok &= TQuery.execute("./MinSG:collectByTag('tag1')", sm, [root] ) == new Set([g100,l0]);
 		
 		// ----------------------
 		// semantic objects
@@ -411,6 +412,47 @@ tests += new Tests.AutomatedTest( "MinSG: NodeQuery",fn(){
 	}
 });
 
+// -----------------------------------------------------------------------------------------------
+
+tests += new Tests.AutomatedTest( "LibMinSGExt/NodeTagFunctions",fn(){
+	Std._unregisterModule('LibMinSGExt/NodeTagFunctions'); // force reload
+	
+
+	var tagFunctions = Std.require('LibMinSGExt/NodeTagFunctions');
+	// instance
+	var sm = new MinSG.SceneManager;
+	var root = new MinSG.ListNode;
+	tagFunctions.addTag(root,"root");
+	
+	var n1 = new MinSG.GeometryNode;
+	root += n1;
+	sm.registerNode('n1',n1);
+	tagFunctions.addTag(n1,"tag1");
+	tagFunctions.addTag(n1,"tag2");
+	
+	var i1 = sm.createInstance("n1");
+	root += i1;
+	tagFunctions.addTag(i1,"tag3");
+	
+	var ok = true;
+	var nodesToTags = tagFunctions.collectTaggedNodes(root);
+	ok &= nodesToTags[root] == ["root"];
+	ok &= nodesToTags[n1].sort() == ["tag1","tag2"];
+	ok &= nodesToTags[i1].sort() == ["tag1","tag2","tag3"];
+	
+	var nodes = tagFunctions.collectNodesByTag(root,"tag1");
+	ok &= nodes.contains(n1) && nodes.contains(i1);
+	
+	ok &= tagFunctions.getLocalTags(i1) == ["tag3"];
+	
+	tagFunctions.removeLocalTag(n1,"tag1");
+	ok &= tagFunctions.getTags(n1) == ["tag2"] && tagFunctions.getTags(i1).sort() == ["tag2","tag3"];
+
+	tagFunctions.clearLocalTags(n1);
+	ok &= tagFunctions.getTags(n1) == [] && tagFunctions.getTags(i1).sort() == ["tag3"];
+
+	return ok;
+});
 // -----------------------------------------------------------------------------------------------
 
 tests += new Tests.AutomatedTest( "MinSG: Persistent node traits",fn(){
