@@ -22,8 +22,7 @@ trait.onInit += fn(MinSG.Node node){
 	
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
-		outln("init");
-		this._rotationStartingTime  := time;
+		outln("onAnimationInit (RotationTrait)");
 		this._rotationInitialSRT  := this.getSRT();
 	};
 	//! \see ObjectTraits/AnimatedBaseTrait
@@ -36,16 +35,11 @@ trait.onInit += fn(MinSG.Node node){
 	};
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
-		outln("stop");
+		outln("onAnimationStop (RotationTrait)");
 		this.setSRT( this._rotationInitialSRT );
 	};
 	
-	node.rotationSpeed := new DataWrapper(  node.getNodeAttribute("rotationSpeed"); );
-	if(!node.rotationSpeed())
-		node.rotationSpeed(90.0);
-	node.rotationSpeed.onDataChanged += [node] => fn(node,speed){
-		node.setNodeAttribute("rotationSpeed",speed);
-	};
+	node.rotationSpeed := node.getNodeAttributeWrapper('rotationSpeed', 90.0 );
 };
 
 trait.allowRemoval();
