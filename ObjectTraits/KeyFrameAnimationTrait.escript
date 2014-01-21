@@ -77,7 +77,7 @@ trait.onInit += fn(MinSG.Node node){
 	node.onAnimationInit += fn(time){
 		outln("onAnimationInit (KeyFrameAnimationTrait)");
 		this._animationStartingTime  := time;
-		this._animationInitialSRT  := this.getSRT();
+		this._animationInitialSRT  := (this.animationKeyFrames()[0]---|> Geometry.SRT) ? this.animationKeyFrames()[0] : this.getSRT();
 	};
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationPlay += fn(time,lastTime){

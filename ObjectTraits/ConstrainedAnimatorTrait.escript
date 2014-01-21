@@ -14,8 +14,13 @@
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/ConstrainedAnimatorTrait');
 
 trait.onInit += fn(MinSG.Node node){
-	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/AnimatorBaseTrait');
+	//! \see ObjectTraits/ActionPerformerTrait
+	@(once) static ActionPerformerTrait = Std.require('ObjectTraits/ActionPerformerTrait');
+	if(!Traits.queryTrait(node,ActionPerformerTrait))
+		Traits.addTrait(node,ActionPerformerTrait);
 	
+	//! \see ObjectTraits/AnimatorBaseTrait
+	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/AnimatorBaseTrait');
 	if(!Traits.queryTrait(node,AnimatorBaseTrait))
 		Traits.addTrait(node,AnimatorBaseTrait);
 	
@@ -77,7 +82,7 @@ trait.onInit += fn(MinSG.Node node){
 		this._animatorTargetTime = endTime ? endTime : startingTime + (targetPosition-_animatorPos()).abs() / this.animatorSpeed();
 		
 		if(!this._animatorTargetPos)
-			Util.registerExtension( 'PADrend_AfterFrame', this->handler);
+			this.addActionHandler(this->handler);	//! \see ObjectTraits/ActionPerformerTrait
 		
 		this._animatorSourceTime = startingTime;
 		this._animatorSourcePos = _animatorPos();

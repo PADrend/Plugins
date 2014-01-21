@@ -14,11 +14,15 @@
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/ContinuousAnimatorTrait');
 
 trait.onInit += fn(MinSG.Node node){
+	//! \see ObjectTraits/AnimatorBaseTrait
 	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/AnimatorBaseTrait');
-	
 	if(!Traits.queryTrait(node,AnimatorBaseTrait))
 		Traits.addTrait(node,AnimatorBaseTrait);
-	
+
+	//! \see ObjectTraits/ActionPerformerTrait
+	@(once) static ActionPerformerTrait = Std.require('ObjectTraits/ActionPerformerTrait');
+	if(!Traits.queryTrait(node,ActionPerformerTrait))
+		Traits.addTrait(node,ActionPerformerTrait);
 	
 	node.animatorSpeed := node.getNodeAttributeWrapper('animatorSpeed',1.0);
 	
@@ -30,7 +34,8 @@ trait.onInit += fn(MinSG.Node node){
 				startingTime = PADrend.getSyncClock();
 			this._animatorIsActive = true;
 			
-			Util.registerExtension( 'PADrend_AfterFrame', [startingTime] => this->fn(startingTime, ...){
+			//! \see ObjectTraits/ActionPerformerTrait
+			this.addActionHandler( this->fn(startingTime, ...){
 				var lastTime = startingTime;
 				while( !this.isDestroyed() && this._animatorIsActive){
 					var t = PADrend.getSyncClock();
