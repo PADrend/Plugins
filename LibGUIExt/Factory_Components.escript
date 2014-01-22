@@ -108,6 +108,7 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 							GUI.POS_Y_ABS|GUI.REFERENCE_Y_BOTTOM|GUI.ALIGN_Y_BOTTOM, 0,0]
 							align at bottom center
 						\note should not be used inside a Panel (use a Container instead)
+		GUI.PROPERTIES : (optional) Array of properties added to the component
 
 		GUI.SIZE : 		(optional) component's size
 						Geometry.Vec2(width,height)
@@ -671,6 +672,13 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 		if( description[GUI.COLOR] ){
 			component.setColor(description[GUI.COLOR]);
 		}
+
+		// set optional properties
+		if( description[GUI.PROPERTIES] ){
+			foreach(description[GUI.PROPERTIES] as var property)
+				component.addProperty(property);
+		}
+		
 
 		// call optional init function
 		if( description[GUI.ON_INIT] ){
