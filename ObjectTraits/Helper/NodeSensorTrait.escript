@@ -1,0 +1,86 @@
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+static trait = new Traits.GenericTrait('ObjectTraits/Helper/NodeSensorTrait');
+
+trait.onInit += fn(MinSG.Node node){
+	
+	node.nodeSensor_rootNode := new DataWrapper;
+	node.nodeSensor_onNodesChanged := new MultiProcedure;
+	node.nodeSensor_ObservedNodes @(private) := new Set;
+
+	var querySensor = node->fn(rootNode, modifiedNode, ...){
+		if(rootNode!=this.nodeSensor_rootNode()||this.isDestroyed()||rootNode.isDestroyed())
+			return $REMOVE;
+		if(!modifiedNode)
+			return;
+
+		var worldBB = this.getWorldBB();
+		
+		var notify = false;
+		if(MinSG.isInSubtree(this,modifiedNode) ){
+			notify = true;
+		}else{
+			foreach(MinSG.collectGeoNodes(modifiedNode) as var alteredGeomNode){
+				if(this.nodeSensor_ObservedNodes.contains(alteredGeomNode)||worldBB.intersects(alteredGeomNode.getWorldBB()) ){
+					notify = true;
+					break;					
+				}
+			}
+		}
+		if(notify){
+			var intersectingNodes = MinSG.collectGeoNodesIntersectingBox(rootNode,worldBB);	
+			this.nodeSensor_ObservedNodes = new Set(intersectingNodes);
+			this.nodeSensor_onNodesChanged(intersectingNodes);
+		}
+	};
+
+
+	node.nodeSensor_rootNode.onDataChanged += [node,querySensor] => fn(node,querySensor, [MinSG.Node,void] rootNode){
+		
+		if(rootNode){
+			var handler = [rootNode] => querySensor;
+			//! \see MinSG.NodeAddedObserverTrait
+			if(!Traits.queryTrait(rootNode,MinSG.NodeAddedObserverTrait))
+				Traits.addTrait(rootNode,MinSG.NodeAddedObserverTrait);
+			rootNode.onNodeAdded += handler;
+			
+			//! \see MinSG.NodeRemovedObserverTrait
+			if(!Traits.queryTrait(rootNode,MinSG.NodeRemovedObserverTrait))
+				Traits.addTrait(rootNode,MinSG.NodeRemovedObserverTrait);
+			rootNode.onNodeRemoved += handler;
+			
+			//! \see MinSG.TransformationObserverTrait
+			if(!Traits.queryTrait(rootNode,MinSG.TransformationObserverTrait))
+				Traits.addTrait(rootNode,MinSG.TransformationObserverTrait);
+			rootNode.onNodeTransformed += handler;
+			
+						
+			//! \see MinSG.TransformationObserverTrait
+			if(!Traits.queryTrait(node,MinSG.TransformationObserverTrait))
+				Traits.addTrait(node,MinSG.TransformationObserverTrait);
+			node.onNodeTransformed += handler;
+		}
+		
+	};
+
+	
+		
+	node.nodeSensor_onNodesChanged += fn(nodes){
+		print_r(nodes);
+	};
+	
+	
+};
+
+return trait;
