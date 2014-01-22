@@ -125,25 +125,12 @@ trait.allowRemoval();
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
-		var entries = [ "Key frames",
-			{
-				GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
-				GUI.FLAGS : GUI.FLAT_BUTTON,
-				GUI.TOOLTIP : "Remove trait",
-				GUI.LABEL : "-",
-				GUI.WIDTH : 20,
-				GUI.ON_CLICK : [node,refreshCallback] => fn(node,refreshCallback){
-					if(Traits.queryTrait(node,trait))
-						Traits.removeTrait(node,trait);
-					refreshCallback();
-				}
-			},		
-			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+		var entries = [
 			{
 				GUI.TYPE : GUI.TYPE_RANGE,
 				GUI.RANGE : [0,60],
 				GUI.LABEL : "speed",
-				GUI.WIDTH : 200,
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.animationSpeed
 			},	
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
@@ -154,6 +141,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 			entries += {
 				GUI.TYPE : GUI.TYPE_NUMBER,
 				GUI.DATA_VALUE : time,
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.ON_DATA_CHANGED : [refreshCallback,node.animationKeyFrames,time] => fn(refreshCallback,keyFrames,oldTime,newTime){
 					var map = keyFrames().clone();
 					var location = map[oldTime];

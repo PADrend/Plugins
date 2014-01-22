@@ -108,24 +108,11 @@ trait.onRemove += fn(node){
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
-		return [ "Animation Proxy",
+		return [
 			{
-				GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
-				GUI.FLAGS : GUI.FLAT_BUTTON,
-				GUI.TOOLTIP : "Remove trait",
-				GUI.LABEL : "-",
-				GUI.WIDTH : 20,
-				GUI.ON_CLICK : [node,refreshCallback] => fn(node,refreshCallback){
-					if(Traits.queryTrait(node,trait))
-						Traits.removeTrait(node,trait);
-					refreshCallback();
-				}
-			},		
-			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
-				{
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.LABEL : "active",
-				GUI.WIDTH : 200,
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.transformationProxyEnabled
 			},
 		];

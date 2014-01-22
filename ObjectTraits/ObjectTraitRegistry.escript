@@ -29,5 +29,6 @@ registry.registerTraitConfigGUI := fn(MinSG.PersistentNodeTrait trait, provider 
 
 registry.getTraits := 		fn(){	return objectTraitRegistry.clone();	};
 registry.getGUIProvider :=	fn(String traitName){	return objectTraitGUIRegistry[traitName];	};
+registry.getTrait :=		fn(String traitName){	return objectTraitRegistry[traitName];	};
 
 return registry;

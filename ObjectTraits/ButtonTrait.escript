@@ -71,20 +71,7 @@ trait.onRemove += fn(node){
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
-		return [ "Animator",
-			{
-				GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
-				GUI.FLAGS : GUI.FLAT_BUTTON,
-				GUI.TOOLTIP : "Remove trait",
-				GUI.LABEL : "-",
-				GUI.WIDTH : 20,
-				GUI.ON_CLICK : [node,refreshCallback] => fn(node,refreshCallback){
-					if(Traits.queryTrait(node,trait))
-						Traits.removeTrait(node,trait);
-					refreshCallback();
-				}
-			},		
-			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+		return [ 
 			{
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.LABEL : "active",
@@ -95,21 +82,21 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 			{
 				GUI.TYPE : GUI.TYPE_TEXT,
 				GUI.LABEL : "fn1",
-				GUI.WIDTH : 200,
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.buttonFn1
 			},	
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
 				GUI.TYPE : GUI.TYPE_TEXT,
 				GUI.LABEL : "fn2",
-				GUI.WIDTH : 200,
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.buttonFn2
 			},	
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
 				GUI.TYPE : GUI.TYPE_TEXT,
 				GUI.LABEL : "linkRole",
-				GUI.WIDTH : 200,
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.buttonLinkRole
 			},	
 			
