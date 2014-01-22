@@ -87,10 +87,10 @@ trait.onInit += fn(MinSG.Node node){
 	};
 
 	
-		
-	node.nodeSensor_onNodesChanged += fn(nodes){
-		print_r(nodes);
-	};
+//		
+//	node.nodeSensor_onNodesChanged += fn(nodes){
+//		print_r(nodes);
+//	};
 	
 	
 };

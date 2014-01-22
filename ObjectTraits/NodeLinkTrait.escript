@@ -10,9 +10,20 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-//! \todo save scene listener!!!!!!!!!!!!!!!!
 
-
+/*! Link the node with other nodes using TreeQueries and roleNames(=String)
+	The following members are added to the given Node:
+			
+	- node.addLinkedNodes(role,query)
+	- node.removeLinkedNodes(role,query)
+	- node.getLinkedNodes(role) -> Array of Nodes
+	
+	- node.onNodesLinked 			MultiProcedure( role, Array of Nodes)
+	- node.onNodesUnlinked 			MultiProcedure( role, Array of Nodes)
+	- node.availableLinkRoleNames	Array of roleNames
+	
+	\see LibMinSGExt/TreeQuery
+*/
 static TreeQuery = Std.require('LibMinSGExt/TreeQuery');
 static queryRelNodes = fn(MinSG.Node source,String query){
 	return TreeQuery.execute(query,PADrend.getSceneManager(),[source]).toArray();
