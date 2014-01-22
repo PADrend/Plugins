@@ -12,7 +12,7 @@
  */
 
 
-/*! The AnimatedBaseTrait is a helper trait for specific animation traits.
+/*! The AnimatedBaseTrait is a helper trait for animation traits.
 	It handles the registration with a linked animator node.
 	The following members are added to the given Node:
 			
@@ -20,8 +20,8 @@
 	- node.onAnimationPlay 	MultiProcedure(time,lastTime)
 	- node.onAnimationStop	MultiProcedure(time)
 	
-	\note add the ObjectTraits/NodeLinkTrait to the given node.
-	\note adds the ObjectTraits/AnimatorBaseTrait to a node linked with the "animator" role.
+	\note adds the ObjectTraits/NodeLinkTrait to the given node.
+	\note adds the ObjectTraits/Helper/AnimatorBaseTrait to a node linked with the "animator" role.
 */
 static AnimationHandler = new Type;
 AnimationHandler.subject := void;
@@ -61,7 +61,7 @@ static trait = new MinSG.PersistentNodeTrait('ObjectTraits/AnimatedBaseTrait');
 trait.onInit += fn(MinSG.Node node){
 
 	@(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
-	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/AnimatorBaseTrait');
+	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/Helper/AnimatorBaseTrait');
 
 	if(!Traits.queryTrait(node,NodeLinkTrait))
 		Traits.addTrait(node,NodeLinkTrait);
@@ -72,7 +72,7 @@ trait.onInit += fn(MinSG.Node node){
 	var connectTo = [node,handler] => fn(node,handler, [MinSG.Node,void] animatorNode){
 		outln(" Connecting ",node," to ",animatorNode);
 		if(node.isSet($__myAnimatorNode) && node.__myAnimatorNode){
-			node.__myAnimatorNode.animationCallbacks.accessFunctions().removeValue(handler); //! \see ObjectTraits/AnimatorBaseTrait
+			node.__myAnimatorNode.animationCallbacks.accessFunctions().removeValue(handler); //! \see ObjectTraits/Helper/AnimatorBaseTrait
 			handler( "stop" );
 		}
 
@@ -82,7 +82,7 @@ trait.onInit += fn(MinSG.Node node){
 			if(!Traits.queryTrait(animatorNode,AnimatorBaseTrait))
 				Traits.addTrait(animatorNode,AnimatorBaseTrait);
 				
-			animatorNode.animationCallbacks += handler;	//! \see ObjectTraits/AnimatorBaseTrait
+			animatorNode.animationCallbacks += handler;	//! \see ObjectTraits/Helper/AnimatorBaseTrait
 		}
 	};
 

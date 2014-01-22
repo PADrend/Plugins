@@ -11,13 +11,26 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
+/*! The NodeSensorTrait is a helper trait transforming the node into a sensor for intersecting GeometryNodes.
+	Whenever a GeometryNode in the subtree below nodeSensor_rootNode starts intersecting the node's WorldBB,
+	moves while intersecting, or stops intersecting, the callbacks nodeSensor_onNodesChanged are notified 
+	with an array of the currently intersecting nodes.	
+	The following members are added to the given Node:
+			
+	- node.nodeSensor_rootNode			DataWrapper( Node or void )
+	- node.nodeSensor_onNodesChanged	MultiProcedure( Array of GeometryNodes)
+
+	\note Adds the MinSG.NodeAddedObserverTrait to nodeSensor_rootNode.
+	\note Adds the MinSG.NodeRemovedObserverTrait to nodeSensor_rootNode.
+	\note Adds the MinSG.TransformationObserverTrait to nodeSensor_rootNode and the subject node
+*/
 static trait = new Traits.GenericTrait('ObjectTraits/Helper/NodeSensorTrait');
 
 trait.onInit += fn(MinSG.Node node){
 	
 	node.nodeSensor_rootNode := new DataWrapper;
 	node.nodeSensor_onNodesChanged := new MultiProcedure;
-	node.nodeSensor_ObservedNodes @(private) := new Set;
+	node.nodeSensor_observedNodes @(private) := new Set;
 
 	var querySensor = node->fn(rootNode, modifiedNode, ...){
 		if(rootNode!=this.nodeSensor_rootNode()||this.isDestroyed()||rootNode.isDestroyed())
@@ -32,7 +45,7 @@ trait.onInit += fn(MinSG.Node node){
 			notify = true;
 		}else{
 			foreach(MinSG.collectGeoNodes(modifiedNode) as var alteredGeomNode){
-				if(this.nodeSensor_ObservedNodes.contains(alteredGeomNode)||worldBB.intersects(alteredGeomNode.getWorldBB()) ){
+				if(this.nodeSensor_observedNodes.contains(alteredGeomNode)||worldBB.intersects(alteredGeomNode.getWorldBB()) ){
 					notify = true;
 					break;					
 				}
@@ -40,7 +53,7 @@ trait.onInit += fn(MinSG.Node node){
 		}
 		if(notify){
 			var intersectingNodes = MinSG.collectGeoNodesIntersectingBox(rootNode,worldBB);	
-			this.nodeSensor_ObservedNodes = new Set(intersectingNodes);
+			this.nodeSensor_observedNodes = new Set(intersectingNodes);
 			this.nodeSensor_onNodesChanged(intersectingNodes);
 		}
 	};
@@ -65,7 +78,6 @@ trait.onInit += fn(MinSG.Node node){
 				Traits.addTrait(rootNode,MinSG.TransformationObserverTrait);
 			rootNode.onNodeTransformed += handler;
 			
-						
 			//! \see MinSG.TransformationObserverTrait
 			if(!Traits.queryTrait(node,MinSG.TransformationObserverTrait))
 				Traits.addTrait(node,MinSG.TransformationObserverTrait);

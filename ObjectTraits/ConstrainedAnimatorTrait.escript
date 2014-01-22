@@ -14,13 +14,13 @@
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/ConstrainedAnimatorTrait');
 
 trait.onInit += fn(MinSG.Node node){
-	//! \see ObjectTraits/ActionPerformerTrait
-	@(once) static ActionPerformerTrait = Std.require('ObjectTraits/ActionPerformerTrait');
+	//! \see ObjectTraits/Helper/ContinuousActionPerformerTrait
+	@(once) static ActionPerformerTrait = Std.require('ObjectTraits/Helper/ContinuousActionPerformerTrait');
 	if(!Traits.queryTrait(node,ActionPerformerTrait))
 		Traits.addTrait(node,ActionPerformerTrait);
 	
-	//! \see ObjectTraits/AnimatorBaseTrait
-	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/AnimatorBaseTrait');
+	//! \see ObjectTraits/Helper/AnimatorBaseTrait
+	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/Helper/AnimatorBaseTrait');
 	if(!Traits.queryTrait(node,AnimatorBaseTrait))
 		Traits.addTrait(node,AnimatorBaseTrait);
 	
@@ -36,7 +36,7 @@ trait.onInit += fn(MinSG.Node node){
 	node._animatorTargetTime := false;
 	node._animatorPos := new DataWrapper(node.animatorMin());
 	node._animatorPos.onDataChanged += node->fn(pos){
-		//! \see ObjectTraits/AnimatorBaseTrait
+		//! \see ObjectTraits/Helper/AnimatorBaseTrait
 		this.animationCallbacks("play",pos);
 	};
 	
@@ -59,7 +59,7 @@ trait.onInit += fn(MinSG.Node node){
 				this._animatorTargetPos = void; // finished
 				this._animatorPos(pos);
 
-				//! \see ObjectTraits/AnimatorBaseTrait
+				//! \see ObjectTraits/Helper/AnimatorBaseTrait
 				this.animationCallbacks("pause",pos);
 				break;
 			}else if(relTime>=0.0){
@@ -82,7 +82,7 @@ trait.onInit += fn(MinSG.Node node){
 		this._animatorTargetTime = endTime ? endTime : startingTime + (targetPosition-_animatorPos()).abs() / this.animatorSpeed();
 		
 		if(!this._animatorTargetPos)
-			this.addActionHandler(this->handler);	//! \see ObjectTraits/ActionPerformerTrait
+			this.addActionHandler(this->handler);	//! \see ObjectTraits/Helper/ContinuousActionPerformerTrait
 		
 		this._animatorSourceTime = startingTime;
 		this._animatorSourcePos = _animatorPos();
@@ -105,7 +105,7 @@ trait.onInit += fn(MinSG.Node node){
 trait.allowRemoval();
 trait.onRemove += fn(node){
 	node.animationStop();
-	node.animationCallbacks.clear(); //! \see ObjectTraits/AnimatorBaseTrait
+	node.animationCallbacks.clear(); //! \see ObjectTraits/Helper/AnimatorBaseTrait
 	
 };
 

@@ -10,12 +10,13 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
+ 
 /*! The Object performs repeated actions (once after each frame).
 	The following members are added to the given Node:
 			
 	- node.addActionHandler(callback)	A yieldable callback called once after each frame.
 */
-static trait = new Traits.GenericTrait('ObjectTraits/ActionPerformerTrait');
+static trait = new Traits.GenericTrait('ObjectTraits/Helper/ContinuousActionPerformerTrait');
 
 trait.onInit += fn(MinSG.Node node){
 

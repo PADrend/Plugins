@@ -24,7 +24,7 @@
 */
 
 
-static trait = new Traits.GenericTrait('ObjectTraits/AnimatorBaseTrait');
+static trait = new Traits.GenericTrait('ObjectTraits/Helper/AnimatorBaseTrait');
 
 trait.onInit += fn(MinSG.Node node){
 	node.animationCallbacks := new MultiProcedure;
