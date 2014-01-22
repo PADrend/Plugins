@@ -56,7 +56,7 @@ T.setup @(private) ::= fn(Geometry.Vec3 source,Geometry.Vec3 target){
 };
 
 /*! Returns the first node (or void) intersecting the line from source to target.
-	\note if restrictSearchingDistance is true, the depth component is read and the query is restriced up to that distance.
+	\note if restrictSearchingDistance is true, the depth component is read and the query is restricted up to that distance.
 			This introduces an additional overhead, but may be significantly faster for huge scenes.
 */
 T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 source,Geometry.Vec3 target, Bool restrictSearchingDistance=false ){
@@ -97,15 +97,22 @@ T.queryNodeFromScreen ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.
 	return queryNode(fc,rootNode,source,destination,restrictSearchingDistance);
 };
 
-/*! Returns the coordinate (or false) of the first interesection of the line from source to target. */
-T.queryIntersection ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 source,Geometry.Vec3 target){
+/*! Returns the coordinate (or false) of the first intersection of the line from source to target. */
+T.queryIntersection ::= fn(MinSG.FrameContext fc,[MinSG.Node,Array] rootNodes,Geometry.Vec3 source,Geometry.Vec3 target){
+	if(! (rootNodes---|>Array))
+		rootNodes = [rootNodes];
+	if(rootNodes.empty())
+		return;
+
 	setup(source,target);
 	fc.getRenderingContext().pushAndSetFBO(fbo);
 
 	// render scene
 	fc.pushAndSetCamera(castCam);
 	fc.getRenderingContext().clearScreen(new Util.Color4f(0,0,0,1));
-	rootNode.display(fc,MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING);//|MinSG.NO_STATES);
+	
+	foreach(rootNodes as var node)
+		node.display(fc,MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING);//|MinSG.NO_STATES);
 	// read depth
 	var screenCenter=resolution*0.5;
 	var depth=Rendering.readDepthValue(screenCenter,screenCenter);
@@ -127,4 +134,6 @@ T.queryIntersectionFromScreen ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,G
 	var destination=source + (fc.convertScreenPosToWorldPos(new Geometry.Vec3(screenPos.getX(),screenPos.getY(),0))-source).normalize()*cam.getFarPlane();
 	return queryIntersection(fc,rootNode,source,destination);
 };
+
+return T;
 
