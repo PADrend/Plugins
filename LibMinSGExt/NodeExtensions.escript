@@ -252,10 +252,3 @@ MinSG.Node.getOriginalNode ::= fn(){
 	var n = this.getPrototype();
 	return n ? n : this;
 };
-
-MinSG.Node.getWorldSRT ::= fn(){
-	var localSRT = this.getSRT();
-	var worldDir = this.localDirToWorldDir( new Geometry.Vec3(0,0,1) );
-	var worldUp = this.localDirToWorldDir( new Geometry.Vec3(0,1,0) );
-	return new Geometry.SRT( this.getWorldPosition(),worldDir ,worldUp,worldDir.length() );
-};
