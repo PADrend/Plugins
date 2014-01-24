@@ -204,7 +204,7 @@ plugin.initGUI := fn(){
 						GUI.TOOLTIP : "Remove trait",
 						GUI.LABEL : "-",
 						GUI.WIDTH : 20,
-						GUI.ON_CLICK : [node,refreshCallback] => fn(node,refreshCallback){
+						GUI.ON_CLICK : [node,trait,refreshCallback] => fn(node,trait,refreshCallback){
 							if(Traits.queryTrait(node,trait))
 								Traits.removeTrait(node,trait);
 							refreshCallback();

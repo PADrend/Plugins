@@ -36,7 +36,8 @@ trait.onInit += fn(MinSG.Node node){
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
 		outln("onAnimationStop (RotationTrait)");
-		this.setSRT( this._rotationInitialSRT );
+		if(this.isSet($_rotationInitialSRT) && this._rotationInitialSRT)
+			this.setSRT( this._rotationInitialSRT );
 	};
 	
 	node.rotationSpeed := node.getNodeAttributeWrapper('rotationSpeed', 90.0 );

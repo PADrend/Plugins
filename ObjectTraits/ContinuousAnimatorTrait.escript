@@ -35,7 +35,7 @@ trait.onInit += fn(MinSG.Node node){
 			this._animatorIsActive = true;
 			
 			//! \see ObjectTraits/Helper/ContinuousActionPerformerTrait
-			this.addActionHandler( this->fn(startingTime, ...){
+			this.addActionHandler( [startingTime]=>this->fn(startingTime, ...){
 				var lastTime = startingTime;
 				while( !this.isDestroyed() && this._animatorIsActive){
 					var t = PADrend.getSyncClock();
