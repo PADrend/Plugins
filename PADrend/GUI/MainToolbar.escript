@@ -283,9 +283,9 @@ plugin.registerStdToolbarEntries := fn() {
 				if(filename){
 					PADrend.message("Save scene \""+filename+"\"");
 					if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
-						out( PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode())?"ok\n":"failed\n");
+						PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());
 					} else {
-						out( PADrend.getSceneManager().saveMinSGFile(filename,[scene])?"ok\n":"failed\n");
+						PADrend.getSceneManager().saveMinSGFile(filename,[scene]);
 					}
 					// Re-select it to provoke an update where necessary.
 					executeExtensions('PADrend_OnSceneSelected',scene );
