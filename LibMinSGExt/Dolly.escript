@@ -25,7 +25,7 @@ t.attributes.getCamera					:= fn(){	return this.camera;	};
 
 t.attributes.getObserverPosition 		:= fn(){	return this.camera.getRelPosition().toArray();	};
 t.attributes.setObserverPosition := fn(pos){
-	pos = pos ? new Geometry.Vec3(pos) : new Geomtry.Vec3;
+	pos = pos ? new Geometry.Vec3(pos) : new Geometry.Vec3;
 	if( pos.toArray()!=this.getObserverPosition() )
 		this.camera.setRelPosition( pos );
 };
