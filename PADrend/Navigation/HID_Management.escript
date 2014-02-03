@@ -148,4 +148,11 @@ PADrend.HID.getDevicesByTraits := fn(requestedFeatures...){
 	return m;
 };
 
+PADrend.HID.queryPossibleDeviceNames := fn(requestedFeatures...){
+	var names = [];
+	foreach(PADrend.HID.getDevicesByTraits(requestedFeatures...) as var name,var device)
+		names += [name];
+	return names;
+};
+
 // ------------------------------------------------------------------------------
