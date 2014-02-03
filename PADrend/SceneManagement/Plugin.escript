@@ -112,13 +112,9 @@ SceneManagement.ex_Init := fn(...){
         GLOBALS.dolly = MinSG.createDolly(camera);
 
         setConfigInfo('PADrend.Camera.observerPosition',"[x,y,z] or false. If false, the default 'angle'-based camera is used.");
-        dolly.setObserverPosition(systemConfig.getValue('PADrend.Camera.observerPosition',false));//[0,0,0]
-        dolly.setObserverOffset(systemConfig.getValue('PADrend.Camera.observerOffset',false));//[0,0,0]
-        dolly.setObserverOffsetEnabled(systemConfig.getValue('PADrend.Camera.observerOffsetEnabled',false));//[0,0,0]
-
         setConfigInfo('PADrend.Camera.frame',"false or corners of projection frame e.g. [[-1,1,-1],[-1,-1,-1],[1,-1,-1]]. To use the frame, observerPosition has to be set. ");
-        dolly.setFrame(systemConfig.getValue('PADrend.Camera.frame',false));//[[-1,1,-1],[-1,-1,-1],[1,-1,-1]]
 
+        dolly.setFrame(systemConfig.getValue('PADrend.Camera.frame',false));//[[-1,1,-1],[-1,-1,-1],[1,-1,-1]]
         dolly.setRelPosition(new Geometry.Vec3(systemConfig.getValue('PADrend.Camera.position',[0,0,0])));
 
 		// --

@@ -54,7 +54,6 @@ plugin.init @(override) := fn(){
 		}
 	}
 	loadPlugins([
-			__DIR__+"/ConfigWindow.escript",
 			__DIR__+"/MainToolbar.escript",
 			__DIR__+"/MainWindow.escript",
 			__DIR__+"/ToolsToolbar.escript" ],true);
