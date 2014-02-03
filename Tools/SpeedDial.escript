@@ -116,29 +116,27 @@ plugin.init @(override) := fn() {
 	registerExtension('Tools_SpeedDial_QueryFolders',[presetPaths] => fn(presetPaths, Array paths){
 		paths.append(presetPaths());
 	});
-	registerExtension('PADrend_RemoteControl_QueryRPCs',this->fn(callback){
-		callback( {
-			'SpeedDial.getPresetList' : this->fn( [String,void] tag=void){ // tag
-				var presets = this.collectPresets();
-				if(tag)
-					presets = this.filterPresets(presets,[tag]);
-				
-				var presetNames = [];
-				foreach(presets as var preset)
-					presetNames+=preset.name;
-				return presetNames;
-			},
-			'SpeedDial.executePreset' : this->fn(name){
-				var presets = [];
-				foreach(this.collectPresets() as var preset){
-					if(preset.name == name){
-						this.loadPreset(preset.path);
-						return true;
-					}
+	Util.requirePlugin('PADrend/RemoteControl').registerFunctions({
+		'SpeedDial.getPresetList' : this->fn( [String,void] tag=void){ // tag
+			var presets = this.collectPresets();
+			if(tag)
+				presets = this.filterPresets(presets,[tag]);
+			
+			var presetNames = [];
+			foreach(presets as var preset)
+				presetNames+=preset.name;
+			return presetNames;
+		},
+		'SpeedDial.executePreset' : this->fn(name){
+			var presets = [];
+			foreach(this.collectPresets() as var preset){
+				if(preset.name == name){
+					this.loadPreset(preset.path);
+					return true;
 				}
-				return false;
 			}
-		});
+			return false;
+		}
 	});
 
 	this.window := false;

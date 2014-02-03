@@ -18,51 +18,44 @@ var plugin = new Plugin({
 		Plugin.AUTHORS : "Claudius",
 		Plugin.OWNER : "All",
 		Plugin.REQUIRES : ['PADrend'],
-		Plugin.EXTENSION_POINTS : [
-
-			/* [ext:PADrend_RemoteControl_QueryRPCs]
-			 * @param callback to call with a Map { rpcName -> rpcCallable }
-			 */
-			'PADrend_RemoteControl_QueryRPCs'
-		]
+		Plugin.EXTENSION_POINTS : []
 });
 
 plugin.init @(override) := fn(){
-	registerExtension('PADrend_RemoteControl_QueryRPCs',this->fn(callback){
-		callback( {
-			'PADrend.about' : fn(){
-				return PADrend.about().implode("\n");
-			}
-		});
+	registerFunction(	'PADrend.about', fn(){
+		return PADrend.about().implode("\n");
 	});
 	
+	broadcast += this.callFunction;
+		
 	return true;
 };
 
-plugin.rpcRegistry @(private) := void;
-
-plugin.refreshFunctions @(public) := fn(){
-	this.rpcRegistry = new Map;
-	executeExtensions('PADrend_RemoteControl_QueryRPCs',[this.rpcRegistry] => fn(registry,Map rpcs){
-		registry.merge(rpcs);
-	});
-};
+static rpcRegistry = new Map;
 
 plugin.getFunction @(public) := fn(rpcName){
-	if(!this.rpcRegistry)
-		this.refreshFunctions();
-	return this.rpcRegistry[rpcName];
+	return rpcRegistry[rpcName];
 };
+
+//! Can be extended from outside.
+plugin.broadcast @(public) := new MultiProcedure; // fn( rpcname, parameters... )
 	
 plugin.callFunction @(public) := fn(rpcName, parameters...){
-	if(!this.rpcRegistry)
-		this.refreshFunctions();
-	var rpc = this.rpcRegistry[rpcName];
+	var rpc = rpcRegistry[rpcName];
 	if(!rpc){
 		Runtime.warn("Invalid RPC: ",rpcName,"(",parameters.implode(","),")");
 		return;
 	}
 	return rpc(parameters...);
+};
+
+plugin.registerFunction @(public) := fn(rpcName, fun){
+	rpcRegistry[ ""+rpcName] = fun;
+};
+
+plugin.registerFunctions @(public) := fn(Map m){
+	foreach(m as var name,var fun)
+		rpcRegistry[ ""+name ] = fun;
 };
 
 return plugin;

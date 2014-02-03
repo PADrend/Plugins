@@ -138,25 +138,23 @@ WaypointsPlugin.init:=fn() {
 		this.cmdHistory:=new CommandHistory();
 	}
 	
-	registerExtension('PADrend_RemoteControl_QueryRPCs',this->fn(callback){
-		callback( {
-			// [ [time,description]* ] 
-			'Waypoints.getWaypointList' : this->fn(){
-				var path = WaypointsPlugin.getCurrentPath();
-				if(!path){
-					PADrend.message("No active path.");
-					return [];
-				}
-				var wps = [];
-				foreach(path.getWaypoints() as var wp){
-					wps += [wp.getTime(), WaypointsPlugin.getWaypointDescription(wp)];
-				}
-				return wps;
-			},
-			'Waypoints.flyTo' : this->fn(time){
-				WaypointsPlugin.flyTo(time,2.5);
+	Util.requirePlugin('PADrend/RemoteControl').registerFunctions({
+		// [ [time,description]* ] 
+		'Waypoints.getWaypointList' : this->fn(){
+			var path = WaypointsPlugin.getCurrentPath();
+			if(!path){
+				PADrend.message("No active path.");
+				return [];
 			}
-		});
+			var wps = [];
+			foreach(path.getWaypoints() as var wp){
+				wps += [wp.getTime(), WaypointsPlugin.getWaypointDescription(wp)];
+			}
+			return wps;
+		},
+		'Waypoints.flyTo' : this->fn(time){
+			WaypointsPlugin.flyTo(time,2.5);
+		}
 	});
 	return true;
 };
