@@ -37,6 +37,7 @@ EffectsPlugin.init:=fn() {
 	modules+=__DIR__+"/"+"InfiniteGround.escript";
 	modules+=__DIR__+"/"+"PostProcessingEffects.escript";
 	modules+=__DIR__+"/"+"LimitFPS.escript";
+	modules+=__DIR__+"/"+"Stereo.escript";
 
 	loadPlugins( modules,false );
 

@@ -43,7 +43,6 @@ SpielereiPlugin.init:=fn() {
 
     // ----
 	var modules = [];
-	modules+=__DIR__+"/"+"Stereo.escript";
 	modules+=__DIR__+"/"+"StatOverlay.escript";
 //	modules+=__DIR__+"/"+"TMSim/Plugin.escript";
 	modules+=__DIR__+"/"+"Anaglyph.escript";
