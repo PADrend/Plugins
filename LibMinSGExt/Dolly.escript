@@ -15,9 +15,6 @@
 
 // -----------------------------------------------------------------
 
-
-
-
 /*!
 	Dolly  ---> CameraFrame (\see LibMinSGExt/Traits/CameraFrameAdjustmentTrait)
 	 |
@@ -25,12 +22,6 @@
 				 |
 				 \----------> Camera (MinSG.CamerNode)
 */
-
-
-
-
-
-
 
 var t = new Traits.GenericTrait('MinSG.DollyNodeTrait');
 
@@ -40,30 +31,6 @@ t.attributes.name := "Dolly";
 
 t.attributes.getCamera					:= fn(){	return this.camera;	};
 t.attributes.getHeadNode				:= fn(){	return this.head;	};
-
-
-
-
-t.attributes.getObserverPosition 		:= fn(){	return [0,0,0];	};
-t.attributes.setObserverPosition := fn(pos){
-	outln("Dolly:setObserverPosition: call ignored!!!!");
-//	pos = pos ? new Geometry.Vec3(pos) : new Geomtry.Vec3;
-//	if( pos.toArray()!=this.getObserverPosition() )
-//		this.camera.setRelPosition( pos );
-};
-
-// observer offset: [x,y,z] | false
-t.attributes.setObserverOffset:=fn(offset){
-	outln("Dolly:setObserverOffset: call ignored!!!!");
-};
-
-t.attributes.getObserverOffset 			:= fn(){	return false;	};
-t.attributes.isObserverOffsetEnabled	:= fn(){	return false;	};
-
-t.attributes.setObserverOffsetEnabled := fn(Bool b){
-	outln("Dolly:setObserverOffsetEnabled: call ignored!!!!");
-};
-
 
 t.onInit += fn(MinSG.ListNode dollyRoot, MinSG.Node camera){
 	
@@ -79,7 +46,7 @@ t.onInit += fn(MinSG.ListNode dollyRoot, MinSG.Node camera){
 };
 
 
-GLOBALS.MinSG.createDolly := [t]=>fn(t,camera){
+MinSG.createDolly := [t]=>fn(t,camera){
     var dolly=new MinSG.ListNode;
     //! \see MinSG.DollyNodeTrait
     Traits.addTrait(dolly,t,camera);
