@@ -65,7 +65,7 @@ HID.DeviceBaseTrait := new Traits.GenericTrait("HID.DeviceBaseTrait");
 	- registerButtonListener(Number buttonId,fun)	Register a listener that is called when an 
 													event for the specific button occurs.
 
-	- sendButtonEvent(Number buttonId, Bool pressed) Needs to be called to invoce
+	- sendButtonEvent(Number buttonId, Bool pressed) Needs to be called to invoke
 													the Button listener.
 													
 	\note requires HID.DeviceBaseTrait
@@ -114,7 +114,7 @@ HID.ControllerButtonTrait := new Traits.GenericTrait("HID.ControllerButtonTrait"
 	- registerAxisListener(Number axisId,fun)		Register a listener that is called when an 
 													event for the specific axis occurs.
 
-	- sendAxisEvent(Number axisId, Number value)	Needs to be called to invoce
+	- sendAxisEvent(Number axisId, Number value)	Needs to be called to invoke
 													the axes listener.
 	\note The axis values should be normalized in the range from -1.0 to 1.0!
 	\note requires HID.DeviceBaseTrait
@@ -163,7 +163,7 @@ HID.ControllerAnalogAxisTrait := new Traits.GenericTrait("HID.ControllerAnalogAx
 	- registerHatListener(Number hatId,fun)		Register a listener that is called when an 
 													event for the specific hat occurs.
 
-	- sendHatEvent(Number hatId, Number value)	Needs to be called to invoce
+	- sendHatEvent(Number hatId, Number value)	Needs to be called to invoke
 													the hats listener.
 	\note The value is a bit combination of:
 			Util.UI.MASK_HAT_DOWN, Util.UI.MASK_HAT_UP, Util.UI.MASK_HAT_LEFT, Util.UI.MASK_HAT_RIGHT
@@ -214,7 +214,7 @@ HID.ControllerHatTrait := new Traits.GenericTrait("HID.ControllerHatTrait");
 													when the transformation changed. 
 													\see LibUtilExt/Extension.escript
 
-	- sendTransformationEvent(SRT|void)				Needs to be called to invoce the transformation listener.
+	- sendTransformationEvent(SRT|void)				Needs to be called to invoke the transformation listener.
 	\note requires HID.DeviceBaseTrait
 */
 HID.Controller_Room6D_Trait := new Traits.GenericTrait("HID.Controller_Room6D_Trait");
