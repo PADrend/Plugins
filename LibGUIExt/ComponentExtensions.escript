@@ -48,7 +48,13 @@ GUI.Button.setButtonShape ::= fn( GUI.AbstractShape  s){
 
 
 // -----------
-// Component (data connections)
+// Component 
+
+GUI.Component.destroy ::= fn(){
+	gui.markForRemoval(this);
+	return this;
+};
+
 
 /*! Replaces the original onDataChanged method by an internal one, which allows the execution
 	of several onDataChanged methods and registeres the given listener accordingly. */
