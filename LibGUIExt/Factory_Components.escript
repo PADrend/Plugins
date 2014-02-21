@@ -1536,3 +1536,7 @@ GUI.GUI_Manager._componentFactories ::= {
 		result.component = c;
 	}
 };
+
+GUI.GUI_Manager.registerComponentFactory ::= fn(type,factory){
+	this._componentFactories[type] = factory;
+};
