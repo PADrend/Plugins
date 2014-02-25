@@ -259,7 +259,7 @@ TransformationTools.AnchorTool := new Type;
 			entries += {
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : ("["+name+"]").fillUp(15," "),
-				GUI.MENU_PROVIDER : [anchor,node] => fn(anchor,node){
+				GUI.MENU : [anchor,node] => fn(anchor,node){
 					var refreshGroup = new GUI.RefreshGroup;
 					var entries = [
 						"Position (local):",
@@ -330,7 +330,7 @@ TransformationTools.AnchorTool := new Type;
 		entries += {
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "New Anchor",
-			GUI.MENU_PROVIDER : [node] => fn(node){
+			GUI.MENU : [node] => fn(node){
 				
 				var name = DataWrapper.createFromValue("anchor#"+node.findAnchors().count());
 				var dir = DataWrapper.createFromValue(false);

@@ -461,7 +461,7 @@ plugin.showWindow:=fn(){
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Submenu 3",
 				GUI.TOOLTIP : "This submenu is also \n created dynamically when \n you push the button.",
-				GUI.MENU_PROVIDER : fn(){
+				GUI.MENU : fn(){
 					// static counter
 					if(!thisFn.isSet($counter)) thisFn.counter:=0;
 

@@ -19,12 +19,12 @@
 GUI.GUI_Manager._createMenu ::= GUI.GUI_Manager.createMenu;
 
 //! \note Use gui.openMenu(...) instead; the Menu-object itself should not be stored or handled directly.
-GUI.GUI_Manager.createMenu ::= fn(idOrEntries = void, width = 150, context...){
+GUI.GUI_Manager.createMenu ::= fn(mixed = void, width = 150, context...){
 	var menu = gui._createMenu(GUI.ONE_TIME_MENU);
-	if(void != idOrEntries ){
+	if(mixed){
 		var components = this.createComponents({
 								GUI.TYPE : 				GUI.TYPE_MENU_ENTRIES,
-								GUI.PROVIDER :			idOrEntries,
+								GUI.PROVIDER :			mixed,
 								GUI.WIDTH : 			width,
 								GUI.CONTEXT_ARRAY : 	context
 		});
@@ -57,14 +57,13 @@ GUI.GUI_Manager.createMenu ::= fn(idOrEntries = void, width = 150, context...){
 };
 
 /*! Open a one time menu at the given position.
-	\param menu Menu may be a GUI.Menu object, an array of entries, or the id of an registered menu.
+	\param menuEntries GUI.Menu || String || fn(context...)-> [entries]
 	\param context If a context is given and the menu is given by id, the context is passed to the 
 			provider functions.
 	\note This function does not return the menu as it may automatically be  destroyed (one time menu). 
 	\note if the menu does not fit to the screen, its position is adjusted*/
-GUI.GUI_Manager.openMenu ::= fn(Geometry.Vec2 position,[GUI.Menu,Array,String] menu,width=150,context...){
-	if(!(menu ---|> GUI.Menu))
-		menu = gui.createMenu(menu,width,context...);
+GUI.GUI_Manager.openMenu ::= fn(Geometry.Vec2 position, menuEntries,width=150,context...){
+	var menu = (menuEntries ---|> GUI.Menu) ? menuEntries : gui.createMenu(menuEntries,width,context...);
 
 	menu.layout(); // assure the height is initialized
 	var height = menu.getHeight();
@@ -86,9 +85,9 @@ GUI.GUI_Manager.printMenuInfo ::= fn(){
 
 /*! Close prior submenus and open the given menu as submenu next to the given entry of the current menu.
 	\see gui.openMenu(...)	*/
-GUI.Menu.openSubmenu ::= fn(GUI.Component entry,[GUI.Menu,Array] menu,width=150,context...){
-	if(!(menu ---|> GUI.Menu))
-		menu = gui.createMenu(menu,width,context...);
+GUI.Menu.openSubmenu ::= fn(GUI.Component entry, menuEntries,width=150,context...){
+	var menu = (menuEntries ---|> GUI.Menu) ? menuEntries : gui.createMenu(menuEntries,width,context...);
+
 	menu.layout(); // assure the height is initialized
 	var height = menu.getHeight();
 	

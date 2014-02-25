@@ -290,7 +290,7 @@ T.init ::= fn(){
 			GUI.DATA_VALUE : filter ,
 			GUI.WIDTH : 15,
 			GUI.HEIGHT : 15,
-			GUI.MENU_PROVIDER : this->fn(){
+			GUI.MENU : this->fn(){
 				return [
 					"*Search filter*",
 					{

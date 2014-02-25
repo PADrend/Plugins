@@ -148,7 +148,7 @@ plugin.init := fn() {
 			GUI.FLAGS : GUI.FLAT_BUTTON,
 
 			GUI.WIDTH : 16,
-			GUI.MENU_PROVIDER : (fn(entry){
+			GUI.MENU : (fn(entry){
 				var behaviours = new Map();
 				executeExtensions('NodeEditor_QueryAvailableBehaviours',behaviours);
 

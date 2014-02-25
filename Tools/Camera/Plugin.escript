@@ -80,7 +80,7 @@ CameraWindowPlugin.ex_Init := fn() {
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Camera",
 			GUI.MENU_WIDTH : 150,
-			GUI.MENU_PROVIDER : fn(){
+			GUI.MENU : fn(){
 				var entries = [];
 				entries += "*Camera*";
 				entries += CameraWindowPlugin.createNearPlaneSlider(PADrend.getActiveCamera(), false);

@@ -255,7 +255,7 @@ plugin.registerStdToolbarEntries := fn() {
 		{
 			GUI.TYPE		: 	GUI.TYPE_MENU,
 			GUI.LABEL		:	"Recent scenes",
-			GUI.MENU_PROVIDER : fn(){
+			GUI.MENU : fn(){
 				var entries = [];
 				foreach( getRecentSceneList() as var filename)
 					entries += {

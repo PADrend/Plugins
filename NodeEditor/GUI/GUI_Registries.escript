@@ -122,7 +122,7 @@ NodeEditor.addConfigTreeEntryProvider(Object,fn( obj,entry ){
 				GUI.POSITION : [GUI.POS_X_ABS|GUI.REFERENCE_X_RIGHT|GUI.ALIGN_X_RIGHT|
 							GUI.POS_Y_ABS|GUI.REFERENCE_Y_TOP|GUI.ALIGN_Y_TOP, 0,0],
 				GUI.MENU_WIDTH : 200,
-				GUI.MENU_PROVIDER : this->fn(){
+				GUI.MENU : this->fn(){
 					var entries  = new Map();
 					foreach(_menuProvider as var p){
 						p(this,entries);

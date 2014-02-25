@@ -328,15 +328,7 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 								called to create the menu entries. 
 								If this value is set, all providers HAVE to accept a parameter!
 
-		GUI.MENU : 				an registered menu's id, or an array or map of menu entries which are created immediately.
-								If a map is given, the entries of the map correspond to subsections in the menu;
-								the key of the subgroup is only used for sorting and does not appear in the final menu.
-								e.g. GUI.MENU : {  "10_loading" : [ "*Load*","Load","Export"] , "20_saving" : [ "*Saving*","Save" ] }
-								e.g. GUI.MENU : 'SomePlugin_AMenusId'
-
-		OR
-		GUI.MENU_PROVIDER : 	A function which is called every time the menu is opened which should return the
-								same content as GUI.MENU
+		GUI.MENU : 				an registered menu's id, or an array, or a callback fn( [context] ) -> Array
 
 
 	Next column marker in Panel
@@ -1113,8 +1105,6 @@ GUI.GUI_Manager._componentFactories ::= {
 
 	// menu
 	GUI.TYPE_MENU : fn(input,result){
-		var entryWidth = input.description[GUI.MENU_WIDTH]?input.description[GUI.MENU_WIDTH]:100;
-
 		var button = this.createButton(input.width?input.width:100,input.height,input.label);
 		button.isSubMenu := input.insideMenu;
 
@@ -1158,60 +1148,28 @@ GUI.GUI_Manager._componentFactories ::= {
 			}
 
 		}
-
-		// (internal) Called by onClick method.
-		button.openMenu := fn( [GUI.Menu,Array] menuEntries){
-
-			// if menu is a submenu -> close old submenues of same parent and open as new menu
-			if( this.getParentComponent()---|> GUI.Menu ){
-				getParentComponent().openSubmenu(this,menuEntries);
-			}else{
-				var pos = getAbsPosition()+new Geometry.Vec2(isSubMenu ? getWidth()*0.95 : 0, isSubMenu ? 0 :getHeight());
-				gui.openMenu(pos,menuEntries);
-			}
-		};
 		var context = (void==input.description[GUI.MENU_CONTEXT]) ? [] : [input.description[GUI.MENU_CONTEXT]];
 		
-		// menu entries are created on demand with the function in description[GUI.MENU_PROVIDER]
-		if(input.description[GUI.MENU_PROVIDER]){ //! \todo simply use gui.createComponents(...) for this (incompatible with Map result...)
-			button.addOnClickHandler( [input.description[GUI.MENU_PROVIDER],entryWidth,context...] => fn(provider,entryWidth,context...){
-				var menuEntries = provider(context...);
+		var menuEntries = input.description[GUI.MENU];
+		if(!menuEntries){
+			menuEntries = input.description[GUI.MENU];
+			if(!menuEntries)
+				menuEntries = ["..."];
+		}else if(menuEntries---|>Array)
+			menuEntries = menuEntries.clone();
 		
-				if( menuEntries ---|> GUI.Menu){ // the menu is already given
-					this.openMenu(menuEntries);
-				}else if( menuEntries ---|> Map){ // subgroups are present
-					var m=[];
-					foreach( menuEntries as var group){
-						foreach( group as var entry)
-							m+=gui.create(entry,entryWidth,true);
-					}
-					this.openMenu(m);
-				}else{ // assume result to be an array of entries
-					var m=[];
-					foreach(menuEntries as var entry)
-						m+=gui.create(entry,entryWidth,true);
-					this.openMenu(m);
-				}
-			});
-
-		} 
-		else{ // menu items are completely known in advance
-			button.addOnClickHandler( [input.description[GUI.MENU].clone(),entryWidth,context...] => fn(entries,entryWidth,context...){
-				var menu;
-				if(entries---|>Map){
-					menu = gui.createMenu();
-					foreach( entries as var group){
-						foreach(group as var menuEntry){
-							menu.add(gui.createComponent(menuEntry,entryWidth,true));
-						}
-					}
-				}else{
-					menu = gui.createMenu(entries,entryWidth,context...);
-				}
-
-				this.openMenu(menu);
-			});
-		}
+		button.addOnClickHandler(	[	this,
+										menuEntries,context,
+										input.description[GUI.MENU_WIDTH]?input.description[GUI.MENU_WIDTH]:100
+									] => fn( gui,menuEntries,context,menuWidth ){
+			if( this.getParentComponent()---|> GUI.Menu ){
+				getParentComponent().openSubmenu(this,menuEntries,menuWidth,context...);
+			}else{
+				var pos = getAbsPosition()+new Geometry.Vec2(isSubMenu ? getWidth()*0.95 : 0, isSubMenu ? 0 :getHeight());
+				gui.openMenu(pos,menuEntries,menuWidth,context...);
+			}
+		});
+		
 		result.component = button;
 	},
 

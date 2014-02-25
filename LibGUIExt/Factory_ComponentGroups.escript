@@ -20,7 +20,7 @@ loadOnce(__DIR__+"/Factory_Components.escript");
      ... A components description
 		GUI.TYPE		GUI.TYPE_COMPONENTS  normal components
 						GUI.TYPE_MENU_ENTRIES components inside a menu
-		GUI.PROVIDER	Id or other provider of the registered components
+		GUI.PROVIDER	Id, Array or callable provider creating entries
 		GUI.WIDTH		(optional) component's width
 		GUI.FILTER		(optional) filter function fn(Map componentProviders) called before creating the components.
 		GUI.CONTEXT		(optional) context object passed to the component providers

@@ -238,7 +238,7 @@ plugin.init := fn() {
 			GUI.FLAGS : GUI.FLAT_BUTTON,
 
 			GUI.WIDTH : 16,
-			GUI.MENU_PROVIDER : (fn(entry){
+			GUI.MENU : (fn(entry){
 				var states = new Map();
 				executeExtensions('NodeEditor_QueryAvailableStates',states);
 
@@ -268,7 +268,7 @@ plugin.init := fn() {
 			GUI.WIDTH : 16,
 			GUI.FLAGS : GUI.FLAT_BUTTON,
 
-			GUI.MENU_PROVIDER : (fn(entry){
+			GUI.MENU : (fn(entry){
 				var stateNames = PADrend.getSceneManager().getNamesOfRegisteredStates();
 				stateNames.sort();
 				var list = gui.create({

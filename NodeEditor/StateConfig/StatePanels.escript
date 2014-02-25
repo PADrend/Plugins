@@ -1239,7 +1239,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState 
 		GUI.LABEL : "Add uniform",
 		GUI.TOOLTIP : "WARNING: Adding matrixes is buggy and may crash the program!",
 		GUI.MENU_WIDTH : 250,
-		GUI.MENU_PROVIDER : (fn(shaderState,treeView){
+		GUI.MENU : (fn(shaderState,treeView){
 			var uniforms=shaderState.getShader().getActiveUniforms();
 			
 			var entries = {
@@ -1391,7 +1391,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderUniformState, fn(MinSG.Shade
 		GUI.LABEL : "Add uniform",
 		GUI.TOOLTIP : "Shows the active uniforms from the next ShaderState up to the rootNode.",
 		GUI.MENU_WIDTH : 250,
-		GUI.MENU_PROVIDER : (fn(shaderUniformState,treeView){
+		GUI.MENU : (fn(shaderUniformState,treeView){
 
 			// search for a shader state
 			var shaderState;

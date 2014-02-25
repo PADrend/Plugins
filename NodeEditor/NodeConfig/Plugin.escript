@@ -192,7 +192,7 @@ plugin.init := fn() {
 			GUI.WIDTH : 15,
 			GUI.FLAGS : GUI.FLAT_BUTTON,
 			GUI.TOOLTIP : "Create a new child",
-			GUI.MENU_PROVIDER : (fn(entry){
+			GUI.MENU : (fn(entry){
 				var m = [];
 				foreach(NodeEditor.nodeFactories as var name,var factory){
 					m += {

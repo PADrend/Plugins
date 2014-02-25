@@ -207,7 +207,7 @@ TransformationTools.RotationTool := new Type;
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Pivot >",
-			GUI.MENU_PROVIDER : this->fn(){
+			GUI.MENU : this->fn(){
 				// proxy
 				var refreshGroup = new GUI.RefreshGroup;
 				var bakePivot = [];
@@ -312,7 +312,7 @@ TransformationTools.RotationTool := new Type;
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Rotate >",
-			GUI.MENU_PROVIDER : this->fn(){
+			GUI.MENU : this->fn(){
                 var value = DataWrapper.createFromValue(0);
 				var refreshGroup = new GUI.RefreshGroup;
 

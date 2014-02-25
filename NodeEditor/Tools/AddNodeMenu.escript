@@ -25,7 +25,7 @@ NodeEditorTools.registerMenues_AddNode := fn() {
 			{
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Add new node",
-				GUI.MENU_PROVIDER : (fn(parentNode){
+				GUI.MENU : (fn(parentNode){
 					var subMenu=[];
 					foreach(NodeEditor.nodeFactories  as var name,var factory){
 						subMenu += {

@@ -86,11 +86,11 @@ plugin.init @(override) := fn() {
 			GUI.LABEL : "Presets",
 			GUI.FLAGS : GUI.BACKGROUND,
 			GUI.MENU_WIDTH : 200,
-			GUI.MENU_PROVIDER : this->fn(){
+			GUI.MENU : this->fn(){
 				var pMenu=[{
 					GUI.TYPE : GUI.TYPE_MENU,
 					GUI.LABEL : "Tags",
-					GUI.MENU_PROVIDER : [sceneToolTags] =>this->getTagFilterMenuEntries
+					GUI.MENU : [sceneToolTags] =>this->getTagFilterMenuEntries
 				}];
 				foreach(this.filterPresets(this.collectPresets(),this.sceneToolTags()) as var preset){
 					var c = gui.create({

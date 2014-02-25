@@ -127,7 +127,7 @@ WaypointsPlugin.addPathMenu:=fn(panel=void){
 	toolBar += {
 		GUI.TYPE				:	GUI.TYPE_MENU,
 		GUI.LABEL				:	"Select ...",
-		GUI.MENU_PROVIDER		:	this -> createPathMenu,
+		GUI.MENU		:	this -> createPathMenu,
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 	toolBar += {

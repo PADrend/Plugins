@@ -171,7 +171,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : ">",
 				GUI.WIDTH : 20,
-				GUI.MENU_PROVIDER : [node,linkEntry,refreshCallback] => fn(node,linkEntry,refreshCallback){
+				GUI.MENU : [node,linkEntry,refreshCallback] => fn(node,linkEntry,refreshCallback){
 					var entries = [];
 					entries += {
 						GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,

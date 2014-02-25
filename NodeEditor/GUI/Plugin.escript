@@ -53,7 +53,7 @@ plugin.registerGUIProviders := fn(){
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Select Node",
 			GUI.MENU_WIDTH : 200,
-			GUI.MENU_PROVIDER : (fn(plugin){
+			GUI.MENU : (fn(plugin){
 				var subMenu=[];
 
 				var node;
@@ -143,7 +143,7 @@ plugin.registerGUIProviders := fn(){
 		toolbarEntries += {
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Tools",
-			GUI.MENU_PROVIDER : fn(){
+			GUI.MENU : fn(){
 				return gui.createMenu('NodeEditor_NodeToolsMenu',150,NodeEditor.getSelectedNodes());
 			}
 			

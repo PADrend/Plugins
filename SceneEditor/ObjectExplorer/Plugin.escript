@@ -226,7 +226,7 @@ plugin.initGUI := fn(){
 			{
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Add object trait",
-				GUI.MENU_PROVIDER : [node,refreshCallback] => fn(node,refreshCallback){
+				GUI.MENU : [node,refreshCallback] => fn(node,refreshCallback){
 					var enabledTraitNames =  new Set(MinSG.getLocalPersistentNodeTraitNames(node));
 					
 					var entries = [];

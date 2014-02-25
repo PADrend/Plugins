@@ -31,7 +31,7 @@ HoCRPlugin.init:=fn(){
 			gui.registerComponentProvider('Spielerei.hoCR',[{
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "HoCR",
-				GUI.MENU_PROVIDER : this->fn(){
+				GUI.MENU : this->fn(){
 					var chickenHandler = this.chickenHandler;
 					var entries =[];
 					entries += {

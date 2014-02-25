@@ -43,7 +43,7 @@ plugin.broadcast @(public) := new MultiProcedure; // fn( rpcname, parameters... 
 plugin.callFunction @(public) := fn(rpcName, parameters...){
 	var rpc = rpcRegistry[rpcName];
 	if(!rpc){
-		Runtime.warn("Invalid RPC: ",rpcName,"(",parameters.implode(","),")");
+		Runtime.warn("Invalid RPC: "+rpcName+"("+parameters.implode(",")+")");
 		return;
 	}
 	return rpc(parameters...);
