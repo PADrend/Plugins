@@ -35,7 +35,6 @@ NodeEditorTools.registerMenues_MeshTools := fn() {
 	});
 
 	// ------------------------------------------------------------------------------------------------
-	
 	gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 		"*Mesh modification*",
 		{
@@ -870,7 +869,63 @@ NodeEditorTools.registerMenues_MeshTools := fn() {
 			'----'
 		]);
 	}
-	
+	// --------------------------------------------------------------------------------------------------
+	gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshFixes',[
+		"*Mesh fixes*",
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Fix normals (deep exploration)",
+			GUI.ON_CLICK : fn(){
+				showWaitingScreen();
+				foreach( NodeEditor.getSelectedNodes() as var subtree){
+					var geoNodes=MinSG.collectGeoNodes(subtree);
+					foreach(geoNodes as var geoNode){
+						var mesh = geoNode.getMesh();
+						var posAcc = Rendering.PositionAttributeAccessor.create(mesh,"sg_Position");
+						var normalAcc;
+						try{
+							normalAcc = Rendering.PositionAttributeAccessor.create(mesh,"sg_Normal");
+						}catch(e){ // may fail if normals are sotred as bytes.
+							out("o");
+							continue;
+						}
+						if(!normalAcc)
+							continue;
+						var n0 = normalAcc.getPosition(0);
+						var p0 = posAcc.getPosition(0);
+						if(n0.length()<(n0-p0).length()){
+							out("-");
+							continue;
+						}
+						// guess normal offset
+						var bb = new Geometry.Box;
+						bb.invalidate();
+						for(var i=0;posAcc.checkRange(i);++i)
+							bb.include( normalAcc.getPosition(i) );
+						
+						if(bb.getExtentMax()<0.1){
+							Rendering.calculateNormals(mesh);
+							out("*");
+						}else{
+							var offset = bb.getCenter();
+							
+							for(var i=0;posAcc.checkRange(i);++i){
+								normalAcc.setPosition(i, (normalAcc.getPosition(i)-offset).normalize() );
+							}
+							mesh._markAsChanged();
+							outln(bb);
+	//							normalAcc.setPosition(i, (normalAcc.getPosition(i)-posAcc.getPosition(i)).normalize() );
+							out("+");
+						}
+						
+					}
+				}
+				outln("Finisehd.");
+			},
+			GUI.TOOLTIP :  "ColladaScenes exported from DeepExploation may\nstore normals with a (strange?) offset"
+		},
+	]);
+
 };
 
 // ------------------------------------------------------------------------------
