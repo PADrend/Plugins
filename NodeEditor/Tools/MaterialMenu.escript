@@ -67,42 +67,41 @@ NodeEditorTools.registerMenues_MaterialTools := fn() {
 			GUI.LABEL : "Reset ambient colors ...",
 			GUI.ON_CLICK : fn() {
 				var p = gui.createPopupWindow( 400, 140,"Reset ambient color" );
-				var params = new ExtObject({ $factor:0.5,$color:1.0,$base:0.0});
+				var factor = DataWrapper.createFromConfig( PADrend.configCache,'NodeEditor.resetAmbient.factor',0.5);
+				var saturation = DataWrapper.createFromConfig( PADrend.configCache,'NodeEditor.resetAmbient.saturation',1.0);
+				var baseBrightness = DataWrapper.createFromConfig( PADrend.configCache,'NodeEditor.resetAmbient.brightness',0.0);
 				
 				p.addOption({
 					GUI.TYPE : GUI.TYPE_RANGE,
 					GUI.RANGE : [0,1.0],
 					GUI.RANGE_STEPS : 20,
 					GUI.LABEL : "Ambient = Diffuse * ",
-					GUI.DATA_OBJECT : params,
-					GUI.DATA_ATTRIBUTE : $factor
+					GUI.DATA_WRAPPER : factor
 				});
 				p.addOption({
 					GUI.TYPE : GUI.TYPE_RANGE,
 					GUI.RANGE : [0,1.0],
 					GUI.RANGE_STEPS : 20,
 					GUI.LABEL : "Saturation ",
-					GUI.DATA_OBJECT : params,
-					GUI.DATA_ATTRIBUTE : $color
+					GUI.DATA_WRAPPER : saturation
 				});			
 				p.addOption({
 					GUI.TYPE : GUI.TYPE_RANGE,
 					GUI.RANGE : [0,1.0],
 					GUI.RANGE_STEPS : 20,
 					GUI.LABEL : "Base brightness ",
-					GUI.DATA_OBJECT : params,
-					GUI.DATA_ATTRIBUTE : $base
+					GUI.DATA_WRAPPER : baseBrightness
 				});
 				
-				p.addAction("Execute",(fn(params){
+				p.addAction("Execute", [factor,saturation,baseBrightness] => fn(factor,saturation,baseBrightness){
 					foreach(NodeEditor.getSelectedNodes() as var n){
 						var states=MinSG.collectStates(n,MinSG.MaterialState);
 						foreach(states as var state){
 							var diff = state.getDiffuse();
 							var a = diff.a();
 							var brightness = (diff.r() + diff.g() + diff.b())/3;
-							var c =  (diff*params.color + new Util.Color4f(brightness,brightness,brightness,1.0)*(1-params.color)) * params.factor;
-							c += new Util.Color4f(params.base,params.base,params.base,1.0);
+							var c =  (diff*saturation() + new Util.Color4f(brightness,brightness,brightness,1.0)*(1-saturation())) * factor();
+							c += new Util.Color4f(baseBrightness(),baseBrightness(),baseBrightness(),1.0);
 							c.a(a);
 							
 							state.setAmbient(c);
@@ -110,30 +109,60 @@ NodeEditorTools.registerMenues_MaterialTools := fn() {
 						}
 					}
 					return true;
-				}).bindLastParams(params));
+				});
 				p.addAction("Close");
-			   p.init();
+				p.init();
 			},
-			GUI.TOOLTIP : "Sets the ambient value of MaterialStates acoridng to their Diffuse value.\n"+
-			"(makes some imported scenes shinier)"
+			GUI.TOOLTIP : "Sets the ambient value of MaterialStates acording to their diffuse value.\n"+
+							"(makes some imported scenes shinier)"
 		},
 		{
-			GUI.TYPE : GUI.TYPE_BUTTON, 
-			GUI.LABEL : "Set all material alpha to 1.0",
-			GUI.ON_CLICK : fn() {
-				var states=MinSG.collectStates(NodeEditor.getSelectedNode(),MinSG.MaterialState);
-				foreach(states as var state){
-					var c=state.getAmbient();
-					state.setAmbient(new Util.Color4f(c.r(), c.g(), c.b(), 1.0));
+			GUI.TYPE : GUI.TYPE_MENU, 
+			GUI.LABEL : "Set material alpha",
+			GUI.MENU : fn() {
+				
+				var amientAlpha = new DataWrapper(1.0);
+				var diffuseAlpha = new DataWrapper(1.0);
+				var specularAlpha = new DataWrapper(0.0);
+				return [
+					{
+						GUI.TYPE : GUI.TYPE_RANGE,
+						GUI.RANGE : [0,1],
+						GUI.DATA_WRAPPER : amientAlpha,
+						GUI.TOOLTIP : "Ambient alpha"
+					},
+					{
+						GUI.TYPE : GUI.TYPE_RANGE,
+						GUI.RANGE : [0,1],
+						GUI.DATA_WRAPPER : diffuseAlpha,
+						GUI.TOOLTIP : "Diffuse alpha"
+					},
+					{
+						GUI.TYPE : GUI.TYPE_RANGE,
+						GUI.RANGE : [0,1],
+						GUI.DATA_WRAPPER : specularAlpha,
+						GUI.TOOLTIP : "Specular alpha"
+					},
+					{
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Set all alpha values",
+						GUI.ON_CLICK : [amientAlpha,diffuseAlpha,specularAlpha] => fn(amientAlpha,diffuseAlpha,specularAlpha){
+							foreach(MinSG.collectStates(NodeEditor.getSelectedNode(),MinSG.MaterialState) as var state){
+								var c=state.getAmbient();
+								state.setAmbient(new Util.Color4f(c.r(), c.g(), c.b(), amientAlpha()));
 
-					c=state.getDiffuse();
-					state.setDiffuse(new Util.Color4f(c.r(), c.g(), c.b(), 1.0));
+								c=state.getDiffuse();
+								state.setDiffuse(new Util.Color4f(c.r(), c.g(), c.b(), diffuseAlpha()));
 
-					c=state.getSpecular();
-					state.setSpecular(new Util.Color4f(c.r(), c.g(), c.b(), 1.0));
+								c=state.getSpecular();
+								state.setSpecular(new Util.Color4f(c.r(), c.g(), c.b(), specularAlpha()));
+								outln("Setting alpha values on: ",state);
+							}
+						}
+					}
+				];
 
-					out(state,"\n");
-				}
+				
 			}
 		},
 		{

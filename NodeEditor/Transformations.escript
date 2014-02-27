@@ -214,7 +214,7 @@ plugin.init=fn(){
 		panel += {
 			GUI.TYPE			:	GUI.TYPE_TEXT,
 			GUI.LABEL			:	"Scale",
-			GUI.OPTIONS			:	[1.0, 0.1, 0.01],
+			GUI.OPTIONS			:	[1.0, 0.1, 0.01, 0.001],
 			GUI.SIZE 			: 	[GUI.WIDTH_ABS, -30,0],
 			GUI.DATA_REFRESH_GROUP : manipulationRefreshGroup,
 			GUI.DATA_PROVIDER : (fn(node){
