@@ -1003,6 +1003,19 @@ plugin.registerStdToolbarEntries := fn() {
 			GUI.TOOLTIP : "Exponent used for calculatin the rotation."
 		}
 	];});
+	gui.registerComponentProvider('PADrend_NavigationConfigMenu.30_HIDDevices',[{
+		GUI.TYPE : GUI.TYPE_MENU,
+		GUI.MENU : 'PADrend_HID_Menu',
+		GUI.LABEL : "HID Devices"
+	}]);
+	gui.registerComponentProvider('PADrend_HID_Menu.00_main',fn(){
+		var entries = [];
+		foreach( PADrend.HID.getDevices() as var deviceName, var device ){
+			entries += deviceName;
+		}
+		return entries;
+	});
+	
 	
 	// ------------------------
 	// gui settings
