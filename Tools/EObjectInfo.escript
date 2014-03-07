@@ -111,7 +111,7 @@ plugin.showObjectWindow:=fn(String command="GLOBALS"){
 		var s=obj.toDbgString();
 		if(s.length()>500)
 			s=s.substr(0,500)+"...";
-		var infoText = info.get(obj);
+		var infoText = ""+info.get(obj);
 		if(infoText.length()>1100){
 			infoText = infoText.substr(0,infoText.find("\n",500) ) + "\n\n...\n\n" + infoText.substr( infoText.find("\n",infoText.length()-500) );
 		}
