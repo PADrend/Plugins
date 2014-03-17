@@ -149,7 +149,7 @@ GLOBALS.ExtensionPoint := Util.ExtensionPoint; //! \deprecated global alias
 			try{
 				result = extension.yieldIterator ? extension.yieldIterator.next() :	(void->extension.fun)(params...);
 			}catch(e){
-				if(extension.yieldIterator.end())
+				if( extension.yieldIterator && extension.yieldIterator.end())
 					extension.yieldIterator = void;
 					
 				if( throwException ){
