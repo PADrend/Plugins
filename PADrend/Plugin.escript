@@ -135,6 +135,7 @@ PADrend.init := fn(){
 					"CommandHandling" : true,
 					"EventLoop" : true,
 					"GUI" : true,
+					"HID" : true,
 					"Navigation" : true,
 					"NodeInteraction" : true,
 					"RemoteControl" : true,

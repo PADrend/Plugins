@@ -16,9 +16,6 @@
  **	[Plugin:PADrend] PADrend/Navigation/Plugin.escript
  **
  **/
-    
-loadOnce("LibMinSGExt/CameraMover.escript");
-
 /***
  **   ---|> Plugin
  **/
@@ -28,7 +25,7 @@ PADrend.Navigation := new Plugin({
 		Plugin.VERSION : 0.6,
 		Plugin.AUTHORS : "Claudius, Ralf & Benjamin",
 		Plugin.OWNER : "All",
-		Plugin.REQUIRES : ['PADrend','PADrend/EventLoop'],
+		Plugin.REQUIRES : ['PADrend','PADrend/EventLoop','PADrend/HID'],
 		Plugin.EXTENSION_POINTS : []
 });
 
@@ -45,7 +42,6 @@ PADrend.Navigation.joystickSupport := void;
  */
 PADrend.Navigation.init := fn(){
 
-	loadOnce(__DIR__+"/HID_Management.escript");
 
 	{
 		registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+1);
@@ -66,13 +62,12 @@ PADrend.Navigation.ex_FrameEnding := fn(){
 //! [ext:PADrend_Init]
 PADrend.Navigation.ex_Init := fn(){
 	
-	// create and register virtual keyboard gamepad \see #677
-	PADrend.HID.initVirtualGamepad();
-	PADrend.HID.initDefaultGamepad( DataWrapper.createFromConfig(systemConfig,'PADrend.Input.analogSensitivity',0.05) );
 	
 	// create cameraMover
-	this.cameraMover = new MinSG.CameraMover(PADrend.SystemUI.getWindow(), PADrend.SystemUI.getEventContext(), PADrend.getDolly(),GLOBALS.camera);
+	    	
+	this.cameraMover = new (Std.require('LibMinSGExt/CameraMover'))(PADrend.SystemUI.getWindow(), PADrend.SystemUI.getEventContext(), PADrend.getDolly(),GLOBALS.camera);
 	this.cameraMover.setInvertYAxis(systemConfig.getValue('PADrend.Input.invertMouse',false));
+	this.cameraMover.smoothMouse = systemConfig.getValue('PADrend.Input.smoothMouse',true);
 
 	this.cameraMover.joypad_rotationFactor := systemConfig.getValue('PADrend.Input.rotationFactor',3);
 	this.cameraMover.joypad_rotationExponent := systemConfig.getValue('PADrend.Input.rotationExponent',2);

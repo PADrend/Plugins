@@ -17,7 +17,6 @@
  **
  **/
     
-loadOnce("LibMinSGExt/CameraMover.escript");
 loadOnce("LibUtilExt/TaskScheduler.escript");
 
 /***
@@ -298,7 +297,11 @@ PADrend.EventLoop.singleFrame := fn() {
 		renderingContext.pushAndSetBlending(blending);
 		
 		Rendering.drawTextureToScreen(renderingContext,
-						new Geometry.Rect(0,0,renderingContext.getWindowWidth(),renderingContext.getWindowHeight()) ,
+						new Geometry.Rect(0,0,renderingContext.getWindowWidth()*0.5,renderingContext.getWindowHeight()) ,
+						gui_Texture,new Geometry.Rect(0,0,1,1));
+		
+		Rendering.drawTextureToScreen(renderingContext,
+						new Geometry.Rect(renderingContext.getWindowWidth()*0.5,0,renderingContext.getWindowWidth()*0.5,renderingContext.getWindowHeight()) ,
 						gui_Texture,new Geometry.Rect(0,0,1,1));
 		
 		renderingContext.popBlending();
@@ -356,14 +359,14 @@ PADrend.EventLoop.enableLazyGUI := fn(){
     renderingContext.popFBO();
     
 	gui_LazyRendering = true;
-	gui.enableLazyRendering();
+//	gui.enableLazyRendering();
 };
 
 PADrend.EventLoop.disableLazyGUI := fn(){
 	gui_FBO = void;
 	gui_Texture = void;
 	gui_LazyRendering = false;
-	gui.disableLazyRendering();
+//	gui.disableLazyRendering();
 };
 
 // --------------------

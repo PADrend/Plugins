@@ -20,40 +20,44 @@
  **/
 
 
-/***
- ** CameraMover
- **/
-MinSG.CameraMover := new Type;
+static T = new Type;
 
-var CameraMover = MinSG.CameraMover;
 /*! public attributes */
-CameraMover.joypad_sensitivity := 10;
-CameraMover.joypad_rotationFactor := 3;
-CameraMover.joypad_rotationExponent := 2;
-CameraMover.initialSpeed := 10;
+T.joypad_sensitivity := 10;
+T.joypad_rotationFactor := 3;
+T.joypad_rotationExponent := 2;
+T.initialSpeed := 10;
+
+T.smoothMouse := true;
+T.pivotOffset @(init,private) := Geometry.Vec3;
+
 
 /*! internal attributes */
-CameraMover.cameraNode @(private) := void;
-CameraMover.dolly @(private) := void;
-CameraMover.evtentContext @(private) := void;
-CameraMover.frameDuration @(private) := 0;
-CameraMover.invertYAxis @(private) := false;
-CameraMover.joypad_planeMovementModifier @(private) := 0;
-CameraMover.lastFrameTimestamp @(private,init) := clock;
-CameraMover.mouseView @(private) := false;
-CameraMover.moveLocalVec @(private,init) 	:= Geometry.Vec3;
-CameraMover.moveAbsVec @(private,init) 	:= Geometry.Vec3;
-CameraMover.moveWalkVec @(private,init) 	:= Geometry.Vec3;
-CameraMover.pressedWithCtrl @(private,init) := Map;
-CameraMover.rotateDollyVec @(private,init)	:= Geometry.Vec3;
-CameraMover.discreteRotationSpeed @(private) := 2.0;
-CameraMover.speed @(private) := void;
-CameraMover.walkMode @(private) := false;
-CameraMover.window @(private) := false;
-CameraMover.registeredDevices @(private,init) := Map;
+T.cameraNode @(private) := void;
+T.dolly @(private) := void;
+T.evtentContext @(private) := void;
+T.frameDuration @(private) := 0;
+T.invertYAxis @(private) := false;
+T.joypad_planeMovementModifier @(private) := 0;
+T.lastFrameTimestamp @(private,init) := clock;
+T.mouseView @(private) := false;
+T.moveLocalVec @(private,init) 	:= Geometry.Vec3;
+T.moveAbsVec @(private,init) 	:= Geometry.Vec3;
+T.moveWalkVec @(private,init) 	:= Geometry.Vec3;
+T.pressedWithCtrl @(private,init) := Map;
+T.rotateDollyVec @(private,init)	:= Geometry.Vec3;
+
+T.mouseRotationVec @(private,init)	:= Geometry.Vec3;
+T.mouseRotationTime @(private)	:= 0;
+
+T.discreteRotationSpeed @(private) := 2.0;
+T.speed @(private) := void;
+T.walkMode @(private) := false;
+T.window @(private) := false;
+T.registeredDevices @(private,init) := Map;
 
 
-CameraMover._actions @(private,init) := fn(){
+T._actions @(private,init) := fn(){
 	return {
 		Util.UI.EVENT_KEYBOARD : {
 			Util.UI.KEY_W : fn(evt) { // [w] forward
@@ -127,8 +131,17 @@ CameraMover._actions @(private,init) := fn(){
 		},
 		Util.UI.EVENT_MOUSE_MOTION : {
 			Util.UI.MASK_NO_BUTTON : fn(evt) {
-				this.dolly.rotateLocal_rad(evt.deltaY*0.01*(this.invertYAxis?1:-1),1,0,0);
-				this.dolly.rotateRel_rad(-evt.deltaX/100,0,1,0);
+				var dx = evt.deltaY*(this.invertYAxis?1:-1);
+				var dy = -evt.deltaX;
+				if(this.smoothMouse){
+					this.mouseRotationTime = clock();
+					this.mouseRotationVec = this.mouseRotationVec*0.5 + new Geometry.Vec3( dx*0.5, dy*0.5, 0  )*0.5;
+					this.execute();
+				}else{
+					var pivot = this.getPivot();
+					this.dolly.rotateAroundLocalAxis_rad( dx*0.01, new Geometry.Line3( pivot, [1,0,0]));
+					this.dolly.rotateAroundRelAxis_rad( dy*0.01, new Geometry.Line3( pivot, [0,1,0]));
+				}
 			},
 			Util.UI.MASK_MOUSE_BUTTON_LEFT : fn(evt) {
 				this.dolly.moveLocal(evt.deltaX*this.speed*this.frameDuration,0,evt.deltaY*this.speed*this.frameDuration);
@@ -146,8 +159,9 @@ CameraMover._actions @(private,init) := fn(){
 			Util.UI.MOUSE_WHEEL_UP : fn(evt) { //wheel up + ctr: move camera
 				if(evt.pressed) {
 					if(this.evtentContext.isCtrlPressed()) {
-						var dist = this.cameraNode.getRelPosition().length();
-						this.cameraNode.moveLocal(new Geometry.Vec3(0,0,-dist*0.1));
+						var dist = this.pivotOffset.z()*0.9;
+						this.dolly.moveLocal(new Geometry.Vec3(0,0,this.pivotOffset.z()-dist));
+						this.pivotOffset.z( dist );
 					} else { //wheel up: increase speed
 						this.speed*=2; 
 					}
@@ -156,8 +170,9 @@ CameraMover._actions @(private,init) := fn(){
 			Util.UI.MOUSE_WHEEL_DOWN:fn(evt){ //wheel down + ctr: move camera
 				if(evt.pressed) {
 					if(this.evtentContext.isCtrlPressed()) {
-						var dist = this.cameraNode.getRelPosition().length();
-						this.cameraNode.moveLocal(new Geometry.Vec3(0,0,[dist*0.1,0.1].max()));
+						var dist = [this.pivotOffset.z()*1.1,-0.1].min();
+						this.dolly.moveLocal(new Geometry.Vec3(0,0,this.pivotOffset.z()-dist));
+						this.pivotOffset.z( dist );
 					} else { //wheel down: decrease speed
 						this.speed*=0.5;
 					}
@@ -172,7 +187,7 @@ CameraMover._actions @(private,init) := fn(){
 	@param window and eventContext
 	@param dolly The node moved by the CameraMover
 	@param camera (optional) The (real) camera placed inside the dolly. If left out, camera and dolly are the same.	*/
-CameraMover._constructor ::= fn(Util.UI.Window _window, Util.UI.EventContext _evtentContext, MinSG.Node _dolly,[MinSG.Node,false] _camera=false){
+T._constructor ::= fn(Util.UI.Window _window, Util.UI.EventContext _evtentContext, MinSG.Node _dolly,[MinSG.Node,false] _camera=false){
 	this.window = _window;
 	this.evtentContext = _evtentContext;
 	this.dolly = _dolly;
@@ -180,7 +195,7 @@ CameraMover._constructor ::= fn(Util.UI.Window _window, Util.UI.EventContext _ev
 	this.speed = this.initialSpeed;
 };
 
-CameraMover.execute ::= fn(){
+T.execute ::= fn(){
 	var tmp=clock();
 	this.frameDuration=(tmp-lastFrameTimestamp);
 	this.lastFrameTimestamp=tmp;
@@ -197,18 +212,37 @@ CameraMover.execute ::= fn(){
 		this.dolly.moveLocal( this.moveLocalVec *this.speed*this.frameDuration);
 	if(!this.moveAbsVec.isZero())
 		this.dolly.moveRel( this.moveAbsVec *this.speed*this.frameDuration);
-	if(this.rotateDollyVec.x()!=0)
-		this.dolly.rotateLocal_rad( this.rotateDollyVec.x()* this.frameDuration*this.discreteRotationSpeed,1,0,0);
-	if(this.rotateDollyVec.y()!=0)
-		this.dolly.rotateRel_rad( this.rotateDollyVec.y()* this.frameDuration*this.discreteRotationSpeed,0,1,0);
+	
+
+	var pivot = this.getPivot();
+	foreach( [rotateDollyVec,mouseRotationVec] as var rVec){
+		// rotate around head
+		if(rVec.x()!=0){
+			this.dolly.rotateAroundLocalAxis_rad( rVec.x()* this.frameDuration*this.discreteRotationSpeed,  
+													new Geometry.Line3(pivot, [1,0,0]));
+		}
+		if(rVec.y()!=0){
+			this.dolly.rotateAroundRelAxis_rad( rVec.y()* this.frameDuration*this.discreteRotationSpeed, 
+												new Geometry.Line3(  this.dolly.localPosToRelPos( pivot ), [0,1,0] ));
+		}
+	}
+	var mouseEventDelta = clock()-this.mouseRotationTime;
+	if(mouseEventDelta>0.2){
+		mouseRotationVec.setValue(0,0,0);
+	}else if( mouseEventDelta>0.04 )
+		mouseRotationVec*=0.2;
 };
-CameraMover.getDiscreteRotationSpeed ::= 	fn(){	return this.discreteRotationSpeed;	};
-CameraMover.getDolly ::= 					fn(){	return this.dolly;	};
-CameraMover.getInvertYAxis ::= 				fn(){	return this.invertYAxis;	};
-CameraMover.getMouseView ::= 				fn(){	return this.mouseView;	};
-CameraMover.getSpeed ::= 					fn(){	return this.speed;	};
-CameraMover.getWalkMode ::= 				fn(){	return this.walkMode;	};
-CameraMover.handleEvent ::= fn(evt,consumeKeysInMouseView=false){
+T.getDiscreteRotationSpeed ::= 	fn(){	return this.discreteRotationSpeed;	};
+T.getDolly ::= 					fn(){	return this.dolly;	};
+T.getPivot ::= fn(){
+	return this.dolly.isSet($getHeadNode) ? this.dolly.getHeadNode().getRelOrigin()+this.pivotOffset : this.pivotOffset;
+};
+
+T.getInvertYAxis ::= 				fn(){	return this.invertYAxis;	};
+T.getMouseView ::= 				fn(){	return this.mouseView;	};
+T.getSpeed ::= 					fn(){	return this.speed;	};
+T.getWalkMode ::= 				fn(){	return this.walkMode;	};
+T.handleEvent ::= fn(evt,consumeKeysInMouseView=false){
 	var action=false;
 	var actionSlot = this._actions.get(evt.type,new Map);
 
@@ -254,7 +288,9 @@ CameraMover.handleEvent ::= fn(evt,consumeKeysInMouseView=false){
 
 //		}
 
-CameraMover.reset ::= fn(){
+T.reset ::= fn(){
+	this.mouseRotationVec = new Geometry.Vec3;
+	this.pivotOffset = new Geometry.Vec3;
 	this.moveLocalVec = new Geometry.Vec3;
 	this.rotateDollyVec = new Geometry.Vec3;
 	this.moveWalkVec = new Geometry.Vec3;
@@ -263,12 +299,12 @@ CameraMover.reset ::= fn(){
 	this.setMouseView(false);
 };
 
-CameraMover.setAction ::= 		fn(eventType, eventState, action)	{	this._actions[eventType][eventState] = action;	};
-CameraMover.setDiscreteRotationSpeed ::= 	fn(Number s)	{	this.discreteRotationSpeed = s;	};
-CameraMover.setDolly ::= 		fn(MinSG.Node newCamera)	{	this.dolly=newCamera;	};
+T.setAction ::= 		fn(eventType, eventState, action)	{	this._actions[eventType][eventState] = action;	};
+T.setDiscreteRotationSpeed ::= 	fn(Number s)	{	this.discreteRotationSpeed = s;	};
+T.setDolly ::= 		fn(MinSG.Node newCamera)	{	this.dolly=newCamera;	};
 
 //! This method is part of the ongoing HID-redesign \see #677
-CameraMover.registerGamepad ::= fn(gamepad){
+T.registerGamepad ::= fn(gamepad){
 	Traits.requireTrait(gamepad,HID.ControllerAnalogAxisTrait); //! \see HID.ControllerAnalogAxisTrait
 	
 	//! \see HID.ControllerAnalogAxisTrait
@@ -329,9 +365,9 @@ CameraMover.registerGamepad ::= fn(gamepad){
 		
 };
 
-CameraMover.setInvertYAxis ::= 	fn(Bool b)	{	this.invertYAxis=b;	};
+T.setInvertYAxis ::= 	fn(Bool b)	{	this.invertYAxis=b;	};
 
-CameraMover.setMouseView ::= fn(Bool enable){
+T.setMouseView ::= fn(Bool enable){
 	if(enable){
 		this.mouseView=true;
 		this.window.hideCursor();
@@ -344,5 +380,8 @@ CameraMover.setMouseView ::= fn(Bool enable){
 	}
 };
 
-CameraMover.setSpeed ::= 					fn(Number s)	{	this.speed = s;	};
-CameraMover.setWalkMode ::= 				fn(Bool b)		{	this.walkMode=b;	};
+T.setSpeed ::= 					fn(Number s)	{	this.speed = s;	};
+T.setWalkMode ::= 				fn(Bool b)		{	this.walkMode=b;	};
+
+return T;
+// --------------------------------------

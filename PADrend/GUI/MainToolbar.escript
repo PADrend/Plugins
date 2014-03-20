@@ -951,6 +951,15 @@ plugin.registerStdToolbarEntries := fn() {
 				systemConfig.setValue('PADrend.Input.invertMouse',data);
 			}
 		},
+		{
+			GUI.TYPE : 	GUI.TYPE_BOOL,
+			GUI.LABEL : "Smooth Mouse rotation",
+			GUI.DATA_PROVIDER : fn(){ return PADrend.getCameraMover().smoothMouse;},
+			GUI.ON_DATA_CHANGED : fn(data){
+				PADrend.getCameraMover().smoothMouse = data;
+				PADrend.configCache.setValue('PADrend.Input.smoothMouse',data);
+			}
+		},
 		"Movement speed",
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
