@@ -858,7 +858,7 @@ plugin.registerStdToolbarEntries := fn() {
 		GUI.MENU_WIDTH : 150
 	}]);
 
-	{
+	gui.registerComponentProvider('PADrend_RenderingSettings',fn(){
 		var m = [];
 		
 		m += "*Rendering flags*";
@@ -891,16 +891,7 @@ plugin.registerStdToolbarEntries := fn() {
 		m += {
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "GL Error Checking",
-			GUI.DATA_PROVIDER : fn(){ return PADrend.EventLoop.GLErrorChecking; },
-			GUI.ON_DATA_CHANGED : fn(d){
-				PADrend.EventLoop.GLErrorChecking = d;
-				systemConfig.setValue('PADrend.Rendering.GLErrorChecking', PADrend.EventLoop.GLErrorChecking);
-				if(PADrend.EventLoop.GLErrorChecking) {
-					Rendering.enableGLErrorChecking();
-				} else {
-					Rendering.disableGLErrorChecking();
-				}
-			}
+			GUI.DATA_WRAPPER : PADrend.EventLoop.glErrorChecking
 		};
 		m += {
 			GUI.TYPE			:	GUI.TYPE_BOOL,
@@ -927,8 +918,8 @@ plugin.registerStdToolbarEntries := fn() {
 			GUI.TOOLTIP : "Adjust the background color."
 			
 		};
-		gui.registerComponentProvider('PADrend_RenderingSettings',m);
-	}
+		return m;
+	});
 
 	// ------------------------
 	// // Config-Menu.20_navigationGroup

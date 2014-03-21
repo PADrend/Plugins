@@ -102,19 +102,14 @@ PADrend.EventLoop := new Plugin({
 
 // -------------------
 
-PADrend.EventLoop.active := true;
-PADrend.EventLoop.activeCamera := void; 
+static active = true;
+static activeCamera = void; 
 PADrend.EventLoop.bgColor := void; 
 PADrend.EventLoop.doClearScreen := true;
-PADrend.EventLoop.GLErrorChecking := void;
+static glErrorChecking = DataWrapper.createFromConfig(systemConfig,'PADrend.Rendering.GLErrorChecking',false);
 PADrend.EventLoop.renderingFlags := 0;
 PADrend.EventLoop.taskScheduler := void;
 PADrend.EventLoop.waitForGlFinish := void;
-
-PADrend.EventLoop.gui_FBO := void;
-PADrend.EventLoop.gui_Texture := void;
-PADrend.EventLoop.gui_LazyRendering := false;
-
 
 /**
  * Plugin initialization.
@@ -123,10 +118,10 @@ PADrend.EventLoop.gui_LazyRendering := false;
 PADrend.EventLoop.init := fn(){
 	loadOnce(__DIR__+"/RenderingPass.escript");
 
-	{
-		registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+1);
-		registerExtension('PADrend_Start',this->ex_Start);
-	}
+	registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+1);
+	registerExtension('PADrend_Start',this->ex_Start);
+
+
 	//  Task scheduler
 	// The task sheduler is called with a timeslot of 0.1 sec after every frame
 	this.taskScheduler := new TaskScheduler;
@@ -177,8 +172,6 @@ PADrend.EventLoop.ex_Init := fn(){
    //  set rendering parameters
 	this.renderingFlags = systemConfig.getValue('PADrend.Rendering.flags',MinSG.FRUSTUM_CULLING);
 	this.waitForGlFinish = systemConfig.getValue('PADrend.Rendering.waitForGlFinish',true);
-	
-	this.GLErrorChecking = systemConfig.getValue('PADrend.Rendering.GLErrorChecking',false);
 
 	//  set bgColor
 	this.bgColor = new Util.Color4f( systemConfig.getValue('PADrend.Rendering.bgColor',[0.5,0.5,0.5,1.0]) );
@@ -188,12 +181,11 @@ PADrend.EventLoop.ex_Init := fn(){
 };
 //! [ext:PADrend_Start]
 PADrend.EventLoop.ex_Start := fn(){
-   while(this.active){
+   while(active){
         out("Starting EventLoop...\n");
         try{
-        	while(this.active){
+        	while(active)
 				this.singleFrame();
-        	}
         }catch(e){
             Runtime.log(Runtime.LOG_ERROR,e);
             continue;
@@ -202,7 +194,7 @@ PADrend.EventLoop.ex_Start := fn(){
 
 };
 PADrend.EventLoop.getActiveCamera := fn(){
-	return this.activeCamera;
+	return activeCamera;
 };
 
 PADrend.EventLoop.getBGColor := fn(){
@@ -214,7 +206,7 @@ PADrend.EventLoop.getRenderingFlags := fn(){
 };
 
 PADrend.EventLoop.setActiveCamera := fn(MinSG.AbstractCameraNode newCamera){
-	this.activeCamera = newCamera;
+	activeCamera = newCamera;
 };
 
 PADrend.EventLoop.setBGColor := fn(Util.Color4f newColor){
@@ -226,35 +218,6 @@ PADrend.EventLoop.setRenderingFlags := fn(Number value){
 	this.renderingFlags = value;
 };
 
-PADrend.EventLoop.handleEvent := fn(evt) {
-
-	// if mouseView is activated, ignore gui
-	if(PADrend.getCameraMover().getMouseView()){  // \todo circular dependency to PADrend.Navigation -> resolve this!
-		if (executeExtensions('PADrend_UIEvent',evt)) 
-			return;
-	}else if ( GLOBALS.gui.handleEvent(evt)||executeExtensions('PADrend_UIEvent',evt) ){
-		return;
-	}else if (evt.type==Util.UI.EVENT_KEYBOARD && evt.pressed) {
-		// [ext:PADrend_KeyPressed]
-		if(executeExtensions('PADrend_KeyPressed',evt)) {
-			return;
-		} else if( (evt.key==Util.UI.KEY_F4 && PADrend.getEventContext().isAltPressed()) || // [ALT] + [F4]
-				(evt.key == Util.UI.KEY_Q && PADrend.getEventContext().isCtrlPressed()) ) { // [CTRL] + [q]{ 
-			PADrend.EventLoop.stop();
-			return;
-		}
-	} else if (evt.type == Util.UI.EVENT_RESIZE) {
-		renderingContext.setWindowClientArea(0, 0, evt.width, evt.height);
-		Listener.notify(Listener.TYPE_APP_WINDOW_SIZE_CHANGED, [evt.width, evt.height]);
-	} else if (evt.type == Util.UI.EVENT_QUIT) {
-		PADrend.EventLoop.stop();
-		return;
-	}
-	return;
-};
-
-
-
 PADrend.EventLoop.planTask := fn(time,fun){
 	this.taskScheduler.plan(time,fun);
 };
@@ -262,7 +225,7 @@ PADrend.EventLoop.planTask := fn(time,fun){
 PADrend.EventLoop.singleFrame := fn() {
 
 	// create "default" rendering pass
-	var renderingPasses = [ new PADrend.RenderingPass("default",PADrend.getRootNode(), getActiveCamera(), this.renderingFlags, this.doClearScreen ? this.bgColor : false) ];
+	var renderingPasses = [ new PADrend.RenderingPass("default",PADrend.getRootNode(),activeCamera, this.renderingFlags, this.doClearScreen ? this.bgColor : false) ];
 	executeExtensions('PADrend_BeforeRendering',renderingPasses);
 
 	// -------------------
@@ -285,37 +248,26 @@ PADrend.EventLoop.singleFrame := fn() {
 	executeExtensions('PADrend_AfterRendering',getActiveCamera());
 
 	// -------------------
-	// ---- Show Gui
-	if(gui_LazyRendering){
-		renderingContext.pushAndSetFBO(gui_FBO);
-		gui.display();
-		renderingContext.popFBO();
-		
-		var blending=new Rendering.BlendingParameters;
-		blending.enable();
-		blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE_MINUS_SRC_ALPHA);
-		renderingContext.pushAndSetBlending(blending);
-		
-		Rendering.drawTextureToScreen(renderingContext,
-						new Geometry.Rect(0,0,renderingContext.getWindowWidth()*0.5,renderingContext.getWindowHeight()) ,
-						gui_Texture,new Geometry.Rect(0,0,1,1));
-		
-		Rendering.drawTextureToScreen(renderingContext,
-						new Geometry.Rect(renderingContext.getWindowWidth()*0.5,0,renderingContext.getWindowWidth()*0.5,renderingContext.getWindowHeight()) ,
-						gui_Texture,new Geometry.Rect(0,0,1,1));
-		
-		renderingContext.popBlending();
-	}else{
-		gui.display();
-	}
-
-	// -------------------
 	// ---- Handle User Inputs
 	PADrend.getEventQueue().process();
 	while(PADrend.getEventQueue().getNumEventsAvailable() > 0) {
-		var event = PADrend.getEventQueue().popEvent();
+		var evt = PADrend.getEventQueue().popEvent();
 		try {
-			this.handleEvent(event);
+			// [ext:PADrend_UIEvent]
+			if ( executeExtensions('PADrend_UIEvent',evt) ){
+			}else if (evt.type==Util.UI.EVENT_KEYBOARD && evt.pressed) {
+				// [ext:PADrend_KeyPressed]
+				if(executeExtensions('PADrend_KeyPressed',evt)) {
+				} else if( (evt.key==Util.UI.KEY_F4 && PADrend.getEventContext().isAltPressed()) || // [ALT] + [F4]
+						(evt.key == Util.UI.KEY_Q && PADrend.getEventContext().isCtrlPressed()) ) { // [CTRL] + [q]{ 
+					PADrend.EventLoop.stop();
+				}
+			} else if (evt.type == Util.UI.EVENT_RESIZE) {
+				renderingContext.setWindowClientArea(0, 0, evt.width, evt.height);
+				Listener.notify(Listener.TYPE_APP_WINDOW_SIZE_CHANGED, [evt.width, evt.height]);
+			} else if (evt.type == Util.UI.EVENT_QUIT) {
+				PADrend.EventLoop.stop();
+			}
 		} catch(exception) {
 			Runtime.warn(exception);
 		}
@@ -337,42 +289,21 @@ PADrend.EventLoop.singleFrame := fn() {
 	// ---- Check for GL error
 	Rendering.enableGLErrorChecking();
 	Rendering.checkGLError();
-	if(!this.GLErrorChecking) {
+	if(!glErrorChecking()) 
 		Rendering.disableGLErrorChecking();
-	}	
 };
 
 PADrend.EventLoop.stop := fn(){
-	active=false;
+	active = false;
 	PADrend.message("Stopping event loop...");
-};
-
-PADrend.EventLoop.enableLazyGUI := fn(){
-	PADrend.message("enableLazyGUI: EXPERIMENTAL!");
-	gui_FBO = new Rendering.FBO;
-
-    renderingContext.pushAndSetFBO(gui_FBO);
-    gui_Texture = Rendering.createStdTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
-    gui_FBO.attachColorTexture(renderingContext,gui_Texture);
-    out(gui_FBO.getStatusMessage(renderingContext),"\n");
-
-    renderingContext.popFBO();
-    
-	gui_LazyRendering = true;
-//	gui.enableLazyRendering();
-};
-
-PADrend.EventLoop.disableLazyGUI := fn(){
-	gui_FBO = void;
-	gui_Texture = void;
-	gui_LazyRendering = false;
-//	gui.disableLazyRendering();
 };
 
 // --------------------
 // Aliases
 
-PADrend.getActiveCamera := PADrend.EventLoop -> PADrend.EventLoop.getActiveCamera;
+PADrend.EventLoop.glErrorChecking := glErrorChecking;
+
+PADrend.getActiveCamera := PADrend.EventLoop.getActiveCamera;
 PADrend.getBGColor := PADrend.EventLoop -> PADrend.EventLoop.getBGColor;
 PADrend.getRenderingFlags := PADrend.EventLoop -> PADrend.EventLoop.getRenderingFlags;
 PADrend.setActiveCamera := PADrend.EventLoop -> PADrend.EventLoop.setActiveCamera;
