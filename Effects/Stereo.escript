@@ -166,6 +166,11 @@ plugin.init @(override) := fn(){
 				lCamera = originalCamera.clone();
 				dolly.getHeadNode() += lCamera;
 			}
+			if( mode==MODE_SIDE_BY_SIDE_LR||mode==MODE_SIDE_BY_SIDE_RL ){
+				Util.requirePlugin('PADrend/GUI').guiMode(2); // temp!!!!!!!!!!!!!!
+			}else{
+				Util.requirePlugin('PADrend/GUI').guiMode(0); // temp!!!!!!!!!!!!!!
+			}
 			
 			// register extension
 			@(once) static isActive = false;
