@@ -4,7 +4,7 @@
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
  * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -47,16 +47,16 @@ static createRenderingPasses = fn(renderingPasses){
 	var newPasses = [];
 	var dolly = PADrend.getDolly();
 	var originalCamera = dolly.getCamera();
-	
+
 	foreach(renderingPasses as var pass){
-		
+
 		// only modify the "default" pass
 		if(pass.getId()!="default"){
 			newPasses += pass;
 			continue;
 		}
 		defaultPassFound = true;
-		
+
 		// adapt parameters
 		foreach( [lCamera,rCamera] as var cam){
 			if(cam)
@@ -78,7 +78,7 @@ static createRenderingPasses = fn(renderingPasses){
 			case MODE_SIDE_BY_SIDE_LR:{
 				lCamera.setViewport( viewport.clone().setWidth( viewport.getWidth()*0.5) );
 				newPasses += new PADrend.RenderingPass(pass.getId()+"_left", pass.getRootNode(), lCamera, pass.getRenderingFlags(), pass.getClearColor());
-				
+
 				rCamera.setViewport( viewport.clone().setWidth( viewport.getWidth()*0.5).setX(viewport.getWidth()*0.5) );
 				newPasses += new PADrend.RenderingPass(pass.getId()+"_right", pass.getRootNode(), rCamera, pass.getRenderingFlags(), pass.getClearColor());
 				break;
@@ -86,7 +86,7 @@ static createRenderingPasses = fn(renderingPasses){
 			case MODE_SIDE_BY_SIDE_RL:{
 				lCamera.setViewport( viewport.clone().setWidth( viewport.getWidth()*0.5).setX(viewport.getWidth()*0.5) );
 				newPasses += new PADrend.RenderingPass(pass.getId()+"_left", pass.getRootNode(), lCamera, pass.getRenderingFlags(), pass.getClearColor());
-				
+
 				rCamera.setViewport( viewport.clone().setWidth( viewport.getWidth()*0.5) );
 				newPasses += new PADrend.RenderingPass(pass.getId()+"_right", pass.getRootNode(), rCamera, pass.getRenderingFlags(), pass.getClearColor());
 				break;
@@ -95,7 +95,7 @@ static createRenderingPasses = fn(renderingPasses){
 		}
 	}
 	renderingPasses.swap(newPasses);
-	
+
 	if(!defaultPassFound){
 		Runtime.warn("No 'default' rendering pass found.");
 	}
@@ -105,7 +105,6 @@ static createRenderingPasses = fn(renderingPasses){
 plugin.init @(override) := fn(){
 	stereoMode = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.stereoMode',MODE_DISABLED);
 	leftEyeHeadOffset = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.lOffset',"-0.03 0 0");
-
 	registerExtension('PADrend_Init',this->fn(){
 		gui.registerComponentProvider('Effects_MainMenu.stereo',[
 			"*Stereo mode*",
@@ -129,7 +128,7 @@ plugin.init @(override) := fn(){
 			},
 			'----'
 		]);
-		
+
 		leftEyeHeadOffset.onDataChanged += fn(str){
 			var arr = str.split(" ");
 			if(arr.count()!=3){
@@ -138,11 +137,11 @@ plugin.init @(override) := fn(){
 			}
 			if(lCamera)
 				lCamera.setRelOrigin( new Geometry.Vec3( (0+arr[0]), (0+arr[1]), (0+arr[2]) ) );
-			
+
 			if(rCamera)
 				rCamera.setRelOrigin( new Geometry.Vec3( (0-arr[0]), (0+arr[1]), (0+arr[2]) ) );
 		};
-		
+
 		stereoMode.onDataChanged += fn(mode){
 			var dolly = PADrend.getDolly();
 			var originalCamera = dolly.getCamera();
@@ -171,12 +170,12 @@ plugin.init @(override) := fn(){
 			}else{
 				Util.requirePlugin('PADrend/GUI').guiMode(0); // temp!!!!!!!!!!!!!!
 			}
-			
+
 			// register extension
 			@(once) static isActive = false;
 			if(mode==MODE_DISABLED){
 				isActive = false;
-				originalCamera.setRelOrigin( [0,0,0] ); 
+				originalCamera.setRelOrigin( [0,0,0] );
 			}else if(!isActive){
 				isActive = true;
 				registerExtension('PADrend_BeforeRendering',fn(renderingPasses){
@@ -185,12 +184,20 @@ plugin.init @(override) := fn(){
 					createRenderingPasses(renderingPasses);
 				});
 			}
-			
+
 			leftEyeHeadOffset.forceRefresh();
 		};
 		stereoMode.forceRefresh();
+
+		 Util.requirePlugin('PADrend/RemoteControl').registerFunctions({
+            'EffectsStereo.changeMode' : fn(){
+                stereoMode(stereoMode() != MODE_DISABLED ? MODE_DISABLED : MODE_SIDE_BY_SIDE_LR ) ;
+                print_r(stereoMode());
+                return true;
+            },
+        });
 	});
-	
+
 	return true;
 };
 
