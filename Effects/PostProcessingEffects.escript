@@ -186,9 +186,13 @@ PPEffectPlugin.setEffect:=fn(newEffect){
 };
 
 PPEffectPlugin.loadAndSetEffect := fn(filename){
-	var effect = load(filename);
-	setEffect(effect);
-	activeEffectFile(filename);
+	if(filename){
+		var effect = load(filename);
+		setEffect(effect);
+		activeEffectFile(filename);
+	}else{
+		setEffect(void);
+	}
 };
 
 /****************************************************************************
