@@ -326,6 +326,10 @@ plugin.initGUI := fn(){
 //					return;
 //				}
 				var nextObject = objects.popBack();
+				if(nextObject == entry.node) // special case: skip iff the nextObject is the scene and the entry is the root entry
+					continue;
+				
+				
 				var nextEntry = entry.entryRegistry[nextObject]; 			//! \see SceneEditor.ObjectEditor.SemanticObjectEntryTrait
 				if(!nextEntry){
 					entry.refreshSubentries();								//! \see GUI.TreeViewEntry.DynamicSubentriesTrait
