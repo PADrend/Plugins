@@ -12,7 +12,7 @@
  */
 
 /*!
-    Fades out connected nodes using an animated blending state.
+    ...
 
     Links
 

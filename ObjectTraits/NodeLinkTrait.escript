@@ -108,10 +108,10 @@ trait.onInit += fn(MinSG.Node node){
 		});
 		storeEntries(this,this.__linkedNodes);
 	};
-	node.getLinkedNodes := fn(String role){ 
+	node.getLinkedNodes := fn([String,void] role=void){ 
 		var linkedNodes = [];
 		foreach(this.__linkedNodes as var entry)
-			if(entry.role==role)
+			if(!role || entry.role==role)
 				linkedNodes.append(entry.nodes);
 		return linkedNodes;
 	};
@@ -125,7 +125,9 @@ trait.onInit += fn(MinSG.Node node){
 };
 trait.allowRemoval();
 
-
+trait.onRemove += fn(node){
+	//!!!!!!!!!!!!!!!!!!!!!1
+};
 
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
