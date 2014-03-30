@@ -33,6 +33,7 @@ plugin.init = fn() {
 				'ObjectTraits/KeyFrameAnimationTrait',
 				'ObjectTraits/MetaObjectTrait',
 				'ObjectTraits/NodeLinkTrait',
+				'ObjectTraits/PointingJointTrait',
 				'ObjectTraits/RayCastSensorTrait',
 				'ObjectTraits/RotationTrait',
 				'ObjectTraits/TransformationProxyTrait',

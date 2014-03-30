@@ -215,22 +215,31 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 			entries += {	GUI.TYPE : GUI.TYPE_NEXT_ROW	};
 		}
 		entries += {
-			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.TYPE : GUI.TYPE_MENU,
 //			GUI.WIDTH : 20,
-			GUI.LABEL : "Add link",
-			GUI.ON_CLICK : [node,refreshCallback] => fn(node,refreshCallback){
-				var target = NodeEditor.getSelectedNode();
-				if(!target){
-					target = self;
+			GUI.LABEL : "Add link(s)",
+			GUI.MENU : [node,refreshCallback] => fn(node,refreshCallback){
+				var entries = [];
+				foreach(node.availableLinkRoleNames as var roleName){
+					entries += {
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : roleName,
+						GUI.ON_CLICK : [node,refreshCallback,roleName] => fn(node,refreshCallback,roleName){
+							foreach( (NodeEditor.getSelectedNodes().empty() ? [node] : NodeEditor.getSelectedNodes()) as var target){
+								var query = createRelativeNodeQuery(node,target);
+								if(!query){
+									PADrend.message("Can't create relative node query!");
+									continue;
+								}
+							
+								node.addLinkedNodes(roleName,query,[target] );
+							}
+							refreshCallback();
+						}
+					};
 				}
-				var query = createRelativeNodeQuery(node,target);
-				if(!query){
-					PADrend.message("Can't create relative node query!");
-					return;
-				}
-				
-				node.addLinkedNodes("link",query,[target] );
-				refreshCallback();
+				return entries;
+
 			}
 		};
 		

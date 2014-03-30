@@ -27,7 +27,9 @@ Renderer.displayNode := fn(node,params){
 //	out("+");
 };
 
-Renderer.doEnableState @(override) ::= fn(...){ //node,params){
+Renderer.doEnableState @(override) ::= fn(node,params){ //node,params){
+	if( !params.getFlag(MinSG.SHOW_META_OBJECTS) )
+		return MinSG.STATE_SKIPPED;
 	this.nodes.clear();
 	return MinSG.STATE_OK;
 };

@@ -56,7 +56,9 @@ trait.onInit += fn(MinSG.Node node){
 	};
 	
 	node.onClick := fn(evt){
-		this.buttonState(!this.buttonState());
+		var ctxt = Util.requirePlugin( 'PADrend/SystemUI').getEventContext();
+		if( evt.button == 0 && !ctxt.isAltPressed() && !ctxt.isCtrlPressed() )
+			this.buttonState(!this.buttonState());
 	};
 	
 };
