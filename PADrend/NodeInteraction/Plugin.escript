@@ -130,7 +130,11 @@ PADrend.NodeInteraction.ex_AfterRenderingPass := fn(...){
 //!	[ext:UIEvent]
 PADrend.NodeInteraction.ex_UIEvent:=fn(evt){
 	if( evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_LEFT && evt.pressed){
-		// try first to pick a metaObject
+			
+		// if metaObjects (e.g. lights or similar nodes) are visible, allow interaction.
+		objPicker.includeMetaObjects( (Util.requirePlugin('PADrend/EventLoop').getRenderingFlags() & MinSG.SHOW_META_OBJECTS)>0 );
+			
+		// try first to pick a metaObject (= nodes located below the metaObjectRoot)
 		var node = objPicker.queryNodeFromScreen(GLOBALS.frameContext,metaObjectRoot,new Geometry.Vec2(evt.x,evt.y),true);
 		// otherwise a pick node from the scene
 		if(!node)

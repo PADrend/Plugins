@@ -146,7 +146,11 @@ ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlace
 ObjectPlacer.defaultNodeInserter := fn(Geometry.Vec2 screenPos,MinSG.Node node){
 
 	var scene = PADrend.getCurrentScene();
-	var r = new MinSG.RendRayCaster;
+	@(once) static r = new MinSG.RendRayCaster;
+	
+	// check if metaObjects (e.g. lights or similar nodes) are visible.
+	r.includeMetaObjects( (Util.requirePlugin('PADrend/EventLoop').getRenderingFlags() & MinSG.SHOW_META_OBJECTS)>0 );
+
 	var pos = r.queryIntersectionFromScreen(frameContext,scene,screenPos);
 	if(!pos)
 		pos = PADrend.getCurrentSceneGroundPlane().getIntersection( frameContext.calcWorldRayOnScreenPos(screenPos) );

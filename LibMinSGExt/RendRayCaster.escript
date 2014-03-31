@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 /****
- **	[PADrend] Util/RendRayCaster.escript
+ **	[PADrend] LibMinSGExt/RendRayCaster.escript
  **/
 
 /*! A Class for ray casting based on rendering.
@@ -28,6 +28,7 @@ var T = MinSG.RendRayCaster;
 T.castCam @(private) := void;
 T.resolution @(private) := void;
 T.fbo @(private) := void;
+T.includeMetaObjects @(public,init) := Std.require('Std/DataWrapper');
 
 T._constructor ::= fn(Number _resolution=10){
 	resolution = _resolution;
@@ -69,7 +70,7 @@ T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 sourc
 	var maxDistance = false;
 	if(restrictSearchingDistance){
 		fc.getRenderingContext().clearScreen(new Util.Color4f(0,0,0,1));
-		rootNode.display(fc,MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING);//|MinSG.NO_STATES);
+		rootNode.display(fc,MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING | (includeMetaObjects()?MinSG.SHOW_META_OBJECTS:0) );//|MinSG.NO_STATES);
 		// read depth
 		var screenCenter=resolution*0.5;
 		var screenSpaceDepth=Rendering.readDepthValue(screenCenter,screenCenter);
@@ -112,7 +113,7 @@ T.queryIntersection ::= fn(MinSG.FrameContext fc,[MinSG.Node,Array] rootNodes,Ge
 	fc.getRenderingContext().clearScreen(new Util.Color4f(0,0,0,1));
 	
 	foreach(rootNodes as var node)
-		node.display(fc,MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING);//|MinSG.NO_STATES);
+		node.display(fc,MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING | (includeMetaObjects()?MinSG.SHOW_META_OBJECTS:0));//|MinSG.NO_STATES);
 	// read depth
 	var screenCenter=resolution*0.5;
 	var depth=Rendering.readDepthValue(screenCenter,screenCenter);
