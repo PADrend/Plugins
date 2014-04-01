@@ -173,9 +173,10 @@ trait.onInit += fn(MinSG.Node node){
 				colors += color;
 			}
 		}
-		
-		var sourceState = new LinkState(nodes,colors);	
-		node.__NodeLinkTrait_revoce += addRevocably( node, sourceState);
+		if(!nodes.empty()){
+			var sourceState = new LinkState(nodes,colors);	
+			node.__NodeLinkTrait_revoce += addRevocably( node, sourceState);
+		}
 	};
 
 	//! \see ObjectTraits/NodeLinkTrait
