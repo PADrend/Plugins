@@ -32,6 +32,7 @@ plugin.init = fn() {
 				'ObjectTraits/FaderTrait',
 				'ObjectTraits/KeyFrameAnimationTrait',
 				'ObjectTraits/MetaObjectTrait',
+				'ObjectTraits/NodeLinkHighlightTrait',
 				'ObjectTraits/NodeLinkTrait',
 				'ObjectTraits/NodeLinkVisuTrait',
 				'ObjectTraits/PointingJointTrait',
