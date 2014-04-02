@@ -260,6 +260,11 @@ plugin.collectPresets := fn(){
 	return presets;
 };
 
+
+plugin.collectPresetsByTag := fn(Array tags){
+	return filterPresets(this.collectPresets(),tags);
+};
+
 //! Returns an array of tags of all found presets
 plugin.collectUsedTags := fn(){
 	var tagSet = new Set; // collect used tags

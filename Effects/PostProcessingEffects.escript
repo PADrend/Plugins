@@ -32,6 +32,8 @@ static defaultEffect = DataWrapper.createFromEntry( PADrend.configCache, 'Effect
 static activeEffectFile = new DataWrapper;
 static plugin = PPEffectPlugin;
 
+plugin.defaultEffect := defaultEffect;
+
 /*!	---|> Plugin	*/
 PPEffectPlugin.init:=fn(){
      { // Register ExtensionPointHandler:

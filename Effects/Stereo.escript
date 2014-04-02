@@ -190,7 +190,7 @@ plugin.init @(override) := fn(){
 		stereoMode.forceRefresh();
 
 		 Util.requirePlugin('PADrend/RemoteControl').registerFunctions({
-            'EffectsStereo.changeMode' : fn(){
+            'EffectsStereo.toggle' : fn(){
                 stereoMode(stereoMode() != MODE_DISABLED ? MODE_DISABLED : MODE_SIDE_BY_SIDE_LR ) ;
                 print_r(stereoMode());
                 return true;
