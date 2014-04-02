@@ -94,6 +94,9 @@ LinkState.doEnableState ::= fn(node,params){
 	return MinSG.STATE_OK;
 };
 LinkState.doDisableState ::= fn(node,params){
+	if( !params.getFlag(MinSG.SHOW_META_OBJECTS) )
+		return MinSG.STATE_SKIPPED;
+	
 	var sourcePos = node.getWorldBB().getCenter();
 	var posAcc = Rendering.PositionAttributeAccessor.create(this.mesh, Rendering.VertexAttributeIds.POSITION);
 
@@ -162,6 +165,8 @@ trait.onInit += fn(MinSG.Node node){
 		var colors = [];
 		//! \see ObjectTraits/NodeLinkTrait
 		foreach( node.accessLinkedNodes() as var linkContainer){
+			if(linkContainer.role==="transform")
+				continue;
 			var r = linkContainer.role.trim();
 			var seed = 41729;
 			for(var i=0;i<r.length();++i)

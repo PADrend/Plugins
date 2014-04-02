@@ -35,6 +35,10 @@ trait.onInit += fn(MinSG.Node node){
 	
 	node.buttonState := new DataWrapper(false);
 	node.buttonState.onDataChanged += [node]=>fn(node, value){
+		if(value) //! TEMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			node.setScale(1.5);
+		else
+			node.setScale(1.0);
 		var time = PADrend.getSyncClock();
 		
 		//! \see ObjectTraits/NodeLinkTrait

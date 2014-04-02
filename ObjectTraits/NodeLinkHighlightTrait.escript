@@ -61,8 +61,12 @@ trait.onInit += fn(MinSG.Node node){
 		node.__NodeLinkHighlightTrait_revoce();
 		
 		//! \see ObjectTraits/NodeLinkTrait
-		foreach(node.getLinkedNodes() as var n)
+		foreach(node.getLinkedNodes() as var n){
 			node.__NodeLinkHighlightTrait_revoce += addRevocably( n, linkedNodeState);
+			
+			n.deactivate();
+			node.__NodeLinkHighlightTrait_revoce += [n] => fn(node){ node.activate(); return $REMOVE;	};
+		}
 		
 	};
 

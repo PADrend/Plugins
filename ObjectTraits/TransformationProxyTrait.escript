@@ -14,6 +14,9 @@
 
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/TransformationProxyTrait');
 
+
+static transformationInProgress = false;
+
 trait.onInit += fn(MinSG.Node node){
 
 	node.transformationProxyEnabled := new DataWrapper(true);
@@ -80,19 +83,25 @@ trait.onInit += fn(MinSG.Node node){
 			wSRT.setScale(1.0);
 			this._inverseWorldTrans.setScale(1.0);
 	
-			if(node.transformationProxyEnabled()){
-				var relWorldTransformation = wSRT * this._inverseWorldTrans;
-				var relWorldRotation = relWorldTransformation.getRotation();
+			if(node.transformationProxyEnabled() && !transformationInProgress){
+				transformationInProgress = true;
+				try{
+					var relWorldTransformation = wSRT * this._inverseWorldTrans;
+					var relWorldRotation = relWorldTransformation.getRotation();
 
-				foreach(transformedNodes as var cNode){
-					var clientWorldSRT = cNode.getWorldSRT();
-					clientWorldSRT.setRotation( relWorldRotation * clientWorldSRT.getRotation());
-					clientWorldSRT.setTranslation( relWorldTransformation * clientWorldSRT.getTranslation() );
-					cNode.setWorldSRT(clientWorldSRT);
+					foreach(transformedNodes as var cNode){
+						var clientWorldSRT = cNode.getWorldSRT();
+						clientWorldSRT.setRotation( relWorldRotation * clientWorldSRT.getRotation());
+						clientWorldSRT.setTranslation( relWorldTransformation * clientWorldSRT.getTranslation() );
+						cNode.setWorldSRT(clientWorldSRT);
+					}
+				}catch(e){ // finally
+					transformationInProgress = false;
+					throw(e);
 				}
+				transformationInProgress = false;
 			}
 			this._inverseWorldTrans := wSRT.inverse();
-
 		}
 	};
 };
