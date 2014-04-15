@@ -1127,7 +1127,13 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Edit",
 				GUI.ON_CLICK : obj->fn(){
-					Util.openOS(this.shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES)[this.index]['file']);
+					var filename = this.shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES)[this.index]['file'];
+					var fullPath = PADrend.getSceneManager().locateShaderFile(filename);
+					if(fullPath)
+						Util.openOS(fullPath);
+					else{
+						Runtime.warn("ShaderFile not found: "+filename);
+					}
 				},
 				GUI.WIDTH : 40,
 				GUI.TOOLTIP : "Edit the file using the system's editor."

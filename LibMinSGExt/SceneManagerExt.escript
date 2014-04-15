@@ -53,4 +53,13 @@ T.loadScene ::= fn(filename, Number importOptions=0){
 	return sceneRoot;
 };
 
+T.locateShaderFile ::= fn(String filename){
+	foreach(this._shaderSearchPaths as var p){
+		if(Util.isFile(p+filename))
+			return p+filename;
+	}
+	return false;
+
+};
+
 return T;
