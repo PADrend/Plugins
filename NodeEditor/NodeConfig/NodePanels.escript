@@ -215,7 +215,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.GroupNode, fn(node, panel){
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Levels",
 		GUI.TOOLTIP			:	"Output how many nodes are on which level of the scene graph.",
-		GUI.ON_CLICK		:	(fn(MinSG.GroupNode groupNode) {
+		GUI.ON_CLICK		:	[node] => fn(MinSG.GroupNode groupNode) {
 									var levelCounts = MinSG.countNodesInLevels(groupNode);
 									var firstLine = "Level:";
 									var secondLine = "Count:";
@@ -224,7 +224,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.GroupNode, fn(node, panel){
 										secondLine += "\t" + count;
 									}
 									outln(firstLine, "\n", secondLine);
-								}).bindFirstParams(node),
+								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	panel++;

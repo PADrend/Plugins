@@ -203,9 +203,9 @@ plugin.rebuildGUI := fn(panel) {
 		};
 		panel++;
 	}
-	statRefreshGroup += (fn(stats) {
+	statRefreshGroup += [stats] =>fn(stats) {
 		PADrend.configCache.setValue('Tools.FrameStats.Stats', PADrend.serialize(stats));
-	}).bindLastParams(stats);
+	};
 };
 
 

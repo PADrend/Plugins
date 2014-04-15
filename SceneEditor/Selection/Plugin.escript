@@ -101,8 +101,8 @@ plugin.createUIToolEntries :=fn(){
 						setSwitch(b);
 					};
 					PADrend.accessUIToolConfigurator('SceneEditor_Window')
-							.registerActivationListener(this->(swithFun.bindFirstParams(true)))
-							.registerDeactivationListener(this->(swithFun.bindFirstParams(false)));
+							.registerActivationListener([true]=>this->swithFun)
+							.registerDeactivationListener([false]=>this->swithFun);
 				},
 
             }],
@@ -120,8 +120,8 @@ plugin.createUIToolEntries :=fn(){
 						setSwitch(b);
 					};
 					PADrend.accessUIToolConfigurator('SceneEditor_Crossing')
-							.registerActivationListener(this->(swithFun.bindFirstParams(true)))
-							.registerDeactivationListener(this->(swithFun.bindFirstParams(false)));
+							.registerActivationListener([true]=>this->swithFun)
+							.registerDeactivationListener([false]=>this->swithFun);
 				},
 
             }],

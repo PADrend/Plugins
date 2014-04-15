@@ -53,7 +53,7 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 		GUI.SIZE				:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.2, 33]
 	});
 
-	cell.createEditGUI := (fn(MinSG.Waypoint waypoint) {
+	cell.createEditGUI := [waypoint] => fn(MinSG.Waypoint waypoint) {
 		this.clear();
 
 		this.add(this.iconArea);
@@ -68,7 +68,7 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 		this.btnSetPos.oldSRT := waypoint.getSRT();
 
 		this.update();
-	}).bindFirstParams(waypoint);
+	};
 
 	cell.createViewGUI := fn() {
 		this.clear();
@@ -86,7 +86,7 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Save",
 		GUI.TOOLTIP				:	"Save changes",
-		GUI.ON_CLICK			:	(fn(cell, waypoint) {
+		GUI.ON_CLICK			:	[cell,waypoint] => fn(cell, waypoint) {
 										waypoint.setSRT(cell.btnSetPos.oldSRT);
 										WaypointsPlugin.changeWaypoint(waypoint,
 											cell.edtTime.getData(),
@@ -94,17 +94,17 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 											cell.btnSetPos.newSRT
 										);
 										cell.createViewGUI();
-									}).bindFirstParams(cell, waypoint),
+									},
 		GUI.SIZE				:	[GUI.HEIGHT_ABS, 0, 33]
 	});
 	cell.btnCancel := gui.create({
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Cancel",
 		GUI.TOOLTIP				:	"Cancel edit",
-		GUI.ON_CLICK			:	(fn(cell, waypoint) {
+		GUI.ON_CLICK			:	[cell,waypoint] => fn(cell, waypoint) {
 										waypoint.setSRT(cell.btnSetPos.oldSRT);
 										cell.createViewGUI();
-									}).bindFirstParams(cell, waypoint),
+									},
 		GUI.SIZE				:	[GUI.HEIGHT_ABS, 0, 33]
 	});
 
@@ -123,10 +123,10 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 		GUI.LABEL				:	"",
 		GUI.TOOLTIP				:	"Fly to waypoint",
 		GUI.FLAGS				:	GUI.FLAT_BUTTON,
-		GUI.ON_CLICK			:	(fn(MinSG.Waypoint waypoint, listView) {
+		GUI.ON_CLICK			:	[waypoint,listView] => fn(MinSG.Waypoint waypoint, listView) {
 										WaypointsPlugin.flyTo(waypoint.getTime());
 										listView.setData(waypoint);
-									}).bindFirstParams(waypoint, listView)
+									}
 	});
 
 	cell.btnSetPos := gui.create({
@@ -135,10 +135,10 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 		GUI.LABEL				:	"",
 		GUI.TOOLTIP				:	"Set waypoint's SRT to current camera's SRT",
 		GUI.FLAGS				:	GUI.FLAT_BUTTON,
-		GUI.ON_CLICK			:	(fn(MinSG.Waypoint waypoint) {
+		GUI.ON_CLICK			:	[waypoint] => fn(MinSG.Waypoint waypoint) {
 										this.newSRT = PADrend.getDolly().getSRT();
 										waypoint.setSRT(this.newSRT);
-									}).bindFirstParams(waypoint)
+									}
 	});
 	cell.btnSetPos.newSRT := void;
 	cell.btnSetPos.oldSRT := void;
@@ -147,7 +147,7 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 		GUI.TYPE				:	GUI.TYPE_CONTAINER,
 		GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 44, 33]
 	});
-	cell.update := (fn(MinSG.Waypoint waypoint) {
+	cell.update := [waypoint] => fn(MinSG.Waypoint waypoint) {
 		this.iconArea.clear();
 
 		if(waypoint != void){
@@ -172,7 +172,7 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 			this.edtDesc.setData("!!!! ERROR !!!!");
 			this.txtDesc.setText("!!!! ERROR !!!!");
 		}
-	}).bindFirstParams(waypoint);
+	};
 
 	cell.createViewGUI();
 

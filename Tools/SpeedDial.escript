@@ -396,10 +396,10 @@ plugin.createPresetContextMenu := fn(preset){
 		entries += {
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Create config",
-			GUI.ON_CLICK : this->fn(preset){
+			GUI.ON_CLICK : [preset] => this->fn(preset){
 				IO.saveTextFile(preset.path+".info","{}");
 				showWindow(); // update
-			}.bindLastParams(preset)
+			}
 		};
 	}
 	return entries;

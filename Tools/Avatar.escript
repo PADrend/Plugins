@@ -110,7 +110,7 @@ plugin.enable:=fn(){
 		this.behaviour.lastTime := Util.Timer.now();
 		this.behaviour.mode := 'run';
 		this.behaviour.lastPos := PADrend.getDolly().getWorldPosition();
-		this.behaviour.doExecute = fn(plugin){
+		this.behaviour.doExecute = [this] => fn(plugin){
 			var time = this.getCurrentTime();
 
 			var pos = PADrend.getDolly().getWorldPosition();
@@ -148,7 +148,7 @@ plugin.enable:=fn(){
 			this.lastTime = time;
 			this.lastPos = pos;
 			return MinSG.AbstractBehaviour.CONTINUE;
-		}.bindFirstParams(this);
+		};
 		PADrend.getSceneManager().getBehaviourManager().registerBehaviour(this.behaviour);
 	}
 	else{

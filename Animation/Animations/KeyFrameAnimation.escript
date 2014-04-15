@@ -270,7 +270,7 @@ KeyFrameAnimation.createAnimationBar ::= fn(storyBoardPanel){
 						}
 						
 					},
-					GUI.CONTEXT_MENU_PROVIDER : (fn(animationBar,index){
+					GUI.CONTEXT_MENU_PROVIDER : [animationBar,index] => fn(animationBar,index){
 						var animation  = animationBar.animation;
 						var storyBoardPanel  = animationBar.storyBoardPanel;
 						var kf = animation.getKeyFrame(index);
@@ -334,7 +334,7 @@ KeyFrameAnimation.createAnimationBar ::= fn(storyBoardPanel){
 							}
 						};
 						return entries;
-					}).bindFirstParams(animationBar,index),
+					},
 				});
 				animationBar.grabbers += grabber;
 				animationBar+=grabber;

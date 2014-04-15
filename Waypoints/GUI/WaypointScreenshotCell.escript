@@ -24,9 +24,9 @@ WaypointsPlugin.createWaypointScreenshotCell := fn(MinSG.Waypoint waypoint) {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"",
 		GUI.TOOLTIP				:	WaypointsPlugin.getWaypointDescription(waypoint),
-		GUI.ON_CLICK			:	(fn(MinSG.Waypoint waypoint) {
+		GUI.ON_CLICK			:	[waypoint] => fn(MinSG.Waypoint waypoint) {
 											WaypointsPlugin.flyTo(waypoint.getTime());
-									}).bindFirstParams(waypoint),
+									},
 		GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 120, 90]
 	});
 

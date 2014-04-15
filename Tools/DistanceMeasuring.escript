@@ -127,8 +127,8 @@ plugin.ex_Init:=fn() {
 				setSwitch(b);
 			};
 			PADrend.accessUIToolConfigurator('DistanceMeasure')
-				.registerActivationListener(this->(swithFun.bindFirstParams(true)))
-				.registerDeactivationListener(this->(swithFun.bindFirstParams(false)));
+				.registerActivationListener(this->([true] => swithFun))
+				.registerDeactivationListener(this->([false] => swithFun));
 		},
 		GUI.TOOLTIP : "Distance measuring tool\n"
 				"[LeftClick] on the scene to start measuring distances.\n"

@@ -38,11 +38,11 @@ NodeEditor.registerConfigPanelProvider(MinSG.State, fn(MinSG.State state, panel)
 	panel += {
 		GUI.TYPE				:	GUI.TYPE_TEXT,
 		GUI.LABEL				:	"StateId:",
-		GUI.DATA_PROVIDER		:	(fn(MinSG.State state) {
+		GUI.DATA_PROVIDER		:	[state] => fn(MinSG.State state) {
 										var id = PADrend.getSceneManager().getNameOfRegisteredState(state);
 										return id ? id : "";
-									}).bindFirstParams(state),
-		GUI.ON_DATA_CHANGED		:	(fn(data, MinSG.State state) {
+									},
+		GUI.ON_DATA_CHANGED		:	[state] => fn(MinSG.State state, data) {
 										var id = data.trim();
 										if(!id.empty()){
 											outln("Registering state: ", id, " -> ", state);
@@ -51,7 +51,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.State, fn(MinSG.State state, panel)
 											outln("Unregister state: ", state);
 											PADrend.getSceneManager().unregisterState(state);
 										}
-									}).bindLastParams(state),
+									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup
 	};
 	panel += {

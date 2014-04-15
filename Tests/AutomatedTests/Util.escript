@@ -301,12 +301,12 @@ tests += new Tests.AutomatedTest( "Util/EScript extensions" , fn(){
 	{	// recursive MultiProcedure-call
 		var f = new MultiProcedure;
 		var a = [0];
-		f+=a -> (fn(f,value){
+		f+=a -> ([f]=>fn(f,value){
 			if(value>0) {
 				this[0]+=value;
 				f(value-1);
 			}
-		}).bindFirstParams(f);
+		});
 		
 		f(10);
 		addResult("MultiProcedure 3", a == [10+9+8+7+6+5+4+3+2+1]);
@@ -323,7 +323,7 @@ tests += new Tests.AutomatedTest( "Util/EScript extensions" , fn(){
 		};
 	
 		var f1 = f.bindLastParams(7);
-		var f2 = f.bindFirstParams(7);
+		var f2 = [7]=>f;
 	
 		addResult("UserFunction.bind", f1(4) == 74 && f1.getBoundParams()[0] == 7
 						&& f2(4) == 47 && f2.getBoundParams()[0] == 7 );

@@ -101,7 +101,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 			GUI.TYPE				:	GUI.TYPE_BUTTON,
 			GUI.LABEL				:	"Suggest",
 			GUI.TOOLTIP				:	"Suggest a file name based on the current scene,\ncamera path, renderer, and evaluator.",
-			GUI.ON_CLICK			:	fn(DataWrapper fileName, DataWrapper evaluatorName) {
+			GUI.ON_CLICK			:	[outputFileName, evaluatorName] => fn(DataWrapper fileName, DataWrapper evaluatorName) {
 											var suggestions = [];
 											var scene = PADrend.getCurrentScene();
 											if(scene && scene.isSet($filename) && !scene.filename.empty()) {
@@ -134,7 +134,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 												suggestions += evaluatorName();
 											}
 											fileName(suggestions.implode("_") + ".tsv");
-										}.bindFirstParams(outputFileName, evaluatorName),
+										},
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
 		panel++;
@@ -179,7 +179,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 			GUI.TYPE				:	GUI.TYPE_BUTTON,
 			GUI.LABEL				:	"Start measurement",
 			GUI.TOOLTIP				:	"Jump to points on the current path and use the currently selected evaluator to sample values.",
-			GUI.ON_CLICK			:	(MeasurementPlugin.samplePath).bindFirstParams(outputFileName, pointIterations, pathIterations, stepSize),
+			GUI.ON_CLICK			:	[outputFileName, pointIterations, pathIterations, stepSize] => (MeasurementPlugin.samplePath),
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
 	

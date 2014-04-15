@@ -283,12 +283,12 @@ plugin.ex_Init @(private) :=fn(){
 			GUI.TOOLTIP : "Time of day"
 		});
 		menu+=timeSlider;
-		registerExtension('PADrend_AfterFrame',this->fn(timeSlider){
+		registerExtension('PADrend_AfterFrame',[timeSlider] => this->fn(timeSlider){
 			if(timeSlider.isDestroyed()){
 				return Extension.REMOVE_EXTENSION;
 			}
 			timeSlider.setData(this.getTimeOfDay());
-		}.bindFirstParams(timeSlider));
+		});
 		menu += {
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Options",

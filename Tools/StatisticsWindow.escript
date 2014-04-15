@@ -52,7 +52,7 @@ plugin.buildWindowsMenu := fn() {
 		windowEntries += {
 			GUI.TYPE		:	GUI.TYPE_BUTTON,
 			GUI.LABEL		:	value["title"],
-			GUI.ON_CLICK	:	this.createStatisticsWindow.bindFirstParams("StatisticsWindow." + key),
+			GUI.ON_CLICK	:	["StatisticsWindow." + key] => this.createStatisticsWindow,
 			GUI.TOOLTIP		:	"Open an existing statistics window."
 		};
 	}
@@ -63,7 +63,7 @@ plugin.buildWindowsMenu := fn() {
 	windowEntries += {
 		GUI.TYPE		:	GUI.TYPE_BUTTON,
 		GUI.LABEL		:	"New Window",
-		GUI.ON_CLICK	:	this.createStatisticsWindow.bindFirstParams("StatisticsWindow.Window" + unusedIndex),
+		GUI.ON_CLICK	:	["StatisticsWindow.Window" + unusedIndex] => this.createStatisticsWindow,
 		GUI.TOOLTIP		:	"Open a new statistics window."
 	};
 	return windowEntries;
@@ -179,11 +179,11 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 			GUI.TYPE				:	GUI.TYPE_CRITICAL_BUTTON,
 			GUI.LABEL				:	"Destroy",
 			GUI.TOOLTIP				:	"Destroy the window background and delete all its settings",
-			GUI.ON_CLICK			:	(fn(String configKey, GUI.Window window) {
+			GUI.ON_CLICK			:	[windowConfigPrefix, window] => fn(String configKey, GUI.Window window) {
 											window.close();
 											gui.markForRemoval(window);
 											PADrend.configCache.unsetValue(configKey);
-										}).bindFirstParams(windowConfigPrefix, window)
+										}
 		},
 		"*Statistics Counters*"
 	];
@@ -199,7 +199,8 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 	// *** Labels for Counters ***
 	var counterConfigData = [];
 	var showFpsLabel = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".showFpsLabel", true);
-	var rebuildLabels = (fn(panel, Array counterConfigData, showFpsLabel, fgValues, highlightValues, fontSize, ...) {
+	var rebuildLabels = [page, counterConfigData, showFpsLabel, windowForegroundColor, windowHighlightColor, fontSize] =>
+							fn(panel, Array counterConfigData, showFpsLabel, fgValues, highlightValues, fontSize, ...) {
 		panel.destroyContents();
 		var fgColor = new Util.Color4ub(new Util.Color4f(fgValues()));
 		var highlightColor = new Util.Color4ub(new Util.Color4f(highlightValues()));
@@ -292,7 +293,7 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 				panel++;
 			}
 		}
-	}).bindFirstParams(page, counterConfigData, showFpsLabel, windowForegroundColor, windowHighlightColor, fontSize);
+	};
 	windowForegroundColor.onDataChanged += rebuildLabels;
 	windowHighlightColor.onDataChanged += rebuildLabels;
 	fontSize.onDataChanged += rebuildLabels;

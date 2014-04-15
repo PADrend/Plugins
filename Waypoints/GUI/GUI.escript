@@ -50,42 +50,42 @@ WaypointsPlugin.createPathMenu := fn() {
 																				{
 																					GUI.TYPE		:	GUI.TYPE_BUTTON,
 																					GUI.LABEL		:	"... root",
-																					GUI.ON_CLICK	:	(fn(MinSG.PathNode path) {
+																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
 																											WaypointsPlugin.attachPath(path,PADrend.getRootNode());
-																										}).bindFirstParams(path)
+																										}
 																				},
 																				{
 																					GUI.TYPE		:	GUI.TYPE_BUTTON,
 																					GUI.LABEL		:	"... scene",
-																					GUI.ON_CLICK	:	(fn(MinSG.PathNode path) {
+																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
 																											WaypointsPlugin.attachPath(path,PADrend.getCurrentScene());
-																										}).bindFirstParams(path)
+																										}
 																				},
 																				{
 																					GUI.TYPE		:	GUI.TYPE_BUTTON,
 																					GUI.LABEL		:	"... selected node",
-																					GUI.ON_CLICK	:	(fn(MinSG.PathNode path) {
+																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
 																											WaypointsPlugin.attachPath(path,NodeEditor.getSelectedNode());
-																										}).bindFirstParams(path)
+																										}
 																				},
 																				"----",
 																				{
 																					GUI.TYPE		:	GUI.TYPE_BUTTON,
 																					GUI.LABEL		:	"Select PathNode",
 																					GUI.TOOLTIP		:	"Select PathNode in NodeEditor",
-																					GUI.ON_CLICK	:	(fn(MinSG.PathNode path) {
+																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
 																											NodeEditor.selectNode(path);
-																										}).bindFirstParams(path)
+																										}
 																				},
 																				"----",
 																				{
 																					GUI.TYPE		:	GUI.TYPE_BUTTON,
 																					GUI.LABEL		:	"Delete",
-																					GUI.ON_CLICK	:	(fn(MinSG.PathNode path) {
+																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
 																											MinSG.destroy(path);
 																											executeExtensions('Waypoints_PathListChanged');
 																											gui.closeAllMenus();
-																										}).bindFirstParams(path)
+																										}
 																				}
 																			]
 											}

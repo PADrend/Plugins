@@ -281,7 +281,7 @@ AnimationBase.createAnimationBar ::= fn(storyBoardPanel){
 		GUI.TYPE : GUI.TYPE_CONTAINER,
 		GUI.WIDTH : 100,
 		GUI.HEIGHT : storyBoardPanel.rowSize-5,
-		GUI.CONTEXT_MENU_PROVIDER : this->(fn(storyBoardPanel){	return getMenuEntries(storyBoardPanel);}).bindFirstParams(storyBoardPanel),
+		GUI.CONTEXT_MENU_PROVIDER : [storyBoardPanel] => this->fn(storyBoardPanel){	return getMenuEntries(storyBoardPanel);},
 		GUI.CONTEXT_MENU_WIDTH : 150,
 		GUI.FLAGS : 0//GUI.BORDER
 	});

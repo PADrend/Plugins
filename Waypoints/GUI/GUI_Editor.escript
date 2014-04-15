@@ -34,7 +34,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		GUI.LIST_ENTRY_HEIGHT	:	35
 	});
 
-	WaypointsPlugin.updatePath := (fn(listView, [MinSG.PathNode, void] path) {
+	WaypointsPlugin.updatePath := [tw] => fn(listView, [MinSG.PathNode, void] path) {
 		listView.clear();
 		if(!path) {
 			return;
@@ -47,7 +47,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		foreach(waypoints as var waypoint) {
 			listView += [waypoint, createWaypointCell(waypoint, listView)];
 		}
-	}).bindFirstParams(tw);
+	};
 
 	registerExtension('Waypoints_PathChanged', WaypointsPlugin -> WaypointsPlugin.updatePath);
 
@@ -65,7 +65,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 	toolbarEntries+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "+Below",
-		GUI.ON_CLICK : (fn(listView) {
+		GUI.ON_CLICK : [tw] => fn(listView) {
 			var path = WaypointsPlugin.getCurrentPath();
 			if(!path)
 				return;
@@ -104,14 +104,14 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 				// Select the new waypoint
 				listView.setData(path.getWaypoint(nextTime));
 			}
-		}).bindFirstParams(tw),
+		},
 		GUI.ICON : iconPath+"AddBelow32.png",
 		GUI.TOOLTIP : "Add waypoint below (first) selected waypoint"
 	};
 	toolbarEntries+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Add",
-		GUI.ON_CLICK : (fn(listView) {
+		GUI.ON_CLICK : [tw] => fn(listView) {
 			var path = WaypointsPlugin.getCurrentPath();
 			if(!path)
 				return;
@@ -120,14 +120,14 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 			WaypointsPlugin.createWaypointAtCam( nextTime);
 			// Select the new waypoint
 			listView.setData(path.getWaypoint(nextTime));
-		}).bindFirstParams(tw),
+		},
 		GUI.ICON : iconPath+"Add32.png",
 		GUI.TOOLTIP : "Add waypoint at end of path"
 	};
 	toolbarEntries+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "+Loop",
-		GUI.ON_CLICK : (fn(listView) {
+		GUI.ON_CLICK : [tw] => fn(listView) {
 			var path = WaypointsPlugin.getCurrentPath();
 			if(!path)
 				return;
@@ -139,7 +139,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 			WaypointsPlugin.closeLoop();
 			// Select the new waypoint
 			listView.setData(path.getWaypoint(nextTime));
-		}).bindFirstParams(tw),
+		},
 		GUI.ICON : iconPath+"CloseLoop32.png",
 		GUI.TOOLTIP : "Add waypoint to close loop (same SRT as first waypoint)"
 	};
@@ -155,20 +155,20 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 	toolbarEntries+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Delete",
-		GUI.ON_CLICK : (fn(listView) {
+		GUI.ON_CLICK : [tw] => fn(listView) {
 			var markedWaypoints = listView.getData();
 			listView.setData(void);
 			foreach(markedWaypoints as var waypoint) {
 				WaypointsPlugin.removeWaypoint(waypoint);
 			}
-		}).bindFirstParams(tw),
+		},
 		GUI.ICON : iconPath+"Trash32.png",
 		GUI.TOOLTIP : "Delete ALL selected waypoints"
 	};
 	toolbarEntries+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Swap",
-		GUI.ON_CLICK : (fn(listView) {
+		GUI.ON_CLICK : [tw] => fn(listView) {
 			var markedWaypoints = listView.getData();
 
 			if(markedWaypoints.count() != 2) {
@@ -183,7 +183,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 				WaypointsPlugin.changeWaypoint(wp1, void, WaypointsPlugin.getWaypointDescription(wp2), wp2.getSRT());
 				WaypointsPlugin.changeWaypoint(wp2, void, desc, srt);
 			}
-		}).bindFirstParams(tw),
+		},
 		GUI.ICON : iconPath+"Swap32.png",
 		GUI.TOOLTIP : "Swap selected waypoints (timestamp)"
 	};
@@ -209,9 +209,9 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 			{
 				GUI.LABEL			:	"Calculate",
 				GUI.TOOLTIP			:	"Calculate by distance and speed (slider)",
-				GUI.ON_CLICK		:	(fn(listView, speed) {
+				GUI.ON_CLICK		:	[tw, speedDataWrapper] => fn(listView, speed) {
 											WaypointsPlugin.setTimecodesByDistance(WaypointsPlugin.getCurrentPath(), speed());
-										}).bindFirstParams(tw, speedDataWrapper)
+										}
 			}
 
 		],

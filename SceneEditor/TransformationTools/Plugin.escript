@@ -100,8 +100,8 @@ plugin.registerMenus:=fn() {
 				setSwitch(b);
 			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Move')
-				.registerActivationListener(this->(swithFun.bindFirstParams(true)))
-				.registerDeactivationListener(this->(swithFun.bindFirstParams(false)));
+				.registerActivationListener([true]=>this->swithFun)
+				.registerDeactivationListener([false]=>this->swithFun);
 		},
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -115,8 +115,8 @@ plugin.registerMenus:=fn() {
 				setSwitch(b);
 			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Rotate')
-				.registerActivationListener(this->(swithFun.bindFirstParams(true)))
-				.registerDeactivationListener(this->(swithFun.bindFirstParams(false)));
+				.registerActivationListener([true]=>this->swithFun)
+				.registerDeactivationListener([false]=>this->swithFun);
 		},
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -131,8 +131,8 @@ plugin.registerMenus:=fn() {
 				setSwitch(b);
 			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Scale')
-				.registerActivationListener(this->(swithFun.bindFirstParams(true)))
-				.registerDeactivationListener(this->(swithFun.bindFirstParams(false)));
+				.registerActivationListener([true]=>this->swithFun)
+				.registerDeactivationListener([false]=>this->swithFun);
 		},
 	},
 	{
@@ -148,8 +148,8 @@ plugin.registerMenus:=fn() {
 				setSwitch(b);
 			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Snap')
-				.registerActivationListener(this->(swithFun.bindFirstParams(true)))
-				.registerDeactivationListener(this->(swithFun.bindFirstParams(false)));
+				.registerActivationListener([true]=>this->swithFun)
+				.registerDeactivationListener([false]=>this->swithFun);
 		},
 	},
 	{
@@ -164,8 +164,8 @@ plugin.registerMenus:=fn() {
 				setSwitch(b);
 			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Snap2')
-				.registerActivationListener(this->(swithFun.bindFirstParams(true)))
-				.registerDeactivationListener(this->(swithFun.bindFirstParams(false)));
+				.registerActivationListener([true]=>this->swithFun)
+				.registerDeactivationListener([false]=>this->swithFun);
 		},
 	},
 	{
@@ -180,8 +180,8 @@ plugin.registerMenus:=fn() {
 				setSwitch(b);
 			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Anchor')
-				.registerActivationListener(this->(swithFun.bindFirstParams(true)))
-				.registerDeactivationListener(this->(swithFun.bindFirstParams(false)));
+				.registerActivationListener( [true]=>this->swithFun )
+				.registerDeactivationListener( [false]=>this->swithFun );
 		},
 		GUI.TOOLTIP : "AnchorTool: Edit a node's anchor points."
 	},

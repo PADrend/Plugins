@@ -37,10 +37,10 @@ plugin.init=fn(){
 			gui.registerComponentProvider('PADrend_PluginsMenu.console',[{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Console",
-				GUI.ON_CLICK : fn(plugin) {
+				GUI.ON_CLICK : [this] => fn(plugin) {
 					plugin.toggleWindow();
 					this.setSwitch(GLOBALS.gui.windows['Console'].isVisible());
-				}.bindFirstParams(this)
+				}
 			}]);
 		});
 		registerExtension('PADrend_KeyPressed',this->this.ex_KeyPressed);

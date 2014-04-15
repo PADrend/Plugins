@@ -134,19 +134,19 @@ plugin.openConfigWindow := fn(){
 	w.addOption({
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL :"single frame (normal [F12] )",
-		GUI.ON_CLICK : this -> (fn(window){
+		GUI.ON_CLICK : [w] => this->fn(window){
 			window.close();
 			planNormalScreenshot();
-		}).bindLastParams(w)
+		}
 	});
 
 	w.addOption({
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL :"high quality multi pass",
-		GUI.ON_CLICK : this -> (fn(window){
+		GUI.ON_CLICK : [w] => this->fn(window){
 			window.close();
 			planHQScreenshot();
-		}).bindLastParams(w)
+		}
 	});
 	w.addOption({
 		GUI.TYPE : GUI.TYPE_RANGE,
@@ -159,10 +159,10 @@ plugin.openConfigWindow := fn(){
 	w.addOption({
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL :"high resolution multi pass",
-		GUI.ON_CLICK : this -> (fn(window){
+		GUI.ON_CLICK : [w] => this->fn(window){
 			window.close();
 			planHRScreenshot();
-		}).bindLastParams(w)
+		}
 	});
 		
 	w.addOption({
@@ -189,16 +189,16 @@ plugin.planNormalScreenshot := fn(filename=void){
 	}
 
 	if(PADrend.configCache.getValue('Tools.ScreenShot.showGUI')){
-		registerExtension('PADrend_AfterFrame',this->(fn(filename){
+		registerExtension('PADrend_AfterFrame',[filename] => this->fn(filename){
 			yield; // wait one frame, to allow the window to close.
 			saveTexture( Rendering.createTextureFromScreen( settings.alpha() ),filename );
 			return Extension.REMOVE_EXTENSION;
-		}).bindLastParams(filename),Extension.HIGH_PRIORITY);
+		},Extension.HIGH_PRIORITY);
 	}else{
-		registerExtension('PADrend_AfterRendering',this->(fn(p,filename){
+		registerExtension('PADrend_AfterRendering',[filename] => this->fn(p,filename){
 			saveTexture( Rendering.createTextureFromScreen( settings.alpha() ),filename );
 			return Extension.REMOVE_EXTENSION;
-		}).bindLastParams(filename),Extension.LOW_PRIORITY);
+		},Extension.LOW_PRIORITY);
 	}
 };
 
@@ -208,7 +208,7 @@ plugin.planHQScreenshot := fn(filename=void){
 	}
 
 	if(PADrend.configCache.getValue('Tools.ScreenShot.showGUI')){
-		registerExtension('PADrend_AfterFrame',this->(fn(filename){
+		registerExtension('PADrend_AfterFrame',[filename] => this->fn(filename){
 			yield; // wait one frame, to allow the window to close.
 			
 			var it = performHq(filename);
@@ -218,9 +218,9 @@ plugin.planHQScreenshot := fn(filename=void){
 				yield;
 			}
 			return Extension.REMOVE_EXTENSION;
-		}).bindLastParams(filename),Extension.HIGH_PRIORITY);
+		},Extension.HIGH_PRIORITY);
 	}else{
-		registerExtension('PADrend_AfterRendering',this->(fn(p,filename){
+		registerExtension('PADrend_AfterRendering',[filename] => this->fn(p,filename){
 			var it = performHq(filename);
 			yield;
 			while(!it.end()) {
@@ -228,7 +228,7 @@ plugin.planHQScreenshot := fn(filename=void){
 				yield;
 			}
 			return Extension.REMOVE_EXTENSION;
-		}).bindLastParams(filename),Extension.LOW_PRIORITY);
+		},Extension.LOW_PRIORITY);
 	}
 };
 
@@ -238,7 +238,7 @@ plugin.planHRScreenshot := fn(filename=void){
 	}
 	
 	if(PADrend.configCache.getValue('Tools.ScreenShot.showGUI')){
-		registerExtension('PADrend_AfterFrame',this->(fn(filename){
+		registerExtension('PADrend_AfterFrame',[filename] => this->fn(filename){
 			yield; // wait one frame, to allow the window to close.
 			
 			var it = performHr(filename);
@@ -248,9 +248,9 @@ plugin.planHRScreenshot := fn(filename=void){
 				yield;
 			}
 			return Extension.REMOVE_EXTENSION;
-		}).bindLastParams(filename),Extension.HIGH_PRIORITY);
+		},Extension.HIGH_PRIORITY);
 	}else{
-		registerExtension('PADrend_AfterRendering',this->(fn(p,filename){
+		registerExtension('PADrend_AfterRendering',[filename] => this->fn(p,filename){
 			var it = performHr(filename);
 			yield;
 			while(!it.end()) {
@@ -258,7 +258,7 @@ plugin.planHRScreenshot := fn(filename=void){
 				yield;
 			}
 			return Extension.REMOVE_EXTENSION;
-		}).bindLastParams(filename),Extension.LOW_PRIORITY);
+		},Extension.LOW_PRIORITY);
 	}
 };
 
