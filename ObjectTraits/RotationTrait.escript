@@ -28,9 +28,12 @@ trait.onInit += fn(MinSG.Node node){
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationPlay += fn(time,lastTime){
 //		outln("play");
-//		var srt = this._rotationInitialSRT.clone();
-		var srt = this.getSRT();
-		srt.rotateLocal_deg( (time-lastTime)*this.rotationSpeed(),new Geometry.Vec3(0,1,0) );
+//		var srt = this.getSRT();
+//		srt.rotateLocal_deg( (time-lastTime)*this.rotationSpeed(),new Geometry.Vec3(0,1,0) );
+
+		var srt = this._rotationInitialSRT.clone();
+		srt.rotateLocal_deg( (time*this.rotationSpeed())%360,new Geometry.Vec3(0,1,0) );
+
 		this.setSRT(srt);
 	};
 	//! \see ObjectTraits/AnimatedBaseTrait
