@@ -71,7 +71,7 @@ SceneManagement._sceneManager := void;
  */
 SceneManagement.init := fn(){
 	
-	this._sceneManager = new MinSG.SceneManager;
+	this._sceneManager = new (Std.require( 'LibMinSGExt/SceneManagerExt' ));
 
 	{
 		registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+2);

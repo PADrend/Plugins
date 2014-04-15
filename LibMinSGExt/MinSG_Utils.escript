@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2012 Lukas Kopecki
  * Copyright (C) 2012 Mouns R. Husan Almarrani
  * Copyright (C) 2010-2011 Ralf Petring <ralf@petring.net>
@@ -19,6 +19,49 @@
  **
  **  MinSG helper functions
  **/
+
+/*!	Registers the handler for creating a ScriptedState from a description.
+	To register an importer for a custom type, add it to the 'LibMinSGExt/ScriptedStateImportersRegistry':
+		state's printableName  -> fn(description){} -> return state
+*/
+MinSG.setScriptedStateImporter( fn(parentNode,Map description){
+	try{
+		var handler = Std.require('LibMinSGExt/ScriptedStateImportersRegistry')[ description['sStateType'] ];
+		if(handler){
+			var state = handler(description);
+			if(state){
+				parentNode += state;
+				return true;
+			}
+		}
+	}catch(e){ // catch all exceptions here -> the handler is called externally and the execution is fragile
+		outln(e);
+	}
+	return false;
+//	print_r(description);
+//	// dispatch according to description['sStateType'
+});
+
+/*!  Registers the handler for describing scripted states.
+	To be able to export scripted states, they require a proper printableName.
+	(optionally) You can add custom exporters in the 'LibMinSGExt/ScriptedStateExportersRegistry'.
+		state's printableName -> fn(State, Map description)
+	\note Attention: only add valid data (no void!) to the description map -- the program may crash otherwise!
+*/
+MinSG.setScriptedStateExporter( fn(state,description){
+	try{
+		var typeName = state._printableName;
+		description['sStateType'] = ""+typeName;
+		var handler = Std.require('LibMinSGExt/ScriptedStateExportersRegistry')[ typeName ];
+		if(handler)
+			handler(state,description);
+
+		print_r(description);
+	}catch(e){  // catch all exceptions here -> the handler is called externally and the execution is fragile
+		outln(e);
+	}
+
+});
 
 // -------------------------------------------------------------------------
 // node visitors
@@ -467,93 +510,6 @@ MinSG.ShaderUniformState._setUniform ::= MinSG.ShaderUniformState.setUniform;
 MinSG.ShaderUniformState.setUniform ::= fn(params...){
 	return this._setUniform(new Rendering.Uniform(params...));
 };
-
-// ------------------------------
-// SceneManager extensions
-
-MinSG.SceneManager._shaderSearchPaths @(init) := Array;
-
-//! Node|false sceneManager.loadScene( filename of .minsg or .dae [, Number importOptions=0])
-MinSG.SceneManager.loadScene ::= fn(filename,Number importOptions=0){
-	if(!filename)
-		return false;
-	var start=clock();
-	var sceneRoot = void;
-	if(filename.endsWith(".dae") || filename.endsWith(".DAE")) {
-	    out("Loading Collada: ",filename,"\n");
-
-		sceneRoot = this.loadCOLLADA(filename, importOptions);
-	} else {
-	    outln("! TODO",__FILE__,":",__LINE__);
-	    print_r(this._shaderSearchPaths);
-	    Util.info("Loading MinSG: ",filename,"\n");
-	    var importContext = this.createImportContext(importOptions);
-	    foreach(this._shaderSearchPaths as var p)
-			importContext.addShaderSearchPath(p);
-	    
-    	var nodeArray = this.loadMinSGFile(importContext,filename);
-    	if(!nodeArray){
-			out("Could not load scene from file '",filename,"'\n");
-    	}else if(nodeArray.count()>1){
-			sceneRoot=new MinSG.ListNode;
-			foreach(nodeArray as var node){
-				sceneRoot.addChild(node);
-			}
-			out("Note: The MinSG-file ",filename," contains more than a single top level node. Adding a new toplevel ListNode.\n");
-    	}else if(nodeArray.size()==1){
-			sceneRoot=nodeArray[0];
-    	}
-	}
-    if(!sceneRoot)
-        return false;
-    sceneRoot.filename := filename;
-	Util.info("\nDone. ",(clock()-start)," sek\n");
-	return sceneRoot;
-};
-
-
-/*!	Registers the handler for creating a ScriptedState from a description.
-	To register an importer for a custom type, add it to the 'LibMinSGExt/ScriptedStateImportersRegistry':
-		state's printableName  -> fn(description){} -> return state
-*/
-MinSG.setScriptedStateImporter( fn(parentNode,Map description){
-	try{
-		var handler = Std.require('LibMinSGExt/ScriptedStateImportersRegistry')[ description['sStateType'] ];
-		if(handler){
-			var state = handler(description);
-			if(state){
-				parentNode += state;
-				return true;
-			}
-		}
-	}catch(e){ // catch all exceptions here -> the handler is called externally and the execution is fragile
-		outln(e);
-	}
-	return false;
-//	print_r(description);
-//	// dispatch according to description['sStateType'
-});
-
-/*!  Registers the handler for describing scripted states.
-	To be able to export scripted states, they require a proper printableName.
-	(optionally) You can add custom exporters in the 'LibMinSGExt/ScriptedStateExportersRegistry'.
-		state's printableName -> fn(State, Map description)
-	\note Attention: only add valid data (no void!) to the description map -- the program may crash otherwise!
-*/
-MinSG.setScriptedStateExporter( fn(state,description){
-	try{
-		var typeName = state._printableName;
-		description['sStateType'] = ""+typeName;
-		var handler = Std.require('LibMinSGExt/ScriptedStateExportersRegistry')[ typeName ];
-		if(handler)
-			handler(state,description);
-
-		print_r(description);
-	}catch(e){  // catch all exceptions here -> the handler is called externally and the execution is fragile
-		outln(e);
-	}
-
-});
 
 // -------------------------------------------------------
 // misc tools
