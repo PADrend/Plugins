@@ -471,6 +471,8 @@ MinSG.ShaderUniformState.setUniform ::= fn(params...){
 // ------------------------------
 // SceneManager extensions
 
+MinSG.SceneManager._shaderSearchPaths @(init) := Array;
+
 //! Node|false sceneManager.loadScene( filename of .minsg or .dae [, Number importOptions=0])
 MinSG.SceneManager.loadScene ::= fn(filename,Number importOptions=0){
 	if(!filename)
@@ -482,8 +484,14 @@ MinSG.SceneManager.loadScene ::= fn(filename,Number importOptions=0){
 
 		sceneRoot = this.loadCOLLADA(filename, importOptions);
 	} else {
+	    outln("! TODO",__FILE__,":",__LINE__);
+	    print_r(this._shaderSearchPaths);
 	    Util.info("Loading MinSG: ",filename,"\n");
-    	var nodeArray = this.loadMinSGFile(filename, importOptions);
+	    var importContext = this.createImportContext(importOptions);
+	    foreach(this._shaderSearchPaths as var p)
+			importContext.addShaderSearchPath(p);
+	    
+    	var nodeArray = this.loadMinSGFile(importContext,filename);
     	if(!nodeArray){
 			out("Could not load scene from file '",filename,"'\n");
     	}else if(nodeArray.count()>1){

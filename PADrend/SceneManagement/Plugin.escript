@@ -71,7 +71,7 @@ SceneManagement._sceneManager := void;
  */
 SceneManagement.init := fn(){
 	
-	this._sceneManager = new MinSG.SceneManager();
+	this._sceneManager = new MinSG.SceneManager;
 
 	{
 		registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+2);
@@ -161,7 +161,7 @@ SceneManagement.ex_Init := fn(...){
         this.createNewSceneRoot("new MinSG.ListNode()",false);
         out("ok.\n");
     }
-   
+   	this._sceneManager._shaderSearchPaths += Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/";
 
 };
 
