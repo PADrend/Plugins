@@ -1001,37 +1001,11 @@ NodeEditor.addConfigTreeEntryProvider(MinSG.ShaderState,fn( obj,entry ){
 		GUI.TOOLTIP : "Re-create the shader",
 		GUI.FLAGS : GUI.FLAT_BUTTON,
 		GUI.WIDTH : 15,
-		GUI.ON_CLICK : (fn(entry){
+		GUI.ON_CLICK : [entry] => fn(entry){
 			PADrend.message("Recreate shader.");
-			var shaderState = entry.getObject(); 
-			
-			var fileInfo = shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES);
-			var cleanedPrograms = new Map();
-			var vs = [];
-			var fs = [];
-			var gs = [];
-
-			foreach(fileInfo as var progInfo){
-				var file = progInfo['file'].trim();
-				var type = progInfo['type'].trim().toLower();
-				if(file.empty()){
-					continue;
-				}else if(type=='shader/glsl_vs'){
-					vs+=file;
-				}else if(type=='shader/glsl_fs'){
-					fs+=file;
-				}else if(type=='shader/glsl_gs'){
-					gs+=file;
-				}
-				cleanedPrograms[type+"|"+file] = {'type':type,'file':file};
-			}
-			var sortedPrograms=[];
-			foreach(cleanedPrograms as var prog) 
-				sortedPrograms+=prog;
-			shaderState.setStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES,sortedPrograms);
-			MinSG.initShaderState(shaderState,vs,gs,fs);
+			entry.getObject().recreateShader( PADrend.getSceneManager() ); 
 			entry.rebuild();
-		}).bindLastParams(entry)
+		}
 	});
 	entry.addOption({
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -1150,7 +1124,21 @@ MinSG.ShaderState._createUniformPanel::=fn(panel){
 /*! ShaderState	*/
 NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState state, panel){
 	// -----------------------------------------------------------
-
+	panel += {
+		GUI.TYPE : GUI.TYPE_TEXT,
+		GUI.OPTIONS_PROVIDER : fn(){
+			var entries = [""];
+			foreach(PADrend.getSceneManager()._shaderSearchPaths as var path){
+				foreach(Util.getFilesInDir(path,[".shader"]) as var filename){
+					entries += (new Util.FileName(filename)).getFile().substr(0,-7); // only file name without ".shader"
+				}
+			}
+			return entries;
+		},
+		GUI.DATA_WRAPPER : state.getStateAttributeWrapper(MinSG.ShaderState.STATE_ATTR_SHADER_NAME,"")
+	
+	};
+	panel++;
 	// uniforms
 	panel+="----";
 	panel.nextRow(5);

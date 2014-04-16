@@ -59,7 +59,6 @@ T.locateShaderFile ::= fn(String filename){
 			return p+filename;
 	}
 	return false;
-
 };
 
 return T;

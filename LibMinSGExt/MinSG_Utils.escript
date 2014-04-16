@@ -497,6 +497,54 @@ MinSG.ShaderState.setUniform ::= fn(params...){
 };
 
 
+static ExtSceneManager = Std.require('LibMinSGExt/SceneManagerExt');
+MinSG.ShaderState.recreateShader ::= fn(ExtSceneManager sm){
+	var vs = [];
+	var fs = [];
+	var gs = [];
+	var shaderName = this.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_NAME);
+	if(shaderName){
+		var shaderFile = sm.locateShaderFile( shaderName+".shader" );
+		if(!shaderFile){
+			Runtime.warn("Unknown shader:"+shaderName);
+			return;
+		}
+		var m = parseJSON( Util.loadFile(shaderFile) );
+		if(m['shader/glsl_fs'])
+			fs = m['shader/glsl_fs'];
+		if(m['shader/glsl_gs'])
+			gs = m['shader/glsl_gs'];
+		if(m['shader/glsl_vs'])
+			vs = m['shader/glsl_vs'];
+		
+		print_r(m); 
+	}else{
+		var fileInfo = shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES);
+		var cleanedPrograms = new Map();
+
+		foreach(fileInfo as var progInfo){
+			var file = progInfo['file'].trim();
+			var type = progInfo['type'].trim().toLower();
+			if(file.empty()){
+				continue;
+			}else if(type=='shader/glsl_vs'){
+				vs+=file;
+			}else if(type=='shader/glsl_fs'){
+				fs+=file;
+			}else if(type=='shader/glsl_gs'){
+				gs+=file;
+			}
+			cleanedPrograms[type+"|"+file] = {'type':type,'file':file};
+		}
+		var sortedPrograms=[];
+		foreach(cleanedPrograms as var prog) 
+			sortedPrograms+=prog;
+		this.setStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES,sortedPrograms);
+	}
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Todo: Use FileLocator
+	MinSG.initShaderState(this,vs,gs,fs);
+};
+
 // ---------------------------
 // ShaderUniformState extension
 
