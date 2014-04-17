@@ -16,13 +16,16 @@
 
 var T = MinSG.SceneManager;
 
-T._searchPaths @(init) := Array; // \todo make private
+T.__searchPaths @(init,private) := Array; 
+T.__workspaceRootPath @(private) := false; // String or false; The folder in which the current
+
+T.addSearchPath ::= 		fn(String p){			this.__searchPaths += p;	};
+T.getWorkspaceRootPath ::= 	fn(){					return this.__workspaceRootPath ;	};
+T.setWorkspaceRootPath ::= 	fn([String,false] p){	this.__workspaceRootPath = p;	};
 
 //! Node|false sceneManager.loadScene( filename of .minsg or .dae [, Number importOptions=0])
-T.loadScene ::= fn(filename, Number importOptions=0){
-	if(!filename)
-		return false;
-	var start=clock();
+T.loadScene ::= fn(String filename, Number importOptions=0){
+	var start = clock();
 	var sceneRoot = void;
 	if(filename.endsWith(".dae") || filename.endsWith(".DAE")) {
 	    outln("Loading Collada: ",filename);
@@ -31,16 +34,12 @@ T.loadScene ::= fn(filename, Number importOptions=0){
 	} else {
 	    Util.info("Loading MinSG: ",filename,"\n");
 	    var importContext = this.createImportContext(importOptions);
-	    
-	    
+    
 	    var f = new Util.FileName( filename );
 	    importContext.addSearchPath( f.getFSName() + "://" + f.getDir() );
-		outln( f.getFSName() + "://" + f.getDir() );
 	    
-	    foreach(this._searchPaths as var p){
+	    foreach(this.__searchPaths as var p)
 			importContext.addSearchPath(p);
-			outln( p );
-	    }
 	    
     	var nodeArray = this.loadMinSGFile(importContext,filename);
     	if(!nodeArray){
@@ -61,12 +60,23 @@ T.loadScene ::= fn(filename, Number importOptions=0){
 	return sceneRoot;
 };
 
-T.locateShaderFile ::= fn(String filename){
-	foreach(this._searchPaths as var p){
-		if(Util.isFile(p+filename))
-			return p+filename;
-	}
-	return false;
+T._getSearchPaths ::= fn(){
+	var arr = [];
+	if( this.__workspaceRootPath )
+		arr += this.__workspaceRootPath;
+	arr.append( this.__searchPaths );
+	return arr;
+};
+
+T.locateFile ::= fn(String relFilename){
+	return this.getFileLocator().locateFile(relFilename);
+};
+
+T.getFileLocator ::= fn(){
+	var l = new Util.FileLocator;
+	foreach(this._getSearchPaths() as var p)
+		l.addSearchPath(p);
+	return l;
 };
 
 return T;

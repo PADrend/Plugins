@@ -166,7 +166,7 @@ SceneManagement.ex_Init := fn(...){
 		this.createNewSceneRoot("new MinSG.ListNode()",false);
 		out("ok.\n");
 	}
-   	defaultSceneManager._searchPaths += Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/";
+   	defaultSceneManager.addSearchPath( Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/" );
 
 };
 
@@ -218,7 +218,7 @@ SceneManagement.getRootNode :=		fn(){	return rootNode;	};
 
 SceneManagement.getSceneList :=		fn(){	return registeredScenes;	};
 
-SceneManagement.getSceneManager :=	fn(){	return activeScene ? activeScene.__sceneManager : defaultSceneManager;	};
+SceneManagement.getSceneManager :=	fn(){	return activeScene&&activeScene.isSet($__sceneManager) ? activeScene.__sceneManager : defaultSceneManager;	};
 
 SceneManagement.loadScene := fn(filename,Number importOptions = MinSG.SceneManager.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY){
 	showWaitingScreen();
@@ -279,6 +279,12 @@ SceneManagement.selectScene := fn(scene) {
 		if(scene){
 			this.getRootNode().addChild(scene);
 			this.initCoordinateSystem( this.getSceneCoordinateSystem(scene) );
+		}
+		if(scene.isSet($filename) && scene.filename){
+			var f = new Util.FileName(scene.filename);
+			this.getSceneManager().setWorkspaceRootPath( f.getFSName() + "://" + f.getDir() );
+		}else{
+			this.getSceneManager().setWorkspaceRootPath( false );
 		}
 		
 	}

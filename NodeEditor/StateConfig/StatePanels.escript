@@ -1102,7 +1102,7 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 				GUI.LABEL : "Edit",
 				GUI.ON_CLICK : obj->fn(){
 					var filename = this.shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES)[this.index]['file'];
-					var fullPath = PADrend.getSceneManager().locateShaderFile(filename);
+					var fullPath = PADrend.getSceneManager().locateFile(filename);
 					if(fullPath)
 						Util.openOS(fullPath);
 					else{
@@ -1128,9 +1128,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState 
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.OPTIONS_PROVIDER : fn(){
 			var entries = [""];
-			foreach(PADrend.getSceneManager()._searchPaths as var path){
+			foreach(PADrend.getSceneManager()._getSearchPaths() as var path){
 				foreach(Util.getFilesInDir(path,[".shader"]) as var filename){
-					entries += (new Util.FileName(filename)).getFile().substr(0,-7); // only file name without ".shader"
+					entries += (new Util.FileName(filename)).getFile(); 
 				}
 			}
 			return entries;
@@ -1542,12 +1542,15 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 														   DataWrapper textureFile) {
 									var fileName = textureFile();
 									if(!fileName.empty()) {
-										out("Loading texture \"", fileName.toString(), "\" ...");
-										var texture = Rendering.createTextureFromFile(fileName);
+										var path = PADrend.getSceneManager().locateFile(fileName);
+										out("Loading texture \"", fileName.toString(), "\" ("+path+")...");
+										var texture = path ?  Rendering.createTextureFromFile(path) : void;
 										if(texture) {
+											texture.setFileName(fileName); // set original filename
 											state.setTexture(texture);
 											outln(" done (", texture, ").");
 										} else {
+											state.setTexture(void);
 											outln(" failed.");
 										}
 									} else {

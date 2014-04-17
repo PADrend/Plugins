@@ -499,12 +499,13 @@ MinSG.ShaderState.setUniform ::= fn(params...){
 
 static ExtSceneManager = Std.require('LibMinSGExt/SceneManagerExt');
 MinSG.ShaderState.recreateShader ::= fn(ExtSceneManager sm){
+	var shaderState = this;
 	var vs = [];
 	var fs = [];
 	var gs = [];
-	var shaderName = this.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_NAME);
-	if(shaderName){
-		var shaderFile = sm.locateShaderFile( shaderName+".shader" );
+	var shaderName = shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_NAME);
+	if(shaderName&&!shaderName.empty()){
+		var shaderFile = sm.locateFile( shaderName );
 		if(!shaderFile){
 			Runtime.warn("Unknown shader:"+shaderName);
 			return;
@@ -539,10 +540,9 @@ MinSG.ShaderState.recreateShader ::= fn(ExtSceneManager sm){
 		var sortedPrograms=[];
 		foreach(cleanedPrograms as var prog) 
 			sortedPrograms+=prog;
-		this.setStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES,sortedPrograms);
+		shaderState.setStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES,sortedPrograms);
 	}
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Todo: Use FileLocator
-	MinSG.initShaderState(this,vs,gs,fs);
+	MinSG.initShaderState(shaderState,vs,gs,fs, Rendering.Shader.USE_UNIFORMS|Rendering.Shader.USE_GL,   sm.getFileLocator());
 };
 
 // ---------------------------

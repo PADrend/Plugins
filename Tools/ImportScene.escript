@@ -137,7 +137,7 @@ plugin.convert := fn(){
 			vs+=path+f+".sfn";
 			fs+=path+f+".sfn";
 		}
-        MinSG.initShaderState(phong, vs,[],fs,Rendering.Shader.USE_UNIFORMS);
+        MinSG.initShaderState(phong, vs,[],fs,Rendering.Shader.USE_UNIFORMS,PADrend.getSceneManager().getFileLocator());
         scene.addState(phong);
     }
     if(addTransparency)

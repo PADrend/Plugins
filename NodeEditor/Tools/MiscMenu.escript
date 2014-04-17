@@ -515,7 +515,7 @@ NodeEditorTools.registerMenues_MiscTools := fn() {
 									var fs = sfn.clone();
 									fs += shaderPath + "universal.fs";
 									var shaderState = new MinSG.ShaderState();
-									MinSG.initShaderState(shaderState, vs, [], fs);
+									MinSG.initShaderState(shaderState, vs, [], fs,PADrend.getSceneManager().getFileLocator());
 									geometry.addState(shaderState);
 
 									var materialState = new MinSG.MaterialState;

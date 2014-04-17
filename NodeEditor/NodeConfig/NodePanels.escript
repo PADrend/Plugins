@@ -357,18 +357,25 @@ NodeEditor.registerConfigPanelProvider( MinSG.GeometryNode, fn(node, panel){
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Reload mesh",
 		GUI.ON_CLICK : data -> fn(){
-			out("Load Mesh \"", this.filename, "\"...");
-			PADrend.message("Load Mesh \"" + this.filename + "\"...");
-			showWaitingScreen();
+			var filename = this.filename;
+			if(!filename.empty()) {
+				var path = PADrend.getSceneManager().locateFile(filename);
+				PADrend.message("Load Mesh \"" + filename + "\" ("+path+")...");
 
-			var geoNode = MinSG.loadModel(this.filename);
-			if(!(geoNode ---|> MinSG.GeometryNode)) {
-				Runtime.warn("Could not load single mesh from " + this.filename);
-				return;
+				if(path){
+					showWaitingScreen();
+					var geoNode = MinSG.loadModel(path);
+					if(geoNode ---|> MinSG.GeometryNode) {
+						var mesh = geoNode.getMesh();
+						mesh.setFileName(filename);
+						this.node.setMesh(mesh);
+						outln("\nDone.");
+						return;
+					}
+				}
+				Runtime.warn("Could not load single mesh from " + filename);
+				
 			}
-		
-			this.node.setMesh(geoNode.getMesh());
-			out("\nDone. \n");
 		},
 		GUI.TOOLTIP		:	"Reload the GeometryNode's mesh from the given file."
 	};
