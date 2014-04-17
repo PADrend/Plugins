@@ -61,8 +61,6 @@ out("\n","-"*79,"\n");
     GLOBALS.frameContext := void;
     GLOBALS.renderingContext := void;
     GLOBALS.camera := void;
-    GLOBALS.cameraOrtho := void; // experimental
-    GLOBALS.dolly := void;	
 }
 { // load and execute PADrend
 	loadPlugins( ["PADrend"],true,[__DIR__+"/../"] );

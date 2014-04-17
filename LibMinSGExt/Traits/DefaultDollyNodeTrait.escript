@@ -23,10 +23,8 @@
 				 \----------> Camera (MinSG.CamerNode)
 */
 
-var t = new Traits.GenericTrait('MinSG.DollyNodeTrait');
+var t = new Traits.GenericTrait('MinSG.DefaultDollyNodeTrait');
 
-t.attributes.observerOffset := false;  		// (Array|false) added to the observer position if observerOffsetEnabled is true
-t.attributes.observerOffsetEnabled := false;
 t.attributes.name := "Dolly";
 
 t.attributes.getCamera					:= fn(){	return this.camera;	};
@@ -45,10 +43,4 @@ t.onInit += fn(MinSG.ListNode dollyRoot, MinSG.Node camera){
 	dollyRoot.camera @(private) := camera;
 };
 
-
-MinSG.createDolly := [t]=>fn(t,camera){
-    var dolly=new MinSG.ListNode;
-    //! \see MinSG.DollyNodeTrait
-    Traits.addTrait(dolly,t,camera);
-    return dolly;
-};
+return t;

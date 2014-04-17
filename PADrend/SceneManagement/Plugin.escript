@@ -18,7 +18,6 @@
  **/
 
 loadOnce("LibUtilExt/Command.escript");
-loadOnce("LibMinSGExt/Dolly.escript");
 
 /***
  **   ---|> Plugin
@@ -59,11 +58,14 @@ PADrend.SceneManagement := new Plugin({
 
 var SceneManagement = PADrend.SceneManagement;
 
-SceneManagement._rootNode := void;
-SceneManagement._sceneList := [];
-SceneManagement._selectedScene := void;
+static registeredScenes = [];
+static rootNode = void;
+static activeScene = void;
+static defaultSceneManager = void;
+static dolly = void;
+
 SceneManagement._defaultLight := void; // directional light 0; formerly known as PADrend.sun
-SceneManagement._sceneManager := void;
+
 
 /**
  * Plugin initialization.
@@ -71,7 +73,7 @@ SceneManagement._sceneManager := void;
  */
 SceneManagement.init := fn(){
 	
-	this._sceneManager = new (Std.require( 'LibMinSGExt/SceneManagerExt' ));
+	defaultSceneManager = new (Std.require( 'LibMinSGExt/SceneManagerExt' ));
 
 	{
 		registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+2);
@@ -84,19 +86,19 @@ SceneManagement.init := fn(){
 
 //! [ext:PADrend_Init]
 SceneManagement.ex_Init := fn(...){
-	{    //  create Camera and dolly
-        out("Creating Camera".fillUp(40));
+	{	//  create Camera and dolly
+		out("Creating Camera".fillUp(40));
 
 		// --
-        // create default perspective camera
-        GLOBALS.camera = new MinSG.CameraNode();
-        camera.name := "DefaultCamera";
-        var viewport = systemConfig.getValue('PADrend.Camera.viewport',false);
-        if(!viewport)
+		// create default perspective camera
+		GLOBALS.camera = new MinSG.CameraNode();
+		camera.name := "DefaultCamera";
+		var viewport = systemConfig.getValue('PADrend.Camera.viewport',false);
+		if(!viewport)
 			viewport = [0,0,renderingContext.getWindowWidth(),renderingContext.getWindowHeight()];
-        camera.setViewport( new Geometry.Rect(viewport[0],viewport[1],viewport[2],viewport[3]));
-        camera.setNearFar(systemConfig.getValue('PADrend.Camera.near',0.1),systemConfig.getValue('PADrend.Camera.far',5000));
-        camera.applyVerticalAngle(systemConfig.getValue('PADrend.Camera.vAngle',90));
+		camera.setViewport( new Geometry.Rect(viewport[0],viewport[1],viewport[2],viewport[3]));
+		camera.setNearFar(systemConfig.getValue('PADrend.Camera.near',0.1),systemConfig.getValue('PADrend.Camera.far',5000));
+		camera.applyVerticalAngle(systemConfig.getValue('PADrend.Camera.vAngle',90));
 		// when the application window is resized:
 		Listener.add( Listener.TYPE_APP_WINDOW_SIZE_CHANGED, camera->fn(evt,newSize){
 			// update viewport only when it has not been fixed in the config
@@ -108,21 +110,24 @@ SceneManagement.ex_Init := fn(...){
 		});
 
 		// --
-        // create dolly for camera
-        GLOBALS.dolly = MinSG.createDolly(camera);
+		// create dolly for camera
+		dolly = new MinSG.ListNode;
+		//! \see MinSG.DefaultDollyNodeTrait
+		Traits.addTrait( dolly,Std.require('LibMinSGExt/Traits/DefaultDollyNodeTrait'),camera );
 
-        setConfigInfo('PADrend.Camera.observerPosition',"[x,y,z] or false. If false, the default 'angle'-based camera is used.");
-        setConfigInfo('PADrend.Camera.frame',"false or corners of projection frame e.g. [[-1,1,-1],[-1,-1,-1],[1,-1,-1]]. To use the frame, observerPosition has to be set. ");
 
-        dolly.setFrame(systemConfig.getValue('PADrend.Camera.frame',false));//[[-1,1,-1],[-1,-1,-1],[1,-1,-1]]
-        dolly.setRelPosition(new Geometry.Vec3(systemConfig.getValue('PADrend.Camera.position',[0,0,0])));
+		setConfigInfo('PADrend.Camera.observerPosition',"[x,y,z] or false. If false, the default 'angle'-based camera is used.");
+		setConfigInfo('PADrend.Camera.frame',"false or corners of projection frame e.g. [[-1,1,-1],[-1,-1,-1],[1,-1,-1]]. To use the frame, observerPosition has to be set. ");
+
+		dolly.setFrame(systemConfig.getValue('PADrend.Camera.frame',false));//[[-1,1,-1],[-1,-1,-1],[1,-1,-1]]
+		dolly.setRelPosition(new Geometry.Vec3(systemConfig.getValue('PADrend.Camera.position',[0,0,0])));
 
 		// --
 		// add camera ortho
-		GLOBALS.cameraOrtho = new MinSG.CameraNodeOrtho();
-        cameraOrtho.name := "OrthoCamera";
-        cameraOrtho.setViewport( new Geometry.Rect(viewport[0],viewport[1],viewport[2],viewport[3]));
-        cameraOrtho.setNearFar(systemConfig.getValue('PADrend.Camera.near',0.1),systemConfig.getValue('PADrend.Camera.far',5000));
+		var cameraOrtho = new MinSG.CameraNodeOrtho();
+		cameraOrtho.name := "OrthoCamera";
+		cameraOrtho.setViewport( new Geometry.Rect(viewport[0],viewport[1],viewport[2],viewport[3]));
+		cameraOrtho.setNearFar(systemConfig.getValue('PADrend.Camera.near',0.1),systemConfig.getValue('PADrend.Camera.far',5000));
 		dolly.addChild(cameraOrtho);
 		// when the application window is resized:
 		Listener.add( Listener.TYPE_APP_WINDOW_SIZE_CHANGED, cameraOrtho->fn(evt,newSize){
@@ -138,30 +143,30 @@ SceneManagement.ex_Init := fn(...){
 			PADrend.getSceneManager().getBehaviourManager().registerBehaviour( new MinSG.SoundReceivingBehaviour(camera) );
 		}
 
-        out("ok.\n");
-    }
+		out("ok.\n");
+	}
 	
-    {  // Create Scene
-        out("Create Root-Node ".fillUp(40));
-    
-        this._rootNode = new MinSG.ListNode();
+	{  // Create Scene
+		out("Create Root-Node ".fillUp(40));
+	
+		rootNode = new MinSG.ListNode;
 		getRootNode().name := "RootNode";
 
-        setConfigInfo('PADrend.sun',"Global directional light source.");
-        if(systemConfig.getValue('PADrend.sun.enabled',true)){
-            this._defaultLight = new MinSG.LightNode();
-            this.initDefaultLightParameters();
-            getRootNode().addChild(_defaultLight);
-            this.lightingState := new MinSG.LightingState();
-            lightingState.setLight(_defaultLight);
-            getRootNode().addState(lightingState);
-        }
+		setConfigInfo('PADrend.sun',"Global directional light source.");
+		if(systemConfig.getValue('PADrend.sun.enabled',true)){
+			this._defaultLight = new MinSG.LightNode();
+			this.initDefaultLightParameters();
+			getRootNode().addChild(_defaultLight);
+			this.lightingState := new MinSG.LightingState();
+			lightingState.setLight(_defaultLight);
+			getRootNode().addState(lightingState);
+		}
 
-        getRootNode().addChild(dolly);
-        this.createNewSceneRoot("new MinSG.ListNode()",false);
-        out("ok.\n");
-    }
-   	this._sceneManager._searchPaths += Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/";
+		getRootNode().addChild(dolly);
+		this.createNewSceneRoot("new MinSG.ListNode()",false);
+		out("ok.\n");
+	}
+   	defaultSceneManager._searchPaths += Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/";
 
 };
 
@@ -181,91 +186,85 @@ SceneManagement.initDefaultLightParameters := fn(){
 SceneManagement.createNewSceneRoot := fn(String t,debugOutput=true){
 	var newSceneRoot = eval(t+";");
 	if(! (newSceneRoot---|>MinSG.Node) )
-        return false;
+		return false;
 
-    newSceneRoot.name := "";
-    newSceneRoot.constructionString:=t;
+	newSceneRoot.name := "";
+	newSceneRoot.constructionString:=t;
 
-    this.registerScene(newSceneRoot);
-    this.selectScene(newSceneRoot);
-    return newSceneRoot;
+	this.registerScene(newSceneRoot);
+	this.selectScene(newSceneRoot);
+	return newSceneRoot;
 };
 
 SceneManagement.deleteScene := fn(scene) {
-	if(_sceneList.contains(scene)) {
+	if(registeredScenes.contains(scene)) {
 		if(scene == getCurrentScene()) {
 			selectScene(void);
 		}
-		var index = _sceneList.findValue(scene);
-		_sceneList.removeIndex(index);
+		var index = registeredScenes.findValue(scene);
+		registeredScenes.removeIndex(index);
 		MinSG.destroy(scene);
 		
-		executeExtensions('PADrend_OnSceneListChanged',_sceneList.clone());
+		executeExtensions('PADrend_OnSceneListChanged',registeredScenes.clone());
 	}
 };
 
-SceneManagement.getCurrentScene := fn(){
-    return this._selectedScene;
-};
+SceneManagement.getCurrentScene :=	fn(){	return activeScene;	};
 
-SceneManagement.getDefaultLight := fn(){
-    return this._defaultLight;
-};
+SceneManagement.getDefaultLight :=	fn(){	return this._defaultLight;	};
 
 //! Returns the unique global root node.
-SceneManagement.getRootNode := fn(){
-	return _rootNode;
-};
+SceneManagement.getRootNode :=		fn(){	return rootNode;	};
 
-SceneManagement.getSceneList := fn() {
-    return _sceneList;
-};
+SceneManagement.getSceneList :=		fn(){	return registeredScenes;	};
 
-SceneManagement.getSceneManager := fn() {
-    return _sceneManager;
-};
+SceneManagement.getSceneManager :=	fn(){	return activeScene ? activeScene.__sceneManager : defaultSceneManager;	};
 
 SceneManagement.loadScene := fn(filename,Number importOptions = MinSG.SceneManager.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY){
 	showWaitingScreen();
 	var sceneRoot=PADrend.getSceneManager().loadScene(filename,importOptions);
 	if(sceneRoot)
 		this.registerScene(sceneRoot);
-    return sceneRoot;
+	return sceneRoot;
 };
 
 SceneManagement.mergeScenes := fn(targetScene,Collection scenes) {
 	foreach(scenes as var s){
 		if(s==targetScene)
 			continue;
-		if(this._sceneList.contains(s)){
-			var index = this._sceneList.findValue(s);
-			this._sceneList.removeIndex(index);
+		if(registeredScenes.contains(s)){
+			var index = registeredScenes.findValue(s);
+			registeredScenes.removeIndex(index);
 		}
 		targetScene.addChild(s);
 	}
-	executeExtensions('PADrend_OnSceneListChanged',_sceneList.clone());
+	executeExtensions('PADrend_OnSceneListChanged',registeredScenes.clone());
 };
 
 SceneManagement.registerScene := fn(MinSG.Node scene) {
-	if(!_sceneList.contains(scene)) {
-		_sceneList.pushBack(scene);
+	if(!registeredScenes.contains(scene)) {
+		registeredScenes.pushBack(scene);
 	}
 	if(!getCurrentScene()) {
 		selectScene(scene);
 	}
+	// store scene manager at scene (\todo create a new one for each scene or workspace!)
+	if(!scene.isSet($__sceneManager)||!scene.__sceneManager)
+		scene.__sceneManager := defaultSceneManager;
+		
 	if(!scene.getAttribute('constructionString')) scene.constructionString:="";
 	if(!scene.getAttribute('name')) scene.name:="";
 	executeExtensions('PADrend_OnSceneRegistered',scene);
-	executeExtensions('PADrend_OnSceneListChanged',_sceneList.clone());
+	executeExtensions('PADrend_OnSceneListChanged',registeredScenes.clone());
 };
 SceneManagement.unregisterScene := fn(MinSG.Node scene) {
-	if(_sceneList.contains(scene)) {
+	if(registeredScenes.contains(scene)) {
 		if(scene == getCurrentScene()) {
 			selectScene(void);
 		}
-		var index = _sceneList.findValue(scene);
-		_sceneList.removeIndex(index);
-		executeExtensions('PADrend_OnSceneListChanged',_sceneList.clone());
+		var index = registeredScenes.findValue(scene);
+		registeredScenes.removeIndex(index);
+		executeExtensions('PADrend_OnSceneListChanged',registeredScenes.clone());
 	}
 };
 
@@ -276,7 +275,7 @@ SceneManagement.selectScene := fn(scene) {
 		if(oldScene) 
 			this.getRootNode().removeChild(oldScene);
 		
-		this._selectedScene = scene;
+		activeScene = scene;
 		if(scene){
 			this.getRootNode().addChild(scene);
 			this.initCoordinateSystem( this.getSceneCoordinateSystem(scene) );
@@ -354,7 +353,7 @@ SceneManagement.getCurrentSceneGroundPlane := fn(Number offset=0.0){
 };
 
 PADrend.getWorldRightVector := fn(){ return frameContext.getWorldRightVector(); };
-PADrend.getWorldUpVector    := fn(){ return frameContext.getWorldUpVector(); };
+PADrend.getWorldUpVector	:= fn(){ return frameContext.getWorldUpVector(); };
 PADrend.getWorldFrontVector := fn(){ return frameContext.getWorldFrontVector(); };
 
 SceneManagement.markSceneCoordinateSystem_YUp := fn(MinSG.Node sceneRoot){	this.markSceneCoordinateSystem(sceneRoot,this.UP_AXIS_Y);	};
@@ -380,7 +379,7 @@ PADrend.createNewSceneRoot := SceneManagement->SceneManagement.createNewSceneRoo
 PADrend.deleteScene := SceneManagement->SceneManagement.deleteScene;
 PADrend.getCurrentScene := SceneManagement->SceneManagement.getCurrentScene;
 PADrend.getCurrentSceneGroundPlane := SceneManagement->SceneManagement.getCurrentSceneGroundPlane;
-PADrend.getDolly := fn(){ return GLOBALS.dolly;	};
+PADrend.getDolly := fn(){ return dolly;	};
 PADrend.getDefaultLight := SceneManagement->SceneManagement.getDefaultLight;
 PADrend.getRootNode := SceneManagement->SceneManagement.getRootNode;
 PADrend.getSceneList := SceneManagement->SceneManagement.getSceneList;
