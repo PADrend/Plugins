@@ -1128,7 +1128,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState 
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.OPTIONS_PROVIDER : fn(){
 			var entries = [""];
-			foreach(PADrend.getSceneManager()._shaderSearchPaths as var path){
+			foreach(PADrend.getSceneManager()._searchPaths as var path){
 				foreach(Util.getFilesInDir(path,[".shader"]) as var filename){
 					entries += (new Util.FileName(filename)).getFile().substr(0,-7); // only file name without ".shader"
 				}

@@ -16,7 +16,7 @@
 
 var T = MinSG.SceneManager;
 
-T._shaderSearchPaths @(init) := Array;
+T._searchPaths @(init) := Array; // \todo make private
 
 //! Node|false sceneManager.loadScene( filename of .minsg or .dae [, Number importOptions=0])
 T.loadScene ::= fn(filename, Number importOptions=0){
@@ -31,8 +31,16 @@ T.loadScene ::= fn(filename, Number importOptions=0){
 	} else {
 	    Util.info("Loading MinSG: ",filename,"\n");
 	    var importContext = this.createImportContext(importOptions);
-	    foreach(this._shaderSearchPaths as var p)
-			importContext.addShaderSearchPath(p);
+	    
+	    
+	    var f = new Util.FileName( filename );
+	    importContext.addSearchPath( f.getFSName() + "://" + f.getDir() );
+		outln( f.getFSName() + "://" + f.getDir() );
+	    
+	    foreach(this._searchPaths as var p){
+			importContext.addSearchPath(p);
+			outln( p );
+	    }
 	    
     	var nodeArray = this.loadMinSGFile(importContext,filename);
     	if(!nodeArray){
@@ -54,7 +62,7 @@ T.loadScene ::= fn(filename, Number importOptions=0){
 };
 
 T.locateShaderFile ::= fn(String filename){
-	foreach(this._shaderSearchPaths as var p){
+	foreach(this._searchPaths as var p){
 		if(Util.isFile(p+filename))
 			return p+filename;
 	}

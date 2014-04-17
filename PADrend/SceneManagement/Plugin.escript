@@ -161,7 +161,7 @@ SceneManagement.ex_Init := fn(...){
         this.createNewSceneRoot("new MinSG.ListNode()",false);
         out("ok.\n");
     }
-   	this._sceneManager._shaderSearchPaths += Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/";
+   	this._sceneManager._searchPaths += Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/";
 
 };
 
