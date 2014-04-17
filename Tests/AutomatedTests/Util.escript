@@ -323,9 +323,9 @@ tests += new Tests.AutomatedTest( "Util/EScript extensions" , fn(){
 		};
 	
 		var f1 = f.bindLastParams(7);
-		var f2 = [7]=>f;
+		var f2 = f.bindFirstParams(7);
 	
-		addResult("UserFunction.bind", f1(4) == 74 && f1.getBoundParams()[0] == 7
+		addResult("UserFunction.bind (@deprecated)", f1(4) == 74 && f1.getBoundParams()[0] == 7
 						&& f2(4) == 47 && f2.getBoundParams()[0] == 7 );
 	}
 	{
