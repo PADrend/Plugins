@@ -4,7 +4,7 @@
  * Web page: http://www.padrend.de/
  * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
 
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -22,7 +22,7 @@ var plugin = new Plugin({
 });
 
 plugin.init = fn() {
-	
+
 	foreach([
 				'ObjectTraits/ButtonTrait',
 				'ObjectTraits/ConstrainedAnimatorTrait',
@@ -39,9 +39,10 @@ plugin.init = fn() {
 				'ObjectTraits/RayCastSensorTrait',
 				'ObjectTraits/RotationTrait',
 				'ObjectTraits/TransformationProxyTrait',
+				'ObjectTraits/DynamicTextTextureTrait'
 			] as var t)
 		Std.require( t );
-	
+
 	return true;
 };
 
