@@ -76,7 +76,7 @@ plugin.ex_KeyPressed:=fn(evt) {
 	return true;
 };
 
-plugin.saveTexture @(private) := fn(Rendering.Texture tex, filename){
+plugin.saveTexture @(private) := fn(Rendering.Texture tex, String filename){
 	var pngFileName = filename + ".png";
 
 	var success = Rendering.saveTexture(renderingContext,tex, pngFileName);
@@ -195,7 +195,7 @@ plugin.planNormalScreenshot := fn(filename=void){
 			return Extension.REMOVE_EXTENSION;
 		},Extension.HIGH_PRIORITY);
 	}else{
-		registerExtension('PADrend_AfterRendering',[filename] => this->fn(p,filename){
+		registerExtension('PADrend_AfterRendering',[filename] => this->fn(filename,...){
 			saveTexture( Rendering.createTextureFromScreen( settings.alpha() ),filename );
 			return Extension.REMOVE_EXTENSION;
 		},Extension.LOW_PRIORITY);
