@@ -17,7 +17,6 @@
  **
  **/
     
-loadOnce("LibUtilExt/TaskScheduler.escript");
 
 /***
  **   ---|> Plugin
@@ -124,7 +123,7 @@ PADrend.EventLoop.init := fn(){
 
 	//  Task scheduler
 	// The task sheduler is called with a timeslot of 0.1 sec after every frame
-	this.taskScheduler := new TaskScheduler;
+	this.taskScheduler := new (Std.require('LibUtilExt/TaskScheduler'));
 	registerExtension('PADrend_AfterRendering',	this->fn(...){	taskScheduler.execute(0.1); } );
 	
 	// Behaviour manager
