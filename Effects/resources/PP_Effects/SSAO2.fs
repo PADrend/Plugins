@@ -36,6 +36,7 @@ uniform float intensityExponent = 1.0;
 uniform float debugBorder = 0.0;
 uniform float maxBrightness = 1.0;
 uniform float radiusIncrease = 1.7;
+uniform float initialRadius = 4;
 uniform int numDirections = 5;
 uniform int numSteps = 5;
 
@@ -86,24 +87,28 @@ void main(){
 		for(float i=0;i<2*PI;i+=stepSize){
 			vec2 ray_cs = vec2(cos(i)*pixelSizeX , sin(i)*pixelSizeY);
 			float lastAng = -1.0;
+
+			vec2 rayOffset_cs = pos_cs + initialRadius*ray_cs;
+
 			for(float j=0;j<numSteps;++j){
-				vec2 samplePos_cs = pos_cs + ray_cs;
+				vec2 samplePos_cs = rayOffset_cs + ray_cs;
 				// clip
 				if( samplePos_cs.x<0.0 || samplePos_cs.x>=1.0 || samplePos_cs.y<0.0 || samplePos_cs.y>=1.0 ){
 					break;
 				}
 
-				vec3 intersection_es = getEyePos(pos_cs + ray_cs);
-				
+				vec3 intersection_es = getEyePos(rayOffset_cs + ray_cs);
 				vec3 dir = intersection_es-eyeSpacePos;
+				
 				float ang = (1.0-dot(normalize(dir),vec3(0,0,-1.0)))*0.5;
-				if(ang<lastAng){ // once a closer point is found, let it influnce the current point
+
+				if(ang<lastAng){ // once a closer point is found, let it influence the current point
 					ang = (ang+lastAng) * 0.5;
 				}else{
 					lastAng = ang;
 				}
 
-				cummulatedOcc += ang/(1.0+length(dir)*distanceMod);
+				cummulatedOcc += ang/(1.0+length(dir)*distanceMod) * 1.0;
 				sum+=1.0;
 				ray_cs *=radiusIncrease;
 			}

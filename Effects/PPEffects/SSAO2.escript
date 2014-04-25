@@ -38,14 +38,15 @@ Effect._constructor:=fn(){
 
 	// settings
 	this.settings := {
-		'debugBlend' : DataWrapper.createFromValue( shader.getUniform('debugBlend').getData()[0] ),
-		'debugBorder' : DataWrapper.createFromValue( shader.getUniform('debugBorder').getData()[0] ),
-		'intensityExponent' : DataWrapper.createFromValue( shader.getUniform('intensityExponent').getData()[0] ),
-		'intensityFactor' : DataWrapper.createFromValue( shader.getUniform('intensityFactor').getData()[0] ),
-		'maxBrightness' : DataWrapper.createFromValue( shader.getUniform('maxBrightness').getData()[0] ),
-		'numDirections' : DataWrapper.createFromValue( shader.getUniform('numDirections').getData()[0] ),
-		'numSteps' : DataWrapper.createFromValue( shader.getUniform('numSteps').getData()[0] ),
-		'radiusIncrease' : DataWrapper.createFromValue( shader.getUniform('radiusIncrease').getData()[0] ),
+		'debugBlend' : DataWrapper.createFromValue( 0+shader.getUniform('debugBlend').getData()[0] ),
+		'debugBorder' : DataWrapper.createFromValue( 0+shader.getUniform('debugBorder').getData()[0] ),
+		'intensityExponent' : DataWrapper.createFromValue( 0+shader.getUniform('intensityExponent').getData()[0] ),
+		'intensityFactor' : DataWrapper.createFromValue( 0+shader.getUniform('intensityFactor').getData()[0] ),
+		'initialRadius' : DataWrapper.createFromValue( 0+shader.getUniform('initialRadius').getData()[0] ),
+		'maxBrightness' : DataWrapper.createFromValue( 0+shader.getUniform('maxBrightness').getData()[0] ),
+		'numDirections' : DataWrapper.createFromValue( 0+shader.getUniform('numDirections').getData()[0] ),
+		'numSteps' : DataWrapper.createFromValue( 0+shader.getUniform('numSteps').getData()[0] ),
+		'radiusIncrease' : DataWrapper.createFromValue( 0+shader.getUniform('radiusIncrease').getData()[0] ),
 		'fxaa' : DataWrapper.createFromValue(true ),
 	};
 	this.presetManager := new PresetManager( PADrend.configCache, 'Effects.SSAO2', settings );
@@ -114,6 +115,7 @@ Effect.end @(override) ::= fn(){
 	
 	shader.setUniform(renderingContext,'debugBlend' , Rendering.Uniform.FLOAT,[settings['debugBlend']() ]);
 	shader.setUniform(renderingContext,'debugBorder' , Rendering.Uniform.FLOAT,[settings['debugBorder']() ]);
+	shader.setUniform(renderingContext,'initialRadius' , Rendering.Uniform.FLOAT,[settings['initialRadius']() ]);
 	shader.setUniform(renderingContext,'intensityExponent' , Rendering.Uniform.FLOAT,[settings['intensityExponent']() ]);
 	shader.setUniform(renderingContext,'intensityFactor' , Rendering.Uniform.FLOAT,[settings['intensityFactor']() ]);
 	shader.setUniform(renderingContext,'maxBrightness' , Rendering.Uniform.FLOAT,[settings['maxBrightness']() ]);
@@ -241,6 +243,14 @@ Effect.getOptionPanel @(override) ::= fn(){
 		GUI.RANGE : [ 1.0,4.0 ],
 		GUI.RANGE_STEP_SIZE : 0.1,
 		GUI.DATA_WRAPPER : settings['radiusIncrease']
+    };
+    p++;   
+    p+={
+		GUI.TYPE : GUI.TYPE_RANGE,
+		GUI.LABEL : "initialRadius",
+		GUI.RANGE : [ 0.0,4.0 ],
+		GUI.RANGE_STEP_SIZE : 0.1,
+		GUI.DATA_WRAPPER : settings['initialRadius']
     };
     p++;
 	p+='----';
