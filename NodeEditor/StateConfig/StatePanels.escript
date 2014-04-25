@@ -1057,7 +1057,9 @@ NodeEditor.addConfigTreeEntryProvider(MinSG.ShaderState,fn( obj,entry ){
 });
 
 NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
-	var programInfo = obj.shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES)[obj.index];
+	var metaData = obj.shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES);
+
+	var programInfo = metaData[obj.index];
 	if(!programInfo)
 		programInfo={'file':"",'type':""};
 	entry.setLabel("");
@@ -1067,8 +1069,7 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 		GUI.CONTENTS : [{
 				GUI.TYPE : GUI.TYPE_TEXT,
 				GUI.DATA_VALUE : programInfo['type'],
-				GUI.ON_DATA_CHANGED : obj->fn(data){	
-						var metaData = this.shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES);
+				GUI.ON_DATA_CHANGED : [metaData] => obj->fn(metaData, data){	
 						if(this.index>=metaData.count())
 							metaData+={'file':"",'type':data};
 						else
@@ -1083,8 +1084,7 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 				GUI.TYPE : GUI.TYPE_FILE,
 				GUI.LABEL : false,
 				GUI.DATA_VALUE : programInfo['file'],
-				GUI.ON_DATA_CHANGED : obj->fn(data){	
-						var metaData = this.shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES);
+				GUI.ON_DATA_CHANGED : [metaData] => obj->fn(metaData,data){	
 						if(this.index>=metaData.count())
 							metaData+={'file':data,'type':""};
 						else
@@ -1092,19 +1092,18 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 						this.shaderState.setStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES,metaData);
 					},
 				GUI.OPTIONS : [programInfo['file']],
-				GUI.SIZE : [GUI.WIDTH_REL,0.6,0],
-				GUI.POSITION : [100,0],
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS,160,0],
 				GUI.ENDINGS : [".fs",".gs",".vs",".sfn"],
 				GUI.TOOLTIP : "Shader program file.\nLeave empty to remove program from shader!"
 			},
 			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Edit",
-				GUI.ON_CLICK : obj->fn(){
-					var filename = this.shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES)[this.index]['file'];
+				GUI.ON_CLICK : [metaData] => obj->fn(metaData){
+					var filename = metaData[this.index]['file'];
 					var fullPath = PADrend.getSceneManager().locateFile(filename);
 					if(fullPath)
-						Util.openOS(fullPath);
+						Util.openOS(""+fullPath);
 					else{
 						Runtime.warn("ShaderFile not found: "+filename);
 					}

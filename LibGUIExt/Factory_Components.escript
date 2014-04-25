@@ -926,7 +926,7 @@ GUI.GUI_Manager._componentFactories ::= {
 				GUI.POS_X_REL|GUI.REFERENCE_X_RIGHT|GUI.ALIGN_X_RIGHT|
 				GUI.POS_Y_ABS|GUI.REFERENCE_Y_TOP|GUI.ALIGN_Y_TOP|
 				GUI.WIDTH_REL|GUI.HEIGHT_ABS,
-				new Geometry.Vec2(relButtonWidth,0),new Geometry.Vec2(0.6-relButtonWidth,input.height) );
+				new Geometry.Vec2(relButtonWidth,0),new Geometry.Vec2( input.label ? 0.6-relButtonWidth : 1.0-relButtonWidth,input.height) );
 
 //		tf.setWidth(tf.getWidth()-20);
 		result.inputComponent = tf;

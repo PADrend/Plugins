@@ -160,7 +160,7 @@ m["Shader: Universal3"] = fn(){
 	
 	p.addAction( "Init Shader",	config->fn(){
 
-		var path = "universal3/";
+		var path = "shader/universal3/";
 		var vs = [path+"main.sfn",path+"sgHelpers.sfn"];
 		var fs = [path+"main.sfn",path+"sgHelpers.sfn"];
 		foreach([this.vertexEffect,this.surfaceProps,this.surfaceEffect,this.lighting,this.fragmentEffect] as var f){
