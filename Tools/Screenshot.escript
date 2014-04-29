@@ -220,7 +220,7 @@ plugin.planHQScreenshot := fn(filename=void){
 			return Extension.REMOVE_EXTENSION;
 		},Extension.HIGH_PRIORITY);
 	}else{
-		registerExtension('PADrend_AfterRendering',[filename] => this->fn(p,filename){
+		registerExtension('PADrend_AfterRendering',[filename] => this->fn(filename,...){
 			var it = performHq(filename);
 			yield;
 			while(!it.end()) {
@@ -250,7 +250,7 @@ plugin.planHRScreenshot := fn(filename=void){
 			return Extension.REMOVE_EXTENSION;
 		},Extension.HIGH_PRIORITY);
 	}else{
-		registerExtension('PADrend_AfterRendering',[filename] => this->fn(p,filename){
+		registerExtension('PADrend_AfterRendering',[filename] => this->fn(filename,...){
 			var it = performHr(filename);
 			yield;
 			while(!it.end()) {
