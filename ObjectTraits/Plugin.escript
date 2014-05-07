@@ -39,7 +39,8 @@ plugin.init = fn() {
 				'ObjectTraits/RayCastSensorTrait',
 				'ObjectTraits/RotationTrait',
 				'ObjectTraits/TransformationProxyTrait',
-				'ObjectTraits/DynamicTextTextureTrait'
+				'ObjectTraits/DynamicTextTextureTrait',
+				'ObjectTraits/PhysicTrait'
 			] as var t)
 		Std.require( t );
 
