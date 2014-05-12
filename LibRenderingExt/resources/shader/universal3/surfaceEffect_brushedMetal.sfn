@@ -40,6 +40,10 @@ void provideSurfaceEffectVars(in VertexProperties vec){
 // fs
 #ifdef SG_FRAGMENT_SHADER
 
+
+uniform sampler2D sg_texture3,sg_texture4;
+uniform float sg_brushedMetallScaling = 4.0;
+
 struct SurfaceProperties {
 	vec3 position_es, normal_es, tangent_es;
 	vec4 ambient, diffuse, specular, emission;
@@ -49,15 +53,18 @@ struct SurfaceProperties {
 vec4 sg_eyeToWorld(in vec4 hes);			//!	\see sgHelper.sfn
 vec4 sg_modelToEye(in vec4 hms);			//!	\see sgHelper.sfn
 
+// temp;
+vec4 sg_modelToClipping(in vec4 hms);
 
 //! \see main.sfn
 void addSurfaceEffects(inout SurfaceProperties surface){
 	//vec4 ws_pos = sg_eyeToWorld(vec4(surface.position_es,1.0));
 
-	float SCALE = 4000.0; //1000.0; 
+//	float SCALE = 4000.0; //1000.0; 
+//	float SCALE = 4.0; //1000.0; 
 	vec3 ORIENTATION = vec3(0,1,0);
 
-	vec3 pos_ms = var_position_hms.xyz / var_position_hms.w * SCALE;
+	vec3 pos_ms = var_position_hms.xyz / var_position_hms.w * sg_brushedMetallScaling;
 
 
 	int h = int( pos_ms.x * ORIENTATION.x + pos_ms.y * ORIENTATION.y +pos_ms.z * ORIENTATION.z );
@@ -96,14 +103,42 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 	vec3 frag_ws = frag_hws.xyz / frag_hws.w;
 	
 	vec3 frag_relWs = frag_ws-obsPos_ws;
+	vec3 fragDir_ws = normalize(frag_relWs);
 	
 	vec3 normal_ws = normalize(sg_eyeToWorld( vec4(surface.normal_es,0) ).xyz);
 	
 	//surface.ambient.rgb = normalize(cross( surface.normal_es, surface.position_es )) ;
 	//surface.ambient.rgb = normalize(surface.position_es);
 	
-	vec3 sideVec =  cross( normal_ws,normalize(frag_relWs));
+	// add some nice looking (but wrong) metallic effect
+	vec3 sideVec =  cross( normal_ws,fragDir_ws);
 	surface.ambient *= 0.0+ (sideVec.x*sideVec.x + sideVec.y*sideVec.y)*(1.5+v*0.5)  ;
+	
+	// -----------------------------------
+	// add reflection (move to lighting)
+//	surface.emission += vec4(reflect(normal_ws,fragDir_ws),0.0);
+
+//	
+//	surface.emission += vec4(length(reflect(fragDir_ws,normal_ws).xy),0.0,0.0,0.0);
+	
+	vec3 reflectionRay_ws = sg_eyeToWorld(vec4(reflect( normalize(surface.position_es) , surface.normal_es),0.0)).xyz;
+	
+	vec4 clip=sg_modelToClipping(var_position_hms);
+	clip.xyz/=clip.w;
+//	if(clip.x<-0.9)
+//		surface.emission += vec4(reflect(fragDir_ws,normal_ws),0.0);
+//	else{
+//		surface.emission += vec4(reflectionRay_ws,0.0);
+		surface.emission += vec4(texture2D(sg_texture3,reflectionRay_ws.xy*0.5+0.5).xxx*0.3 ,0.0);
+	
+//	}
+	
+	// global lighting
+//	vec3 normal_ws = sg_eyeToWorld(vec4(surface.normal_es,0.0)).xyz;
+//	surface.ambient = vec4(0.0);
+//	surface.diffuse = vec4(0.0);
+//	surface.specular = vec4(0.0);
+	surface.emission += vec4(texture2D(sg_texture4,normal_ws.xy*0.5+0.5).xxx*0.8 ,0.0);
 	
 	//surface.normal_es = ORIENTATION*v*0.001;
 	//surface.ambient *= 1.0-v;
