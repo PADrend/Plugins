@@ -84,7 +84,7 @@ plugin.saveTexture @(private) := fn(Rendering.Texture tex, String filename){
 		PADrend.message("Screenshot: \""+ pngFileName+ "\": "+ tex+ "\t"+ (success ? "ok." : "\afailed!"));
 		return pngFileName;
 	} else {
-		var bmpFileName = fileName + ".bmp";
+		var bmpFileName = filename + ".bmp";
 		success = Rendering.saveTexture(renderingContext,tex, bmpFileName);
 		PADrend.message("Screenshot: \""+ bmpFileName+ "\": "+ tex+ "\t"+ (success ? "ok." : "\afailed!"));
 		return bmpFileName;
