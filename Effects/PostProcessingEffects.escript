@@ -322,10 +322,10 @@ PPEffect_DrawToScreen._constructor ::= fn() {
 	this.colorTexture := Rendering.createStdTexture(renderingContext.getWindowWidth(), renderingContext.getWindowHeight(), true);
 	this.depthTexture := Rendering.createDepthTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight());
 	
-	renderingContext.pushAndSetFBO(fbo);
 	fbo.attachColorTexture(renderingContext, colorTexture);
 	fbo.attachDepthTexture(renderingContext, depthTexture);
-	renderingContext.popFBO();
+	//outln(fbo.getStatusMessage(renderingContext));
+	Rendering.checkGLError();
 };
 
 PPEffect_DrawToScreen.drawTexture ::= fn(Rendering.Texture texture) {

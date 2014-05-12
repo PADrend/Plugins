@@ -45,6 +45,7 @@ T._constructor ::= fn(Number _resolution=10){
 	var depthBuffer = Rendering.createDepthTexture(_resolution,_resolution);
 	fbo.attachDepthTexture(renderingContext,depthBuffer);
 	renderingContext.popFBO();
+	Rendering.checkGLError();
 
 };
 
@@ -61,6 +62,7 @@ T.setup @(private) ::= fn(Geometry.Vec3 source,Geometry.Vec3 target){
 			This introduces an additional overhead, but may be significantly faster for huge scenes.
 */
 T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 source,Geometry.Vec3 target, Bool restrictSearchingDistance=false ){
+	Rendering.checkGLError();
 	setup(source,target);
 	fc.getRenderingContext().pushAndSetFBO(fbo);
 
@@ -83,6 +85,7 @@ T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 sourc
  	var nodes=MinSG.collectVisibleNodes(rootNode, fc, maxDistance, true);
 	fc.popCamera();
 	fc.getRenderingContext().popFBO();
+		Rendering.checkGLError();
 	return nodes[0];
 };
 
@@ -100,6 +103,7 @@ T.queryNodeFromScreen ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.
 
 /*! Returns the coordinate (or false) of the first intersection of the line from source to target. */
 T.queryIntersection ::= fn(MinSG.FrameContext fc,[MinSG.Node,Array] rootNodes,Geometry.Vec3 source,Geometry.Vec3 target){
+		Rendering.checkGLError();
 	if(! (rootNodes---|>Array))
 		rootNodes = [rootNodes];
 	if(rootNodes.empty())
@@ -125,14 +129,17 @@ T.queryIntersection ::= fn(MinSG.FrameContext fc,[MinSG.Node,Array] rootNodes,Ge
 	}
 	fc.popCamera();
 	fc.getRenderingContext().popFBO();
+		Rendering.checkGLError();
 	return result;
 };
 
 /*! Returns the coordinate (or false) of the first intersection of the line from the camera through the given pixel. */
 T.queryIntersectionFromScreen ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec2 screenPos){
+		Rendering.checkGLError();
 	var cam=fc.getCamera();
 	var source=cam.getWorldPosition();
 	var destination=source + (fc.convertScreenPosToWorldPos(new Geometry.Vec3(screenPos.getX(),screenPos.getY(),0))-source).normalize()*cam.getFarPlane();
+		Rendering.checkGLError();
 	return queryIntersection(fc,rootNode,source,destination);
 };
 
