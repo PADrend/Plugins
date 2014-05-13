@@ -68,6 +68,7 @@ static MODE_DISABLED = false;
 static MODE_NORMAL = 0;
 static MODE_LAZY = 1;
 static MODE_DUAL = 2;
+static MODE_DUAL_COMPESSED = 3;
 
 static guiMode = new DataWrapper(MODE_NORMAL);
 
@@ -113,6 +114,29 @@ static renderGUI = fn(){
 			break;
 		}
 		case MODE_DUAL:{
+			@(once) initGUI_FBO();
+			renderingContext.pushAndSetFBO(gui_FBO);
+			renderingContext.clearScreen(new Util.Color4f(0,0,0,0));
+			gui.display();
+			renderingContext.popFBO();
+			
+			var blending=new Rendering.BlendingParameters;
+			blending.enable();
+			blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE_MINUS_SRC_ALPHA);
+			renderingContext.pushAndSetBlending(blending);
+			
+			Rendering.drawTextureToScreen(renderingContext,
+							new Geometry.Rect(0,0,renderingContext.getWindowWidth()*0.5,renderingContext.getWindowHeight()) ,
+							gui_Texture,new Geometry.Rect(0,0,0.5,1));
+			
+			Rendering.drawTextureToScreen(renderingContext,
+							new Geometry.Rect(renderingContext.getWindowWidth()*0.5,0,renderingContext.getWindowWidth()*0.5,renderingContext.getWindowHeight()) ,
+							gui_Texture,new Geometry.Rect(0,0,0.5,1));
+			
+			renderingContext.popBlending();
+			break;
+		}
+		case MODE_DUAL_COMPESSED:{
 			@(once) initGUI_FBO();
 			renderingContext.pushAndSetFBO(gui_FBO);
 			renderingContext.clearScreen(new Util.Color4f(0,0,0,0));

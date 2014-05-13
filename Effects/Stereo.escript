@@ -27,6 +27,7 @@ var plugin = new Plugin({
 });
 
 
+static compressGUI;	// DataWrapper (true for stereo-tv mode)
 static stereoMode;	// DataWrapper MODE_????
 static MODE_DISABLED = 0;
 static MODE_LEFT = 1;
@@ -104,6 +105,10 @@ static createRenderingPasses = fn(renderingPasses){
 
 plugin.init @(override) := fn(){
 	stereoMode = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.stereoMode',MODE_DISABLED);
+	compressGUI = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.compressGUI',false);
+	compressGUI.onDataChanged += fn(...){
+		stereoMode.forceRefresh();
+	};
 	leftEyeHeadOffset = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.lOffset',"-0.03 0 0");
 	registerExtension('PADrend_Init',this->fn(){
 		gui.registerComponentProvider('Effects_MainMenu.stereo',[
@@ -125,6 +130,12 @@ plugin.init @(override) := fn(){
 				GUI.DATA_WRAPPER : leftEyeHeadOffset,
 				GUI.TOOLTIP : "Left eye's offset relative to head node.\nx y z",
 				GUI.OPTIONS : ["-0.03 0 0"]
+			},
+			{
+				GUI.TYPE : GUI.TYPE_BOOL,
+				GUI.DATA_WRAPPER : compressGUI,
+				GUI.LABEL : "Compress GUI",
+				GUI.TOOLTIP : "Enable for sideBySide stereo configurations\n having halved horizontal resolution.",
 			},
 			'----'
 		]);
@@ -166,7 +177,7 @@ plugin.init @(override) := fn(){
 				dolly.getHeadNode() += lCamera;
 			}
 			if( mode==MODE_SIDE_BY_SIDE_LR||mode==MODE_SIDE_BY_SIDE_RL ){
-				Util.requirePlugin('PADrend/GUI').guiMode(2); // temp!!!!!!!!!!!!!!
+				Util.requirePlugin('PADrend/GUI').guiMode( compressGUI() ? 3:2); // temp!!!!!!!!!!!!!!
 			}else{
 				Util.requirePlugin('PADrend/GUI').guiMode(0); // temp!!!!!!!!!!!!!!
 			}
