@@ -17,8 +17,8 @@
  **/
 var plugin = new Plugin({
 		Plugin.NAME : 'Tools_EObjectInfo',
-		Plugin.DESCRIPTION : "EObjectInfo: Tool for displaying attributes for EScript-Objects [ctrl] + [^]",
-		Plugin.VERSION : 1.0,
+		Plugin.DESCRIPTION : "EObjectInfo: Tool for displaying attributes for EScript-Objects.",
+		Plugin.VERSION : 1.1,
 		Plugin.AUTHORS : "Claudius Jaehn",
 		Plugin.LICENSE : "Mozilla Public License, v. 2.0",
 		Plugin.OWNER : "All",
@@ -27,41 +27,26 @@ var plugin = new Plugin({
 });
 
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
 plugin.init @(override) := fn(){
-    { // Register ExtensionPointHandler:
-
-        registerExtension('PADrend_Init',this->fn(){
-			gui.registerComponentProvider('PADrend_PluginsMenu.eObjInfo',[
-				{
-					GUI.TYPE : GUI.TYPE_BUTTON,
-					GUI.LABEL : "EScript Object Info",
-					GUI.ON_CLICK : this->showObjectWindow
-				}
-			]);
+	registerExtension('PADrend_Init', this->fn(){
+		gui.registerComponentProvider('Tools_DebugWindowTabs.eObjInfo',	fn(){
+			return {
+				GUI.TYPE : GUI.TYPE_TAB,
+				GUI.TAB_CONTENT :  createObjInfoGUI("GLOBALS"),
+				GUI.LABEL : "EObj Info",
+			};
 		});
-        registerExtension('PADrend_KeyPressed',this -> fn(evt) {
-			// [ctrl] + [^]
-			if((evt.key == Util.UI.KEY_CIRCUMFLEX || evt.key == Util.UI.KEY_GRAVE) && 
-					PADrend.getEventContext().isCtrlPressed()) {
-				showObjectWindow();
-				return true;
-			}
-			return false;
-		});
-	}
-
+	});
     return true;
 };
 
-plugin.showObjectWindow:=fn(String command="GLOBALS"){
-	var handler=new ExtObject();
+static createObjInfoGUI = fn(String command){
+	var handler = new ExtObject;
 
-	var w=gui.createWindow(500,300,"EScript Object Info");
-	w.setPosition(300,300);
+	var w = gui.create({
+		GUI.TYPE : GUI.TYPE_CONTAINER,
+//		GUI.LAYOUE : GUI.LAYOUT_TIGHT_FLOW
+	});
 
 	var commandPanel=gui.createPanel(1,1,GUI.AUTO_LAYOUT|GUI.RAISED_BORDER);
 	commandPanel.setExtLayout(
@@ -230,7 +215,7 @@ plugin.showObjectWindow:=fn(String command="GLOBALS"){
 		GUI.POSITION : [GUI.POS_X_ABS|GUI.REFERENCE_X_RIGHT|GUI.ALIGN_X_RIGHT, -5,0]		
 
 	};
-
+	return w;
 
 };
 

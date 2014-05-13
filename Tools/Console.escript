@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2009-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2009-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2009 Jan Krems
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -12,14 +12,11 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:Tools_Console] Tools/Console.escript
- ** 2009-07-20
- **/
+
 var plugin = new Plugin({
 		Plugin.NAME : 'Tools_Console',
 		Plugin.DESCRIPTION : "Console window for scripting. Opened with [^] key.",
-		Plugin.VERSION : 1.0,
+		Plugin.VERSION : 1.1,
 		Plugin.AUTHORS : "Claudius Jaehn",
 		Plugin.LICENSE : "Mozilla Public License, v. 2.0",
 		Plugin.OWNER : "All",
@@ -27,64 +24,21 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-/**
-* Plugin initialization.
-* ---|> Plugin
-*/
-plugin.init=fn(){
-	{ // Register ExtensionPointHandler:
-		registerExtension('PADrend_Init',this->fn(){
-			gui.registerComponentProvider('PADrend_PluginsMenu.console',[{
-				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : "Console",
-				GUI.ON_CLICK : [this] => fn(plugin) {
-					plugin.toggleWindow();
-					this.setSwitch(GLOBALS.gui.windows['Console'].isVisible());
-				}
-			}]);
-		});
-		registerExtension('PADrend_KeyPressed',this->this.ex_KeyPressed);
-	}
-
+plugin.init @(override) := fn(){
+	registerExtension('PADrend_Init', this->fn(){
+		gui.registerComponentProvider('Tools_DebugWindowTabs.console',	this->createTab);
+	});
 	return true;
 };
 
-//!	[ext:PADrend_KeyPressed]
-plugin.ex_KeyPressed := fn(evt) {
-	if((evt.key == Util.UI.KEY_CIRCUMFLEX || evt.key == Util.UI.KEY_GRAVE) && 
-			!PADrend.getEventContext().isCtrlPressed()) {
-		toggleWindow();
-		return true;
-	}
-	return false;
-};
 
-plugin.toggleWindow:=fn(){
-	if(! GLOBALS.gui.windows['Console'] ){
-		GLOBALS.gui.windows['Console'] = this.createWindow();
-	}else{
-		GLOBALS.gui.windows['Console'].toggleVisibility();
-	}
-	this.getFocus();
-};
 
-plugin.getFocus:=fn(){
-	gui.setActiveComponent(this.inputComponent);
-	this.inputComponent.select();
-	this.inputComponent.activate();
-};
-
-plugin.createWindow := fn(){
-
-	var window = gui.createWindow(450, 400, "Console");
-	window.setPosition(330, 240);
-
+plugin.createTab := fn(){
 	var windowContainer = gui.create({
 		GUI.TYPE			:	GUI.TYPE_CONTAINER,
 		GUI.SIZE			:	GUI.SIZE_MAXIMIZE,
 		GUI.LAYOUT			:	GUI.LAYOUT_FLOW
 	});
-	window += windowContainer;
 
 	var output = gui.create({
 		GUI.TYPE			:	GUI.TYPE_PANEL,
@@ -103,14 +57,19 @@ plugin.createWindow := fn(){
 				GUI.WIDTH_ABS | GUI.HEIGHT_ABS,
 				new Geometry.Vec2(5, 10), new Geometry.Vec2(-83, 15));
 	windowContainer += inputComponent;
-	this.inputComponent := inputComponent;
 
+	var getFocus = [inputComponent] => fn(inputComponent){
+		gui.setActiveComponent(inputComponent);
+		inputComponent.select();
+		inputComponent.activate();
+	};
+	
 	windowContainer += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"execute",
-		GUI.ON_CLICK			:	(fn(plugin, inputComponent, outputComponent) {
+		GUI.ON_CLICK			:	[getFocus, inputComponent, output] => fn(getFocus, inputComponent, outputComponent) {
 										var outBackup=out;
-										var tmp=new ExtObject();
+										var tmp=new ExtObject;
 										tmp.result:="";
 										GLOBALS.out:=tmp->fn(p...){
 											this.result+=p.implode();
@@ -121,7 +80,7 @@ plugin.createWindow := fn(){
 										inputComponent.setCurrentOptionIndex(0);
 										inputComponent.setText("");
 
-										plugin.getFocus();
+										getFocus();
 
 										outputComponent+=" > "+s;
 										outputComponent.nextRow();
@@ -152,21 +111,27 @@ plugin.createWindow := fn(){
 											outputComponent.nextRow();
 										}
 										GLOBALS.out=outBackup;
-									}).bindLastParams(this, inputComponent, output),
+									},
 		GUI.WIDTH				:	50
 	};
 	windowContainer += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"X",
 		GUI.TOOLTIP				:	"Clear",
-		GUI.ON_CLICK			:	(fn(inputComponent, outputComponent) {
+		GUI.ON_CLICK			:	[inputComponent,output] => fn(inputComponent, outputComponent) {
 										outputComponent.clear();
 										inputComponent.clearOptions();
-									}).bindLastParams(inputComponent, output),
+									},
 		GUI.WIDTH				:	16
 	};
-
-	return window;
+	
+	var tab = gui.create({
+		GUI.TYPE : GUI.TYPE_TAB,
+		GUI.TAB_CONTENT : windowContainer,
+		GUI.LABEL : "Console",
+	});
+	tab.onOpen := getFocus;
+	return tab;
 };
 
 return plugin;
