@@ -122,4 +122,7 @@ GUI.POSITION_CENTER_XY :=	[
 // May be overridden and used for other menu buttons.
 GUI.OPTIONS_MENU_MARKER := ">";
 
+GUI.DIM_LINE_HEIGHT := 20;
+GUI.DIM_TIGHT_LINE_HEIGHT := 15;
+
 // ------------------------------------------------------------------------------------
