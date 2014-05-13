@@ -97,7 +97,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
                 GUI.WIDTH : 200,
                 GUI.LABEL : "LocalSurfaceVelocity",
                 GUI.DATA_WRAPPER : node.physic_localSurfaceVelocity
-
+			}
 		];
 	});
 });
