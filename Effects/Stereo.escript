@@ -37,6 +37,7 @@ static MODE_SIDE_BY_SIDE_RL = 4;
 static MODE_ANAGLYPH = 10;
 
 static leftEyeHeadOffset; // DataWrapper "0 0 0"
+static rightEyeHeadOffset; // DataWrapper "0 0 0"
 
 static lCamera; // void | CameraNode
 static rCamera; // void | CameraNode
@@ -110,35 +111,9 @@ plugin.init @(override) := fn(){
 		stereoMode.forceRefresh();
 	};
 	leftEyeHeadOffset = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.lOffset',"-0.03 0 0");
+	rightEyeHeadOffset = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.rOffset',"0.03 0 0");
+	
 	registerExtension('PADrend_Init',this->fn(){
-		gui.registerComponentProvider('Effects_MainMenu.stereo',[
-			"*Stereo mode*",
-			{
-				GUI.TYPE : GUI.TYPE_SELECT,
-				GUI.DATA_WRAPPER : stereoMode,
-				GUI.OPTIONS : [
-					[MODE_DISABLED,"Disabled"],
-					[MODE_LEFT,"Left eye"],
-					[MODE_RIGHT,"Right eye"],
-					[MODE_SIDE_BY_SIDE_LR,"SideBySide L-R"],
-					[MODE_SIDE_BY_SIDE_RL,"SideBySide R-L"],
-					// Anaglyph
-				]
-			},
-			{
-				GUI.TYPE : GUI.TYPE_TEXT,
-				GUI.DATA_WRAPPER : leftEyeHeadOffset,
-				GUI.TOOLTIP : "Left eye's offset relative to head node.\nx y z",
-				GUI.OPTIONS : ["-0.03 0 0"]
-			},
-			{
-				GUI.TYPE : GUI.TYPE_BOOL,
-				GUI.DATA_WRAPPER : compressGUI,
-				GUI.LABEL : "Compress GUI",
-				GUI.TOOLTIP : "Enable for sideBySide stereo configurations\n having halved horizontal resolution.",
-			},
-			'----'
-		]);
 
 		leftEyeHeadOffset.onDataChanged += fn(str){
 			var arr = str.split(" ");
@@ -147,10 +122,16 @@ plugin.init @(override) := fn(){
 				arr = [0,0,0];
 			}
 			if(lCamera)
-				lCamera.setRelOrigin( new Geometry.Vec3( (0+arr[0]), (0+arr[1]), (0+arr[2]) ) );
-
+				lCamera.setRelOrigin( arr );
+		};
+		rightEyeHeadOffset.onDataChanged += fn(str){
+			var arr = str.split(" ");
+			if(arr.count()!=3){
+				Runtime.warn("Ill formatted eye offset: "+str);
+				arr = [0,0,0];
+			}
 			if(rCamera)
-				rCamera.setRelOrigin( new Geometry.Vec3( (0-arr[0]), (0+arr[1]), (0+arr[2]) ) );
+				rCamera.setRelOrigin( arr );
 		};
 
 		stereoMode.onDataChanged += fn(mode){
@@ -197,16 +178,62 @@ plugin.init @(override) := fn(){
 			}
 
 			leftEyeHeadOffset.forceRefresh();
+			rightEyeHeadOffset.forceRefresh();
 		};
 		stereoMode.forceRefresh();
 
-		 Util.requirePlugin('PADrend/RemoteControl').registerFunctions({
+		Util.requirePlugin('PADrend/RemoteControl').registerFunctions({
             'EffectsStereo.toggle' : fn(){
                 stereoMode(stereoMode() != MODE_DISABLED ? MODE_DISABLED : MODE_SIDE_BY_SIDE_LR ) ;
                 print_r(stereoMode());
                 return true;
             },
         });
+        
+        // ------------------------
+		// gui
+		gui.registerComponentProvider('Effects_MainMenu.stereo',[
+			{
+				GUI.TYPE : GUI.TYPE_MENU,
+				GUI.LABEL : "Stereoscopic",
+				GUI.MENU : 'Effects_Stereo'
+			}
+		]);
+		gui.registerComponentProvider('Effects_Stereo.main',[
+			{
+				GUI.TYPE : GUI.TYPE_SELECT,
+				GUI.DATA_WRAPPER : stereoMode,
+				GUI.OPTIONS : [
+					[MODE_DISABLED,"Disabled"],
+					[MODE_LEFT,"Left eye"],
+					[MODE_RIGHT,"Right eye"],
+					[MODE_SIDE_BY_SIDE_LR,"SideBySide L-R"],
+					[MODE_SIDE_BY_SIDE_RL,"SideBySide R-L"],
+					// Anaglyph
+				],
+				GUI.TOOLTIP : "Stero mode"
+			},
+			{
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.DATA_WRAPPER : leftEyeHeadOffset,
+				GUI.OPTIONS : ["-0.03 0 0"],
+				GUI.TOOLTIP : "Left eye's offset relative to head node (cm).\nx y z"
+			},
+			{
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.DATA_WRAPPER : rightEyeHeadOffset,
+				GUI.OPTIONS : ["0.03 0 0"],
+				GUI.TOOLTIP : "Right eye's offset relative to head node (cm).\nx y z"
+			},
+			{
+				GUI.TYPE : GUI.TYPE_BOOL,
+				GUI.DATA_WRAPPER : compressGUI,
+				GUI.LABEL : "Compress GUI",
+				GUI.TOOLTIP : "Enable for sideBySide stereo configurations\n having halved horizontal resolution.",
+			},
+			'----'
+		]);
+
 	});
 
 	return true;
