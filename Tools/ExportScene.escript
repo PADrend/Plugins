@@ -223,7 +223,7 @@ plugin.exporter[plugin.D3FACT] = fn(Util.FileName folder, String name, Set meshe
     
     {
     	// create a screenshot of the scene with the current camera and save it together with the scene
-		PADrend.renderScene( PADrend.getRootNode(), PADrend.getActiveCamera(), PADrend.getRenderingFlags(), PADrend.getBGColor());
+		PADrend.renderScene( PADrend.getRootNode(), PADrend.getActiveCamera(), PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers() );
 	    var filename = new Util.FileName(prefix + name + ".png");
 		var texture = Rendering.createTextureFromScreen();
 		Rendering.saveTexture(renderingContext, texture, filename);

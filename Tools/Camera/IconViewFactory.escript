@@ -66,7 +66,7 @@ return fn(MinSG.AbstractCameraNode camera) {
 				GLOBALS.renderingContext.clearScreen(PADrend.getBGColor());
 
 				GLOBALS.frameContext.pushCamera();
-				PADrend.renderScene(PADrend.getRootNode(), camera, PADrend.getRenderingFlags(), PADrend.getBGColor());
+				PADrend.renderScene(PADrend.getRootNode(), camera, PADrend.getRenderingFlags(), PADrend.getBGColor(),PADrend.getRenderingLayers());
 				GLOBALS.frameContext.popCamera();
 				GLOBALS.renderingContext.popFBO();
 

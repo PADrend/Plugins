@@ -358,7 +358,8 @@ plugin.ex_UIEvent:=fn(evt){
 		@(once) static r = new MinSG.RendRayCaster;
 
 		// check if metaObjects (e.g. lights or similar nodes) are visible.
-		r.includeMetaObjects( (Util.requirePlugin('PADrend/EventLoop').getRenderingFlags() & MinSG.SHOW_META_OBJECTS)>0 );
+		
+		r.renderingLayers(Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
 	
 		var node = r.queryNodeFromScreen(frameContext,PADrend.getRootNode(),new Geometry.Vec2(evt.x,evt.y),true);
 		if(node && evt.button == Util.UI.MOUSE_BUTTON_RIGHT)

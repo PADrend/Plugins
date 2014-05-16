@@ -22,6 +22,7 @@ RenderingPass._printableName ::= "RenderingPass";
 RenderingPass.id := void;				//!< Can be used to identify the RenderingPass
 RenderingPass.camera := void;			//!< Camera used for rendering
 RenderingPass.renderingFlags := void;
+RenderingPass.renderingLayers := void;
 RenderingPass.rootNode := void;			//!< The rendered root node
 RenderingPass.clearColor := void;		//!< Util.Color4f or false
 
@@ -30,24 +31,28 @@ RenderingPass._constructor ::= fn(_id,
 								MinSG.Node _rootNode,
 								MinSG.AbstractCameraNode _camera, 
 								Number _renderingFlags, 
-								[Util.Color4f,false] _clearColor ){
-	id = _id;
-	camera = _camera;
-	renderingFlags = _renderingFlags;
-	rootNode = _rootNode;
-	clearColor = _clearColor.clone();
+								[Util.Color4f,false] _clearColor,
+								Number _renderingLayers = 1
+								){
+	this.id = _id;
+	this.camera = _camera;
+	this.renderingFlags = _renderingFlags;
+	this.rootNode = _rootNode;
+	this.clearColor = _clearColor.clone();
+	this.renderingLayers = _renderingLayers;
 };
 
 
 //! Render the stored scene
 RenderingPass.execute ::= fn(){
-	PADrend.renderScene( rootNode, camera, renderingFlags, clearColor);
+	PADrend.renderScene( this.rootNode, this.camera, this.renderingFlags, this.clearColor, this.renderingLayers);
 };
 
 RenderingPass.getCamera ::= 		fn(){	return camera;	};
 RenderingPass.getClearColor ::= 	fn(){	return clearColor;	};
 RenderingPass.getId ::= 			fn(){	return id;	};
 RenderingPass.getRenderingFlags ::= fn(){	return renderingFlags;	};
+RenderingPass.getRenderingLayers ::=fn(){	return renderingLayers;	};
 RenderingPass.getRootNode ::= 		fn(){	return rootNode;	};
 
 // ------------------------------------------------------------------------------

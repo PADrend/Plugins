@@ -179,7 +179,7 @@ CameraWindowPlugin.createOptionPanel := fn(MinSG.AbstractCameraNode camera) {
 			if(doDisplay() == 1 && gui.isCurrentlyEnabled(icon)) {
 				
 				GLOBALS.renderingContext.pushAndSetFBO(fbo);
-				PADrend.renderScene(PADrend.getRootNode(), camera, PADrend.getRenderingFlags(), PADrend.getBGColor());
+				PADrend.renderScene(PADrend.getRootNode(), camera, PADrend.getRenderingFlags(), PADrend.getBGColor(),PADrend.getRenderingLayers());
 				GLOBALS.renderingContext.popFBO();
 
 				GLOBALS.frameContext.setCamera(PADrend.getActiveCamera());

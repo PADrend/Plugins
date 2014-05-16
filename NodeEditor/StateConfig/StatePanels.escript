@@ -79,7 +79,24 @@ NodeEditor.registerConfigPanelProvider(MinSG.State, fn(MinSG.State state, panel)
     	GUI.ON_DATA_CHANGED : state -> state.setTempState,
 		GUI.TOOLTIP : "If enabled, the state is not saved."
     };
-	
+	{// rendering Layers
+		panel++;
+		var m = 1;
+		for(var i=0;i<8;++i){
+			var dataWrapper = new DataWrapper( state.testRenderingLayer(m) );
+			dataWrapper.onDataChanged += [state,m] => fn(state,m,b){
+				state.setRenderingLayers( state.getRenderingLayers().setBitMask(m,b) );
+			};
+			m*=2;
+
+			panel += { 
+				GUI.LABEL : ""+i+"    ",
+				GUI.TYPE : GUI.TYPE_BOOL,
+				GUI.TOOLTIP : "State is active on rendering layer #"+i,
+				GUI.DATA_WRAPPER : dataWrapper
+			};
+		}
+    }
 });
 
 // ----

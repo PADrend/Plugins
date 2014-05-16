@@ -149,7 +149,7 @@ ObjectPlacer.defaultNodeInserter := fn(Geometry.Vec2 screenPos,MinSG.Node node){
 	@(once) static r = new MinSG.RendRayCaster;
 	
 	// check if metaObjects (e.g. lights or similar nodes) are visible.
-	r.includeMetaObjects( (Util.requirePlugin('PADrend/EventLoop').getRenderingFlags() & MinSG.SHOW_META_OBJECTS)>0 );
+	r.renderingLayers( Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
 
 	var pos = r.queryIntersectionFromScreen(frameContext,scene,screenPos);
 	if(!pos)

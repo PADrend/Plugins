@@ -171,7 +171,7 @@ TransformationTools.SnapTool2 := new Type;
 		var scene = PADrend.getCurrentScene();
 	
 		// check if metaObjects (e.g. lights or similar nodes) are visible.
-		rayCaster.includeMetaObjects( (Util.requirePlugin('PADrend/EventLoop').getRenderingFlags() & MinSG.SHOW_META_OBJECTS)>0 );
+		rayCaster.renderingLayers( Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
 	
 		this.startPos = rayCaster.queryIntersectionFromScreen(frameContext,scene,new Geometry.Vec2(evt.x,evt.y));
 		if(!this.startPos)

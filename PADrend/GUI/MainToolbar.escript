@@ -867,17 +867,46 @@ plugin.registerStdToolbarEntries := fn() {
 			m += {
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.LABEL : flagName,
-				GUI.DATA_PROVIDER : (fn(flagName){
+				GUI.DATA_PROVIDER : [flagName] => fn(flagName){
 					return (PADrend.getRenderingFlags() & MinSG.getAttribute(flagName))>0;
-				}).bindLastParams(flagName),
-				GUI.ON_DATA_CHANGED : (fn(data, flagName){
+				},
+				GUI.ON_DATA_CHANGED : [flagName] => fn(flagName, data){
 					var mask = MinSG.getAttribute(flagName);
 					PADrend.setRenderingFlags( (PADrend.getRenderingFlags()-(PADrend.getRenderingFlags()&mask))| (data?mask:0) );
 					systemConfig.setValue('PADrend.Rendering.flags',PADrend.getRenderingFlags());
-				}).bindLastParams(flagName),
+				},
 			
 			};
 		}
+
+		{// rendering Layers
+			static eventLoop = Util.requirePlugin('PADrend/EventLoop');
+
+			m += "Rendering layer:";
+
+			var container = gui.create({
+				GUI.TYPE : GUI.TYPE_CONTAINER,
+				GUI.LAYOUT : GUI.LAYOUT_TIGHT_FLOW,
+				GUI.WIDTH : 200
+			});
+			var mask = 1;
+			
+			for(var i=0;i<8;++i){
+				var dataWrapper = new DataWrapper( (eventLoop.getRenderingLayers()&mask)>0);
+				dataWrapper.onDataChanged += [mask] => fn(mask,b){
+					eventLoop.setRenderingLayers(eventLoop.getRenderingLayers().setBitMask(mask,b) );
+				};
+				mask*=2;
+
+				container += { 
+					GUI.LABEL : "",
+					GUI.TYPE : GUI.TYPE_BOOL,
+					GUI.TOOLTIP : "Activate rendering layer #"+i,
+					GUI.DATA_WRAPPER : dataWrapper
+				};
+			}
+			m+=container;
+		}		
 		m += "*Eventloop flags*";
 		m += {
 			GUI.TYPE : GUI.TYPE_BOOL,

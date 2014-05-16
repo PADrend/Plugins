@@ -41,7 +41,7 @@ MinSG.ImageWriteEvaluator.measure @(override) ::= fn(MinSG.FrameContext frameCon
 	
 	renderingContext.pushViewport();
 	renderingContext.setViewport(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
-	PADrend.renderScene(PADrend.getRootNode(), void, PADrend.getRenderingFlags(), PADrend.getBGColor());
+	PADrend.renderScene(PADrend.getRootNode(), void, PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
 	renderingContext.popViewport();
 	
 	renderingContext.popFBO();

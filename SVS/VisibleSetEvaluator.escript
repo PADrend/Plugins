@@ -67,7 +67,7 @@ SVS.VisibleSetEvaluator.measure @(override) ::= fn(	MinSG.FrameContext frameCont
 	renderingContext.pushViewport();
 	renderingContext.setViewport(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
 
-	PADrend.renderScene(node, void, PADrend.getRenderingFlags(), PADrend.getBGColor());
+	PADrend.renderScene(node, void, PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
 
 	var collectedNodes = pvsSource().getCollectedNodes();
 	potentiallyVisibleSet = new MinSG.VisibilityVector;

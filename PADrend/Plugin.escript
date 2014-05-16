@@ -218,19 +218,19 @@ PADrend.message := fn(p...){
 
 /*! (static) Render the given sceneGraph with the given camera and flags.
 	\note If the clearColor is false, the rendering buffer is not cleared before rendering */
-PADrend.renderScene := fn( MinSG.Node _rootNode, [MinSG.AbstractCameraNode,void] _camera, Number _renderingFlags, [Util.Color4f,false] _clearColor ){
+PADrend.renderScene := fn( MinSG.Node _rootNode, [MinSG.AbstractCameraNode,void] _camera, Number _renderingFlags, [Util.Color4f,false] _clearColor, Number renderingLayers=1 ){
 	renderingContext.setImmediateMode(false);
 	// force a reset of the opengl state - this can eventually be removed if the renderingContext is at no position
 	// interfered by wrongly placed glPush- and glPopAttribs.
 	renderingContext.applyChanges(true);
 	// \note The camera has to be enabled before the screen is cleared because it also defines the viewport to clear
-	if(_camera) {
+	if(_camera)
 		frameContext.setCamera(_camera);
-	}
-	if(_clearColor) {
+	if(_clearColor) 
 		renderingContext.clearScreen(_clearColor);
-	}
-	frameContext.displayNode(_rootNode,_renderingFlags);
+	frameContext.displayNode(_rootNode, (new MinSG.RenderParam)
+												.setFlags(_renderingFlags)
+												.setRenderingLayers(renderingLayers));
 	renderingContext.setImmediateMode(true);
 };
 

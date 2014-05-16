@@ -69,28 +69,28 @@ static createRenderingPasses = fn(renderingPasses){
 		switch(stereoMode()){
 			case MODE_LEFT:{
 				lCamera.setViewport( viewport );
-				newPasses += new PADrend.RenderingPass(pass.getId()+"_left", pass.getRootNode(), lCamera, pass.getRenderingFlags(), pass.getClearColor());
+				newPasses += new PADrend.RenderingPass(pass.getId()+"_left", pass.getRootNode(), lCamera, pass.getRenderingFlags(), pass.getClearColor(), pass.getRenderingLayers());
 				break;
 			}
 			case MODE_RIGHT:{
 				rCamera.setViewport( viewport );
-				newPasses += new PADrend.RenderingPass(pass.getId()+"_right", pass.getRootNode(), rCamera, pass.getRenderingFlags(), pass.getClearColor());
+				newPasses += new PADrend.RenderingPass(pass.getId()+"_right", pass.getRootNode(), rCamera, pass.getRenderingFlags(), pass.getClearColor(), pass.getRenderingLayers());
 				break;
 			}
 			case MODE_SIDE_BY_SIDE_LR:{
 				lCamera.setViewport( viewport.clone().setWidth( viewport.getWidth()*0.5) );
-				newPasses += new PADrend.RenderingPass(pass.getId()+"_left", pass.getRootNode(), lCamera, pass.getRenderingFlags(), pass.getClearColor());
+				newPasses += new PADrend.RenderingPass(pass.getId()+"_left", pass.getRootNode(), lCamera, pass.getRenderingFlags(), pass.getClearColor(), pass.getRenderingLayers());
 
 				rCamera.setViewport( viewport.clone().setWidth( viewport.getWidth()*0.5).setX(viewport.getWidth()*0.5) );
-				newPasses += new PADrend.RenderingPass(pass.getId()+"_right", pass.getRootNode(), rCamera, pass.getRenderingFlags(), pass.getClearColor());
+				newPasses += new PADrend.RenderingPass(pass.getId()+"_right", pass.getRootNode(), rCamera, pass.getRenderingFlags(), pass.getClearColor(), pass.getRenderingLayers());
 				break;
 			}
 			case MODE_SIDE_BY_SIDE_RL:{
 				lCamera.setViewport( viewport.clone().setWidth( viewport.getWidth()*0.5).setX(viewport.getWidth()*0.5) );
-				newPasses += new PADrend.RenderingPass(pass.getId()+"_left", pass.getRootNode(), lCamera, pass.getRenderingFlags(), pass.getClearColor());
+				newPasses += new PADrend.RenderingPass(pass.getId()+"_left", pass.getRootNode(), lCamera, pass.getRenderingFlags(), pass.getClearColor(), pass.getRenderingLayers());
 
 				rCamera.setViewport( viewport.clone().setWidth( viewport.getWidth()*0.5) );
-				newPasses += new PADrend.RenderingPass(pass.getId()+"_right", pass.getRootNode(), rCamera, pass.getRenderingFlags(), pass.getClearColor());
+				newPasses += new PADrend.RenderingPass(pass.getId()+"_right", pass.getRootNode(), rCamera, pass.getRenderingFlags(), pass.getClearColor(), pass.getRenderingLayers());
 				break;
 			}
 			// ANAGLYPH...

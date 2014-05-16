@@ -81,6 +81,32 @@ NodeEditor.registerConfigPanelProvider( MinSG.Node, fn(node, panel){
     	GUI.ON_DATA_CHANGED : [node] => MinSG.SemanticObjects.markAsSemanticObject,
 		GUI.TOOLTIP : "Mark to show if the node is a semantic object."
     };
+    {// rendering Layers
+		var accessibleLayers = 0xffff;
+		for(var n=node.getParent();n;n=n.getParent() ){
+			accessibleLayers &= n.getRenderingLayers();
+		}
+		
+		panel++;
+		var m = 1;
+		for(var i=0;i<8;++i){
+			var isAccessible = (accessibleLayers&m)>0;
+			
+			var dataWrapper = new DataWrapper( node.testRenderingLayer(m) );
+			dataWrapper.onDataChanged += [node,m] => fn(node,m,b){
+				node.setRenderingLayers( node.getRenderingLayers().setBitMask(m,b) );
+			};
+			m*=2;
+
+			panel += { 
+				GUI.LABEL : ""+(isAccessible ? i : "("+i+")")+"    ",
+				GUI.TYPE : GUI.TYPE_BOOL,
+				GUI.TOOLTIP : "Node is active on rendering layer #"+i+ (isAccessible ? "" :"\nNote: Path to does not provide this layer."),
+				GUI.DATA_WRAPPER : dataWrapper
+			};
+		}
+    }
+    
     if(node.isInstance()){
 		var inheritedTraits = MinSG.getLocalPersistentNodeTraitNames(node.getPrototype());
 		if(!inheritedTraits.empty()){

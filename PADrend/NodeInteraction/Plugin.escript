@@ -37,10 +37,7 @@
  * @endcode
  */
 
-/***
- **   ---|> Plugin
- **/
-PADrend.NodeInteraction := new Plugin({
+var plugin = new Plugin({
 		Plugin.NAME : 'PADrend/NodeInteraction',
 		Plugin.DESCRIPTION : "*EXPERIMENTAL* Basic functionality to interact with objects in the scene;\n should e.g. be used by the transformation EditNodes of the NodeEditor ",
 		Plugin.VERSION : 0.1,
@@ -50,28 +47,23 @@ PADrend.NodeInteraction := new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
+	
 // -------------------
 
-PADrend.NodeInteraction.metaObjectRoot := void;
-PADrend.NodeInteraction.objPicker := void;
-PADrend.NodeInteraction.highlightState := void;
+plugin.metaObjectRoot := void;
+plugin.objPicker := void;
+plugin.highlightState := void;
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-PADrend.NodeInteraction.init := fn(){
-	{
-		registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY);
-		registerExtension('PADrend_UIEvent',this->ex_UIEvent);
-		registerExtension('PADrend_AfterRenderingPass',this->ex_AfterRenderingPass);
-	}
+plugin.init @(override) := fn(){
+	registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY);
+	registerExtension('PADrend_UIEvent',this->ex_UIEvent);
+	registerExtension('PADrend_AfterRenderingPass',this->ex_AfterRenderingPass);
 	
 	return true;
 };
 
 //! [ext:PADrend_Init]
-PADrend.NodeInteraction.ex_Init := fn(){
+plugin.ex_Init := fn(){
 	this.metaObjectRoot = new MinSG.ListNode();
 	metaObjectRoot.name := "PADrend.NodeInteraction.metaObjectRoot";
 	
@@ -117,7 +109,7 @@ PADrend.NodeInteraction.ex_Init := fn(){
 
 
 //! [ext:PADrend_AfterRenderingPass]
-PADrend.NodeInteraction.ex_AfterRenderingPass := fn(...){
+plugin.ex_AfterRenderingPass := fn(...){
 	if(metaObjectRoot.countChildren()==0)
 		return;
 	
@@ -128,12 +120,12 @@ PADrend.NodeInteraction.ex_AfterRenderingPass := fn(...){
 };
 
 //!	[ext:UIEvent]
-PADrend.NodeInteraction.ex_UIEvent:=fn(evt){
+plugin.ex_UIEvent:=fn(evt){
 	if( evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_LEFT && evt.pressed){
 			
 		// if metaObjects (e.g. lights or similar nodes) are visible, allow interaction.
-		objPicker.includeMetaObjects( (Util.requirePlugin('PADrend/EventLoop').getRenderingFlags() & MinSG.SHOW_META_OBJECTS)>0 );
-			
+		objPicker.renderingLayers( Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
+
 		// try first to pick a metaObject (= nodes located below the metaObjectRoot)
 		var node = objPicker.queryNodeFromScreen(GLOBALS.frameContext,metaObjectRoot,new Geometry.Vec2(evt.x,evt.y),true);
 		// otherwise a pick node from the scene
@@ -148,13 +140,16 @@ PADrend.NodeInteraction.ex_UIEvent:=fn(evt){
 	return Extension.CONTINUE;
 };
 
-PADrend.NodeInteraction.addMetaNode := fn(MinSG.Node n){
+plugin.addMetaNode := fn(MinSG.Node n){
 	metaObjectRoot.addChild(n);
 };
 
-PADrend.NodeInteraction.removeMetaNode := fn(MinSG.Node n){
+plugin.removeMetaNode := fn(MinSG.Node n){
 	metaObjectRoot.removeChild(n);
 };
 
-return PADrend.NodeInteraction;
+// alias
+PADrend.NodeInteraction := plugin;
+
+return plugin;
 // ------------------------------------------------------------------------------

@@ -28,22 +28,23 @@ var T = MinSG.RendRayCaster;
 T.castCam @(private) := void;
 T.resolution @(private) := void;
 T.fbo @(private) := void;
-T.includeMetaObjects @(public,init) := Std.require('Std/DataWrapper');
+T.renderingLayers @(public,init) := Std.require('Std/DataWrapper');
 
 T._constructor ::= fn(Number _resolution=10){
-	resolution = _resolution;
-	castCam = new MinSG.CameraNodeOrtho;
-	castCam.setViewport( new Geometry.Rect(0,0,resolution,resolution));
-	castCam.setFrustumFromScaledViewport(0.001);
+	this.renderingLayers( 1 );
+	this.resolution = _resolution;
+	this.castCam = new MinSG.CameraNodeOrtho;
+	this.castCam.setViewport( new Geometry.Rect(0,0,resolution,resolution));
+	this.castCam.setFrustumFromScaledViewport(0.001);
 
 	// create FBO
-	fbo = new Rendering.FBO;
+	this.fbo = new Rendering.FBO;
 	renderingContext.pushAndSetFBO(fbo);
 	var renderBuffer = Rendering.createStdTexture(_resolution,_resolution,true);
-	fbo.attachColorTexture(renderingContext,renderBuffer);
+	this.fbo.attachColorTexture(renderingContext,renderBuffer);
 //	fbo.attachColorTexture(renderingContext,Rendering.createStdTexture(_resolution,_resolution,true)); //! \see #657
 	var depthBuffer = Rendering.createDepthTexture(_resolution,_resolution);
-	fbo.attachDepthTexture(renderingContext,depthBuffer);
+	this.fbo.attachDepthTexture(renderingContext,depthBuffer);
 	renderingContext.popFBO();
 	Rendering.checkGLError();
 
@@ -51,10 +52,10 @@ T._constructor ::= fn(Number _resolution=10){
 
 /*! (internal) */
 T.setup @(private) ::= fn(Geometry.Vec3 source,Geometry.Vec3 target){
-	castCam.setNearFar(0,(target-source).length());
-	castCam.setRelPosition(source);
-	castCam.lookAtAbs(target);
-	castCam.rotateLocal_deg(180,new Geometry.Vec3(0,1,0));
+	this.castCam.setNearFar(0,(target-source).length());
+	this.castCam.setRelPosition(source);
+	this.castCam.lookAtAbs(target);
+	this.castCam.rotateLocal_deg(180,new Geometry.Vec3(0,1,0));
 };
 
 /*! Returns the first node (or void) intersecting the line from source to target.
@@ -63,7 +64,7 @@ T.setup @(private) ::= fn(Geometry.Vec3 source,Geometry.Vec3 target){
 */
 T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 source,Geometry.Vec3 target, Bool restrictSearchingDistance=false ){
 	Rendering.checkGLError();
-	setup(source,target);
+	this.setup(source,target);
 	fc.getRenderingContext().pushAndSetFBO(fbo);
 
 	fc.pushAndSetCamera(castCam);
@@ -72,7 +73,12 @@ T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 sourc
 	var maxDistance = false;
 	if(restrictSearchingDistance){
 		fc.getRenderingContext().clearScreen(new Util.Color4f(0,0,0,1));
-		rootNode.display(fc,MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING | (includeMetaObjects()?MinSG.SHOW_META_OBJECTS:0) );//|MinSG.NO_STATES);
+
+		var params = (new MinSG.RenderParam)
+					.setFlags(MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING) //|MinSG.NO_STATES);
+					.setRenderingLayers( this.renderingLayers() );
+
+		rootNode.display(fc, params );
 		// read depth
 		var screenCenter=resolution*0.5;
 		var screenSpaceDepth=Rendering.readDepthValue(screenCenter,screenCenter);
@@ -109,15 +115,18 @@ T.queryIntersection ::= fn(MinSG.FrameContext fc,[MinSG.Node,Array] rootNodes,Ge
 	if(rootNodes.empty())
 		return;
 
-	setup(source,target);
+	this.setup(source,target);
 	fc.getRenderingContext().pushAndSetFBO(fbo);
 
 	// render scene
 	fc.pushAndSetCamera(castCam);
 	fc.getRenderingContext().clearScreen(new Util.Color4f(0,0,0,1));
 	
+	var params = (new MinSG.RenderParam)
+					.setFlags(MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING) //|MinSG.NO_STATES);
+					.setRenderingLayers( this.renderingLayers() );
 	foreach(rootNodes as var node)
-		node.display(fc,MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING | (includeMetaObjects()?MinSG.SHOW_META_OBJECTS:0));//|MinSG.NO_STATES);
+		node.display(fc,params);
 	// read depth
 	var screenCenter=resolution*0.5;
 	var depth=Rendering.readDepthValue(screenCenter,screenCenter);

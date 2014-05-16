@@ -135,7 +135,7 @@ SpielereiPlugin.registerMenus := fn(){
 
 						cam.setSRT( new Geometry.SRT(pos,dir,up) );
 						
-						PADrend.renderScene(PADrend.getRootNode(), cam, PADrend.getRenderingFlags(), PADrend.getBGColor());
+						PADrend.renderScene(PADrend.getRootNode(), cam, PADrend.getRenderingFlags(), PADrend.getBGColor(),PADrend.getRenderingLayers());
 
 						renderingContext.popFBO();
 						depthTexture.download(renderingContext);

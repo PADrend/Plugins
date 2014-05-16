@@ -12,16 +12,8 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:PADrend] PADrend/EventLoop/Plugin.escript
- **
- **/
-    
 
-/***
- **   ---|> Plugin
- **/
-PADrend.EventLoop := new Plugin({
+static plugin = new Plugin({
 		Plugin.NAME : 'PADrend/EventLoop',
 		Plugin.DESCRIPTION : "PADrend's main event loop",
 		Plugin.VERSION : 0.1,
@@ -99,22 +91,22 @@ PADrend.EventLoop := new Plugin({
 		]
 });
 
+
+PADrend.EventLoop := plugin;
 // -------------------
 
 static active = true;
 static activeCamera = void; 
-PADrend.EventLoop.bgColor := void; 
-PADrend.EventLoop.doClearScreen := true;
+plugin.bgColor := void; 
+plugin.doClearScreen := true;
 static glErrorChecking = DataWrapper.createFromConfig(systemConfig,'PADrend.Rendering.GLErrorChecking',false);
-PADrend.EventLoop.renderingFlags := 0;
-PADrend.EventLoop.taskScheduler := void;
-PADrend.EventLoop.waitForGlFinish := void;
+static renderingFlags = 0;
+plugin.taskScheduler := void;
+plugin.waitForGlFinish := void;
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-PADrend.EventLoop.init := fn(){
+static renderingLayers = 1;
+
+plugin.init @(override) := fn(){
 	loadOnce(__DIR__+"/RenderingPass.escript");
 
 	registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+1);
@@ -167,9 +159,9 @@ PADrend.EventLoop.init := fn(){
 
 
 //! [ext:PADrend_Init]
-PADrend.EventLoop.ex_Init := fn(){
+plugin.ex_Init := fn(){
    //  set rendering parameters
-	this.renderingFlags = systemConfig.getValue('PADrend.Rendering.flags',MinSG.FRUSTUM_CULLING);
+	renderingFlags = systemConfig.getValue('PADrend.Rendering.flags',MinSG.FRUSTUM_CULLING);
 	this.waitForGlFinish = systemConfig.getValue('PADrend.Rendering.waitForGlFinish',true);
 
 	//  set bgColor
@@ -179,7 +171,7 @@ PADrend.EventLoop.ex_Init := fn(){
 	this.setActiveCamera(GLOBALS.camera);
 };
 //! [ext:PADrend_Start]
-PADrend.EventLoop.ex_Start := fn(){
+plugin.ex_Start := fn(){
    while(active){
         out("Starting EventLoop...\n");
         try{
@@ -192,39 +184,30 @@ PADrend.EventLoop.ex_Start := fn(){
 	}
 
 };
-PADrend.EventLoop.getActiveCamera := fn(){
-	return activeCamera;
-};
+plugin.getActiveCamera := 		fn(){	return activeCamera;	};
+plugin.getBGColor := 			fn(){	return this.bgColor;	};
+plugin.getRenderingFlags :=		fn(){	return renderingFlags;	};
+plugin.getRenderingLayers := 	fn(){	return renderingLayers;	};
 
-PADrend.EventLoop.getBGColor := fn(){
-	return this.bgColor;
-};
+plugin.setActiveCamera :=		fn(MinSG.AbstractCameraNode newCamera){	activeCamera = newCamera;	};
 
-PADrend.EventLoop.getRenderingFlags := fn(){
-	return this.renderingFlags;
-};
-
-PADrend.EventLoop.setActiveCamera := fn(MinSG.AbstractCameraNode newCamera){
-	activeCamera = newCamera;
-};
-
-PADrend.EventLoop.setBGColor := fn(Util.Color4f newColor){
+plugin.setBGColor := fn(Util.Color4f newColor){
 	systemConfig.setValue('PADrend.Rendering.bgColor',[newColor.r(),newColor.g(),newColor.b(),newColor.a()]);
 	this.bgColor = newColor;
 };
 
-PADrend.EventLoop.setRenderingFlags := fn(Number value){
-	this.renderingFlags = value;
-};
+plugin.setRenderingFlags :=		fn(Number f){	renderingFlags = f;	};
+plugin.setRenderingLayers :=	fn(Number l){	renderingLayers = l;	};
 
-PADrend.EventLoop.planTask := fn(time,fun){
+
+plugin.planTask := fn(time,fun){
 	this.taskScheduler.plan(time,fun);
 };
 
-PADrend.EventLoop.singleFrame := fn() {
+plugin.singleFrame := fn() {
 
 	// create "default" rendering pass
-	var renderingPasses = [ new PADrend.RenderingPass("default",PADrend.getRootNode(),activeCamera, this.renderingFlags, this.doClearScreen ? this.bgColor : false) ];
+	var renderingPasses = [ new PADrend.RenderingPass("default",PADrend.getRootNode(),activeCamera, renderingFlags, this.doClearScreen ? this.bgColor : false,renderingLayers) ];
 	executeExtensions('PADrend_BeforeRendering',renderingPasses);
 
 	// -------------------
@@ -259,13 +242,13 @@ PADrend.EventLoop.singleFrame := fn() {
 				if(executeExtensions('PADrend_KeyPressed',evt)) {
 				} else if( (evt.key==Util.UI.KEY_F4 && PADrend.getEventContext().isAltPressed()) || // [ALT] + [F4]
 						(evt.key == Util.UI.KEY_Q && PADrend.getEventContext().isCtrlPressed()) ) { // [CTRL] + [q]{ 
-					PADrend.EventLoop.stop();
+					plugin.stop();
 				}
 			} else if (evt.type == Util.UI.EVENT_RESIZE) {
 				renderingContext.setWindowClientArea(0, 0, evt.width, evt.height);
 				Listener.notify(Listener.TYPE_APP_WINDOW_SIZE_CHANGED, [evt.width, evt.height]);
 			} else if (evt.type == Util.UI.EVENT_QUIT) {
-				PADrend.EventLoop.stop();
+				plugin.stop();
 			}
 		} catch(exception) {
 			Runtime.warn(exception);
@@ -292,7 +275,7 @@ PADrend.EventLoop.singleFrame := fn() {
 		Rendering.disableGLErrorChecking();
 };
 
-PADrend.EventLoop.stop := fn(){
+plugin.stop := fn(){
 	active = false;
 	PADrend.message("Stopping event loop...");
 };
@@ -300,18 +283,21 @@ PADrend.EventLoop.stop := fn(){
 // --------------------
 // Aliases
 
-PADrend.EventLoop.glErrorChecking := glErrorChecking;
 
-PADrend.getActiveCamera := PADrend.EventLoop.getActiveCamera;
-PADrend.getBGColor := PADrend.EventLoop -> PADrend.EventLoop.getBGColor;
-PADrend.getRenderingFlags := PADrend.EventLoop -> PADrend.EventLoop.getRenderingFlags;
-PADrend.setActiveCamera := PADrend.EventLoop -> PADrend.EventLoop.setActiveCamera;
-PADrend.setBGColor := PADrend.EventLoop -> PADrend.EventLoop.setBGColor;
-PADrend.setRenderingFlags := PADrend.EventLoop -> PADrend.EventLoop.setRenderingFlags;
-PADrend.planTask := PADrend.EventLoop -> PADrend.EventLoop.planTask;
+plugin.glErrorChecking := glErrorChecking;
+
+PADrend.getActiveCamera := 		plugin -> plugin.getActiveCamera;
+PADrend.getBGColor := 			plugin -> plugin.getBGColor;
+PADrend.getRenderingFlags :=	plugin -> plugin.getRenderingFlags;
+PADrend.getRenderingLayers := 	plugin -> plugin.getRenderingLayers;
+PADrend.setActiveCamera := 		plugin -> plugin.setActiveCamera;
+PADrend.setBGColor := 			plugin -> plugin.setBGColor;
+PADrend.setRenderingFlags :=	plugin -> plugin.setRenderingFlags;
+PADrend.setRenderingLayers :=	plugin -> plugin.setRenderingLayers;
+PADrend.planTask :=				plugin -> plugin.planTask;
 
 // --------------------
 
 
-return PADrend.EventLoop;
+return plugin;
 // ------------------------------------------------------------------------------

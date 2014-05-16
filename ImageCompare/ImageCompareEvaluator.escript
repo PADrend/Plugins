@@ -56,11 +56,11 @@ MinSG.ImageCompareEvaluator.measure @(override) ::= fn(MinSG.FrameContext frameC
 	
 	fbo.attachColorTexture(renderingContext,firstTexture);
 	PADrend.selectScene(firstScene);
-	PADrend.renderScene(PADrend.getRootNode(), void, PADrend.getRenderingFlags(), PADrend.getBGColor());
+	PADrend.renderScene(PADrend.getRootNode(), void, PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
 	
 	fbo.attachColorTexture(renderingContext,secondTexture);
 	PADrend.selectScene(secondScene);
-	PADrend.renderScene(PADrend.getRootNode(), void, PADrend.getRenderingFlags(), PADrend.getBGColor());
+	PADrend.renderScene(PADrend.getRootNode(), void, PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
 	
 	renderingContext.popViewport();
 	

@@ -270,7 +270,7 @@ plugin.ex_AfterFrame @(private) := fn(...){
     
 	    
 		// render reflection
-	    PADrend.renderScene(PADrend.getRootNode(),mirror_cam,PADrend.getRenderingFlags(),PADrend.getBGColor());
+	    PADrend.renderScene(PADrend.getRootNode(),mirror_cam,PADrend.getRenderingFlags(),PADrend.getBGColor(), PADrend.getRenderingLayers());
 	    
 		frameContext.setCamera(camera);
 	     
