@@ -1,0 +1,131 @@
+#version 120
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+ 
+ /*	
+	Multi-Render-Target shader
+	Layers
+	0		...	"Normal" color including lighting and fragment effects
+	1		...	position in sg_mrt_eyeSpaceConversionMatrix * eyeSpace
+	2		... normal in sg_mrt_eyeSpaceConversionMatrix * eyeSpace
+	3		... surface ambient color (without lighting and fragment effects)
+	4		... surface diffuse color (without lighting and fragment effects)
+	5		... surface specular color (without lighting and fragment effects)
+ 
+ */
+ 
+varying vec3 var_normal_es;
+varying vec4 var_position_hes;
+
+// -------------------------------------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+float sg_getPointSize();						//!	\see sgHelper.sfn
+vec3 sg_getVertexPosition_ms();					//!	\see sgHelper.sfn
+vec3 sg_getVertexNormal_ms();					//!	\see sgHelper.sfn
+vec4 sg_modelToClipping(in vec4 hms);			//!	\see sgHelper.sfn
+vec4 sg_modelToEye(in vec4 hms);				//!	\see sgHelper.sfn
+vec4 sg_modelToWorld(in vec4 hms);				//!	\see sgHelper.sfn
+
+// ----
+
+struct VertexProperties {
+	vec3 position_es, normal_es;
+	float pointSize;
+};
+
+void addVertexEffect(inout vec3 pos_ms, inout vec3 normal_ms, inout float pointSize);	//!	\see vertexEffect_???.sfn
+void provideSurfaceVars(in VertexProperties);											//! \see surfaceProp_???.sfn
+void provideSurfaceEffectVars(in VertexProperties);										//! \see surfaceEffect_???.sfn
+void provideLightingVars(in VertexProperties);											//! \see lighting_???.sfn
+void provideFragmentEffectVars(in VertexProperties);									//! \see fragmentEffect_???.sfn
+
+void main (void) {
+    vec3 normal_ms = sg_getVertexNormal_ms();
+    vec3 position_ms = sg_getVertexPosition_ms();
+    float pointSize = sg_getPointSize();
+
+    // optionally modify model space position, normal and point size
+    addVertexEffect(position_ms, normal_ms,pointSize);
+
+	VertexProperties vert;
+	vert.position_es = sg_modelToEye(vec4(position_ms,1.0)).xyz;
+	vert.normal_es = sg_modelToEye(vec4(normal_ms,0.0)).xyz; // \note the value is not normalized!
+
+	provideSurfaceVars(vert);
+	provideSurfaceEffectVars(vert);
+	provideLightingVars(vert);
+	provideFragmentEffectVars(vert);
+
+	var_position_hes = vec4(vert.position_es,1.0);
+	var_normal_es = vert.normal_es;
+	gl_PointSize = pointSize;
+	gl_Position = sg_modelToClipping(vec4(position_ms,1.0));
+}
+
+
+#endif
+
+// -------------------------------------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+uniform mat4 sg_mrt_eyeSpaceConversionMatrix = mat4(1.0);
+
+struct CompositeColor {
+	vec4 ambient, diffuse, specular;
+};
+
+struct SurfaceProperties {
+	vec3 position_es, normal_es, tangent_es;
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+
+
+void calcSurfaceProperties(inout SurfaceProperties surface);		//! \see surfaceProps_???.sfn
+void addSurfaceEffects(inout SurfaceProperties surface);			//! \see surfaceEffect_???.sfn
+void calcLighting(in SurfaceProperties,out CompositeColor);			//! \see lighting_???.sfn
+void addFragmentEffect(in SurfaceProperties,inout CompositeColor);	//! \see fragmentEffect_???.sfn
+
+void main (void) {
+	// init surface properties
+	SurfaceProperties surface;
+	surface.position_es = var_position_hes.xyz / var_position_hes.w;
+	surface.normal_es = normalize(var_normal_es);
+
+	calcSurfaceProperties(surface);				// get surface properties (material, textures, ...)
+	addSurfaceEffects(surface);					// optionally add a surface effect (e.g. add snow)
+	
+	CompositeColor color;
+	calcLighting(surface,color);				// add lighting and calculate color
+
+	addFragmentEffect(surface,color);			// add effects (e.g. fog)
+	
+	// 
+	
+	gl_FragData[0] = color.ambient+color.diffuse+color.specular;	// combine color components into one color.
+	vec4 pos_hxs = sg_mrt_eyeSpaceConversionMatrix * vec4( surface.position_es,1.0);
+	gl_FragData[1] = vec4( pos_hxs.xyz/pos_hxs.w , 1.0 );
+	gl_FragData[2] = vec4( normalize( (sg_mrt_eyeSpaceConversionMatrix * vec4(surface.normal_es,0.0)).xyz), 1.0 );
+	
+	gl_FragData[3] = surface.ambient;
+	gl_FragData[4] = surface.diffuse;
+	gl_FragData[5] = surface.specular;
+}
+
+#endif
+// ------------------------------------------------------------------------------
