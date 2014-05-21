@@ -262,3 +262,15 @@ MinSG.Node.getOriginalNode ::= fn(){
 	var n = this.getPrototype();
 	return n ? n : this;
 };
+
+// --------------
+
+MinSG.GroupState."+=" ::= fn( MinSG.State obj){
+	this.addState(obj);
+	return this;
+};
+
+MinSG.GroupState."-=" ::= fn( MinSG.State obj){
+	this.removeState(obj);
+	return this;
+};
