@@ -168,7 +168,7 @@ GUI.DraggableTrait := new Traits.GenericTrait("GUI.DraggableTrait");
 			
 			// register global mouse button listener
 			gui.onMouseButton += this->fn(evt){
-				if(!_dragging_active)
+				if(this.isDestroyed() || !_dragging_active)
 					return $REMOVE;
 				if(evt.button == _dragging_button){
 					stopDragging();
@@ -177,7 +177,7 @@ GUI.DraggableTrait := new Traits.GenericTrait("GUI.DraggableTrait");
 			};
 
 			gui.onMouseMove += this->fn(evt){
-				if(!_dragging_active)
+				if(this.isDestroyed() || !_dragging_active)
 					return $REMOVE;
 				onDrag(evt);
 			};
