@@ -19,6 +19,7 @@ varying vec4 var_vertexColor;
 varying vec2 var_texCoord_xy, var_texCoord_xz, var_texCoord_zy;
 //varying vec3 var_blend;
 
+uniform vec2 sg_textureScales = vec2(0.1,0.05);
 
 // ------------------------------------------------------------------------
 // vs
@@ -42,9 +43,9 @@ void provideSurfaceVars(in VertexProperties vertex){
 	vec3 normal_ws = normalize(sg_eyeToWorld(vec4(vertex.normal_es,0.0)).xyz);
 	
 	if(sg_textureEnabled[0]){
-		var_texCoord_xy = pos_ws.xy * 0.05;
-		var_texCoord_zy = pos_ws.zy * 0.05;
-		var_texCoord_xz = pos_ws.xz * 0.1;
+		var_texCoord_xy = pos_ws.xy * sg_textureScales.y;
+		var_texCoord_zy = pos_ws.zy * sg_textureScales.y;
+		var_texCoord_xz = pos_ws.xz * sg_textureScales.x;
 	}
 //	if(sg_textureEnabled[1]){
 //		var_texCoord1 = pos_ws.xy * 0.1;
