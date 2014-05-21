@@ -87,9 +87,13 @@ T.begin ::= fn(){
 	renderingContext.pushAndSetFBO(fbo);
 	foreach(outputTextures as var index,var t)
 		fbo.attachColorTexture(renderingContext,t,index);
+
 	if(outputDepthTexture)
 		fbo.attachDepthTexture(renderingContext,outputDepthTexture);
-//	out(fbo.getStatusMessage(renderingContext),"\n");
+
+	fbo.setDrawBuffers(outputTextures.count());
+
+	//out(fbo.getStatusMessage(renderingContext),"\n");
 	if(shader){
 		try{
 			renderingContext.pushAndSetShader(shader);
