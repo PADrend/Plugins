@@ -50,9 +50,9 @@ var plugin = new Plugin({
 	
 // -------------------
 
-plugin.metaObjectRoot := void;
-plugin.objPicker := void;
-plugin.highlightState := void;
+static metaObjectRoot;
+static objPicker;
+static highlightState;
 
 plugin.init @(override) := fn(){
 	registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY);
@@ -64,14 +64,13 @@ plugin.init @(override) := fn(){
 
 //! [ext:PADrend_Init]
 plugin.ex_Init := fn(){
-	this.metaObjectRoot = new MinSG.ListNode();
+	metaObjectRoot = new MinSG.ListNode;
 	metaObjectRoot.name := "PADrend.NodeInteraction.metaObjectRoot";
 	
-	PADrend.getRootNode().addChild(this.metaObjectRoot);
+	PADrend.getRootNode().addChild(metaObjectRoot);
 	
-	this.objPicker  = new MinSG.RendRayCaster;
-	
-	
+	objPicker  = new MinSG.RendRayCaster;
+		
 	// --------
 	highlightState = new MinSG.GroupState;
 
@@ -122,15 +121,7 @@ plugin.ex_AfterRenderingPass := fn(...){
 //!	[ext:UIEvent]
 plugin.ex_UIEvent:=fn(evt){
 	if( evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_LEFT && evt.pressed){
-			
-		// if metaObjects (e.g. lights or similar nodes) are visible, allow interaction.
-		objPicker.renderingLayers( Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
-
-		// try first to pick a metaObject (= nodes located below the metaObjectRoot)
-		var node = objPicker.queryNodeFromScreen(GLOBALS.frameContext,metaObjectRoot,new Geometry.Vec2(evt.x,evt.y),true);
-		// otherwise a pick node from the scene
-		if(!node)
-			node = objPicker.queryNodeFromScreen(GLOBALS.frameContext,PADrend.getRootNode(),new Geometry.Vec2(evt.x,evt.y),true);
+		var node = pickNodeFromScreen(evt.x,evt.y,true);
 		
 		if(node){
 			if(node.isSet($onClick))
@@ -147,6 +138,26 @@ plugin.addMetaNode := fn(MinSG.Node n){
 plugin.removeMetaNode := fn(MinSG.Node n){
 	metaObjectRoot.removeChild(n);
 };
+plugin.pickNodeFromScreen := fn(Number screenX,Number screenY,Bool includeMetaObjects=false){
+	// if metaObjects (e.g. lights or similar nodes) are visible, allow interaction.
+	objPicker.renderingLayers( Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
+
+	var node;
+	if(includeMetaObjects){
+		// try first to pick a metaObject (= nodes located below the metaObjectRoot)
+		node = objPicker.queryNodeFromScreen(GLOBALS.frameContext,metaObjectRoot,new Geometry.Vec2(screenX,screenY),true);
+	
+		// otherwise a pick node from the scene
+		if(!node)
+			node = objPicker.queryNodeFromScreen(GLOBALS.frameContext,PADrend.getRootNode(),new Geometry.Vec2(screenX,screenY),true);
+	}else{
+		metaObjectRoot.deactivate();
+		node = objPicker.queryNodeFromScreen(GLOBALS.frameContext,PADrend.getRootNode(),new Geometry.Vec2(screenX,screenY),true);
+		metaObjectRoot.activate();
+	}
+	return node;
+};
+
 
 // alias
 PADrend.NodeInteraction := plugin;
