@@ -88,7 +88,7 @@ float getSingleShadowSample(in sampler2D shadowTexture, in vec3 coord, in vec2 o
 }
 
 //! smoot_step implementation
-float smooth(in float edge0,in float edge1,in float x){
+float smooth2(in float edge0,in float edge1,in float x){
 	float t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
 	return t * t * (3.0 - 2.0 * t);
 }
@@ -118,7 +118,7 @@ float getShadow() {
 		sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, _shadowSamplingPoints[i]*1.5);
 
 	// adjust the gradient
-	sum = smooth(0.0,11.0,sum);
+	sum = smooth2(0.0,11.0,sum);
 	return sum;
 }
 
