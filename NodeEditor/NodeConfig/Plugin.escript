@@ -56,6 +56,21 @@ plugin.init := fn() {
 	}];
 
 	NodeEditor.addConfigTreeEntryProvider(MinSG.Node,fn( node,entry ){
+		
+		//! \see AcceptDroppedStatesTrait
+		@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');								
+		Traits.addTrait( entry._label, AcceptDroppedStatesTrait);
+		entry._label.onStatesDropped += [node] => fn(node, source, Array states, actionType, evt){
+			AcceptDroppedStatesTrait.transferDroppedStates( source, node, states, actionType); //! \see AcceptDroppedStatesTrait
+			for(var c=this; c; c=c.getParentComponent()){
+				if(c.isSet($rebuild)){
+					c->c.rebuild();
+					break;
+				}
+			}
+		};
+		
+				
 		entry.setColor( NodeEditor.NODE_COLOR );
 		entry.addMenuProvider(fn(entry,menu){
 			var node = entry.getObject();

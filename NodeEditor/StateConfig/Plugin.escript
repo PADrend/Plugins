@@ -91,6 +91,83 @@ plugin.init := fn() {
 	
 	// Config tree entry for MinSG.State
 	NodeEditor.addConfigTreeEntryProvider(MinSG.State,fn( state,entry ){
+		{	// dragging
+			var component = gui.create({
+				GUI.TYPE : GUI.TYPE_CONTAINER,
+				GUI.WIDTH : 15,
+				GUI.HEIGHT : 15,
+//				GUI.FLAGS : GUI.BORDER,
+				GUI.DRAGGING_ENABLED : true,
+				GUI.DRAGGING_MARKER : true,
+				GUI.DRAGGING_CONNECTOR : true,
+				GUI.TOOLTIP : "Drag to assign state to node. "
+			});
+			entry.getBaseContainer() += component;
+			
+			static getDroppingComponent = fn( x,y ){
+				//! \see AcceptDroppedStatesTrait
+				@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');
+				for( var c = gui.getComponentAtPos(new Geometry.Vec2(x,y)); c; c=c.getParentComponent()){
+					if(Traits.queryTrait(c,AcceptDroppedStatesTrait) )
+						return c;
+				}
+				return void;
+			};
+			
+			component.onDrag += fn(evt){
+				this.getDraggingMarker().setEnabled(false);			//! \see GUI.DraggingMarkerTrait
+				this.getDraggingConnector().setEnabled(false);		//! \see GUI.DraggingConnectorTrait
+
+				var droppingComponent = getDroppingComponent(evt.x,evt.y);
+		
+				//! \see GUI.DraggingMarkerTrait
+				this.getDraggingMarker().destroyContents();
+
+				this.getDraggingConnector().clearProperties();
+				
+				if(droppingComponent){
+					this.getDraggingMarker() += "->";
+					this.getDraggingConnector().addProperty(
+						new GUI.ShapeProperty(GUI.PROPERTY_CONNECTOR_LINE_SHAPE,
+							gui._createSmoothConnectorShape( GUI.GREEN ,2)));
+				}else if(!gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y)).getParentComponent()) { // screen ?
+					this.getDraggingConnector().addProperty(
+						new GUI.ShapeProperty(GUI.PROPERTY_CONNECTOR_LINE_SHAPE,
+							gui._createSmoothConnectorShape( new Util.Color4ub(0,0,255,255) ,2)));
+				}else{
+					this.getDraggingConnector().addProperty(
+						new GUI.ShapeProperty(GUI.PROPERTY_CONNECTOR_LINE_SHAPE,
+							gui._createSmoothConnectorShape( new Util.Color4ub(200,200,200,255) ,1)));
+				}
+
+				
+				this.getDraggingMarker().setEnabled(true);			//! \see GUI.DraggingMarkerTrait
+				this.getDraggingConnector().setEnabled(true);		//! \see GUI.DraggingConnectorTrait
+				return false;
+			};
+			
+			component.onDrop += [entry,state] => fn(entry,state,evt){
+				// find the state container by traversing the entry tree
+				var stateSource;
+				for( var c = entry.getParentComponent(); c; c=c.getParentComponent() ){
+					if(c.isSet($getObject) && c.getObject().isSet($getStates)){
+						stateSource = c.getObject();
+						break;
+					}
+				}
+				var droppingComponent = getDroppingComponent(evt.x,evt.y);
+				if(droppingComponent){
+					droppingComponent.onStatesDropped(stateSource,[state], droppingComponent.defaultStateDropActions,evt ); 				//! \see AcceptDroppedStatesTrait
+				}else  if(!gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y)).getParentComponent()) { // screen ?
+					var node = Util.requirePlugin('PADrend/NodeInteraction').pickNodeFromScreen(evt.x,evt.y,false);
+					if(node){
+						@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');					//! \see AcceptDroppedStatesTrait
+						AcceptDroppedStatesTrait.transferDroppedStates( stateSource, node, [state] );
+					}
+				}
+			};
+		}
+		
 		entry.setColor( NodeEditor.STATE_COLOR );
 		entry.addOption({
 			GUI.TYPE : GUI.TYPE_BOOL,
@@ -193,6 +270,20 @@ plugin.init := fn() {
 	// -------------------------------
 	// GroupState
 	NodeEditor.addConfigTreeEntryProvider(MinSG.GroupState,fn( obj,entry ){
+		//! \see AcceptDroppedStatesTrait
+		@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');								
+		Traits.addTrait( entry._label, AcceptDroppedStatesTrait);
+		entry._label.onStatesDropped += [obj] => fn(obj, source, Array states, actionType, evt){
+			AcceptDroppedStatesTrait.transferDroppedStates( source, obj, states, actionType); //! \see AcceptDroppedStatesTrait
+			for(var c=this; c; c=c.getParentComponent()){
+				if(c.isSet($rebuild)){
+					c->c.rebuild();
+					break;
+				}
+			}
+		};
+
+	
 		entry.addOption({
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.ICON : "#StatesSmall",
@@ -226,6 +317,9 @@ plugin.init := fn() {
 	}];
 
 	NodeEditor.addConfigTreeEntryProvider(StatesContainerWrapper,fn( wrapper,entry ){
+		
+		
+		
 		var statesContainer = wrapper.getStatesContainer();
 		entry.setColor( NodeEditor.STATE_COLOR );
 
