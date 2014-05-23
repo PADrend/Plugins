@@ -17,40 +17,42 @@ static trait = new MinSG.PersistentNodeTrait('ObjectTraits/PhysicTrait');
 
 trait.onInit += fn( node){
     @(once) static PhysicSceneTrait = Std.require('Physics/PhysicSceneTrait');
-    if(!Physics.getActiveWorld()){
-		var scene = PADrend.getCurrentScene();
-		if(!Traits.queryTrait(scene,PhysicSceneTrait))
-			Traits.addTrait(scene,PhysicSceneTrait);
-		PADrend.message("Physic World is created!");
-	}
-    if(!Physics.isPhysicsNode(node)){
-        Physics.getActiveWorld().addNodeToPhyiscWorld(node);
-    }
-    node.physic_mass := node.getNodeAttributeWrapper('physic_mass', 0 );
-    node.physic_mass.onDataChanged += [node]=>fn(node,d){
-        Physics.getActiveWorld().updateMass(node,d);
+
+
+    var world = Physics.getWorld( node );
+
+    node.physic_mass := node.getNodeAttributeWrapper('physic_mass', 1 );
+    node.physic_mass.onDataChanged += [world,node]=>fn(world,node,d){
+        world.updateMass(node,d);
     };
 
     node.physic_friction := node.getNodeAttributeWrapper('physic_friction', 0 );
-    node.physic_friction.onDataChanged += [node]=>fn(node,d){
-        Physics.getActiveWorld().updateFriction(node,d);
+    node.physic_friction.onDataChanged += [world,node]=>fn(world,node,d){
+        world.updateFriction(node,d);
     };
 
     node.physic_rollingFriction := node.getNodeAttributeWrapper('physic_rollingFriction', 0 );
-    node.physic_rollingFriction.onDataChanged += [node]=>fn(node,d){
-        Physics.getActiveWorld().updateRollingFriction(node,d);
+    node.physic_rollingFriction.onDataChanged += [world,node]=>fn(world,node,d){
+        world.updateRollingFriction(node,d);
     };
 
     node.physic_shapeType := node.getNodeAttributeWrapper('physic_shapeType', {MinSG.Physics.SHAPE_TYPE : MinSG.Physics.SHAPE_TYPE_BOX} );
-    node.physic_shapeType.onDataChanged += [node]=>fn(node,d){
-        Physics.getActiveWorld().updateShape(node,d);
+    node.physic_shapeType.onDataChanged += [world,node]=>fn(world,node,d){
+        world.updateShape(node,d);
     };
 
     node.physic_localSurfaceVelocity:= node.getNodeAttributeWrapper('physic_localSurfaceVelocity', "0 0 0");
-    node.physic_localSurfaceVelocity.onDataChanged += [node]=>fn(node,d){
+    node.physic_localSurfaceVelocity.onDataChanged += [world,node]=>fn(world,node,d){
         var vec = new Geometry.Vec3(d.split(" "));
-        Physics.getActiveWorld().updateLocalSurfaceVelocity(node,vec);
+        world.updateLocalSurfaceVelocity(node,vec);
     };
+    world.addNodeToPhyiscWorld(node, node.physic_shapeType());
+    world.updateShape(node,node.physic_shapeType());
+    world.updateFriction(node,node.physic_friction());
+    world.updateRollingFriction(node,node.physic_rollingFriction());
+    world.updateLocalSurfaceVelocity(node, new Geometry.Vec3(node.physic_localSurfaceVelocity().split(" ")));
+    world.updateMass(node,node.physic_mass());
+
 };
 
 trait.allowRemoval();
@@ -97,7 +99,8 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
                 GUI.WIDTH : 200,
                 GUI.LABEL : "LocalSurfaceVelocity",
                 GUI.DATA_WRAPPER : node.physic_localSurfaceVelocity
-			}
+            }
+
 		];
 	});
 });
