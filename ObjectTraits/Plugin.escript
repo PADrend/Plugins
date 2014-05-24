@@ -40,7 +40,8 @@ plugin.init = fn() {
 				'ObjectTraits/RotationTrait',
 				'ObjectTraits/TransformationProxyTrait',
 				'ObjectTraits/DynamicTextTextureTrait',
-				'ObjectTraits/PhysicTrait'
+				'ObjectTraits/PhysicTrait',
+				'ObjectTraits/P2PConstraintTrait'
 			] as var t)
 		Std.require( t );
 
