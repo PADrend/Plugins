@@ -95,7 +95,7 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 							}
 							return $BREAK;
 						}
-						\note adds the GUI.MouseButtonListenerTrait trait.
+						\note adds the MouseButtonListenerTrait trait.
 						\note see GUI.ChainedEventHandler
 						
 		GUI.POSITION :	(optional) component's position
@@ -606,17 +606,19 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 
 		// context menu
 		if( description[GUI.CONTEXT_MENU_PROVIDER]){
-			//! \see GUI.ContextMenuTrait
-			if(!Traits.queryTrait(component,GUI.ContextMenuTrait))
-				Traits.addTrait(component,GUI.ContextMenuTrait,description.get(GUI.CONTEXT_MENU_WIDTH,150));
+			//! \see ContextMenuTrait
+			@(once) static ContextMenuTrait = Std.require('LibGUIExt/Traits/ContextMenuTrait');
+			if(!Traits.queryTrait(component, ContextMenuTrait))
+				Traits.addTrait(component, ContextMenuTrait,description.get(GUI.CONTEXT_MENU_WIDTH,150));
 			component.contextMenuProvider += description[GUI.CONTEXT_MENU_PROVIDER];
 		}
 		
 		// mouse button listener
 		if( description[GUI.ON_MOUSE_BUTTON]){
-			//! \see GUI.MouseButtonListenerTrait
-			if(!Traits.queryTrait(component,GUI.MouseButtonListenerTrait))
-				Traits.addTrait(component,GUI.MouseButtonListenerTrait);
+			//! \see MouseButtonListenerTrait
+			@(once) static MouseButtonListenerTrait = Std.require('LibGUIExt/Traits/MouseButtonListenerTrait');
+			if(!Traits.queryTrait(component, MouseButtonListenerTrait))
+				Traits.addTrait(component, MouseButtonListenerTrait);
 			component.onMouseButton += description[GUI.ON_MOUSE_BUTTON];
 		}
 			

@@ -200,7 +200,8 @@ plugin.showWindow := fn(){
         }
     };
 	window += panel;
-	Traits.addTrait(window, GUI.StorableRectTrait, DataWrapper.createFromConfig(PADrend.configCache, "Node_Repeator.winRect", [200,100,240,100]));
+	Traits.addTrait(window, Std.require('LibGUIExt/Traits/StorableRectTrait'), 
+							DataWrapper.createFromConfig(PADrend.configCache, "Node_Repeator.winRect", [200,100,240,100]));
 };
 
 plugin.repeatNode :=fn(Array nodes,ExtObject iteration,MinSG.GroupNode scene){

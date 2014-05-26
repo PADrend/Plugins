@@ -90,10 +90,10 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 		}
 	);
 	//! \see GUI.ContextMenuTrait
-	Traits.addTrait(window,GUI.ContextMenuTrait,200);
+	Traits.addTrait(window, Std.require('LibGUIExt/Traits/ContextMenuTrait'),200);
 
 	//! \see GUI.StorableRectTrait
-	Traits.addTrait(window,GUI.StorableRectTrait,
+	Traits.addTrait(window, Std.require('LibGUIExt/Traits/StorableRectTrait'),
 			DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".rect", windowRectDefault));
 
 

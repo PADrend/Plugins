@@ -87,6 +87,7 @@ plugin.init @(override) := fn() {
 			GUI.FLAGS : GUI.BACKGROUND,
 			GUI.MENU_WIDTH : 200,
 			GUI.MENU : this->fn(){
+				@(once) static AdjustableBackgroundColorTrait = Std.require('LibGUIExt/Traits/AdjustableBackgroundColorTrait');
 				var pMenu=[{
 					GUI.TYPE : GUI.TYPE_MENU,
 					GUI.LABEL : "Tags",
@@ -104,7 +105,7 @@ plugin.init @(override) := fn() {
 						GUI.TOOLTIP : preset.getFullDescription()
 					},200,true);
 					if(preset.bgColor)
-						Traits.addTrait(c,GUI.AdjustableBackgroundColorTrait,preset.bgColor);
+						Traits.addTrait(c, AdjustableBackgroundColorTrait,preset.bgColor);
 					pMenu+=c;
 				}
 				return pMenu;
@@ -406,6 +407,7 @@ plugin.createPresetContextMenu := fn(preset){
 };
 
 plugin.showWindow:=fn(){
+	@(once) static AdjustableBackgroundColorTrait = Std.require('LibGUIExt/Traits/AdjustableBackgroundColorTrait');
 
 	// create/resize window
 	var width=[renderingContext.getWindowWidth(),1024].min();
@@ -458,8 +460,8 @@ plugin.showWindow:=fn(){
 			GUI.CONTEXT_MENU_PROVIDER : [preset] => this->createPresetContextMenu
 		});
 		if(preset.bgColor){
-			//! \see GUI.AdjustableBackgroundColorTrait
-			Traits.addTrait( b, GUI.AdjustableBackgroundColorTrait, preset.bgColor);
+			//! \see AdjustableBackgroundColorTrait
+			Traits.addTrait( b, AdjustableBackgroundColorTrait, preset.bgColor);
 		}
 		
 		panel += b;

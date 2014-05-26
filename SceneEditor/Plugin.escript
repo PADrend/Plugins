@@ -110,7 +110,8 @@ plugin.showWindow := fn(){
 		}
 	});
 
-	Traits.addTrait(window, GUI.StorableRectTrait, DataWrapper.createFromConfig(PADrend.configCache, "SceneEditor.winRect", [100,100,300,350]));
+	Traits.addTrait(window, Std.require('LibGUIExt/Traits/StorableRectTrait'), 
+						DataWrapper.createFromConfig(PADrend.configCache, "SceneEditor.winRect", [100,100,300,350]));
 
 	var tabPanel =gui.create({
 		GUI.TYPE:	GUI.TYPE_TABBED_PANEL,
