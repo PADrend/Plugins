@@ -48,8 +48,9 @@ NodeEditor.registerConfigPanelProvider(MinSG.State, fn(MinSG.State state, panel)
 											outln("Registering state: ", id, " -> ", state);
 											PADrend.getSceneManager().registerState(id, state);
 										} else {
-											outln("Unregister state: ", state);
-											PADrend.getSceneManager().unregisterState(state);
+											id = PADrend.getSceneManager().getNameOfRegisteredState(state);
+											outln("Unregister state: ", id);
+											PADrend.getSceneManager().unregisterState(id);
 										}
 									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup
@@ -1074,25 +1075,30 @@ NodeEditor.addConfigTreeEntryProvider(MinSG.ShaderState,fn( obj,entry ){
 });
 
 NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
-	var metaData = obj.shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES);
+	var shaderState = obj.shaderState;
+	var getMetaData = [MinSG.ShaderState.STATE_ATTR_SHADER_FILES] => (shaderState->shaderState.getStateAttribute);
+	var setMetaData = [MinSG.ShaderState.STATE_ATTR_SHADER_FILES] => (shaderState->shaderState.setStateAttribute);
+	var index = obj.index;
 
-	var programInfo = metaData[obj.index];
+	var programInfo = getMetaData()[index];
 	if(!programInfo)
 		programInfo={'file':"",'type':""};
 	entry.setLabel("");
+	
 	entry.getBaseContainer()+={
 		GUI.TYPE : GUI.TYPE_CONTAINER,
 		GUI.LAYOUT : GUI.LAYOUT_TIGHT_FLOW,
 		GUI.CONTENTS : [{
 				GUI.TYPE : GUI.TYPE_TEXT,
 				GUI.DATA_VALUE : programInfo['type'],
-				GUI.ON_DATA_CHANGED : [metaData] => obj->fn(metaData, data){	
-						if(this.index>=metaData.count())
-							metaData+={'file':"",'type':data};
-						else
-							metaData[this.index]['type'] = data;
-						this.shaderState.setStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES,metaData);
-					},
+				GUI.ON_DATA_CHANGED : [getMetaData,setMetaData,index] => fn(getMetaData,setMetaData,index, data){
+					var metaData = getMetaData();
+					if( index>=metaData.count() )
+						metaData+={'file':"",'type':data};
+					else
+						metaData[index]['type'] = data;
+					setMetaData(metaData);
+				},
 				GUI.OPTIONS : ["shader/glsl_vs","shader/glsl_fs","shader/glsl_gs"],
 				GUI.SIZE : [GUI.WIDTH_ABS,100,0],
 				GUI.TOOLTIP : "Shader program type"
@@ -1101,13 +1107,14 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 				GUI.TYPE : GUI.TYPE_FILE,
 				GUI.LABEL : false,
 				GUI.DATA_VALUE : programInfo['file'],
-				GUI.ON_DATA_CHANGED : [metaData] => obj->fn(metaData,data){	
-						if(this.index>=metaData.count())
-							metaData+={'file':data,'type':""};
-						else
-							metaData[this.index]['file'] = data;
-						this.shaderState.setStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES,metaData);
-					},
+				GUI.ON_DATA_CHANGED : [getMetaData,setMetaData,index] => fn(getMetaData,setMetaData,index, data){
+					var metaData = getMetaData();
+					if( index>=metaData.count() )
+						metaData+={'file':data,'type':""};
+					else
+						metaData[index]['file'] = data;
+					setMetaData(metaData);
+				},
 				GUI.OPTIONS : [programInfo['file']],
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS,160,0],
 				GUI.ENDINGS : [".fs",".gs",".vs",".sfn"],
@@ -1116,8 +1123,8 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Edit",
-				GUI.ON_CLICK : [metaData] => obj->fn(metaData){
-					var filename = metaData[this.index]['file'];
+				GUI.ON_CLICK : [getMetaData,index] => fn(getMetaData,index){
+					var filename = getMetaData()[index]['file'];
 					var fullPath = PADrend.getSceneManager().locateFile(filename);
 					if(fullPath)
 						Util.openOS(""+fullPath);
@@ -1134,14 +1141,179 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 								
 });
 
-MinSG.ShaderState._createUniformPanel::=fn(panel){
-};
+
+gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
+	var entries = [];
+
+	var tv = gui.create({
+		GUI.TYPE : GUI.TYPE_TREE,
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS , 2 ,100 ]
+	});
+	entries+=tv;
+	var	uniformInputList = [];
+
+	tv.refresh := [uniformContainer,uniformInputList] => fn(uniformContainer,uniformInputList){
+		this.clear();
+		uniformInputList.clear();
+		var uniforms = uniformContainer.getUniforms();
+		uniforms+=new Rendering.Uniform('',Rendering.Uniform.FLOAT,[0]);
+		foreach(uniforms as var uniform){
+			var entry=gui.createContainer(400,20);
+			this.add(entry);
+			// name
+			var nameTF=gui.createTextfield(100,15,uniform.getName());
+			nameTF.onDataChanged := this->apply;
+			nameTF.setPosition(0,2);
+			entry.add(nameTF);
+
+			var typeDD=gui.createDropdown(80,15);
+			typeDD.setPosition( 100,2 );
+			typeDD.addOption(Rendering.Uniform.BOOL,"BOOL");
+			typeDD.addOption(Rendering.Uniform.INT,"INT");
+			typeDD.addOption(Rendering.Uniform.FLOAT,"FLOAT");
+			typeDD.addOption(Rendering.Uniform.VEC2F,"VEC2F");
+			typeDD.addOption(Rendering.Uniform.VEC3F,"VEC3F");
+			typeDD.addOption(Rendering.Uniform.VEC4F,"VEC4F");
+			typeDD.addOption(Rendering.Uniform.VEC2I,"VEC2I");
+			typeDD.addOption(Rendering.Uniform.VEC3I,"VEC3I");
+			typeDD.addOption(Rendering.Uniform.VEC4I,"VEC4I");
+			typeDD.addOption(Rendering.Uniform.VEC2B,"VEC2B");
+			typeDD.addOption(Rendering.Uniform.VEC3B,"VEC3B");
+			typeDD.addOption(Rendering.Uniform.VEC4B,"VEC4B");
+			typeDD.addOption(Rendering.Uniform.MATRIX_2X2F,"MATRIX_2X2F");
+			typeDD.addOption(Rendering.Uniform.MATRIX_3X3F,"MATRIX_3X3F");
+			typeDD.addOption(Rendering.Uniform.MATRIX_4X4F,"MATRIX_4X4F");
+			typeDD.setData(uniform.getType());
+			typeDD.onDataChanged := this->apply;
+			entry.add(typeDD);
+
+			// data
+			var dataTF=gui.createTextfield(150,15,toJSON(uniform.getData(),false));
+			dataTF.onDataChanged := this->apply;
+			dataTF.setPosition(180,2);
+			entry.add(dataTF);
+
+			uniformInputList+=[nameTF,typeDD,dataTF];
+
+			var removeButton=gui.createButton(20,15,"-");
+			entry.add(removeButton);
+			removeButton.setPosition(350,2);
+			removeButton.onClick = [nameTF,this] => fn(nameTF,tv){
+				nameTF.setText("");
+				tv.apply();
+			};
+		}
+	};
+	tv.apply := [uniformContainer,uniformInputList] => fn(uniformContainer,uniformInputList,...){
+		out("Setting uniforms: \n");
+		uniformContainer.removeUniforms();
+		// add new uniforms
+		foreach(uniformInputList as var entry){
+			var name=entry[0].getData().trim();
+			if(name=="")
+				continue;
+			var type=entry[1].getData();
+			var data=parseJSON(entry[2].getData().trim());
+
+			var u = new Rendering.Uniform(name,type,data);
+//				out(entry.nameTF.getText().trim());
+			out(">",u,"\n");
+			uniformContainer.setUniform(u);
+//			print_r(uniformContainer.getUniform(name).getData());
+		}
+		refresh();
+		out("\n");
+	};
+
+	tv.refresh();
+
+	entries += GUI.NEXT_ROW;
+	
+	entries += {
+		GUI.TYPE : GUI.TYPE_MENU,
+		GUI.LABEL : "Add uniform",
+		GUI.TOOLTIP : "WARNING: Adding matrixes is buggy and may crash the program!",
+		GUI.MENU_WIDTH : 250,
+		GUI.MENU : [uniformContainer,tv] => fn(uniformContainer,treeView){
+			// search for a shader state
+			var shaderState;
+			if(uniformContainer---|>MinSG.ShaderState){
+				shaderState = uniformContainer;
+			}else{
+				var node = NodeEditor.getSelectedNode();
+				while(node && !shaderState){
+					var todo = node.getStates();
+					while(!todo.empty()){
+						var s = todo.popFront();
+						if(s---|>MinSG.ShaderState){
+							shaderState = s;
+							break;
+						}else if(s.isSet($getStates)){ // GroupState?
+							todo.append(s.getStates());
+						}
+					}
+					node = node.getParent();
+				}
+			}
+			if(!shaderState)
+				return [];	
+		
+			var entries = {
+				GUI.TYPE : GUI.TYPE_TREE,
+				GUI.OPTIONS : [],
+				GUI.WIDTH : 250,
+				GUI.HEIGHT : 200,							
+			};
+			foreach(shaderState.getShader().getActiveUniforms() as var uniform){
+				// split uniform's name by '.' to identifiy the uniform struct-group 
+				var s = uniform.getName();
+				if(s.beginsWith("gl_")) //  create group for gl uniforms
+					s="gl."+s;
+				else if(s.beginsWith("sg_")) //  create group for sg uniforms
+					s="sg."+s;
+				var groupNames = s.split(".");
+				var name = groupNames.popBack();
+				
+				var currentMap = entries;
+				foreach(groupNames as var groupName){
+					if(!currentMap[groupName]){
+						currentMap[groupName] = {
+							GUI.TYPE : GUI.TYPE_TREE_GROUP,
+							GUI.OPTIONS : [groupName],
+							GUI.FLAGS : GUI.COLLAPSED_ENTRY
+						};
+						currentMap[GUI.OPTIONS]+=currentMap[groupName];
+					}
+					currentMap = currentMap[groupName];
+				}
+				currentMap[GUI.OPTIONS] += {
+					GUI.TYPE : GUI.TYPE_BUTTON,
+					GUI.LABEL : name+" ("+uniform.getNumValues()+")",
+					GUI.WIDTH : 180,
+					GUI.ON_CLICK : (fn(uniformContainer,uniform,treeView){
+						uniformContainer.setUniform(uniform);
+						treeView.refresh();
+					}).bindLastParams(uniformContainer,uniform,treeView)
+		
+				};
+				
+			}
+			return [entries];
+		}
+	
+	};
+
+
+	return entries;
+});
+
 
 /*! ShaderState	*/
 NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState state, panel){
 	// -----------------------------------------------------------
 	panel += {
 		GUI.TYPE : GUI.TYPE_TEXT,
+		GUI.LABEL : "Shader preset",
 		GUI.OPTIONS_PROVIDER : fn(){
 			var entries = [""];
 			foreach(PADrend.getSceneManager()._getSearchPaths() as var path){
@@ -1158,145 +1330,20 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState 
 	// uniforms
 	panel+="----";
 	panel.nextRow(5);
-	panel+="*Uniforms:*";
-	panel.nextRow(5);
-	var tv=gui.createTreeView(400,100);
-	panel+=tv;
-	tv.shaderState := state;
-	tv.uniformInputList := [];
-	/*!	*/
-	tv.refresh := fn(){
-		clear();
-		var uniforms=shaderState.getUniforms();
-		this.uniformInputList=[];
-		uniforms+=new Rendering.Uniform('',Rendering.Uniform.FLOAT,[0]);
-		foreach(uniforms as var uniform){
-			var entry=gui.createContainer(400,20);
-			this.add(entry);
-			// name
-			var nameTF=gui.createTextfield(100,15,uniform.getName());
-			nameTF.onDataChanged := this->apply;
-			nameTF.setPosition(0,2);
-			entry.add(nameTF);
-
-			var typeDD=gui.createDropdown(80,15);
-			typeDD.setPosition( 100,2 );
-			typeDD.addOption(Rendering.Uniform.BOOL,"BOOL");
-			typeDD.addOption(Rendering.Uniform.INT,"INT");
-			typeDD.addOption(Rendering.Uniform.FLOAT,"FLOAT");
-			typeDD.addOption(Rendering.Uniform.VEC2F,"VEC2F");
-			typeDD.addOption(Rendering.Uniform.VEC3F,"VEC3F");
-			typeDD.addOption(Rendering.Uniform.VEC4F,"VEC4F");
-			typeDD.addOption(Rendering.Uniform.VEC2I,"VEC2I");
-			typeDD.addOption(Rendering.Uniform.VEC3I,"VEC3I");
-			typeDD.addOption(Rendering.Uniform.VEC4I,"VEC4I");
-			typeDD.addOption(Rendering.Uniform.VEC2B,"VEC2B");
-			typeDD.addOption(Rendering.Uniform.VEC3B,"VEC3B");
-			typeDD.addOption(Rendering.Uniform.VEC4B,"VEC4B");
-			typeDD.addOption(Rendering.Uniform.MATRIX_2X2F,"MATRIX_2X2F");
-			typeDD.addOption(Rendering.Uniform.MATRIX_3X3F,"MATRIX_3X3F");
-			typeDD.addOption(Rendering.Uniform.MATRIX_4X4F,"MATRIX_4X4F");
-			typeDD.setData(uniform.getType());
-			typeDD.onDataChanged := this->apply;
-			entry.add(typeDD);
-
-			// data
-			var dataTF=gui.createTextfield(150,15,toJSON(uniform.getData(),false));
-			dataTF.onDataChanged := this->apply;
-			dataTF.setPosition(180,2);
-			entry.add(dataTF);
-
-			uniformInputList+=[nameTF,typeDD,dataTF];
-
-			var removeButton=gui.createButton(20,15,"-");
-			entry.add(removeButton);
-			removeButton.setPosition(350,2);
-			removeButton.nameTF := nameTF;
-			removeButton.tv := this;
-			removeButton.onClick=fn(){
-				nameTF.setText("");
-				tv.apply();
-			};
-		}
+	
+	panel+={
+		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
+		GUI.LABEL : "Uniforms",
+		GUI.COLLAPSED : false,
+		GUI.CONTENTS : {
+			GUI.TYPE : GUI.TYPE_COMPONENTS,
+			GUI.PROVIDER : 'NodeEditor_UniformEditor',
+			GUI.CONTEXT : state
+		},
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_CHILDREN_ABS , 10 ,5 ]
 	};
-	tv.apply := fn(...){
-		out("Setting uniforms: \n");
-		shaderState.removeUniforms();
-		// add new uniforms
-		foreach(this.uniformInputList as var entry){
-			var name=entry[0].getData().trim();
-			if(name=="")
-				continue;
-			var type=entry[1].getData();
-			var data=parseJSON(entry[2].getData().trim());
-
-			var u = new Rendering.Uniform(name,type,data);
-//				out(entry.nameTF.getText().trim());
-			out(">",u,"\n");
-			shaderState.setUniform(u);
-//			print_r(shaderState.getUniform(name).getData());
-		}
-		refresh();
-		out("\n");
-	};
-
-	tv.refresh();
-
 	panel++;
 	
-	panel += {
-		GUI.TYPE : GUI.TYPE_MENU,
-		GUI.LABEL : "Add uniform",
-		GUI.TOOLTIP : "WARNING: Adding matrixes is buggy and may crash the program!",
-		GUI.MENU_WIDTH : 250,
-		GUI.MENU : (fn(shaderState,treeView){
-			var uniforms=shaderState.getShader().getActiveUniforms();
-			
-			var entries = {
-				GUI.TYPE : GUI.TYPE_TREE,
-				GUI.OPTIONS : [],
-				GUI.WIDTH : 250,
-				GUI.HEIGHT : 200,							
-			};
-			foreach(uniforms as var uniform){
-				// split uniform's name by '.' to identifiy the uniform struct-group 
-				var s = uniform.getName();
-				if(s.beginsWith("gl_")) //  create group for gl uniforms
-					s="gl."+s;
-				else if(s.beginsWith("sg_")) //  create group for sg uniforms
-					s="sg."+s;
-				var groupNames = s.split(".");
-				var name = groupNames.popBack();
-				
-				var currentMap = entries;
-				foreach(groupNames as var groupName){
-					if(!currentMap[groupName]){
-						currentMap[groupName] = {
-							GUI.TYPE : GUI.TYPE_TREE_GROUP,
-							GUI.OPTIONS : [groupName],
-							GUI.FLAGS : GUI.COLLAPSED_ENTRY
-						};
-						currentMap[GUI.OPTIONS]+=currentMap[groupName];
-					}
-					currentMap = currentMap[groupName];
-				}
-				currentMap[GUI.OPTIONS] += {
-					GUI.TYPE : GUI.TYPE_BUTTON,
-					GUI.LABEL : name+" ("+uniform.getNumValues()+")",
-					GUI.WIDTH : 180,
-					GUI.ON_CLICK : (fn(shaderState,uniform,treeView){
-						shaderState.setUniform(uniform);
-						treeView.refresh();
-					}).bindLastParams(shaderState,uniform,treeView)
-		
-				};
-				
-			}
-			return [entries];
-		}).bindLastParams(state,tv)
-	
-	};
-
 		// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// attributes
 });
@@ -1305,164 +1352,18 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState 
 
 /*! ShaderUniformState	*/
 NodeEditor.registerConfigPanelProvider( MinSG.ShaderUniformState, fn(MinSG.ShaderUniformState state, panel){
-	panel+="*Uniforms:*";
-	panel.nextRow(5);
-	var tv=gui.createTreeView(400,100);
-	panel+=tv;
-	tv.shaderUniformState := state;
-	tv.uniformInputList := [];
-	/*!	*/
-	tv.refresh := fn(){
-		clear();
-		var uniforms=shaderUniformState.getUniforms();
-		this.uniformInputList=[];
-		uniforms+=new Rendering.Uniform('',Rendering.Uniform.FLOAT,[0]);
-		foreach(uniforms as var uniform){
-			var entry=gui.createContainer(400,20);
-			this.add(entry);
-			// name
-			var nameTF=gui.createTextfield(100,15,uniform.getName());
-			nameTF.onDataChanged := this->apply;
-			nameTF.setPosition(0,2);
-			entry.add(nameTF);
-
-			var typeDD=gui.createDropdown(80,15);
-			typeDD.setPosition( 100,2 );
-			typeDD.addOption(Rendering.Uniform.BOOL,"BOOL");
-			typeDD.addOption(Rendering.Uniform.INT,"INT");
-			typeDD.addOption(Rendering.Uniform.FLOAT,"FLOAT");
-			typeDD.addOption(Rendering.Uniform.VEC2F,"VEC2F");
-			typeDD.addOption(Rendering.Uniform.VEC3F,"VEC3F");
-			typeDD.addOption(Rendering.Uniform.VEC4F,"VEC4F");
-			typeDD.addOption(Rendering.Uniform.VEC2I,"VEC2I");
-			typeDD.addOption(Rendering.Uniform.VEC3I,"VEC3I");
-			typeDD.addOption(Rendering.Uniform.VEC4I,"VEC4I");
-			typeDD.addOption(Rendering.Uniform.VEC2B,"VEC2B");
-			typeDD.addOption(Rendering.Uniform.VEC3B,"VEC3B");
-			typeDD.addOption(Rendering.Uniform.VEC4B,"VEC4B");
-			typeDD.addOption(Rendering.Uniform.MATRIX_2X2F,"MATRIX_2X2F");
-			typeDD.addOption(Rendering.Uniform.MATRIX_3X3F,"MATRIX_3X3F");
-			typeDD.addOption(Rendering.Uniform.MATRIX_4X4F,"MATRIX_4X4F");
-			typeDD.setData(uniform.getType());
-			typeDD.onDataChanged := this->apply;
-			entry.add(typeDD);
-
-			// data
-			var dataTF=gui.createTextfield(150,15,toJSON(uniform.getData(),false));
-			dataTF.onDataChanged := this->apply;
-			dataTF.setPosition(180,2);
-			entry.add(dataTF);
-
-			uniformInputList+=[nameTF,typeDD,dataTF];
-
-			var removeButton=gui.createButton(20,15,"-");
-			entry.add(removeButton);
-			removeButton.setPosition(350,2);
-			removeButton.nameTF := nameTF;
-			removeButton.tv := this;
-			removeButton.onClick=fn(){
-				nameTF.setText("");
-				tv.apply();
-			};
-		}
-	};
-	tv.apply := fn(...){
-		out("Setting uniforms: \n");
-		shaderUniformState.removeUniforms();
-		// add new uniforms
-		foreach(this.uniformInputList as var entry){
-			var name=entry[0].getData().trim();
-			if(name=="")
-				continue;
-			var type=entry[1].getData();
-			var data;
-			try{
-				data=parseJSON(entry[2].getData().trim());
-			}catch(e){
-				Runtime.warn(e);
-				continue;
-			}
-			var u=new Rendering.Uniform(name,type,data);
-
-//				out(entry.nameTF.getText().trim());
-			out(">",u,"\n");
-			shaderUniformState.setUniform(u);
-		}
-		refresh();
-		out("\n");
+	panel+={
+		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
+		GUI.LABEL : "Uniforms",
+		GUI.COLLAPSED : false,
+		GUI.CONTENTS : {
+			GUI.TYPE : GUI.TYPE_COMPONENTS,
+			GUI.PROVIDER : 'NodeEditor_UniformEditor',
+			GUI.CONTEXT : state
+		},
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_CHILDREN_ABS , 10 ,5 ]
 	};
 
-	tv.refresh();
-
-	panel++;
-	
-	panel += {
-		GUI.TYPE : GUI.TYPE_MENU,
-		GUI.LABEL : "Add uniform",
-		GUI.TOOLTIP : "Shows the active uniforms from the next ShaderState up to the rootNode.",
-		GUI.MENU_WIDTH : 250,
-		GUI.MENU : (fn(shaderUniformState,treeView){
-
-			// search for a shader state
-			var shaderState;
-			var node = NodeEditor.getSelectedNode();
-			while(node && !shaderState){
-				foreach(node.getStates() as var s){
-					if(s---|>MinSG.ShaderState){
-						shaderState = s;
-					}
-				}
-				node = node.getParent();
-			}
-			if(!shaderState){
-				return [];	
-			}
-			var uniforms=shaderState.getShader().getActiveUniforms();
-			
-			var entries = {
-				GUI.TYPE : GUI.TYPE_TREE,
-				GUI.OPTIONS : [],
-				GUI.WIDTH : 250,
-				GUI.HEIGHT : 200,							
-			};
-			foreach(uniforms as var uniform){
-				// split uniform's name by '.' to identifiy the uniform struct-group 
-				var s = uniform.getName();
-				if(s.beginsWith("gl_")) //  create group for gl uniforms
-					s="gl."+s;
-				else if(s.beginsWith("sg_")) //  create group for sg uniforms
-					s="sg."+s;
-				var groupNames = s.split(".");
-				var name = groupNames.popBack();
-				
-				var currentMap = entries;
-				foreach(groupNames as var groupName){
-					if(!currentMap[groupName]){
-						currentMap[groupName] = {
-							GUI.TYPE : GUI.TYPE_TREE_GROUP,
-							GUI.OPTIONS : [groupName],
-							GUI.FLAGS : GUI.COLLAPSED_ENTRY
-						};
-						currentMap[GUI.OPTIONS]+=currentMap[groupName];
-					}
-					currentMap = currentMap[groupName];
-				}
-				currentMap[GUI.OPTIONS] += {
-					GUI.TYPE : GUI.TYPE_BUTTON,
-					GUI.LABEL : name+" ("+uniform.getNumValues()+")",
-					GUI.WIDTH : 180,
-					GUI.ON_CLICK : (fn(shaderUniformState,uniform,treeView){
-						shaderUniformState.setUniform(uniform);
-						treeView.refresh();
-					}).bindLastParams(shaderUniformState,uniform,treeView)
-		
-				};
-				
-			}
-			return [entries];
-		}).bindLastParams(state,tv)
-	
-	};
 });
 
 // ----
