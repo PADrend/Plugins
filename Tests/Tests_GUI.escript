@@ -1092,6 +1092,29 @@ plugin.showWindow:=fn(){
 	p++;
     p+='----';
     p++;
+
+    {	// LibGUIExt/Traits/RefreshableContainerTrait
+		p+="LibGUIExt/Traits/RefreshableContainerTrait";
+		p++;
+    	var c = gui.create({
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Refresh with random content",
+			GUI.ON_CLICK : fn(){	this.refresh();	},	//! \see LibGUIExt/Traits/RefreshableContainerTrait
+			GUI.WIDTH : 300,
+    	});
+		Traits.addTrait(c,Std.require('LibGUIExt/Traits/RefreshableContainerTrait'),fn(){
+			var s="";
+			for(var i=Rand.equilikely(2,10);i>0;--i )
+				s += " "+i;
+			return [s];
+		});
+    	p+=c;
+    	
+    	p++;
+    }
+        
+
+
 	p+="----";
     p++;
     p+="*Bug Testcases*";
