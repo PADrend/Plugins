@@ -35,9 +35,9 @@ PADrend.SystemUI := new Plugin({
 
 // -------------------
 
-PADrend.SystemUI.window @(private) := void;
-PADrend.SystemUI.eventContext @(private) := void;
-PADrend.SystemUI.eventQueue @(private) := void;
+static window;
+static eventContext;
+static eventQueue;
 
 /**
  * Plugin initialization.
@@ -175,7 +175,52 @@ PADrend.SystemUI.init := fn(){
 			]);
 		});
 	}
-
+	// window config menu
+	registerExtension('PADrend_Init', fn(){
+		gui.registerComponentProvider('PADrend_ConfigMenu.30_WindowConfig',['----',{
+			GUI.TYPE : GUI.TYPE_MENU,
+			GUI.LABEL : "System Window",
+			GUI.MENU : 'PADrend_SystemUI_WindowConfigMenu',
+			GUI.MENU_WIDTH : 150
+		}]);
+		
+		gui.registerComponentProvider('PADrend_SystemUI_WindowConfigMenu.10_main',fn(){
+			var borderless = Std.DataWrapper.createFromEntry( systemConfig, 'PADrend.window.noFrame' );
+			var size = Std.DataWrapper.createFromFunctions(
+				fn(){ 		return toJSON(systemConfig.getValue('PADrend.window.size'),false); },
+				fn(txt){	systemConfig.setValue('PADrend.window.size', parseJSON(txt)); 	}
+			);
+			var position = Std.DataWrapper.createFromFunctions(
+				fn(){ 		return toJSON(systemConfig.getValue('PADrend.window.pos'),false); },
+				fn(txt){	systemConfig.setValue('PADrend.window.pos', parseJSON(txt)); 	}
+			);
+			var tt =  "Save config and restart required!";
+			return [
+				"*System window*",
+				{
+					GUI.TYPE : 	GUI.TYPE_TEXT,
+					GUI.LABEL : "Size",
+					GUI.DATA_WRAPPER : size,
+					GUI.TOOLTIP : tt,
+					GUI.OPTIONS : [ "[800,600]","[1024,768]","[1280,1024]","[1280,740]","[1280,740]","[1366,768]","[1920,1080]","[1920,1200]","[3840,1080]" ]
+				},
+				{
+					GUI.TYPE : 	GUI.TYPE_TEXT,
+					GUI.LABEL : "Position",
+					GUI.DATA_WRAPPER : position,
+					GUI.TOOLTIP : tt,
+					GUI.OPTIONS : [ "false", "[0,0]" ]
+				},
+				{
+					GUI.TYPE : 	GUI.TYPE_BOOL,
+					GUI.LABEL : "borderless",
+					GUI.DATA_WRAPPER : borderless,
+					GUI.TOOLTIP : tt
+				},
+				
+			];
+		});
+	});
 	return true;
 };
 
