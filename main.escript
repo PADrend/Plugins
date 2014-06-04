@@ -19,12 +19,10 @@ Runtime.enableLogCounting();
 
 addSearchPath(__DIR__); // add "plugins/" to the search path for load and loadOnce.
 
-if(EScript.VERSION >= 607){ // Elise
-	load("LibEStd/init.escript");
-	Std.addModuleSearchPath(__DIR__); // add "plugins/" to the search path for Std.require
-}else{
-	loadOnce ("LibUtilExt/deprecated/Config.escript");
-}
+
+load("LibEStd/init.escript");
+Std.addModuleSearchPath(__DIR__); // add "plugins/" to the search path for Std.require
+
 systemConfig.init(mainConfig);
 setConfigInfo('System.mainScript',"Main script file (default: PADrend/PADrend.escript)");
 load (systemConfig.getValue('System.mainScript',"PADrend/PADrend.escript"));

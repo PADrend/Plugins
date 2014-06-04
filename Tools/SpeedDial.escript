@@ -216,7 +216,7 @@ plugin.Preset := new Type;
 		this.path = _path;
 		this.name = _name;
 		if(IO.isFile(path+".info")){
-			var config = new ConfigManager(true);
+			var config = new Std.JSONDataStore(true);
 			config.init(this.path+".info");
 
 			this.bgColor = DataWrapper.createFromConfig( config,"bgColor", [0.5,0.5,0.5,0.5] );

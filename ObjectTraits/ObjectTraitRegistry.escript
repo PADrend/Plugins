@@ -16,13 +16,15 @@ static objectTraitGUIRegistry = new Map; // traitName -> guiProvider(obj)
 
 var registry = new Namespace;
 
-registry.registerTrait := fn(MinSG.PersistentNodeTrait trait,String displayableName=""){
+registry.registerTrait := fn(trait,String displayableName=""){
+	assert( trait---|> MinSG.PersistentNodeTrait );
 	if(displayableName.empty())
 		displayableName = trait.getName();
 	objectTraitRegistry[displayableName] = trait;
 };
 
-registry.registerTraitConfigGUI := fn(MinSG.PersistentNodeTrait trait, provider ){
+registry.registerTraitConfigGUI := fn(trait, provider ){
+	assert( trait---|> MinSG.PersistentNodeTrait );
 	Std.Traits.requireTrait(provider, Std.Traits.CallableTrait); //! \see Traits.CallableTrait
 	objectTraitGUIRegistry[trait.getName()] = provider;
 };
