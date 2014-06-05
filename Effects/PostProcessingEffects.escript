@@ -248,8 +248,11 @@ PPEffect_Simple.beginPass ::= fn(PADrend.RenderingPass pass){
 		effect = Rendering.createStdTexture(viewport.width(), viewport.height(),true);
 		color = Rendering.createStdTexture(viewport.width(), viewport.height(),true);
 		depth = Rendering.createDepthTexture(viewport.width(), viewport.height());
-		if(noise)
-			noise = Rendering.createNoiseTexture(viewport.width(), viewport.height(),true);
+		if(noise){
+			
+			noise = Rendering.createNoiseTexture(viewport.width(), viewport.height());
+			noise.planMipmapCreation();
+		}
 	}
 	
 	renderingContext.pushAndSetFBO(fbo);

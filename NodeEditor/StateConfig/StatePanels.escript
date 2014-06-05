@@ -1443,6 +1443,44 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 		}
 	};
 
+	var texture = state.getTexture();
+	if(texture){
+		panel += "*Texture info:*";
+		panel++;
+		panel += "File: "+ (texture.getFileName().toString().empty() ? "[embedded]" :  texture.getFileName().toString());
+		panel++;
+		panel += "Size: "+ texture.getWidth() + "*" +texture.getWidth() + "*"+texture.getNumLayers();
+		panel++;
+		panel += "HasMipmaps: "+ texture.getHasMipmaps() + " Linear min filtering:" +texture.getUseLinearMinFilter() + " Linear mag filter:"+texture.getUseLinearMagFilter();
+		panel++;
+		panel += {
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "(Re-) create mipmaps",
+			GUI.ON_CLICK : [texture] => fn(texture){ texture.createMipmaps(renderingContext);}
+//			GUI.ON_CLICK : texture -> texture.createMipmaps
+		};
+		panel += {
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Show",
+			GUI.ON_CLICK : [texture] => Rendering.showDebugTexture,
+			GUI.TOOLTIP : "Show the texture for 0.5 sek in the\n lower left corner of the screen."
+		};
+	}
+	// store to file
+	// show 
+	// create mipmaps
+	// auto create mipmaps
+	// show / edit type 
+	
+	panel++;
+//	panel += {// texture type
+//		GUI.TYPE			:	GUI.TYPE_OPTION,
+//		GUI.LABEL			:	"Texture file:",
+//		GUI.DATA_WRAPPER	:	textureFile,
+//		GUI.ENDINGS			:	[".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff"],
+//		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
+//	};	
+	panel++;
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_FILE,
 		GUI.LABEL			:	"Texture file:",
@@ -1474,6 +1512,10 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 										outln("Removing texture.");
 										state.setTexture(void);
 									}
+									
+									//! \see RefreshableContainerTrait
+									@(once) static  RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
+									RefreshableContainerTrait.refreshContainer( this );
 								}
 	};
 	panel++;

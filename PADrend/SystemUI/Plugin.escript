@@ -202,7 +202,7 @@ PADrend.SystemUI.init := fn(){
 					GUI.LABEL : "Size",
 					GUI.DATA_WRAPPER : size,
 					GUI.TOOLTIP : tt,
-					GUI.OPTIONS : [ "[800,600]","[1024,768]","[1280,1024]","[1280,740]","[1280,740]","[1366,768]","[1920,1080]","[1920,1200]","[3840,1080]" ]
+					GUI.OPTIONS : [ "[800,600]","[1024,768]","[1280,1024]","[1280,740]","[1280,740]","[1366,768]","[1440,900]","[1920,1080]","[1920,1200]","[3840,1080]" ]
 				},
 				{
 					GUI.TYPE : 	GUI.TYPE_TEXT,
@@ -250,6 +250,16 @@ PADrend.SystemUI.showCursor := fn() {
 
 PADrend.SystemUI.warpCursor := fn(Number x, Number y) {
 	window.warpCursor(x, y);
+};
+
+PADrend.SystemUI.checkForKey := fn(){
+	eventQueue.process();
+	while(eventQueue.getNumEventsAvailable() > 0) {
+		var evt = eventQueue.popEvent();
+		if(evt.type==Util.UI.EVENT_KEYBOARD && evt.pressed)
+			return evt.key;
+	}	
+	return false;
 };
 
 // --------------------

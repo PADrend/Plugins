@@ -130,7 +130,7 @@ plugin.createGround @(private) := fn(){
     // create fbo for render water reflections
     this.fbo := new Rendering.FBO;
     renderingContext.pushAndSetFBO(this.fbo);
-    this.mirrorTexture := Rendering.createStdTexture(512, 512, 0, false, true);
+    this.mirrorTexture := Rendering.createStdTexture(512, 512, false);
     this.fbo.attachColorTexture(renderingContext,mirrorTexture);
     this.depthTexture:=Rendering.createDepthTexture(512, 512);
     this.fbo.attachDepthTexture(renderingContext,depthTexture);
@@ -142,11 +142,13 @@ plugin.createGround @(private) := fn(){
     var noise = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/DynamicSky/dynamic_sky1.bmp"));
     noise.setTextureUnit(0);
     dome.addState(noise);
-    var meadow1 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/meadow1.bmp", true));
+    var meadow1 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/meadow1.bmp"));
+    meadow1.getTexture().createMipmaps(renderingContext);
     meadow1.setTextureUnit(1);
     dome.addState(meadow1);
-    var meadow2 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/concrete2.bmp", true));
-    meadow2.setTextureUnit(2);
+    var meadow2 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/concrete2.bmp"));
+    meadow2.getTexture().createMipmaps(renderingContext);
+	meadow2.setTextureUnit(2);
     dome.addState(meadow2);    
     var water_normal = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/water_normal.jpg"));
     water_normal.setTextureUnit(3);
