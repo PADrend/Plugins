@@ -18,9 +18,23 @@
 	Adds the following public attributes:
 	- refresh()		Destroy the container's old children and re-create them. 
 					\note Must be overwritten by the user if no childDescription is passed as trait parameter.
+
+	Offers the following helper functions:
+	- refreshContainer( GUI.Component c ) 	Search a refreshable enclosing container of c (or c itself) and refresh it.
+					If no refreshable container is found, the function returns without notice. 
 */
-var t = new Traits.GenericTrait("GUI.RefreshableContainerTrait"); 
-	
+static t = new Traits.GenericTrait("GUI.RefreshableContainerTrait"); 
+
+t.refreshContainer := fn( GUI.Component c ){
+	for( ; c; c=c.getParentComponent() ){
+		if( Traits.queryTrait(c, t) ){
+			c.refresh();
+			break;
+		}
+	}
+};
+
+
 t.attributes.refresh := Std.ABSTRACT_METHOD;
 	
 t.onInit += fn(GUI.Container container, contentDescription = void){

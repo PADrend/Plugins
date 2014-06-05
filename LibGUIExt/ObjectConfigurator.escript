@@ -164,13 +164,22 @@ GUI.ObjectConfigurator.createConfigPanel ::= fn(obj){
 		myConfigurator.update(myObject).
 */
 GUI.ObjectConfigurator.initConfigPanel ::= fn(GUI.Container configPanelContainer){
+
+	configPanelContainer.__configuredObject := void;	
 	
-	configPanelContainer.update := (fn(obj,configurator){
-		destroyContents();
+	configPanelContainer.update := [this] => fn(configurator, obj){
+		this.destroyContents();
+		this.__configuredObject = obj;
 		if(void!==obj){
 			this += configurator.createConfigPanel(obj);
 		}
-	}).bindLastParams(this);
+	};
+	//! \see RefreshableContainerTrait
+	@(once) static  RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
+	Traits.addTrait( configPanelContainer, RefreshableContainerTrait );
+	configPanelContainer.refresh @(override) := fn(){
+		this.update( this.__configuredObject );
+	};
 };
 
 /*!	Configure the given GUI.TreeView to show configuration entries for objects.
