@@ -82,6 +82,7 @@ if(EScript.VERSION>=701){
 	Traits.PrintableNameTrait := Std.require('Std/Traits/PrintableNameTrait');
 
 	GLOBALS.DataWrapper := Std.require('Std/DataWrapper');
+	Std.JSONDataStore := Std.require('Std/JSONDataStore');
 
 }
 
