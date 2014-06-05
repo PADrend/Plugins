@@ -10,9 +10,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-assert(EScript.VERSION>=607); 
-
-/*
+ /*
 	This file loads the EScript Std library (available since 0.6.7) and makes
 	some adjustments to provide compatibility with the former EScript extensions
 	in LibUtilExt.
@@ -20,45 +18,93 @@ assert(EScript.VERSION>=607);
 	this file in new code!
 */
 
-addSearchPath(__DIR__ + "/../../modules/EScript");
-addSearchPath(__DIR__ + "/../../../EScript");
-addSearchPath("EScript.exp");
-loadOnce("Std/basics.escript");
-Std.addModuleSearchPath(__DIR__ + "/../../modules/EScript");
-Std.addModuleSearchPath(__DIR__ + "/../../../EScript");
-Std.addModuleSearchPath("EScript.exp");
 
-Std.require('Std/TypeExtensions');
 
-GLOBALS.ObjectSerialization := Std.require('Std/ObjectSerialization');
-GLOBALS.MultiProcedure := Std.require('Std/MultiProcedure');
-GLOBALS.DataWrapperContainer := Std.require('Std/DataWrapperContainer');
-GLOBALS.Set := Std.require('Std/Set');
-GLOBALS.info := Std.require('Std/info');
-GLOBALS.PriorityQueue := Std.require('Std/PriorityQueue');
-GLOBALS.Traits := Std.require('Std/Traits/basics');
-Traits.CallableTrait := Std.require('Std/Traits/CallableTrait');
-Traits.DefaultComparisonOperatorsTrait := Std.require('Std/Traits/DefaultComparisonOperatorsTrait');
-Traits.PrintableNameTrait := Std.require('Std/Traits/PrintableNameTrait');
+if(EScript.VERSION>=701){
+
+	// locate and load Std library
+	foreach( [	__DIR__ + "/../../modules/EScript/Std/complete.escript",
+				__DIR__ + "/../../../EScript/Std/complete.escript",
+				__DIR__ + "/../../../EScript.exp/Std/complete.escript"
+				] as var stdLibPath){
+		if(IO.isFile(stdLibPath)){
+			GLOBALS.Std := load(stdLibPath);
+			break;
+		}
+	}else{
+		Runtime.exception("Could not locate EScript Std library.");
+	}
+	var module = Std.module;
+	
+	// -----------------------
+	// deprecated aliases
+	GLOBALS.Delegate := FnBinder;
+	
+	Std.require := module;
+	GLOBALS.Traits := Std.Traits;
+	
+	GLOBALS.DataWrapper := Std.DataWrapper;
+	GLOBALS.ObjectSerialization := Std.ObjectSerialization;
+	GLOBALS.MultiProcedure := Std.MultiProcedure;
+	GLOBALS.DataWrapperContainer := Std.DataWrapperContainer;
+	GLOBALS.Set := Std.Set;
+	GLOBALS.info := Std.info;
+	GLOBALS.PriorityQueue := Std.PriorityQueue;
+	GLOBALS.Traits := Std.Traits;
+	
+	Std.addModuleSearchPath := module->module.addSearchPath;
+	Std.onModule := module->module.on;
+	Std._unregisterModule := module->module._unregisterModule;
+	Std._registerModule := module->module._registerModule;
+
+	
+}else{
+	assert(EScript.VERSION>=607); 
+	addSearchPath(__DIR__ + "/../../modules/EScript");
+	addSearchPath(__DIR__ + "/../../../EScript");
+	addSearchPath("EScript.exp");
+	loadOnce("Std/basics.escript");
+	Std.addModuleSearchPath(__DIR__ + "/../../modules/EScript");
+	Std.addModuleSearchPath(__DIR__ + "/../../../EScript");
+	Std.addModuleSearchPath("EScript.exp");
+
+	Std.require('Std/TypeExtensions');
+
+	GLOBALS.ObjectSerialization := Std.require('Std/ObjectSerialization');
+	GLOBALS.MultiProcedure := Std.require('Std/MultiProcedure');
+	GLOBALS.DataWrapperContainer := Std.require('Std/DataWrapperContainer');
+	GLOBALS.Set := Std.require('Std/Set');
+	GLOBALS.info := Std.require('Std/info');
+	GLOBALS.PriorityQueue := Std.require('Std/PriorityQueue');
+	GLOBALS.Traits := Std.require('Std/Traits/basics');
+	Traits.CallableTrait := Std.require('Std/Traits/CallableTrait');
+	Traits.DefaultComparisonOperatorsTrait := Std.require('Std/Traits/DefaultComparisonOperatorsTrait');
+	Traits.PrintableNameTrait := Std.require('Std/Traits/PrintableNameTrait');
+
+	GLOBALS.DataWrapper := Std.require('Std/DataWrapper');
+
+}
+
+
 
 // --------------------------------------------------
 // DataWrapper
-GLOBALS.DataWrapper := Std.require('Std/DataWrapper');
-DataWrapper.createFromConfig ::= DataWrapper.createFromEntry;
+
+Std.DataWrapper.createFromConfig ::= Std.DataWrapper.createFromEntry;
 
 //! Returns an array of possible default values
-DataWrapper.getOptions ::= fn(){
+Std.DataWrapper.getOptions ::= fn(){
 	return isSet($_options) ? 
 		(_options---|>Array ? _options.clone() : (this->_options) () ) : [];
 };
 
 //! Returns if the dataWrapper has possible default values
-DataWrapper.hasOptions ::= fn(){
+Std.DataWrapper.hasOptions ::= fn(){
 	return isSet($_options);
 };
 
 //! Set an Array of possible default values. Returns this.
-DataWrapper.setOptions ::= fn(Array options){
+Std.DataWrapper.setOptions ::= fn(Array options){
 	this._options @(private) := options.clone();
 	return this;
 };
@@ -68,7 +114,7 @@ DataWrapper.setOptions ::= fn(Array options){
 		var myDataWrapper = DataWrapper.createFromValue(5).setOptionsProvider( fn(){ return [this(),this()*2] } );
 		print_r(myDataWrapper.getOptions()); // [5,10]
 */
-DataWrapper.setOptionsProvider ::= fn(callable){
+Std.DataWrapper.setOptionsProvider ::= fn(callable){
 	this._options @(private) := callable;
 	return this;
 };
@@ -77,12 +123,12 @@ DataWrapper.setOptionsProvider ::= fn(callable){
 
 // --------------------------------------------------
 // Config
-GLOBALS.ConfigManager := Std.require('Std/JSONDataStore');
-ConfigManager.getValue ::= ConfigManager.get;
-ConfigManager.setValue ::= ConfigManager.set;
+
+Std.JSONDataStore.getValue ::= Std.JSONDataStore.get;
+Std.JSONDataStore.setValue ::= Std.JSONDataStore.set;
 
 // system' main config manager
-GLOBALS.systemConfig := new ConfigManager;
+GLOBALS.systemConfig := new Std.JSONDataStore();
 
 // compatibility interface
 GLOBALS.getConfigValue := systemConfig->systemConfig.getValue;
@@ -106,7 +152,7 @@ UserFunction.pleaseImplement ::= fn(...){	Runtime.exception("This method is not 
  \note Requires the target to have the Traits.CallableTrait.
  \see Traits.CallableTrait
 */
-Traits.BindableParametersTrait := new Traits.GenericTrait("Traits.BindableParametersTrait");
+Std.Traits.BindableParametersTrait := new Std.Traits.GenericTrait("Traits.BindableParametersTrait");
 {
 
 	static _bindLastParams = fn(wrappedFun,params...){
@@ -141,7 +187,7 @@ Traits.BindableParametersTrait := new Traits.GenericTrait("Traits.BindableParame
 	};
 
 
-	var t = Traits.BindableParametersTrait;
+	var t = Std.Traits.BindableParametersTrait;
 
 	// Binding parameters with function wrappers
 	t.attributes.bindLastParams ::=	fn(params...){		return _bindLastParams(this,params...);		};
@@ -153,15 +199,15 @@ Traits.BindableParametersTrait := new Traits.GenericTrait("Traits.BindableParame
 	t.attributes.getBoundParams ::=	fn(){		return _getBoundParams(this);	};
 
 	t.onInit += fn(t){
-		Traits.requireTrait(t,Traits.CallableTrait);
+		Std.Traits.requireTrait(t,Std.Traits.CallableTrait);
 	};
 }
 
 
-Traits.addTrait(Function,		Traits.BindableParametersTrait);
-Traits.addTrait(UserFunction,	Traits.BindableParametersTrait);
-Traits.addTrait(Delegate,		Traits.BindableParametersTrait);
-Traits.addTrait(MultiProcedure,	Traits.BindableParametersTrait);
+Std.Traits.addTrait(Function,			Std.Traits.BindableParametersTrait);
+Std.Traits.addTrait(UserFunction,		Std.Traits.BindableParametersTrait);
+Std.Traits.addTrait(Delegate,			Std.Traits.BindableParametersTrait);
+Std.Traits.addTrait(Std.MultiProcedure,	Std.Traits.BindableParametersTrait);
 // --------------------------------------------------
 
 

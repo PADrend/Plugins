@@ -58,7 +58,7 @@ PresetManager.activePreset @(private) := void;
 PresetManager.configChanged @(private) := void;
 
 //! (ctro)
-PresetManager._constructor ::= fn(ConfigManager _config,String _keyBase,[ExtObject,Map] _settings){
+PresetManager._constructor ::= fn(Std.JSONDataStore _config,String _keyBase,[ExtObject,Map] _settings){
 	config = _config;
 	keyBase = _keyBase+'.';
 	

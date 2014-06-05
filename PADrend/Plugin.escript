@@ -118,7 +118,7 @@ PADrend.init := fn(){
 		}
 	
 		// configCache to store persistent data like file histories
-		this.configCache = new ConfigManager( true );
+		this.configCache = new Std.JSONDataStore( true );
 		this.configCache.init( systemConfig.getValue('PADrend.configCacheFile',this.userPath()+"config.tmp"),false);
   
         showWaitingScreen.fancy = systemConfig.getValue('PADrend.fancyWaitScreen',false);
