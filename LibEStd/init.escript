@@ -84,6 +84,20 @@ if(EScript.VERSION>=701){
 	GLOBALS.DataWrapper := Std.require('Std/DataWrapper');
 	Std.JSONDataStore := Std.require('Std/JSONDataStore');
 
+	Std.addRevocably := fn( array, callback ){
+		array += callback;
+		var revocer = fn(){
+			if(thisFn.array){
+				thisFn.array -= thisFn.callback;
+				thisFn.array = void;
+				thisFn.callback = void;
+			}
+			return $REMOVE;
+		}.clone();
+		revocer.array := array;
+		revocer.callback := callback;
+		return revocer;
+	};
 }
 
 
