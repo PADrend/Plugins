@@ -1433,7 +1433,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 	};
 	panel++;
 
-	var textureFile = DataWrapper.createFromValue("");
+	var textureFile = Std.DataWrapper.createFromValue("");
 	if(state.hasTexture()) {
 		textureFile(state.getTexture().getFileName().toString());
 	}
@@ -1442,16 +1442,25 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 			state.getTexture().setFileName(new Util.FileName(data));
 		}
 	};
+	var config_createMipmaps = new Std.DataWrapper(false);
+	var config_textureType = new Std.DataWrapper(Rendering.Texture.TEXTURE_2D);
+	var config_numLayers = new Std.DataWrapper(1);
 
 	var texture = state.getTexture();
 	if(texture){
+		config_createMipmaps( texture.getHasMipmaps() );
+		config_textureType( texture.getTextureType() );
+		config_numLayers( texture.getNumLayers() );
+
+		panel+='----';
+		panel++;
 		panel += "*Texture info:*";
 		panel++;
 		panel += "File: "+ (texture.getFileName().toString().empty() ? "[embedded]" :  texture.getFileName().toString());
 		panel++;
-		panel += "Size: "+ texture.getWidth() + "*" +texture.getWidth() + "*"+texture.getNumLayers();
+		panel += "Size: "+ texture.getWidth() + "*" +texture.getWidth() + "*"+config_numLayers();
 		panel++;
-		panel += "HasMipmaps: "+ texture.getHasMipmaps() + " Linear min filtering:" +texture.getUseLinearMinFilter() + " Linear mag filter:"+texture.getUseLinearMagFilter();
+		panel += "HasMipmaps: "+ config_createMipmaps() + " Linear min filtering:" +texture.getUseLinearMinFilter() + " Linear mag filter:"+texture.getUseLinearMagFilter();
 		panel++;
 		panel += {
 			GUI.TYPE : GUI.TYPE_BUTTON,
@@ -1465,21 +1474,10 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 			GUI.ON_CLICK : [texture] => Rendering.showDebugTexture,
 			GUI.TOOLTIP : "Show the texture for 0.5 sek in the\n lower left corner of the screen."
 		};
+		panel++;
 	}
-	// store to file
-	// show 
-	// create mipmaps
-	// auto create mipmaps
-	// show / edit type 
-	
-	panel++;
-//	panel += {// texture type
-//		GUI.TYPE			:	GUI.TYPE_OPTION,
-//		GUI.LABEL			:	"Texture file:",
-//		GUI.DATA_WRAPPER	:	textureFile,
-//		GUI.ENDINGS			:	[".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff"],
-//		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
-//	};	
+//	panel++;
+	panel+='----';
 	panel++;
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_FILE,
@@ -1489,35 +1487,72 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	panel++;
-
+	panel += {
+		GUI.TYPE			:	GUI.TYPE_BOOL,
+		GUI.LABEL			:	"Create mipmaps",
+		GUI.DATA_WRAPPER	:	config_createMipmaps,
+		GUI.TOOLTIP			:	"Create mipmaps when texture is loaded."
+	};
+	panel++;
+	panel += {
+		GUI.TYPE			:	GUI.TYPE_SELECT,
+		GUI.LABEL			:	"Texture type",
+		GUI.DATA_WRAPPER	:	config_textureType,
+		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0],
+		GUI.OPTIONS			:	[ 
+									[Rendering.Texture.TEXTURE_1D,"1d texture (no layers)"],
+									[Rendering.Texture.TEXTURE_1D_ARRAY,"1d texture array"],
+									[Rendering.Texture.TEXTURE_2D,"2d texture (no layers)"],
+									[Rendering.Texture.TEXTURE_2D_ARRAY,"2d texture array"],
+									[Rendering.Texture.TEXTURE_3D,"3d texture"],
+									[Rendering.Texture.TEXTURE_CUBE_MAP,"cube map texture (no layers)"],
+									[Rendering.Texture.TEXTURE_CUBE_MAP_ARRAY,"cube map texture array"]
+								],
+		GUI.TOOLTIP			:	"Create texture type for loaded texture."
+	};
+	panel++;
+	panel += {
+		GUI.TYPE			:	GUI.TYPE_NUMBER,
+		GUI.LABEL			:	"Number of layers / array entries",
+		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0],
+		GUI.DATA_WRAPPER	:	config_numLayers
+	};
+	panel++;
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Reload texture",
-		GUI.ON_CLICK		:	[state, textureFile] => fn(MinSG.TextureState state,
-														   DataWrapper textureFile) {
-									var fileName = textureFile();
-									if(!fileName.empty()) {
-										var path = PADrend.getSceneManager().locateFile(fileName);
-										out("Loading texture \"", fileName.toString(), "\" ("+path+")...");
-										var texture = path ?  Rendering.createTextureFromFile(path) : void;
-										if(texture) {
-											texture.setFileName(fileName); // set original filename
-											state.setTexture(texture);
-											outln(" done (", texture, ").");
-										} else {
-											state.setTexture(void);
-											outln(" failed.");
-										}
-									} else {
-										outln("Removing texture.");
-										state.setTexture(void);
-									}
-									
-									//! \see RefreshableContainerTrait
-									@(once) static  RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
-									RefreshableContainerTrait.refreshContainer( this );
-								}
-	};
+		GUI.ON_CLICK		:	[state, textureFile,config_createMipmaps,config_textureType,config_numLayers ] =>
+										fn(MinSG.TextureState state, textureFile,config_createMipmaps,config_textureType,config_numLayers) {
+			var fileName = textureFile();
+			if(fileName.empty()) {
+				outln("Removing texture.");
+				state.setTexture(void);
+			}else{
+				var path = PADrend.getSceneManager().locateFile(fileName);
+				outln("Loading texture \"", fileName.toString(), "\" ("+path+")...");
+				var texture;
+				if(!path){
+				}else if(config_textureType()==Rendering.Texture.TEXTURE_2D){
+					texture = Rendering.createTextureFromFile(path);
+				}else{
+					Runtime.warn("Texture format is not yet supported.");
+				}
+				if(!texture){
+					texture = Rendering.createChessTexture(64,64,8);
+					outln(" failed.");
+				}
+				
+				texture.setFileName(fileName); // set original filename
+				state.setTexture(texture);
+				if(config_createMipmaps())
+					texture.createMipmaps(renderingContext);
+				outln(" done (", texture, ").");
+			} 
+			//! \see RefreshableContainerTrait
+			@(once) static  RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
+			RefreshableContainerTrait.refreshContainer( this );
+		}
+};
 	panel++;
 });
 
