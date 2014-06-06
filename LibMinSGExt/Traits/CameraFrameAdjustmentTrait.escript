@@ -51,7 +51,7 @@ static updateCameras = fn(dolly, [Array,void] frame){
 			}
 			camera.setSRT( new Geometry.SRT(camera.getRelPosition(), 					// position
 											-relFrameNormal,							// direction
-											-camera.worldDirToRelDir(wFrameUp)));		// up-vector
+											camera.worldDirToRelDir(wFrameUp)));		// up-vector
 
 
 			// - calculate corners relative to the camera
@@ -59,14 +59,14 @@ static updateCameras = fn(dolly, [Array,void] frame){
 			var localFrameBottomRight = camera.worldPosToLocalPos(wFrameBottomRight);
 			
 			// - calculate and set the frustum's angles
-			var distanceToPlane = localFrameTopLeft.getZ();
+			var distanceToPlane = -localFrameTopLeft.getZ();
 
-			var leftAngle 	= -(localFrameTopLeft.getX()/distanceToPlane).atan();
-			var rightAngle 	= -(localFrameBottomRight.getX()/distanceToPlane).atan();
-			var bottomAngle	= -(localFrameBottomRight.getY()/distanceToPlane).atan();
-			var topAngle= -(localFrameTopLeft.getY()/distanceToPlane).atan();
+			var leftAngle 	= 	(distanceToPlane/localFrameTopLeft.getX()).atan().radToDeg();
+			var rightAngle 	= 	(distanceToPlane/localFrameBottomRight.getX()).atan().radToDeg();
+			var bottomAngle	= 	(distanceToPlane/localFrameBottomRight.getY()).atan().radToDeg();
+			var topAngle = 		(distanceToPlane/localFrameTopLeft.getY()).atan().radToDeg();
 			
-			camera.setAngles(leftAngle.radToDeg(),rightAngle.radToDeg(),bottomAngle.radToDeg(),topAngle.radToDeg());
+			camera.setAngles(leftAngle,rightAngle,bottomAngle,topAngle);
 		}
 	
 	}catch(e){
