@@ -178,7 +178,14 @@ GUI.ObjectConfigurator.initConfigPanel ::= fn(GUI.Container configPanelContainer
 	@(once) static  RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
 	Traits.addTrait( configPanelContainer, RefreshableContainerTrait );
 	configPanelContainer.refresh @(override) := fn(){
+		var scrollPosBackup;
+		if(this.getFirstChild().isSet($getScrollPos))
+			scrollPosBackup = this.getFirstChild().getScrollPos();
 		this.update( this.__configuredObject );
+		if(scrollPosBackup&&this.getFirstChild().isSet($scrollTo)){
+			this.layout();
+			this.getFirstChild().scrollTo(scrollPosBackup);
+		}
 	};
 };
 
