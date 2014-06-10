@@ -49,6 +49,7 @@ plugin.init @(override) := fn() {
 	modules+=__DIR__+"/FrameStats.escript";
 	modules+=__DIR__+"/GamePadConfig.escript";
 	modules+=__DIR__+"/JumpNRun.escript";
+	modules+=__DIR__+"/MovementConstraints.escript";
 	modules+=__DIR__+"/OrientationVisualization.escript";
 	modules+=__DIR__+"/QuickScript.escript";
 	modules+=__DIR__+"/Avatar.escript";
