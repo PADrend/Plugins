@@ -244,9 +244,15 @@ Util.loadPlugins @(public) := fn( Array filenames, showNotification = true, Arra
 
 			var success = plugin.init();
 			if(!success && showNotification){
-				out( " - failed\n" );
+				outln( " - failed" );
 			}else if (!success){
-				out(("Initializing ["+pluginName+"]").fillUp(40," "),"failed\n");
+				outln(("Initializing ["+pluginName+"]").fillUp(40," "),"failed");
+			}else{
+				var listeners = onPluginListener[pluginName];
+				if(listeners){
+					listeners( plugin );
+					listeners.clear();
+				}
 			}
 		}catch(e){
 			Runtime.log(Runtime.LOG_ERROR,"Error while initializing Plugin '"+pluginName+"':\n"+e);
@@ -304,6 +310,17 @@ Util.queryPlugin @(public) := fn(name,minVersion = void) {
 //! (public)
 Util.getPluginRegistry @(public) := fn() {
 	return _pluginRegistry;
+};
+static onPluginListener = new Map;
+Util.onPlugin @(public) :=  fn( String pluginName, callback ){
+	var p = Util.queryPlugin(pluginName);
+	if( p ){
+		callback( p );
+	}else{
+		if( !onPluginListener[pluginName] ) 
+			onPluginListener[pluginName] = new Std.MultiProcedure;
+		onPluginListener[pluginName] += callback;
+	}
 };
 
 //----------------------
