@@ -15,14 +15,16 @@ static  TextureProcessor = Std.require('LibRenderingExt/TextureProcessor');
  var vs = "	void main( void ){  gl_TexCoord[0] = gl_MultiTexCoord0;  gl_Position = ftransform(); } ";
  
  var smooth_fs = 
-	"#version 130\n"
+//	"#version 130\n"
+	"#version 120\n"
 	"uniform int resolution = 64; \n"
 	"uniform int radius = 2; \n"
 	"uniform sampler2D T_density; \n"
 	"vec4 getValue(in ivec3 pos){\n"
 	"  if(pos.x<0 || pos.x>=resolution ||pos.y<0 ||pos.y>=resolution||pos.z<0||pos.z>=resolution)\n"
 	"	 return vec4(0.0);\n"
-	"  return vec4(texelFetch(T_density,ivec2(pos.x+pos.z*resolution,pos.y),0).rgb,1.0);\n"
+//	"  return vec4(texelFetch(T_density,ivec2(pos.x+pos.z*resolution,pos.y),0).rgb,1.0);\n" // >= Shader 130
+	"  return vec4(texture2D(T_density, vec2( float(pos.x)/float(resolution*resolution)+float(pos.z)/float(resolution), float(pos.y)/float(resolution))).rgb,1.0);\n"
 	"}\n"
 	"\n"
 	"void main(){\n"
@@ -42,32 +44,37 @@ static  TextureProcessor = Std.require('LibRenderingExt/TextureProcessor');
 	"}\n"
 ;
 var invert_fs = 
-	"#version 130\n"
+	"#version 120\n"
+//	"#version 130\n"
 	"uniform sampler2D T_density; \n"
 	"uniform float densityOffset = 0.0; \n"
 	"\n"
 	"\n"
 	"\n"
 	"void main(){\n"
-	"	vec4 c = texelFetch(T_density,ivec2(gl_FragCoord.xy),0);"
+//	"	vec4 c = texelFetch(T_density,ivec2(gl_FragCoord.xy),0);"  // >= Shader 130
+	"	vec4 c = texture2D(T_density,gl_TexCoord[0].xy);"
 	"   float f = c.r; "
 	"   f = (1.0-clamp(f,0.0,1.0)); "
-	"	gl_FragColor = vec4(f+ densityOffset, f-densityOffset*2.0   ,0,0);\n"
+	"	gl_FragColor = vec4( f+densityOffset, 1.0, 0.0, 0.0);\n"
 	"}\n"
 ;
  var ambOcc_fs = 
-	"#version 130\n"
+	"#version 120\n"
+//	"#version 130\n"
 	"uniform int radius = 5; \n"
 	"uniform int resolution = 64; \n"
 	"uniform sampler2D T_density; \n"
 	"float getDensity(in ivec3 pos){\n"
 	"  if(pos.x<0 || pos.x>=resolution ||pos.y<0 ||pos.y>=resolution||pos.z<0||pos.z>=resolution)\n"
 	"	 return 1.0;\n"
-	"  return clamp(texelFetch(T_density,ivec2(pos.x+pos.z*resolution,pos.y),0).r,0.0,1.0);\n"
+//	"  return clamp(texelFetch(T_density,ivec2(pos.x+pos.z*resolution,pos.y),0).r,0.0,1.0);\n"  // >= Shader 130
+	"  return clamp( texture2D(T_density, vec2( float(pos.x)/float(resolution*resolution)+float(pos.z)/float(resolution), float(pos.y)/float(resolution))).r,0.0,1.0);\n"
 	"}\n"
 	"\n"
 	"void main(){\n"
-	"	float density = texelFetch(T_density,ivec2(gl_FragCoord.xy),0).r;"
+//	"	float density = texelFetch(T_density,ivec2(gl_FragCoord.xy),0).r;"  // >= Shader 130
+	"	float density =  texture2D(T_density,gl_TexCoord[0].xy).r;"
 	"	ivec3 pos = ivec3(mod(gl_FragCoord.x,resolution), int(gl_FragCoord.y),int(gl_FragCoord.x)/resolution);\n"
 	"	float sum = 0.0;\n"
 	"	float occlusion;\n"
@@ -90,16 +97,13 @@ var invert_fs =
 	"}\n"
 ;
 static smoothShader = Rendering.Shader.createShader( vs,smooth_fs );
-static invertShader = Rendering.Shader.createShader( vs,invert_fs );
-
 
 static shaders = [];
 shaders += smoothShader;
 shaders += smoothShader;
 shaders += smoothShader;
-shaders += invertShader;
-shaders += Rendering.Shader.createShader( vs,ambOcc_fs );;
-
+shaders += Rendering.Shader.createShader( vs,invert_fs );
+shaders += Rendering.Shader.createShader( vs,ambOcc_fs );
 
 var T = new Type;
 
