@@ -15,7 +15,7 @@ static  TextureProcessor = Std.require('LibRenderingExt/TextureProcessor');
  var vs = "	void main( void ){  gl_TexCoord[0] = gl_MultiTexCoord0;  gl_Position = ftransform(); } ";
  
  var smooth_fs = 
-	"#version 120\n"
+	"#version 130\n"
 	"uniform int resolution = 64; \n"
 	"uniform int radius = 2; \n"
 	"uniform sampler2D T_density; \n"
@@ -42,7 +42,7 @@ static  TextureProcessor = Std.require('LibRenderingExt/TextureProcessor');
 	"}\n"
 ;
 var invert_fs = 
-	"#version 120\n"
+	"#version 130\n"
 	"uniform sampler2D T_density; \n"
 	"uniform float densityOffset = 0.0; \n"
 	"\n"
@@ -56,7 +56,7 @@ var invert_fs =
 	"}\n"
 ;
  var ambOcc_fs = 
-	"#version 120\n"
+	"#version 130\n"
 	"uniform int radius = 5; \n"
 	"uniform int resolution = 64; \n"
 	"uniform sampler2D T_density; \n"
