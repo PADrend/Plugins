@@ -23,8 +23,10 @@ static  TextureProcessor = Std.require('LibRenderingExt/TextureProcessor');
 	"vec4 getValue(in ivec3 pos){\n"
 	"  if(pos.x<0 || pos.x>=resolution ||pos.y<0 ||pos.y>=resolution||pos.z<0||pos.z>=resolution)\n"
 	"	 return vec4(0.0);\n"
+	"  ivec2 texelPos = ivec2(pos.x+pos.z*resolution,pos.y); \n"
+	"  return vec4(texelFetch(T_density,texelPos,0).rgb,1.0);\n" // >= Shader 130
 //	"  return vec4(texelFetch(T_density,ivec2(pos.x+pos.z*resolution,pos.y),0).rgb,1.0);\n" // >= Shader 130
-	"  return vec4(texture2D(T_density, vec2( float(pos.x)/float(resolution*resolution)+float(pos.z)/float(resolution), float(pos.y)/float(resolution))).rgb,1.0);\n"
+	"  return vec4(texture2D(T_density, vec2( float(texelPos.x)/float(resolution*resolution), float(texelPos.y)/float(resolution))).rgb,1.0);\n"
 	"}\n"
 	"\n"
 	"void main(){\n"
@@ -68,8 +70,10 @@ var invert_fs =
 	"float getDensity(in ivec3 pos){\n"
 	"  if(pos.x<0 || pos.x>=resolution ||pos.y<0 ||pos.y>=resolution||pos.z<0||pos.z>=resolution)\n"
 	"	 return 1.0;\n"
-//	"  return clamp(texelFetch(T_density,ivec2(pos.x+pos.z*resolution,pos.y),0).r,0.0,1.0);\n"  // >= Shader 130
-	"  return clamp( texture2D(T_density, vec2( float(pos.x)/float(resolution*resolution)+float(pos.z)/float(resolution), float(pos.y)/float(resolution))).r,0.0,1.0);\n"
+	"  ivec2 texelPos = ivec2(pos.x+pos.z*resolution,pos.y); \n"
+	
+//	"  return clamp(texelFetch(T_density,texelPos,0).r,0.0,1.0);\n"  // >= Shader 130
+	"  return clamp( texture2D(T_density,vec2( float(texelPos.x)/float(resolution*resolution), float(texelPos.y)/float(resolution))).r,0.0,1.0);\n"
 	"}\n"
 	"\n"
 	"void main(){\n"
