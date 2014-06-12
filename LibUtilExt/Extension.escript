@@ -219,24 +219,14 @@ GLOBALS.ExtensionPoint := Util.ExtensionPoint; //! \deprecated global alias
 		this.needsSorting = true;
 		return extension;
 	};
-
-	T.registerConditionalExtension ::= fn(DataWrapper condition,extOrFun,[Number,Bool] priority = Util.EXTENSION_PRIORITY_MEDIUM) {
-		var extension = extOrFun---|>Extension ? extOrFun : createExtension(extOrFun,priority);
-		var conditionListener = [extension] => ( this->fn(extension,enabled){
-			if(enabled){
-				if(!extensions.contains(extension)){
-					registerExtension(extension);
-				}
-			}else {
-				removeExtension(extension);
-			}
-		});
-		condition.onDataChanged += conditionListener;
-		
-		conditionListener(condition());
-		return extension;
+	
+	T.registerExtensionRevocably ::= fn( fun, p...) {
+		this.registerExtension( fun, p...);
+		return [this,fun] => fn(extensionPoint,fun){
+			extensionPoint.removeExtension( fun );
+			return $REMOVE;
+		};
 	};
-
 
 	T.removeExtension ::= fn(extOrFun) {
 		var fun = extOrFun---|>Extension ? extOrFun.fun : extOrFun;
@@ -271,22 +261,13 @@ Util.registerExtension := fn(name, fun,[Number,Bool] priority = Util.EXTENSION_P
 };
 GLOBALS.registerExtension := Util.registerExtension; //! \deprecated global alias
 
-/*! (public) Register an extension at the extension point with @p name with the given @p priority.
-	The extension is only active while the boolean DataWrapper @p condition is true. No runtime overhead
-	is introduced for inactive extensions. 
-	\see ExtensionPoint.registerConditionalExtension	*/
-Util.registerConditionalExtension := fn(DataWrapper condition, name, fun,[Number,Bool] priority = Util.EXTENSION_PRIORITY_MEDIUM) {
-	var extensionPoint = ExtensionPoint.get(name);
-	if(!extensionPoint){
-		Runtime.warn("Unknown extension point: "+name);
-		return;
-	}
-	if(extensionPoint.isDeprecated()){
-		Runtime.warn("Extending deprecated extension point '"+name+"' with extension '"+fun.toDbgString()+"'.");
-	}
-	return extensionPoint.registerConditionalExtension(condition,fun,priority);
+Util.registerExtensionRevocably := fn( name, fun, p...) {
+	Util.registerExtension( name, fun, p...);
+	return [name,fun] => fn(name,fun){
+		Util.removeExtension( name, fun );
+		return $REMOVE;
+	};
 };
-GLOBALS.registerConditionalExtension := Util.registerConditionalExtension; //! \deprecated global alias
 
 //! (public)
 Util.removeExtension := fn(name, fun) {

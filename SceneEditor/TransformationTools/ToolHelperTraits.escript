@@ -82,29 +82,29 @@ TransformationTools.FrameListenerTrait := new Traits.GenericTrait("Transformatio
 	
 	t.attributes.onFrame_static ::= void;
 	t.attributes.onFrame @(init) := MultiProcedure;
-	t.attributes._frameListenerEnabledWrapper @(private) := void; // void | DataWrapper(bool)
+	t.attributes._revoceFrameListener @(private) := void; // void | MultiProcedure
 
 	t.attributes.enableFrameListener ::= fn(){
-		if(this._frameListenerEnabledWrapper){
-			this._frameListenerEnabledWrapper(true);
-		}else{
-			this._frameListenerEnabledWrapper = DataWrapper.createFromValue(true);
+		if(!this._revoceFrameListener){
+			this._revoceFrameListener = new Std.MultiProcedure;
 			// use beforeRendering instead of afterRendering to keep the editNode and the moved nodes in sync.
-			registerConditionalExtension(this._frameListenerEnabledWrapper,'PADrend_BeforeRendering', this->fn(...){
-				onFrame_static();
-				onFrame();
+			this._revoceFrameListener += Util.registerExtensionRevocably('PADrend_BeforeRendering', this->fn(...){
+				this.onFrame_static();
+				this.onFrame();
 			}); 
 		}
 		return this;
 	};
 
 	t.attributes.disableFrameListener ::= fn(){
-		if(_frameListenerEnabledWrapper)
-			_frameListenerEnabledWrapper(false);
+		if(this._revoceFrameListener){
+			this._revoceFrameListener();
+			this._revoceFrameListener = void;
+		}
 		return this;
 	};
 	t.attributes.isFrameListenerActive ::= fn(){
-		return !_frameListenerEnabledWrapper || _frameListenerEnabledWrapper();
+		return true & this._revoceFrameListener;
 	};
 	t.onInit += fn(obj){
 		obj.onFrame_static = new MultiProcedure;

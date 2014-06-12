@@ -235,8 +235,8 @@ tests += new Tests.AutomatedTest( "Util/ExtensionPoint" , fn(){
 	extensionPoint += bar; // medium priority
 	extensionPoint.registerExtension( fn(arr){ arr+="first"; }, Extension.HIGH_PRIORITY*2.0);
 	
-	var cond = DataWrapper.createFromValue(true);
-	extensionPoint.registerConditionalExtension( cond,fn(arr){ arr+="opt"; }, Extension.HIGH_PRIORITY);
+	var revoce = new Std.MultiProcedure;
+	revoce += extensionPoint.registerExtensionRevocably( fn(arr){ arr+="opt"; }, Extension.HIGH_PRIORITY);
 	
 	var arr1 = [];
 	extensionPoint(arr1);
@@ -244,10 +244,11 @@ tests += new Tests.AutomatedTest( "Util/ExtensionPoint" , fn(){
 
 	
 	extensionPoint -= bar;
-	cond(false);
+	
+	revoce();
 	var arr2 = [];
 	extensionPoint(arr2);
-	addResult("ExtensionPoint 2",arr2 == ["first","foo"]);
+	addResult("ExtensionPoint 2",arr2 == ["first","foo"] && revoce.empty());
 	
 });
 // -----------------------------------------------------------------------------------------------
