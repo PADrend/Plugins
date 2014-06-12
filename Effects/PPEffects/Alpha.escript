@@ -11,21 +11,17 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_DrawToScreen);
-
-Effect.applyUniforms ::= fn(){
-	shader.setUniform(renderingContext,"colorTexture", Rendering.Uniform.INT, [0]);
-};
+var Effect = new Type( Std.require('Effects/SimplePPEffect2') );
 
 Effect._constructor ::= fn() {
 	this.shader := Rendering.Shader.loadShader(getShaderFolder() + "Simple_GL.vs", getShaderFolder() + "DisplayAlpha.fs", Rendering.Shader.USE_GL);
 };
 
-Effect.begin ::= fn() {
+Effect.begin @(override) ::= fn() {
 	renderingContext.pushAndSetFBO(fbo);
 };
 
-Effect.end ::= fn() {
+Effect.end @(override) ::= fn() {
 	renderingContext.popFBO();
 	
 	renderingContext.pushAndSetShader(shader);
@@ -33,4 +29,4 @@ Effect.end ::= fn() {
 	renderingContext.popShader();
 };
 
-return new Effect();
+return new Effect;

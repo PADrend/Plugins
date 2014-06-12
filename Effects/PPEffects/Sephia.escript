@@ -10,10 +10,10 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_Simple);
+var Effect = new Type( Std.require('Effects/SimplePPEffect') );
 
 Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_130.vs", getShaderFolder()+"Sepia.fs", Rendering.Shader.USE_UNIFORMS))){
 	this.border := renderingContext.getWindowWidth();
 };
 
-return new Effect();
+return new Effect;

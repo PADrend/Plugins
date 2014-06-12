@@ -11,7 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_Simple);
+var Effect = new Type( Std.require('Effects/SimplePPEffect') );
 
 Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs", getShaderFolder()+"EdgeDetection.fs", Rendering.Shader.USE_GL))){
 	this.colorize := false;
@@ -19,13 +19,13 @@ Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+
 	this.method := false;
 };
 
-Effect.applyUniforms ::= fn(){
+Effect.applyUniforms @(override) ::= fn(){
 	shader.setUniform(renderingContext,"colorize", Rendering.Uniform.BOOL, [colorize]);
 	shader.setUniform(renderingContext,"useDepth", Rendering.Uniform.BOOL, [useDepth]);
 	shader.setUniform(renderingContext,"method", Rendering.Uniform.BOOL, [method]);
 };
 
-Effect.addOptions ::= fn(p){
+Effect.addOptions @(override) ::= fn(p){
 	
 	p += "*EdgeDetection*";
 	p++;
@@ -37,4 +37,4 @@ Effect.addOptions ::= fn(p){
 	p++;
 };
 
-return new Effect();
+return new Effect;

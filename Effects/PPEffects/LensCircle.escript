@@ -11,7 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_Simple);
+var Effect = new Type( Std.require('Effects/SimplePPEffect') );
 
 Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs", getShaderFolder()+"LensCircle.fs", Rendering.Shader.USE_GL))){
 	this.innerRadius := 0.1;
@@ -19,13 +19,13 @@ Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+
 	this.move := false;
 };
 
-Effect.applyUniforms ::= fn(){
+Effect.applyUniforms @(override) ::= fn(){
 	shader.setUniform(renderingContext,"innerRadius", Rendering.Uniform.FLOAT, [innerRadius]);
 	shader.setUniform(renderingContext,"outerRadius", Rendering.Uniform.FLOAT, [outerRadius]);
 	shader.setUniform(renderingContext,"move", Rendering.Uniform.BOOL, [move]);
 };
 
-Effect.addOptions ::= fn(p){
+Effect.addOptions @(override) ::= fn(p){
 	
 	p += "*LensCircle*";
 	p++;
@@ -37,4 +37,4 @@ Effect.addOptions ::= fn(p){
 	p++;
 };
 
-return new Effect();
+return new Effect;

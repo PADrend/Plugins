@@ -11,7 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_Simple);
+var Effect = new Type( Std.require('Effects/SimplePPEffect') );
 
 Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs", getShaderFolder()+"IceGlass.fs", Rendering.Shader.USE_GL))){
 	
@@ -21,14 +21,14 @@ Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+
 	this.freq := 0.115;
 };
 
-Effect.applyUniforms ::= fn(){
+Effect.applyUniforms @(override) ::= fn(){
 	
 	shader.setUniform(renderingContext,"PixelX", Rendering.Uniform.INT, [pixelX]);
 	shader.setUniform(renderingContext,"PixelY", Rendering.Uniform.INT, [pixelY]);
 	shader.setUniform(renderingContext,"Freq", Rendering.Uniform.FLOAT, [freq]);
 };
 
-Effect.addOptions ::= fn(p){
+Effect.addOptions @(override) ::= fn(p){
 	
 	p += "*IceGlass*";
 	p++;
@@ -40,4 +40,4 @@ Effect.addOptions ::= fn(p){
 	p++;
 };
 
-return new Effect();
+return new Effect;

@@ -11,9 +11,9 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect);
+var Effect = new Type( Std.require('Effects/PPEffect') );
 
-Effect._constructor:=fn(){
+Effect._constructor ::= fn(){
 	this.range:=10;
 	this.fbo:=new Rendering.FBO;
 	renderingContext.pushAndSetFBO(fbo);
@@ -33,13 +33,13 @@ Effect._constructor:=fn(){
 	renderingContext.popShader();
 };
 /*! ---|> PPEffect  */
-Effect.begin:=fn(){
+Effect.begin @(override) ::= fn(){
 	renderingContext.pushAndSetFBO(fbo);
 	fbo.attachColorTexture(renderingContext,colorTexture_1);
 	fbo.attachDepthTexture(renderingContext,depthTexture);
 };
 /*! ---|> PPEffect  */
-Effect.end:=fn(){
+Effect.end @(override) ::=fn(){
 	fbo.detachDepthTexture(renderingContext);
 	
 	renderingContext.pushAndSetShader(shader);
@@ -66,7 +66,7 @@ Effect.end:=fn(){
 	renderingContext.popShader();
 };
 /*! ---|> PPEffect  */
-Effect.getOptionPanel:=fn(){
+Effect.getOptionPanel @(override) ::=fn(){
 	var p=gui.createPanel(200,200,GUI.AUTO_MAXIMIZE|GUI.AUTO_LAYOUT);
 	p.add(gui.createLabel("Blur"));
 	p.nextRow();
@@ -83,4 +83,4 @@ Effect.getOptionPanel:=fn(){
 	return p;
 };
 
-return new Effect();
+return new Effect;

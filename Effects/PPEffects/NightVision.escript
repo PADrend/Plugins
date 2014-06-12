@@ -11,7 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_Simple);
+var Effect = new Type( Std.require('Effects/SimplePPEffect') );
 
 Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs", getShaderFolder()+"NightVision.fs", Rendering.Shader.USE_GL))){
 	this.lumThres := 0.2;
@@ -20,13 +20,13 @@ Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+
 	this.noise = true;
 };
 
-Effect.applyUniforms ::= fn(){
+Effect.applyUniforms @(override) ::= fn(){
 	shader.setUniform(renderingContext,"lumThres", Rendering.Uniform.FLOAT, [lumThres]);
 	shader.setUniform(renderingContext,"colorAmp", Rendering.Uniform.FLOAT, [colorAmp]);
 	shader.setUniform(renderingContext,"maskSize", Rendering.Uniform.FLOAT, [maskSize]);
 };
 
-Effect.addOptions ::= fn(p){
+Effect.addOptions @(override) ::= fn(p){
 	
 	p += "*NightVision*";
 	p++;
@@ -38,4 +38,4 @@ Effect.addOptions ::= fn(p){
 	p++;
 };
 
-return new Effect();
+return new Effect;

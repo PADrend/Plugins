@@ -11,9 +11,9 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect);
+var Effect = new Type( Std.require('Effects/PPEffect') );
 
-Effect._constructor:=fn(){
+Effect._constructor ::= fn(){
 	
 	this.fbo:=new Rendering.FBO;
 	renderingContext.pushAndSetFBO(fbo);
@@ -34,12 +34,12 @@ Effect._constructor:=fn(){
 	renderingContext.popShader();
 };
 /*! ---|> PPEffect  */
-Effect.begin:=fn(){
+Effect.begin @(override) ::= fn(){
 	
 	renderingContext.pushAndSetFBO(fbo);
 };
 /*! ---|> PPEffect  */
-Effect.end:=fn(){
+Effect.end @(override) ::= fn(){
 	renderingContext.popFBO();
 	
 	renderingContext.pushAndSetShader(shader);
@@ -51,4 +51,4 @@ Effect.end:=fn(){
 	
 };
 
-return new Effect();
+return new Effect;

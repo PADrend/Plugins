@@ -11,7 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_Simple);
+var Effect = new Type( Std.require('Effects/SimplePPEffect') );
 
 Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_130.vs", getShaderFolder()+"Posterize.fs", Rendering.Shader.USE_UNIFORMS))){
 	
@@ -20,12 +20,12 @@ Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+
 	
 };
 
-Effect.applyUniforms ::= fn(){
+Effect.applyUniforms @(override) ::= fn(){
 	shader.setUniform(renderingContext,"gamma", Rendering.Uniform.FLOAT, [this.gamma]);
 	shader.setUniform(renderingContext,"numColors", Rendering.Uniform.FLOAT, [this.numColors]);
 };
 
-Effect.addOptions ::= fn(p){
+Effect.addOptions @(override) ::= fn(p){
 	
 	p += "*Posterize*";
 	p++;
@@ -35,4 +35,4 @@ Effect.addOptions ::= fn(p){
 	p++;
 };
 
-return new Effect();
+return new Effect;

@@ -11,7 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_Simple);
+var Effect = new Type( Std.require('Effects/SimplePPEffect') );
 
 Effect._constructor ::= fn() @(super(Rendering.Shader.loadShader(getShaderFolder() + "Simple_130.vs", getShaderFolder() + "DepthDerivative.fs", Rendering.Shader.USE_UNIFORMS))) {
 	this.derivativeOrder := DataWrapper.createFromValue(3);
@@ -19,13 +19,13 @@ Effect._constructor ::= fn() @(super(Rendering.Shader.loadShader(getShaderFolder
 	this.epsilon := DataWrapper.createFromValue(0.00001);
 };
 
-Effect.applyUniforms ::= fn() {
+Effect.applyUniforms @(override) ::= fn() {
 	shader.setUniform(renderingContext,"derivativeOrder", Rendering.Uniform.INT, [derivativeOrder()]);
 	shader.setUniform(renderingContext,"edgeHighlightMode", Rendering.Uniform.BOOL, [edgeHighlightMode()]);
 	shader.setUniform(renderingContext,"epsilon", Rendering.Uniform.FLOAT, [epsilon()]);
 };
 
-Effect.addOptions ::= fn(panel) {
+Effect.addOptions @(override) ::= fn(panel) {
 	panel += "*DepthDerivative*";
 	panel++;
 	panel += {
@@ -53,4 +53,4 @@ Effect.addOptions ::= fn(panel) {
 	panel++;
 };
 
-return new Effect();
+return new Effect;

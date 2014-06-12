@@ -28,29 +28,34 @@ GLOBALS.PPEffectPlugin := new Plugin({
 			Plugin.REQUIRES : []
 });
 
-static defaultEffect = DataWrapper.createFromEntry( PADrend.configCache, 'Effects.ppEffectDefault',false);
-static activeEffectFile = new DataWrapper;
+static defaultEffect = Std.DataWrapper.createFromEntry( PADrend.configCache, 'Effects.ppEffectDefault',false);
+static activeEffectFile = new Std.DataWrapper;
+static activeEffect = new Std.DataWrapper;
 static plugin = PPEffectPlugin;
 
-plugin.defaultEffect := defaultEffect;
-
-/*!	---|> Plugin	*/
-PPEffectPlugin.init:=fn(){
-     { // Register ExtensionPointHandler:
-        registerExtension('PADrend_Init',this->initMenus);
-        registerExtension('PADrend_AfterRenderingPass',this->this.ex_AfterRenderingPass,Extension.LOW_PRIORITY); // use low priority to include other afterFrame-effects (like selected node's annotation)
-        registerExtension('PADrend_BeforeRenderingPass',this->this.ex_BeforeRenderingPass);
-        registerExtension('PADrend_AfterRendering',this->this.ex_AfterRendering,Extension.LOW_PRIORITY); // use low priority to include other afterFrame-effects (like selected node's annotation)
-        registerExtension('PADrend_BeforeRendering',this->this.ex_BeforeRendering);
-    }
-    this.effect:=false;
-    this.optionWindow:=false;
+PPEffectPlugin.init @(override) := fn(){
     
     registerExtension('PADrend_Init',fn(){
+		initMenus();
 		if(defaultEffect())
 			plugin.loadAndSetEffect(defaultEffect());
     });
 
+    static revoce = new MultiProcedure;
+    activeEffect.onDataChanged += fn(effect){
+    	activeEffectFile( false ); // clear file name 
+    	revoce();
+    	if(effect){
+			// use low priority to include other afterFrame-effects (like selected node's annotation)
+			revoce += Util.registerExtensionRevocably('PADrend_AfterRenderingPass',	fn(PADrend.RenderingPass pass){ activeEffect() && activeEffect().endPass(pass);	},Extension.LOW_PRIORITY );
+			revoce += Util.registerExtensionRevocably('PADrend_BeforeRenderingPass',fn(PADrend.RenderingPass pass){ activeEffect() && activeEffect().beginPass(pass);	});
+
+			// use low priority to include other afterFrame-effects (like selected node's annotation)
+			revoce += Util.registerExtensionRevocably('PADrend_AfterRendering',		fn(...){ activeEffect() && activeEffect().end();	},Extension.LOW_PRIORITY); 
+			revoce += Util.registerExtensionRevocably('PADrend_BeforeRendering',	fn(...){ activeEffect() && activeEffect().begin();	});
+    	}
+    };
+       
     return true;
 };
 
@@ -69,7 +74,30 @@ static scanEffectFiles = fn(){
 	return files;
 };
 
-PPEffectPlugin.initMenus := fn(){
+static initMenus = fn(){
+	static optionWindow;
+	
+	static createOtionWindow = fn(effect){
+		if(!optionWindow){
+			optionWindow = gui.createWindow(400,200,"EffectOptions");
+			optionWindow.setPosition(300,300);
+			activeEffect.onDataChanged += [optionWindow] => fn(optionWindow, newEffect){
+				if(optionWindow.isDestroyed())
+					return $REMOVE;
+				optionWindow.clear();
+				if(newEffect)
+					optionWindow.add(activeEffect.getOptionPanel());
+			};
+
+		}else{
+			optionWindow.clear();
+		}
+		if(effect){
+			optionWindow.add(effect.getOptionPanel());
+		}
+		optionWindow.setEnabled(true);
+	};
+
 	gui.registerComponentProvider('Effects_MainMenu.postprocessing',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "PP effects",
@@ -87,8 +115,8 @@ PPEffectPlugin.initMenus := fn(){
 		m+={
 			GUI.TYPE : GUI.TYPE_BUTTON, 
 			GUI.LABEL : "Options...",
-			GUI.ON_CLICK :this->fn(){
-				this.createOtionWindow(this.effect);
+			GUI.ON_CLICK : fn(){
+				createOtionWindow(activeEffect());
 			}
 		};
 
@@ -124,220 +152,20 @@ PPEffectPlugin.initMenus := fn(){
 
 };
 
-/**
- * [ext:PADrend_BeforeRendering]
- */
-PPEffectPlugin.ex_BeforeRendering:=fn(...){
-    if(!effect)
-        return;
-    effect.begin();
-};
 
-/**
- * [ext:PADrend_AfterRendering]
- */
-PPEffectPlugin.ex_AfterRendering:=fn(...){
-    if(!effect)
-        return;
-    effect.end();
-};
+PPEffectPlugin.defaultEffect := defaultEffect; // alias for public access
 
-/**
- * [ext:PADrend_BeforeRendering]
- */
-PPEffectPlugin.ex_BeforeRenderingPass:=fn(PADrend.RenderingPass pass){
-    if(!effect)
-        return;
-    effect.beginPass(pass);
-};
-
-/**
- * [ext:PADrend_AfterRendering]
- */
-PPEffectPlugin.ex_AfterRenderingPass:=fn(PADrend.RenderingPass pass){
-    if(!effect)
-        return;
-    effect.endPass(pass);
-};
-
-/**
- * [ext:PADrend_AfterRendering]
- */
-PPEffectPlugin.createOtionWindow:=fn(effect){
-    if(!optionWindow){
-        this.optionWindow = gui.createWindow(400,200,"EffectOptions");
-        this.optionWindow.setPosition(300,300);
-
-    }else{
-        this.optionWindow.clear();
-    }
-    if(effect){
-        optionWindow.add(effect.getOptionPanel());
-    }
-    optionWindow.setEnabled(true);
-};
-
-PPEffectPlugin.setEffect:=fn(newEffect){
-    this.effect=newEffect;
-    if(optionWindow){
-        optionWindow.clear();
-        if(newEffect)
-            optionWindow.add(effect.getOptionPanel());
-    }
-	activeEffectFile(false);
+PPEffectPlugin.setEffect := fn(newEffect){
+	activeEffect( newEffect );
 };
 
 PPEffectPlugin.loadAndSetEffect := fn(filename){
 	if(filename){
-		var effect = load(filename);
-		setEffect(effect);
+		setEffect( load(filename) );
 		activeEffectFile(filename);
 	}else{
 		setEffect(void);
 	}
 };
-
-/****************************************************************************
- * PPEffect
- ****************************************************************************/
-
-GLOBALS.PPEffect:=new Type();
-PPEffect._printableName @(override) ::= $PPEffect;
-/*! ---o  */
-PPEffect.begin:=fn(){};
-/*! ---o  */
-PPEffect.end:=fn(){};
-/*! ---o  */
-PPEffect.beginPass:=fn(PADrend.RenderingPass pass){};
-/*! ---o  */
-PPEffect.endPass:=fn(PADrend.RenderingPass pass){};
-/*! ---o  */
-PPEffect.getOptionPanel:=fn(){
-    return gui.createLabel("Effect");
-};
-PPEffect.getShaderFolder ::= fn(){	return __DIR__+"/resources/PP_Effects/";	};
-
-/****************************************************************************
- * PPEffect_Simple ---|> PPEffect
- ****************************************************************************/
-GLOBALS.PPEffect_Simple := new Type(PPEffect);
-PPEffect_Simple._constructor::=fn(Rendering.Shader shader){
-
-	this.fbo := new Rendering.FBO;
-	this.color := void;
-	this.effect := void;
-	this.depth := void;
-	this.noise := void;
-	this.numbers := void;
-
-	this.viewport := void;
-	this.shader := shader;
-
-	this.border := 1.0;
-};
-
-PPEffect_Simple.applyUniforms ::= fn(){
-};
-
-PPEffect_Simple.beginPass ::= fn(PADrend.RenderingPass pass){
-	
-	this.viewport = pass.getCamera().getViewport();
-	pass.getCamera().setViewport(new Geometry.Rect(0,0,viewport.width(),viewport.height()));
-	
-	if(!effect || viewport.width() != effect.getWidth() || viewport.height() != effect.getHeight()){
-		effect = Rendering.createStdTexture(viewport.width(), viewport.height(),true);
-		color = Rendering.createStdTexture(viewport.width(), viewport.height(),true);
-		depth = Rendering.createDepthTexture(viewport.width(), viewport.height());
-		if(noise){
-			
-			noise = Rendering.createNoiseTexture(viewport.width(), viewport.height());
-			noise.planMipmapCreation();
-		}
-	}
-	
-	renderingContext.pushAndSetFBO(fbo);
-	fbo.attachColorTexture(renderingContext,color);
-	fbo.attachDepthTexture(renderingContext,depth);
-	
-};
-
-PPEffect_Simple.endPass ::= fn(PADrend.RenderingPass pass){
-
-	fbo.detachColorTexture(renderingContext);
-	fbo.detachDepthTexture(renderingContext);
-	renderingContext.popFBO();
-	
-	pass.getCamera().setViewport(viewport);
-	frameContext.setCamera(pass.getCamera());
-	
-	renderingContext.pushAndSetShader(shader);
-	
-	shader.setUniform(renderingContext,"color", Rendering.Uniform.INT, [0], false);
-	shader.setUniform(renderingContext,"depth", Rendering.Uniform.INT, [1], false);
-	shader.setUniform(renderingContext,"noise", Rendering.Uniform.INT, [2], false);
-	shader.setUniform(renderingContext,"numbers", Rendering.Uniform.INT, [3], false);
-	shader.setUniform(renderingContext,"imageSize", Rendering.Uniform.VEC2I, [ [viewport.width(), viewport.height()] ], false);
-	
-	shader.setUniform(renderingContext,"border", Rendering.Uniform.FLOAT, [border], false);
-	applyUniforms();
-	
-	renderingContext.pushAndSetTexture(0, color);
-	renderingContext.pushAndSetTexture(1, depth);
-	if(noise)
-		renderingContext.pushAndSetTexture(2, noise);
-	if(numbers)
-		renderingContext.pushAndSetTexture(3, numbers);
-	
-	renderingContext.pushAndSetDepthBuffer(true, true, Rendering.Comparison.ALWAYS);
-	Rendering.drawFullScreenRect(renderingContext);
-	renderingContext.popDepthBuffer();
-	
-	renderingContext.popTexture(0);
-	renderingContext.popTexture(1);
-	if(noise)
-		renderingContext.popTexture(2);
-	if(numbers)
-		renderingContext.popTexture(3);
-	
-	renderingContext.popShader();
-};
-
-PPEffect_Simple.getOptionPanel ::= fn(){
-	var p = gui.createPanel(400,200,GUI.AUTO_MAXIMIZE|GUI.AUTO_LAYOUT);
-	p += "*Global*";
-    p++;
-    p += {GUI.LABEL:"border", GUI.TYPE:GUI.TYPE_RANGE, GUI.RANGE:[0,1], GUI.RANGE_STEPS:100, GUI.DATA_OBJECT:this, GUI.DATA_ATTRIBUTE:$border};
-	p++;
-	addOptions(p);
-	return p;
-};
-
-PPEffect_Simple.addOptions ::= fn(panel){
-};
-
-/****************************************************************************
- * PPEffect_DrawToScreen ---|> PPEffect
- ****************************************************************************/
-GLOBALS.PPEffect_DrawToScreen := new Type(PPEffect);
-PPEffect_DrawToScreen._constructor ::= fn() {
-	this.fbo := new Rendering.FBO;
-	
-	this.colorTexture := Rendering.createStdTexture(renderingContext.getWindowWidth(), renderingContext.getWindowHeight(), true);
-	this.depthTexture := Rendering.createDepthTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight());
-	
-	fbo.attachColorTexture(renderingContext, colorTexture);
-	fbo.attachDepthTexture(renderingContext, depthTexture);
-	//outln(fbo.getStatusMessage(renderingContext));
-	Rendering.checkGLError();
-};
-
-PPEffect_DrawToScreen.drawTexture ::= fn(Rendering.Texture texture) {
-	Rendering.drawTextureToScreen(renderingContext, new Geometry.Rect(0, 0, renderingContext.getWindowWidth(), renderingContext.getWindowHeight()),
-								  [texture], [new Geometry.Rect(0, 0, 1, 1)]);
-};
-
-/****************************************************************************
- * 
- ****************************************************************************/
 
 return PPEffectPlugin;

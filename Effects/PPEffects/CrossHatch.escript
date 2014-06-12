@@ -11,7 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_Simple);
+var Effect = new Type( Std.require('Effects/SimplePPEffect') );
 
 Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs", getShaderFolder()+"CrossHatch.fs", Rendering.Shader.USE_GL))){
 	
@@ -23,7 +23,7 @@ Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+
 	
 };
 
-Effect.applyUniforms ::= fn(){
+Effect.applyUniforms @(override) ::= fn(){
 	shader.setUniform(renderingContext,"hatch_y_offset", Rendering.Uniform.FLOAT, [this.hatch_y]);
 	shader.setUniform(renderingContext,"lum_threshold_1", Rendering.Uniform.FLOAT, [this.lum_1]);
 	shader.setUniform(renderingContext,"lum_threshold_2", Rendering.Uniform.FLOAT, [this.lum_2]);
@@ -31,7 +31,7 @@ Effect.applyUniforms ::= fn(){
 	shader.setUniform(renderingContext,"lum_threshold_4", Rendering.Uniform.FLOAT, [this.lum_4]);
 };
 
-Effect.addOptions ::= fn(p){
+Effect.addOptions @(override) ::= fn(p){
 	
 	p += "*CrossHatch*";
 	p++;
@@ -45,4 +45,4 @@ Effect.addOptions ::= fn(p){
 	p++;
 };
 
-return new Effect();
+return new Effect;

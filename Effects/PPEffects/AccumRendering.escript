@@ -11,9 +11,9 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect);
+var Effect = new Type( Std.require('Effects/PPEffect') );
 
-Effect._constructor := fn() {
+Effect._constructor ::= fn() {
 	this.fbo := new Rendering.FBO();
 	renderingContext.pushAndSetFBO(fbo);
 	
@@ -29,7 +29,7 @@ Effect._constructor := fn() {
 };
 
 /*! ---|> PPEffect  */
-Effect.begin := fn() {
+Effect.begin @(override) ::= fn() {
 	
 	renderingContext.pushAndSetFBO(fbo);
 	var newSRT=PADrend.getDolly().getSRT();
@@ -40,7 +40,7 @@ Effect.begin := fn() {
 };
 
 /*! ---|> PPEffect  */
-Effect.end := fn() {
+Effect.end @(override) ::= fn() {
 	PADrend.EventLoop.doClearScreen = true;
 	
 	renderingContext.popFBO();
@@ -48,4 +48,4 @@ Effect.end := fn() {
 								  [colorTexture], [new Geometry.Rect(0, 0, 1, 1)]);
 };
 
-return new Effect();
+return new Effect;

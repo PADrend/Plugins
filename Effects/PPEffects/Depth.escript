@@ -10,15 +10,15 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_DrawToScreen);
+var Effect = new Type( Std.require('Effects/SimplePPEffect2') );
 
-Effect.begin ::= fn() {
+Effect.begin @(override) ::= fn() {
 	renderingContext.pushAndSetFBO(fbo);
 };
 
-Effect.end ::= fn() {
+Effect.end @(override) ::= fn() {
 	renderingContext.popFBO();
 	drawTexture(depthTexture);
 };
 
-return new Effect();
+return new Effect;

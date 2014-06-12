@@ -15,7 +15,7 @@
  **/
 
 
-var Effect = new Type(PPEffect);
+var Effect = new Type( Std.require('Effects/PPEffect') );
 
 Effect.debug := void;
 
@@ -50,14 +50,14 @@ Effect._constructor ::= fn() {
 };
 
 //! ---|> PPEffect
-Effect.begin ::= fn() {
+Effect.begin @(override) ::= fn() {
 	renderingContext.pushAndSetFBO(fbo);
 	fbo.setDrawBuffers(5);
 	renderingContext.pushAndSetShader(packShader);
 };
 
 //! ---|> PPEffect
-Effect.end ::= fn() {
+Effect.end @(override) ::= fn() {
 	fbo.setDrawBuffers(1);
 	renderingContext.popFBO();
 	renderingContext.popShader();
@@ -131,4 +131,4 @@ Effect.getOptionPanel:=fn(){
     return p;
 };
 
-return new Effect();
+return new Effect;

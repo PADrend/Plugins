@@ -10,22 +10,22 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type(PPEffect_DrawToScreen);
+var Effect = new Type( Std.require('Effects/SimplePPEffect2') );
 
 Effect._constructor ::= fn() {
 	this.shader := Rendering.Shader.loadShader(getShaderFolder() + "NormalToColor.vs", getShaderFolder() + "NormalToColor.fs", Rendering.Shader.USE_GL);
 };
 
-Effect.begin ::= fn() {
+Effect.begin @(override) ::= fn() {
 	renderingContext.pushAndSetFBO(fbo);
 	renderingContext.pushAndSetShader(shader);
 };
 
-Effect.end ::= fn() {
+Effect.end @(override) ::= fn() {
 	renderingContext.popFBO();
 	renderingContext.popShader();
 	
 	drawTexture(colorTexture);
 };
 
-return new Effect();
+return new Effect;

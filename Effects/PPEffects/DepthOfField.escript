@@ -15,7 +15,7 @@
  **/
 
 
-var Effect = new Type(PPEffect);
+var Effect = new Type( Std.require('Effects/PPEffect') );
 
 Effect._constructor:=fn(){
     this.fbo:=new Rendering.FBO;
@@ -205,4 +205,4 @@ Effect.getOptionPanel  @(override) ::= fn(){
     return p;
 };
 
-return new Effect();
+return new Effect;
