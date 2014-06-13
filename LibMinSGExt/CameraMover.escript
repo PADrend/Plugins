@@ -328,25 +328,14 @@ T.registerGamepad ::= fn(gamepad){
 	};
 
 	
-	//! \see HID.ControllerAnalogAxisTrait
+	//! \see HID.???Trait
 	gamepad.onButton += this->fn(button,pressed){
 		if(button == 9) {	// reset
 			if(pressed) {
 				this.reset();
 				this.dolly.setRelPosition(new Geometry.Vec3(0,0,0)); 
 			}
-		}else if(button == 5) {	
-			if(pressed) {
-				this.moveAbsVec.y(this.moveAbsVec.y() + 1);
-			} else {
-				this.moveAbsVec.y(this.moveAbsVec.y() - 1);
-			}
-		}else if(button == 7) {	
-			if(pressed) {
-				this.moveAbsVec.y(this.moveAbsVec.y() - 1);
-			} else {
-				this.moveAbsVec.y(this.moveAbsVec.y() + 1);
-			}	
+
 		}else if(button == 4) {	
 			if(pressed) {
 				if(this.joypad_planeMovementModifier == 0)
