@@ -51,6 +51,7 @@ plugin.init := fn() {
 			this.availableBehaviours['ParticlePointEmitter'] = fn(MinSG.ParticleSystemNode n){ return new MinSG.ParticlePointEmitter(n); };
 			this.availableBehaviours['ParticleBoxEmitter'] = fn(MinSG.ParticleSystemNode n){ return new MinSG.ParticleBoxEmitter(n); };
 			this.availableBehaviours['ParticleGravityAffector'] = fn(MinSG.ParticleSystemNode n){ return new MinSG.ParticleGravityAffector(n); };
+			this.availableBehaviours['ParticleReflectionAffector'] = fn(MinSG.ParticleSystemNode n){ return new MinSG.ParticleReflectionAffector(n); };
 			this.availableBehaviours['ParticleFadeOutAffector'] = fn(MinSG.ParticleSystemNode n){ return new MinSG.ParticleFadeOutAffector(n); };
 			this.availableBehaviours['ParticleAnimator'] = fn(MinSG.ParticleSystemNode n){ return new MinSG.ParticleAnimator(n); };
 		} // particle system

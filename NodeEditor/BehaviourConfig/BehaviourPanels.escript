@@ -376,6 +376,43 @@ NodeEditor.registerConfigPanelProvider( MinSG.ParticleGravityAffector, fn(MinSG.
 	};
 });
 
+/*!	ParticleReflectionAffector	*/
+if(MinSG.isSet($ParticleReflectionAffector))
+NodeEditor.registerConfigPanelProvider( MinSG.ParticleReflectionAffector, fn(MinSG.ParticleReflectionAffector b, panel){
+    panel += "*ParticleReflectionAffector:*";
+    panel++;
+
+    panel += {
+		GUI.TYPE : GUI.TYPE_RANGE,
+		GUI.LABEL : "Reflectiveness",
+		GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions(b->b.getReflectiveness,b->b.setReflectiveness),
+		GUI.RANGE : [0,1.0]		
+    };
+    panel++;
+
+    panel += {
+		GUI.TYPE : GUI.TYPE_RANGE,
+		GUI.LABEL : "Adherence",
+		GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions(b->b.getAdherence,b->b.setAdherence),
+		GUI.RANGE : [0,1.0]
+    };
+
+    panel++;
+    
+    panel += {
+		GUI.TYPE : GUI.TYPE_TEXT,
+		GUI.LABEL : "Plane",
+		GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( 
+				[b] => fn(b){	return (b.getPlane().getNormal().toArray() += b.getPlane().getOffset()).implode(" ");	},
+				[b] => fn(b,str){
+					var arr = str.split(" ");
+					b.setPlane( new Geometry.Plane( arr.slice(0,3), arr[3] ) );
+				})
+    };
+    panel++;
+    
+});
+
 // ----
 
 /*!	ParticlePointEmitter	*/
