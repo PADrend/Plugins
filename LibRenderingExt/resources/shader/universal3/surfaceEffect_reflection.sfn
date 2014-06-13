@@ -53,6 +53,8 @@ uniform mat4 sg_eyeToLastEye;
 uniform vec2 last_viewportScale = vec2(1,1);
 uniform vec2 last_viewportOffset = vec2(0,0);
 
+uniform float mat_reflectionStrength = 0.5;
+
 //uniform mat4 lastCamMatrix;  //!!!!!!!!!!!!!!!!!!!!!! eye to world
 uniform mat4 invLastCamMatrix;  //!!!!!!!!!!!!!!!!!!!!!! world to eye
 
@@ -75,6 +77,9 @@ vec4 lastColorBufferLookup(in vec2 screenPos){
 
 //! \see main.sfn
 void addSurfaceEffects(inout SurfaceProperties surface){
+
+	if( mat_reflectionStrength <= 0.0 )
+		return;
 
 	// project position into last frame's eye space
 	vec3 pos_es = hvec4ToVec3(invLastCamMatrix * sg_eyeToWorld(vec4(surface.position_es,1.0) ));
@@ -200,8 +205,10 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 			quality = pow(quality,0.2-length(intersectionRay_es));
 		}
 		
-		// use surface's secular alpha as reflectance value 
-		float amount = min(surface.specular.a *  pow(quality,200.0) *  smoothstep(length(pos_es)*0.75,0.1,f),1.0);
+//		// use surface's secular alpha as reflectance value 
+//		float amount = min(surface.specular.a *  pow(quality,200.0) *  smoothstep(length(pos_es)*0.75,0.1,f),1.0);
+
+		float amount = min(mat_reflectionStrength *  pow(quality,200.0) *  smoothstep(length(pos_es)*0.75,0.1,f),1.0);
 
 		
 		// reduce reflections when reflecting points near the screen's border
@@ -210,7 +217,8 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 			amount /= pow(1.15-borderDist,50);
 		}
 		 
-		surface.emission = mix(surface.emission,lastColorBufferLookup( best.xy ),amount);
+		vec4 reflectedColor = lastColorBufferLookup( best.xy );
+		surface.emission = mix(surface.emission,reflectedColor * surface.specular,amount);
 //			surface.reflectance *  pow(quality,200.0)/max(1,f/length(intersection_es))*0.5 );
 		
 	}
