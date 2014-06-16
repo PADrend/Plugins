@@ -77,7 +77,7 @@ T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 sourc
 		var params = (new MinSG.RenderParam)
 					.setFlags(MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING) //|MinSG.NO_STATES);
 					.setRenderingLayers( this.renderingLayers() );
-
+					
 		rootNode.display(fc, params );
 		// read depth
 		var screenCenter=resolution*0.5;
@@ -88,7 +88,7 @@ T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 sourc
 //		out(maxDistance,"\n");
 	}
 
- 	var nodes=MinSG.collectVisibleNodes(rootNode, fc, maxDistance, true);
+ 	var nodes=MinSG.collectVisibleNodes(rootNode, fc, maxDistance, true,this.renderingLayers());
 	fc.popCamera();
 	fc.getRenderingContext().popFBO();
 		Rendering.checkGLError();
@@ -104,7 +104,7 @@ T.queryNodeFromScreen ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.
 	var bounds = rootNode.getWorldBB();
 	var dist = [cam.getFarPlane(), bounds.getDistance(cam.getWorldPosition()) + ( bounds.getExtentMax() * 1.415 /* sqrt(2) */ ) ].min();
 	var destination=source + (fc.convertScreenPosToWorldPos(new Geometry.Vec3(screenPos.getX(),screenPos.getY(),0))-source).normalize()*dist;
-	return queryNode(fc,rootNode,source,destination,restrictSearchingDistance);
+	return this.queryNode(fc,rootNode,source,destination,restrictSearchingDistance);
 };
 
 /*! Returns the coordinate (or false) of the first intersection of the line from source to target. */
