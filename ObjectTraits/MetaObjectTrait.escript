@@ -11,7 +11,8 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-
+static META_OBJECT_LAYER = 4; // layer 2 (2^2)
+ 
 static Renderer = new Type( MinSG.ScriptedNodeRendererState );
 Renderer._printableName @(override) ::= "_MetaObjectRenderer(tmp)";
 
@@ -20,6 +21,7 @@ Renderer.nodes @(init) := Array;
 //Renderer._constructor ::= fn()@(super(MinSG.FrameContext.APPROXIMATION_CHANNEL)){};
 Renderer._constructor ::= fn()@(super("META_OBJECT_CHANNEL")){
 	this.setTempState(true);
+	this.setRenderingLayers( META_OBJECT_LAYER );
 
 };
 Renderer.displayNode := fn(node,params){
@@ -28,8 +30,8 @@ Renderer.displayNode := fn(node,params){
 };
 
 Renderer.doEnableState @(override) ::= fn(node,params){ //node,params){
-	if( !params.getFlag(MinSG.SHOW_META_OBJECTS) )
-		return MinSG.STATE_SKIPPED;
+//	if( !params.getFlag(MinSG.SHOW_META_OBJECTS) )
+//		return MinSG.STATE_SKIPPED;
 	this.nodes.clear();
 	return MinSG.STATE_OK;
 };
@@ -63,7 +65,7 @@ var MetaNodeState = new Type( MinSG.ScriptedState );
 MetaNodeState._printableName @(override) ::= "_MetaNodeState(tmp)";
 MetaNodeState._constructor ::= fn(){
 	this.setTempState(true);
-
+	this.setRenderingLayers( META_OBJECT_LAYER );
 };
 
 MetaNodeState.doEnableState ::= fn(node,params){
@@ -106,12 +108,14 @@ static trait = new MinSG.PersistentNodeTrait('ObjectTraits/MetaObjectTrait');
 
 trait.onInit += fn(MinSG.GeometryNode node){
 	node += highlightState;
+	node.setRenderingLayers( META_OBJECT_LAYER );
 };
 
 trait.allowRemoval();
 trait.onRemove += fn(node){
 	outln("Remove state.");
 	node.removeState(highlightState);
+	node.setRenderingLayers( 1 ); // layer 0 (2^0)
 };
 
 Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){

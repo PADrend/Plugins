@@ -21,21 +21,6 @@
 		linkNames
 
 */
-static addRevocably = fn( array, callback ){
-	array += callback;
-	var revocer = fn(){
-		if(thisFn.array){
-			thisFn.array -= thisFn.callback;
-			thisFn.array = void;
-			thisFn.callback = void;
-		}
-		return $REMOVE;
-	}.clone();
-	revocer.array := array;
-	revocer.callback := callback;
-	return revocer;
-};
-
 
 static hsv2rgb = fn(Number h,Number s, Number v){
     var hh = h.clamp( 0,360 ) / 60.0;
@@ -65,6 +50,7 @@ static hsv2rgb = fn(Number h,Number s, Number v){
 Util.hsv2rgb := hsv2rgb;
 
 // ---------------------------------------
+static META_OBJECT_LAYER = 4; // layer 2 (2^2)
 
 static COLOR1 = new Util.Color4f(0.0,1.0,0.0,1.0);
 static COLOR2 = new Util.Color4f(0.0,0.0,0.0,0.1);
@@ -88,14 +74,15 @@ LinkState._constructor ::= fn(Array linkedNodes,Array colors){
 	mesh.setUseIndexData(false);
 	this.mesh = mesh;
 	
+	this.setRenderingLayers( META_OBJECT_LAYER );
 };
 
 LinkState.doEnableState ::= fn(node,params){
 	return MinSG.STATE_OK;
 };
 LinkState.doDisableState ::= fn(node,params){
-	if( !params.getFlag(MinSG.SHOW_META_OBJECTS) )
-		return MinSG.STATE_SKIPPED;
+//	if( !params.getFlag(MinSG.SHOW_META_OBJECTS) )
+//		return MinSG.STATE_SKIPPED;
 	
 	var sourcePos = node.getWorldBB().getCenter();
 	var posAcc = Rendering.PositionAttributeAccessor.create(this.mesh, Rendering.VertexAttributeIds.POSITION);
@@ -180,7 +167,7 @@ trait.onInit += fn(MinSG.Node node){
 		}
 		if(!nodes.empty()){
 			var sourceState = new LinkState(nodes,colors);	
-			node.__NodeLinkTrait_revoce += addRevocably( node, sourceState);
+			node.__NodeLinkTrait_revoce += Std.addRevocably( node, sourceState);
 		}
 	};
 
