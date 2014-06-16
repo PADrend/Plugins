@@ -53,7 +53,7 @@ uniform mat4 sg_eyeToLastEye;
 uniform vec2 last_viewportScale = vec2(1,1);
 uniform vec2 last_viewportOffset = vec2(0,0);
 
-uniform float mat_reflectionStrength = 0.5;
+uniform float sg_reflectionStrength = 0.0;
 
 //uniform mat4 lastCamMatrix;  //!!!!!!!!!!!!!!!!!!!!!! eye to world
 uniform mat4 invLastCamMatrix;  //!!!!!!!!!!!!!!!!!!!!!! world to eye
@@ -78,7 +78,7 @@ vec4 lastColorBufferLookup(in vec2 screenPos){
 //! \see main.sfn
 void addSurfaceEffects(inout SurfaceProperties surface){
 
-	if( mat_reflectionStrength <= 0.0 )
+	if( sg_reflectionStrength <= 0.0 )
 		return;
 
 	// project position into last frame's eye space
@@ -208,7 +208,7 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 //		// use surface's secular alpha as reflectance value 
 //		float amount = min(surface.specular.a *  pow(quality,200.0) *  smoothstep(length(pos_es)*0.75,0.1,f),1.0);
 
-		float amount = min(mat_reflectionStrength *  pow(quality,200.0) *  smoothstep(length(pos_es)*0.75,0.1,f),1.0);
+		float amount = min(sg_reflectionStrength *  pow(quality,200.0) *  smoothstep(length(pos_es)*0.75,0.1,f),1.0);
 
 		
 		// reduce reflections when reflecting points near the screen's border
