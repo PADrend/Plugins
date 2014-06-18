@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2012,2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2012 Ralf Petring <ralf@petring.net>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -13,15 +13,15 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-MinSG.ImageCompareEvaluator := new Type(MinSG.ScriptedEvaluator);
+var Evaluator = new Type(MinSG.ScriptedEvaluator);
 
-MinSG.ImageCompareEvaluator._constructor ::= fn() {
+Evaluator._constructor ::= fn() {
 	this.firstScene := void;
 	this.secondScene := void;
 	
 	this.imageComparator := void;
 	
-	this.fbo := new Rendering.FBO();
+	this.fbo := new Rendering.FBO;
 	this.firstTexture := void;
 	this.secondTexture := void;
 	this.depthTexture := void;
@@ -30,23 +30,26 @@ MinSG.ImageCompareEvaluator._constructor ::= fn() {
 	this.result := void;
 };
 
-MinSG.ImageCompareEvaluator.beginMeasure @(override)::= fn() {
+Evaluator.beginMeasure @(override)::= fn() {
 	result = void;
 	return this;
 };
 
-MinSG.ImageCompareEvaluator.endMeasure @(override) ::= fn(MinSG.FrameContext frameContext) {
+Evaluator.endMeasure @(override) ::= fn(MinSG.FrameContext frameContext) {
 	return this;
 };
 
-MinSG.ImageCompareEvaluator.measure @(override) ::= fn(MinSG.FrameContext frameContext, MinSG.Node node, Geometry.Rect rect) {
+Evaluator.measure @(override) ::= fn(MinSG.FrameContext frameContext, MinSG.Node node, Geometry.Rect rect) {
 	var width = rect.getWidth();
 	var height = rect.getHeight();
 	
-	firstTexture = Rendering.createStdTexture(width, height, true);
-	secondTexture = Rendering.createStdTexture(width, height, true);
-	depthTexture = Rendering.createDepthTexture(width,height);
-	resultTexture = Rendering.createStdTexture(width, height, true);
+	if(!firstTexture||firstTexture.getWidth()!=width||firstTexture.getHeight()!=height){
+		outln("ImageCompareEvaluator: Recreate textures.");
+		firstTexture = Rendering.createStdTexture(width, height, true);
+		secondTexture = Rendering.createStdTexture(width, height, true);
+		depthTexture = Rendering.createDepthTexture(width,height);
+		resultTexture = Rendering.createStdTexture(width, height, true);
+	}
 	
 	renderingContext.pushAndSetFBO(fbo);
 	fbo.attachDepthTexture(renderingContext,depthTexture);
@@ -72,30 +75,30 @@ MinSG.ImageCompareEvaluator.measure @(override) ::= fn(MinSG.FrameContext frameC
 		return;
 	}
 	result = value;
-	
+
 	return this;
 };
 
-MinSG.ImageCompareEvaluator.getResults @(override) ::= fn() {
+Evaluator.getResults @(override) ::= fn() {
 	return [result];
 };
 
-MinSG.ImageCompareEvaluator.getMaxValue ::= fn() {
+Evaluator.getMaxValue @(override) ::= fn() {
 	return result;
 };
 
-MinSG.ImageCompareEvaluator.getMode ::= fn() {
+Evaluator.getMode @(override) ::= fn() {
 	return MinSG.Evaluator.SINGLE_VALUE;
 };
 
-MinSG.ImageCompareEvaluator.setMode ::= fn(dummy) {
+Evaluator.setMode @(override) ::= fn(dummy) {
 };
 
-MinSG.ImageCompareEvaluator.getEvaluatorTypeName ::= fn() {
+Evaluator.getEvaluatorTypeName @(override) ::= fn() {
 	return "ImageCompareEvaluator";
 };
 
-MinSG.ImageCompareEvaluator.setFirstScene ::= fn(MinSG.Node s) {
+Evaluator.setFirstScene ::= fn(MinSG.Node s) {
 	firstScene = s;
 	
 	if(MinSG.isSet($MAR)){ // only used for MultiAlgorithmRendering (Diss Ralf)
@@ -105,7 +108,7 @@ MinSG.ImageCompareEvaluator.setFirstScene ::= fn(MinSG.Node s) {
 	}
 };
 
-MinSG.ImageCompareEvaluator.setSecondScene ::= fn(MinSG.Node s) {
+Evaluator.setSecondScene ::= fn(MinSG.Node s) {
 	secondScene = s;
 	
 	if(MinSG.isSet($MAR)){ // only used for MultiAlgorithmRendering (Diss Ralf)
@@ -115,34 +118,34 @@ MinSG.ImageCompareEvaluator.setSecondScene ::= fn(MinSG.Node s) {
 	}
 };
 
-MinSG.ImageCompareEvaluator.algoSelector := void; // only used for MultiAlgorithmRendering (Diss Ralf)
+Evaluator.algoSelector := void; // only used for MultiAlgorithmRendering (Diss Ralf)
 
-MinSG.ImageCompareEvaluator.setScenes ::= fn(MinSG.Node first, MinSG.Node second) {
+Evaluator.setScenes ::= fn(MinSG.Node first, MinSG.Node second) {
 	setFirstScene(first);
 	setSecondScene(second);
 };
 
-MinSG.ImageCompareEvaluator.setImageComparator ::= fn(MinSG.AbstractImageComparator comparator) {
+Evaluator.setImageComparator ::= fn(MinSG.AbstractImageComparator comparator) {
 	imageComparator = comparator;
 };
 
-MinSG.ImageCompareEvaluator.isReady ::= fn() {
+Evaluator.isReady ::= fn() {
 	return (firstScene && secondScene && imageComparator);
 };
 
-MinSG.ImageCompareEvaluator.getFirstTexture ::= fn() {
+Evaluator.getFirstTexture ::= fn() {
 	return firstTexture;
 };
 
-MinSG.ImageCompareEvaluator.getSecondTexture ::= fn() {
+Evaluator.getSecondTexture ::= fn() {
 	return secondTexture;
 };
 
-MinSG.ImageCompareEvaluator.getResultTexture ::= fn() {
+Evaluator.getResultTexture ::= fn() {
 	return resultTexture;
 };
 
-MinSG.ImageCompareEvaluator.createConfigPanel ::= fn() {
+Evaluator.createConfigPanel @(override)  ::= fn() {
 	// parent::createConfigPanel()
 	var panel = (this -> MinSG.Evaluator.createConfigPanel)();
 
@@ -188,7 +191,7 @@ MinSG.ImageCompareEvaluator.createConfigPanel ::= fn() {
 		GUI.LABEL : "Quality",
 		GUI.TYPE : GUI.TYPE_NUMBER,
 		GUI.WIDTH : 100,
-		GUI.DATA_WRAPPER : ImageComparePlugin.quality,
+		GUI.DATA_WRAPPER : Util.requirePlugin('ImageCompare').currentQuality,
 		GUI.FLAGS : GUI.LOCKED
 	}];
 	
@@ -198,7 +201,7 @@ MinSG.ImageCompareEvaluator.createConfigPanel ::= fn() {
 		GUI.LABEL : "Display Textures",
 		GUI.TYPE : GUI.TYPE_BOOL,
 		GUI.WIDTH : 100,
-		GUI.DATA_WRAPPER : ImageComparePlugin.displayTextures,
+		GUI.DATA_WRAPPER : Util.requirePlugin('ImageCompare').displayTexturesEnabled,
 	}];
 	
 	panel++;
@@ -311,3 +314,4 @@ MinSG.ImageCompareEvaluator.createConfigPanel ::= fn() {
 		
 	return panel;
 };
+return Evaluator;

@@ -11,24 +11,24 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-MinSG.ImageWriteEvaluator := new Type(MinSG.ScriptedEvaluator);
+var Evaluator = new Type(MinSG.ScriptedEvaluator);
 
-MinSG.ImageWriteEvaluator._constructor ::= fn() {
-	this.fbo := new Rendering.FBO();
+Evaluator._constructor ::= fn() {
+	this.fbo := new Rendering.FBO;
 
 	this.imageDirectory := DataWrapper.createFromConfig(PADrend.configCache, 'MinSG.ImageCompare.writeDirectory', "");
 	this.imageCounter := DataWrapper.createFromValue(0);
 };
 
-MinSG.ImageWriteEvaluator.beginMeasure @(override)::= fn() {
+Evaluator.beginMeasure @(override)::= fn() {
 	return this;
 };
 
-MinSG.ImageWriteEvaluator.endMeasure @(override) ::= fn(MinSG.FrameContext frameContext) {
+Evaluator.endMeasure @(override) ::= fn(MinSG.FrameContext frameContext) {
 	return this;
 };
 
-MinSG.ImageWriteEvaluator.measure @(override) ::= fn(MinSG.FrameContext frameContext, MinSG.Node node, Geometry.Rect rect) {
+Evaluator.measure @(override) ::= fn(MinSG.FrameContext frameContext, MinSG.Node node, Geometry.Rect rect) {
 	var width = rect.getWidth();
 	var height = rect.getHeight();
 	
@@ -52,26 +52,26 @@ MinSG.ImageWriteEvaluator.measure @(override) ::= fn(MinSG.FrameContext frameCon
 	return this;
 };
 
-MinSG.ImageWriteEvaluator.getResults @(override) ::= fn() {
+Evaluator.getResults @(override) ::= fn() {
 	return [imageCounter()];
 };
 
-MinSG.ImageWriteEvaluator.getMaxValue ::= fn() {
+Evaluator.getMaxValue @(override) ::= fn() {
 	return imageCounter();
 };
 
-MinSG.ImageWriteEvaluator.getMode ::= fn() {
+Evaluator.getMode@(override)  ::= fn() {
 	return MinSG.Evaluator.SINGLE_VALUE;
 };
 
-MinSG.ImageWriteEvaluator.setMode ::= fn(dummy) {
+Evaluator.setMode @(override) ::= fn(dummy) {
 };
 
-MinSG.ImageWriteEvaluator.getEvaluatorTypeName ::= fn() {
+Evaluator.getEvaluatorTypeName @(override) ::= fn() {
 	return "ImageWriteEvaluator";
 };
 
-MinSG.ImageWriteEvaluator.createConfigPanel ::= fn() {
+Evaluator.createConfigPanel @(override) ::= fn() {
 	// parent::createConfigPanel()
 	var panel = (this -> MinSG.Evaluator.createConfigPanel)();
 
@@ -95,3 +95,5 @@ MinSG.ImageWriteEvaluator.createConfigPanel ::= fn() {
 
 	return panel;
 };
+
+return Evaluator;

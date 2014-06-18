@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2012-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2012-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -12,7 +12,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-GLOBALS.ImageComparePlugin := new Plugin({
+var plugin = new Plugin({
 			Plugin.NAME				:	"ImageCompare",
 			Plugin.VERSION			:	"1.0",
 			Plugin.DESCRIPTION		:	"Display the two source images and the resulting image of an ImageCompareEvaluator.",
@@ -23,44 +23,62 @@ GLOBALS.ImageComparePlugin := new Plugin({
 });
 
 //! Result of the ImageCompareEvaluator.
-ImageComparePlugin.quality := DataWrapper.createFromValue(0.0);
-//! Status of the output of the three textures of the ImageCompareEvaluator.
-ImageComparePlugin.displayTextures := DataWrapper.createFromValue(false);
-//! Temporary storage for the current PADrend scene.
-ImageComparePlugin.tempScene := void;
+static currentQuality = new Std.DataWrapper(0.0);
+plugin.currentQuality := currentQuality;
 
-ImageComparePlugin.init := fn() {
+//! Status of the output of the three textures of the ImageCompareEvaluator.
+static displayTexturesEnabled = new Std.DataWrapper(false);
+plugin.displayTexturesEnabled := displayTexturesEnabled;
+
+static tempScene; //! Temporary storage for the current PADrend scene.
+
+plugin.init := fn() {
 	if(!MinSG.isSet($AbstractImageComparator)) {
 		out(__FILE__,__LINE__," MinSG::ImageCompare not supported. Did you compile with MINSG_EXT_IMAGECOMPARE defined?\n");
 		return false;
 	}
-	{
-		load(__DIR__ + "/ImageCompareEvaluator.escript");
-		load(__DIR__ + "/ImageReadEvaluator.escript");
-		load(__DIR__ + "/ImageWriteEvaluator.escript");
+	
+	static revoceExtensions = new Std.MultiProcedure;
+	displayTexturesEnabled.onDataChanged += fn(enable){
+		revoceExtensions();
+		if(enable){
+			revoceExtensions += Util.registerExtensionRevocably('PADrend_BeforeRendering', ex_BeforeRendering);
+			revoceExtensions += Util.registerExtensionRevocably('PADrend_AfterRendering', ex_AfterRendering);
+		}
+	};
+	
+	{ // init shader file locator
+		var shaderLocator = new Util.FileLocator;
+		var storedLocation = systemConfig.getValue('ImageCompare.shaderLocation',false);
+		if(storedLocation){
+			shaderLocator.addSearchPath(storedLocation);
+		}else{
+			if(getEnv('MINSG_DATA_DIR'))
+				shaderLocator.addSearchPath( getEnv('MINSG_DATA_DIR') );
+			shaderLocator.addSearchPath( "../share/MinSG/data/" );
+			shaderLocator.addSearchPath( "modules/MinSG/data/" );
+			shaderLocator.addSearchPath( "../modules/MinSG/data/" );
+		}
+		MinSG.AbstractOnGpuComparator.initShaderFileLocator( shaderLocator );
+		if( !shaderLocator.locateFile( new Util.FileName("shader/ImageCompare/ImageCompare.vs")) ){
+			Runtime.warn("ImageCompareEvaluator: shader resource files could not be located.");
+		}
 	}
-	{
-		registerExtension('PADrend_BeforeRendering', this -> this.ex_BeforeRendering);
-		registerExtension('PADrend_AfterRendering', this -> this.ex_AfterRendering);
-		
-		registerExtension('Evaluator_QueryEvaluators', this -> this.ex_QueryEvaluators);
-	}
+
+	Util.registerExtension('Evaluator_QueryEvaluators', fn(Array evaluatorList) {
+		evaluatorList += new (Std.require( 'ImageCompare/ImageCompareEvaluator' ));
+		evaluatorList += new (Std.require( 'ImageCompare/ImageReadEvaluator' ));
+		evaluatorList += new (Std.require( 'ImageCompare/ImageWriteEvaluator' ));
+	});
 	return true;
 };
 
-ImageComparePlugin.ex_QueryEvaluators := fn(Array evaluatorList) {
-	evaluatorList += new MinSG.ImageCompareEvaluator;
-	evaluatorList += new MinSG.ImageReadEvaluator;
-	evaluatorList += new MinSG.ImageWriteEvaluator;
-};
 
-ImageComparePlugin.ex_BeforeRendering := fn(...) {
-	if(!displayTextures()) {
-		return;
-	}
+static ex_BeforeRendering = fn(...) {
+
 	var evaluator = EvaluatorManager.getSelectedEvaluator();
-	if(!(evaluator ---|> MinSG.ImageCompareEvaluator) || !evaluator.isReady()) {
-		displayTextures(false);
+	if(!(evaluator ---|> ( Std.require( 'ImageCompare/ImageCompareEvaluator' ))) || !evaluator.isReady()) {
+		displayTexturesEnabled(false);
 		return;
 	}
 	
@@ -68,10 +86,9 @@ ImageComparePlugin.ex_BeforeRendering := fn(...) {
 	PADrend.selectScene(void);
 };
 
-ImageComparePlugin.ex_AfterRendering := fn(...) {
-	if(!displayTextures()) {
+static ex_AfterRendering = fn(...) {
+	if(!displayTexturesEnabled()) 
 		return;
-	}
 	
 	PADrend.selectScene(tempScene);
 	
@@ -92,7 +109,7 @@ ImageComparePlugin.ex_AfterRendering := fn(...) {
 	frameContext.popCamera();
 	
 	// Update GUI
-	quality(evaluator.getResults()[0]);
+	currentQuality(evaluator.getResults()[0]);
 	
 	var halfW = renderingContext.getWindowWidth() / 2;
 	var halfH = renderingContext.getWindowHeight() / 2;
@@ -109,4 +126,4 @@ ImageComparePlugin.ex_AfterRendering := fn(...) {
 	Rendering.drawTextureToScreen(renderingContext, new Geometry.Rect(0, 0, width, height), evaluator.getResultTexture(), new Geometry.Rect(0, 0, 1, 1));
 };
 
-return ImageComparePlugin;
+return plugin;

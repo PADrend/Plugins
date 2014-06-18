@@ -11,9 +11,9 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-MinSG.ImageReadEvaluator := new Type(MinSG.ScriptedEvaluator);
+var Evaluator = new Type(MinSG.ScriptedEvaluator);
 
-MinSG.ImageReadEvaluator._constructor ::= fn() {
+Evaluator._constructor ::= fn() {
 	this.imageComparator := void;
 
 	this.firstImageDirectory := DataWrapper.createFromConfig(PADrend.configCache, 'MinSG.ImageCompare.firstReadDirectory', "");
@@ -23,16 +23,16 @@ MinSG.ImageReadEvaluator._constructor ::= fn() {
 	this.result := void;
 };
 
-MinSG.ImageReadEvaluator.beginMeasure @(override)::= fn() {
+Evaluator.beginMeasure @(override)::= fn() {
 	result = void;
 	return this;
 };
 
-MinSG.ImageReadEvaluator.endMeasure @(override) ::= fn(MinSG.FrameContext frameContext) {
+Evaluator.endMeasure @(override) ::= fn(MinSG.FrameContext frameContext) {
 	return this;
 };
 
-MinSG.ImageReadEvaluator.measure @(override) ::= fn(MinSG.FrameContext frameContext, MinSG.Node node, Geometry.Rect rect) {
+Evaluator.measure @(override) ::= fn(MinSG.FrameContext frameContext, MinSG.Node node, Geometry.Rect rect) {
 	var firstFile = this.firstImageDirectory() + "/" + this.imageCounter() + ".png";
 	var secondFile = this.secondImageDirectory() + "/" + this.imageCounter() + ".png";
 	var firstTexture = Rendering.createTextureFromFile(firstFile);
@@ -70,30 +70,30 @@ MinSG.ImageReadEvaluator.measure @(override) ::= fn(MinSG.FrameContext frameCont
 	return this;
 };
 
-MinSG.ImageReadEvaluator.getResults @(override) ::= fn() {
+Evaluator.getResults @(override) ::= fn() {
 	return [result];
 };
 
-MinSG.ImageReadEvaluator.getMaxValue ::= fn() {
+Evaluator.getMaxValue @(override)  ::= fn() {
 	return result;
 };
 
-MinSG.ImageReadEvaluator.getMode ::= fn() {
+Evaluator.getMode @(override) ::= fn() {
 	return MinSG.Evaluator.SINGLE_VALUE;
 };
 
-MinSG.ImageReadEvaluator.setMode ::= fn(dummy) {
+Evaluator.setMode @(override) ::= fn(dummy) {
 };
 
-MinSG.ImageReadEvaluator.getEvaluatorTypeName ::= fn() {
+Evaluator.getEvaluatorTypeName @(override) ::= fn() {
 	return "ImageReadEvaluator";
 };
 
-MinSG.ImageReadEvaluator.setImageComparator ::= fn(MinSG.AbstractImageComparator comparator) {
+Evaluator.setImageComparator ::= fn(MinSG.AbstractImageComparator comparator) {
 	imageComparator = comparator;
 };
 
-MinSG.ImageReadEvaluator.createConfigPanel ::= fn() {
+Evaluator.createConfigPanel @(override) ::= fn() {
 	// parent::createConfigPanel()
 	var panel = (this -> MinSG.Evaluator.createConfigPanel)();
 
@@ -230,3 +230,5 @@ MinSG.ImageReadEvaluator.createConfigPanel ::= fn() {
 		
 	return panel;
 };
+
+return Evaluator;
