@@ -17,7 +17,7 @@
 /*!
  \example // simple non recursive example
  
-	
+	static TypeBasedHandler = Std.require('LibUtilExt/TypeBasedHandler');
 	var describer = new TypeBasedHandler(false); // one (non recursive) type handler for all instances
 	describer.addHandler(Object,fn(obj){		return "(generic object '"+obj.getTypeName()+"')";	});
 	describer.addHandler(Number,fn(Number s){	return "(Number "+s+")"; });
@@ -48,11 +48,11 @@
 	out( r1.implode(",") ); // Collection,Size:3,Maximum:3
 */
 
-GLOBALS.TypeBasedHandler := new Type;
+var T = new Type;
 
-TypeBasedHandler._printableName @(override) ::= $TypeBasedHandler;
-TypeBasedHandler._registry @(private,init) := Map; //!< Type ---> [ fn(obj, params...){....}* ]
-TypeBasedHandler._recursive @(private) := false;
+T._printableName @(override) ::= $TypeBasedHandler;
+T._registry @(private,init) := Map; //!< Type ---> [ fn(obj, params...){....}* ]
+T._recursive @(private) := false;
 
 /*! (ctor)
 	@param recursive 
@@ -61,7 +61,7 @@ TypeBasedHandler._recursive @(private) := false;
 						The value of the last and most specialied factory is returned.
 		'false' ...  only the most specialized handler are executed and the last result value is returned.
 */
-TypeBasedHandler._constructor ::= fn( Bool recursive){
+T._constructor ::= fn( Bool recursive){
 	_recursive = recursive;
 };
 
@@ -69,7 +69,7 @@ TypeBasedHandler._constructor ::= fn( Bool recursive){
 	\note The calling object (this), which is used for calling the handler functions, is the 
 		object the TypeBasedHandler is called from (and not the TypeBasedHandler).
 	\note if no handler is found, an exception is thrown. */
-TypeBasedHandler._call ::= fn(callingObject, obj, additionalParameters* ){
+T._call ::= fn(callingObject, obj, additionalParameters* ){
 	var handler = queryHandlerForType(obj.getType());
 	if(handler.empty())
 		Runtime.exception("No handler for type '"+obj.getType()+"'");
@@ -85,12 +85,12 @@ TypeBasedHandler._call ::= fn(callingObject, obj, additionalParameters* ){
 };
 
 //! [Type, function]
-TypeBasedHandler."+=" ::= fn(Array a){
+T."+=" ::= fn(Array a){
 	addHandler(a...);
 };
 
 //! Register a handler function for a given Type.
-TypeBasedHandler.addHandler ::= fn(Type type,fun){
+T.addHandler ::= fn(Type type,fun){
 	if(!_registry[type]){
 		_registry[type] = [];
 	}else if(!_recursive){
@@ -106,7 +106,7 @@ TypeBasedHandler.addHandler ::= fn(Type type,fun){
 		for(var handler = tbh.queryHandlerForType(myObj.getType()); !handler.empty() ; handler.popBack() )
 			(handler.last()) (myObj);
 */
-TypeBasedHandler.queryHandlerForType ::= fn(Type type){
+T.queryHandlerForType ::= fn(Type type){
 	var handler = [];
 	do{
 		var a = _registry[type];
@@ -119,3 +119,4 @@ TypeBasedHandler.queryHandlerForType ::= fn(Type type){
 	}while(type);
 	return handler;
 };
+return T;

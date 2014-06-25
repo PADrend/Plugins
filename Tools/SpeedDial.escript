@@ -18,9 +18,6 @@
  **/
 
 
-/***
- **   NodeEditorPlugin ---|> Plugin
- **/
 var plugin = new Plugin({
 		Plugin.NAME : 'Tools_SpeedDial',
 		Plugin.DESCRIPTION : "Quick access to preset-scripts (F3).",

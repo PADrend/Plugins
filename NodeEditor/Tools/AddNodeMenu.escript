@@ -11,46 +11,40 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:NodeEditor] NodeEditor/Tools/AddNodeMenu.escript
- **/
 
-NodeEditorTools.registerMenues_AddNode := fn() {
-	gui.registerComponentProvider('NodeEditor_NodeToolsMenu.addNode',fn(Array nodes){
-		if( nodes.size()!=1 || !(nodes.front()---|>MinSG.GroupNode))
-			return [];
+gui.registerComponentProvider('NodeEditor_NodeToolsMenu.addNode',fn(Array nodes){
+	if( nodes.size()!=1 || !(nodes.front()---|>MinSG.GroupNode))
+		return [];
 
-		return [
-			'----',
-			{
-				GUI.TYPE : GUI.TYPE_MENU,
-				GUI.LABEL : "Add new node",
-				GUI.MENU : (fn(parentNode){
-					var subMenu=[];
-					foreach(NodeEditor.nodeFactories  as var name,var factory){
-						subMenu += {
-							GUI.TYPE : GUI.TYPE_BUTTON,
-							GUI.LABEL : "Create "+name,
-							GUI.ON_CLICK :  (fn(parentNode,name,factory){
-								out("Adding new ",name," to ",NodeEditor.getString(parentNode),".\n");
-								var n = factory();
-								parentNode.addChild(n);
-								NodeEditor.selectNode(n);
-							}).bindLastParams(parentNode,name,factory)
-						};
-					}
-					return subMenu;
-				}).bindLastParams(nodes.front()),
-				GUI.MENU_WIDTH : 150
-			}
-		];
-	});
-	
+	return [
+		'----',
+		{
+			GUI.TYPE : GUI.TYPE_MENU,
+			GUI.LABEL : "Add new node",
+			GUI.MENU : [nodes.front()] => fn(parentNode){
+				var subMenu=[];
+				foreach(NodeEditor.nodeFactories  as var name,var factory){
+					subMenu += {
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Create "+name,
+						GUI.ON_CLICK :  [parentNode,name,factory] => fn(parentNode,name,factory){
+							outln("Adding new ",name," to ",NodeEditor.getString(parentNode),".");
+							var n = factory();
+							parentNode.addChild(n);
+							NodeEditor.selectNode(n);
+						}
+					};
+				}
+				return subMenu;
+			},
+			GUI.MENU_WIDTH : 150
+		}
+	];
+});
 
-	// add clone of existing node
-	// add node from file
+
+// add clone of existing node
+// add node from file
  
-};
-
 // ------------------------------------------------------------------------------
 

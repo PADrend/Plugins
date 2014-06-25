@@ -398,7 +398,7 @@ tests += new Tests.AutomatedTest( "Util/Listener" , fn(){
 // -----------------------------------------------------------------------------------------------
 
 tests += new Tests.AutomatedTest( "Util/TypeBasedHandler" , fn(){
-	loadOnce("LibUtilExt/TypeBasedHandler.escript");
+	var TypeBasedHandler = Std.require('LibUtilExt/TypeBasedHandler');
 	
 	var ObjectDescriber = new Type();
 	

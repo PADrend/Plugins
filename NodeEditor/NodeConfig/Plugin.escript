@@ -16,9 +16,6 @@
  ** Module for the NodeEditor: Shows and modifies the parameters of a node
  **/
 
-/***
- **  ---|> Plugin
- **/
 var plugin = new Plugin({
 		Plugin.NAME : 'NodeEditor/NodeConfig',
 		Plugin.DESCRIPTION : 'Shows and modifies the parameters of a node.',
@@ -27,8 +24,7 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : [	]
 });
 
-//!	---|> Plugin
-plugin.init := fn() {
+plugin.init @(override) := fn() {
 
 	{ // init members
 		loadOnce(__DIR__+"/NodePanels.escript");
@@ -85,10 +81,10 @@ plugin.init := fn() {
 			var selectionMenu = [ '----' ,{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Select this node",
-				GUI.ON_CLICK : (fn(node){	
+				GUI.ON_CLICK : [entry.getObject()] => fn(node){	
 					NodeEditor.selectNode(node);
 					gui.closeAllMenus();
-				}).bindLastParams(entry.getObject())
+				}
 			}];
 			
 			if(node.isInstance()){
@@ -96,21 +92,21 @@ plugin.init := fn() {
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : "Select prototype '"+NodeEditor.getString(node.getPrototype())+"'",
 					GUI.TOOLTIP : "Select the prototype from which this node is cloned from.",
-					GUI.ON_CLICK : (fn(prototype){
+					GUI.ON_CLICK : [node.getPrototype()] => fn(prototype){
 						NodeEditor.selectNode(prototype);
 						PADrend.message("Prototype selected: '"+prototype+"'");
-					}).bindLastParams(node.getPrototype())
+					}
 				};
 			}else{
 				selectionMenu+={
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : "Select instances of '"+NodeEditor.getString(node)+"'",
 					GUI.TOOLTIP : "Select the instances of this node in the current scene.",
-					GUI.ON_CLICK : (fn(node){
+					GUI.ON_CLICK : [node] => fn(node){
 						var instances = MinSG.collectInstances(PADrend.getCurrentScene(),node);
 						NodeEditor.selectNodes(instances);
 						PADrend.message("" + instances.count() + " instances selected.");
-					}).bindLastParams(node)
+					}
 				};
 			}
 			menu['20_selection'] = selectionMenu;
@@ -123,12 +119,12 @@ plugin.init := fn() {
 				{
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : "Fly to node",
-					GUI.ON_CLICK : (fn(node){
+					GUI.ON_CLICK : [node] => fn(node){
 						var box = node.getWorldBB();
 						var targetDir = (box.getCenter() - PADrend.getDolly().getWorldPosition()).normalize();
 						var target = new Geometry.SRT( box.getCenter() - targetDir * box.getExtentMax() * 1.0, -targetDir, PADrend.getWorldUpVector());
 						PADrend.Navigation.flyTo(target);
-					}).bindLastParams(node)
+					}
 				}
 			];
 		});	
@@ -169,9 +165,9 @@ plugin.init := fn() {
 			menu['90_showAttributes'] = [{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Show attributes",
-				GUI.ON_CLICK : (fn(entry){
+				GUI.ON_CLICK : [entry] => fn(entry){
 					entry.createSubentry( new NodeEditor.Wrappers.AttributeWrapper("Attributes",entry.getObject().getNodeAttributes()) , 'attributes' );
-				}).bindLastParams(entry)
+				}
 			}];
 		});
 	});
@@ -207,23 +203,23 @@ plugin.init := fn() {
 			GUI.WIDTH : 15,
 			GUI.FLAGS : GUI.FLAT_BUTTON,
 			GUI.TOOLTIP : "Create a new child",
-			GUI.MENU : (fn(entry){
+			GUI.MENU : [entry] => fn(entry){
 				var m = [];
 				foreach(NodeEditor.nodeFactories as var name,var factory){
 					m += {
 						GUI.TYPE : GUI.TYPE_BUTTON,
 						GUI.LABEL : "Create "+name,
-						GUI.ON_CLICK :  (fn(entry,name,factory){
+						GUI.ON_CLICK :  [entry,name,factory] => fn(entry,name,factory){
 							var node = entry.getObject().getNode();
 							PADrend.message("Adding new "+name+" to "+NodeEditor.getString(node)+".");
 							var n = factory();
 							node.addChild(n);
 							entry.rebuild();
-						}).bindLastParams(entry,name,factory)
+						}
 					};
 				}
 				return m;				
-			}).bindLastParams(entry)
+			}
 		});
 		var children = MinSG.getChildNodes(node);
 		var limit = 25;
@@ -237,10 +233,10 @@ plugin.init := fn() {
 					GUI.ICON_COLOR : GUI.BLACK,			
 					GUI.WIDTH : 15,
 					GUI.REQUEST_MESSAGE : "Destroy this node?",
-					GUI.ON_CLICK : (fn(entry,child){
+					GUI.ON_CLICK : [entry,child] => fn(entry,child){
 						entry.getObject().getNode().removeChild(child);
 						entry.rebuild();
-					}).bindLastParams(entry,child),
+					},
 					GUI.TOOLTIP : "Destroy this child."
 				});
 			}
@@ -270,9 +266,9 @@ plugin.init := fn() {
 			GUI.FLAGS : GUI.FLAT_BUTTON,
 			GUI.WIDTH : 15,
 			GUI.TOOLTIP : "Show children",
-			GUI.ON_CLICK : (fn(entry){
+			GUI.ON_CLICK : [entry] => fn(entry){
 				entry.createSubentry(new NodeEditor.Wrappers.NodeChildrenWrapper(entry.getObject()),'children');
-			}).bindLastParams(entry)
+			}
 		});	
 	});
 	// -------------------------------------------------------------------------

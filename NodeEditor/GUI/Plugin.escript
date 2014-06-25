@@ -15,11 +15,7 @@
  **	[Plugin:NodeEditor] NodeEditor/GUI/Plugin.escript
  ** Configuration tool for nodes of the scene graph.
  **/
- 
 
-/***
- **  ---|> Plugin
- **/
 var plugin = new Plugin({
 		Plugin.NAME : 'NodeEditor/GUI',
 		Plugin.DESCRIPTION : 'Configuration tool for nodes of the scene graph.',
@@ -30,15 +26,11 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : [	]
 });
 
-//!	---|> Plugin
-plugin.init := fn() {
+plugin.init @(override) := fn() {
 	loadOnce(__DIR__+"/GUI_Basics.escript");
 	loadOnce(__DIR__+"/GUI_Registries.escript");
-	
-	{ // register at extension points
-		
-		registerExtension('PADrend_Init',this->this.registerGUIProviders);
-	}
+
+	registerExtension('PADrend_Init',this->this.registerGUIProviders);
 
 	return true;
 };
@@ -53,7 +45,7 @@ plugin.registerGUIProviders := fn(){
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Select Node",
 			GUI.MENU_WIDTH : 200,
-			GUI.MENU : (fn(plugin){
+			GUI.MENU : [this] => fn(plugin){
 				var subMenu=[];
 
 				var node;
@@ -64,21 +56,21 @@ plugin.registerGUIProviders := fn(){
 							GUI.TYPE : GUI.TYPE_BUTTON,
 							GUI.LABEL : "Select prototype '"+NodeEditor.getString(node.getPrototype())+"'",
 							GUI.TOOLTIP : "Select the prototype from which this node is cloned from.",
-							GUI.ON_CLICK : (fn(prototype){
+							GUI.ON_CLICK : [node.getPrototype()]=>fn(prototype){
 								NodeEditor.selectNode(prototype);
 								PADrend.message("Prototype selected: '"+prototype+"'");
-							}).bindLastParams(node.getPrototype())
+							}
 						};
 					}else{
 						subMenu+={
 							GUI.TYPE : GUI.TYPE_BUTTON,
 							GUI.LABEL : "Select instances of '"+NodeEditor.getString(node)+"'",
 							GUI.TOOLTIP : "Select the instances of this node in the current scene.",
-							GUI.ON_CLICK : (fn(node){
+							GUI.ON_CLICK : [node] => fn(node){
 								var instances = MinSG.collectInstances(PADrend.getCurrentScene(),node);
 								NodeEditor.selectNodes(instances);
 								PADrend.message("" + instances.count() + " instances selected.");
-							}).bindLastParams(node)
+							}
 						};
 					}
 					subMenu+='----';
@@ -115,13 +107,13 @@ plugin.registerGUIProviders := fn(){
 					subMenu+={
 						GUI.TYPE : GUI.TYPE_BUTTON,
 						GUI.LABEL : "Children",
-						GUI.ON_CLICK : (fn(plugin){
-							plugin.openChildSelectorMenu(getAbsPosition()+new Geometry.Vec2(0,10),NodeEditor.getSelectedNode());
-						}).bindLastParams(plugin)
+						GUI.ON_CLICK : fn(){
+							openChildSelectorMenu(getAbsPosition()+new Geometry.Vec2(0,10),NodeEditor.getSelectedNode());
+						}
 					};
 				}
 				return subMenu;
-			}).bindLastParams(this)
+			}
 		}
 	]);
 	
@@ -201,7 +193,7 @@ plugin._createNavBar:=fn(width,height){
 	panel.setExtLayout(
 			GUI.WIDTH_ABS|GUI.HEIGHT_ABS,
 			new Geometry.Vec2(0,0),new Geometry.Vec2(width,height) );
-	panel.refresh:= (fn( selectednodes,plugin ){
+	panel.refresh:= fn( selectednodes ){
 		destroyContents();
 		var breadcrumbNodes=[];
 
@@ -258,9 +250,9 @@ plugin._createNavBar:=fn(width,height){
 				GUI.ICON_COLOR : NodeEditor.NODE_COLOR,
 				GUI.FLAGS : GUI.FLAT_BUTTON,
 				GUI.WIDTH : 12,
-				GUI.ON_CLICK : (fn(plugin,node){ 
-						plugin.openChildSelectorMenu(getAbsPosition()+new Geometry.Vec2(0,10),node); 
-				}).bindLastParams(plugin,node)
+				GUI.ON_CLICK : [node] => fn(node){ 
+						openChildSelectorMenu(getAbsPosition()+new Geometry.Vec2(0,10),node); 
+				}
 			};
 			
 			pos+=14;
@@ -308,13 +300,13 @@ plugin._createNavBar:=fn(width,height){
 				GUI.ICON_COLOR : node.countChildren() > 0 ? NodeEditor.NODE_COLOR : NodeEditor.NODE_COLOR_PASSIVE,
 				GUI.FLAGS : GUI.FLAT_BUTTON,
 				GUI.WIDTH : 12,
-				GUI.ON_CLICK : (fn(plugin,node){ 
-						plugin.openChildSelectorMenu(getAbsPosition()+new Geometry.Vec2(0,10),node); 
-				}).bindLastParams(plugin,node)
+				GUI.ON_CLICK : [node] => fn(node){ 
+						openChildSelectorMenu(getAbsPosition()+new Geometry.Vec2(0,10),node); 
+				}
 			};
 		}
 
-	}).bindLastParams(this);
+	};
 
 	registerExtension('NodeEditor_OnNodesSelected', panel->fn(nodes){	refresh(nodes);	});
 	return panel;
@@ -376,14 +368,14 @@ plugin._fillConfiguratorContainer := fn(GUI.Container page) {
 	| ...							|
 	| 								|
 	|-------------------------------|	*/
-plugin.openChildSelectorMenu:=fn(Geometry.Vec2 pos,MinSG.GroupNode n){
-	var m=gui.createMenu();
+static openChildSelectorMenu = fn(Geometry.Vec2 pos,MinSG.GroupNode n){
+	var m = gui.createMenu();
 	var entries = [];
 	foreach(MinSG.getChildNodes(n) as var c){
 		var s = NodeEditor.getString(c);
 		entries += [c,s,s.toLower()];
 	}
-	m.refresh := (fn(String filterText,entries){
+	m.refresh := [entries] => fn(entries,String filterText){
 		tv.clear();
 		filterText = filterText.toLower();
 		var t = new Util.Timer();
@@ -394,14 +386,14 @@ plugin.openChildSelectorMenu:=fn(Geometry.Vec2 pos,MinSG.GroupNode n){
 					GUI.LABEL : entry[1],
 					GUI.FLAGS : GUI.FLAT_BUTTON,
 					GUI.TEXT_ALIGNMENT : (GUI.TEXT_ALIGN_LEFT | GUI.TEXT_ALIGN_MIDDLE),
-					GUI.ON_CLICK : (fn(node){
+					GUI.ON_CLICK : [entry[0]] => fn(node){
 						NodeEditor.selectNode(node);
 						gui.closeAllMenus();
-					}).bindLastParams(entry[0])
+					}
 				};
 			}
 		}
-	}).bindLastParams(entries);
+	};
 	m+={
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.ON_DATA_CHANGED : m->m.refresh,

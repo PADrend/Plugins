@@ -11,17 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:NodeEditor] NodeEditor/Tools/Plugin.escript
- **/
-
-// create namespace
-GLOBALS.NodeEditorTools := new Namespace();
-
-/***
- **   ---|> Plugin
- **/
-var plugin=new Plugin({
+var plugin = new Plugin({
 		Plugin.NAME : 'NodeEditor/Tools',
 		Plugin.DESCRIPTION : 'Collection of tools to modify nodes, meshes or the scene tree.',
 		Plugin.VERSION : 0.2,
@@ -29,26 +19,11 @@ var plugin=new Plugin({
 		Plugin.EXTENSION_POINTS : [	]
 });
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-plugin.init:=fn() {
+plugin.init @(override) := fn() {
 
-	{	/// load menues and tools
-		loadOnce(__DIR__+"/NodeTools.escript");
-
-		loadOnce(__DIR__+"/AddNodeMenu.escript");
-		loadOnce(__DIR__+"/MaterialMenu.escript");
-		loadOnce(__DIR__+"/MeshMenu.escript");
-		loadOnce(__DIR__+"/MiscMenu.escript");
-		loadOnce(__DIR__+"/TreeMenu.escript");
-	}
-
-    { /// Register ExtensionPointHandler:
-		registerExtension('PADrend_Init',this->registerMenus);
-    }
-
+	/// load menues and tools
+	loadOnce(__DIR__+"/NodeTools.escript");
+	registerExtension('PADrend_Init',this->registerMenus);
 	return true;
 };
 
@@ -93,12 +68,12 @@ plugin.registerMenus := fn(){
 		}
 		return menu;
 	});
-	NodeEditorTools.registerMenues_AddNode();
-	NodeEditorTools.registerMenues_MaterialTools();
-	NodeEditorTools.registerMenues_MeshTools();
-	NodeEditorTools.registerMenues_MiscTools();
-	NodeEditorTools.registerMenues_TreeTools();
 
+	load(__DIR__+"/AddNodeMenu.escript");
+	load(__DIR__+"/MaterialMenu.escript");
+	load(__DIR__+"/MeshMenu.escript");
+	load(__DIR__+"/MiscMenu.escript");
+	load(__DIR__+"/TreeMenu.escript");
 };
 
 return plugin;

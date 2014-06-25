@@ -301,13 +301,13 @@ NodeEditor.registerConfigPanelProvider(MinSG.BlendingState, fn(MinSG.BlendingSta
 		GUI.DATA_PROVIDER		:	state -> fn() {
 										return getParameters().getBlendEquationRGB();
 									},
-		GUI.ON_DATA_CHANGED		:	state -> (fn(newEquation, refreshGroup) {
+		GUI.ON_DATA_CHANGED		:	[refreshGroup] => state->fn(refreshGroup,newEquation) {
 										setParameters(getParameters().setBlendEquationRGB(newEquation));
 										if(!refreshGroup.separate) {
 											setParameters(getParameters().setBlendEquationAlpha(newEquation));
 											refreshGroup.refresh();
 										}
-									}).bindLastParams(refreshGroup),
+									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.WIDTH				:	200
 	};
@@ -318,13 +318,13 @@ NodeEditor.registerConfigPanelProvider(MinSG.BlendingState, fn(MinSG.BlendingSta
 		GUI.DATA_PROVIDER		:	state -> fn() {
 										return getParameters().getBlendEquationAlpha();
 									},
-		GUI.ON_DATA_CHANGED		:	state -> (fn(newEquation, refreshGroup) {
+		GUI.ON_DATA_CHANGED		:	[refreshGroup] => state->fn(refreshGroup, newEquation) {
 										setParameters(getParameters().setBlendEquationAlpha(newEquation));
 										if(!refreshGroup.separate) {
 											setParameters(getParameters().setBlendEquationRGB(newEquation));
 											refreshGroup.refresh();
 										}
-									}).bindLastParams(refreshGroup),
+									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.WIDTH				:	200
 	};
@@ -342,13 +342,13 @@ NodeEditor.registerConfigPanelProvider(MinSG.BlendingState, fn(MinSG.BlendingSta
 		GUI.DATA_PROVIDER		:	state -> fn() {
 										return getParameters().getBlendFuncSrcRGB();
 									},
-		GUI.ON_DATA_CHANGED		:	state -> (fn(newFunction, refreshGroup) {
+		GUI.ON_DATA_CHANGED		:	[refreshGroup] => state->fn(refreshGroup, newFunction) {
 										setParameters(getParameters().setBlendFuncSrcRGB(newFunction));
 										if(!refreshGroup.separate) {
 											setParameters(getParameters().setBlendFuncSrcAlpha(newFunction));
 											refreshGroup.refresh();
 										}
-									}).bindLastParams(refreshGroup),
+									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.WIDTH				:	200
 	};
@@ -359,13 +359,13 @@ NodeEditor.registerConfigPanelProvider(MinSG.BlendingState, fn(MinSG.BlendingSta
 		GUI.DATA_PROVIDER		:	state -> fn() {
 										return getParameters().getBlendFuncSrcAlpha();
 									},
-		GUI.ON_DATA_CHANGED		:	state -> (fn(newFunction, refreshGroup) {
+		GUI.ON_DATA_CHANGED		:	[refreshGroup] => state->fn(refreshGroup, newFunction) {
 										setParameters(getParameters().setBlendFuncSrcAlpha(newFunction));
 										if(!refreshGroup.separate) {
 											setParameters(getParameters().setBlendFuncSrcRGB(newFunction));
 											refreshGroup.refresh();
 										}
-									}).bindLastParams(refreshGroup),
+									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.WIDTH				:	200
 	};
@@ -383,13 +383,13 @@ NodeEditor.registerConfigPanelProvider(MinSG.BlendingState, fn(MinSG.BlendingSta
 		GUI.DATA_PROVIDER		:	state -> fn() {
 										return getParameters().getBlendFuncDstRGB();
 									},
-		GUI.ON_DATA_CHANGED		:	state -> (fn(newFunction, refreshGroup) {
+		GUI.ON_DATA_CHANGED		:	[refreshGroup] => state->fn(refreshGroup, newFunction) {
 										setParameters(getParameters().setBlendFuncDstRGB(newFunction));
 										if(!refreshGroup.separate) {
 											setParameters(getParameters().setBlendFuncDstAlpha(newFunction));
 											refreshGroup.refresh();
 										}
-									}).bindLastParams(refreshGroup),
+									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.WIDTH				:	200
 	};
@@ -400,13 +400,13 @@ NodeEditor.registerConfigPanelProvider(MinSG.BlendingState, fn(MinSG.BlendingSta
 		GUI.DATA_PROVIDER		:	state -> fn() {
 										return getParameters().getBlendFuncDstAlpha();
 									},
-		GUI.ON_DATA_CHANGED		:	state -> (fn(newFunction, refreshGroup) {
+		GUI.ON_DATA_CHANGED		:	[refreshGroup] => state->fn(refreshGroup, newFunction) {
 										setParameters(getParameters().setBlendFuncDstAlpha(newFunction));
 										if(!refreshGroup.separate) {
 											setParameters(getParameters().setBlendFuncDstRGB(newFunction));
 											refreshGroup.refresh();
 										}
-									}).bindLastParams(refreshGroup),
+									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.WIDTH				:	200
 	};
@@ -724,10 +724,10 @@ NodeEditor.registerConfigPanelProvider(MinSG.MaterialState, fn(MinSG.MaterialSta
 	shininessPanel += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Pre multiply alpha",
-		GUI.ON_CLICK			:	state -> (fn(refreshGroup) {
+		GUI.ON_CLICK			:	[refreshGroup]=> state -> fn(refreshGroup) {
 										preMultiplyAlpha();
 										refreshGroup.refresh();
-									}).bindLastParams(refreshGroup),
+									},
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	panel++;
@@ -1290,10 +1290,10 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : name+" ("+uniform.getNumValues()+")",
 					GUI.WIDTH : 180,
-					GUI.ON_CLICK : (fn(uniformContainer,uniform,treeView){
+					GUI.ON_CLICK : [uniformContainer,uniform,treeView] => fn(uniformContainer,uniform,treeView){
 						uniformContainer.setUniform(uniform);
 						treeView.refresh();
-					}).bindLastParams(uniformContainer,uniform,treeView)
+					}
 		
 				};
 				

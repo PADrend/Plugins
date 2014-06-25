@@ -20,26 +20,26 @@
  **/
 
 
-/***
- **   ---|> Plugin
- **/
+
 var plugin = new Plugin({
 		Plugin.NAME : 'NodeEditor/BehaviourConfig',
 		Plugin.DESCRIPTION : 'Shows and modifies the behaviours attached to a node.',
 		Plugin.VERSION : 0.2,
 		Plugin.REQUIRES : ['NodeEditor/GUI'],
-		Plugin.EXTENSION_POINTS : [	]
+		Plugin.EXTENSION_POINTS : [
+		
+			/* [ext:NodeEditor_QueryAvailableBehaviours]
+			 * Add behaviourss to the list of availabe behaviourss.
+			 * @param   Map of available behaviours
+			 *          name -> Behaviour | function which returns a Behaviour
+			 * @result  void
+			 */
+			'NodeEditor_QueryAvailableBehaviours'
+		]
 });
 
-// some shortcuts
-plugin.getSelectedNode := fn(){return NodeEditor.getSelectedNode();};
-plugin.getSelectedNodes := fn(){return NodeEditor.getSelectedNodes();};
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-plugin.init := fn() {
+plugin.init @(override) := fn() {
 
 	{ // init members
 		loadOnce(__DIR__+"/BehaviourPanels.escript");
@@ -82,9 +82,9 @@ plugin.init := fn() {
 			GUI.WIDTH : 15,
 			GUI.TOOLTIP : "Show or refresh behaviours",
 			GUI.COLOR : NodeEditor.STATE_COLOR,
-			GUI.ON_CLICK : (fn(entry){
+			GUI.ON_CLICK : [entry]=>fn(entry){
 				entry.createSubentry(new NodeEditor.BehavioursConfigurator(entry.getObject()),'behaviours');
-			}).bindLastParams(entry)
+			}
 		});
 		entry.addOption(b);	
 
@@ -149,7 +149,7 @@ plugin.init := fn() {
 			GUI.FLAGS : GUI.FLAT_BUTTON,
 
 			GUI.WIDTH : 16,
-			GUI.MENU : (fn(entry){
+			GUI.MENU : [entry]=>fn(entry){
 				var behaviours = new Map();
 				executeExtensions('NodeEditor_QueryAvailableBehaviours',behaviours);
 
@@ -158,7 +158,7 @@ plugin.init := fn() {
 					menu += {
 						GUI.TYPE : GUI.TYPE_BUTTON,
 						GUI.LABEL : name,
-						GUI.ON_CLICK :(fn(entry,behaviourFactory){
+						GUI.ON_CLICK : [entry,behaviourFactory]=>fn(entry,behaviourFactory){
 							var node = entry.getObject().getNode();
 							var behaviour;
 							if(behaviourFactory ---|> MinSG.AbstractBehaviour){
@@ -169,12 +169,12 @@ plugin.init := fn() {
 							PADrend.getSceneManager().getBehaviourManager().registerBehaviour(behaviour);						
 							entry.rebuild();
 							entry.configure(behaviour);
-						}).bindLastParams(entry,behaviourFactory)
+						}
 					};
 				}
 				return menu;
 						
-			}).bindLastParams(entry)
+			}
 		});
 		var behaviours = configurator.getBehaviours();
 		foreach(behaviours as var behaviour){
@@ -187,11 +187,11 @@ plugin.init := fn() {
 				GUI.FLAGS : GUI.FLAT_BUTTON,
 				GUI.WIDTH : 15,
 				GUI.REQUEST_MESSAGE : "Remove behaviour from node?",
-				GUI.ON_CLICK : (fn(entry,behaviour){
+				GUI.ON_CLICK : [entry,behaviour]=>fn(entry,behaviour){
 					PADrend.getSceneManager().getBehaviourManager().removeBehaviour(behaviour);
 					entry.rebuild();
 					entry.configure(void);
-				}).bindLastParams(entry,behaviour),
+				},
 				GUI.TOOLTIP : "Remove this behaviour from the node."
 			});
 			

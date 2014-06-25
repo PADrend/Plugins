@@ -16,7 +16,6 @@
  ** Shows and modifies the properties of nodes of he scene graph.
  ** \note Combination of old StateConfig-, GraphDisplay (by Benjamin Eikel)- and MeshTool-Plugin
  **/
-loadOnce("LibUtilExt/TypeBasedHandler.escript");
  
 declareNamespace($NodeEditor);
 
@@ -24,7 +23,7 @@ declareNamespace($NodeEditor);
 
 //! @name Factories (for Nodes and States)
 // @{
-NodeEditor.nodeFactories := new Map();  //!<  human readable string -> factory function returning a MinSG.Node
+NodeEditor.nodeFactories := new Map;  //!<  human readable string -> factory function returning a MinSG.Node
 ////////NodeEditor.stateFactories := new Map();  //!<  human readable string -> factory function returning a MinSG.State
 //	@}
 
@@ -33,7 +32,7 @@ NodeEditor.nodeFactories := new Map();  //!<  human readable string -> factory f
 //! @name String conversions
 // @{
 //! Get a descriptive string for the given Node or State
-NodeEditor.getString := new TypeBasedHandler(false);
+NodeEditor.getString := new (Std.require('LibUtilExt/TypeBasedHandler'))(false);
 
 NodeEditor.getString += [Object,fn(obj){return obj.toString();}];
 NodeEditor.getString += [MinSG.Node, fn(node){
@@ -88,4 +87,80 @@ NodeEditor.getStateString:=fn(state){
 
 
 
+//--------------------------------
+
+//! @name Node selection
+// @{
+{
+	
+static selectedNodes = [];
+static selectedNodesSet = new Std.Set;
+
+NodeEditor.addSelectedNode :=	fn(MinSG.Node node){	NodeEditor.addSelectedNodes([node]);	};
+
+NodeEditor.addSelectedNodes := fn(Array nodesToSelect){
+	foreach(nodesToSelect as var n){
+		if(n && !selectedNodesSet.contains(n)){
+			selectedNodesSet+=n;
+			selectedNodes+=n;
+			
+		}
+	}
+	NodeEditor.onSelectionChanged(selectedNodes);
+};
+
+NodeEditor.clearNodeSelection := fn(){
+	selectedNodes.clear();
+	selectedNodesSet.clear();
+	NodeEditor.onSelectionChanged(selectedNodes);
+};
+
+NodeEditor.getSelectedNode := 	fn(){   	return selectedNodes.front();	};
+NodeEditor.getSelectedNodes := 	fn(){		return selectedNodes.clone();	};
+NodeEditor.isNodeSelected := 	fn(node){	return selectedNodesSet.contains(node);	};
+
+NodeEditor.jumpToSelection := fn(time=0.5){
+	if( getSelectedNode() ){
+		var box = MinSG.combineNodesWorldBBs(selectedNodes);
+
+		var targetDir = (box.getCenter() - PADrend.getDolly().getWorldPosition()).normalize();
+		var target = new Geometry.SRT( box.getCenter() - targetDir * box.getExtentMax() * 1.0, -targetDir, PADrend.getWorldUpVector());
+		PADrend.Navigation.flyTo(target);
+	}
+};
+
+/*! Called whenever the node selection is changed. May be called explicitly to trigger
+	an update of all corresponding listeners.*/
+NodeEditor.onSelectionChanged := new Std.MultiProcedure;
+
+NodeEditor.selectNode := fn([MinSG.Node,void] node){
+    if(node){
+		selectedNodes.clear();
+		selectedNodesSet.clear();
+		NodeEditor.addSelectedNode(node);
+    }else{
+		NodeEditor.clearNodeSelection();
+    }
+};
+
+NodeEditor.selectNodes := fn(Array nodesToSelect){
+    selectedNodes.clear();
+    selectedNodesSet.clear();
+	NodeEditor.addSelectedNodes(nodesToSelect);
+};
+
+NodeEditor.unselectNode :=			fn(MinSG.Node node){	NodeEditor.unselectNodes([node]);	};
+
+NodeEditor.unselectNodes:=fn(Array nodesToRemove){
+	foreach(nodesToRemove as var n)
+		selectedNodesSet -= n;
+	selectedNodes.filter( [selectedNodesSet] => fn(selectedNodesSet,node){ return selectedNodesSet.contains(node);} );
+	NodeEditor.onSelectionChanged(selectedNodes);
+};
+
+}
+
+// @}
+
+return NodeEditor;
 // ----------------------------------------------------------------

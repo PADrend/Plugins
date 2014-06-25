@@ -68,11 +68,11 @@ declareNamespace($NodeEditor,$Wrappers);
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Open...",
 			GUI.FLAGS : GUI.FLAT_BUTTON,
-			GUI.ON_CLICK : (fn(objWrapper,entry){
+			GUI.ON_CLICK : [objWrapper,entry]=>fn(objWrapper,entry){
 				foreach(objWrapper.getObjects() as var obj)
 					entry.createSubentry(obj);
 				this.setEnabled(false);
-			}).bindLastParams(objWrapper,entry)
+			}
 		});
 	});
 }

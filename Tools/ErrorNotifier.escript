@@ -14,10 +14,6 @@
  **	[Plugin:Tools_ErrorNotifier] Tools/ErrorNotifier.escript
  **/
 
-
-/***
- **   NodeEditorPlugin ---|> Plugin
- **/
 var plugin = new Plugin({
 		Plugin.NAME : 'Tools_ErrorNotifier',
 		Plugin.DESCRIPTION : "Show a notification if an error or a warning occurs.",

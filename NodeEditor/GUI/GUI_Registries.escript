@@ -22,8 +22,7 @@
 declareNamespace($NodeEditor);
 
 loadOnce("LibGUIExt/ObjectConfigurator.escript");
-loadOnce("LibUtilExt/TypeBasedHandler.escript");
-NodeEditor._objConfigurator := new GUI.ObjectConfigurator();
+NodeEditor._objConfigurator := new GUI.ObjectConfigurator;
 
 // --------------------------------------------------------------------------------------------------------------
 
@@ -156,7 +155,7 @@ NodeEditor.addConfigTreeEntryProvider(Object,fn( obj,entry ){
 			};
 		}];
 	*/
-NodeEditor.getIcon := new TypeBasedHandler(false);
+NodeEditor.getIcon := new (Std.require('LibUtilExt/TypeBasedHandler'))(false);
 NodeEditor.getIcon += [Object,fn(obj){return false;}]; // false is returned per default.
 //	@}
 

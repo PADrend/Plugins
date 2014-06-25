@@ -17,11 +17,11 @@
  **
  ** Collection of various functions for node and tree modifications
  **/
-
+ 
 /**
  * Print node info depending on the node type
  */
-NodeEditorTools.printNodeInfo:=fn(MinSG.Node node) {
+MinSG.printNodeInfo:=fn(MinSG.Node node) {
 	if(node ---|> MinSG.GeometryNode){
 		var mesh=node.getMesh();
 //		var vbo=node.getVBOWrapper();

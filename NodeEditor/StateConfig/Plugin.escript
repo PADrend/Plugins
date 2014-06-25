@@ -17,40 +17,37 @@
  ** Module for the NodeEditor: Shows and modifies the states attached to a node
  **/
 
-
-/***
- **   ---|> Plugin
- **/
 var plugin = new Plugin({
 		Plugin.NAME : 'NodeEditor/StateConfig',
 		Plugin.DESCRIPTION : 'Shows and modifies the states attached to a node.',
 		Plugin.VERSION : 0.2,
 		Plugin.REQUIRES : ['NodeEditor/GUI'],
-		Plugin.EXTENSION_POINTS : [	]
+		Plugin.EXTENSION_POINTS : [	
+					
+			/* [ext:NodeEditor_QueryAvailableStates]
+			 * Add states to the list of availabe states.
+			 * @param   Map of available states (e.g. rendering states)
+			 *          name -> State | function which returns a State
+			 * @result  void
+			 */
+			'NodeEditor_QueryAvailableStates'
+		
+		]
 });
 
-// some shortcuts
-plugin.getSelectedNode := fn(){return NodeEditor.getSelectedNode();};
-plugin.getSelectedNodes := fn(){return NodeEditor.getSelectedNodes();};
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-plugin.init := fn() {
+plugin.init @(override) := fn() {
 
 	{ // init members
 		loadOnce(__DIR__+"/StatePanels.escript");
 	}
 
-	{ // register at extension points
-		registerExtension('NodeEditor_QueryAvailableStates',this->ex_queryAvailableStates);
-		registerExtension('PADrend_Init',this->registerMenus);
-	}
-
-    { // init available states (for "new"-button)
-    	this.availableStates := load(__DIR__+"/AvailableStates.escript");
-    }
+	// register extensions
+	Util.registerExtension('NodeEditor_QueryAvailableStates',fn(a) {
+		@(once) static availableStates = load(__DIR__+"/AvailableStates.escript"); // init available states (for "new"-button)
+		a.merge(availableStates);
+	});
+	Util.registerExtension('PADrend_Init',this->registerMenus);
 
 
 	//-----------------------------------------------------------------------------------------------------
@@ -75,13 +72,13 @@ plugin.init := fn() {
 				MinSG.ShaderUniformState : "#UniformStateSmall"
 			} as var type, var icon){
 		
-		NodeEditor.getIcon += [type,(fn(obj,icon){
+		NodeEditor.getIcon += [type, [icon] => fn(icon,obj){
 			return {
 				GUI.TYPE : GUI.TYPE_ICON,
 				GUI.ICON : icon,
 				GUI.ICON_COLOR : NodeEditor.STATE_COLOR
 			};
-		}).bindLastParams(icon)];
+		}];
 	}
 	
 	
@@ -174,8 +171,8 @@ plugin.init := fn() {
 			GUI.LABEL : "",
 			GUI.WIDTH : 15,
 			GUI.TOOLTIP : "Is this State active?",
-			GUI.DATA_PROVIDER : (fn(state){	return state.isActive();	}).bindLastParams(state),
-			GUI.ON_DATA_CHANGED : (fn(data, state){	if(data) { state.activate(); } else { state.deactivate(); }	}).bindLastParams(state)
+			GUI.DATA_PROVIDER : [state] => fn(state){	return state.isActive();	},
+			GUI.ON_DATA_CHANGED : [state] => fn(state,data){	if(data) { state.activate(); } else { state.deactivate(); }	}
 		});
 		entry.addMenuProvider(fn(entry,menu){
 			var name = NodeEditor.getString(entry.getObject());
@@ -183,12 +180,12 @@ plugin.init := fn() {
 				 {
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : "Select nodes with this state",
-					GUI.ON_CLICK : (fn(state){	
+					GUI.ON_CLICK : [entry.getObject()] => fn(state){	
 						var nodes = MinSG.collectNodesWithState(PADrend.getCurrentScene(),state);
 						NodeEditor.selectNodes(nodes);
 						gui.closeAllMenus();
 						PADrend.message("" + nodes.count() + " nodes selected.");
-					}).bindLastParams(entry.getObject()),
+					},
 					GUI.TOOLTIP : "Select all nodes in the current scene that\n use "+name+".",
 				}
 			];
@@ -196,7 +193,7 @@ plugin.init := fn() {
 			{
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : "Add to all selected nodes",
-					GUI.ON_CLICK : (fn(state){
+					GUI.ON_CLICK : [entry.getObject()] => fn(state){
 						var nodes = NodeEditor.getSelectedNodes();
 						var counter = 0;
 						foreach(nodes as var node){
@@ -207,13 +204,13 @@ plugin.init := fn() {
 						}
 						gui.closeAllMenus();
 						PADrend.message("State added to "+counter+" nodes.");
-					}).bindLastParams(entry.getObject()),
+					},
 					GUI.TOOLTIP : "Add the state "+name+" \n to all selected nodes which do not already have the state.",
 				},
 				{
 					GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
 					GUI.LABEL : "Remove from all selected nodes",
-					GUI.ON_CLICK : (fn(state){
+					GUI.ON_CLICK : [entry.getObject()] => fn(state){
 						var nodes = NodeEditor.getSelectedNodes();
 						var counter = 0;
 						foreach(nodes as var node){
@@ -224,14 +221,14 @@ plugin.init := fn() {
 						}
 						gui.closeAllMenus();
 						PADrend.message("State removed from "+counter+" nodes.");
-					}).bindLastParams(entry.getObject()),
+					},
 					GUI.TOOLTIP : "Remove the state "+name+"\n from all selected nodes.",
 					GUI.REQUEST_MESSAGE : "??? Remove the state "+name+"\n from all selected nodes ???",
 				},
 				{
 					GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
 					GUI.LABEL : "Remove from all nodes in the scene",
-					GUI.ON_CLICK : (fn(state){
+					GUI.ON_CLICK : [entry.getObject()] => fn(state){
 						var nodes = MinSG.collectNodesWithState(PADrend.getCurrentScene(),state);
 						var counter = nodes.count();
 						foreach(nodes as var node){
@@ -239,7 +236,7 @@ plugin.init := fn() {
 						}
 						gui.closeAllMenus();
 						PADrend.message("State removed from "+counter+" nodes.");
-					}).bindLastParams(entry.getObject()),
+					},
 					GUI.TOOLTIP : "Remove the state "+name+"\n from all nodes in the scene.",
 					GUI.REQUEST_MESSAGE : "??? Remove the state "+name+"\n from all nodes in the scene ???"
 				}
@@ -258,9 +255,9 @@ plugin.init := fn() {
 			GUI.WIDTH : 15,
 			GUI.TOOLTIP : "Show or refresh states",
 			GUI.COLOR : NodeEditor.STATE_COLOR,
-			GUI.ON_CLICK : (fn(entry){
+			GUI.ON_CLICK : [entry]=>fn(entry){
 				entry.createSubentry(new NodeEditor.Wrappers.StatesContainerWrapper(entry.getObject()),'states');
-			}).bindLastParams(entry)
+			}
 		});
 		entry.addOption(b);	
 		if(entry.isActiveEntry)
@@ -292,9 +289,9 @@ plugin.init := fn() {
 			GUI.WIDTH : 15,
 			GUI.TOOLTIP : "Show or refresh states",
 			GUI.COLOR : NodeEditor.STATE_COLOR,
-			GUI.ON_CLICK : (fn(entry){
+			GUI.ON_CLICK : [entry] => fn(entry){
 				entry.createSubentry(new NodeEditor.Wrappers.StatesContainerWrapper(entry.getObject()),'states');
-			}).bindLastParams(entry)
+			}
 		});	
 	});
 
@@ -332,7 +329,7 @@ plugin.init := fn() {
 			GUI.FLAGS : GUI.FLAT_BUTTON,
 
 			GUI.WIDTH : 16,
-			GUI.MENU : (fn(entry){
+			GUI.MENU : [entry] => fn(entry){
 				var states = new Map();
 				executeExtensions('NodeEditor_QueryAvailableStates',states);
 
@@ -341,18 +338,18 @@ plugin.init := fn() {
 					menu += {
 						GUI.TYPE : GUI.TYPE_BUTTON,
 						GUI.LABEL : name,
-						GUI.ON_CLICK :(fn(entry,stateFactory){
+						GUI.ON_CLICK : [entry,stateFactory] => fn(entry,stateFactory){
 							var statesContainer = entry.getObject().getStatesContainer();
 							var state = (stateFactory ---|> MinSG.State) ? stateFactory : stateFactory();
 							statesContainer.addState(state);
 							entry.rebuild();
 							entry.configure(state);
-						}).bindLastParams(entry,stateFactory)
+						}
 					};
 				}
 				return menu;
 						
-			}).bindLastParams(entry)
+			}
 		});
 		entry.addOption({
 			GUI.TYPE : GUI.TYPE_MENU,
@@ -362,7 +359,7 @@ plugin.init := fn() {
 			GUI.WIDTH : 16,
 			GUI.FLAGS : GUI.FLAT_BUTTON,
 
-			GUI.MENU : (fn(entry){
+			GUI.MENU : [entry] => fn(entry){
 				var stateNames = PADrend.getSceneManager().getNamesOfRegisteredStates();
 				stateNames.sort();
 				var list = gui.create({
@@ -375,18 +372,18 @@ plugin.init := fn() {
 						GUI.TYPE : GUI.TYPE_BUTTON,
 						GUI.LABEL : name,
 	//					GUI.TEXT_ALIGN_LEFT|GUI.TEXT_ALIGN_MIDDLE
-						GUI.ON_CLICK :(fn(entry,name){
+						GUI.ON_CLICK : [entry,name] => fn(entry,name){
 							var statesContainer = entry.getObject().getStatesContainer();
 							var state = PADrend.getSceneManager().getRegisteredState(name);
 							statesContainer.addState(state);
 							entry.rebuild();
 							entry.configure(state);
-						}).bindLastParams(entry,name)
+						}
 					};
 				}
 				return [list];
 						
-			}).bindLastParams(entry)
+			}
 		});
 		
 
@@ -413,7 +410,7 @@ plugin.init := fn() {
 					GUI.ICON_COLOR : GUI.BLACK,
 					GUI.FLAGS : GUI.FLAT_BUTTON,
 					GUI.WIDTH : 15,
-					GUI.ON_CLICK : (switchStates).bindLastParams(entry,index,index-1),
+					GUI.ON_CLICK : [entry,index,index-1] => switchStates,
 					GUI.TOOLTIP : "Move this state up in the state list."
 				});
 			}else{
@@ -426,7 +423,7 @@ plugin.init := fn() {
 					GUI.ICON_COLOR : GUI.BLACK,
 					GUI.FLAGS : GUI.FLAT_BUTTON,
 					GUI.WIDTH : 15,
-					GUI.ON_CLICK : (switchStates).bindLastParams(entry,index,index+1),
+					GUI.ON_CLICK : [entry,index,index+1] => switchStates,
 					GUI.TOOLTIP : "Move this state down in the state list."
 				});
 			}else{
@@ -439,11 +436,11 @@ plugin.init := fn() {
 				GUI.FLAGS : GUI.FLAT_BUTTON,
 				GUI.WIDTH : 15,
 				GUI.REQUEST_MESSAGE : "?? Remove this state from this "+typeName+" ???",
-				GUI.ON_CLICK : (fn(entry,state){
+				GUI.ON_CLICK : [entry,state] => fn(entry,state){
 					entry.getObject().getStatesContainer().removeState(state);
 					entry.rebuild();
 					entry.configure(void);
-				}).bindLastParams(entry,state),
+				},
 				GUI.TOOLTIP : "Remove this state from this "+typeName+"."
 			});
 		}
@@ -452,11 +449,6 @@ plugin.init := fn() {
 	// -------------------------------
 
     return true;
-};
-
-//!	[ext:NodeEditor_QueryAvailableStates]
-plugin.ex_queryAvailableStates := fn(a) {
-    a.merge(availableStates);
 };
 
 

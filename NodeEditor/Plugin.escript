@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2009-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2009-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010-2011 David Maicher
  * Copyright (C) 2012 Mouns R. Husan Almarrani
  * Copyright (C) 2010-2011 Ralf Petring <ralf@petring.net>
@@ -15,78 +15,69 @@
  * http://mozilla.org/MPL/2.0/.
  */
 /****
- **	[Plugin:NodeEditor] StateConfig/Plugin.escript
+ **	[Plugin:NodeEditor] NodeEditor/Plugin.escript
  **
  ** Shows and modifies the properties of nodes of he scene graph.
  ** \note Combination of old StateConfig-, GraphDisplay (by Benjamin Eikel)- and MeshTool-Plugin
  **/
-
-declareNamespace($NodeEditor);
-
-
-/***
- **   NodeEditorPlugin ---|> Plugin
- **/
-GLOBALS.NodeEditorPlugin:=new Plugin({
+var plugin = new Plugin({
 		Plugin.NAME : 'NodeEditor',
 		Plugin.DESCRIPTION : "Modifies nodes and states of the scene graph.",
 		Plugin.VERSION : 0.2,
 		Plugin.REQUIRES : ['PADrend','PADrend/Navigation'],
 		Plugin.EXTENSION_POINTS : [
-
-
 			/* [ext:NodeEditor_OnNodesSelected]
 			 * Called whenever the selected nodes change
 			 * @param   Array of currently selected nodes (do not change!)
 			 * @result  void
 			 */
-			'NodeEditor_OnNodesSelected',
-
-			/* [ext:NodeEditor_QueryAvailableBehaviours]
-			 * Add behaviourss to the list of availabe behaviourss.
-			 * @param   Map of available behaviours
-			 *          name -> Behaviour | function which returns a Behaviour
-			 * @result  void
-			 */
-			'NodeEditor_QueryAvailableBehaviours',
-
-			/* [ext:NodeEditor_QueryAvailableStates]
-			 * Add states to the list of availabe states.
-			 * @param   Map of available states (e.g. rendering states)
-			 *          name -> State | function which returns a State
-			 * @result  void
-			 */
-			'NodeEditor_QueryAvailableStates'
-
+			'NodeEditor_OnNodesSelected'
 		]
 });
 
-var plugin = NodeEditorPlugin;
 
-// -------------------
+static nodeClipboard = [];
+static nodeClipboardMode = $COPY; // || $CUT
+static NodeEditor;
 
-plugin.keyMap @(private) := new Map;
-plugin.storedSelections := [];
-plugin.nodeClipboard @(private):= [];
-plugin.nodeClipboardMode @(private) := $COPY; // || $CUT
+plugin.init @(override) := fn() {
+	
+	NodeEditor = Std.require('NodeEditor/NodeEditor');
 
+	/// Register ExtensionPointHandler:
+	registerExtension('PADrend_Init', fn(){	NodeEditor.selectNode(PADrend.getCurrentScene());	});
+	registerExtension('PADrend_UIEvent',fn(evt){
+		if(	evt.type==Util.UI.EVENT_MOUSE_BUTTON &&
+				(evt.button == Util.UI.MOUSE_BUTTON_LEFT || evt.button == Util.UI.MOUSE_BUTTON_RIGHT) &&
+				evt.pressed &&
+				PADrend.getEventContext().isCtrlPressed()) {
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-plugin.init:=fn() {
+			@(once) static r = new MinSG.RendRayCaster;
 
-	{ /// Register ExtensionPointHandler:
-		registerExtension('PADrend_Init',this->this.ex_Init);
-		registerExtension('PADrend_UIEvent',this->this.ex_UIEvent);
-		registerExtension('PADrend_KeyPressed',this->this.ex_KeyPressed);
-		registerExtension('PADrend_AfterRenderingPass',this->this.ex_AfterRenderingPass);
-		registerExtension('PADrend_OnSceneSelected',this->this.selectNode); // automatically select the scene
-	}
+			// check if metaObjects (e.g. lights or similar nodes) are visible.
+			r.renderingLayers(Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
+		
+			var node = r.queryNodeFromScreen(frameContext,PADrend.getRootNode(),new Geometry.Vec2(evt.x,evt.y),true);
+			if(node && evt.button == Util.UI.MOUSE_BUTTON_RIGHT)
+				node = objectIdentifier(node);
 
-	loadOnce(__DIR__+"/NodeEditor.escript");
-
+			if(PADrend.getEventContext().isShiftPressed()){
+				if(node){
+					if(NodeEditor.isNodeSelected(node))
+						NodeEditor.unselectNode(node);
+					else
+						NodeEditor.addSelectedNode(node);
+				}
+			}else{
+				NodeEditor.selectNode(node);
+			}
+			return true;
+		}
+		return false;
+	});
+	
+	registerExtension('PADrend_OnSceneSelected', NodeEditor.selectNode); // automatically select the scene
+	
 	var modules = [
 				__DIR__+"/GUI/Plugin.escript",
 				__DIR__+"/Transformations.escript",
@@ -98,16 +89,70 @@ plugin.init:=fn() {
 
 	loadPlugins( modules,true);
 
-	return true;
-};
+	// ----------------------------
+	NodeEditor.onSelectionChanged += fn(selectedNodes){		Util.executeExtensions('NodeEditor_OnNodesSelected',selectedNodes);	};
 
-//! [ext:PADrend_Init]
-plugin.ex_Init:=fn() {
+	// ----------------------------
+	{	// highlight selected nodes
+		static revoce = new Std.MultiProcedure;
 
-    this.selectNode(PADrend.getCurrentScene());
+		NodeEditor.onSelectionChanged += fn(selectedNodes){		
+			revoce();
+			if(!selectedNodes.empty())
+				revoce += Util.registerExtensionRevocably('PADrend_AfterRenderingPass', [selectedNodes] => highlightNodes );
+		};
 
+		static COLOR_BG_NODE = new Util.Color4f(0,0,0,1);
+		static COLOR_BG_SEM_OBJ = new Util.Color4f(0,0.4,0,1);
+		static COLOR_TEXT_ORIGINAL = new Util.Color4f(1,1,1,1);
+		static COLOR_TEXT_INSTANCE = new Util.Color4f(0.9,0.9,0.9,1);
 
-	this.keyMap[Util.UI.KEY_DELETE] = this->fn(){				// [entf] delete selected nodes
+		static highlightNodes = fn(selectedNodes,...){
+			var skipAnnotations = selectedNodes.count()>20;
+			foreach(selectedNodes as var node){
+				if(!node || node==PADrend.getCurrentScene() || node==PADrend.getRootNode())
+					continue;
+
+				
+				if(!skipAnnotations){
+					frameContext.showAnnotation(node,NodeEditor.getString(node),0,true,
+												node.isInstance() ? COLOR_TEXT_INSTANCE : COLOR_TEXT_ORIGINAL,
+												MinSG.SemanticObjects.isSemanticObject(node) ? COLOR_BG_SEM_OBJ : COLOR_BG_NODE  );
+				}
+
+				renderingContext.pushMatrix();
+				renderingContext.resetMatrix();
+				renderingContext.multMatrix(node.getWorldMatrix());
+
+				var bb = node.getBB();
+
+				var blending=new Rendering.BlendingParameters;
+				blending.enable();
+				blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA, Rendering.BlendFunc.ONE);
+				renderingContext.pushAndSetBlending(blending);
+				renderingContext.pushAndSetDepthBuffer(true, false, Rendering.Comparison.LEQUAL);
+				renderingContext.pushAndSetLighting(false);
+				renderingContext.pushAndSetPolygonOffset(-1.0, -1.0);
+				renderingContext.applyChanges();
+				Rendering.drawWireframeBox(renderingContext, bb, new Util.Color4f(1.0, 1.0, 1.0, 0.4));
+				Rendering.drawBox(renderingContext, bb, new Util.Color4f(1.0, 1.0, 1.0, 0.2));
+				renderingContext.popMatrix();
+				renderingContext.popPolygonOffset();
+				renderingContext.popLighting();
+				renderingContext.popDepthBuffer();
+				renderingContext.popBlending();
+			}
+		};
+	}
+	// ----------------------------
+	// keyboard input
+	static keyMap = new Map;	
+	registerExtension('PADrend_KeyPressed', fn(evt) {
+		var handler = keyMap[evt.key];
+		return handler ? handler() : false;
+	});
+
+	keyMap[Util.UI.KEY_DELETE] = fn(){				// [entf] delete selected nodes
 		var p;
 		foreach(NodeEditor.getSelectedNodes() as var node){
 			if(node == PADrend.getCurrentScene() || node == PADrend.getRootNode()){
@@ -120,48 +165,48 @@ plugin.ex_Init:=fn() {
 		NodeEditor.selectNode(p);
 		return true;
 	};
-	this.keyMap[Util.UI.KEY_PAGEUP] = this->fn(){				// [pgUp] Select parent nodes of selected nodes
-		var oldSelection = this.getSelectedNodes().clone();
-		this.selectNode(void);
+	keyMap[Util.UI.KEY_PAGEUP] = fn(){				// [pgUp] Select parent nodes of selected nodes
+		var oldSelection = NodeEditor.getSelectedNodes().clone();
+		NodeEditor.selectNode(void);
 		foreach(oldSelection as var node){
 			if(node.hasParent())
-				this.addSelectedNode(node.getParent());
+				NodeEditor.addSelectedNode(node.getParent());
 		}
 		return true;
 	};
-	this.keyMap[Util.UI.KEY_PAGEDOWN] = this->fn(){			// [pgDown] Select child nodes of selected nodes
+	keyMap[Util.UI.KEY_PAGEDOWN] = fn(){			// [pgDown] Select child nodes of selected nodes
 		var selection = new Set;
-		foreach(this.getSelectedNodes() as var node){
+		foreach(NodeEditor.getSelectedNodes() as var node){
 			foreach(MinSG.getChildNodes(node) as var child){
 				selection += child;
 
-				if(selection.count()>=500){
-					Runtime.warn("Number of selected Nodes reached 500. Stopping here... ");
-					this.selectNodes(selection.toArray());
+				if(selection.count()>=5000){
+					Runtime.warn("Number of selected Nodes reached 5000. Stopping here... ");
+					NodeEditor.selectNodes(selection.toArray());
 					return true;
 				}
 			}
 		}
-		this.selectNodes(selection.toArray());
+		NodeEditor.selectNodes(selection.toArray());
 		return true;
 	};
-	this.keyMap[Util.UI.KEY_HOME] = this->fn(){				// [pos1] Select current scene
-		this.selectNode( PADrend.getCurrentScene());
+	keyMap[Util.UI.KEY_HOME] = fn(){				// [pos1] Select current scene
+		NodeEditor.selectNode( PADrend.getCurrentScene());
 		return true;
 	};
-	this.keyMap[Util.UI.KEY_C] = this->fn(){					// [ctrl] + [c] copy out
-		if(PADrend.getEventContext().isCtrlPressed() && !this.getSelectedNodes().empty()){
-			this.nodeClipboard = this.getSelectedNodes().clone();
-			this.nodeClipboardMode = $COPY;
-			PADrend.message(""+this.nodeClipboard.count()," selected nodes copied to clipboard. ");
+	keyMap[Util.UI.KEY_C] = fn(){					// [ctrl] + [c] copy out
+		if(PADrend.getEventContext().isCtrlPressed() && !NodeEditor.getSelectedNodes().empty()){
+			nodeClipboard = NodeEditor.getSelectedNodes().clone();
+			nodeClipboardMode = $COPY;
+			PADrend.message(""+nodeClipboard.count()," selected nodes copied to clipboard. ");
 			return true;
 		}
 		return false;
 	};
-	this.keyMap[Util.UI.KEY_D] = this->fn(){					// [ctrl] + [d] duplicate   // \todo USE COMMAND
+	keyMap[Util.UI.KEY_D] = fn(){					// [ctrl] + [d] duplicate   // \todo USE COMMAND
 		if(PADrend.getEventContext().isCtrlPressed()){
 			var newNodes = [];
-			foreach(this.getSelectedNodes() as var node){
+			foreach(NodeEditor.getSelectedNodes() as var node){
 				if(!node.hasParent() || !node.getParent().hasParent()){
 					PADrend.message("Can't duplicate scene or root.");
 				}else{
@@ -172,36 +217,36 @@ plugin.ex_Init:=fn() {
 				}
 			}
 			PADrend.message(""+newNodes.count()+" nodes duplicated." );
-			this.selectNodes(newNodes);
+			NodeEditor.selectNodes(newNodes);
 			return true;
 		}
 
 		return false;
 	};	
-	this.keyMap[Util.UI.KEY_J] = this->fn(){					// [j] Jump to selection
-		this.jumpToSelection();
+	keyMap[Util.UI.KEY_J] = fn(){					// [j] Jump to selection
+		NodeEditor.jumpToSelection();
 		return true;
 	};
-	this.keyMap[Util.UI.KEY_X] = this->fn(){					// [ctrl] + [x] cut out
-		if(PADrend.getEventContext().isCtrlPressed() && !this.getSelectedNodes().empty()){
-			this.nodeClipboard = this.getSelectedNodes().clone();
-			this.nodeClipboardMode = $CUT;
-			PADrend.message(""+this.nodeClipboard.count()," selected nodes cut out. ");
+	keyMap[Util.UI.KEY_X] = fn(){					// [ctrl] + [x] cut out
+		if(PADrend.getEventContext().isCtrlPressed() && !NodeEditor.getSelectedNodes().empty()){
+			nodeClipboard = NodeEditor.getSelectedNodes().clone();
+			nodeClipboardMode = $CUT;
+			PADrend.message(""+nodeClipboard.count()," selected nodes cut out. ");
 			return true;
 		}
 		return false;
 	};
-	this.keyMap[Util.UI.KEY_V] = this->fn(){					// [ctrl] + [v] paste \todo check for cycles!!!!!!!!!!!!!!!!!!!!!!!!!1
+	keyMap[Util.UI.KEY_V] = fn(){					// [ctrl] + [v] paste \todo check for cycles!!!!!!!!!!!!!!!!!!!!!!!!!1
 		if(PADrend.getEventContext().isCtrlPressed()){
 			// transformations
-			if(this.getSelectedNodes().count()!=1 || !(this.getSelectedNode()---|>MinSG.GroupNode)){
+			if(NodeEditor.getSelectedNodes().count()!=1 || !(NodeEditor.getSelectedNode()---|>MinSG.GroupNode)){
 				Runtime.warn("Select one GroupNode for pasting.");
 				return true;
 			}
-			var parentNode = this.getSelectedNode();
+			var parentNode = NodeEditor.getSelectedNode();
 			if(nodeClipboardMode == $CUT){
 				out("Moving cut out nodes to ",NodeEditor.getString(parentNode),": ");
-				foreach(this.nodeClipboard as var node){
+				foreach(nodeClipboard as var node){
 
 					if(MinSG.isInSubtree(parentNode,node)){
 						Runtime.warn("Skipping node to prevent cycle.");
@@ -210,13 +255,13 @@ plugin.ex_Init:=fn() {
 					MinSG.changeParentKeepTransformation(node,parentNode);
 					out(".");
 				}
-				this.selectNodes(nodeClipboard);
-				this.nodeClipboard.clear();
+				NodeEditor.selectNodes(nodeClipboard);
+				nodeClipboard.clear();
 				out("\n");
 			}else{
 				out("Copying nodes to ",NodeEditor.getString(parentNode),": ");
 				var clones=[];
-				foreach(this.nodeClipboard as var node){
+				foreach(nodeClipboard as var node){
 
 					if(MinSG.isInSubtree(parentNode,node)){
 						Runtime.warn("Skipping node to prevent cycle.");
@@ -230,7 +275,7 @@ plugin.ex_Init:=fn() {
 
 					out(".");
 				}
-				this.selectNodes(clones);
+				NodeEditor.selectNodes(clones);
 				out("\n");
 			}
 
@@ -243,15 +288,16 @@ plugin.ex_Init:=fn() {
 
 	// [0...9] restore selection
 	// [ctrl] + [0...9] store selection
+	static storedSelections = [];
 	foreach( [Util.UI.KEY_0, Util.UI.KEY_1, Util.UI.KEY_2, Util.UI.KEY_3, Util.UI.KEY_4, Util.UI.KEY_5] as var index,var sym){
-		this.keyMap[sym] = this -> (fn(index){
+		keyMap[sym] = [index] => this->fn(index){
 			if(PADrend.getEventContext().isShiftPressed()) // no shift
 				return false;
 
 			if(PADrend.getEventContext().isCtrlPressed()){ // store
-				out("Storing current selection at #",index,"\n");
-				var selection = this.getSelectedNodes().clone();
-				this.storedSelections[index] = selection;
+				outln("Storing current selection at #",index);
+				var selection = NodeEditor.getSelectedNodes().clone();
+				storedSelections[index] = selection;
 
 				// TEMP This is a temporary solution which is eventually replaced by the scene editor's group management feature
 				var ids = [];
@@ -276,7 +322,7 @@ plugin.ex_Init:=fn() {
 				}
 
 			} else {
-				var selection = this.storedSelections[index];
+				var selection = storedSelections[index];
 				if(!selection){
 					var selectionRegistry = PADrend.getCurrentScene().getNodeAttribute('NodeEditor_selections');
 					if(selectionRegistry && selectionRegistry[index]){
@@ -286,31 +332,28 @@ plugin.ex_Init:=fn() {
 							if(n)
 								selection += n;
 						}
-						this.storedSelections[index] = selection;
+						storedSelections[index] = selection;
 					}
 				}
 				if(!selection){
 					Runtime.warn("No selection stored at #"+index);
 				}else{
-					if(selection == this.getSelectedNodes()){
-						this.jumpToSelection();
+					if(selection == NodeEditor.getSelectedNodes()){
+						NodeEditor.jumpToSelection();
 					} else {
-						out("Restoring selection #",index,"\n");
-						this.selectNodes(selection);
+						outln("Restoring selection #",index);
+						NodeEditor.selectNodes(selection);
 
 					}
 				}
 			}
 			return true;
-		}).bindLastParams(index);
+		};
 	}
-	this.storedSelections[0] = [PADrend.getRootNode()];
-
-
 
 	// temporary!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	this.follower := void;
-	this.keyMap[Util.UI.KEY_L] = this->fn(){					// [l] Lock to selection
+	static follower;
+	keyMap[Util.UI.KEY_L] = this->fn(){					// [l] Lock to selection
 		var dolly = PADrend.getDolly();
 		var camera = PADrend.getActiveCamera();
 		if(follower){
@@ -338,101 +381,14 @@ plugin.ex_Init:=fn() {
 		}
 		return true;
 	};
+	// -------------------------------------------
 
 
+	return true;
 };
 
-//! [ext:PADrend_KeyPressed]
-plugin.ex_KeyPressed:=fn(evt) {
-	var handler = this.keyMap[evt.key];
-	return handler ? handler() : false;
-};
-
-//! [ext:UIEvent]
-plugin.ex_UIEvent:=fn(evt){
-	if(	evt.type==Util.UI.EVENT_MOUSE_BUTTON &&
-			(evt.button == Util.UI.MOUSE_BUTTON_LEFT || evt.button == Util.UI.MOUSE_BUTTON_RIGHT) &&
-			evt.pressed &&
-			PADrend.getEventContext().isCtrlPressed()) {
-
-		@(once) static r = new MinSG.RendRayCaster;
-
-		// check if metaObjects (e.g. lights or similar nodes) are visible.
-		
-		r.renderingLayers(Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
-	
-		var node = r.queryNodeFromScreen(frameContext,PADrend.getRootNode(),new Geometry.Vec2(evt.x,evt.y),true);
-		if(node && evt.button == Util.UI.MOUSE_BUTTON_RIGHT)
-			node = objectIdentifier(node);
-
-		if(PADrend.getEventContext().isShiftPressed()){
-			if(node){
-				if(isNodeSelected(node))
-					unselectNode(node);
-				else
-					addSelectedNode(node);
-			}
-		}else{
-			selectNode(node);
-		}
-		return true;
-	}
-
-
-	return false;
-};
-
-plugin.COLOR_BG_NODE := new Util.Color4f(0,0,0,1);
-plugin.COLOR_BG_SEM_OBJ := new Util.Color4f(0,0.4,0,1);
-plugin.COLOR_TEXT_ORIGINAL := new Util.Color4f(1,1,1,1);
-plugin.COLOR_TEXT_INSTANCE := new Util.Color4f(0.9,0.9,0.9,1);
-
-//! [ext:PADrend_AfterRenderingPass]
-plugin.ex_AfterRenderingPass:=fn(pass){
-	var skipAnnotations = selectedNodes.count()>20;
-	foreach(selectedNodes as var node){
-		if(!node || node==PADrend.getCurrentScene() || node==PADrend.getRootNode())
-			continue;
-
-		
-		if(!skipAnnotations){
-			frameContext.showAnnotation(node,NodeEditor.getString(node),0,true,
-										node.isInstance() ? COLOR_TEXT_INSTANCE : COLOR_TEXT_ORIGINAL,
-										MinSG.SemanticObjects.isSemanticObject(node) ? COLOR_BG_SEM_OBJ : COLOR_BG_NODE  );
-		}
-
-		renderingContext.pushMatrix();
-		renderingContext.resetMatrix();
-		renderingContext.multMatrix(node.getWorldMatrix());
-
-		var bb = node.getBB();
-
-		var blending=new Rendering.BlendingParameters();
-		blending.enable();
-		blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA, Rendering.BlendFunc.ONE);
-		renderingContext.pushAndSetBlending(blending);
-		renderingContext.pushAndSetDepthBuffer(true, false, Rendering.Comparison.LEQUAL);
-		renderingContext.pushAndSetLighting(false);
-		renderingContext.pushAndSetPolygonOffset(-1.0, -1.0);
-		renderingContext.applyChanges();
-		Rendering.drawWireframeBox(renderingContext, bb, new Util.Color4f(1.0, 1.0, 1.0, 0.4));
-		Rendering.drawBox(renderingContext, bb, new Util.Color4f(1.0, 1.0, 1.0, 0.2));
-		renderingContext.popMatrix();
-		renderingContext.popPolygonOffset();
-		renderingContext.popLighting();
-		renderingContext.popDepthBuffer();
-		renderingContext.popBlending();
-	}
-    return;
-};
-
-//--------------------------------
-
-//! @name Node selection
-// @{
-plugin.selectedNodes @(private):= [];
-plugin.selectedNodesSet @(private):= new Set;
-plugin.objectIdentifier @(private):= fn(node){
+plugin.setObjectIdentifier := 	fn(fun){		objectIdentifier = fun;	};
+static objectIdentifier = fn(node){
 	
 	var semObj = MinSG.SemanticObjects.isSemanticObject(node) ? node :	MinSG.SemanticObjects.getContainingSemanticObject(node);
 	if( semObj ){
@@ -440,7 +396,7 @@ plugin.objectIdentifier @(private):= fn(node){
 		//! \todo This should be integrated into the selection method.
 		while(true){
 			var next = MinSG.SemanticObjects.getContainingSemanticObject(semObj);
-			if(!next || isNodeSelected(next))
+			if(!next || NodeEditor.isNodeSelected(next))
 				break;
 			semObj = next;
 		}
@@ -452,88 +408,6 @@ plugin.objectIdentifier @(private):= fn(node){
 	return node;
 };
 
-plugin.addSelectedNode :=	fn(MinSG.Node node){	addSelectedNodes([node]);	};
-
-plugin.addSelectedNodes:=fn(Array nodesToSelect){
-	foreach(nodesToSelect as var n){
-		if(!n || selectedNodesSet.contains(n))
-			continue;
-		selectedNodesSet+=n;
-		selectedNodes+=n;
-	}
-	onSelectionChanged();
-};
-
-plugin.clearNodeSelection := fn(){
-	selectedNodes.clear();
-	selectedNodesSet.clear();
-	onSelectionChanged();
-};
-
-plugin.getSelectedNode := 	fn(){   	return this.selectedNodes.front();	};
-plugin.getSelectedNodes := 	fn(){		return this.selectedNodes.clone();	};
-plugin.isNodeSelected := 	fn(node){	return this.selectedNodesSet.contains(node);	};
-
-plugin.jumpToSelection := fn(time=0.5){
-	if( getSelectedNode() ){
-		var box = MinSG.combineNodesWorldBBs(selectedNodes);
-
-		var targetDir = (box.getCenter() - PADrend.getDolly().getWorldPosition()).normalize();
-		var target = new Geometry.SRT( box.getCenter() - targetDir * box.getExtentMax() * 1.0, -targetDir, PADrend.getWorldUpVector());
-		PADrend.Navigation.flyTo(target);
-	}
-};
-
-/*! Called whenever the node selection is changed. May be called explicitly to trigger
-	an update of all corresponding listeners.*/
-plugin.onSelectionChanged := fn(){		executeExtensions('NodeEditor_OnNodesSelected',selectedNodes);	};
-
-plugin.selectNode:=fn([MinSG.Node,void] node){
-    if(node){
-		selectedNodes.clear();
-		selectedNodesSet.clear();
-		addSelectedNode(node);
-    }else{
-		clearNodeSelection();
-    }
-};
-
-plugin.selectNodes:=fn(Array nodesToSelect){
-    selectedNodes.clear();
-    selectedNodesSet.clear();
-	addSelectedNodes(nodesToSelect);
-};
-
-plugin.setObjectIdentifier := 	fn(fun){		objectIdentifier = fun;	};
-
-plugin.unselectNode :=			fn(MinSG.Node node){	unselectNodes([node]);	};
-
-plugin.unselectNodes:=fn(Array nodesToRemove){
-	foreach(nodesToRemove as var n){
-		if(objectIdentifier)
-			n = objectIdentifier(n);
-		if(n)
-			selectedNodesSet -= n;
-	}
-	selectedNodes.filter( [selectedNodesSet] => fn(selectedNodesSet,node){ return selectedNodesSet.contains(node);} );
-	onSelectionChanged();
-};
-
-// @}
-
-//--------------------------------
-// aliases
-
-NodeEditor.addSelectedNode := plugin->plugin.addSelectedNode;
-NodeEditor.addSelectedNodes := plugin->plugin.addSelectedNodes;
-NodeEditor.getSelectedNode := plugin->plugin.getSelectedNode;
-NodeEditor.getSelectedNodes := plugin->plugin.getSelectedNodes;
-NodeEditor.onSelectionChanged := plugin->plugin.onSelectionChanged;
-NodeEditor.selectNode := plugin->plugin.selectNode;
-NodeEditor.selectNodes := plugin->plugin.selectNodes;
-NodeEditor.setObjectIdentifier := plugin->plugin.setObjectIdentifier;
-NodeEditor.unselectNode := plugin->plugin.unselectNode;
-NodeEditor.unselectNodes := plugin->plugin.unselectNodes;
 
 
 // -------------------------------
