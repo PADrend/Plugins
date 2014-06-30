@@ -108,7 +108,7 @@ m["Shader: Universal2"] = fn(){
 			fs+=path+f()+".sfn";
 		}
 		MinSG.initShaderState(shaderState,vs, [], fs, Rendering.Shader.USE_UNIFORMS, PADrend.getSceneManager().getFileLocator());
-		NodeEditor.onSelectionChanged(); // refresh the gui
+		NodeEditor.refreshSelectedNodes(); // refresh the gui
 
 	} );
 
@@ -168,7 +168,7 @@ m["Shader: Universal3"] = fn(){
 			fs+=path+f()+".sfn";
 		}
 		MinSG.initShaderState(shaderState,vs, [], fs, Rendering.Shader.USE_UNIFORMS,PADrend.getSceneManager().getFileLocator());
-		NodeEditor.onSelectionChanged(); // refresh the gui
+		NodeEditor.refreshSelectedNodes(); // refresh the gui
 
 	} );
 

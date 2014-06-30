@@ -484,7 +484,7 @@ plugin.registerMenus := fn() {
 			b.state := state;
 			b.onClick = fn(){
 				node.removeState(state);
-				NodeEditor.onSelectionChanged(); // refresh the gui
+				NodeEditor.refreshSelectedNodes(); // refresh the gui
 				gui.closeAllMenus();
 			};
 
@@ -531,7 +531,7 @@ plugin.registerMenus := fn() {
 						foreach(NodeEditor.getSelectedNodes() as var node){
 							node.addState(state);
 						}
-						NodeEditor.onSelectionChanged(); // refresh the gui
+						NodeEditor.refreshSelectedNodes(); // refresh the gui
 					};
 					menu.add(button);
 			};

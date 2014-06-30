@@ -39,6 +39,7 @@ Evaluator.endMeasure @(override) ::= fn(MinSG.FrameContext frameContext) {
 	return this;
 };
 
+
 Evaluator.measure @(override) ::= fn(MinSG.FrameContext frameContext, MinSG.Node node, Geometry.Rect rect) {
 	var width = rect.getWidth();
 	var height = rect.getHeight();
@@ -57,6 +58,7 @@ Evaluator.measure @(override) ::= fn(MinSG.FrameContext frameContext, MinSG.Node
 	renderingContext.pushViewport();
 	renderingContext.setViewport(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
 	
+
 	fbo.attachColorTexture(renderingContext,firstTexture);
 	PADrend.selectScene(firstScene);
 	PADrend.renderScene(PADrend.getRootNode(), void, PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
@@ -187,10 +189,11 @@ Evaluator.createConfigPanel @(override)  ::= fn() {
 	
 	panel++;
 
+	
 	panel += [{
 		GUI.LABEL : "Quality",
 		GUI.TYPE : GUI.TYPE_NUMBER,
-		GUI.WIDTH : 100,
+		GUI.WIDTH : 300,
 		GUI.DATA_WRAPPER : Util.requirePlugin('ImageCompare').currentQuality,
 		GUI.FLAGS : GUI.LOCKED
 	}];

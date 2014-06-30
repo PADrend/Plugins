@@ -133,6 +133,10 @@ NodeEditor.jumpToSelection := fn(time=0.5){
 	an update of all corresponding listeners.*/
 NodeEditor.onSelectionChanged := new Std.MultiProcedure;
 
+NodeEditor.refreshSelectedNodes := fn(){
+	NodeEditor.onSelectionChanged( selectedNodes );
+};
+
 NodeEditor.selectNode := fn([MinSG.Node,void] node){
     if(node){
 		selectedNodes.clear();
