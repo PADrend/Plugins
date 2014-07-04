@@ -7,7 +7,7 @@
  * Copyright (C) 2010 Paul Justus
  * Copyright (C) 2010-2013 Ralf Petring <ralf@petring.net>
  * Copyright (C) 2010-2011 Robert Gmyr
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -30,7 +30,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.State, fn(MinSG.State state, panel)
 
 	panel.nextRow(10);
 	panel += '----';
-	
+
 	panel++;
 
 	var refreshGroup = new GUI.RefreshGroup;
@@ -90,7 +90,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.State, fn(MinSG.State state, panel)
 			};
 			m*=2;
 
-			panel += { 
+			panel += {
 				GUI.LABEL : ""+i+"    ",
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.TOOLTIP : "State is active on rendering layer #"+i,
@@ -740,7 +740,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.MaterialState, fn(MinSG.MaterialSta
 NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer state, panel){
 	panel += "*HOM (Hierarchical Occlusion Maps) Renderer:*";
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"Minimum Occluder Size",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
@@ -754,7 +754,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"Maximum Occluder Complexity",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
@@ -768,7 +768,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	panel++;
-		
+
 	panel += {
 		GUI.LABEL			:	"Maximum Occluder Depth",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
@@ -779,7 +779,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"Triangle Limit",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
@@ -790,7 +790,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"HOM Pyramid Side Length",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
@@ -802,7 +802,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"Show occluders only",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
@@ -810,7 +810,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.HOMRenderer.setShowOnlyOccluders
 	};
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"Show HOM pyramid",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
@@ -818,7 +818,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.HOMRenderer.setShowHOMPyramid
 	};
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"Show culled geometry",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
@@ -1021,7 +1021,7 @@ NodeEditor.addConfigTreeEntryProvider(MinSG.ShaderState,fn( obj,entry ){
 		GUI.WIDTH : 15,
 		GUI.ON_CLICK : [entry] => fn(entry){
 			PADrend.message("Recreate shader.");
-			entry.getObject().recreateShader( PADrend.getSceneManager() ); 
+			entry.getObject().recreateShader( PADrend.getSceneManager() );
 			entry.rebuild();
 		}
 	});
@@ -1034,7 +1034,7 @@ NodeEditor.addConfigTreeEntryProvider(MinSG.ShaderState,fn( obj,entry ){
 		GUI.TOOLTIP : "Show shader objects",
 		GUI.ON_CLICK : [entry] => fn(entry){
 			entry.rebuild();
-			var shaderState = entry.getObject(); 
+			var shaderState = entry.getObject();
 			var programs = shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES);
 			var index;
 			foreach(programs as index,var program){
@@ -1084,7 +1084,7 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 	if(!programInfo)
 		programInfo={'file':"",'type':""};
 	entry.setLabel("");
-	
+
 	entry.getBaseContainer()+={
 		GUI.TYPE : GUI.TYPE_CONTAINER,
 		GUI.LAYOUT : GUI.LAYOUT_TIGHT_FLOW,
@@ -1138,7 +1138,7 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 		],
 		GUI.SIZE : GUI.SIZE_MAXIMIZE,
 	};
-								
+
 });
 
 
@@ -1228,7 +1228,7 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 	tv.refresh();
 
 	entries += GUI.NEXT_ROW;
-	
+
 	entries += {
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "Add uniform",
@@ -1256,16 +1256,16 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 				}
 			}
 			if(!shaderState)
-				return [];	
-		
+				return [];
+
 			var entries = {
 				GUI.TYPE : GUI.TYPE_TREE,
 				GUI.OPTIONS : [],
 				GUI.WIDTH : 250,
-				GUI.HEIGHT : 200,							
+				GUI.HEIGHT : 200,
 			};
 			foreach(shaderState.getShader().getActiveUniforms() as var uniform){
-				// split uniform's name by '.' to identifiy the uniform struct-group 
+				// split uniform's name by '.' to identifiy the uniform struct-group
 				var s = uniform.getName();
 				if(s.beginsWith("gl_")) //  create group for gl uniforms
 					s="gl."+s;
@@ -1273,7 +1273,7 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 					s="sg."+s;
 				var groupNames = s.split(".");
 				var name = groupNames.popBack();
-				
+
 				var currentMap = entries;
 				foreach(groupNames as var groupName){
 					if(!currentMap[groupName]){
@@ -1294,13 +1294,13 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 						uniformContainer.setUniform(uniform);
 						treeView.refresh();
 					}
-		
+
 				};
-				
+
 			}
 			return [entries];
 		}
-	
+
 	};
 
 
@@ -1318,19 +1318,19 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState 
 			var entries = [""];
 			foreach(PADrend.getSceneManager()._getSearchPaths() as var path){
 				foreach(Util.getFilesInDir(path,[".shader"]) as var filename){
-					entries += (new Util.FileName(filename)).getFile(); 
+					entries += (new Util.FileName(filename)).getFile();
 				}
 			}
 			return entries;
 		},
 		GUI.DATA_WRAPPER : state.getStateAttributeWrapper(MinSG.ShaderState.STATE_ATTR_SHADER_NAME,"")
-	
+
 	};
 	panel++;
 	// uniforms
 	panel+="----";
 	panel.nextRow(5);
-	
+
 	panel+={
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 		GUI.LABEL : "Uniforms",
@@ -1343,7 +1343,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState 
 		GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_CHILDREN_ABS , 10 ,5 ]
 	};
 	panel++;
-	
+
 		// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// attributes
 });
@@ -1427,7 +1427,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 		GUI.LABEL			:	"Texure unit:",
 		GUI.RANGE			:	[0, 7],
 		GUI.RANGE_STEP_SIZE	:	1,
-		GUI.DATA_WRAPPER	:	DataWrapper.createFromFunctions(state -> state.getTextureUnit, 
+		GUI.DATA_WRAPPER	:	DataWrapper.createFromFunctions(state -> state.getTextureUnit,
 																state -> state.setTextureUnit),
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
@@ -1499,7 +1499,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 		GUI.LABEL			:	"Texture type",
 		GUI.DATA_WRAPPER	:	config_textureType,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0],
-		GUI.OPTIONS			:	[ 
+		GUI.OPTIONS			:	[
 									[Rendering.Texture.TEXTURE_1D,"1d texture (no layers)"],
 									[Rendering.Texture.TEXTURE_1D_ARRAY,"1d texture array"],
 									[Rendering.Texture.TEXTURE_2D,"2d texture (no layers)"],
@@ -1532,22 +1532,19 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 				outln("Loading texture \"", fileName.toString(), "\" ("+path+")...");
 				var texture;
 				if(!path){
-				}else if(config_textureType()==Rendering.Texture.TEXTURE_2D){
-					texture = Rendering.createTextureFromFile(path);
-				}else{
-					Runtime.warn("Texture format is not yet supported.");
-				}
+				}else
+					texture = Rendering.createTextureFromFile(path, config_textureType(), config_numLayers());
 				if(!texture){
 					texture = Rendering.createChessTexture(64,64,8);
 					outln(" failed.");
 				}
-				
+
 				texture.setFileName(fileName); // set original filename
 				state.setTexture(texture);
 				if(config_createMipmaps())
 					texture.createMipmaps(renderingContext);
 				outln(" done (", texture, ").");
-			} 
+			}
 			//! \see RefreshableContainerTrait
 			@(once) static  RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
 			RefreshableContainerTrait.refreshContainer( this );
@@ -1577,9 +1574,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.TransparencyRenderer, fn(MinSG.Tra
 if(MinSG.isSet($TreeVisualization))
 NodeEditor.registerConfigPanelProvider( MinSG.TreeVisualization, fn(MinSG.TreeVisualization state, panel){
 	panel += "*Tree Visualization*";
-	
+
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"Draw depth",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
@@ -1589,9 +1586,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.TreeVisualization, fn(MinSG.TreeVi
 		GUI.DATA_PROVIDER	:	state -> state.getDrawDepth,
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
-	
+
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"Show splitting planes",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
@@ -1599,9 +1596,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.TreeVisualization, fn(MinSG.TreeVi
 		GUI.DATA_PROVIDER	:	state -> state.getShowSplittingPlanes,
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
-	
+
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"Show bounding boxes",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
@@ -1609,9 +1606,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.TreeVisualization, fn(MinSG.TreeVi
 		GUI.DATA_PROVIDER	:	state -> state.getShowBoundingBoxes,
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
-	
+
 	panel++;
-	
+
 	panel += {
 		GUI.LABEL			:	"Show lines",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
