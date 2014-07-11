@@ -10,9 +10,8 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-MinSG.LineWidthState := new Type(MinSG.ScriptedState); 
+var LineWidthState = new Type(MinSG.ScriptedState); 
 
-var LineWidthState = MinSG.LineWidthState;
 LineWidthState._printableName @(override) ::= $LineWidthState;
 
 LineWidthState.lineWidth @(init) := fn() {
@@ -41,3 +40,4 @@ NodeEditor.registerConfigPanelProvider(LineWidthState, fn(state, panel) {
 	};
 	panel++;
 });
+return LineWidthState;

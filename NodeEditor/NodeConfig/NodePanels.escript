@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 David Maicher
  * Copyright (C) 2010 Jan Krems
  * Copyright (C) 2010 Paul Justus
@@ -19,23 +19,32 @@
  **	[Plugin:NodeConfig] NodeEditor/NodePanels.escript
  **
  **/
+static CONFIG_PREFIX = 'NodeEditor_ObjConfig_';
+ 
+static getBaseTypeEntries = fn( obj, baseType=void ){
+	return	gui.createComponents( {	
+		GUI.TYPE 		: 	GUI.TYPE_COMPONENTS, 
+		GUI.PROVIDER	:	CONFIG_PREFIX + (baseType ? baseType : obj.getType().getBaseType()).toString(), 
+		GUI.CONTEXT		:	obj 
+	});
+};
 
 /*!	Node */
-NodeEditor.registerConfigPanelProvider( MinSG.Node, fn(node, panel){
-
-    panel += {
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.Node, fn(node){
+	var entries = [];
+	entries += {
 		GUI.TYPE : GUI.TYPE_LABEL,
 		GUI.LABEL : NodeEditor.getString(node),
 		GUI.FONT : GUI.FONT_ID_LARGE,
 		GUI.COLOR : NodeEditor.NODE_COLOR
-    };
+	};
 
-    panel.nextRow(10);
-	panel += '----';
+	entries += { GUI.TYPE : GUI.TYPE_NEXT_ROW, GUI.SPACING : 10};
+	entries += '----';
 
 	var id = PADrend.getSceneManager().getNameOfRegisteredNode(node);
-	panel++;
-	panel+={
+	entries += GUI.NEXT_ROW;
+	entries+={
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "NodeId:",
 		GUI.DATA_VALUE : id ? id : "",
@@ -54,40 +63,40 @@ NodeEditor.registerConfigPanelProvider( MinSG.Node, fn(node, panel){
 			}
 		}
 	};
-    panel++;
-    panel += {
-    	GUI.TYPE : GUI.TYPE_BOOL,
-    	GUI.LABEL : "is active",
-    	GUI.DATA_VALUE : node.isActive(),
-    	GUI.ON_DATA_CHANGED : [node] => fn(node,data){
+	entries += GUI.NEXT_ROW;
+	entries += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "is active",
+		GUI.DATA_VALUE : node.isActive(),
+		GUI.ON_DATA_CHANGED : [node] => fn(node,data){
 			if(data) {
 				node.activate();
 			} else {
 				node.deactivate();
 			}
 		}
-    };
-    panel += {
-    	GUI.TYPE : GUI.TYPE_BOOL,
-    	GUI.LABEL : "is temporary",
-    	GUI.DATA_VALUE : node.isTempNode(),
-    	GUI.ON_DATA_CHANGED : node -> node.setTempNode,
+	};
+	entries += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "is temporary",
+		GUI.DATA_VALUE : node.isTempNode(),
+		GUI.ON_DATA_CHANGED : node -> node.setTempNode,
 		GUI.TOOLTIP : "If enabled, the node is not saved."
-    };
-    panel += {
-    	GUI.TYPE : GUI.TYPE_BOOL,
-    	GUI.LABEL : "is semantic obj",
-    	GUI.DATA_VALUE : MinSG.SemanticObjects.isSemanticObject(node),
-    	GUI.ON_DATA_CHANGED : [node] => MinSG.SemanticObjects.markAsSemanticObject,
+	};
+	entries += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "is semantic obj",
+		GUI.DATA_VALUE : MinSG.SemanticObjects.isSemanticObject(node),
+		GUI.ON_DATA_CHANGED : [node] => MinSG.SemanticObjects.markAsSemanticObject,
 		GUI.TOOLTIP : "Mark to show if the node is a semantic object."
-    };
-    {// rendering Layers
+	};
+	{// rendering Layers
 		var accessibleLayers = 0xffff;
 		for(var n=node.getParent();n;n=n.getParent() ){
 			accessibleLayers &= n.getRenderingLayers();
 		}
 		
-		panel++;
+		entries += GUI.NEXT_ROW;
 		var m = 1;
 		for(var i=0;i<8;++i){
 			var isAccessible = (accessibleLayers&m)>0;
@@ -98,55 +107,59 @@ NodeEditor.registerConfigPanelProvider( MinSG.Node, fn(node, panel){
 			};
 			m*=2;
 
-			panel += { 
+			entries += { 
 				GUI.LABEL : ""+(isAccessible ? i : "("+i+")")+"    ",
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.TOOLTIP : "Node is active on rendering layer #"+i+ (isAccessible ? "" :"\nNote: Path to does not provide this layer."),
 				GUI.DATA_WRAPPER : dataWrapper
 			};
 		}
-    }
-    
-    if(node.isInstance()){
+	}
+	
+	if(node.isInstance()){
 		var inheritedTraits = MinSG.getLocalPersistentNodeTraitNames(node.getPrototype());
 		if(!inheritedTraits.empty()){
-			panel++;
-			panel += "PersistentNodeTraits (inherited): "+inheritedTraits.implode(", ");
+			entries += GUI.NEXT_ROW;
+			entries += "PersistentNodeTraits (inherited): "+inheritedTraits.implode(", ");
 		}
-    }
-    var localTraits = MinSG.getLocalPersistentNodeTraitNames(node);
-    if(!localTraits.empty()){
-		panel++;
-		panel += "PersistentNodeTraits (local): "+localTraits.implode(", ");
-    }
+	}
+	var localTraits = MinSG.getLocalPersistentNodeTraitNames(node);
+	if(!localTraits.empty()){
+		entries += GUI.NEXT_ROW;
+		entries += "PersistentNodeTraits (local): "+localTraits.implode(", ");
+	}
 	if(node.isInstance()){
-		panel++;
-		panel += {
+		entries += GUI.NEXT_ROW;
+		entries += {
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Prototype of " + NodeEditor.getString(node.getPrototype()),
 			GUI.ON_CLICK : [node] => fn(node){	NodeEditor.selectNode(node.getPrototype());	},
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,15],
 			GUI.TOOLTIP : "Select prototype."
 		};		
-    }
+	}
+	entries += GUI.NEXT_ROW;
+	entries += '----';
+	entries += GUI.NEXT_ROW;
+	return entries;
 });
 
 // ----
 
 /*!	GroupNode	*/
-NodeEditor.registerConfigPanelProvider( MinSG.GroupNode, fn(node, panel){
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GroupNode, fn(node){
+	var entries = getBaseTypeEntries(node,MinSG.GroupNode.getBaseType());
+	entries += "*GroupNode Info:*";
 
-    panel += "*GroupNode Info:*";
+	entries += GUI.NEXT_ROW;
+	var cb=gui.createCheckbox("is closed",node.isClosed());
+	cb.node:=node;
+	cb.onDataChanged = fn(data){
+		node.setClosed(data);
+	};
+	entries += (cb);
 
-    panel++;
-    var cb=gui.createCheckbox("is closed",node.isClosed());
-    cb.node:=node;
-    cb.onDataChanged = fn(data){
-    	node.setClosed(data);
-    };
-    panel += (cb);
-
-    panel++;
+	entries += GUI.NEXT_ROW;
 
 	var button = gui.createButton(150,20,"Count values in (sub)tree:");
 
@@ -204,40 +217,40 @@ NodeEditor.registerConfigPanelProvider( MinSG.GroupNode, fn(node, panel){
 	button.labels := new ExtObject();
 	button.createLabels();
 
-    panel += (button);
-    panel++;
+	entries += (button);
+	entries += GUI.NEXT_ROW;
 
-    panel += "Nodes:         ";
-	panel.nextColumn();
-    panel += (button.labels.nodes);
-    panel++;
+	entries += "Nodes:		 ";
+	entries += GUI.NEXT_COLUMN;
+	entries += (button.labels.nodes);
+	entries += GUI.NEXT_ROW;
 
-    panel += "GroupNodes:    ";
-	panel.nextColumn();
-    panel += (button.labels.groupnodes);
-    panel++;
+	entries += "GroupNodes:	";
+	entries += GUI.NEXT_COLUMN;
+	entries += (button.labels.groupnodes);
+	entries += GUI.NEXT_ROW;
 
-    panel += "GeometryNodes: ";
-	panel.nextColumn();
-    panel += (button.labels.geonodes);
-    panel++;
+	entries += "GeometryNodes: ";
+	entries += GUI.NEXT_COLUMN;
+	entries += (button.labels.geonodes);
+	entries += GUI.NEXT_ROW;
 
-    panel += "Triangles:     ";
-	panel.nextColumn();
-    panel.add(button.labels.triangles);
-    panel++;
+	entries += "Triangles:	 ";
+	entries += GUI.NEXT_COLUMN;
+	entries += button.labels.triangles;
+	entries += GUI.NEXT_ROW;
 
-    panel += "Vertices:      ";
-	panel.nextColumn();
-    panel += (button.labels.vertices);
-	panel++;
+	entries += "Vertices:	  ";
+	entries += GUI.NEXT_COLUMN;
+	entries += (button.labels.vertices);
+	entries += GUI.NEXT_ROW;
 
-    panel += "States:        ";
-	panel.nextColumn();
-    panel += (button.labels.states);
-	panel++;
+	entries += "States:		";
+	entries += GUI.NEXT_COLUMN;
+	entries += (button.labels.states);
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Levels",
 		GUI.TOOLTIP			:	"Output how many nodes are on which level of the scene graph.",
@@ -253,27 +266,28 @@ NodeEditor.registerConfigPanelProvider( MinSG.GroupNode, fn(node, panel){
 								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
-    return true;
+	entries += GUI.NEXT_ROW;
+	return entries;
 });
 
 // ----
 
 /*!	GeometryNode	*/
-NodeEditor.registerConfigPanelProvider( MinSG.GeometryNode, fn(node, panel){
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GeometryNode, fn(node){
+	var entries = getBaseTypeEntries(node,MinSG.GeometryNode.getBaseType());
 
-	panel += "*GeometryNode Info:*";
-	panel++;
-	panel += "Vertices: " + node.getVertexCount();
-	panel++;
-	panel += "Triangles: " + node.getTriangleCount();
-	panel++;
+	entries += "*GeometryNode Info:*";
+	entries += GUI.NEXT_ROW;
+	entries += "Vertices: " + node.getVertexCount();
+	entries += GUI.NEXT_ROW;
+	entries += "Triangles: " + node.getTriangleCount();
+	entries += GUI.NEXT_ROW;
 	var mesh = node.getMesh();
 	if(mesh) {
-		panel+='----';
-		panel++;
-		panel += mesh.toString();
-		panel++;
+		entries+='----';
+		entries += GUI.NEXT_ROW;
+		entries += mesh.toString();
+		entries += GUI.NEXT_ROW;
 
 		
 		var attributesPanel = gui.create({
@@ -347,25 +361,25 @@ NodeEditor.registerConfigPanelProvider( MinSG.GeometryNode, fn(node, panel){
 								];
 		}
 		
-		panel += attributesPanel;
-		panel++;
-		panel += "Vertex Size: " + mesh.getVertexDescription().getVertexSize();
-		panel++;
-		panel += {
+		entries += attributesPanel;
+		entries += GUI.NEXT_ROW;
+		entries += "Vertex Size: " + mesh.getVertexDescription().getVertexSize();
+		entries += GUI.NEXT_ROW;
+		entries += {
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Use indexData",
 			GUI.DATA_PROVIDER : mesh -> mesh.isUsingIndexData,
 			GUI.ON_DATA_CHANGED : mesh -> mesh.setUseIndexData
 		};
-		panel++;
+		entries += GUI.NEXT_ROW;
 	}
 
-	panel++;
-	panel+='----';
-	panel++;
+	entries += GUI.NEXT_ROW;
+	entries+='----';
+	entries += GUI.NEXT_ROW;
 	// mesh file selector
 	var data = new ExtObject({$filename : mesh?mesh.getFileName().toString() : "", $node : node });
-	panel += {
+	entries += {
 		GUI.TYPE : GUI.TYPE_FILE,
 		GUI.LABEL : "Mesh's filename",
 		GUI.ENDINGS : [".ply",".mmf"],
@@ -378,8 +392,8 @@ NodeEditor.registerConfigPanelProvider( MinSG.GeometryNode, fn(node, panel){
 		},
 		GUI.TOOLTIP		:	"Leave empty to embed the mesh in minsg file."
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Reload mesh",
 		GUI.ON_CLICK : data -> fn(){
@@ -406,21 +420,22 @@ NodeEditor.registerConfigPanelProvider( MinSG.GeometryNode, fn(node, panel){
 		GUI.TOOLTIP		:	"Reload the GeometryNode's mesh from the given file."
 	};
 	
-	panel++;
-	return true;
+	entries += GUI.NEXT_ROW;
+	return entries;
 });
 
 // ----
 
 /*!	Light	*/
-NodeEditor.registerConfigPanelProvider( MinSG.LightNode, fn(node, panel){
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.LightNode, fn(node){
+	var entries = getBaseTypeEntries(node,MinSG.LightNode.getBaseType());
 
-	var dummy = new ExtObject();
+	var dummy = new ExtObject;
 	dummy.node := node;
 
-    panel += "*LightNode Info:*";
+	entries += "*LightNode Info:*";
 
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	dummy.type := gui.createRadioButtonSet();
 	dummy.type.addOption(MinSG.LightNode.POINT, "Point Light");
@@ -428,8 +443,8 @@ NodeEditor.registerConfigPanelProvider( MinSG.LightNode, fn(node, panel){
 	dummy.type.addOption(MinSG.LightNode.DIRECTIONAL, "Directional Light");
 	dummy.type.onDataChanged = dummy->fn(data){if(disabled)return; node.setLightType(data); reset();};
 
-	panel += dummy.type;
-	panel++;
+	entries += dummy.type;
+	entries += GUI.NEXT_ROW;
 
 	dummy.ambient := gui.create({
 		GUI.TYPE : GUI.TYPE_COLOR,
@@ -438,8 +453,8 @@ NodeEditor.registerConfigPanelProvider( MinSG.LightNode, fn(node, panel){
 		GUI.ON_DATA_CHANGED : dummy->fn(data){if(disabled)return; node.setAmbientLightColor(data); reset();},
 		GUI.LABEL : "Ambient"
 	});
-	panel += dummy.ambient;
-	panel.nextColumn();
+	entries += dummy.ambient;
+	entries += GUI.NEXT_COLUMN;
 
 	dummy.diffuse := gui.create({
 		GUI.TYPE : GUI.TYPE_COLOR,
@@ -449,8 +464,8 @@ NodeEditor.registerConfigPanelProvider( MinSG.LightNode, fn(node, panel){
 		GUI.LABEL : "Diffuse"
 	});
 
-	panel += dummy.diffuse;
-	panel++;
+	entries += dummy.diffuse;
+	entries += GUI.NEXT_ROW;
 
 	dummy.specular := gui.create({
 		GUI.TYPE : GUI.TYPE_COLOR,
@@ -460,8 +475,8 @@ NodeEditor.registerConfigPanelProvider( MinSG.LightNode, fn(node, panel){
 		GUI.LABEL : "Specular"
 	});
 
-	panel += dummy.specular;
-	panel.nextColumn();
+	entries += dummy.specular;
+	entries += GUI.NEXT_COLUMN;
 
 	var attenuationPanel = gui.createPanel(180, 100, GUI.AUTO_LAYOUT | GUI.LOWERED_BORDER);
 	attenuationPanel.setMargin(1);
@@ -490,12 +505,12 @@ NodeEditor.registerConfigPanelProvider( MinSG.LightNode, fn(node, panel){
 
 	attenuationPanel.add(dummy.quadratic);
 
-	panel += (attenuationPanel);
-	panel++;
+	entries += (attenuationPanel);
+	entries += GUI.NEXT_ROW;
 
 	var spotPanel = gui.createPanel(180, 80, GUI.AUTO_LAYOUT | GUI.LOWERED_BORDER);
 	spotPanel.setMargin(1);
-	panel += (spotPanel);
+	entries += (spotPanel);
 
 	spotPanel.add(gui.createLabel(180, 15, "Spot exponent:"));
 	spotPanel++;
@@ -527,7 +542,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.LightNode, fn(node, panel){
 	};
 	dummy.reset();
 
-	return true;
+	return entries;
 });
 
 // ----
@@ -535,51 +550,52 @@ NodeEditor.registerConfigPanelProvider( MinSG.LightNode, fn(node, panel){
 if(MinSG.isSet($ParticleSystemNode)){
 
 /*!	ParticleSystemNode	*/
-NodeEditor.registerConfigPanelProvider( MinSG.ParticleSystemNode, fn(node, panel){
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ParticleSystemNode, fn(node){
+	var entries = getBaseTypeEntries(node,MinSG.ParticleSystemNode.getBaseType());
 
-    panel += "*ParticleSystemNode Info:*";
-    panel++;
+	entries += "*ParticleSystemNode Info:*";
+	entries += GUI.NEXT_ROW;
 
-    // create GUI
-    // 1. create renderer selector
-    var cb = gui.createDropdown(180, 15);
-    cb.addOption(MinSG.ParticleSystemNode.POINT_RENDERER, "Point renderer");
-    cb.addOption(MinSG.ParticleSystemNode.BILLBOARD_RENDERER, "Billboard renderer");
-    cb.setData(node.getRendererType());
-    cb.node := node;
-	cb.onDataChanged = fn(data){
+	// create GUI
+	// 1. create renderer selector
+	var cb = gui.createDropdown(180, 15);
+	cb.addOption(MinSG.ParticleSystemNode.POINT_RENDERER, "Point renderer");
+	cb.addOption(MinSG.ParticleSystemNode.BILLBOARD_RENDERER, "Billboard renderer");
+	cb.setData(node.getRendererType());
+	cb.onDataChanged = [node]=>fn(node,data){
 		node.setRenderer(data);
 	};
-    panel += (cb);
+	entries += cb;
 
-    // 2. change max particles
-    panel.nextRow(5);
-    {
-    	panel += "Max. particle count: ";
-    }
-    panel++;
+	// 2. change max particles
+	entries += { GUI.TYPE : GUI.TYPE_NEXT_ROW, GUI.SPACING : 5};
 	{
-		panel += (panel.maxParticles:=gui.createExtSlider([100,16],[100,10000],200));
-		panel.maxParticles.setValue(node.getMaxParticleCount());
-		panel.maxParticles.node := node;
-		panel.maxParticles.onDataChanged = fn(data){
+		entries += "Max. particle count: ";
+	}
+	entries += GUI.NEXT_ROW;
+	{
+		var maxParticleSlider = gui.createExtSlider([100,16],[100,10000],200);
+		entries += maxParticleSlider;
+		maxParticles.setValue(node.getMaxParticleCount());
+		maxParticles.onDataChanged = [node]=>fn(node,data){
 			node.setMaxParticleCount(data);
 		};
 	}
 
-    return true;
+	return entries;
 });
 }
 
 /*!	MultiAlgoGroupNode	*/
 if(MinSG.isSet($MAR))
 	
-	NodeEditor.registerConfigPanelProvider( MinSG.MAR.MultiAlgoGroupNode, fn(node, panel){
+	gui.registerComponentProvider(CONFIG_PREFIX + MinSG.MAR.MultiAlgoGroupNode, fn(node){
+		var entries = getBaseTypeEntries(node,MinSG.MultiAlgoGroupNode.getBaseType());
+
+		entries += "*MultiAlgoGroupNode Info:*";
+		entries += GUI.NEXT_ROW;
 		
-		panel += "*MultiAlgoGroupNode Info:*";
-		panel++;
-		
-		panel += {
+		entries += {
 			GUI.TYPE : GUI.TYPE_SELECT,
 			GUI.LABEL : "Algorithm",
 			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(node->node.getAlgorithm, node->node.setAlgorithm),
@@ -594,38 +610,40 @@ if(MinSG.isSet($MAR))
 						  ]
 		};
 		
-		return true;
+		return entries;
 	});
 // --------------------------------------------------------------------------
 
 //!	PathNode
 if(MinSG.isSet($PathNode)) {
-	NodeEditor.registerConfigPanelProvider(MinSG.PathNode, fn(node, panel) {
-		panel += "*PathNode*";
-		panel++;
+	gui.registerComponentProvider(CONFIG_PREFIX + MinSG.PathNode, fn(node){
+		var entries = getBaseTypeEntries(node,MinSG.PathNode.getBaseType());
+
+		entries += "*PathNode*";
+		entries += GUI.NEXT_ROW;
 
 		var displayWaypointsDataWrapper = DataWrapper.createFromFunctions(	node -> node.getMetaDisplayWaypoints,
 																			node -> node.setMetaDisplayWaypoints);
-		panel += {
+		entries += {
 			GUI.TYPE			:	GUI.TYPE_BOOL,
 			GUI.LABEL			:	"Display waypoints",
 			GUI.TOOLTIP			:	"Enable/disable the display of the waypoints' meta objects",
 			GUI.DATA_WRAPPER	:	displayWaypointsDataWrapper,
 			GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
-		panel++;
+		entries += GUI.NEXT_ROW;
 
 		var displayTimesDataWrapper = DataWrapper.createFromFunctions(	node -> node.getMetaDisplayTimes,
 																		node -> node.setMetaDisplayTimes);
-		panel += {
+		entries += {
 			GUI.TYPE			:	GUI.TYPE_BOOL,
 			GUI.LABEL			:	"Display times",
 			GUI.TOOLTIP			:	"Enable/disable the display of the waypoints' time stamps",
 			GUI.DATA_WRAPPER	:	displayTimesDataWrapper,
 			GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
-		panel++;
+		entries += GUI.NEXT_ROW;
 
-		return true;
+		return entries;
 	});
 }

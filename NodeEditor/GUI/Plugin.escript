@@ -340,7 +340,7 @@ plugin._fillConfiguratorContainer := fn(GUI.Container page) {
 	page += gui.createHSplitter();
 	page += configPanelContainer;
 
-	NodeEditor._objConfigurator.initTreeViewConfigPanelCombo(entryContainer,configPanelContainer);
+	NodeEditor._objConfigurator.initTreeViewConfigPanelCombo(entryContainer,configPanelContainer,'NodeEditor_ObjConfig_'  );
 
 	registerExtension('NodeEditor_OnNodesSelected',entryContainer->fn(nodes) {
 		var limit = 25;

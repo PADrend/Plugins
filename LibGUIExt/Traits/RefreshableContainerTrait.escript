@@ -35,7 +35,7 @@ t.refreshContainer := fn( GUI.Component c ){
 };
 
 
-t.attributes.refresh := Std.ABSTRACT_METHOD;
+t.attributes.refresh := fn(){Runtime.exception("This method is not implemented.");};	// Std.ABSTRACT_METHOD;
 	
 t.onInit += fn(GUI.Container container, contentDescription = void){
 	if(void!==contentDescription){

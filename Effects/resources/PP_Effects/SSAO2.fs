@@ -57,6 +57,9 @@ vec3 camToEye(in vec2 camPos,float depth){
 	eyePos /= eyePos.w; 
 	return eyePos.xyz;
 }
+float calcLuma(in vec3 color){
+	return sqrt(dot(color, vec3(0.299, 0.587, 0.114))); // needed for fxaa
+}
 
 void main(){
     vec2 pos_cs = vec2(gl_TexCoord[0].s,gl_TexCoord[0].t);
@@ -67,12 +70,12 @@ void main(){
 	{ // background? --> skip calculations for speedup
 		float depth = texture2D(TDepth, pos_cs).r;
 		if(depth>0.99999){
-			gl_FragColor = originalColor;
+			gl_FragColor = vec4(originalColor.rgb,calcLuma(originalColor.rgb)); // luma needed for fxaa
 			return; 
 		}
 		eyeSpacePos = camToEye(pos_cs,depth); // don't use getEyePos as we already have the depth value.
 		if(eyeSpacePos.z<-10000.0 || pos_cs.x<debugBorder){
-			gl_FragColor = originalColor;
+			gl_FragColor = vec4(originalColor.rgb,calcLuma(originalColor.rgb)); // luma needed for fxaa
 			return;
 		}
 	}
@@ -118,8 +121,6 @@ void main(){
 
 	{ // calculate final color
 		float f =  pow(freeVolume* intensityFactor,intensityExponent); 
-
-		
 		vec3 color = originalColor.xyz;
 		
 		color = mix( color, vec3(1.0,1.0,1.0),debugBlend);
@@ -134,10 +135,8 @@ void main(){
 		// reduce color in RGB-space (not so good...)
 	//		baseColor *= min(blocking/counter + intensityOffset,1.0);	
 		
-		float luma = sqrt(dot(color, vec3(0.299, 0.587, 0.114))); // needed for fxaa
-		
-//		gl_FragColor = vec4(color,originalColor.w);
-		gl_FragColor = vec4(color,luma);
+
+		gl_FragColor = vec4(color.rgb,calcLuma(color.rgb)); // luma needed for fxaa
 	}
 	return;
 }

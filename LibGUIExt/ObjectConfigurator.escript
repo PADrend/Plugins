@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -30,6 +30,7 @@ GUI.ObjectConfigurator._configPanelRegistry  @(init) := fn(){	return new TypeBas
 		});
 	\note
 		There may be more than one handler registered for one type.
+	\deprecated Use normal gui registries instead!
 */
 GUI.ObjectConfigurator.addConfigPanelProvider ::= fn(Type type,fun){
 	_configPanelRegistry += [type,fun];
@@ -129,6 +130,7 @@ GUI.ObjectConfigurator.createConfigTreeEntry ::= fn(obj,Bool isActiveEntry=false
 
 
 //! Create a config panel for the given object.
+//! \deprecated Use normal gui registries instead!
 GUI.ObjectConfigurator.createConfigPanel ::= fn(obj){
 	var p = gui.create({
 		GUI.TYPE : GUI.TYPE_PANEL,
@@ -161,17 +163,73 @@ GUI.ObjectConfigurator.createConfigPanel ::= fn(obj){
 
 		// show the configuration panel for myObject inside the panel.
 		myConfigurator.update(myObject).
+	\deprecated Use normal gui registries instead!
 */
-GUI.ObjectConfigurator.initConfigPanel ::= fn(GUI.Container configPanelContainer){
+GUI.ObjectConfigurator.initConfigPanel ::= fn(GUI.Container configPanelContainer, [String,void] _panelProviderPrefix){
 
 	configPanelContainer.__configuredObject := void;	
 	
-	configPanelContainer.update := [this] => fn(configurator, obj){
+	configPanelContainer.update := [this,_panelProviderPrefix] => fn(configurator,_panelProviderPrefix, obj){
 		this.destroyContents();
 		this.__configuredObject = obj;
-		if(void!==obj){
-			this += configurator.createConfigPanel(obj);
+		
+		if( _panelProviderPrefix){
+			var p = gui.create({
+				GUI.TYPE : GUI.TYPE_PANEL,
+				GUI.FLAGS : GUI.AUTO_LAYOUT,
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_FILL_ABS, 1, 1]
+			});
+
+			var entries;
+			if( gui.hasRegisteredComponentProvider( _panelProviderPrefix+obj.toString() )){
+				entries = gui.createComponents( 
+					{
+						GUI.TYPE		:	GUI.TYPE_COMPONENTS,
+						GUI.PROVIDER	:	_panelProviderPrefix+obj.toString(),
+						GUI.CONTEXT		:	obj
+					}
+				);
+			}else{
+				
+				for( var t=obj.getType(); t; t=t.getBaseType()){
+					var id = _panelProviderPrefix + t.toString();
+					if( gui.hasRegisteredComponentProvider( id ) ){
+						entries = gui.createComponents( {
+								GUI.TYPE		:	GUI.TYPE_COMPONENTS,
+								GUI.PROVIDER	:	id,
+								GUI.CONTEXT		:	obj
+						});
+						break;
+					}
+					
+				}
+			}
+			if(entries)
+				foreach( entries as var c)
+					p += c;
+
+			if(void!==obj){	//! \deprecated 
+				var handler = configurator._configPanelRegistry.queryHandlerForType(obj.getType());
+				while(!handler.empty()){
+					var fun = handler.popBack();
+					try{
+						fun(obj,p);
+					}catch(e){
+						Runtime.warn(e);
+					}
+					if(!handler.empty()){
+						p++;
+						p+='----';
+						p++;
+					}
+				}
+			}
+			this += p;
+
+		}else if(void!==obj){ //! \deprecated 
+//			this += configurator.createConfigPanel(obj);
 		}
+		
 	};
 	//! \see RefreshableContainerTrait
 	@(once) static  RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
@@ -250,8 +308,8 @@ GUI.ObjectConfigurator.initTreeView ::= fn(GUI.TreeView treeView){
 		// show the entries for several objects.
 		myConfigurator.update( [myObject1,myObject2,myObject3] ).
 */
-GUI.ObjectConfigurator.initTreeViewConfigPanelCombo ::= fn(GUI.TreeView treeView, GUI.Container configPanelContainer){
-	initConfigPanel(configPanelContainer);
+GUI.ObjectConfigurator.initTreeViewConfigPanelCombo ::= fn(GUI.TreeView treeView, GUI.Container configPanelContainer, [String,void] _panelProviderPrefix = void){
+	initConfigPanel(configPanelContainer,_panelProviderPrefix);
 	initTreeView(treeView);
 	
 	//! Whenever an object is selected for configuration in the tree view, a corresponding config panel is shown in the configPanelContainer

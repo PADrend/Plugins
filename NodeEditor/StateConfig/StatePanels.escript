@@ -18,24 +18,34 @@
  **	[Plugin:NodeEditor/StateConfig] NodeEditor/StatePanels.escript
  **
  **/
-
-/*!	State	*/
-NodeEditor.registerConfigPanelProvider(MinSG.State, fn(MinSG.State state, panel) {
-	panel += {
+static CONFIG_PREFIX = 'NodeEditor_ObjConfig_';
+ 
+static getBaseTypeEntries = fn( obj, baseType=void ){
+	return	gui.createComponents( {	
+		GUI.TYPE 		: 	GUI.TYPE_COMPONENTS, 
+		GUI.PROVIDER	:	CONFIG_PREFIX + (baseType ? baseType : obj.getType().getBaseType()).toString(), 
+		GUI.CONTEXT		:	obj 
+	});
+};
+ 
+//!	State
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.State, fn(MinSG.State state) {
+	var entries = [];
+	entries += {
 		GUI.TYPE				:	GUI.TYPE_LABEL,
 		GUI.LABEL				:	NodeEditor.getString(state),
 		GUI.FONT				:	GUI.FONT_ID_LARGE,
 		GUI.COLOR				:	NodeEditor.STATE_COLOR
 	};
 
-	panel.nextRow(10);
-	panel += '----';
+	entries += { GUI.TYPE : GUI.TYPE_NEXT_ROW, GUI.SPACING : 10};
+	entries += '----';
 
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	var refreshGroup = new GUI.RefreshGroup;
 
-	panel += {
+	entries += {
 		GUI.TYPE				:	GUI.TYPE_TEXT,
 		GUI.LABEL				:	"StateId:",
 		GUI.DATA_PROVIDER		:	[state] => fn(MinSG.State state) {
@@ -55,33 +65,33 @@ NodeEditor.registerConfigPanelProvider(MinSG.State, fn(MinSG.State state, panel)
 									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup
 	};
-	panel += {
+	entries += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"refresh",
 		GUI.ON_CLICK			:	refreshGroup -> refreshGroup.refresh
 	};
-	panel++;
-	panel += {
-    	GUI.TYPE : GUI.TYPE_BOOL,
-    	GUI.LABEL : "is active",
-    	GUI.DATA_VALUE : state.isActive(),
-    	GUI.ON_DATA_CHANGED : [state] => fn(state,data){
+	entries += GUI.NEXT_ROW;
+	entries += {
+	GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "is active",
+		GUI.DATA_VALUE : state.isActive(),
+		GUI.ON_DATA_CHANGED : [state] => fn(state,data){
 			if(data) {
 				state.activate();
 			} else {
 				state.deactivate();
 			}
 		}
-    };
-    panel += {
-    	GUI.TYPE : GUI.TYPE_BOOL,
-    	GUI.LABEL : "is temporary",
-    	GUI.DATA_VALUE : state.isTempState(),
-    	GUI.ON_DATA_CHANGED : state -> state.setTempState,
+	};
+	entries += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "is temporary",
+		GUI.DATA_VALUE : state.isTempState(),
+		GUI.ON_DATA_CHANGED : state -> state.setTempState,
 		GUI.TOOLTIP : "If enabled, the state is not saved."
-    };
+	};
 	{// rendering Layers
-		panel++;
+		entries += GUI.NEXT_ROW;
 		var m = 1;
 		for(var i=0;i<8;++i){
 			var dataWrapper = new DataWrapper( state.testRenderingLayer(m) );
@@ -90,24 +100,29 @@ NodeEditor.registerConfigPanelProvider(MinSG.State, fn(MinSG.State state, panel)
 			};
 			m*=2;
 
-			panel += {
+			entries += { 
 				GUI.LABEL : ""+i+"    ",
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.TOOLTIP : "State is active on rendering layer #"+i,
 				GUI.DATA_WRAPPER : dataWrapper
 			};
 		}
-    }
+	}
+	entries += GUI.NEXT_ROW;
+	entries += '----';
+	entries += GUI.NEXT_ROW;
+	return entries;
 });
 
 // ----
 
 //! AlphaTestState
-NodeEditor.registerConfigPanelProvider(MinSG.AlphaTestState, fn(MinSG.AlphaTestState state, panel) {
-	panel += "*AlphaTestState:*";
-	panel++;
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.AlphaTestState, fn(MinSG.AlphaTestState state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*AlphaTestState:*";
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RADIO,
 		GUI.OPTIONS			:	[
 									[Rendering.Comparison.LESS, "LESS (alpha < ref)"],
@@ -126,9 +141,9 @@ NodeEditor.registerConfigPanelProvider(MinSG.AlphaTestState, fn(MinSG.AlphaTestS
 									setParameters(getParameters().setMode(newMode));
 								}
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Reference Value",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.RANGE			:	[0.0, 1.0],
@@ -141,7 +156,8 @@ NodeEditor.registerConfigPanelProvider(MinSG.AlphaTestState, fn(MinSG.AlphaTestS
 								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
+	return entries;
 });
 
 // ----
@@ -149,8 +165,9 @@ NodeEditor.registerConfigPanelProvider(MinSG.AlphaTestState, fn(MinSG.AlphaTestS
 /*!	AlgoSelector */
 if(MinSG.isSet($MAR))
 {
-	NodeEditor.registerConfigPanelProvider( MinSG.MAR.AlgoSelector, fn(MinSG.MAR.AlgoSelector state, panel){
-		panel += {
+	gui.registerComponentProvider(CONFIG_PREFIX + MinSG.MAR.AlgoSelector, fn(MinSG.MAR.AlgoSelector state) {
+		var entries = getBaseTypeEntries(state);
+		entries += {
 			GUI.TYPE : GUI.TYPE_SELECT,
 			GUI.OPTIONS : [
 				[MinSG.MAR.MultiAlgoGroupNode.Auto, MinSG.MAR.MultiAlgoGroupNode.algoIdToString(MinSG.MAR.MultiAlgoGroupNode.Auto)],
@@ -166,8 +183,8 @@ if(MinSG.isSet($MAR))
 			GUI.LABEL : "Mode",
 			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(state->state.getRenderMode, state->state.setRenderMode)
 		};
-		panel++;
-		panel += {
+		entries += GUI.NEXT_ROW;
+		entries += {
 			GUI.TYPE : GUI.TYPE_SELECT,
 			GUI.OPTIONS : [
 				[MinSG.MAR.AlgoSelector.NEAREST, "Nearest"],
@@ -177,8 +194,8 @@ if(MinSG.isSet($MAR))
 			GUI.LABEL : "Interpolation",
 			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(state->state.getInterpolationMode, state->state.setInterpolationMode)
 		};
-		panel++;
-		panel += {
+		entries += GUI.NEXT_ROW;
+		entries += {
 			GUI.TYPE : GUI.TYPE_SELECT,
 			GUI.OPTIONS : [
 				[MinSG.MAR.AlgoSelector.ABS, "Absolute"],
@@ -188,19 +205,21 @@ if(MinSG.isSet($MAR))
 			GUI.LABEL : "Regulation",
 			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(state->state.getRegulationMode, state->state.setRegulationMode)
 		};
-		panel++;
-		panel += {
+		entries += GUI.NEXT_ROW;
+		entries += {
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.RANGE : [5, 200],
 			GUI.RANGE_STEPS : 195,
 			GUI.LABEL : "Target Time",
 			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(state->state.getTargetTime, state->state.setTargetTime)
 		};
+		return entries;
 	});
 
-	NodeEditor.registerConfigPanelProvider( MinSG.MAR.SurfelRenderer, fn(MinSG.MAR.SurfelRenderer state, panel){
+	gui.registerComponentProvider(CONFIG_PREFIX + MinSG.MAR.SurfelRenderer, fn(MinSG.MAR.SurfelRenderer state) {
+	var entries = getBaseTypeEntries(state);
 		var dw = DataWrapper.createFromFunctions(state->state.getSurfelCountFactor, state->state.setSurfelCountFactor);
-		panel += {
+		entries += {
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.LABEL : "Surfel Count Factor",
 			GUI.RANGE : [-5,5],
@@ -209,8 +228,8 @@ if(MinSG.isSet($MAR))
 			GUI.DATA_WRAPPER : dw
 		};
 		dw = DataWrapper.createFromFunctions(state->state.getSurfelSizeFactor, state->state.setSurfelSizeFactor);
-		panel++;
-		panel += {
+		entries += GUI.NEXT_ROW;
+		entries += {
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.LABEL : "Surfel Size Factor",
 			GUI.RANGE : [-5,5],
@@ -219,8 +238,8 @@ if(MinSG.isSet($MAR))
 			GUI.DATA_WRAPPER : dw
 		};
 		dw = DataWrapper.createFromFunctions(state->state.getMaxAutoSurfelSize, state->state.setMaxAutoSurfelSize);
-		panel++;
-		panel += {
+		entries += GUI.NEXT_ROW;
+		entries += {
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.LABEL : "max auto surfel size",
 			GUI.RANGE : [1,10],
@@ -228,19 +247,21 @@ if(MinSG.isSet($MAR))
 			GUI.DATA_WRAPPER : dw
 		};
 		dw = DataWrapper.createFromFunctions(state->state.getForceSurfels, state->state.setForceSurfels);
-		panel++;
-		panel += {
+		entries += GUI.NEXT_ROW;
+		entries += {
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Force Surfels",
 			GUI.DATA_WRAPPER : dw
 		};
+		return entries;
 	});
 }
 
 // -----
 
 //! BlendingState
-NodeEditor.registerConfigPanelProvider(MinSG.BlendingState, fn(MinSG.BlendingState state, panel) {
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.BlendingState, fn(MinSG.BlendingState state) {
+	var entries = getBaseTypeEntries(state);
 	var equations = [
 		[Rendering.BlendEquation.FUNC_ADD, "FUNC_ADD"],
 		[Rendering.BlendEquation.FUNC_SUBTRACT, "FUNC_SUBTRACT"],
@@ -272,14 +293,14 @@ NodeEditor.registerConfigPanelProvider(MinSG.BlendingState, fn(MinSG.BlendingSta
 	var refreshGroup = new GUI.RefreshGroup;
 	refreshGroup.separate := !equalParams;
 
-	panel += {
+	entries += {
 		GUI.TYPE				:	GUI.TYPE_BOOL,
 		GUI.LABEL				:	"Separate",
 		GUI.TOOLTIP				:	"If checked, different RGB and Alpha values can be set.",
 		GUI.DATA_OBJECT			:	refreshGroup,
 		GUI.DATA_ATTRIBUTE		:	$separate
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	var separatePanel = gui.create({
 		GUI.TYPE				:	GUI.TYPE_CONTAINER,
@@ -412,10 +433,10 @@ NodeEditor.registerConfigPanelProvider(MinSG.BlendingState, fn(MinSG.BlendingSta
 	};
 	separatePanel++;
 
-	panel += separatePanel;
-	panel++;
+	entries += separatePanel;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.TYPE				:	GUI.TYPE_COLOR,
 		GUI.LABEL				:	"Color",
 		GUI.DATA_PROVIDER		:	state -> fn() {
@@ -426,21 +447,23 @@ NodeEditor.registerConfigPanelProvider(MinSG.BlendingState, fn(MinSG.BlendingSta
 									}
 	};
 
-	panel += {
+	entries += {
 		GUI.TYPE				:	GUI.TYPE_BOOL,
 		GUI.LABEL				:	"Depth mask",
 		GUI.DATA_PROVIDER		:	state -> state.getBlendDepthMask,
 		GUI.ON_DATA_CHANGED		:	state -> state.setBlendDepthMask
 	};
+	return entries;
 });
 
 // ----
 
 //! BudgetAnnotationState
-NodeEditor.registerConfigPanelProvider(MinSG.BudgetAnnotationState, fn(MinSG.BudgetAnnotationState state, panel) {
-	panel += "*BudgetAnnotationState*";
-	panel++;
-	panel += {
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.BudgetAnnotationState, fn(MinSG.BudgetAnnotationState state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*BudgetAnnotationState*";
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_TEXT,
 		GUI.LABEL			:	"Attribute",
 		GUI.TOOLTIP			:	"Name of the attribute that is stored in the nodes.",
@@ -448,8 +471,8 @@ NodeEditor.registerConfigPanelProvider(MinSG.BudgetAnnotationState, fn(MinSG.Bud
 		GUI.DATA_PROVIDER	:	state -> state.getAnnotationAttribute,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"Budget",
 		GUI.TOOLTIP			:	"Initial budget that is distributed among the tree.",
@@ -459,8 +482,8 @@ NodeEditor.registerConfigPanelProvider(MinSG.BudgetAnnotationState, fn(MinSG.Bud
 		GUI.DATA_PROVIDER	:	state -> state.getBudget,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_SELECT,
 		GUI.LABEL			:	"Distribution type",
 		GUI.TOOLTIP			:	"Type of function to calculate the fractions of the budget.",
@@ -474,17 +497,19 @@ NodeEditor.registerConfigPanelProvider(MinSG.BudgetAnnotationState, fn(MinSG.Bud
 		GUI.DATA_PROVIDER	:	state -> state.getDistributionType,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
+	return entries;
 });
 
 // -----
 
 /*! CHCppRenderer */
-NodeEditor.registerConfigPanelProvider(MinSG.CHCppRenderer, fn(MinSG.CHCppRenderer state, panel) {
-	panel += "*CHC++ Renderer*";
-	panel++;
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.CHCppRenderer, fn(MinSG.CHCppRenderer state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*CHC++ Renderer*";
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Culling",
 		GUI.ON_CLICK		:	[state] => fn(MinSG.CHCppRenderer renderer) {
@@ -492,7 +517,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.CHCppRenderer, fn(MinSG.CHCppRender
 								},
 		GUI.SIZE			:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.23, 20]
 	};
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Show Visible",
 		GUI.ON_CLICK		:	[state] => fn(MinSG.CHCppRenderer renderer) {
@@ -500,7 +525,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.CHCppRenderer, fn(MinSG.CHCppRender
 								},
 		GUI.SIZE			:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.23, 20]
 	};
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Show Culled",
 		GUI.ON_CLICK		:	[state] => fn(MinSG.CHCppRenderer renderer) {
@@ -508,7 +533,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.CHCppRenderer, fn(MinSG.CHCppRender
 								},
 		GUI.SIZE			:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.23, 20]
 	};
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Unconditioned",
 		GUI.TOOLTIP			:	"Without exploiting temporal coherence.",
@@ -517,11 +542,11 @@ NodeEditor.registerConfigPanelProvider(MinSG.CHCppRenderer, fn(MinSG.CHCppRender
 								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 10, 20]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	var visibilityThreshold = DataWrapper.createFromFunctions(	state -> state.getVisibilityThreshold,
 																state -> state.setVisibilityThreshold);
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"visibilityThreshold",
 		GUI.RANGE			:	[0.0, 200.0],
@@ -529,11 +554,11 @@ NodeEditor.registerConfigPanelProvider(MinSG.CHCppRenderer, fn(MinSG.CHCppRender
 		GUI.DATA_WRAPPER	:	visibilityThreshold,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	var maxPrevInvisNodesBatchSize = DataWrapper.createFromFunctions(	state -> state.getMaxPrevInvisNodesBatchSize,
 																		state -> state.setMaxPrevInvisNodesBatchSize);
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"maxPrevInvisNodesBatchSize",
 		GUI.RANGE			:	[1.0, 200.0],
@@ -541,11 +566,11 @@ NodeEditor.registerConfigPanelProvider(MinSG.CHCppRenderer, fn(MinSG.CHCppRender
 		GUI.DATA_WRAPPER	:	maxPrevInvisNodesBatchSize,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	var skippedFramesTillQuery = DataWrapper.createFromFunctions(	state -> state.getSkippedFramesTillQuery,
 																	state -> state.setSkippedFramesTillQuery);
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"skippedFramesTillQuery",
 		GUI.RANGE			:	[0.0, 50.0],
@@ -553,11 +578,11 @@ NodeEditor.registerConfigPanelProvider(MinSG.CHCppRenderer, fn(MinSG.CHCppRender
 		GUI.DATA_WRAPPER	:	skippedFramesTillQuery,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	var maxDepthForTightBoundingVolumes = DataWrapper.createFromFunctions(	state -> state.getMaxDepthForTightBoundingVolumes,
 																			state -> state.setMaxDepthForTightBoundingVolumes);
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"maxDepthForTightBoundingVolumes",
 		GUI.RANGE			:	[0.0, 10.0],
@@ -565,11 +590,11 @@ NodeEditor.registerConfigPanelProvider(MinSG.CHCppRenderer, fn(MinSG.CHCppRender
 		GUI.DATA_WRAPPER	:	maxDepthForTightBoundingVolumes,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	var maxAreaDerivationForTightBoundingVolumes = DataWrapper.createFromFunctions(	state -> state.getMaxAreaDerivationForTightBoundingVolumes,
 																					state -> state.setMaxAreaDerivationForTightBoundingVolumes);
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"maxAreaDerivationForTightBoundingVolumes",
 		GUI.RANGE			:	[0.0, 10.0],
@@ -577,35 +602,39 @@ NodeEditor.registerConfigPanelProvider(MinSG.CHCppRenderer, fn(MinSG.CHCppRender
 		GUI.DATA_WRAPPER	:	maxAreaDerivationForTightBoundingVolumes,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
+	return entries;
 });
 
 // -----
 
 //! ColorCubeRenderer
 if(MinSG.isSet($ColorCubeRenderer))
-NodeEditor.registerConfigPanelProvider(MinSG.ColorCubeRenderer, fn(MinSG.ColorCubeRenderer state, panel) {
-	panel += "*Color Cube Renderer:*";
-	panel++;
-	panel+={
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ColorCubeRenderer, fn(MinSG.ColorCubeRenderer state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*Color Cube Renderer:*";
+	entries += GUI.NEXT_ROW;
+	entries+={
 		GUI.LABEL			:	"Highlighting (debug)",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.ON_DATA_CHANGED	:	state -> state.setHighlightEnabled,
 		GUI.DATA_PROVIDER	:	state -> state.isHighlightEnabled
 	};
+	return entries;
 });
 
 // ----
 
 //! CullFaceState
-NodeEditor.registerConfigPanelProvider( MinSG.CullFaceState, fn(MinSG.CullFaceState state, panel){
-	panel += {
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.CullFaceState, fn(MinSG.CullFaceState state) {
+	var entries = getBaseTypeEntries(state);
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.LABEL			:	"Enabled",
 		GUI.DATA_PROVIDER	:	state -> state.getCullingEnabled,
 		GUI.ON_DATA_CHANGED	: 	state -> state.setCullingEnabled
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RADIO,
 		GUI.OPTIONS			:	[
 									[Rendering.CULL_FRONT, "Cull FRONT-facing polygons."],
@@ -615,13 +644,15 @@ NodeEditor.registerConfigPanelProvider( MinSG.CullFaceState, fn(MinSG.CullFaceSt
 		GUI.DATA_PROVIDER	:	state -> state.getCullMode,
 		GUI.ON_DATA_CHANGED	: 	state -> state.setCullMode
 	};
+	return entries;
 });
 
 // ----
 
 //! LODRenderer
-NodeEditor.registerConfigPanelProvider( MinSG.LODRenderer, fn(MinSG.LODRenderer state, panel){
-	panel += {
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.LODRenderer, fn(MinSG.LODRenderer state) {
+	var entries = getBaseTypeEntries(state);
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.RANGE_FN_BASE	:	2,
 		GUI.RANGE			:	[10,25],
@@ -630,8 +661,8 @@ NodeEditor.registerConfigPanelProvider( MinSG.LODRenderer, fn(MinSG.LODRenderer 
 		GUI.DATA_PROVIDER	:	state -> state.getMinComplexity,
 		GUI.ON_DATA_CHANGED	: 	state -> state.setMinComplexity
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.RANGE_FN_BASE	:	2,
 		GUI.RANGE			:	[10,25],
@@ -640,8 +671,8 @@ NodeEditor.registerConfigPanelProvider( MinSG.LODRenderer, fn(MinSG.LODRenderer 
 		GUI.DATA_PROVIDER	:	state -> state.getMaxComplexity,
 		GUI.ON_DATA_CHANGED	: 	state -> state.setMaxComplexity
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.RANGE_FN_BASE	:	2,
 		GUI.RANGE			:	[-5,5],
@@ -650,18 +681,20 @@ NodeEditor.registerConfigPanelProvider( MinSG.LODRenderer, fn(MinSG.LODRenderer 
 		GUI.DATA_PROVIDER	:	state -> state.getRelComplexity,
 		GUI.ON_DATA_CHANGED	: 	state -> state.setRelComplexity
 	};
+	return entries;
 });
 
 // ----
 
-NodeEditor.registerConfigPanelProvider(MinSG.MaterialState, fn(MinSG.MaterialState state, panel) {
-	panel += "*Material State:*";
-	panel++;
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.MaterialState, fn(MinSG.MaterialState state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*Material State:*";
+	entries += GUI.NEXT_ROW;
 
 	var refreshGroup = new GUI.RefreshGroup;
 
 
-	panel += {
+	entries += {
 		GUI.TYPE				:	GUI.TYPE_COLOR,
 		GUI.LABEL				:	"Ambient",
 		GUI.DATA_PROVIDER		:	state -> fn() {
@@ -673,7 +706,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.MaterialState, fn(MinSG.MaterialSta
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.48, 0]
 	};
-	panel += {
+	entries += {
 		GUI.TYPE				:	GUI.TYPE_COLOR,
 		GUI.LABEL				:	"Diffuse",
 		GUI.DATA_PROVIDER		:	state -> fn() {
@@ -685,8 +718,8 @@ NodeEditor.registerConfigPanelProvider(MinSG.MaterialState, fn(MinSG.MaterialSta
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE				:	GUI.TYPE_COLOR,
 		GUI.LABEL				:	"Specular",
 		GUI.DATA_PROVIDER		:	state -> fn() {
@@ -704,7 +737,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.MaterialState, fn(MinSG.MaterialSta
 		GUI.FLAGS				:	GUI.RAISED_BORDER,
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS, 10, 10],
 	});
-	panel += shininessPanel;
+	entries += shininessPanel;
 
 	shininessPanel += {
 		GUI.TYPE				:	GUI.TYPE_RANGE,
@@ -730,18 +763,20 @@ NodeEditor.registerConfigPanelProvider(MinSG.MaterialState, fn(MinSG.MaterialSta
 									},
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
+	return entries;
 });
 
 // ----
 
 /*! HOMRenderer */
-NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer state, panel){
-	panel += "*HOM (Hierarchical Occlusion Maps) Renderer:*";
-	panel++;
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.HOMRenderer, fn(MinSG.HOMRenderer state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*HOM (Hierarchical Occlusion Maps) Renderer:*";
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Minimum Occluder Size",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.RANGE			:	[0.0, 100.0],
@@ -753,9 +788,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Maximum Occluder Complexity",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.RANGE			:	[0.0, 200000.0],
@@ -767,9 +802,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Maximum Occluder Depth",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.RANGE			:	[0.0, 200.0],
@@ -778,9 +813,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.HOMRenderer.setMaxOccluderDepth,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Triangle Limit",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.RANGE			:	[0.0, 200000.0],
@@ -789,9 +824,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.HOMRenderer.setTriangleLimit,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"HOM Pyramid Side Length",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.RANGE			:	[3, 11],
@@ -801,38 +836,40 @@ NodeEditor.registerConfigPanelProvider( MinSG.HOMRenderer, fn(MinSG.HOMRenderer 
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.HOMRenderer.setSideLength,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Show occluders only",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.DATA_VALUE		:	state.getShowOnlyOccluders(),
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.HOMRenderer.setShowOnlyOccluders
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Show HOM pyramid",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.DATA_VALUE		:	state.getShowHOMPyramid(),
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.HOMRenderer.setShowHOMPyramid
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Show culled geometry",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.DATA_VALUE		:	state.getShowCulledGeometry(),
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.HOMRenderer.setShowCulledGeometry
 	};
+	return entries;
 });
 
 // ----
 
 /*! LightingState */
-NodeEditor.registerConfigPanelProvider( MinSG.LightingState, fn(MinSG.LightingState state, panel){
-	panel+= "*Lighting State:*";
-	panel++;
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.LightingState, fn(MinSG.LightingState state) {
+	var entries = getBaseTypeEntries(state);
+	entries+= "*Lighting State:*";
+	entries += GUI.NEXT_ROW;
 
 	var dd = gui.createDropdown(300, 15);
 	dd.state := state;
@@ -849,7 +886,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.LightingState, fn(MinSG.LightingSt
 			this.state.setLight(getData());
 		}
 	};
-	panel.add(dd);
+	entries += dd;
 
 	dd.refresh();
 
@@ -862,23 +899,25 @@ NodeEditor.registerConfigPanelProvider( MinSG.LightingState, fn(MinSG.LightingSt
 			GLOBALS.NodeEditor.selectNode(node);
 		}
 	};
-	panel.add(button);
+	entries += button;
 
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	button = gui.createButton(300, 15, "Refresh");
 	button.dd := dd;
 	button.onClick = fn() {
 		this.dd.refresh();
 	};
-	panel.add(button);
+	entries += button;
+	return entries;
 });
 
 // ----
 
 /*! NodeRendererState */
-NodeEditor.registerConfigPanelProvider(MinSG.NodeRendererState, fn(MinSG.NodeRendererState state, panel) {
-	panel += {
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.NodeRendererState, fn(MinSG.NodeRendererState state) {
+	var entries = getBaseTypeEntries(state,MinSG.NodeRendererState.getBaseType());
+	entries += {
 		GUI.LABEL			:	"SourceChannel",
 		GUI.TYPE			:	GUI.TYPE_TEXT,
 		GUI.ON_DATA_CHANGED	:	state -> state.setSourceChannel,
@@ -886,16 +925,33 @@ NodeEditor.registerConfigPanelProvider(MinSG.NodeRendererState, fn(MinSG.NodeRen
 		GUI.OPTIONS			:	[MinSG.FrameContext.DEFAULT_CHANNEL, MinSG.FrameContext.APPROXIMATION_CHANNEL],
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
+	entries += GUI.NEXT_ROW;
+	entries += '----';
+	entries += GUI.NEXT_ROW;
+	return entries;
 });
+
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ScriptedNodeRendererState, fn(MinSG.ScriptedNodeRendererState state) {
+	return getBaseTypeEntries(state,MinSG.NodeRendererState.getBaseType());
+});
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ScriptedState, fn(MinSG.ScriptedState state) {
+	return getBaseTypeEntries(state,MinSG.ScriptedState.getBaseType());
+});
+
+//gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ScriptedState, fn(MinSG.NodeRendererState state) {
+//	return getBaseTypeEntries(state);
+//});
 
 // -----
 
 /*! OccRenderer */
-NodeEditor.registerConfigPanelProvider(MinSG.OccRenderer, fn(MinSG.OccRenderer state, panel) {
-	panel+= "*CHC Renderer*";
-	panel++;
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.OccRenderer, fn(MinSG.OccRenderer state) {
+	var entries = getBaseTypeEntries(state);
+	print_r(entries);
+	entries+= "*CHC Renderer*";
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Culling",
 		GUI.ON_CLICK		:	[state] => fn(MinSG.OccRenderer renderer) {
@@ -903,7 +959,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.OccRenderer, fn(MinSG.OccRenderer s
 								},
 		GUI.SIZE			:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.18, 20]
 	};
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Show Visible",
 		GUI.ON_CLICK		:	[state] => fn(MinSG.OccRenderer renderer) {
@@ -911,7 +967,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.OccRenderer, fn(MinSG.OccRenderer s
 								},
 		GUI.SIZE			:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.18, 20]
 	};
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Show Culled",
 		GUI.ON_CLICK		:	[state] => fn(MinSG.OccRenderer renderer) {
@@ -919,7 +975,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.OccRenderer, fn(MinSG.OccRenderer s
 								},
 		GUI.SIZE			:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.18, 20]
 	};
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Opt Culling",
 		GUI.ON_CLICK		:	[state] => fn(MinSG.OccRenderer renderer) {
@@ -927,7 +983,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.OccRenderer, fn(MinSG.OccRenderer s
 								},
 		GUI.SIZE			:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.18, 20]
 	};
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Unconditioned",
 		GUI.TOOLTIP			:	"Without exploiting temporal coherence.",
@@ -936,16 +992,18 @@ NodeEditor.registerConfigPanelProvider(MinSG.OccRenderer, fn(MinSG.OccRenderer s
 								},
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 10, 20]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
+	return entries;
 });
 
 // ----
 
 //! PolygonModeState
-NodeEditor.registerConfigPanelProvider(MinSG.PolygonModeState, fn(MinSG.PolygonModeState state, panel) {
-	panel += "*PolygonModeState:*";
-	panel++;
-	panel += {
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.PolygonModeState, fn(MinSG.PolygonModeState state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*PolygonModeState:*";
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RADIO,
 		GUI.OPTIONS			:	[
 									[Rendering.PolygonModeParameters.POINT, "POINT (raster polygons as points)"],
@@ -959,17 +1017,19 @@ NodeEditor.registerConfigPanelProvider(MinSG.PolygonModeState, fn(MinSG.PolygonM
 									setParameters(getParameters().setMode(newMode));
 								}
 	};
+	return entries;
 });
 
 // ----
 
 /*! ProjSizeFilterState */
-NodeEditor.registerConfigPanelProvider( MinSG.ProjSizeFilterState, fn(MinSG.ProjSizeFilterState state, panel){
-	panel+=	"Changes the rendering channel of nodes when their projected size is smaller \n"+
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ProjSizeFilterState, fn(MinSG.ProjSizeFilterState state) {
+	var entries = getBaseTypeEntries(state);
+	entries+=	"Changes the rendering channel of nodes when their projected size is smaller \n"+
 			"than the given value ( if they are far enough away).\n"+
 			"Works best in combination with an approximation renderer (e.g. ColorCubeRenderer).\n";
-	panel++;
-	panel+={
+	entries += GUI.NEXT_ROW;
+	entries+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "Maximum projection size",
 		GUI.RANGE : [1,1000],
@@ -979,8 +1039,8 @@ NodeEditor.registerConfigPanelProvider( MinSG.ProjSizeFilterState, fn(MinSG.Proj
 					 "in the other channel.",
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
-	panel+={
+	entries += GUI.NEXT_ROW;
+	entries+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "Minimum distance",
 		GUI.RANGE : [0,500],
@@ -990,15 +1050,16 @@ NodeEditor.registerConfigPanelProvider( MinSG.ProjSizeFilterState, fn(MinSG.Proj
 					 "in the other channel.",
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
-	panel+={
+	entries += GUI.NEXT_ROW;
+	entries+={
 		GUI.LABEL : "TargetChannel",
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.ON_DATA_CHANGED : state->state.setTargetChannel,
 		GUI.DATA_PROVIDER	:	state -> state.getTargetChannel,
-		GUI.OPTIONS :  	[ MinSG.FrameContext.DEFAULT_CHANNEL,MinSG.FrameContext.APPROXIMATION_CHANNEL ],
+		GUI.OPTIONS : 	[ MinSG.FrameContext.DEFAULT_CHANNEL,MinSG.FrameContext.APPROXIMATION_CHANNEL ],
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
+	return entries;
 });
 
 // -------
@@ -1267,9 +1328,9 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 			foreach(shaderState.getShader().getActiveUniforms() as var uniform){
 				// split uniform's name by '.' to identifiy the uniform struct-group
 				var s = uniform.getName();
-				if(s.beginsWith("gl_")) //  create group for gl uniforms
+				if(s.beginsWith("gl_")) // create group for gl uniforms
 					s="gl."+s;
-				else if(s.beginsWith("sg_")) //  create group for sg uniforms
+				else if(s.beginsWith("sg_")) // create group for sg uniforms
 					s="sg."+s;
 				var groupNames = s.split(".");
 				var name = groupNames.popBack();
@@ -1309,9 +1370,10 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 
 
 /*! ShaderState	*/
-NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState state, panel){
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ShaderState, fn(MinSG.ShaderState state) {
+	var entries = getBaseTypeEntries(state,MinSG.ShaderState.getBaseType());
 	// -----------------------------------------------------------
-	panel += {
+	entries += {
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "Shader preset",
 		GUI.OPTIONS_PROVIDER : fn(){
@@ -1326,12 +1388,12 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState 
 		GUI.DATA_WRAPPER : state.getStateAttributeWrapper(MinSG.ShaderState.STATE_ATTR_SHADER_NAME,"")
 
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 	// uniforms
-	panel+="----";
-	panel.nextRow(5);
+	entries+="----";
+	entries += { GUI.TYPE : GUI.TYPE_NEXT_ROW, GUI.SPACING : 5};
 
-	panel+={
+	entries+={
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 		GUI.LABEL : "Uniforms",
 		GUI.COLLAPSED : false,
@@ -1342,17 +1404,19 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderState, fn(MinSG.ShaderState 
 		},
 		GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_CHILDREN_ABS , 10 ,5 ]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 		// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// attributes
+	return entries;
 });
 
 // -------------
 
 /*! ShaderUniformState	*/
-NodeEditor.registerConfigPanelProvider( MinSG.ShaderUniformState, fn(MinSG.ShaderUniformState state, panel){
-	panel+={
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ShaderUniformState, fn(MinSG.ShaderUniformState state) {
+	var entries = getBaseTypeEntries(state);
+	entries+={
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 		GUI.LABEL : "Uniforms",
 		GUI.COLLAPSED : false,
@@ -1364,14 +1428,16 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShaderUniformState, fn(MinSG.Shade
 		GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_CHILDREN_ABS , 10 ,5 ]
 	};
 
+	return entries;
 });
 
 // ----
 
 /*! ShadowState	*/
-NodeEditor.registerConfigPanelProvider( MinSG.ShadowState, fn(MinSG.ShadowState state, panel){
-	panel += "*ShadowState:*";
-	panel++;
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ShadowState, fn(MinSG.ShadowState state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*ShadowState:*";
+	entries += GUI.NEXT_ROW;
 
 	var dd = gui.createDropdown(300, 15);
 	dd.state := state;
@@ -1388,7 +1454,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShadowState, fn(MinSG.ShadowState 
 			this.state.setLight(data);
 		}
 	};
-	panel.add(dd);
+	entries += dd;
 
 	dd.refresh();
 
@@ -1401,28 +1467,30 @@ NodeEditor.registerConfigPanelProvider( MinSG.ShadowState, fn(MinSG.ShadowState 
 			GLOBALS.NodeEditor.selectNode(node);
 		}
 	};
-	panel.add(button);
+	entries += button;
 
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	button = gui.createButton(300, 15, "Refresh");
 	button.dd := dd;
 	button.onClick = fn() {
 		this.dd.refresh();
 	};
-	panel.add(button);
+	entries += button;
 
-	panel++;
+	entries += GUI.NEXT_ROW;
+	return entries;
 });
 
 // ----
 
 /*! Texture	*/
-NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState state, panel) {
-	panel += "*Texture State:*";
-	panel++;
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TextureState, fn(MinSG.TextureState state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*Texture State:*";
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"Texure unit:",
 		GUI.RANGE			:	[0, 7],
@@ -1431,7 +1499,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 																state -> state.setTextureUnit),
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
+	entries += GUI.NEXT_ROW;
 
 	var textureFile = Std.DataWrapper.createFromValue("");
 	if(state.hasTexture()) {
@@ -1452,73 +1520,74 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 		config_textureType( texture.getTextureType() );
 		config_numLayers( texture.getNumLayers() );
 
-		panel+='----';
-		panel++;
-		panel += "*Texture info:*";
-		panel++;
-		panel += "File: "+ (texture.getFileName().toString().empty() ? "[embedded]" :  texture.getFileName().toString());
-		panel++;
-		panel += "Size: "+ texture.getWidth() + "*" +texture.getWidth() + "*"+config_numLayers();
-		panel++;
-		panel += "HasMipmaps: "+ config_createMipmaps() + " Linear min filtering:" +texture.getUseLinearMinFilter() + " Linear mag filter:"+texture.getUseLinearMagFilter();
-		panel++;
-		panel += {
+		entries+='----';
+		entries += GUI.NEXT_ROW;
+		entries += "*Texture info:*";
+		entries += GUI.NEXT_ROW;
+		entries += "File: "+ (texture.getFileName().toString().empty() ? "[embedded]" : texture.getFileName().toString());
+		entries += GUI.NEXT_ROW;
+		entries += "Size: "+ texture.getWidth() + "*" +texture.getWidth() + "*"+config_numLayers();
+		entries += GUI.NEXT_ROW;
+		entries += "HasMipmaps: "+ config_createMipmaps() + " Linear min filtering:" +texture.getUseLinearMinFilter() + " Linear mag filter:"+texture.getUseLinearMagFilter();
+		entries += GUI.NEXT_ROW;
+		entries += {
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "(Re-) create mipmaps",
 			GUI.ON_CLICK : [texture] => fn(texture){ texture.createMipmaps(renderingContext);}
 //			GUI.ON_CLICK : texture -> texture.createMipmaps
 		};
-		panel += {
+		entries += {
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Show",
 			GUI.ON_CLICK : [texture] => Rendering.showDebugTexture,
 			GUI.TOOLTIP : "Show the texture for 0.5 sek in the\n lower left corner of the screen."
 		};
-		panel++;
+		entries += GUI.NEXT_ROW;
 	}
-//	panel++;
-	panel+='----';
-	panel++;
-	panel += {
+//	entries += GUI.NEXT_ROW;
+	entries+='----';
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_FILE,
 		GUI.LABEL			:	"Texture file:",
 		GUI.DATA_WRAPPER	:	textureFile,
 		GUI.ENDINGS			:	[".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff"],
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.LABEL			:	"Create mipmaps",
 		GUI.DATA_WRAPPER	:	config_createMipmaps,
 		GUI.TOOLTIP			:	"Create mipmaps when texture is loaded."
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_SELECT,
 		GUI.LABEL			:	"Texture type",
 		GUI.DATA_WRAPPER	:	config_textureType,
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0],
 		GUI.OPTIONS			:	[
-									[Rendering.Texture.TEXTURE_1D,"1d texture (no layers)"],
+									[Rendering.Texture.TEXTURE_1D,"1d texture (1 layer)"],
 									[Rendering.Texture.TEXTURE_1D_ARRAY,"1d texture array"],
-									[Rendering.Texture.TEXTURE_2D,"2d texture (no layers)"],
+									[Rendering.Texture.TEXTURE_2D,"2d texture (1 layer)"],
 									[Rendering.Texture.TEXTURE_2D_ARRAY,"2d texture array"],
 									[Rendering.Texture.TEXTURE_3D,"3d texture"],
-									[Rendering.Texture.TEXTURE_CUBE_MAP,"cube map texture (no layers)"],
-									[Rendering.Texture.TEXTURE_CUBE_MAP_ARRAY,"cube map texture array"]
+									[Rendering.Texture.TEXTURE_CUBE_MAP,"cube map texture (6 layers)"],
+									[Rendering.Texture.TEXTURE_CUBE_MAP_ARRAY,"cube map texture array (6*n layers)"]
 								],
 		GUI.TOOLTIP			:	"Create texture type for loaded texture."
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_NUMBER,
 		GUI.LABEL			:	"Number of layers / array entries",
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0],
-		GUI.DATA_WRAPPER	:	config_numLayers
+		GUI.DATA_WRAPPER	:	config_numLayers,
+		GUI.TOOLTIP			:	"TEXTURE_1D: 1\nTEXTURE_1D_ARRAY: >=1\nTEXTURE_2D: 1\nTEXTURE_2D_ARRAY: >=1\nTEXTURE_3D: >=1\nTEXTURE_CUBE_MAP: 6\nTEXTURE_CUBE_MAP_ARRAY: n*6"
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE			:	GUI.TYPE_BUTTON,
 		GUI.LABEL			:	"Reload texture",
 		GUI.ON_CLICK		:	[state, textureFile,config_createMipmaps,config_textureType,config_numLayers ] =>
@@ -1531,8 +1600,7 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 				var path = PADrend.getSceneManager().locateFile(fileName);
 				outln("Loading texture \"", fileName.toString(), "\" ("+path+")...");
 				var texture;
-				if(!path){
-				}else
+				if(path)
 					texture = Rendering.createTextureFromFile(path, config_textureType(), config_numLayers());
 				if(!texture){
 					texture = Rendering.createChessTexture(64,64,8);
@@ -1546,38 +1614,42 @@ NodeEditor.registerConfigPanelProvider(MinSG.TextureState, fn(MinSG.TextureState
 				outln(" done (", texture, ").");
 			}
 			//! \see RefreshableContainerTrait
-			@(once) static  RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
+			@(once) static RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
 			RefreshableContainerTrait.refreshContainer( this );
 		}
-};
-	panel++;
+	};
+	entries += GUI.NEXT_ROW;
+	return entries;
 });
 
 // ----
 
 /*! TransparencyRenderer	*/
-NodeEditor.registerConfigPanelProvider( MinSG.TransparencyRenderer, fn(MinSG.TransparencyRenderer state, panel){
-	panel+= "*Tansparency Renderer:*";
-	panel++;
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TransparencyRenderer, fn(MinSG.TransparencyRenderer state) {
+	var entries = getBaseTypeEntries(state);
+	entries+= "*Tansparency Renderer:*";
+	entries += GUI.NEXT_ROW;
 
 	var cb = gui.createCheckbox("Use premultiplied alpha", state.getUsePremultipliedAlpha());
 	cb.setTooltip("If checked, a blending equation for premultiplied-alpha colors is used.");
-    cb.state := state;
-    cb.onDataChanged = fn(data) {
-    	this.state.setUsePremultipliedAlpha(data);
-    };
-    panel.add(cb);
+	cb.state := state;
+	cb.onDataChanged = fn(data) {
+		this.state.setUsePremultipliedAlpha(data);
+	};
+	entries += cb;
+	return entries;
 });
 // ----
 
 //! TreeVisualization
 if(MinSG.isSet($TreeVisualization))
-NodeEditor.registerConfigPanelProvider( MinSG.TreeVisualization, fn(MinSG.TreeVisualization state, panel){
-	panel += "*Tree Visualization*";
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TreeVisualization, fn(MinSG.TreeVisualization state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*Tree Visualization*";
 
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Draw depth",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.RANGE			:	[0, 64],
@@ -1587,9 +1659,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.TreeVisualization, fn(MinSG.TreeVi
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
 
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Show splitting planes",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.ON_DATA_CHANGED	:	state -> state.setShowSplittingPlanes,
@@ -1597,9 +1669,9 @@ NodeEditor.registerConfigPanelProvider( MinSG.TreeVisualization, fn(MinSG.TreeVi
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
 
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Show bounding boxes",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.ON_DATA_CHANGED	:	state -> state.setShowBoundingBoxes,
@@ -1607,25 +1679,27 @@ NodeEditor.registerConfigPanelProvider( MinSG.TreeVisualization, fn(MinSG.TreeVi
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
 
-	panel++;
+	entries += GUI.NEXT_ROW;
 
-	panel += {
+	entries += {
 		GUI.LABEL			:	"Show lines",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.ON_DATA_CHANGED	:	state -> state.setShowLines,
 		GUI.DATA_PROVIDER	:	state -> state.getShowLines,
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
+	return entries;
 });
 
 // ----
 
 /*! TwinPartitionsRenderer	*/
 if(MinSG.isSet($TwinPartitionsRenderer))
-NodeEditor.registerConfigPanelProvider( MinSG.TwinPartitionsRenderer, fn(MinSG.TwinPartitionsRenderer state, panel){
-	panel += "*Twin Partitions Renderer:*";
-	panel++;
-	panel += {
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TwinPartitionsRenderer, fn(MinSG.TwinPartitionsRenderer state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*Twin Partitions Renderer:*";
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.LABEL			:	"Maximum runtime [k-triangles]",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.DATA_VALUE		:	state.getMaximumRuntime() / 1000,
@@ -1637,16 +1711,16 @@ NodeEditor.registerConfigPanelProvider( MinSG.TwinPartitionsRenderer, fn(MinSG.T
 								},
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.LABEL			:	"Display Textured Depth Meshes",
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.DATA_VALUE		:	state.getDrawTexturedDepthMeshes(),
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.TwinPartitionsRenderer.setDrawTexturedDepthMeshes,
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.LABEL			:	"Polygon Offset Factor",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.DATA_VALUE		:	state.getPolygonOffsetFactor(),
@@ -1655,8 +1729,8 @@ NodeEditor.registerConfigPanelProvider( MinSG.TwinPartitionsRenderer, fn(MinSG.T
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.TwinPartitionsRenderer.setPolygonOffsetFactor,
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
-	panel++;
-	panel += {
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.LABEL			:	"Polygon Offset Units",
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.DATA_VALUE		:	state.getPolygonOffsetUnits(),
@@ -1665,9 +1739,53 @@ NodeEditor.registerConfigPanelProvider( MinSG.TwinPartitionsRenderer, fn(MinSG.T
 		GUI.ON_DATA_CHANGED	:	state -> MinSG.TwinPartitionsRenderer.setPolygonOffsetUnits,
 		GUI.SIZE			:	[GUI.WIDTH_ABS, -30, 0]
 	};
+	return entries;
 });
 
-// -----------------------------------------------------------
+//! BlueSurfels
+if(MinSG.isSet($SurfelRenderer))
+	gui.registerComponentProvider('NodeEditor_ObjConfig_'+MinSG.SurfelRenderer, fn(renderer){
+		var entries = gui.createComponents( {	GUI.TYPE:GUI.TYPE_COMPONENTS, GUI.PROVIDER:'NodeEditor_ObjConfig_'+MinSG.SurfelRenderer.getBaseType().toString(), GUI.CONTEXT:renderer });
 
+		entries += {
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "Count factor",
+			GUI.RANGE : [1.0,20.0],
+			GUI.RANGE_STEP_SIZE : 1,
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getCountFactor, renderer->renderer.setCountFactor)
+		};
+		entries += GUI.NEXT_ROW;
+		
+		entries += {
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "Size factor",
+			GUI.RANGE : [1.0,20.0],
+			GUI.RANGE_STEP_SIZE : 1,
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getSizeFactor, renderer->renderer.setSizeFactor)
+		};
+		entries += GUI.NEXT_ROW;
 
+		entries += {
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "minSideLength",
+			GUI.RANGE : [1.0,1000.0],
+			GUI.RANGE_STEP_SIZE : 10,
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMinSideLength, renderer->renderer.setMinSideLength)
+		};
+		entries += GUI.NEXT_ROW;
+		
+		entries += {
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "maxSideLength",
+			GUI.RANGE : [1.0,1000.0],
+			GUI.RANGE_STEP_SIZE : 10,
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxSideLength, renderer->renderer.setMaxSideLength)
+		};
+		entries += GUI.NEXT_ROW;
+		return entries;
+	});
 // --------------------------------------------------------------------------

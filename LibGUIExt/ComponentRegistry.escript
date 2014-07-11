@@ -69,6 +69,10 @@ GUI.GUI_Manager._getComponentProviderRegistry ::= fn( ){
 		this._componentProviderRegistry @(private) := new Map;
 	return this._componentProviderRegistry;
 };
+GUI.GUI_Manager.hasRegisteredComponentProvider ::= fn(String id ){
+	var p = this._getComponentProviderRegistry();
+	return (p && p[id]) ? true : false;
+};
 
 /*! Register a function for creating gui components(e.g. menu or toolbar entries).
 	\param componentId The identifier of the group of components; if the entries provided by the provider

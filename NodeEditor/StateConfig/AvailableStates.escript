@@ -18,36 +18,36 @@
  ** Map of available states used for the "new"-button.
  **/
  
-loadOnce("LibMinSGExt/LineWidthState.escript");
+var m = new Map;
 
-var m = new Map();
-
-m["AlphaTestState"] = fn(){return new MinSG.AlphaTestState();};
-m["BlendingState"] = fn(){return new MinSG.BlendingState();};
+m["AlphaTestState"] = fn(){return new MinSG.AlphaTestState;};
+m["BlendingState"] = fn(){return new MinSG.BlendingState;};
 m["BudgetAnnotationState"] = fn() { return new MinSG.BudgetAnnotationState; };
-m["CHC renderer"] = fn(){return new MinSG.OccRenderer();};
-m["CHC++ renderer"] = fn(){return new MinSG.CHCppRenderer();};
+m["CHC renderer"] = fn(){return new MinSG.OccRenderer;};
+m["CHC++ renderer"] = fn(){return new MinSG.CHCppRenderer;};
 if(MinSG.isSet($ColorCubeRenderer))
-	m["ColorCube renderer"] = fn() { return new MinSG.ColorCubeRenderer();};
-m["CullFaceState"] = fn(){return new MinSG.CullFaceState();};
+	m["ColorCube renderer"] = fn() { return new MinSG.ColorCubeRenderer;};
+m["CullFaceState"] = fn(){return new MinSG.CullFaceState;};
 m["HOM renderer"] = fn() { return new MinSG.HOMRenderer(512); };
-m["GroupState"] = fn() { return new MinSG.GroupState(); };
-m["Lighting"] = fn(){return new MinSG.LightingState();};
-m[MinSG.LineWidthState._printableName] = fn() { return new MinSG.LineWidthState; };
-m["LOD-Renderer"] = fn(){return new MinSG.LODRenderer();};
-m["MaterialState"] = fn(){return new MinSG.MaterialState();};
+m["GroupState"] = fn() { return new MinSG.GroupState; };
+m["Lighting"] = fn(){return new MinSG.LightingState;};
+m["LineWidthState"] = fn() { return new (Std.require('LibMinSGExt/LineWidthState')); };
+m["LOD-Renderer"] = fn(){return new MinSG.LODRenderer;};
+if(MinSG.isSet($MAR))
+	m["MAR Surfel Renderer"] = fn(){return new MinSG.MAR.SurfelRenderer;};
+m["MaterialState"] = fn(){return new MinSG.MaterialState;};
 m["Mirror"] = fn() { var state = new MinSG.MirrorState(512); return state; };
-m["OccludeeRenderer"] = fn() { return new MinSG.OccludeeRenderer(); };
-m["PolygonModeState"] = fn(){return new MinSG.PolygonModeState();};
-m["ProjSizeFilterState"] = fn(){return new MinSG.ProjSizeFilterState();};
+m["OccludeeRenderer"] = fn() { return new MinSG.OccludeeRenderer; };
+m["PolygonModeState"] = fn(){return new MinSG.PolygonModeState;};
+m["ProjSizeFilterState"] = fn(){return new MinSG.ProjSizeFilterState;};
 m["Shadow"] = fn(){return new MinSG.ShadowState(4096);};
-m["Shader"] = fn(){	return new MinSG.ShaderState();	};
-m["ShaderUniform"] = fn(){	return new MinSG.ShaderUniformState();	};
+m["Shader"] = fn(){	return new MinSG.ShaderState;	};
+m["ShaderUniform"] = fn(){	return new MinSG.ShaderUniformState;	};
 m["Shader: Universal2"] = fn(){
-	var shaderState = new MinSG.ShaderState();
+	var shaderState = new MinSG.ShaderState;
 	var p = gui.createPopupWindow(200,200);
 
-	var config = new ExtObject();
+	var config = new ExtObject;
 	config.shading := DataWrapper.createFromValue("shading_phong");
 	config.color := DataWrapper.createFromValue("color_standard");
 	config.texture := DataWrapper.createFromValue("texture");
@@ -175,16 +175,14 @@ m["Shader: Universal3"] = fn(){
 	p.init();
 	return shaderState;
 };
-m["Strange renderer"] = new MinSG.StrangeExampleRenderer();
-m["Transparency Renderer"] = fn(){return new MinSG.TransparencyRenderer();};
-if(MinSG.isSet($TreeVisualization)) {
+m["Strange renderer"] = new MinSG.StrangeExampleRenderer;
+if(MinSG.isSet($SurfelRenderer))		
+	m[ "SurfelRenderer" ] = fn(){return new MinSG.SurfelRenderer;};
+m["Transparency Renderer"] = fn(){return new MinSG.TransparencyRenderer;};
+if(MinSG.isSet($TreeVisualization))
 	m["TreeVisualization"] = fn() { return new MinSG.TreeVisualization; };
-}
-m["Texture"] = fn(){return new MinSG.TextureState();};
+m["Texture"] = fn(){return new MinSG.TextureState;};
 
-if(MinSG.isSet($MAR)){
-	m["MAR Surfel Renderer"] = fn(){return new MinSG.MAR.SurfelRenderer();};
-}
 
 return m;
 // ---------------------------------------------------------------------------------------------

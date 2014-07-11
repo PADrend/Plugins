@@ -19,11 +19,23 @@
 #ifdef SG_VERTEX_SHADER
 
 vec4 sg_modelToEye(in vec4 hms);				//!	\see sgHelper.sfn
+vec4 sg_getVertexColor();						//!	\see sgHelper.sfn
 
 //! \see main.sfn
 void addVertexEffect(inout vec3 pos_ms, inout vec3 normal_ms, inout float pointSize){
-	vec3 normal_es = sg_modelToEye(vec4(normal_ms,0.0)).xyz;
-	pointSize *= dot( normalize(normal_es),vec3(0,0,1) );
+
+	// reduce point size when seeing the point from the side
+	float d = - dot( normalize(sg_modelToEye(vec4(normal_ms,0.0)).xyz),  normalize(sg_modelToEye(vec4(pos_ms,1.0)).xyz)  );
+
+
+//		vec3 normal_es = sg_modelToEye(vec4(normal_ms,0.0)).xyz;
+//	float d = dot( normalize(normal_es),vec3(0,0,1) );
+
+	if(d>0){ // front facing?
+		d = (0.5*d + 0.5) * sg_getVertexColor().a; // adjust size according to (hopefully) unused vertex alpha value.
+//		d = (0.5*d + 0.5) ;
+	}
+	pointSize *= d;
 }
 
 #endif
