@@ -4,7 +4,7 @@
  * Web page: http://www.padrend.de/
  * Copyright (C) 2012 Benjamin Eikel <benjamin@eikel.org>
  * Copyright (C) 2012-2014 Claudius Jähn <claudius@uni-paderborn.de>
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -15,6 +15,8 @@
 /*! A TextureProcessor converts some input textures into some output textures
 	using a shader. It is just a wrapper for some simple fbo handling, but
 	can simplify your code.
+	\note To bind a specific layer or level of a texture as output texture,
+            use [Texture,level, layer] as texture parameter.
 	\code
 	(new TextureProcessor)
 		.setInputTextures([colorInput1,colorInput2])
@@ -22,7 +24,7 @@
 		.setOutputDepthTexture( myDepthTexture )
 		.setShader(myPPEffect)
 		.execute();
-	
+
 	// or
 	var tp = (new TextureProcessor)
 		.setInputTextures([colorInput1,colorInput2])
@@ -30,7 +32,7 @@
 		.setOutputDepthTexture( myDepthTexture );
 	tp.begin();
 	// render something
-	tp.end(); 
+	tp.end();
 	// resultingTexture & myDepthTexture contain the resulting image.
 */
 var T = new Type();
@@ -38,7 +40,7 @@ T._printableName @(override) := $TextureProcessor;
 T.outputDepthTexture @(private) := void;
 T.fbo @(private) := void;
 T.inputTextures @(private,init) := Array;
-T.outputTextures @(private,init) := Array;
+T.outputTextures @(private,init) := Array; // [  [array,level,layer]* ]
 T.shader @(private) := void;
 T.width @(private) := 0;
 T.height @(private) := 0;
@@ -47,7 +49,7 @@ T.getDepthTexture	::= fn(){	return outputDepthTexture;	};
 T.getInputTextures	::= fn(){	return inputTextures.clone();	};
 T.getOutputTextures	::= fn(){	return outputTextures.clone();	};
 T.getResolution		::= fn(){	return new Geometry.Vec2(width,height);	};
-T.getShader 			::= fn(){	return shader;	};
+T.getShader 		::= fn(){	return shader;	};
 
 T.setShader ::= fn([Rendering.Shader,void] _shader){
 	shader = _shader;
@@ -62,12 +64,17 @@ T.setInputTextures ::= fn(Array _inputTextures){
 	inputTextures = _inputTextures.clone();
 	return this;
 };
-T.setOutputTexture ::= fn(Rendering.Texture _outputTexture){
-	outputTextures = [_outputTexture];
+T.setOutputTexture ::= fn( [Rendering.Texture,Array] _outputTexture){
+	outputTextures = _outputTexture.isA(Array) ? [_outputTexture] :  [ [_outputTexture,0,0] ];
+    assert(outputTextures.back()[0].isA(Rendering.Texture));
 	return this;
 };
 T.setOutputTextures ::= fn(Array _outputTextures){
-	outputTextures = _outputTextures.clone();
+	outputTextures = [];
+	foreach( _outputTextures as var entry){
+	    outputTextures += entry.isA(Array) ? entry.clone() :  [ [entry,0,0] ];
+	    assert(outputTextures.back()[0].isA(Rendering.Texture));
+	}
 	return this;
 };
 T.setOutputDepthTexture ::= fn([Rendering.Texture,void] _outputDepthTexture){
@@ -83,20 +90,21 @@ T.begin ::= fn(){
 	}
 	if(!fbo)
 		fbo = new Rendering.FBO;
-	
-	renderingContext.pushAndSetFBO(fbo);
-	foreach(outputTextures as var index,var t)
-		fbo.attachColorTexture(renderingContext,t,index);
 
+	renderingContext.pushAndSetFBO(fbo);
+	foreach(outputTextures as var index,var textureEntry){
+        fbo.attachColorTexture(renderingContext,textureEntry[0],index,textureEntry.get(1,0),textureEntry.get(2,0));
+
+	}
 	if(outputDepthTexture)
 		fbo.attachDepthTexture(renderingContext,outputDepthTexture);
 
 	fbo.setDrawBuffers(outputTextures.count());
-
-	//out(fbo.getStatusMessage(renderingContext),"\n");
+// 	out(fbo.getStatusMessage(renderingContext),"\n");
 	if(shader){
 		try{
 			renderingContext.pushAndSetShader(shader);
+			 outln( __FILE__,":",__LINE__); Rendering.checkGLError();
 		}catch(e){
 			renderingContext.popFBO();
 			fbo = void; // clear all attachments
@@ -104,9 +112,8 @@ T.begin ::= fn(){
 		}
 	}
 
-
-	width = outputTextures.front().getWidth();
-	height = outputTextures.front().getHeight();
+	width = outputTextures.front()[0].getWidth();
+	height = outputTextures.front()[0].getHeight();
 	renderingContext.pushAndSetScissor(new Rendering.ScissorParameters(new Geometry.Rect(0,0,width,height)));
 	renderingContext.pushViewport();
 	renderingContext.setViewport(0,0,width,height);
