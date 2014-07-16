@@ -13,8 +13,10 @@
  */
 
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/EnvironmentTextureTrait');
-@(once) static TextureProcessor = Std.require('LibRenderingExt/TextureProcessor');
-static directions = [
+static eventLoop = Util.requirePlugin('PADrend/EventLoop');
+static size = 256;
+trait.onInit += fn(node){
+    @(once) trait.directions := [
         [ new Geometry.Vec3( 0,  0,  1), new Geometry.Vec3(0, 1, 0), 0],
         [ new Geometry.Vec3( 1,  0,  0), new Geometry.Vec3(0, 1, 0), 1],
         [ new Geometry.Vec3( 0,  0, -1), new Geometry.Vec3(0, 1, 0), 2],
@@ -22,36 +24,20 @@ static directions = [
         [ new Geometry.Vec3( 0,  1,  0), new Geometry.Vec3(1, 0, 0), 4],
         [ new Geometry.Vec3( 0, -1,  0), new Geometry.Vec3(1, 0, 0), 5]
     ];
-static size = 256;
-static camera = new MinSG.CameraNode(90, 1.0, 1, 5000);
-static tp = (new TextureProcessor)
-        .setOutputDepthTexture( Rendering.createDepthCubeTexture(size, size) );
-static color_texture = Rendering.createStdCubeTexture(size, size, true);
-//static color_texture = Rendering.createStdTexture(size, size, true);
+    @(once) trait.camera := new MinSG.CameraNode(90, 1.0, 1, 5000);
+    trait.camera.setViewport(new Geometry.Rect(0, 0, size, size));
+    @(once) trait.tp := (new (Std.require('LibRenderingExt/TextureProcessor')))
+        .setOutputDepthTexture( Rendering.createDepthTexture(size, size) );
 
-static index = 0;
-trait.onInit += fn(node){
-    camera.setViewport(new Geometry.Rect(0, 0, size, size));
-    var text= [];
-
-//    foreach(directions as var dirArray){
-//        var color_texture = Rendering.createStdCubeTexture(size, size, true);
-//        camera.setSRT(new Geometry.SRT(node.getWorldOrigin(), dirArray[0], dirArray[1]));
-//        tp.setOutputTextures( [color_texture, dirArray[2], dirArray[2]] )
-//            .begin();
-//        PADrend.renderScene(PADrend.getRootNode(), camera, PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
-//        color_texture.download(renderingContext);
-//        text+=color_texture;
-//        tp.end();
-//
-//    }
-//
-//    foreach (text as var texture){
-//        var filename = new Util.FileName(__DIR__+"/TestImages/testImage"+ id+".png");
-//        Rendering.saveTexture(renderingContext, texture, filename);
-//        Rendering.showDebugTexture(texture);
-//        id++;
-//    }
+    trait.stateWrapper := DataWrapper.createFromValue(" ");
+    trait.stateWrapper.onDataChanged += fn(data){
+        var state = new MinSG.TextureState();
+        PADrend.getSceneManager().registerState(data,state);
+    };
+    trait.layerWrapper := DataWrapper.createFromValue(1);
+//    trait.layerWrapper.onDataChanged += fn(data){
+//        eventLoop.setRenderingLayers(data);
+//    };
 
 };
 
@@ -62,36 +48,53 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [
 			{
-				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : "create img",
-				GUI.ON_CLICK: [node]=>fn(node){
-                    if(index < 6){
-                        var dirArray = directions[index];
-                        outln( __FILE__,":",__LINE__); Rendering.checkGLError();
-                        camera.setSRT(new Geometry.SRT(node.getWorldOrigin(), dirArray[0], dirArray[1]));
-                        outln( __FILE__,":",__LINE__); Rendering.checkGLError();
-                        tp.setOutputTexture( [color_texture, 0, dirArray[2]] );
+                GUI.TYPE : GUI.TYPE_TEXT,
+                GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS, 10, 20],
+                GUI.LABEL : "StateIds",
+                GUI.OPTIONS_PROVIDER : fn(){
+                        var stateNames = PADrend.getSceneManager().getNamesOfRegisteredStates();
+                        if(stateNames.size() >0){
+                            stateNames.sort();
+                            return stateNames;
+                        }
+                        else
+                            return;
 
-                        outln( __FILE__,":",__LINE__); Rendering.checkGLError();
-                        tp.begin();
-                        outln( __FILE__,":",__LINE__); Rendering.checkGLError(); outln(">>>>");
-                        PADrend.renderScene(PADrend.getRootNode(), camera, PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
-                        outln( __FILE__,":",__LINE__); Rendering.checkGLError();
-                        tp.end();
-                        outln( __FILE__,":",__LINE__); Rendering.checkGLError();
-
-//                        index++;
-
-                    }
-                    else{
-                        outln("All images are created!");
-                        Rendering.showDebugTexture(color_texture);
-                    }
-
-                }
-
+                    },
+                GUI.DATA_WRAPPER : trait.stateWrapper
+			},
+			{   GUI.TYPE : GUI.TYPE_NEXT_ROW},
+			{
+                GUI.TYPE : GUI.TYPE_NUMBER,
+                GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS, 10, 20],
+                GUI.LABEL : "Rendering layers",
+                GUI.DATA_WRAPPER : trait.layerWrapper
 			},
 
+			{   GUI.TYPE : GUI.TYPE_NEXT_ROW},
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "create img",
+				GUI.ON_CLICK: [node, trait.stateWrapper, trait.layerWrapper]=>fn(node, stateWrapper, layerWrapper){
+				    if(stateWrapper()==" "){
+                        outln("No state selected or no state existed");
+				    }
+				    else{
+                        var color_texture = Rendering.createStdCubeTexture(size, size);
+                        eventLoop.setRenderingLayers(layerWrapper());
+                        foreach(trait.directions as var dirArray){
+                            trait.camera.setSRT(new Geometry.SRT(node.getWorldOrigin(), dirArray[0], dirArray[1]));
+                            trait.tp.setOutputTexture( [color_texture, 0, dirArray[2]] );
+                            trait.tp.begin();
+                            PADrend.renderScene(PADrend.getRootNode(), trait.camera, PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
+                            trait.tp.end();
+                            var state =  PADrend.getSceneManager().getRegisteredState(stateWrapper());
+                            state.setTexture(color_texture);
+                        }
+
+				    }
+                }
+			}
 		];
 	});
 });
