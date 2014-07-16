@@ -16,13 +16,14 @@ static trait = new MinSG.PersistentNodeTrait('ObjectTraits/EnvironmentTextureTra
 static eventLoop = Util.requirePlugin('PADrend/EventLoop');
 static size = 256;
 trait.onInit += fn(node){
+
     @(once) trait.directions := [
-        [ new Geometry.Vec3( 0,  0,  1), new Geometry.Vec3(0, 1, 0), 0],
-        [ new Geometry.Vec3( 1,  0,  0), new Geometry.Vec3(0, 1, 0), 1],
-        [ new Geometry.Vec3( 0,  0, -1), new Geometry.Vec3(0, 1, 0), 2],
-        [ new Geometry.Vec3(-1,  0,  0), new Geometry.Vec3(0, 1, 0), 3],
-        [ new Geometry.Vec3( 0,  1,  0), new Geometry.Vec3(1, 0, 0), 4],
-        [ new Geometry.Vec3( 0, -1,  0), new Geometry.Vec3(1, 0, 0), 5]
+        [ new Geometry.Vec3( 1,  0,  0), new Geometry.Vec3(0, 1, 0), 0],
+        [ new Geometry.Vec3(-1,  0,  0), new Geometry.Vec3(0, 1, 0), 1],
+        [ new Geometry.Vec3( 0,  1,  0), new Geometry.Vec3(1, 0, 0), 2],
+        [ new Geometry.Vec3( 0, -1,  0), new Geometry.Vec3(1, 0, 0), 3],
+        [ new Geometry.Vec3( 0,  0,  1), new Geometry.Vec3(0, 1, 0), 4],
+        [ new Geometry.Vec3( 0,  0, -1), new Geometry.Vec3(0, 1, 0), 5]
     ];
     @(once) trait.camera := new MinSG.CameraNode(90, 1.0, 1, 5000);
     trait.camera.setViewport(new Geometry.Rect(0, 0, size, size));
@@ -90,6 +91,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
                             trait.tp.end();
                             var state =  PADrend.getSceneManager().getRegisteredState(stateWrapper());
                             state.setTexture(color_texture);
+                            outln("Cube texture is created");
                         }
 
 				    }
