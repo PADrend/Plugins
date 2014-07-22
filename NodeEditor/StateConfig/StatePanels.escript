@@ -1529,6 +1529,22 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TextureState, fn(MinSG.Textu
 	var config_createMipmaps = new Std.DataWrapper(false);
 	var config_textureType = new Std.DataWrapper(Rendering.Texture.TEXTURE_2D);
 	var config_numLayers = new Std.DataWrapper(1);
+	
+	config_textureType.onDataChanged += [config_numLayers] => fn(config_numLayers, type){
+		switch(type){
+			case Rendering.Texture.TEXTURE_1D:
+			case Rendering.Texture.TEXTURE_2D:
+			case Rendering.Texture.TEXTURE_BUFFER:
+				config_numLayers(1);
+				break;
+			case Rendering.Texture.TEXTURE_CUBE_MAP:
+				config_numLayers(6);
+				break;
+			case Rendering.Texture.TEXTURE_CUBE_MAP_ARRAY:
+				config_numLayers( (((config_numLayers()-1)/6).floor()+1)*6 );
+				break;
+		}
+	};
 
 	var texture = state.getTexture();
 	if(texture){
