@@ -1211,70 +1211,18 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 		GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS , 2 ,100 ]
 	});
 	entries+=tv;
-	var	uniformInputList = [];
-
-	tv.refresh := [uniformContainer,uniformInputList] => fn(uniformContainer,uniformInputList){
-		this.clear();
-		uniformInputList.clear();
-		var uniforms = uniformContainer.getUniforms();
-		uniforms+=new Rendering.Uniform('',Rendering.Uniform.FLOAT,[0]);
-		foreach(uniforms as var uniform){
-			var entry=gui.createContainer(400,20);
-			this.add(entry);
-			// name
-			var nameTF=gui.createTextfield(100,15,uniform.getName());
-			nameTF.onDataChanged := this->apply;
-			nameTF.setPosition(0,2);
-			entry.add(nameTF);
-
-			var typeDD=gui.createDropdown(80,15);
-			typeDD.setPosition( 100,2 );
-			typeDD.addOption(Rendering.Uniform.BOOL,"BOOL");
-			typeDD.addOption(Rendering.Uniform.INT,"INT");
-			typeDD.addOption(Rendering.Uniform.FLOAT,"FLOAT");
-			typeDD.addOption(Rendering.Uniform.VEC2F,"VEC2F");
-			typeDD.addOption(Rendering.Uniform.VEC3F,"VEC3F");
-			typeDD.addOption(Rendering.Uniform.VEC4F,"VEC4F");
-			typeDD.addOption(Rendering.Uniform.VEC2I,"VEC2I");
-			typeDD.addOption(Rendering.Uniform.VEC3I,"VEC3I");
-			typeDD.addOption(Rendering.Uniform.VEC4I,"VEC4I");
-			typeDD.addOption(Rendering.Uniform.VEC2B,"VEC2B");
-			typeDD.addOption(Rendering.Uniform.VEC3B,"VEC3B");
-			typeDD.addOption(Rendering.Uniform.VEC4B,"VEC4B");
-			typeDD.addOption(Rendering.Uniform.MATRIX_2X2F,"MATRIX_2X2F");
-			typeDD.addOption(Rendering.Uniform.MATRIX_3X3F,"MATRIX_3X3F");
-			typeDD.addOption(Rendering.Uniform.MATRIX_4X4F,"MATRIX_4X4F");
-			typeDD.setData(uniform.getType());
-			typeDD.onDataChanged := this->apply;
-			entry.add(typeDD);
-
-			// data
-			var dataTF=gui.createTextfield(150,15,toJSON(uniform.getData(),false));
-			dataTF.onDataChanged := this->apply;
-			dataTF.setPosition(180,2);
-			entry.add(dataTF);
-
-			uniformInputList+=[nameTF,typeDD,dataTF];
-
-			var removeButton=gui.createButton(20,15,"-");
-			entry.add(removeButton);
-			removeButton.setPosition(350,2);
-			removeButton.onClick = [nameTF,this] => fn(nameTF,tv){
-				nameTF.setText("");
-				tv.apply();
-			};
-		}
-	};
-	tv.apply := [uniformContainer,uniformInputList] => fn(uniformContainer,uniformInputList,...){
+	var	uniformDataList = [];
+	
+	var apply = [uniformContainer,uniformDataList,tv] => fn(uniformContainer,uniformDataList,tv,...){
 		out("Setting uniforms: \n");
 		uniformContainer.removeUniforms();
 		// add new uniforms
-		foreach(uniformInputList as var entry){
-			var name=entry[0].getData().trim();
+		foreach(uniformDataList as var entry){
+			var name=entry[0]().trim();
 			if(name=="")
 				continue;
-			var type=entry[1].getData();
-			var data=parseJSON(entry[2].getData().trim());
+			var type=entry[1]();
+			var data=parseJSON(entry[2]().trim());
 
 			var u = new Rendering.Uniform(name,type,data);
 //				out(entry.nameTF.getText().trim());
@@ -1282,9 +1230,73 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 			uniformContainer.setUniform(u);
 //			print_r(uniformContainer.getUniform(name).getData());
 		}
-		refresh();
+		tv.refresh();
 		out("\n");
 	};
+	
+	tv.refresh := [uniformContainer,uniformDataList,apply] => fn(uniformContainer,uniformDataList,apply){
+		this.clear();
+		uniformDataList.clear();
+		var uniforms = uniformContainer.getUniforms();
+		uniforms.sort( fn(u0,u1){return u0.getName()<u1.getName();});
+		uniforms+=new Rendering.Uniform('',Rendering.Uniform.FLOAT,[0]);
+		foreach(uniforms as var uniform){
+			var name = new Std.DataWrapper(uniform.getName());
+			name.onDataChanged += apply;
+			var type = new Std.DataWrapper(uniform.getType());
+			type.onDataChanged += apply;
+			var value = new Std.DataWrapper(toJSON(uniform.getData(),false));
+			value.onDataChanged += apply;
+			uniformDataList += [name,type,value];
+			
+			this += {
+				GUI.TYPE : GUI.TYPE_CONTAINER,
+				GUI.LAYOUT : GUI.LAYOUT_FLOW,
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,2,20],
+				GUI.CONTENTS : [
+					{
+						GUI.TYPE : GUI.TYPE_TEXT,
+						GUI.DATA_WRAPPER : name,
+						GUI.SIZE : [GUI.WIDTH_REL,0.4,0],
+					},
+					{
+						GUI.TYPE : GUI.TYPE_SELECT,
+						GUI.DATA_WRAPPER : type,
+						GUI.OPTIONS : [
+							[Rendering.Uniform.BOOL,"BOOL"],
+							[Rendering.Uniform.INT,"INT"],
+							[Rendering.Uniform.FLOAT,"FLOAT"],
+							[Rendering.Uniform.VEC2F,"VEC2F"],
+							[Rendering.Uniform.VEC3F,"VEC3F"],
+							[Rendering.Uniform.VEC4F,"VEC4F"],
+							[Rendering.Uniform.VEC2I,"VEC2I"],
+							[Rendering.Uniform.VEC3I,"VEC3I"],
+							[Rendering.Uniform.VEC4I,"VEC4I"],
+							[Rendering.Uniform.VEC2B,"VEC2B"],
+							[Rendering.Uniform.VEC3B,"VEC3B"],
+							[Rendering.Uniform.VEC4B,"VEC4B"],
+							[Rendering.Uniform.MATRIX_2X2F,"MATRIX_2X2F"],
+							[Rendering.Uniform.MATRIX_3X3F,"MATRIX_3X3F"],
+							[Rendering.Uniform.MATRIX_4X4F,"MATRIX_4X4F"],
+						],
+						GUI.SIZE : [GUI.WIDTH_REL,0.2,0],
+					},
+					{
+						GUI.TYPE : GUI.TYPE_TEXT,
+						GUI.DATA_WRAPPER : value,
+						GUI.SIZE : [GUI.WIDTH_FILL_ABS,20,0],
+					},
+					{
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "-",
+						GUI.ON_CLICK : [""] => name,
+						GUI.SIZE : [GUI.WIDTH_FILL_ABS,2,0],
+					},
+				]
+			};
+		}
+	};
+
 
 	tv.refresh();
 
@@ -1325,7 +1337,10 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 				GUI.WIDTH : 250,
 				GUI.HEIGHT : 200,
 			};
-			foreach(shaderState.getShader().getActiveUniforms() as var uniform){
+			var activeUniforms = shaderState.getShader().getActiveUniforms();
+//			print_r(activeUniforms);
+			activeUniforms.sort( fn(u0,u1){return u0.getName()<u1.getName();});
+			foreach(activeUniforms as var uniform){
 				// split uniform's name by '.' to identifiy the uniform struct-group
 				var s = uniform.getName();
 				if(s.beginsWith("gl_")) // create group for gl uniforms
@@ -1350,7 +1365,8 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 				currentMap[GUI.OPTIONS] += {
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : name+" ("+uniform.getNumValues()+")",
-					GUI.WIDTH : 180,
+					GUI.SIZE : [GUI.WIDTH_FILL_ABS,20,0],
+					GUI.TEXT_ALIGNMENT : (GUI.TEXT_ALIGN_LEFT | GUI.TEXT_ALIGN_MIDDLE),
 					GUI.ON_CLICK : [uniformContainer,uniform,treeView] => fn(uniformContainer,uniform,treeView){
 						uniformContainer.setUniform(uniform);
 						treeView.refresh();
