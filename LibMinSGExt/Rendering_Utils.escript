@@ -21,6 +21,12 @@
 
 //! Show the given texture on the sceen for the given time and swap the frame buffer.
 Rendering.showDebugTexture := fn(Rendering.Texture t, time = 0.5){
+	
+	if( t.getTextureType()!=Rendering.Texture.TEXTURE_2D ){
+		var b = Rendering.createBitmapFromTexture( renderingContext, t );
+		t = Rendering.createTextureFromBitmap( b );
+	}
+	
 	renderingContext.pushAndSetScissor(new Rendering.ScissorParameters(new Geometry.Rect(0,0,t.getWidth(),t.getHeight())));
 	renderingContext.pushViewport();
 	renderingContext.setViewport(0,0,t.getWidth(),t.getHeight());
