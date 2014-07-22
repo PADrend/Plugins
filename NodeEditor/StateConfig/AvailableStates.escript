@@ -48,11 +48,11 @@ m["Shader: Universal2"] = fn(){
 	var p = gui.createPopupWindow(200,200);
 
 	var config = new ExtObject;
-	config.shading := DataWrapper.createFromValue("shading_phong");
-	config.color := DataWrapper.createFromValue("color_standard");
-	config.texture := DataWrapper.createFromValue("texture");
-	config.shadow := DataWrapper.createFromValue("shadow_disabled");
-	config.effect := DataWrapper.createFromValue("effect_disabled");
+	config.shading := new Std.DataWrapper("shading_phong");
+	config.color := new Std.DataWrapper("color_standard");
+	config.texture := new Std.DataWrapper("texture");
+	config.shadow := new Std.DataWrapper("shadow_disabled");
+	config.effect := new Std.DataWrapper("effect_disabled");
 	config.shaderState := shaderState;
 
 	p.addOption({
@@ -115,16 +115,16 @@ m["Shader: Universal2"] = fn(){
 	p.init();
 	return shaderState;
 };
-m["Shader: Universal3"] = fn(){
+m["Shader: U3(compose)"] = fn(){
 	var shaderState = new MinSG.ShaderState;
 	var p = gui.createPopupWindow(200,200);
 
 	var config = new ExtObject;
-	config.vertexEffect := DataWrapper.createFromValue("vertexEffect_none");
-	config.surfaceProps := DataWrapper.createFromValue("surfaceProps_matTex");
-	config.surfaceEffect := DataWrapper.createFromValue("surfaceEffect_none");
-	config.lighting := DataWrapper.createFromValue("lighting_phong");
-	config.fragmentEffect := DataWrapper.createFromValue("fragmentEffect_none");
+	config.vertexEffect := new Std.DataWrapper("vertexEffect_none");
+	config.surfaceProps := new Std.DataWrapper("surfaceProps_matTex");
+	config.surfaceEffect := new Std.DataWrapper("surfaceEffect_none");
+	config.lighting := new Std.DataWrapper("lighting_phong");
+	config.fragmentEffect := new Std.DataWrapper("fragmentEffect_none");
 	config.shaderState := shaderState;
 
 	p.addOption({
@@ -149,7 +149,7 @@ m["Shader: Universal3"] = fn(){
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "lighting",
 		GUI.DATA_WRAPPER :  config.lighting,
-		GUI.OPTIONS : ["lighting_none","lighting_phong","lighting_shadow" ]
+		GUI.OPTIONS : ["lighting_none","lighting_phong","lighting_phongEnv","lighting_shadow" ]
 	});
 	p.addOption({
 		GUI.TYPE : GUI.TYPE_TEXT,
@@ -171,8 +171,51 @@ m["Shader: Universal3"] = fn(){
 		NodeEditor.refreshSelectedNodes(); // refresh the gui
 
 	} );
+	p.addAction( "Cancel" );
 
 	p.init();
+	return shaderState;
+};
+m["Shader: U3(preset)"] = fn(){
+
+	var shaderState = new MinSG.ShaderState;
+
+	var preset = new Std.DataWrapper("");
+	preset.onDataChanged += [shaderState] => fn(shaderState, presetName){
+		shaderState.getStateAttributeWrapper(MinSG.ShaderState.STATE_ATTR_SHADER_NAME)(presetName);
+		shaderState.recreateShader( PADrend.getSceneManager() );
+	};
+	
+	gui.openDialog({
+		GUI.TYPE : GUI.TYPE_POPUP_DIALOG,
+		GUI.LABEL : "Init ShaderState with shader preset",
+		GUI.ACTIONS : ["Done"],
+		GUI.SIZE : [400,100],
+		GUI.OPTIONS : [
+			{
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.LABEL : "Preset:",
+				GUI.OPTIONS_PROVIDER : fn(){
+					var entries = [""];
+					foreach(PADrend.getSceneManager()._getSearchPaths() as var path){
+						foreach(Util.getFilesInDir(path,[".shader"]) as var filename){
+							entries += (new Util.FileName(filename)).getFile();
+						}
+					}
+					return entries;
+				},
+				GUI.DATA_WRAPPER : preset
+			}
+		]
+	});
+	preset( "universal3_default.shader" );
+	
+	return shaderState;
+
+
+	
+	
+	
 	return shaderState;
 };
 m["Strange renderer"] = new MinSG.StrangeExampleRenderer;
