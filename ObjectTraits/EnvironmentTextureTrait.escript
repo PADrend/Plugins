@@ -18,12 +18,12 @@ static size = 256;
 trait.onInit += fn(node){
 
     @(once) trait.directions := [
-        [ new Geometry.Vec3( 1,  0,  0), new Geometry.Vec3(0, 1, 0), 0],
-        [ new Geometry.Vec3(-1,  0,  0), new Geometry.Vec3(0, 1, 0), 1],
-        [ new Geometry.Vec3( 0,  1,  0), new Geometry.Vec3(1, 0, 0), 2],
-        [ new Geometry.Vec3( 0, -1,  0), new Geometry.Vec3(1, 0, 0), 3],
-        [ new Geometry.Vec3( 0,  0,  1), new Geometry.Vec3(0, 1, 0), 4],
-        [ new Geometry.Vec3( 0,  0, -1), new Geometry.Vec3(0, 1, 0), 5]
+        [ new Geometry.Vec3(-1,  0,  0), new Geometry.Vec3(0, -1, 0) ],
+        [ new Geometry.Vec3( 1,  0,  0), new Geometry.Vec3(0, -1, 0) ],
+        [ new Geometry.Vec3( 0, -1,  0), new Geometry.Vec3(0, 0, 1) ],
+        [ new Geometry.Vec3( 0,  1,  0), new Geometry.Vec3(0, 0, 1) ],
+        [ new Geometry.Vec3( 0,  0, -1), new Geometry.Vec3(0, -1, 0) ],
+        [ new Geometry.Vec3( 0,  0,  1), new Geometry.Vec3(0, -1, 0) ],
     ];
     @(once) trait.camera := new MinSG.CameraNode(90, 1.0, 1, 5000);
     trait.camera.setViewport(new Geometry.Rect(0, 0, size, size));
@@ -81,18 +81,18 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
                         outln("No state selected or no state existed");
 				    }
 				    else{
-                        var color_texture = Rendering.createStdCubeTexture(size, size);
+                        var color_texture = Rendering.createHDRCubeTexture(size, size);
                         eventLoop.setRenderingLayers(layerWrapper());
-                        foreach(trait.directions as var dirArray){
-                            trait.camera.setSRT(new Geometry.SRT(node.getWorldOrigin(), dirArray[0], dirArray[1]));
-                            trait.tp.setOutputTexture( [color_texture, 0, dirArray[2]] );
+                        foreach(trait.directions as var i,var dirArray){
+                            trait.camera.setSRT(new Geometry.SRT(node.getWorldBB().getCenter(), dirArray[0], dirArray[1]));
+                            trait.tp.setOutputTexture( [color_texture, 0, i] );
                             trait.tp.begin();
                             PADrend.renderScene(PADrend.getRootNode(), trait.camera, PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
                             trait.tp.end();
                             var state =  PADrend.getSceneManager().getRegisteredState(stateWrapper());
                             state.setTexture(color_texture);
-                            outln("Cube texture is created");
                         }
+                        outln("Cube texture is created");
 
 				    }
                 }
