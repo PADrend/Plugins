@@ -155,7 +155,8 @@ plugin.registerStdToolbarEntries := fn() {
 	};
 
 	// scenes subgroup
-	gui.registerComponentProvider('PADrend_FileMenu.10_scene',[
+	gui.registerComponentProvider('PADrend_FileMenu.10_scene',fn(){
+		var entries = [
 		{
 			GUI.LABEL		:	"Load Scene ...",
 			GUI.TOOLTIP		:	"Show a dialog to choose a file, and read a scene from that file.\nSupported types: .minsg, .dae",
@@ -273,34 +274,39 @@ plugin.registerStdToolbarEntries := fn() {
 				return entries;
 			}
 									
-		},
-		{
-			GUI.TYPE		:	GUI.TYPE_CRITICAL_BUTTON,
-			GUI.LABEL		:	"Save scene",
-			GUI.ON_CLICK	:	fn() {
-				var scene = PADrend.getCurrentScene();
-				var filename = scene.isSet($filename) ? scene.filename : void;
-				if(filename){
-					PADrend.message("Save scene \""+filename+"\"");
-					if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
-						PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());
-					} else {
-						PADrend.getSceneManager().saveMinSGFile(filename,[scene]);
+		}];
+		if(PADrend.getCurrentScene().isSet($filename)){
+			entries += {
+				GUI.TYPE		:	GUI.TYPE_CRITICAL_BUTTON,
+				GUI.LABEL		:	"Save scene",
+				GUI.ON_CLICK	:	fn() {
+					var scene = PADrend.getCurrentScene();
+					var filename = scene.isSet($filename) ? scene.filename : void;
+					if(filename){
+						PADrend.message("Save scene \""+filename+"\"");
+						if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
+							PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());
+						} else {
+							PADrend.getSceneManager().saveMinSGFile(filename,[scene]);
+						}
+						// Re-select it to provoke an update where necessary.
+						executeExtensions('PADrend_OnSceneSelected',scene );
+					}else{
+						openSaveSceneDialog();
 					}
-					// Re-select it to provoke an update where necessary.
-					executeExtensions('PADrend_OnSceneSelected',scene );
-				}else{
-					openSaveSceneDialog();
-				}
-			}
-		},
-		{
+				},
+				GUI.TOOLTIP : "Save scene as "+ PADrend.getCurrentScene().filename
+			};
+		}
+		entries +={
 			GUI.TYPE		:	GUI.TYPE_BUTTON,
 			GUI.LABEL		:	"Save scene as ...",
 			GUI.TOOLTIP		:	"Show a dialog to choose a file, and write the current scene into that file.\nSupported types: .minsg, .dae",
 			GUI.ON_CLICK	:	openSaveSceneDialog
+		};
+		return entries;
 		}
-	]);
+	);
 
 	// meshes subgroup
 	gui.registerComponentProvider('PADrend_FileMenu.20_meshes',[
