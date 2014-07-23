@@ -16,7 +16,7 @@
  *	Static factories and registry for evaluators.
  */
 
-GLOBALS.EvaluatorManager := new ExtObject();
+static EvaluatorManager = new ExtObject;
 
 EvaluatorManager.evaluators := [];
 EvaluatorManager.evaluator := false;
@@ -62,5 +62,5 @@ EvaluatorManager.updateEvaluatorList := fn( [String,void] select=void){
 			this.selectEvaluator(e);
 		}
 	}
-	
 };
+return EvaluatorManager;

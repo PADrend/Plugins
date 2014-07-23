@@ -61,7 +61,7 @@ EvaluatorPlugin.init = fn() {
 	{
 		loadOnce(__DIR__ + "/Evaluator.escript");
 		loadOnce(__DIR__ + "/Evaluators.escript");
-		loadOnce(__DIR__ + "/EvaluatorManager.escript");
+		GLOBALS.EvaluatorManager := Std.require('Evaluator/EvaluatorManager');
 	}
 	{ /// Register ExtensionPointHandler:
 		registerExtension('PADrend_Init', this->fn(){
@@ -144,6 +144,7 @@ EvaluatorPlugin.createWindow := fn( posX, posY) {
 
 //! (static)
 EvaluatorPlugin.createConfigPanel := fn() {
+	static EvaluatorManager = Std.require('Evaluator/EvaluatorManager');
 	var panel = gui.create({
 		GUI.TYPE			:	GUI.TYPE_CONTAINER,
 		GUI.SIZE			:	GUI.SIZE_MAXIMIZE,

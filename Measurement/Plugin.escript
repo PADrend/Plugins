@@ -70,7 +70,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 		panel += "*Tests along current path using evaluator*";
 		panel++;
 
-		var currentEvaluator = EvaluatorManager.getSelectedEvaluator();
+		var currentEvaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
 		var evaluatorName = DataWrapper.createFromValue(currentEvaluator ? currentEvaluator.name() : "");
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_TEXT,
