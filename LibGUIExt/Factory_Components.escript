@@ -682,11 +682,15 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 		// optional contents (children)
 		{
 			var contents = description[GUI.CONTENTS];
-			if( contents && !skipAddingContents ){
-				foreach( this.createComponents({
-								GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
-								GUI.PROVIDER : contents }) as var c)
-					component+=c;
+			if( contents ){
+				if(!skipAddingContents ){
+					foreach( this.createComponents({
+									GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
+									GUI.PROVIDER : contents }) as var c)
+						component+=c;
+				}
+				if(contents.isA(String))// for debugging
+					component._componentId := contents;
 			}
 		}
 

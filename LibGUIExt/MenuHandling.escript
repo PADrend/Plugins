@@ -22,6 +22,9 @@ GUI.GUI_Manager._createMenu ::= GUI.GUI_Manager.createMenu;
 GUI.GUI_Manager.createMenu ::= fn(mixed = void, width = 150, context...){
 	var menu = gui._createMenu(GUI.ONE_TIME_MENU);
 	if(mixed){
+		if(mixed.isA(String))	// for debugging
+			menu._componentId := mixed;
+		
 		var components = this.createComponents({
 								GUI.TYPE : 				GUI.TYPE_MENU_ENTRIES,
 								GUI.PROVIDER :			mixed,

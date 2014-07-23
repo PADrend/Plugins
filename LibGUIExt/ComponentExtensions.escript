@@ -154,8 +154,10 @@ GUI.Container.add::=fn(componentOrArrayOrDescription){
 	}
 	return this._add(gui.create(componentOrArrayOrDescription));
 };
-GUI.Container.append ::= fn( p... ){
-	foreach( gui.createComponents( p... ) as var c)
+GUI.Container.append ::= fn( mixed,p... ){
+	if(mixed.isA(String))// for debugging
+		this._componentId := mixed;
+	foreach( gui.createComponents( mixed,p... ) as var c)
 		this._add(c);
 	return this;
 };
@@ -190,6 +192,8 @@ GUI.TabbedPanel.addTab ::= fn(String title,content,tooltip=false){
 	return t;
 };
 GUI.TabbedPanel.addTabs ::= fn( tabsOrComponentId){
+	if(tabsOrComponentId.isA(String))// for debugging
+		this._componentId := tabsOrComponentId;
 	foreach(gui.createComponents(tabsOrComponentId) as var tab)
 		this.add(tab);
 	return this;
