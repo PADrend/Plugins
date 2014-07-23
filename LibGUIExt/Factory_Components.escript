@@ -733,6 +733,16 @@ GUI.GUI_Manager._componentFactories ::= {
 
 	// button
 	GUI.TYPE_BUTTON : fn(input,result){
+		var flags = input.description.get(GUI.FLAGS,0);
+		if( (flags&GUI.LOCKED)>0 ){
+			var d = input.description.clone();
+			d[GUI.ON_CLICK] = void;
+			d[GUI.TYPE] = GUI.TYPE_LABEL;
+			d[GUI.COLOR] = new Util.Color4f(0.5,0.5,0.5,0.5);
+			result.component = this.create( d );
+			return;
+		}
+			
 		var button = this.createButton(input.width?input.width:100,input.height,input.label);
 		var onClick = input.description[GUI.ON_CLICK];
 		if(onClick)
