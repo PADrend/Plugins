@@ -13,7 +13,6 @@
  */
 
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/EnvironmentTextureTrait');
-static eventLoop = Util.requirePlugin('PADrend/EventLoop');
 static size = 256;
 trait.onInit += fn(node){
 
@@ -30,15 +29,8 @@ trait.onInit += fn(node){
     @(once) trait.tp := (new (Std.require('LibRenderingExt/TextureProcessor')))
         .setOutputDepthTexture( Rendering.createDepthTexture(size, size) );
 
-    trait.stateWrapper := DataWrapper.createFromValue(" ");
-    trait.stateWrapper.onDataChanged += fn(data){
-        var state = new MinSG.TextureState();
-        PADrend.getSceneManager().registerState(data,state);
-    };
+    trait.stateNameWrapper := DataWrapper.createFromValue("");
     trait.layerWrapper := DataWrapper.createFromValue(1);
-//    trait.layerWrapper.onDataChanged += fn(data){
-//        eventLoop.setRenderingLayers(data);
-//    };
 
 };
 
@@ -62,7 +54,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
                             return;
 
                     },
-                GUI.DATA_WRAPPER : trait.stateWrapper
+                GUI.DATA_WRAPPER : trait.stateNameWrapper
 			},
 			{   GUI.TYPE : GUI.TYPE_NEXT_ROW},
 			{
@@ -71,28 +63,29 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
                 GUI.LABEL : "Rendering layers",
                 GUI.DATA_WRAPPER : trait.layerWrapper
 			},
-
 			{   GUI.TYPE : GUI.TYPE_NEXT_ROW},
 			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : "create img",
-				GUI.ON_CLICK: [node, trait.stateWrapper, trait.layerWrapper]=>fn(node, stateWrapper, layerWrapper){
-				    if(stateWrapper()==" "){
-                        outln("No state selected or no state existed");
+				GUI.LABEL : "create texture",
+				GUI.ON_CLICK: [node, trait.stateNameWrapper, trait.layerWrapper]=>fn(node, stateNameWrapper, layerWrapper){
+				    if(stateNameWrapper().empty()){
+                        outln("No state selected/entered");
 				    }
 				    else{
                         var color_texture = Rendering.createHDRCubeTexture(size, size);
-                        eventLoop.setRenderingLayers(layerWrapper());
                         foreach(trait.directions as var i,var dirArray){
                             trait.camera.setSRT(new Geometry.SRT(node.getWorldBB().getCenter(), dirArray[0], dirArray[1]));
                             trait.tp.setOutputTexture( [color_texture, 0, i] );
                             trait.tp.begin();
-                            PADrend.renderScene(PADrend.getRootNode(), trait.camera, PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
+                            PADrend.renderScene(PADrend.getRootNode(), trait.camera, PADrend.getRenderingFlags(), PADrend.getBGColor(), layerWrapper());
                             trait.tp.end();
-                            var state =  PADrend.getSceneManager().getRegisteredState(stateWrapper());
-                            state.setTexture(color_texture);
                         }
-                        outln("Cube texture is created");
+                        var state =  PADrend.getSceneManager().getRegisteredState(stateNameWrapper());
+                        if(!state){
+                            state = new MinSG.TextureState;
+                            PADrend.getSceneManager().registerState(stateNameWrapper(),state);
+                        }
+                        state.setTexture(color_texture);
 
 				    }
                 }
