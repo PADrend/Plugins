@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2008-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2008-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010-2011 Ralf Petring <ralf@petring.net>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -17,107 +17,117 @@
  *	EScript extensions for different Evaluator implementations
  */
 
+static CONFIG_PREFIX = 'Evaluator_Config_';
+
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 // OverdrawFactorEvaluator
 
-//! MinSG.OverdrawFactorEvaluator ---|> MinSG.Evaluator
-GLOBALS.MinSG.OverdrawFactorEvaluator.createConfigPanel ::= fn() {
-	// parent::createConfigPanel()
-	var panel = (this -> MinSG.Evaluator.createConfigPanel)();
+Util.registerExtension('PADrend_Init', fn(){
+	gui.registerComponentProvider( CONFIG_PREFIX + MinSG.OverdrawFactorEvaluator.toString(), fn(evaluator){
+		var entries = gui.createComponents( {
+				GUI.TYPE : GUI.TYPE_COMPONENTS,
+				GUI.PROVIDER : 	CONFIG_PREFIX + MinSG.OverdrawFactorEvaluator.getBaseType().toString(), 
+				GUI.CONTEXT : evaluator
+		});
+		var quantileDataWrapper = DataWrapper.createFromFunctions(	evaluator -> evaluator.getResultQuantile,
+																	evaluator -> evaluator.setResultQuantile);
+		entries += {
+			GUI.TYPE			:	GUI.TYPE_RANGE,
+			GUI.LABEL			:	"Result quantile",
+			GUI.TOOLTIP			:	"The quantile of the values in the image that is returned as result.",
+			GUI.RANGE			:	[0, 1],
+			GUI.RANGE_STEPS		:	20,
+			GUI.DATA_WRAPPER	:	quantileDataWrapper,
+			GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
+		};
+		entries += GUI.NEXT_ROW;
 
-	var quantileDataWrapper = DataWrapper.createFromFunctions(	this -> this.getResultQuantile,
-																this -> this.setResultQuantile);
-	panel += {
-		GUI.TYPE			:	GUI.TYPE_RANGE,
-		GUI.LABEL			:	"Result quantile",
-		GUI.TOOLTIP			:	"The quantile of the values in the image that is returned as result.",
-		GUI.RANGE			:	[0, 1],
-		GUI.RANGE_STEPS		:	20,
-		GUI.DATA_WRAPPER	:	quantileDataWrapper,
-		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	panel++;
+		var ignoreZeroDataWrapper = DataWrapper.createFromFunctions(evaluator -> evaluator.areZeroValuesIgnored,
+																	evaluator -> fn(data) {
+																		if(data) {
+																			this.ignoreZeroValues();
+																		} else {
+																			this.keepZeroValues();
+																		}
+																	});
+		entries += {
+			GUI.TYPE			:	GUI.TYPE_BOOL,
+			GUI.LABEL			:	"Ignore zero values",
+			GUI.TOOLTIP			:	"If checked, ignore zero values for the calculation of the quantile.",
+			GUI.DATA_WRAPPER	:	ignoreZeroDataWrapper,
+			GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
+		};
+		entries += GUI.NEXT_ROW;
 
-	var ignoreZeroDataWrapper = DataWrapper.createFromFunctions(this -> this.areZeroValuesIgnored,
-																this -> fn(data) {
-																	if(data) {
-																		this.ignoreZeroValues();
-																	} else {
-																		this.keepZeroValues();
-																	}
-																});
-	panel += {
-		GUI.TYPE			:	GUI.TYPE_BOOL,
-		GUI.LABEL			:	"Ignore zero values",
-		GUI.TOOLTIP			:	"If checked, ignore zero values for the calculation of the quantile.",
-		GUI.DATA_WRAPPER	:	ignoreZeroDataWrapper,
-		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	panel++;
-
-	return panel;
-};
+		return entries;
+	});
+});
+	
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 // StatsEvaluator
 
+Util.registerExtension('PADrend_Init', fn(){
+	gui.registerComponentProvider( CONFIG_PREFIX + MinSG.StatsEvaluator.toString(), fn(evaluator){
+		var entries = gui.createComponents( {
+				GUI.TYPE : GUI.TYPE_COMPONENTS,
+				GUI.PROVIDER : 	CONFIG_PREFIX + MinSG.StatsEvaluator.getBaseType().toString(), 
+				GUI.CONTEXT : evaluator
+		});
+		return entries.append([	
+			{
+				GUI.TYPE				:	GUI.TYPE_NUMBER,
+				GUI.LABEL				:	"Iterations:",
+				GUI.TOOLTIP				:	"If iterations = 2, the second value is used. If iterations > 2, the median is used.",
+				GUI.DATA_PROVIDER		:	evaluator -> evaluator.getNumberOfIterations,
+				GUI.ON_DATA_CHANGED		:	evaluator -> fn(data) {
+												this.setNumberOfIterations(data);
+												this.update();
+											},
+				GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
+			},
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE				:	GUI.TYPE_SELECT,
+				GUI.LABEL				:	"Stats:",
+				GUI.OPTIONS				:	{
+					var stats = [];
+					for(var counter = 0; counter < PADrend.frameStatistics.getNumCounters(); ++counter)
+						stats += [counter, PADrend.frameStatistics.getDescription(counter)];
+					stats;
+				},
+				GUI.DATA_PROVIDER		:	evaluator -> evaluator.getStatIndex,
+				GUI.ON_DATA_CHANGED		:	evaluator -> fn(data) {
+												this.setStatIndex(data);
+												this.update();
+											},
+				GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
+			},
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE				:	GUI.TYPE_BOOL,
+				GUI.LABEL				:	"Call glFinish",
+				GUI.TOOLTIP				:	"If checked, call glFinish() after each measurement.",
+				GUI.DATA_PROVIDER		:	evaluator -> evaluator.getCallGlFinish,
+				GUI.ON_DATA_CHANGED		:	evaluator -> fn(data) {
+												this.setCallGlFinish(data);
+												this.update();
+											},
+				GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
+			},
+			GUI.NEXT_ROW,
+		]);
+	});
+});
+
+
 //! MinSG.StatsEvaluator ---|> MinSG.Evaluator
-GLOBALS.MinSG.StatsEvaluator.createConfigPanel ::= fn() {
-	// parent::createConfigPanel()
-	var panel = (this -> MinSG.Evaluator.createConfigPanel)();
-
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_NUMBER,
-		GUI.LABEL				:	"Iterations:",
-		GUI.TOOLTIP				:	"If iterations = 2, the second value is used. If iterations > 2, the median is used.",
-		GUI.DATA_PROVIDER		:	this -> this.getNumberOfIterations,
-		GUI.ON_DATA_CHANGED		:	this -> fn(data) {
-										this.setNumberOfIterations(data);
-										this.update();
-									},
-		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	panel++;
-
-	var stats = [];
-	for(var counter = 0; counter < PADrend.frameStatistics.getNumCounters(); ++counter) {
-		stats += [counter, PADrend.frameStatistics.getDescription(counter)];
-	}
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_SELECT,
-		GUI.LABEL				:	"Stats:",
-		GUI.OPTIONS				:	stats,
-		GUI.DATA_PROVIDER		:	this -> this.getStatIndex,
-		GUI.ON_DATA_CHANGED		:	this -> fn(data) {
-										this.setStatIndex(data);
-										this.update();
-									},
-		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	panel++;
-
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_BOOL,
-		GUI.LABEL				:	"Call glFinish",
-		GUI.TOOLTIP				:	"If checked, call glFinish() after each measurement.",
-		GUI.DATA_PROVIDER		:	this -> this.getCallGlFinish,
-		GUI.ON_DATA_CHANGED		:	this -> fn(data) {
-										this.setCallGlFinish(data);
-										this.update();
-									},
-		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	panel++;
-
-    return panel;
-};
-
-//! MinSG.StatsEvaluator ---|> MinSG.Evaluator
-GLOBALS.MinSG.StatsEvaluator.createName ::= fn() {
+MinSG.StatsEvaluator.createName @(override) ::= fn() {
 	return this.getEvaluatorTypeName() + " (" +
 			PADrend.frameStatistics.getDescription(this.getStatIndex()) + ", " +
 			this.getNumberOfIterations() + " iter, " + 
 			"glFinish=" + this.getCallGlFinish() + ", " + 
+			this.directionPresetName()+", "+
 			(this.getMode() == MinSG.Evaluator.DIRECTION_VALUES ? "directional" : "single") + ")";
 };
 
@@ -140,32 +150,33 @@ PADrend.Serialization.registerType( MinSG.StatsEvaluator, "MinSG.StatsEvaluator"
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 // VisibilityEvaluator
 
+Util.registerExtension('PADrend_Init', fn(){
+	gui.registerComponentProvider( CONFIG_PREFIX + MinSG.VisibilityEvaluator.toString(), fn(evaluator){
+		var entries = gui.createComponents( {
+				GUI.TYPE : GUI.TYPE_COMPONENTS,
+				GUI.PROVIDER : 	CONFIG_PREFIX + MinSG.VisibilityEvaluator.getBaseType().toString(), 
+				GUI.CONTEXT : evaluator
+		});
+		entries +=	{
+			GUI.TYPE				:	GUI.TYPE_SELECT,
+			GUI.LABEL				:	"Operation mode:",
+			GUI.OPTIONS				:	[
+											[false, "Count visible objects"],
+											[true, "Count polygons in visible objects"]
+										],
+			GUI.DATA_PROVIDER		:	evaluator -> evaluator.doesCountPolygons,
+			GUI.ON_DATA_CHANGED		:	evaluator -> fn(data) {
+											this.setCountPolygons(data);
+											this.update();
+										},
+			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
+		};
+		return entries;
+	});
+});
+
 /*! MinSG.VisibilityEvaluator ---|> MinSG.Evaluator */
-GLOBALS.MinSG.VisibilityEvaluator.createConfigPanel ::= fn(){
-	// parent::createConfigPanel(gui)
-	var panel = (this -> MinSG.Evaluator.createConfigPanel)();
-
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_SELECT,
-		GUI.LABEL				:	"Operation mode:",
-		GUI.OPTIONS				:	[
-										[false, "Count visible objects"],
-										[true, "Count polygons in visible objects"]
-									],
-		GUI.DATA_PROVIDER		:	this -> this.doesCountPolygons,
-		GUI.ON_DATA_CHANGED		:	this -> fn(data) {
-										this.setCountPolygons(data);
-										this.update();
-									},
-		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	panel++;
-
-    return panel;
-};
-
-/*! MinSG.VisibilityEvaluator ---|> MinSG.Evaluator */
-GLOBALS.MinSG.VisibilityEvaluator.createName ::= fn(){
+MinSG.VisibilityEvaluator.createName @(override) ::= fn(){
 	return this.getEvaluatorTypeName()+" ("+ (doesCountPolygons() ? "Number of polygons" : "Number of objects")+")";
 };
 

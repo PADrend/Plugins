@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2008-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2008-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Ralf Petring <ralf@petring.net>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -19,28 +19,58 @@
 
 // -----------------------------------------------------------------------------------------------------------------------------
 
-// MinSG.Evaluator.name @(init) := fn() { return DataWrapper.createFromValue(""); };
+// MinSG.Evaluator.name @(init) := fn() { return new Std.DataWrapper(""); };
 
 /// (static)
 MinSG.Evaluator.defaultMeasurementResolutionExpressions ::= [
+	"[1024,1024]",
 	"[wWidth, wHeight]",
-	"[wWidth / 4, wWidth / 4]",
 	"[wWidth, wHeight].min()",
-	"200",
-	"[800, 480]"
+	"[256,256]"
 ];
 
 // -----------------------------------------------------
+MinSG.Evaluator.getDirectionPresets ::= fn(){
+	static presets;
+	@(once){
+		presets = new Map;
+
+		foreach({ 
+					"cube" : Rendering.createCube(),
+					"tetrahderon" : Rendering.createTetrahedron(),
+					"octrahedron" : Rendering.createOctahedron(),
+					"icosahedron" : Rendering.createIcosahedron(),
+					"dodecahedron" : Rendering.createDodecahedron()
+				}	as var name, var mesh){
+			var arr = [];
+			var posAcc = Rendering.PositionAttributeAccessor.create(mesh, Rendering.VertexAttributeIds.POSITION);
+			var numVertives = mesh.getVertexCount();
+			for(var i = 0; i<numVertives; ++i){
+				var dir = posAcc.getPosition(i).normalize();
+				var up = new Geometry.Vec3(0,1,0);
+				if( dir.dot(up).abs()>0.9 )
+					up = new Geometry.Vec3(0,0,1);
+				up = dir.cross(up).cross(dir);
+				arr += [dir,up];
+			}
+			presets[ name ] = arr;
+		}
+	}
+	return presets;
+};
 
 /*!	Called once upon registration. */
 MinSG.Evaluator.init ::= fn() {
-	this.__camera := new MinSG.CameraNode();
 	this.cameraAngle := DataWrapper.createFromConfig(PADrend.configCache, 'MinSG.Evaluator.cameraAngle', 120);
-	this.cameraAngle.onDataChanged += this -> fn(...) { this.refreshCamera(); };
 	this.measurementResolution := void;
 	this.measurementResolutionExpression := void;
-	this.name := DataWrapper.createFromValue(this.createName());
+	this.directionPresetName := DataWrapper.createFromConfig(PADrend.configCache, 'MinSG.Evaluator.directions', 'octrahedron');
+	this.directionPresetName.onDataChanged += this->update;
+
+	this.name := new Std.DataWrapper(this.createName());
 	setMeasurementResolutionExpression(MinSG.Evaluator.defaultMeasurementResolutionExpressions[0]);
+	
+	
 };
 
 
@@ -49,28 +79,9 @@ MinSG.Evaluator.init ::= fn() {
  * has to be different for different types of evaluators. Therefore, the
  * function has to be overridden in classes that inherit ScriptedEvaluator.
  */
-MinSG.Evaluator.getEvaluatorTypeName ::= fn() {
-	return this.getTypeName();
-};
+MinSG.Evaluator.getEvaluatorTypeName ::=	fn() {	return this.getTypeName();	};
 
-MinSG.Evaluator.getCamera ::= fn(){
-	return this.__camera;
-};
-
-
-MinSG.Evaluator.getCameraAngle ::= fn() {
-	return this.cameraAngle();
-};
-
-/*! Setup camera used by the Evaluator.
-	- Create it if it does not yet exist.
-	- Set the near and far plane according to the global camera
-	- Set the angle
-*/
-MinSG.Evaluator.refreshCamera ::= fn() {
-	this.__camera.setNearFar(GLOBALS.camera.getNearPlane(),GLOBALS.camera.getFarPlane());
-	this.__camera.applyVerticalAngle(cameraAngle());
-};
+MinSG.Evaluator.getCameraAngle ::= 			fn() {	return this.cameraAngle();	};
 
 /*!
  * Parse the expression that describes the resolution used for the measurement.
@@ -88,9 +99,9 @@ MinSG.Evaluator.setMeasurementResolutionExpression ::= fn(String resExp) {
 		
 		var newRes = eval("fn(wHeight,wWidth){ return ("+ measurementResolutionExpression + "); };")(wHeight,wWidth);
 		if(newRes ---|> Number) {
-			this.measurementResolution = new Geometry.Rect(0, 0, newRes, newRes);
+			this.measurementResolution = new Geometry.Vec2( newRes, newRes);
 		} else if(newRes ---|> Array && newRes.size() == 2) {
-			this.measurementResolution = new Geometry.Rect(0, 0, newRes[0], newRes[1]);
+			this.measurementResolution = new Geometry.Vec2( newRes[0], newRes[1]);
 		} else {
 			Runtime.warn("Invalid measurement resolution (must be a Number or an Array with two entries).");
 		}
@@ -99,17 +110,110 @@ MinSG.Evaluator.setMeasurementResolutionExpression ::= fn(String resExp) {
 	}
 };
 
-/*!	MinSG.Evaluator ---o	*/
+//!	MinSG.Evaluator ---o
 MinSG.Evaluator.createName ::= fn(){
-    return this.getEvaluatorTypeName()+" ("+(this.getMode()==MinSG.Evaluator.DIRECTION_VALUES?"directional":"single")+")";
+    return this.getEvaluatorTypeName()+" ("+this.directionPresetName()+", "+(this.getMode()==MinSG.Evaluator.DIRECTION_VALUES?"directional":"single")+")";
 };
 
-/*!	MinSG.Evaluator ---o	*/
-MinSG.Evaluator.update ::= fn() {
+//!	MinSG.Evaluator ---o
+MinSG.Evaluator.update ::= fn(...) {
     this.name(this.createName());
     executeExtensions('Evaluator_OnEvaluatorDescriptionChanged', this, this.name());
-	this.refreshCamera();
 };
+
+static CONFIG_PREFIX = 'Evaluator_Config_';
+
+Util.registerExtension('PADrend_Init', fn(){
+
+	gui.registerComponentProvider( CONFIG_PREFIX + MinSG.Evaluator.toString(), fn(evaluator){
+		var resultDataWrapper = new Std.DataWrapper("");
+		return [
+			{
+				GUI.TYPE				:	GUI.TYPE_LABEL,
+				GUI.LABEL				:	"[name]",
+				GUI.FONT				:	GUI.FONT_ID_HEADING,
+				GUI.DATA_WRAPPER		:	evaluator.name
+			},
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE				:	GUI.TYPE_TEXT,
+				GUI.LABEL				:	"Measurement resolution:",
+				GUI.OPTIONS				:	MinSG.Evaluator.defaultMeasurementResolutionExpressions,
+				GUI.ON_DATA_CHANGED		:	evaluator -> fn(data) {
+												this.setMeasurementResolutionExpression(data);
+												this.update();
+											},
+				GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
+			},
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE				:	GUI.TYPE_TEXT,
+				GUI.LABEL				:	"Measurement aperture:",
+				GUI.OPTIONS				:	[120, 90, 60],
+				GUI.DATA_WRAPPER		:	evaluator.cameraAngle,
+				GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
+			},
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE				:	GUI.TYPE_SELECT,
+				GUI.LABEL				:	"Directions:",
+				GUI.OPTIONS				:	{
+					var dirOptions = [];
+					foreach(evaluator.getDirectionPresets() as var name,var dirs)
+						dirOptions += [name , name+ " ("+dirs.count()+")"];
+					dirOptions;
+				},	
+				GUI.DATA_WRAPPER		:	evaluator.directionPresetName,
+				GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
+			},
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE				:	GUI.TYPE_BOOL,
+				GUI.LABEL				:	"Direction-dependant",
+				GUI.ON_DATA_CHANGED		:	evaluator -> fn(data) {
+												this.setMode(data ? MinSG.Evaluator.DIRECTION_VALUES : MinSG.Evaluator.SINGLE_VALUE);
+												this.update();
+											},
+				GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
+			},
+			GUI.NEXT_ROW,
+			'----',
+			GUI.NEXT_ROW,
+			"*Preview*",
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE				:	GUI.TYPE_TEXT,
+				GUI.LABEL				:	"Result:",
+				GUI.TOOLTIP				:	"Output of the evaluator's result.",
+				GUI.DATA_WRAPPER		:	resultDataWrapper,
+				GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0],
+				GUI.FLAGS				:	GUI.LOCKED
+			},
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE				:	GUI.TYPE_BUTTON,
+				GUI.LABEL				:	"Measure",
+				GUI.TOOLTIP				:	"Execute a measurement with the current evalutor and settings.",
+				GUI.ON_CLICK			:	[evaluator, resultDataWrapper] => fn(evaluator, resultOutput) {
+											var results = evaluator.singleMeasure( PADrend.getCurrentScene(), PADrend.getActiveCamera()); 
+											if(results.empty()) {
+												resultOutput("(empty)");
+											} else {
+												resultOutput(results.front().toString());
+											}
+										},
+				GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
+			},
+			GUI.NEXT_ROW,
+			'----',
+			GUI.NEXT_ROW
+		];
+	
+	});
+
+});
+
+
 
 /*!	MinSG.Evaluator ---o	*/
 MinSG.Evaluator.createConfigPanel ::= fn(){
@@ -117,178 +221,98 @@ MinSG.Evaluator.createConfigPanel ::= fn(){
 		GUI.TYPE				:	GUI.TYPE_PANEL,
 		GUI.SIZE				:	GUI.SIZE_MAXIMIZE
 	});
-
-	var heading = gui.create({
-		GUI.TYPE				:	GUI.TYPE_LABEL,
-		GUI.LABEL				:	this.name(),
-		GUI.FONT				:	GUI.FONT_ID_HEADING
-	});
-	this.name.onDataChanged += heading -> heading.setText;
-	panel += heading;
-	panel++;
-
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_TEXT,
-		GUI.LABEL				:	"Measurement resolution:",
-		GUI.OPTIONS				:	MinSG.Evaluator.defaultMeasurementResolutionExpressions,
-		GUI.ON_DATA_CHANGED		:	this -> fn(data) {
-										this.setMeasurementResolutionExpression(data);
-										this.update();
-									},
-		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	panel++;
-
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_TEXT,
-		GUI.LABEL				:	"Measurement aperture:",
-		GUI.OPTIONS				:	[120, 90, 60],
-		GUI.DATA_WRAPPER		:	this.cameraAngle,
-		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	panel++;
-
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_BOOL,
-		GUI.LABEL				:	"Direction-dependant",
-		GUI.ON_DATA_CHANGED		:	this -> fn(data) {
-										this.setMode(data ? MinSG.Evaluator.DIRECTION_VALUES : MinSG.Evaluator.SINGLE_VALUE);
-										this.update();
-									},
-		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	panel++;
-
-	panel += "----";
-	panel++;
-
-	panel += "*Preview*";
-	panel++;
-
-	var resultDataWrapper = DataWrapper.createFromValue("");
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_TEXT,
-		GUI.LABEL				:	"Result:",
-		GUI.TOOLTIP				:	"Output of the evaluator's result.",
-		GUI.DATA_WRAPPER		:	resultDataWrapper,
-		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0],
-		GUI.FLAGS				:	GUI.LOCKED
-	};
-	panel++;
-
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_BUTTON,
-		GUI.LABEL				:	"Measure",
-		GUI.TOOLTIP				:	"Execute a measurement with the current evalutor and settings.",
-		GUI.ON_CLICK			:	[this, resultDataWrapper] => fn(MinSG.Evaluator evaluator, DataWrapper resultOutput) {
-										var viewport = evaluator.measurementResolution;
-
-										var measurementCamera = PADrend.getActiveCamera().clone();
-										measurementCamera.setViewport(viewport);
-										measurementCamera.applyVerticalAngle(evaluator.cameraAngle());
-										measurementCamera.setMatrix(PADrend.getActiveCamera().getWorldMatrix());
-
-										frameContext.pushCamera();
-										frameContext.setCamera(measurementCamera);
-
-										evaluator.beginMeasure();
-										evaluator.measure(frameContext, PADrend.getCurrentScene(), viewport);
-										evaluator.endMeasure(frameContext);
-
-										frameContext.popCamera();
-
-										var results = evaluator.getResults();
-										if(results.empty()) {
-											resultOutput("(empty)");
-										} else {
-											resultOutput(results.front().toString());
-										}
-									},
-		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	panel++;
-
-	panel += "----";
-	panel++;
+	for( var obj = this; obj; obj = obj.isA(Type) ? obj.getBaseType() : obj.getType()){
+		var entries = gui.createComponents( {	
+			GUI.TYPE 		: 	GUI.TYPE_COMPONENTS, 
+			GUI.PROVIDER	:	CONFIG_PREFIX + obj.toString(), 
+			GUI.CONTEXT		:	this
+		});
+		if(!entries.empty()){
+			panel.append(entries);
+			break;
+		}
+	}else{
+		panel += "?????";
+	}
 
     return panel;
 };
 
 
+static getFBOAndTexture = fn(Geometry.Vec2 resolution){
+	static r2;
+	static fbo;
+	static texture;
+	if(resolution != r2){
+		fbo = new Rendering.FBO;
+		texture = Rendering.createStdTexture(resolution.x(),resolution.y(),false);
+		fbo.attachColorTexture( renderingContext, texture );
+		fbo.attachDepthTexture( renderingContext, Rendering.createDepthTexture(resolution.x(),resolution.y()));
+		r2 = resolution.clone();
+		outln( "Evaluator: Recreate FBO (",fbo.getStatusMessage(renderingContext),")" );
+	}
+	return [fbo,texture];
+	
+};
+
 /*!	Array Evaluator.cubeMeasure(...)
 	\note the camera needs to have the right angle
 */
-MinSG.Evaluator.cubeMeasure::=fn( 	MinSG.Node sceneNode, Geometry.Vec3 position, Array directions=[0,1,2,3,4,5]) {
+MinSG.Evaluator.cubeMeasure::=fn( 	MinSG.Node sceneNode, Geometry.Vec3 position) {
+	[var fbo,var texture] = getFBOAndTexture(  this.measurementResolution );
 
-	this.refreshCamera();
+	var cam = new MinSG.CameraNode;
+	cam.setNearFar(frameContext.getCamera().getNearPlane(), frameContext.getCamera().getFarPlane());
+	cam.applyVerticalAngle(cameraAngle());
 	
-	var rect = this.measurementResolution.clone();
-	var displace = renderingContext.getWindowWidth() >= rect.getWidth() * 4 && renderingContext.getWindowHeight() >= rect.getHeight() * 3;
-
-	var c=this.getCamera();
-	c.setRelPosition(position);
+	var viewport = new Geometry.Rect(0,0, this.measurementResolution.x(),this.measurementResolution.y());
+	cam.setViewport( viewport );
 
 	this.beginMeasure();
-	var rc=GLOBALS.frameContext;
-	rc.pushCamera();
+	
+	var directions = this.getDirectionPresets()[ this.directionPresetName() ];
+	assert( directions&&!directions.empty(), "MinSG.Evaluator.cubeMeasure: invalid directionPresetName '"+directionPresetName()+"'" );
 
-	// left
-	if(displace) {
-		rect.setY(rect.getY() + rect.getHeight());
-	}
-	if(directions.contains(0)){
-		rc.setCamera(c.setViewport(rect).setRelRotation_rad(Math.PI_2,new Geometry.Vec3(0,1,0)));
-		this.measure(rc,sceneNode,rect);
-	}
+	var screenX = 0;
+	var screenDX = renderingContext.getWindowWidth() / directions.count() ;
+	var screenY = (renderingContext.getWindowHeight()-screenDX) * 0.5;
 
-	// front
-	if(displace) {
-		rect.setX(rect.getX() + rect.getWidth());
-	}
-	if(directions.contains(1)){
-		rc.setCamera(c.setViewport(rect).setRelRotation_rad(0,new Geometry.Vec3(0,0,0)));
-		this.measure(rc,sceneNode,rect);
-	}
+	foreach( directions as var dirAndUp ){
+		cam.setSRT(  new Geometry.SRT(position,dirAndUp[0],dirAndUp[1] ));
+		frameContext.pushCamera();
+		frameContext.setCamera(cam);
 
-	// right
-	if(displace) {
-		rect.setX(rect.getX() + rect.getWidth());
-	}
-	if(directions.contains(2)){
-		rc.setCamera(c.setViewport(rect).setRelRotation_rad(Math.PI_2,new Geometry.Vec3(0,-1,0)));
-		this.measure(rc,sceneNode,rect);
+		renderingContext.pushAndSetFBO( fbo );
+		this.measure(frameContext,sceneNode,viewport);
+		renderingContext.popFBO( );
+
+		frameContext.popCamera();
+
+		Rendering.drawTextureToScreen(renderingContext,new Geometry.Rect(screenX,screenY,screenDX-1,screenDX-1) ,[texture],[new Geometry.Rect(0,0,1,1)]);
+		screenX +=  screenDX;
 	}
 
-	// back
-	if(displace) {
-		rect.setX(rect.getX() + rect.getWidth());
-	}
-	if(directions.contains(3)){
-		rc.setCamera(c.setViewport(rect).setRelRotation_rad(Math.PI,new Geometry.Vec3(0,-1,0)));
-		this.measure(rc,sceneNode,rect);
-	}
+	this.endMeasure(frameContext);
 
-	// bottom
-	if(displace) {
-		rect.setX(rect.getX() - rect.getWidth() * 2);
-		rect.setY(rect.getY() - rect.getHeight());
-	}
-	if(directions.contains(4)){
-		rc.setCamera(c.setViewport(rect).setRelRotation_rad(Math.PI_2,new Geometry.Vec3(-1,0,0)));
-		this.measure(rc,sceneNode,rect);
-	}
+	return this.getResults();
+};
 
-	// top
-	if(displace) {
-		rect.setY(rect.getY() + rect.getHeight() * 2);
-	}
-	if(directions.contains(5)){
-		rc.setCamera(c.setViewport(rect).setRelRotation_rad(Math.PI_2,new Geometry.Vec3(1,0,0)));
-		this.measure(rc,sceneNode,rect);
-	}
+MinSG.Evaluator.singleMeasure ::= fn( MinSG.Node scene, MinSG.AbstractCameraNode cam){
+	var viewport = new Geometry.Rect(0,0, this.measurementResolution.x(), this.measurementResolution.y());
 
-	this.endMeasure(rc);
-	rc.popCamera();
+	var measurementCamera = cam.clone();
+	measurementCamera.setViewport(viewport);
+	measurementCamera.applyVerticalAngle( this.cameraAngle());
+	measurementCamera.setMatrix(cam.getWorldMatrix());
+
+	frameContext.pushCamera();
+	frameContext.setCamera(measurementCamera);
+
+	this.beginMeasure();
+	this.measure(frameContext, PADrend.getCurrentScene(), viewport);
+	this.endMeasure(frameContext);
+
+	frameContext.popCamera();
 
 	return this.getResults();
 };
