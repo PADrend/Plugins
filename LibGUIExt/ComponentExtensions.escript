@@ -154,6 +154,11 @@ GUI.Container.add::=fn(componentOrArrayOrDescription){
 	}
 	return this._add(gui.create(componentOrArrayOrDescription));
 };
+GUI.Container.append ::= fn( p... ){
+	foreach( gui.createComponents( p... ) as var c)
+		this._add(c);
+	return this;
+};
 
 /*! Container += Component is an alias for Container.add(Component)*/
 GUI.Container."+="::=GUI.Container.add;
