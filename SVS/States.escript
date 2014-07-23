@@ -14,10 +14,10 @@ declareNamespace($SVS);
 
 SVS.registerStates := fn() {
 	registerExtension('NodeEditor_QueryAvailableStates', fn(states) {
-		states.set("SVS BudgetRenderer", fn() { return new MinSG.SVS.BudgetRenderer; });
-		states.set("SVS GeometryNodeCollector", fn() { return new MinSG.SVS.GeometryNodeCollector; });
-		states.set("SVS Renderer", fn() { return new MinSG.SVS.Renderer; });
-		states.set("SVS SphereVisualizationRenderer", fn() { return new MinSG.SVS.SphereVisualizationRenderer; });
+		states.set("[ext] SVS BudgetRenderer", fn() { return new MinSG.SVS.BudgetRenderer; });
+		states.set("[ext] SVS GeometryNodeCollector", fn() { return new MinSG.SVS.GeometryNodeCollector; });
+		states.set("[ext] SVS Renderer", fn() { return new MinSG.SVS.Renderer; });
+		states.set("[ext] SVS SphereVisualizationRenderer", fn() { return new MinSG.SVS.SphereVisualizationRenderer; });
 	});
 	NodeEditor.registerConfigPanelProvider(MinSG.SVS.Renderer, fn(MinSG.SVS.Renderer state, panel) {
 		panel += "*SVS Renderer*";

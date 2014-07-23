@@ -57,7 +57,7 @@ Renderer.doDisableState  @(override) ::= fn(node,params){// node,params){
 };
 
 Util.registerExtension('NodeEditor_QueryAvailableStates',fn(map){
-	map['_MetaNodeRenderer'] = fn(){return new Renderer;};
+	map['[scripted] MetaNodeRenderer'] = fn(){return new Renderer;};
 });
 
 

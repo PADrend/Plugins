@@ -22,28 +22,130 @@ var m = new Map;
 
 m["AlphaTestState"] = fn(){return new MinSG.AlphaTestState;};
 m["BlendingState"] = fn(){return new MinSG.BlendingState;};
-m["BudgetAnnotationState"] = fn() { return new MinSG.BudgetAnnotationState; };
-m["CHC renderer"] = fn(){return new MinSG.OccRenderer;};
-m["CHC++ renderer"] = fn(){return new MinSG.CHCppRenderer;};
-if(MinSG.isSet($ColorCubeRenderer))
-	m["ColorCube renderer"] = fn() { return new MinSG.ColorCubeRenderer;};
 m["CullFaceState"] = fn(){return new MinSG.CullFaceState;};
-m["HOM renderer"] = fn() { return new MinSG.HOMRenderer(512); };
 m["GroupState"] = fn() { return new MinSG.GroupState; };
 m["Lighting"] = fn(){return new MinSG.LightingState;};
-m["LineWidthState"] = fn() { return new (Std.require('LibMinSGExt/LineWidthState')); };
-m["LOD-Renderer"] = fn(){return new MinSG.LODRenderer;};
-if(MinSG.isSet($MAR))
-	m["MAR Surfel Renderer"] = fn(){return new MinSG.MAR.SurfelRenderer;};
 m["MaterialState"] = fn(){return new MinSG.MaterialState;};
-m["Mirror"] = fn() { var state = new MinSG.MirrorState(512); return state; };
-m["OccludeeRenderer"] = fn() { return new MinSG.OccludeeRenderer; };
 m["PolygonModeState"] = fn(){return new MinSG.PolygonModeState;};
 m["ProjSizeFilterState"] = fn(){return new MinSG.ProjSizeFilterState;};
-m["Shadow"] = fn(){return new MinSG.ShadowState(4096);};
 m["Shader"] = fn(){	return new MinSG.ShaderState;	};
-m["ShaderUniform"] = fn(){	return new MinSG.ShaderUniformState;	};
-m["Shader: Universal2"] = fn(){
+m["Shader: univeral3 (compose)"] = fn(){
+	var shaderState = new MinSG.ShaderState;
+	var p = gui.createPopupWindow(200,200);
+
+	var config = new ExtObject;
+	config.vertexEffect := new Std.DataWrapper("vertexEffect_none");
+	config.surfaceProps := new Std.DataWrapper("surfaceProps_matTex");
+	config.surfaceEffect := new Std.DataWrapper("surfaceEffect_none");
+	config.lighting := new Std.DataWrapper("lighting_phong");
+	config.fragmentEffect := new Std.DataWrapper("fragmentEffect_none");
+	config.shaderState := shaderState;
+
+	p.addOption({
+		GUI.TYPE : GUI.TYPE_TEXT,
+		GUI.LABEL : "vertexEffect",
+		GUI.DATA_WRAPPER :  config.vertexEffect,
+		GUI.OPTIONS : ["vertexEffect_none","vertexEffect_dynamicPointSize" ]
+	});
+	p.addOption({
+		GUI.TYPE : GUI.TYPE_TEXT,
+		GUI.LABEL : "surfaceProps",
+		GUI.DATA_WRAPPER :  config.surfaceProps,
+		GUI.OPTIONS : ["surfaceProps_mat","surfaceProps_matTex","surfaceProps_matTexSpecNorm" ,"surfaceProps_terrain_1" ]
+	});
+	p.addOption({
+		GUI.TYPE : GUI.TYPE_TEXT,
+		GUI.LABEL : "surfaceEffect",
+		GUI.DATA_WRAPPER :  config.surfaceEffect,
+		GUI.OPTIONS : ["surfaceEffect_none","surfaceEffect_reflection","surfaceEffect_translucency" ]
+	});
+	p.addOption({
+		GUI.TYPE : GUI.TYPE_TEXT,
+		GUI.LABEL : "lighting",
+		GUI.DATA_WRAPPER :  config.lighting,
+		GUI.OPTIONS : ["lighting_none","lighting_phong","lighting_phongEnv","lighting_shadow" ]
+	});
+	p.addOption({
+		GUI.TYPE : GUI.TYPE_TEXT,
+		GUI.LABEL : "fragmentEffect",
+		GUI.DATA_WRAPPER :  config.fragmentEffect,
+		GUI.OPTIONS : ["fragmentEffect_none", "fragmentEffect_highlight", "fragmentEffect_normalToAlpha" ]
+	});
+	
+	p.addAction( "Init Shader",	config->fn(){
+
+		var path = "shader/universal3/";
+		var vs = [path+"main.sfn",path+"sgHelpers.sfn"];
+		var fs = [path+"main.sfn",path+"sgHelpers.sfn"];
+		foreach([this.vertexEffect,this.surfaceProps,this.surfaceEffect,this.lighting,this.fragmentEffect] as var f){
+			vs+=path+f()+".sfn";
+			fs+=path+f()+".sfn";
+		}
+		MinSG.initShaderState(shaderState,vs, [], fs, Rendering.Shader.USE_UNIFORMS,PADrend.getSceneManager().getFileLocator());
+		NodeEditor.refreshSelectedNodes(); // refresh the gui
+
+	} );
+	p.addAction( "Cancel" );
+
+	p.init();
+	return shaderState;
+};
+m["Shader: univeral3 (preset)"] = fn(){
+
+	var shaderState = new MinSG.ShaderState;
+
+	var preset = new Std.DataWrapper("");
+	preset.onDataChanged += [shaderState] => fn(shaderState, presetName){
+		shaderState.getStateAttributeWrapper(MinSG.ShaderState.STATE_ATTR_SHADER_NAME)(presetName);
+		shaderState.recreateShader( PADrend.getSceneManager() );
+	};
+	
+	gui.openDialog({
+		GUI.TYPE : GUI.TYPE_POPUP_DIALOG,
+		GUI.LABEL : "Init ShaderState with shader preset",
+		GUI.ACTIONS : ["Done"],
+		GUI.SIZE : [400,100],
+		GUI.OPTIONS : [
+			{
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.LABEL : "Preset:",
+				GUI.OPTIONS_PROVIDER : fn(){
+					var entries = [""];
+					foreach(PADrend.getSceneManager()._getSearchPaths() as var path){
+						foreach(Util.getFilesInDir(path,[".shader"]) as var filename){
+							entries += (new Util.FileName(filename)).getFile();
+						}
+					}
+					return entries;
+				},
+				GUI.DATA_WRAPPER : preset
+			}
+		]
+	});
+	preset( "universal3_default.shader" );
+	
+	return shaderState;
+};
+m["Shader Uniform"] = fn(){	return new MinSG.ShaderUniformState;	};
+m["Transparency Renderer"] = fn(){return new MinSG.TransparencyRenderer;};
+m["Texture"] = fn(){return new MinSG.TextureState;};
+
+
+m["[ext] BudgetAnnotationState"] = fn() { return new MinSG.BudgetAnnotationState; };
+m["[ext] CHC renderer"] = fn(){return new MinSG.OccRenderer;};
+m["[ext] CHC++ renderer"] = fn(){return new MinSG.CHCppRenderer;};
+
+if(MinSG.isSet($ColorCubeRenderer))
+	m["[ext] ColorCube renderer"] = fn() { return new MinSG.ColorCubeRenderer;};
+m["[ext] HOM renderer"] = fn() { return new MinSG.HOMRenderer(512); };
+m["[ext] LineWidthState"] = fn() { return new (Std.require('LibMinSGExt/LineWidthState')); };
+m["[ext] LOD-Renderer"] = fn(){return new MinSG.LODRenderer;};
+if(MinSG.isSet($MAR))
+	m["[ext] MAR Surfel Renderer"] = fn(){return new MinSG.MAR.SurfelRenderer;};
+m["[ext] Mirror"] = fn() { var state = new MinSG.MirrorState(512); return state; };
+m["[ext] OccludeeRenderer"] = fn() { return new MinSG.OccludeeRenderer; };
+m["[ext] Shadow"] = fn(){return new MinSG.ShadowState(4096);};
+m["[deprecated] Shader: Universal2"] = fn(){
 	var shaderState = new MinSG.ShaderState;
 	var p = gui.createPopupWindow(200,200);
 
@@ -115,116 +217,12 @@ m["Shader: Universal2"] = fn(){
 	p.init();
 	return shaderState;
 };
-m["Shader: U3(compose)"] = fn(){
-	var shaderState = new MinSG.ShaderState;
-	var p = gui.createPopupWindow(200,200);
 
-	var config = new ExtObject;
-	config.vertexEffect := new Std.DataWrapper("vertexEffect_none");
-	config.surfaceProps := new Std.DataWrapper("surfaceProps_matTex");
-	config.surfaceEffect := new Std.DataWrapper("surfaceEffect_none");
-	config.lighting := new Std.DataWrapper("lighting_phong");
-	config.fragmentEffect := new Std.DataWrapper("fragmentEffect_none");
-	config.shaderState := shaderState;
-
-	p.addOption({
-		GUI.TYPE : GUI.TYPE_TEXT,
-		GUI.LABEL : "vertexEffect",
-		GUI.DATA_WRAPPER :  config.vertexEffect,
-		GUI.OPTIONS : ["vertexEffect_none","vertexEffect_dynamicPointSize" ]
-	});
-	p.addOption({
-		GUI.TYPE : GUI.TYPE_TEXT,
-		GUI.LABEL : "surfaceProps",
-		GUI.DATA_WRAPPER :  config.surfaceProps,
-		GUI.OPTIONS : ["surfaceProps_mat","surfaceProps_matTex","surfaceProps_matTexSpecNorm" ,"surfaceProps_terrain_1" ]
-	});
-	p.addOption({
-		GUI.TYPE : GUI.TYPE_TEXT,
-		GUI.LABEL : "surfaceEffect",
-		GUI.DATA_WRAPPER :  config.surfaceEffect,
-		GUI.OPTIONS : ["surfaceEffect_none","surfaceEffect_reflection","surfaceEffect_translucency" ]
-	});
-	p.addOption({
-		GUI.TYPE : GUI.TYPE_TEXT,
-		GUI.LABEL : "lighting",
-		GUI.DATA_WRAPPER :  config.lighting,
-		GUI.OPTIONS : ["lighting_none","lighting_phong","lighting_phongEnv","lighting_shadow" ]
-	});
-	p.addOption({
-		GUI.TYPE : GUI.TYPE_TEXT,
-		GUI.LABEL : "fragmentEffect",
-		GUI.DATA_WRAPPER :  config.fragmentEffect,
-		GUI.OPTIONS : ["fragmentEffect_none", "fragmentEffect_highlight", "fragmentEffect_normalToAlpha" ]
-	});
-	
-	p.addAction( "Init Shader",	config->fn(){
-
-		var path = "shader/universal3/";
-		var vs = [path+"main.sfn",path+"sgHelpers.sfn"];
-		var fs = [path+"main.sfn",path+"sgHelpers.sfn"];
-		foreach([this.vertexEffect,this.surfaceProps,this.surfaceEffect,this.lighting,this.fragmentEffect] as var f){
-			vs+=path+f()+".sfn";
-			fs+=path+f()+".sfn";
-		}
-		MinSG.initShaderState(shaderState,vs, [], fs, Rendering.Shader.USE_UNIFORMS,PADrend.getSceneManager().getFileLocator());
-		NodeEditor.refreshSelectedNodes(); // refresh the gui
-
-	} );
-	p.addAction( "Cancel" );
-
-	p.init();
-	return shaderState;
-};
-m["Shader: U3(preset)"] = fn(){
-
-	var shaderState = new MinSG.ShaderState;
-
-	var preset = new Std.DataWrapper("");
-	preset.onDataChanged += [shaderState] => fn(shaderState, presetName){
-		shaderState.getStateAttributeWrapper(MinSG.ShaderState.STATE_ATTR_SHADER_NAME)(presetName);
-		shaderState.recreateShader( PADrend.getSceneManager() );
-	};
-	
-	gui.openDialog({
-		GUI.TYPE : GUI.TYPE_POPUP_DIALOG,
-		GUI.LABEL : "Init ShaderState with shader preset",
-		GUI.ACTIONS : ["Done"],
-		GUI.SIZE : [400,100],
-		GUI.OPTIONS : [
-			{
-				GUI.TYPE : GUI.TYPE_TEXT,
-				GUI.LABEL : "Preset:",
-				GUI.OPTIONS_PROVIDER : fn(){
-					var entries = [""];
-					foreach(PADrend.getSceneManager()._getSearchPaths() as var path){
-						foreach(Util.getFilesInDir(path,[".shader"]) as var filename){
-							entries += (new Util.FileName(filename)).getFile();
-						}
-					}
-					return entries;
-				},
-				GUI.DATA_WRAPPER : preset
-			}
-		]
-	});
-	preset( "universal3_default.shader" );
-	
-	return shaderState;
-
-
-	
-	
-	
-	return shaderState;
-};
-m["Strange renderer"] = new MinSG.StrangeExampleRenderer;
+m["[ext] Strange renderer"] = new MinSG.StrangeExampleRenderer;
 if(MinSG.isSet($SurfelRenderer))		
-	m[ "SurfelRenderer" ] = fn(){return new MinSG.SurfelRenderer;};
-m["Transparency Renderer"] = fn(){return new MinSG.TransparencyRenderer;};
+	m[ "[ext] SurfelRenderer" ] = fn(){return new MinSG.SurfelRenderer;};
 if(MinSG.isSet($TreeVisualization))
-	m["TreeVisualization"] = fn() { return new MinSG.TreeVisualization; };
-m["Texture"] = fn(){return new MinSG.TextureState;};
+	m["[ext] TreeVisualization"] = fn() { return new MinSG.TreeVisualization; };
 
 
 return m;

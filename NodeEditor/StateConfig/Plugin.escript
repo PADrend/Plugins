@@ -329,8 +329,9 @@ plugin.init @(override) := fn() {
 			GUI.FLAGS : GUI.FLAT_BUTTON,
 
 			GUI.WIDTH : 16,
+			GUI.MENU_WIDTH : 200,
 			GUI.MENU : [entry] => fn(entry){
-				var states = new Map();
+				var states = new Map;
 				executeExtensions('NodeEditor_QueryAvailableStates',states);
 
 				var menu = [];
