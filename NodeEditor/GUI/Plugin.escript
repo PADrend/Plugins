@@ -41,45 +41,45 @@ plugin.registerGUIProviders := fn(){
 	// node selection
 	gui.registerComponentProvider('PADrend_FileMenu.25_exportSelectedNode',fn(){
 		var entries = [];
-		if(NodeEditor.getSelectedNodes().count()==1 && NodeEditor.getSelectedNode()!=PADrend.getRootNode() && NodeEditor.getSelectedNode()!=PADrend.getCurrentScene()){
-			entries += {
-				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : "Save node as...",
-				GUI.TOOLTIP : 	"Show a dialog to export the selected node into a .minsg file.",
-				GUI.ON_CLICK : fn(){
-					var node = NodeEditor.getSelectedNode();
-					gui.openDialog({
-						GUI.TYPE :		GUI.TYPE_FILE_DIALOG,
-						GUI.LABEL :		"Export node: "+NodeEditor.getNodeString(node),
-						GUI.ENDINGS :	[".minsg", ".dae", ".DAE"],
-						GUI.FILENAME : 	node.isSet($filename) ? node.filename : PADrend.getScenePath()+"/Neu.minsg",
-						GUI.ON_ACCEPT : [node] => fn(node, filename){
-									
-							var save = [node,filename] => fn(node,filename){
-								PADrend.message("Save node \""+filename+"\"");
-								if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
-									PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());
-								} else {
-									PADrend.getSceneManager().saveMinSGFile(filename,[node]);
-								}
-							};
-							
-							if(Util.isFile(filename)){
-								gui.openDialog({
-									GUI.TYPE :				GUI.TYPE_POPUP_DIALOG ,
-									GUI.LABEL :				"Overwrite?",
-									GUI.ACTIONS : 			[ ["overwrite",save] , ["cancel"]],
-									GUI.OPTIONS : 			["The file '"+filename+"' exists."],
-									GUI.SIZE : 		 		[320,80]
-								});
-							}else{
-								save();
+		entries += {
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Save node as...",
+			GUI.TOOLTIP : 	"Show a dialog to export the selected node into a .minsg file.",
+			GUI.FLAGS : (NodeEditor.getSelectedNodes().count()!=1 || NodeEditor.getSelectedNode()==PADrend.getRootNode() || NodeEditor.getSelectedNode()==PADrend.getCurrentScene())?GUI.LOCKED : 0,
+			GUI.ON_CLICK : fn(){
+				var node = NodeEditor.getSelectedNode();
+				gui.openDialog({
+					GUI.TYPE :		GUI.TYPE_FILE_DIALOG,
+					GUI.LABEL :		"Export node: "+NodeEditor.getNodeString(node),
+					GUI.ENDINGS :	[".minsg", ".dae", ".DAE"],
+					GUI.FILENAME : 	node.isSet($filename) ? node.filename : PADrend.getScenePath()+"/Neu.minsg",
+					GUI.ON_ACCEPT : [node] => fn(node, filename){
+								
+						var save = [node,filename] => fn(node,filename){
+							PADrend.message("Save node \""+filename+"\"");
+							if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
+								PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());
+							} else {
+								PADrend.getSceneManager().saveMinSGFile(filename,[node]);
 							}
+						};
+						
+						if(Util.isFile(filename)){
+							gui.openDialog({
+								GUI.TYPE :				GUI.TYPE_POPUP_DIALOG ,
+								GUI.LABEL :				"Overwrite?",
+								GUI.ACTIONS : 			[ ["overwrite",save] , ["cancel"]],
+								GUI.OPTIONS : 			["The file '"+filename+"' exists."],
+								GUI.SIZE : 		 		[320,80]
+							});
+						}else{
+							save();
 						}
-					});
-				}
-			};
-		}
+					}
+				});
+			}
+		};
+	
 		return entries;
 	});
 
