@@ -12,13 +12,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:PADrend] PADrend/GUI/Plugin.escript
- **
- **/
 
-
-//! ---|> Plugin
 var plugin = new Plugin({
 		Plugin.NAME : 'PADrend/GUI',
 		Plugin.DESCRIPTION : "Main application\'s GUI.",
@@ -31,18 +25,19 @@ var plugin = new Plugin({
 
 // -------------------
 
-
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
 plugin.init @(override) := fn(){
 	//  Init global GUI Manager
 	GUI.init(PADrend.SystemUI.getWindow(), PADrend.getEventContext());
 	
 	registerExtension('PADrend_Init',			this->initGUIResources,Extension.HIGH_PRIORITY+1);
 	registerExtension('PADrend_AfterRendering', fn(...){ renderGUI(); }, Extension.LOW_PRIORITY*2);
-	registerExtension('PADrend_UIEvent', 		fn(evt){ return gui.handleEvent(evt); });
+	registerExtension('PADrend_UIEvent', 		fn(evt){
+		if(guiMode()==MODE_DUAL_COMPESSED && evt.isSet($x)){
+			evt = evt.clone();
+			evt.x *= 2.0;
+		}
+		return gui.handleEvent(evt); 
+	});
 
 	
 	// right click menu
