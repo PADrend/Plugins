@@ -51,12 +51,11 @@ var plugin = new Plugin({
 // -------------------
 
 static metaObjectRoot;
-static objPicker;
 static highlightState;
 
 plugin.init @(override) := fn(){
 	registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY);
-	registerExtension('PADrend_UIEvent',this->ex_UIEvent);
+	registerExtension('PADrend_UIEvent',this->ex_UIEvent,Extension.LOW_PRIORITY); // low priority to prefer the gui
 	registerExtension('PADrend_AfterRenderingPass',this->ex_AfterRenderingPass);
 	
 	return true;
@@ -68,8 +67,6 @@ plugin.ex_Init := fn(){
 	metaObjectRoot.name := "PADrend.NodeInteraction.metaObjectRoot";
 	
 	PADrend.getRootNode().addChild(metaObjectRoot);
-	
-	objPicker  = new MinSG.RendRayCaster;
 		
 	// --------
 	highlightState = new MinSG.GroupState;
@@ -121,7 +118,10 @@ plugin.ex_AfterRenderingPass := fn(...){
 //!	[ext:UIEvent]
 plugin.ex_UIEvent:=fn(evt){
 	if( evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_LEFT && evt.pressed){
-		var node = pickNodeFromScreen(evt.x,evt.y,true);
+		var Picking = Util.requirePlugin('PADrend/Picking');
+		var node = Picking.pickNode([evt.x,evt.y],metaObjectRoot);
+		if(!node)
+			node = Picking.pickNode([evt.x,evt.y],PADrend.getCurrentScene());
 		
 		if(node){
 			if(node.isSet($onClick))
@@ -137,25 +137,6 @@ plugin.addMetaNode := fn(MinSG.Node n){
 
 plugin.removeMetaNode := fn(MinSG.Node n){
 	metaObjectRoot.removeChild(n);
-};
-plugin.pickNodeFromScreen := fn(Number screenX,Number screenY,Bool includeMetaObjects=false){
-	// if metaObjects (e.g. lights or similar nodes) are visible, allow interaction.
-	objPicker.renderingLayers( Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
-
-	var node;
-	if(includeMetaObjects){
-		// try first to pick a metaObject (= nodes located below the metaObjectRoot)
-		node = objPicker.queryNodeFromScreen(GLOBALS.frameContext,metaObjectRoot,new Geometry.Vec2(screenX,screenY),true);
-	
-		// otherwise a pick node from the scene
-		if(!node)
-			node = objPicker.queryNodeFromScreen(GLOBALS.frameContext,PADrend.getRootNode(),new Geometry.Vec2(screenX,screenY),true);
-	}else{
-		metaObjectRoot.deactivate();
-		node = objPicker.queryNodeFromScreen(GLOBALS.frameContext,PADrend.getRootNode(),new Geometry.Vec2(screenX,screenY),true);
-		metaObjectRoot.activate();
-	}
-	return node;
 };
 
 

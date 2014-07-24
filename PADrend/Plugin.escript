@@ -138,6 +138,7 @@ PADrend.init := fn(){
 					"HID" : true,
 					"Navigation" : true,
 					"NodeInteraction" : true,
+					"Picking" : true,
 					"RemoteControl" : true,
 					"SceneManagement" : true,
 					"Serialization" : true,

@@ -42,7 +42,7 @@ out("\n","-"*79,"\n");
     loadOnce ("LibUtilExt/Misc_Utils.escript");
 
     loadOnce ("LibMinSGExt/Geometry_Utils.escript");
-    loadOnce ("LibMinSGExt/RendRayCaster.escript");
+    Std.require('LibMinSGExt/RendRayCaster');
 	loadOnce ("LibMinSGExt/MinSG_Utils.escript");
 	loadOnce ("LibMinSGExt/NodeExtensions.escript");
 	loadOnce ("LibMinSGExt/NodeTraits.escript");
