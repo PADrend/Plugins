@@ -129,7 +129,6 @@ TransformationTools.SnapTool2 := new Type;
 
 	T.handleIndividualNodes @(init) := fn(){	return DataWrapper.createFromValue(true);	};
 	T.startPos @(private) := void;	// position of the metaNode in worldCoordinates when start dragging or void
-	T.rayCaster @(init,private) := MinSG.RendRayCaster;
 	T.castSegmentScaling @(private) := 1.0; // influences the length of the casting segments 
 
 	T.nodeMarkerNode @(private) := 	void;	// a geometry node with a "cast segment" for each dragged node
@@ -168,14 +167,10 @@ TransformationTools.SnapTool2 := new Type;
 		foreach(nodes as var node)
 			node.deactivate();
 
-		var scene = PADrend.getCurrentScene();
 	
-		// check if metaObjects (e.g. lights or similar nodes) are visible.
-		rayCaster.renderingLayers( Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
-	
-		this.startPos = rayCaster.queryIntersectionFromScreen(frameContext,scene,new Geometry.Vec2(evt.x,evt.y));
+		this.startPos = Util.requirePlugin('PADrend/Picking').queryIntersection( [evt.x,evt.y] );
 		if(!this.startPos)
-			this.startPos = PADrend.getCurrentSceneGroundPlane().getIntersection( frameContext.calcWorldRayOnScreenPos(evt.x,evt.y) );
+			this.startPos = PADrend.getCurrentSceneGroundPlane().getIntersection( Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ) );
 
 		// activate nodes
 		foreach(nodes as var node)
@@ -192,10 +187,9 @@ TransformationTools.SnapTool2 := new Type;
 		foreach(nodes as var node)
 			node.deactivate();
 
-		var scene = PADrend.getCurrentScene();
-		var newPos = this.rayCaster.queryIntersectionFromScreen(frameContext,scene,new Geometry.Vec2(evt.x,evt.y));
+		var newPos = Util.requirePlugin('PADrend/Picking').queryIntersection( [evt.x,evt.y] );
 		if(!newPos)
-			newPos = PADrend.getCurrentSceneGroundPlane().getIntersection( frameContext.calcWorldRayOnScreenPos(evt.x,evt.y) );
+			newPos = PADrend.getCurrentSceneGroundPlane().getIntersection(  Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ) );
 		if(!newPos){
 			// activate nodes
 			foreach(nodes as var node)
@@ -214,6 +208,8 @@ TransformationTools.SnapTool2 := new Type;
 		}else{ // if individual
 			var sceneGround = PADrend.getCurrentSceneGroundPlane();
 			
+			var scene = PADrend.getCurrentScene();
+
 			var sceneMinY = scene.getWorldBB().getMinY();
 			foreach(this.nodeRays as var node,var segment){
 				var intersection = this.rayCaster.queryIntersection(frameContext,scene,

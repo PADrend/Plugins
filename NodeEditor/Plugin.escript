@@ -52,12 +52,9 @@ plugin.init @(override) := fn() {
 				evt.pressed &&
 				PADrend.getEventContext().isCtrlPressed()) {
 
-			@(once) static r = new MinSG.RendRayCaster;
+			@(once) static Picking = Util.requirePlugin('PADrend/Picking');
 
-			// check if metaObjects (e.g. lights or similar nodes) are visible.
-			r.renderingLayers(Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
-		
-			var node = r.queryNodeFromScreen(frameContext,PADrend.getRootNode(),new Geometry.Vec2(evt.x,evt.y),true);
+			var node = Picking.pickNode( [evt.x,evt.y] );
 			if(node && evt.button == Util.UI.MOUSE_BUTTON_RIGHT)
 				node = objectIdentifier(node);
 

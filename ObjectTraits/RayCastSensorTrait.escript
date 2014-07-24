@@ -25,7 +25,7 @@ static trait = new MinSG.PersistentNodeTrait('ObjectTraits/RayCastSensorTrait');
 
 
 static rayCast = fn(sensorNode,Array geomNodes){
-	@(once) static rayCaster = new MinSG.RendRayCaster;
+	@(once) static rayCaster = new (Std.require('LibMinSGExt/RendRayCaster'));
 	
 	geomNodes = geomNodes.clone();
 	geomNodes.removeValue(sensorNode);

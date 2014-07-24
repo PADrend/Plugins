@@ -144,17 +144,14 @@ ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlace
 
 //! Place the given node at the given position and add it to the current scene.
 ObjectPlacer.defaultNodeInserter := fn(Geometry.Vec2 screenPos,MinSG.Node node){
-
-	var scene = PADrend.getCurrentScene();
-	@(once) static r = new MinSG.RendRayCaster;
+	var Picking = Util.requirePlugin('PADrend/Picking');
 	
-	// check if metaObjects (e.g. lights or similar nodes) are visible.
-	r.renderingLayers( Util.requirePlugin('PADrend/EventLoop').getRenderingLayers() );
-
-	var pos = r.queryIntersectionFromScreen(frameContext,scene,screenPos);
+	var pos = Picking.queryIntersection( screenPos );
 	if(!pos)
-		pos = PADrend.getCurrentSceneGroundPlane().getIntersection( frameContext.calcWorldRayOnScreenPos(screenPos) );
+		pos = PADrend.getCurrentSceneGroundPlane().getIntersection( Picking.getPickingRay(screenPos) );
 	if(pos){
+		var scene = PADrend.getCurrentScene();
+
 //		print_r(pos);
 		scene += node;
 

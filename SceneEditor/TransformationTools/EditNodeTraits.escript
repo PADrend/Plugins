@@ -170,7 +170,7 @@ EditNodes.TranslatableAxisTrait := new Traits.GenericTrait("EditNodes.Translatab
 										(this.getWorldMatrix() * new Geometry.Vec4(1,0,0,0)).xyz().normalize());
 			// store initial closest point to the mouse
 			this.__NE_TranslAxis_initialPos_ws = __NE_TranslAxis_axis_ws.getClosestPointToRay(
-										frameContext.calcWorldRayOnScreenPos(evt.x,evt.y));
+										Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ));
 			__NE_TranslAxis_currentTranslation_ws = new Geometry.Vec3(0,0,0);
 			onTranslationStart();
 		};
@@ -178,7 +178,7 @@ EditNodes.TranslatableAxisTrait := new Traits.GenericTrait("EditNodes.Translatab
 		//! \see EditNodes.DraggableTrait
 		node.onDragging += fn(evt){
 			var newPos_ws = __NE_TranslAxis_axis_ws.getClosestPointToRay(
-								frameContext.calcWorldRayOnScreenPos(evt.x,evt.y));
+								Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ));
 			__NE_TranslAxis_currentTranslation_ws = newPos_ws-__NE_TranslAxis_initialPos_ws;
 			onTranslate(__NE_TranslAxis_currentTranslation_ws);
 		};
@@ -221,7 +221,7 @@ EditNodes.TranslatablePlaneTrait := new Traits.GenericTrait("EditNodes.Translata
 									(this.getWorldMatrix() * new Geometry.Vec4(0,0,1,0)).xyz().normalize()); // plane normal
 			// store initial intersection
 			this.__NE_TranslPlane_initialPos_ws = __NE_TranslPlane_plane_ws.getIntersection(
-									frameContext.calcWorldRayOnScreenPos(evt.x,evt.y));
+									Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ));
 			__NE_TranslPlane_currentTranslation_ws = new Geometry.Vec3(0,0,0);
 			onTranslationStart();
 		};
@@ -229,7 +229,7 @@ EditNodes.TranslatablePlaneTrait := new Traits.GenericTrait("EditNodes.Translata
 		//! \see EditNodes.DraggableTrait
 		node.onDragging += fn(evt){
 			var newPos_ws = __NE_TranslPlane_plane_ws.getIntersection(
-									frameContext.calcWorldRayOnScreenPos(evt.x,evt.y) );
+									Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ) );
 			if(newPos_ws){
 				__NE_TranslPlane_currentTranslation_ws = newPos_ws-__NE_TranslPlane_initialPos_ws;
 				onTranslate(__NE_TranslPlane_currentTranslation_ws);
@@ -279,7 +279,7 @@ EditNodes.RotatableTrait := new Traits.GenericTrait("EditNodes.RotatableTrait");
 									(this.getWorldMatrix() * new Geometry.Vec4(0,0,1,0)).xyz().normalize()); // plane normal
 			d.pivot_ws = this.getWorldPosition();
 
-			var intersection = d.plane_ws.getIntersection(frameContext.calcWorldRayOnScreenPos(evt.x,evt.y));
+			var intersection = d.plane_ws.getIntersection( Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ));
 			d.initialDir_ws = intersection ? (intersection-d.pivot_ws).normalize() : new Geometry.Vec3(1,0,0);
 			d.currentAngle_deg = 0;
 			onRotationStart();
@@ -288,7 +288,7 @@ EditNodes.RotatableTrait := new Traits.GenericTrait("EditNodes.RotatableTrait");
 		//! \see EditNodes.DraggableTrait
 		node.onDragging += fn(evt){
 			var d = __EditNode_rotationData;
-			var intersection = d.plane_ws.getIntersection(frameContext.calcWorldRayOnScreenPos(evt.x,evt.y));
+			var intersection = d.plane_ws.getIntersection( Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ));
 			if(intersection){
 				var dir = (intersection-d.pivot_ws).normalize();
 				// sign( <dir1 x normal, dir2> ) * <dir1,dir2>

@@ -181,8 +181,7 @@ plugin.setMode := fn(newMode){
 
 plugin.queryScenePos := fn(Geometry.Vec2 screenPos){
 
-	var r = new MinSG.RendRayCaster;
-	var pos = r.queryIntersectionFromScreen(frameContext,PADrend.getCurrentScene(),screenPos);
+	var pos = Util.requirePlugin('PADrend/Picking').queryIntersection( screenPos );
 	if(!pos) return void;
 	var minY = PADrend.getCurrentScene().getWorldBB().getMinY();
 	if(pos.getY()<minY)
