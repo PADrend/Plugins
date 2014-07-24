@@ -103,6 +103,7 @@ static glErrorChecking = DataWrapper.createFromConfig(systemConfig,'PADrend.Rend
 static renderingFlags = 0;
 plugin.taskScheduler := void;
 plugin.waitForGlFinish := void;
+static camerasUsedForLastFrame = [];
 
 static renderingLayers = 1;
 
@@ -184,12 +185,13 @@ plugin.ex_Start := fn(){
 	}
 
 };
-plugin.getActiveCamera := 		fn(){	return activeCamera;	};
-plugin.getBGColor := 			fn(){	return this.bgColor;	};
-plugin.getRenderingFlags :=		fn(){	return renderingFlags;	};
-plugin.getRenderingLayers := 	fn(){	return renderingLayers;	};
+plugin.getActiveCamera := 				fn(){	return activeCamera;	};
+plugin.getBGColor := 					fn(){	return this.bgColor;	};
+plugin.getCamerasUsedForLastFrame :=	fn(){	return camerasUsedForLastFrame;	};
+plugin.getRenderingFlags :=				fn(){	return renderingFlags;	};
+plugin.getRenderingLayers := 			fn(){	return renderingLayers;	};
 
-plugin.setActiveCamera :=		fn(MinSG.AbstractCameraNode newCamera){	activeCamera = newCamera;	};
+plugin.setActiveCamera :=				fn(MinSG.AbstractCameraNode newCamera){	activeCamera = newCamera;	};
 
 plugin.setBGColor := fn(Util.Color4f newColor){
 	systemConfig.setValue('PADrend.Rendering.bgColor',[newColor.r(),newColor.g(),newColor.b(),newColor.a()]);
@@ -209,14 +211,16 @@ plugin.singleFrame := fn() {
 	// create "default" rendering pass
 	var renderingPasses = [ new PADrend.RenderingPass("default",PADrend.getRootNode(),activeCamera, renderingFlags, this.doClearScreen ? this.bgColor : false,renderingLayers) ];
 	executeExtensions('PADrend_BeforeRendering',renderingPasses);
-
+	
 	// -------------------
 	// ---- Render Scene
 	frameContext.beginFrame();
 
+	var usedCameras = [];
 	// execute all rendering passes in the given order
 	while(!renderingPasses.empty()){
 		var renderingPass = renderingPasses.popFront();
+		usedCameras += renderingPass.getCamera();
 		executeExtensions('PADrend_BeforeRenderingPass',renderingPass);
 		renderingPass.execute();
 		executeExtensions('PADrend_AfterRenderingPass',renderingPass);		
@@ -229,6 +233,8 @@ plugin.singleFrame := fn() {
 
 	executeExtensions('PADrend_AfterRendering',getActiveCamera());
 
+	camerasUsedForLastFrame.swap( usedCameras );
+	
 	// -------------------
 	// ---- Handle User Inputs
 	PADrend.getEventQueue().process();
