@@ -104,7 +104,7 @@ T.begin ::= fn(){
 	if(shader){
 		try{
 			renderingContext.pushAndSetShader(shader);
-			 outln( __FILE__,":",__LINE__); Rendering.checkGLError();
+//			 outln( __FILE__,":",__LINE__); Rendering.checkGLError();
 		}catch(e){
 			renderingContext.popFBO();
 			fbo = void; // clear all attachments
