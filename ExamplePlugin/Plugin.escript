@@ -49,59 +49,70 @@ plugin.onRemovePlugin += fn(){
 	outln("Bye!");
 };
 
-plugin.cash := void; // holds your current amount of gold
+static cash; // holds your current amount of gold
 
 /**
  * Plugin initialization.
  * ---|> Plugin
  */
-plugin.init:=fn() {
-	{ // Register ExtensionPointHandler:
-        registerExtension('PADrend_Init',this->this.ex_Init); 
-		registerExtension('ExamplePlugin_OnRedButtonPressed',this->fn(){
-			PADrend.message("You just pressed the red button! That costs you 10 gold!");
-			cash(cash()-10);
-		});
-    }
-	return true;
-};
+plugin.init @(override) :=fn() {
+	// cash = new Std.DataWrapper(100); // always start with 100 gold
+	cash = Std.DataWrapper.createFromConfig( PADrend.configCache,'ExamplePlugin.gold',100 ); // automatically store the gold in the config
+	cash.onDataChanged += fn(value)	{	
+		PADrend.message("You now have "+value+" gold.\n");
+	};
 
-//!	[ext:PADrend_Init]
-plugin.ex_Init := fn(){
-	out("ExmaplePlugin: Hello World! Init init init...\n");
-	// cash = DataWrapper.createFromValue(100); // always start with 100 gold
-	cash = DataWrapper.createFromConfig( PADrend.configCache,'ExamplePlugin.gold',100 ); // automatically store the gold in the config
-	cash.onDataChanged += fn(value)	{	PADrend.message("You now have "+value+" gold.\n");	};
-	
-	// init menu entries
-	gui.registerComponentProvider('PADrend_PluginsMenu.examplePlugin',{
-		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL : "ExamplePlugin",
-		GUI.ON_CLICK : this->showWindow
+	// Register ExtensionPointHandlers:
+	registerExtension('PADrend_Init',  initGUI); 
+	registerExtension('ExamplePlugin_OnRedButtonPressed', fn(){
+		PADrend.message("You just pressed the red button! That costs you 10 gold!");
+		cash(cash()-10);
 	});
 
+	return true; // plugin successful initialized 
 };
 
-plugin.showWindow := fn(){
-	var w = gui.createPopupWindow(300,100,"ExamplePlugin-Window");
-	w+={
-		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL : "RED BUTTON",
-		GUI.COLOR : GUI.RED,
-		GUI.FONT : GUI.FONT_ID_LARGE,
-		GUI.TOOLTIP : "Dangerous button! Do not press!",
-		GUI.ON_CLICK : fn(){	executeExtensions('ExamplePlugin_OnRedButtonPressed');	}
-	};
-	w+={
-		GUI.TYPE : GUI.TYPE_NUMBER,
-		GUI.LABEL : "Cash",
-		GUI.DATA_WRAPPER : cash,
-		GUI.TOOLTIP : "Your current amount of gold.",
-	};
-	w.addAction("Cancel",fn(){	PADrend.message("Bye!"); },"Run away!");
-	w.init();
+static initGUI = fn(){
+	outln("ExmaplePlugin: Init GUI...");
+	
+	// init menu entries
+	gui.registerComponentProvider('PADrend_PluginsMenu.examplePlugin',[
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "ExamplePlugin",
+			GUI.ON_CLICK : fn(){
+				// for openDialog documentation, see LibGUIExt/Factory_Dialogs.escript
+				gui.openDialog({
+					GUI.TYPE : GUI.TYPE_POPUP_DIALOG,
+					GUI.LABEL : "ExamplePlugin-Window",
+					GUI.SIZE : [300,100],
+					GUI.ACTIONS : [
+						[ "Cancel",fn(){	PADrend.message("Bye!"); }, "Tooltip: Run away!" ]
+					],
+					GUI.OPTIONS : 'ExamplePlugin_WindowEntries'
+				});
+			}
+		}
+	]);
+	
+	gui.registerComponentProvider('ExamplePlugin_WindowEntries.cash',[ 
+		{// for gui component documentation, see LibGUIExt/Factory_Components.escript
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "RED BUTTON",
+			GUI.COLOR : GUI.RED,
+			GUI.FONT : GUI.FONT_ID_LARGE,
+			GUI.TOOLTIP : "Dangerous button! Do not press!",
+			GUI.ON_CLICK : fn(){	executeExtensions('ExamplePlugin_OnRedButtonPressed');	}
+		},
+		{
+			GUI.TYPE : GUI.TYPE_NUMBER,
+			GUI.LABEL : "Cash",
+			GUI.DATA_WRAPPER : cash,
+			GUI.TOOLTIP : "Your current amount of gold.",
+		}
+	]);
+
 };
 
-// -------------------
 return plugin;
 // ------------------------------------------------------------------------------
