@@ -124,6 +124,8 @@ GUI.GUI_Manager._dialogFactories ::= {
 		}
 		var options = input.description[GUI.OPTIONS];
 		if(options){
+			if(options.isA(String))// for debugging
+				d._componentId := options;
 			foreach(this.createComponents(options) as var option)
 				d+=option;
 		}
