@@ -75,7 +75,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
                         var color_texture = Rendering.createHDRCubeTexture(size, size);
                         foreach(trait.directions as var i,var dirArray){
                             trait.camera.setSRT(new Geometry.SRT(node.getWorldBB().getCenter(), dirArray[0], dirArray[1]));
-                            trait.tp.setOutputTexture( [color_texture, 0, i] );
+                            trait.tp.setOutputTexture( color_texture, 0, i );
                             trait.tp.begin();
                             PADrend.renderScene(PADrend.getRootNode(), trait.camera, PADrend.getRenderingFlags(), PADrend.getBGColor(), layerWrapper());
                             trait.tp.end();
