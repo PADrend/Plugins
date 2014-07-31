@@ -74,6 +74,26 @@ static scanEffectFiles = fn(){
 	return files;
 };
 
+static fillOptionWindow = fn( window, effect){
+	window.destroyContents();
+	if(effect){
+		var c = effect.getOptionPanel();
+		if(c.isA(GUI.Component))
+			window += c;
+		else{
+			var panel = gui.create({
+					GUI.TYPE : GUI.TYPE_PANEL,
+					GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_FILL_ABS,0,0]
+			});
+			foreach(gui.createComponents(c) as var entry){
+				panel +=entry;
+				panel++;
+			}
+			window += panel;
+		}
+	}
+};
+
 static initMenus = fn(){
 	static optionWindow;
 	
@@ -84,17 +104,12 @@ static initMenus = fn(){
 			activeEffect.onDataChanged += [optionWindow] => fn(optionWindow, newEffect){
 				if(optionWindow.isDestroyed())
 					return $REMOVE;
-				optionWindow.clear();
-				if(newEffect)
-					optionWindow.add(activeEffect.getOptionPanel());
+				fillOptionWindow(optionWindow,newEffect);
 			};
 
-		}else{
-			optionWindow.clear();
 		}
-		if(effect){
-			optionWindow.add(effect.getOptionPanel());
-		}
+		fillOptionWindow( optionWindow,effect );
+		
 		optionWindow.setEnabled(true);
 	};
 
