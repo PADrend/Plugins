@@ -17,9 +17,10 @@
 /*! Add the follwong public attributes to a MinSG.Node:
 
 	- envMap_update()				Method for creating/updating the env map; the created map is returned.
-	- envMap_targetStateId			(DataWrapper) Registered name of a TextureState for holding the envMap
-	- envMap_renderingLayers		(DataWrapper) Rendering layers used to create the environment map.
-	- createHDRCubeTexture			(DataWrapper) Resolution of the created environment map.
+	- envMap_targetStateId			(DataWrapper,String) Registered name of a TextureState for holding the envMap
+	- envMap_renderingLayers		(DataWrapper,Number) Rendering layers used to create the environment map.
+	- envMap_resolution				(DataWrapper,Number) Resolution of the created environment map.
+	- envMap_updateOnTranslation	(DataWrapper,Bool) If true, the texture is refreshed when the node is moved.
 
 */
 static trait = new MinSG.PersistentNodeTrait('ObjectTraits/EnvironmentTextureTrait');
@@ -33,14 +34,15 @@ trait.attributes.envMap_update ::= fn(){
 		var position = this.getWorldBB().getCenter();
 		var fbo = new Rendering.FBO;
 		fbo.attachDepthTexture( renderingContext,Rendering.createDepthTexture(resolution, resolution) );
-		var camera = new MinSG.CameraNode(90, 1.0, 1, 5000);
+		var camera = new MinSG.CameraNode;
 		camera.setViewport(new Geometry.Rect(0, 0, resolution, resolution));
+		camera.applyVerticalAngle(90);
 
 		foreach([
 					[ new Geometry.Vec3(-1,  0,  0), new Geometry.Vec3(0, -1, 0) ],
 					[ new Geometry.Vec3( 1,  0,  0), new Geometry.Vec3(0, -1, 0) ],
 					[ new Geometry.Vec3( 0, -1,  0), new Geometry.Vec3(0,  0, 1) ],
-					[ new Geometry.Vec3( 0,  1,  0), new Geometry.Vec3(0,  0, 1) ],
+					[ new Geometry.Vec3( 0,  1,  0), new Geometry.Vec3(0,  0, -1) ],
 					[ new Geometry.Vec3( 0,  0, -1), new Geometry.Vec3(0, -1, 0) ],
 					[ new Geometry.Vec3( 0,  0,  1), new Geometry.Vec3(0, -1, 0) ],
 				] as var layer,var dirArray){
@@ -57,9 +59,9 @@ trait.attributes.envMap_update ::= fn(){
 		var state =  PADrend.getSceneManager().getRegisteredState( id );
 		if(!state){
 			state = new MinSG.TextureState;
+			state.setTextureUnit(4);
 			PADrend.getSceneManager().registerState( id,state);
 		}
-
 		state.setTexture(envMap);
 	}
 	return envMap;
@@ -70,6 +72,21 @@ trait.onInit += fn(MinSG.Node node){
 	node.envMap_targetStateId := node.getNodeAttributeWrapper('envMap_stateId', "" );
 	node.envMap_renderingLayers := node.getNodeAttributeWrapper('envMap_rendLayers', 1 );
 	node.envMap_resolution := node.getNodeAttributeWrapper('envMap_resolution', 256 );
+	node.envMap_updateOnTranslation := node.getNodeAttributeWrapper('envMap_updateOnTranslation', true );
+	
+	node.envMap_updateOnTranslation.onDataChanged += [node]=>fn(node,b){
+		if(b){
+			if(!Traits.queryTrait(node,MinSG.TransformationObserverTrait))
+				Traits.addTrait( node,MinSG.TransformationObserverTrait );
+			node.onNodeTransformed += fn(...){
+				if( this.envMap_updateOnTranslation() )
+					this.envMap_update();
+			};
+			return $REMOVE;
+		}
+	};
+	node.envMap_updateOnTranslation.forceRefresh();
+
 	
 	PADrend.planTask(0.1, node->node.envMap_update); // plan initial map creation
 };
