@@ -1,10 +1,11 @@
 #version 120
+#extension GL_ARB_shading_language_420pack: require
 
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -32,11 +33,11 @@ void provideLightingVars(in VertexProperties vec){}
 #ifdef SG_FRAGMENT_SHADER
 
 uniform bool sg_cubeEnv_enabled = false;
-uniform float sg_cubeEnvReflection_strength = 0.0;
-uniform samplerCube sg_cubeEnvReflection_map;
+uniform float sg_cubeEnvReflection_strength = 0.5;					// default: 0.5 influence to specular lighting
+uniform layout(binding = 4) samplerCube sg_cubeEnvReflection_map;	// default textureUnit 4
 
-uniform float sg_cubeEnvDiffuse_strength = 0.0;
-uniform samplerCube sg_cubeEnvDiffuse_map;
+uniform float sg_cubeEnvDiffuse_strength = 0.0;						// default: no influence to diffuse lighting
+uniform layout(binding = 4) samplerCube sg_cubeEnvDiffuse_map;		// default textureUnit 4
 
 struct CompositeColor {
 	vec4 ambient, diffuse, specular;
