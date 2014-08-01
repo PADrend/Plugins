@@ -156,7 +156,7 @@ plugin.init @(override) := fn() {
 				if(droppingComponent){
 					droppingComponent.onStatesDropped(stateSource,[state], droppingComponent.defaultStateDropActions,evt ); 				//! \see AcceptDroppedStatesTrait
 				}else  if(!gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y)).getParentComponent()) { // screen ?
-					var node = Util.requirePlugin('PADrend/NodeInteraction').pickNodeFromScreen(evt.x,evt.y,false);
+					var node = Util.requirePlugin('PADrend/Picking').pickNode( [evt.x,evt.y] );
 					if(node){
 						@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');					//! \see AcceptDroppedStatesTrait
 						AcceptDroppedStatesTrait.transferDroppedStates( stateSource, node, [state] );
