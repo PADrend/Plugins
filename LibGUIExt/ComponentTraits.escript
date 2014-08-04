@@ -34,6 +34,7 @@ static MouseButtonListenerTrait = Std.require('LibGUIExt/Traits/MouseButtonListe
 				Can be called stop the dragging process. onStopDragging() is called, but onDrop(...) is skipped.
 	
 	\note Adds the MouseButtonListenerTrait if not already present.
+	\note the coordinates stored in the events are screenPositions (and not guiPositions)
 */
 GUI.DraggableTrait := new Traits.GenericTrait("GUI.DraggableTrait");
 {
@@ -63,7 +64,7 @@ GUI.DraggableTrait := new Traits.GenericTrait("GUI.DraggableTrait");
 		c.onMouseButton += fn(evt){
 			if(!evt.pressed || !_dragging_possibleButtons.contains(evt.button))
 				return $CONTINUE;
-
+			
 			this._dragging_button @(private) := evt.button;
 			this._dragging_active @(private) := true;
 			
@@ -75,16 +76,26 @@ GUI.DraggableTrait := new Traits.GenericTrait("GUI.DraggableTrait");
 			gui.onMouseButton += this->fn(evt){
 				if(this.isDestroyed() || !_dragging_active)
 					return $REMOVE;
+				
 				if(evt.button == _dragging_button){
 					stopDragging();
-					onDrop(evt);
+								
+					var evt2 = evt.clone();
+					var screenPos = gui.guiPosToScreenPos( [evt2.x,evt2.y] );
+					evt2.x = screenPos.x();
+					evt2.y = screenPos.y();
+					this.onDrop(evt2);
 				}
 			};
 
 			gui.onMouseMove += this->fn(evt){
-				if(this.isDestroyed() || !_dragging_active)
+				if(this.isDestroyed() || !this._dragging_active)
 					return $REMOVE;
-				onDrag(evt);
+				var evt2 = evt.clone();
+				var screenPos = gui.guiPosToScreenPos( [evt2.x,evt2.y] );
+				evt2.x = screenPos.x();
+				evt2.y = screenPos.y();
+				this.onDrag(evt2);
 			};
 			return $BREAK; // event handled
 		};
@@ -106,7 +117,7 @@ GUI.DraggableTrait := new Traits.GenericTrait("GUI.DraggableTrait");
 		\code
 			myComponent.onDrag += fn(evt){
 				getDraggingMarker().setEnabled(false);
-				var c = (gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y)));
+				var c = (gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] )));
 				// ...
 				
 				getDraggingMarker().setEnabled(true);
@@ -132,7 +143,7 @@ GUI.DraggingMarkerTrait := new Traits.GenericTrait("GUI.DraggingMarkerTrait");
 		
 		c.onStartDragging += fn(evt){
 			var marker;
-			this._draggingMarker_relPos := getAbsPosition() - new Geometry.Vec2(evt.x,evt.y);
+			this._draggingMarker_relPos := getAbsPosition() - gui.screenPosToGUIPos( [evt.x,evt.y] );
 
 			if(isSet($_dragging_markerFactory) && _dragging_markerFactory){
 				marker = gui.create( _dragging_markerFactory(this) );
@@ -164,7 +175,7 @@ GUI.DraggingMarkerTrait := new Traits.GenericTrait("GUI.DraggingMarkerTrait");
 		c.onDrag += fn(evt){
 			var marker = _draggingMarker_marker;
 			if(marker){
-				marker.setPosition(evt.x+_draggingMarker_relPos.getX(),evt.y+_draggingMarker_relPos.getY());
+				marker.setPosition( gui.screenPosToGUIPos( [evt.x,evt.y] ) + _draggingMarker_relPos );
 			}
 		};
 	};
@@ -187,7 +198,7 @@ GUI.DraggingMarkerTrait := new Traits.GenericTrait("GUI.DraggingMarkerTrait");
 			myComponent.onDrag += fn(evt){
 				getDraggingMarker().setEnabled(false);
 				getDraggingConnector().setEnabled(false);
-				var c = (gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y)));
+				var c = (gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] )));
 				// ...
 				
 				getDraggingMarker().setEnabled(true);

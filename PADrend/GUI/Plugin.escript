@@ -31,20 +31,45 @@ plugin.init @(override) := fn(){
 	
 	registerExtension('PADrend_Init',			this->initGUIResources,Extension.HIGH_PRIORITY+1);
 	registerExtension('PADrend_AfterRendering', fn(...){ renderGUI(); }, Extension.LOW_PRIORITY*2);
-	registerExtension('PADrend_UIEvent', 		fn(evt){
-		if(guiMode()==MODE_DUAL_COMPESSED && evt.isSet($x)){
+
+	registerExtension('PADrend_Init', fn(){
+		// register position converters: screen pos <-> gui pos
+		gui.screenPosToGUIPos @(override) := [gui.screenPosToGUIPos] => fn(originalFun, pos){
+			if(guiMode()==MODE_DUAL_COMPESSED){
+				pos = new Geometry.Vec2(pos);
+				pos.x( (pos.x()*2) % renderingContext.getWindowWidth() );
+			}else if(guiMode()==MODE_DUAL){
+				pos = new Geometry.Vec2(pos);
+				pos.x( pos.x() % (renderingContext.getWindowWidth()*0.5) );
+			}
+			return originalFun(pos);
+		};
+		gui.guiPosToScreenPos @(override) := [gui.guiPosToScreenPos] => fn(originalFun, pos){
+			if(guiMode()==MODE_DUAL_COMPESSED){
+				pos = new Geometry.Vec2(pos);
+				pos.x( pos.x()*0.5 );
+			}
+			return originalFun(pos);
+		};
+	});
+
+	// main gui event handler: pass ui-events to gui
+	registerExtension('PADrend_UIEvent', fn(evt){
+		if(evt.isSet($x) && evt.isSet($y)){ //mouse event -> convert screen pos into gui pos
+			var pos = gui.screenPosToGUIPos( [evt.x,evt.y] );
 			evt = evt.clone();
-			evt.x *= 2.0;
+			evt.x = pos.x();
+			evt.y = pos.y();
 		}
 		return gui.handleEvent(evt); 
 	});
-
+	
 	
 	// right click menu
 	if(systemConfig.getValue( 'PADrend.GUI.rightClickMenu',true)){
 		registerExtension( 'PADrend_UIEvent',this->fn(evt){
 			if(evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_RIGHT && evt.pressed && !PADrend.getEventContext().isCtrlPressed()){
-				gui.openMenu(new Geometry.Vec2(evt.x,evt.y),'PADrend_SceneToolMenu');
+				gui.openMenu(gui.screenPosToGUIPos( [evt.x,evt.y] ),'PADrend_SceneToolMenu');
 			}
 			return false;
 		});
@@ -112,7 +137,10 @@ static renderGUI = fn(){
 			@(once) initGUI_FBO();
 			renderingContext.pushAndSetFBO(gui_FBO);
 			renderingContext.clearScreen(new Util.Color4f(0,0,0,0));
+			renderingContext.pushViewport();
+			renderingContext.setViewport(0,0,renderingContext.getWindowWidth()*0.5,renderingContext.getWindowHeight());
 			gui.display();
+			renderingContext.popViewport();
 			renderingContext.popFBO();
 			
 			var blending=new Rendering.BlendingParameters;

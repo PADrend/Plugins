@@ -134,7 +134,7 @@ plugin.showWindow := fn(){
                     GUI.TOOLTIP: "you can drag and drop it in the entries field!",
                     });
                     comp.onDrop :=fn(evt,data){
-                        for(var c = (gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y)));c;c=c.getParentComponent()){
+                        for(var c = (gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] )));c;c=c.getParentComponent()){
                             if(Traits.queryTrait(c,NodeRepeater.AcceptsDataSettingTrait)){
                                 c.data(data[1]); //! \see AcceptsDataSettingTrait
                                 return;

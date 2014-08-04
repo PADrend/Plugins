@@ -101,10 +101,10 @@ plugin.init @(override) := fn() {
 			});
 			entry.getBaseContainer() += component;
 			
-			static getDroppingComponent = fn( x,y ){
+			static getDroppingComponent = fn( Geometry.Vec2 guiPos ){
 				//! \see AcceptDroppedStatesTrait
 				@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');
-				for( var c = gui.getComponentAtPos(new Geometry.Vec2(x,y)); c; c=c.getParentComponent()){
+				for( var c = gui.getComponentAtPos(guiPos); c; c=c.getParentComponent()){
 					if(Traits.queryTrait(c,AcceptDroppedStatesTrait) )
 						return c;
 				}
@@ -115,7 +115,7 @@ plugin.init @(override) := fn() {
 				this.getDraggingMarker().setEnabled(false);			//! \see GUI.DraggingMarkerTrait
 				this.getDraggingConnector().setEnabled(false);		//! \see GUI.DraggingConnectorTrait
 
-				var droppingComponent = getDroppingComponent(evt.x,evt.y);
+				var droppingComponent = getDroppingComponent(gui.screenPosToGUIPos( [evt.x,evt.y] ));
 		
 				//! \see GUI.DraggingMarkerTrait
 				this.getDraggingMarker().destroyContents();
@@ -127,7 +127,7 @@ plugin.init @(override) := fn() {
 					this.getDraggingConnector().addProperty(
 						new GUI.ShapeProperty(GUI.PROPERTY_CONNECTOR_LINE_SHAPE,
 							gui._createSmoothConnectorShape( GUI.GREEN ,2)));
-				}else if(!gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y)).getParentComponent()) { // screen ?
+				}else if(!gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] )).getParentComponent()) { // screen ?
 					this.getDraggingConnector().addProperty(
 						new GUI.ShapeProperty(GUI.PROPERTY_CONNECTOR_LINE_SHAPE,
 							gui._createSmoothConnectorShape( new Util.Color4ub(0,0,255,255) ,2)));
@@ -152,10 +152,10 @@ plugin.init @(override) := fn() {
 						break;
 					}
 				}
-				var droppingComponent = getDroppingComponent(evt.x,evt.y);
+				var droppingComponent = getDroppingComponent(gui.screenPosToGUIPos( [evt.x,evt.y] ));
 				if(droppingComponent){
 					droppingComponent.onStatesDropped(stateSource,[state], droppingComponent.defaultStateDropActions,evt ); 				//! \see AcceptDroppedStatesTrait
-				}else  if(!gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y)).getParentComponent()) { // screen ?
+				}else  if(!gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] )).getParentComponent()) { // screen ?
 					var node = Util.requirePlugin('PADrend/Picking').pickNode( [evt.x,evt.y] );
 					if(node){
 						@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');					//! \see AcceptDroppedStatesTrait

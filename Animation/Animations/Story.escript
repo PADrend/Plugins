@@ -254,7 +254,7 @@ Story.createStoryBoardPanel ::= fn(Animation.PlaybackContext playbackContext){
 	
 	panel.openMenu := fn(evt) {
 		var entries = [];
-		var localPos = new Geometry.Vec2(evt.x, evt.y) - getAbsPosition() - getContentContainer().getPosition();
+		var localPos = gui.screenPosToGUIPos( [evt.x,evt.y] ) - getAbsPosition() - getContentContainer().getPosition();
 		var time = this.getTimeForPosition(localPos.getX());
 		var row = (localPos.getY() / this.rowSize).floor();
 		
@@ -327,7 +327,7 @@ Story.createStoryBoardPanel ::= fn(Animation.PlaybackContext playbackContext){
 				}
 			};
 		}
-		gui.openMenu(new Geometry.Vec2(evt.x - 3, evt.y - 3), entries);
+		gui.openMenu( gui.screenPosToGUIPos( [evt.x,evt.y] ) - new Geometry.Vec2(3,3), entries);
 	};
 	
 	panel.getPositionForTime := fn(time){

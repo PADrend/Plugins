@@ -38,7 +38,7 @@ plugin.init @(override) := fn(){
 		if(b){
 			revoce += Util.registerExtensionRevocably('PADrend_UIEvent',fn(evt){
 				if(evt.type==Util.UI.EVENT_MOUSE_MOTION){
-					analyzedComponent(gui.getComponentAtPos(new Geometry.Vec2(evt.x, evt.y)));
+					analyzedComponent(gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] )));
 //					outln( gui.getComponentAtPos(new Geometry.Vec2(evt.x, evt.y)) );
 				}
 				return;

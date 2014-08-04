@@ -102,7 +102,7 @@ ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlace
 			if(hasDraggingConnector)
 				getDraggingConnector().setEnabled(false);
 		
-			var droppingComponent = gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y));
+			var droppingComponent = gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] ));
 			var droppingPossible = !droppingComponent.getParentComponent() || 
 					Traits.queryTrait(droppingComponent,ObjectPlacer.AcceptsObjectCreatorsTrait); //! \see ObjectPlacer.AcceptsObjectCreatorsTrait
 			
@@ -120,9 +120,8 @@ ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlace
 				getDraggingMarker().setEnabled(true);
 		};
 		
-		component.onDrop += fn(evt,objectInserter,objectCreator){
-			var screenPos = new Geometry.Vec2(evt.x,evt.y);
-			var droppingComponent = gui.getComponentAtPos(screenPos);
+		component.onDrop += [objectInserter,objectCreator]=>fn(objectInserter,objectCreator, evt){
+			var droppingComponent = gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] ));
 			if(Traits.queryTrait(droppingComponent,ObjectPlacer.AcceptsObjectCreatorsTrait)){
 				droppingComponent.addObjectCreator(objectCreator); //! \see ObjectPlacer.AcceptsObjectCreatorsTrait
 				return;
@@ -134,16 +133,17 @@ ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlace
 				return;
 			}
 			var obj = objectCreator();
-			objectInserter(screenPos,obj);
+			objectInserter([evt.x,evt.y],obj);
 
-		}.bindLastParams(objectInserter,objectCreator);
+		};
 	};
 }
 
 //ObjectPlacer.onNodeInserted := new MultiProcedure; //! \todo move to prominent place?
 
 //! Place the given node at the given position and add it to the current scene.
-ObjectPlacer.defaultNodeInserter := fn(Geometry.Vec2 screenPos,MinSG.Node node){
+ObjectPlacer.defaultNodeInserter := fn(screenPos,MinSG.Node node){
+	screenPos = new Geometry.Vec2(screenPos);
 	var Picking = Util.requirePlugin('PADrend/Picking');
 	
 	var pos = Picking.queryIntersection( screenPos );

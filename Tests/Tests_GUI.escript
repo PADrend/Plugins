@@ -755,7 +755,7 @@ plugin.showWindow:=fn(){
 			PADrend.message("Dragging...");
 		},
 		GUI.ON_DROP : fn(evt){
-			var c = (gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y)));
+			var c = gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] ));
 			PADrend.message("Dropped on "+c);
 			this.setText("Drag Me!");
 		},
@@ -763,7 +763,7 @@ plugin.showWindow:=fn(){
 			getDraggingMarker().setEnabled(false);
 			getDraggingConnector().setEnabled(false);
 			
-			var c = (gui.getComponentAtPos(new Geometry.Vec2(evt.x,evt.y)));
+			var c = gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] ));
 			if(c.isSet($getData)){
 				getDraggingConnector().clearProperties();
 				getDraggingConnector().addProperty(

@@ -179,7 +179,8 @@ plugin.setMode := fn(newMode){
 	this.mode = newMode;
 };
 
-plugin.queryScenePos := fn(Geometry.Vec2 screenPos){
+plugin.queryScenePos := fn(screenPos){
+	screenPos = new Geometry.Vec2(screenPos);
 
 	var pos = Util.requirePlugin('PADrend/Picking').queryIntersection( screenPos );
 	if(!pos) return void;
@@ -194,7 +195,7 @@ plugin.ex_UIEvent:=fn(evt){
 
 	if( evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.pressed){
 		if( evt.button == Util.UI.MOUSE_BUTTON_LEFT && this.mode==PICK_FIRST ){
-			var pos=queryScenePos(new Geometry.Vec2(evt.x,evt.y));
+			var pos=queryScenePos( [evt.x, evt.y] );
 			out(pos,"\n");
 			if(!pos) return Extension.CONTINUE;
 			
@@ -204,7 +205,7 @@ plugin.ex_UIEvent:=fn(evt){
 			this.setMode(PICK_SECOND);
 
 		}else if(evt.button == Util.UI.MOUSE_BUTTON_LEFT && this.mode==PICK_SECOND ){
-			var pos=queryScenePos(new Geometry.Vec2(evt.x,evt.y));
+			var pos=queryScenePos( [evt.x, evt.y] );
 			out(pos,"\n");
 			if(!pos) return Extension.CONTINUE;
 			
@@ -212,7 +213,7 @@ plugin.ex_UIEvent:=fn(evt){
 
 			this.setMode(PICK_FIRST);
 		}else if(evt.button == Util.UI.MOUSE_BUTTON_LEFT && this.mode==PICK_JUMP){
-			var pos=queryScenePos(new Geometry.Vec2(evt.x,evt.y));
+			var pos=queryScenePos( [evt.x, evt.y] );
 			out(pos,"\n");
 			if(!pos) return Extension.CONTINUE;
 			
@@ -253,7 +254,7 @@ plugin.ex_UIEvent:=fn(evt){
 		}
 		return Extension.BREAK;
 	}else if( evt.type==Util.UI.EVENT_MOUSE_MOTION && this.mode==PICK_SECOND){
-		var pos=queryScenePos(new Geometry.Vec2(evt.x,evt.y));
+		var pos=queryScenePos( [evt.x, evt.y] );
 		if(!pos) return Extension.CONTINUE;
 		this.selectSecondPoint(pos);
 		PADrend.executeCommand( pos -> fn(){ Tools.DistanceMeasuringPlugin.selectSecondPoint(this); });
