@@ -368,7 +368,7 @@ plugin.init @(override) := fn() {
 				$execute : fn(p...){
 					if(!active)
 						return Extension.REMOVE_EXTENSION;
-					dolly.setWorldPosition(node.getWorldBB().getCenter());
+					PADrend.getDolly().setWorldPosition(node.getWorldBB().getCenter());
 					return Extension.CONTINUE;
 				}
 			});
