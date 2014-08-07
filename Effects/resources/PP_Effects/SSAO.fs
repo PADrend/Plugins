@@ -101,16 +101,16 @@ void main(){
 		
 	vec3 noise;
 	if(useNoise){
-		int h = int(x/pixelSizeX + y*5000/pixelSizeY + mod(eyeSpacePos.z*10000.0,0.7) );
+		uint h = uint(x/pixelSizeX + y*5000/pixelSizeY + mod(eyeSpacePos.z*10000.0,0.7) );
 		h ^= (((h) * 1234393) % 0xffffff);
 		h ^= (((h) * 1234393) % 0xffffff);
-		float f1 = float(h%1024-512);
+		float f1 = float(h%1024)-512.0;
 		
 		h ^= (((h) * 1234393) % 0xffffff);
-		float f2 = float(h%1024-512);
+		float f2 = float(h%1024)-512.0;
 
 		h ^= (((h) * 1234393) % 0xffffff);
-		float f3 = float(h%1024-512);
+		float f3 = float(h%1024)-512.0;
 		
 		noise = normalize(vec3( f1,f2,f3 ));
 	}
