@@ -66,9 +66,12 @@ Geometry.interpolateCubicBezier := fn(p0,p1,p2,p3,t){
 //---------
 // Vec3 extensions
 
-Geometry.Vec3.round ::= fn(Number r){
-	this.x(this.x().round(r));
-	this.y(this.y().round(r));
-	this.z(this.z().round(r));
+Geometry.Vec3.round ::= fn(Number r=1){
+	var xValue = this.x().round(r);
+	var yValue = this.y().round(r);
+	var zValue = this.z().round(r);
+	this.x( xValue==0 ? 0 : xValue );
+	this.y( yValue==0 ? 0 : yValue );
+	this.z( zValue==0 ? 0 : zValue );
 	return this;
 };
