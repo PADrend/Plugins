@@ -25,7 +25,16 @@ GLOBALS.PPEffectPlugin := new Plugin({
 			Plugin.DESCRIPTION : "Various post-processing effects",
 			Plugin.AUTHORS : "Benjamin Eikel, Claudius Jaehn, Ralf Petring",
 			Plugin.OWNER : "All",
-			Plugin.REQUIRES : []
+			Plugin.REQUIRES : [],		
+			Plugin.EXTENSION_POINTS : [ 
+				/* [ext:Effects_PPEffects_querySearchPaths]
+				 * Called to query the effect search paths.
+				 * @param   array
+				 * @result  void
+				 */
+				'Effects_PPEffects_querySearchPaths',
+			
+			]
 });
 
 static defaultEffect = Std.DataWrapper.createFromEntry( PADrend.configCache, 'Effects.ppEffectDefault',false);
@@ -34,18 +43,21 @@ static activeEffect = new Std.DataWrapper;
 static plugin = PPEffectPlugin;
 
 PPEffectPlugin.init @(override) := fn(){
-    
-    registerExtension('PADrend_Init',fn(){
+	
+	Util.registerExtension('PADrend_Init',fn(){
 		initMenus();
 		if(defaultEffect())
 			plugin.loadAndSetEffect(defaultEffect());
-    });
-
-    static revoce = new MultiProcedure;
-    activeEffect.onDataChanged += fn(effect){
-    	activeEffectFile( false ); // clear file name 
-    	revoce();
-    	if(effect){
+	});
+	Util.registerExtension('Effects_PPEffects_querySearchPaths',fn(Array paths){
+		paths += __DIR__+"/PPEffects";
+	});
+	
+	static revoce = new MultiProcedure;
+	activeEffect.onDataChanged += fn(effect){
+		activeEffectFile( false ); // clear file name 
+		revoce();
+		if(effect){
 			// use low priority to include other afterFrame-effects (like selected node's annotation)
 			revoce += Util.registerExtensionRevocably('PADrend_AfterRenderingPass',	fn(PADrend.RenderingPass pass){ activeEffect() && activeEffect().endPass(pass);	},Extension.LOW_PRIORITY );
 			revoce += Util.registerExtensionRevocably('PADrend_BeforeRenderingPass',fn(PADrend.RenderingPass pass){ activeEffect() && activeEffect().beginPass(pass);	});
@@ -53,23 +65,26 @@ PPEffectPlugin.init @(override) := fn(){
 			// use low priority to include other afterFrame-effects (like selected node's annotation)
 			revoce += Util.registerExtensionRevocably('PADrend_AfterRendering',		fn(...){ activeEffect() && activeEffect().end();	},Extension.LOW_PRIORITY); 
 			revoce += Util.registerExtensionRevocably('PADrend_BeforeRendering',	fn(...){ activeEffect() && activeEffect().begin();	});
-    	}
-    };
-       
-    return true;
+		}
+	};
+	return true;
 };
 
 //! name -> filename
 static scanEffectFiles = fn(){
 	var files = new Map; 
-	foreach(Util.getFilesInDir(__DIR__+"/PPEffects",['.escript']) as var file){
-		var name = file.substr(file.rFind("/")+1);
-		name = name.substr(0,name.rFind("."));
-		if(name.beginsWith("_"))
-			continue;
-		if(file.beginsWith("file://"))
-			file = file.substr(7);
-		files[name] = file;
+	var effectFolders = [];
+	Util.executeExtensions( 'Effects_PPEffects_querySearchPaths',effectFolders );
+	foreach(effectFolders as var folder){
+		foreach(Util.getFilesInDir( folder,['.escript']) as var file){
+			var name = file.substr(file.rFind("/")+1);
+			name = name.substr(0,name.rFind("."));
+			if(name.beginsWith("_"))
+				continue;
+			if(file.beginsWith("file://"))
+				file = file.substr(7);
+			files[name] = file;
+		}
 	}
 	return files;
 };
@@ -159,7 +174,8 @@ static initMenus = fn(){
 				GUI.LABEL : defaultEffect()==file ? name+" (default)" : name,
 				GUI.ON_CLICK : [file] => fn(file) {
 					PADrend.executeCommand( [file]=>fn(file){PPEffectPlugin.loadAndSetEffect(file); });
-				}
+				},
+				GUI.TOOLTIP : file
 			};
 		}
 		return m;
