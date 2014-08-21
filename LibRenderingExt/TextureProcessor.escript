@@ -125,11 +125,24 @@ T.begin ::= fn(){
 //! Render the input textures into the output textures using a shader.
 T.execute ::= fn(){
 	this.begin();
-	var inputRects = [];
-	foreach(this.inputTextures as var t)
-		inputRects += new Geometry.Rect(0,0,1,1);
-	Rendering.drawTextureToScreen(GLOBALS.renderingContext,new Geometry.Rect(0,0,this.width,this.height),
-					this.inputTextures,inputRects);
+	
+	if(this.inputTextures.empty()){
+		renderingContext.pushAndSetScissor(new Rendering.ScissorParameters(new Geometry.Rect(0,0,this.width,this.height)));
+		renderingContext.pushViewport();
+		renderingContext.setViewport(0,0,this.width,this.height);
+
+		Rendering.drawFullScreenRect( renderingContext );
+								
+		renderingContext.popViewport();
+		renderingContext.popScissor();
+	}else{
+		var inputRects = [];
+		foreach(this.inputTextures as var t)
+			inputRects += new Geometry.Rect(0,0,1,1);
+		Rendering.drawTextureToScreen(GLOBALS.renderingContext,new Geometry.Rect(0,0,this.width,this.height),
+						this.inputTextures,inputRects);
+	}
+	
 	this.end();
 	return this;
 };
