@@ -113,6 +113,14 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 			{
 				GUI.TYPE : GUI.TYPE_NUMBER,
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS, 10, 20],
+				GUI.LABEL : "Resoultion",
+				GUI.DATA_WRAPPER : node.envMap_resolution,
+				GUI.OPTIONS : [16,32,64,128,256,512,1024]
+			},
+			{   GUI.TYPE : GUI.TYPE_NEXT_ROW},
+			{
+				GUI.TYPE : GUI.TYPE_NUMBER,
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS, 10, 20],
 				GUI.LABEL : "Rendering layers",
 				GUI.DATA_WRAPPER : node.envMap_renderingLayers
 			},
