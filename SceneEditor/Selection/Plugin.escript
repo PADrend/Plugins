@@ -4,7 +4,7 @@
  * Web page: http://www.padrend.de/
  * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2013 Mouns R. Husan Almarrani
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -40,6 +40,8 @@ plugin.path := __DIR__+"/../../../plugins/PADrend/resources/MouseCursors";
 plugin.cursor_plus := Util.loadBitmap(__DIR__+"/../../../plugins/PADrend/resources/MouseCursors/3dSceneCursor_plus.png");
 plugin.cursor_minus := Util.loadBitmap(__DIR__+"/../../../plugins/PADrend/resources/MouseCursors/3dSceneCursor_minus.png");
 //plugin.cursor := gui.getStyleManager().getMouseCursor();
+static includeSemObj  = DataWrapper.createFromValue(false);
+static SemObjTools = Std.require('LibMinSGExt/SemanticObject');
 
 plugin.init @(override) := fn(){
 	this.eventHandler = this->ex_UIEvent;
@@ -104,6 +106,13 @@ plugin.createUIToolEntries :=fn(){
 							.registerActivationListener([true]=>this->swithFun)
 							.registerDeactivationListener([false]=>this->swithFun);
 				},
+				GUI.CONTEXT_MENU_PROVIDER : fn(){
+                    return [{
+                        GUI.TYPE : GUI.TYPE_BOOL,
+                        GUI.LABEL : "incl. sem. obj.",
+                        GUI.DATA_WRAPPER : includeSemObj
+                    }];
+                }
 
 			}],
 			['SceneEditor_Crossing',{GUI.TYPE:GUI.TYPE_ICON,GUI.ICON : '#SelectWindowCrossing',GUI.ICON_COLOR:GUI.WHITE},{
@@ -123,6 +132,13 @@ plugin.createUIToolEntries :=fn(){
 							.registerActivationListener([true]=>this->swithFun)
 							.registerDeactivationListener([false]=>this->swithFun);
 				},
+				GUI.CONTEXT_MENU_PROVIDER : fn(){
+                    return [{
+                        GUI.TYPE : GUI.TYPE_BOOL,
+                        GUI.LABEL : "incl. sem. obj.",
+                        GUI.DATA_WRAPPER : includeSemObj
+                    }];
+                }
 
 			}],
 		],
@@ -130,6 +146,7 @@ plugin.createUIToolEntries :=fn(){
 		GUI.ON_DATA_CHANGED : fn(tool){
 			PADrend.setActiveUITool(tool);
 		}
+
 	});
 
 	gui.registerComponentProvider('PADrend_SceneToolMenu.01_sceneEditor_Selection',fn(){
@@ -147,12 +164,19 @@ plugin.ex_UIEvent := fn(evt){
 		if(evt.pressed){
 			this.selectionStart = new Geometry.Vec2(evt.x,evt.y);
 			var node = Util.requirePlugin('PADrend/Picking').pickNode( [evt.x,evt.y] );
+			var semObj ;
 			if(node){
+                if(includeSemObj()){
+                    semObj = SemObjTools.getContainingSemanticObject(node);
+                    if(semObj){
+                        node =semObj;
+                    }
+                }
 				if(PADrend.getEventContext().isShiftPressed()){
 					NodeEditor.addSelectedNode(node);
 				}
 				else if(PADrend.getEventContext().isAltPressed())
-						 NodeEditor.unselectNode(node);
+                        NodeEditor.unselectNode(node);
 				else{
 					NodeEditor.selectNode(node);
 				}
@@ -161,6 +185,18 @@ plugin.ex_UIEvent := fn(evt){
 		else if(!evt.pressed ){
 			if(this.selectionWindow){
 				var nodes = this.collectNodesInSelectionWindow((this.window? false:true));
+				var nodesWithSem = [];
+				if(includeSemObj()){
+                    foreach(nodes as var node){
+                        var semObj = SemObjTools.getContainingSemanticObject(node);
+                        if(semObj)
+                            nodesWithSem +=semObj;
+                        else
+                            nodesWithSem +=node;
+                    }
+                    nodes = nodesWithSem;
+				}
+
 				if(PADrend.getEventContext().isShiftPressed()){
 					NodeEditor.addSelectedNodes(nodes);
 				}
