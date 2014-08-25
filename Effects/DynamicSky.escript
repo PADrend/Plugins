@@ -40,11 +40,11 @@ var plugin = Effects.DynamicSky;
 
 //!	---|> Plugin
 plugin.init @(override) := fn(){
-    { // Register ExtensionPointHandler:
-        registerExtension('PADrend_Init',this->this.ex_Init);
-    }
-    
-    // time
+	{ // Register ExtensionPointHandler:
+		registerExtension('PADrend_Init',this->this.ex_Init);
+	}
+	
+	// time
 	this.activeTimeFactor @(private) := 0; // (internal)
 	this.skyClockOffset @(private) := DataWrapper.createFromValue(0);
 	// if 'useActualTime' is true, the current system time is taken as initial time. Otherwise, 'time' is taken.
@@ -57,52 +57,53 @@ plugin.init @(override) := fn(){
 	if(!useActualTime())
 		this.setTimeOfDay(  systemConfig.getValue('Effects.DynSky.time',13.0) );
 
-    this.timeFactor @(private) := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.timeFactor',0.0);
-    this.timeFactor.onDataChanged += this->fn(Number v){
+	this.timeFactor @(private) := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.timeFactor',0.0);
+	this.timeFactor.onDataChanged += this->fn(Number v){
 		var t = this.getTimeOfDay();
 		this.activeTimeFactor = v;
 		this.setTimeOfDay(t);
-    };
+	};
 	this.timeFactor.forceRefresh();
 
-    // date
+	// date
 	this.julianDay := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.julianDay',180);
-    this.useActualDay := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.useActualDay',false);
-    this.useActualDay.onDataChanged += this->fn(Bool b){
+	this.useActualDay := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.useActualDay',false);
+	this.useActualDay.onDataChanged += this->fn(Bool b){
 		if(b)
 			this.julianDay(getDate()["yday"]);
-    };
-    this.useActualDay.forceRefresh();
-    this.timeZone:=0;
-    this.longitude:=10;
-    this.latitude:=20;
+	};
+	this.useActualDay.forceRefresh();
+	this.timeZone:=0;
+	this.longitude:=10;
+	this.latitude:=20;
 
-    
-    // clouds
-    this.cloudActiveSpeed @(private) := 0; // (internal)
-    this.cloudClockOffset := DataWrapper.createFromValue(0);
-    this.cloudSpeed := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.cloudSpeed',0.004);
-    this.cloudSpeed.onDataChanged += this->fn(Number v){
+	
+	// clouds
+	this.cloudActiveSpeed @(private) := 0; // (internal)
+	this.cloudClockOffset := DataWrapper.createFromValue(0);
+	this.cloudSpeed := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.cloudSpeed',0.004);
+	this.cloudSpeed.onDataChanged += this->fn(Number v){
 		var t = this.getCloudTime();
 		this.cloudActiveSpeed = v;
 		this.setCloudTime(t);
-    };
+	};
 	this.cloudSpeed.forceRefresh();
 
-    this.cloudDensity := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.cloudDensity',0.6);
+	this.cloudDensity := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.cloudDensity',0.6);
+	this.maxSunBrightness := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.maxSunBrightness',10000);
 
-    
-    // misc
-    this.influenceSunLight := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.influenceSunLight',false);
-    this.skyNode := void;
-    this.skyShaderState := void;
-    this.colors := void;
-    this.starsEnabled := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.starsEnabled',false);;
+	
+	// misc
+	this.influenceSunLight := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.influenceSunLight',false);
+	this.skyNode := void;
+	this.skyShaderState := void;
+	this.colors := void;
+	this.starsEnabled := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.starsEnabled',false);;
 	// variable for haze of InfiniteGround	
-    this.hazeColor := void;
+	this.hazeColor := void;
 
-    this.enabled := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.enabled',false);
-    this.enabled.onDataChanged += this->fn(Bool b){    	
+	this.enabled := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.enabled',false);
+	this.enabled.onDataChanged += this->fn(Bool b){    	
 		if(b){
 			if(this.skyNode){
 				this.skyNode.activate();
@@ -117,147 +118,151 @@ plugin.init @(override) := fn(){
 	
 	registerExtension('PADrend_Init',enabled->enabled.forceRefresh);
 
-    PADrend.syncVars.addDataWrapper('Effects.DynSky.skyClockOffset',this.skyClockOffset);
-    PADrend.syncVars.addDataWrapper('Effects.DynSky.timeFactor',this.timeFactor);
-    PADrend.syncVars.addDataWrapper('Effects.DynSky.julianDay',this.julianDay);
-    PADrend.syncVars.addDataWrapper('Effects.DynSky.cloudClockOffset',this.cloudClockOffset);
-    PADrend.syncVars.addDataWrapper('Effects.DynSky.cloudSpeed',this.cloudSpeed);
-    PADrend.syncVars.addDataWrapper('Effects.DynSky.cloudDensity',this.cloudDensity);
-    PADrend.syncVars.addDataWrapper('Effects.DynSky.influenceSunLight',this.influenceSunLight);
-    PADrend.syncVars.addDataWrapper('Effects.DynSky.enabled',this.enabled);
-    PADrend.syncVars.addDataWrapper('Effects.DynSky.starsEnabled',this.starsEnabled);
-    
-    return true;
+	PADrend.syncVars.addDataWrapper('Effects.DynSky.skyClockOffset',this.skyClockOffset);
+	PADrend.syncVars.addDataWrapper('Effects.DynSky.timeFactor',this.timeFactor);
+	PADrend.syncVars.addDataWrapper('Effects.DynSky.julianDay',this.julianDay);
+	PADrend.syncVars.addDataWrapper('Effects.DynSky.cloudClockOffset',this.cloudClockOffset);
+	PADrend.syncVars.addDataWrapper('Effects.DynSky.cloudSpeed',this.cloudSpeed);
+	PADrend.syncVars.addDataWrapper('Effects.DynSky.cloudDensity',this.cloudDensity);
+	PADrend.syncVars.addDataWrapper('Effects.DynSky.influenceSunLight',this.influenceSunLight);
+	PADrend.syncVars.addDataWrapper('Effects.DynSky.enabled',this.enabled);
+	PADrend.syncVars.addDataWrapper('Effects.DynSky.starsEnabled',this.starsEnabled);
+	PADrend.syncVars.addDataWrapper('Effects.DynSky.maxSunBrightness',this.maxSunBrightness);
+	
+	return true;
 };
 
 plugin.createSky @(private) := fn(){
-    // create sky dome
-    var dome=new MinSG.GeometryNode;
-    dome.setMesh(Rendering.MeshBuilder.createDome(100,40,40,1));
-    this.skyNode = new MinSG.EnvironmentState;
+	// create sky dome
+	var dome=new MinSG.GeometryNode;
+	dome.setMesh(Rendering.MeshBuilder.createDome(100,40,40,1));
+	this.skyNode = new MinSG.EnvironmentState;
 
-    skyNode.setEnvironment(dome);
-    dome.moveRel(0,-0.2,0); // move a little bit downward to reduce the possibly visible seam on the border to the floot
-    PADrend.getRootNode().addState(skyNode);
+	skyNode.setEnvironment(dome);
+	dome.moveRel(0,-0.2,0); // move a little bit downward to reduce the possibly visible seam on the border to the floot
+	PADrend.getRootNode().addState(skyNode);
 
 	var resourcesFolder = __DIR__+"/resources/DynamicSky";
 
-    // load textures
-    var tn1 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/dynamic_sky1.bmp"));
-    tn1.setTextureUnit(0);
-    dome.addState(tn1);
-    var tn2 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/dynamic_sky_normal.bmp"));
-    tn2.setTextureUnit(1);
-    dome.addState(tn2);
+	// load textures
+	var tn1 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/dynamic_sky1.bmp"));
+	tn1.setTextureUnit(0);
+	dome.addState(tn1);
+	var tn2 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/dynamic_sky_normal.bmp"));
+	tn2.setTextureUnit(1);
+	dome.addState(tn2);
 
-    // load Shader
-    this.skyShaderState=new MinSG.ShaderState(Rendering.Shader.loadShader(resourcesFolder+"/dynamicSky.vs",
-                                                                    resourcesFolder+"/dynamicSky.fs"));
-    dome.addState(skyShaderState);
-    skyShaderState.setUniform(new Rendering.Uniform('ColorMap',Rendering.Uniform.INT,[0]));
-    skyShaderState.setUniform(new Rendering.Uniform('BumpMap',Rendering.Uniform.INT,[1]));
+	// load Shader
+	this.skyShaderState=new MinSG.ShaderState(Rendering.Shader.loadShader(resourcesFolder+"/dynamicSky.vs",
+																	resourcesFolder+"/dynamicSky.fs"));
+	dome.addState(skyShaderState);
+	skyShaderState.setUniform(new Rendering.Uniform('ColorMap',Rendering.Uniform.INT,[0]));
+	skyShaderState.setUniform(new Rendering.Uniform('BumpMap',Rendering.Uniform.INT,[1]));
 
-    // init colors
-    this.colors={//  skyColor_1(horizon) skyColor_2          skyColor_3          cloudColor         light
-        0.0     : [ 0.03, 0.03, 0.05,   0.05, 0.05, 0.05,   0.02, 0.02, 0.02,   0.05, 0.05, 0.05,   0.00 ,0.00, 0.05],
-        0.7     : [ 0.04, 0.04, 0.07,   0.04, 0.04, 0.05,   0.01, 0.01, 0.01,   0.05, 0.05, 0.05,   0.00 ,0.00, 0.05],
-        0.8     : [ 0.05, 0.05, 0.10,   0.03, 0.03, 0.05,   0.00, 0.00, 0.00,   0.10, 0.00, 0.00,   0.10 ,0.10, 0.45],
-        1.0     : [ 0.45, 0.28, 0.11,   0.41, 0.46, 0.49,   0.12, 0.14, 0.17,   0.71, 0.56, 0.46,   0.70 ,0.40, 0.40], //cimg0571
-        1.1     : [ 0.91, 0.68, 0.32,   0.66, 0.66, 0.66,   0.36, 0.38, 0.41,   0.75, 0.65, 0.55,   0.80 ,0.70, 0.70], //cimg0566
-        1.3     : [ 0.92, 0.84, 0.84,   0.82, 0.86, 0.91,   0.71, 0.77, 0.86,   0.75, 0.65, 0.55,   0.80 ,0.80, 0.80], //cimg0565
-        1.5     : [ 0.85, 0.90, 0.90,   0.89, 1.00, 1.00,   0.00, 0.40, 0.70,   1.00, 1.00, 1.00,   0.80 ,0.80, 0.80],
-        2.0     : [ 0.92, 0.99, 1.00,   0.55, 0.74, 0.95,   0.35, 0.50, 0.73,   1.00, 1.00, 1.00,   0.90 ,0.90, 0.90]
-    };
+	// init colors
+	this.colors={//  skyColor_1(horizon) skyColor_2          skyColor_3          cloudColor         light
+		0.0     : [ 0.03, 0.03, 0.05,   0.05, 0.05, 0.05,   0.02, 0.02, 0.02,   0.05, 0.05, 0.05,   0.00 ,0.00, 0.05],
+		0.7     : [ 0.04, 0.04, 0.07,   0.04, 0.04, 0.05,   0.01, 0.01, 0.01,   0.05, 0.05, 0.05,   0.00 ,0.00, 0.05],
+		0.8     : [ 0.05, 0.05, 0.10,   0.03, 0.03, 0.05,   0.00, 0.00, 0.00,   0.10, 0.00, 0.00,   0.10 ,0.10, 0.45],
+		1.0     : [ 0.45, 0.28, 0.11,   0.41, 0.46, 0.49,   0.12, 0.14, 0.17,   0.71, 0.56, 0.46,   0.70 ,0.40, 0.40], //cimg0571
+		1.1     : [ 0.91, 0.68, 0.32,   0.66, 0.66, 0.66,   0.36, 0.38, 0.41,   0.75, 0.65, 0.55,   0.80 ,0.70, 0.70], //cimg0566
+		1.3     : [ 0.92, 0.84, 0.84,   0.82, 0.86, 0.91,   0.71, 0.77, 0.86,   0.75, 0.65, 0.55,   0.80 ,0.80, 0.80], //cimg0565
+		1.5     : [ 0.85, 0.90, 0.90,   0.89, 1.00, 1.00,   0.00, 0.40, 0.70,   1.00, 1.00, 1.00,   0.80 ,0.80, 0.80],
+		2.0     : [ 0.92, 0.99, 1.00,   0.55, 0.74, 0.95,   0.35, 0.50, 0.73,   1.00, 1.00, 1.00,   0.90 ,0.90, 0.90]
+	};
 
-    { // Register ExtensionPointHandler:
-        registerExtension('PADrend_AfterFrame',this->this.ex_AfterFrame);
-    }
-    ex_AfterFrame(); // init other values...
+	{ // Register ExtensionPointHandler:
+		registerExtension('PADrend_AfterFrame',this->this.ex_AfterFrame);
+	}
+	ex_AfterFrame(); // init other values...
 };
 
 //!	[ext:PADrend_AfterFrame]
 plugin.ex_AfterFrame @(private) :=fn(...){
-    if(!this.enabled())
-        return;
+	if(!this.enabled())
+		return;
 
 	var sun = PADrend.getDefaultLight();
 	var sunHeight; //< y pos of the sun
-    {         // calculate sun position
-        var sunPos=MinSG.calculateSunPosition(this.getTimeOfDay(),julianDay(),timeZone,longitude,latitude);
+	{         // calculate sun position
+		var sunPos=MinSG.calculateSunPosition(this.getTimeOfDay(),julianDay(),timeZone,longitude,latitude);
 
-        sunHeight = sunPos.getY()+1.0; // 0<sunHeight<2
-        
-        if(PADrend.isCurrentCoordinateSystem_ZUp()){
-	    	//out("Dynamic Sky: z-up ", sunPos);
-	    	var tmp = sunPos.getY();
-	    	sunPos.setY(-sunPos.getZ());
-	    	sunPos.setZ(tmp);
-	    	//outln(" --> ", sunPos);
-	    }
-	    else if(!PADrend.isCurrentCoordinateSystem_YUp()){
-	    	outln("Dynamic Sky: unsupported world Up Vector");
-	    	this.enabled(false);
-	    }
-	    
-        sun.setRelPosition(new Geometry.Vec3(0,0,0));
-        sun.rotateToWorldDir(sunPos);
-        sun.setRelPosition(sunPos*5000);
-        
-        skyShaderState.setUniform(new Rendering.Uniform('sunPosition',Rendering.Uniform.VEC3F,[ sunPos ]));
-    }
+		sunHeight = sunPos.getY()+1.0; // 0<sunHeight<2
+		
+		if(PADrend.isCurrentCoordinateSystem_ZUp()){
+			//out("Dynamic Sky: z-up ", sunPos);
+			var tmp = sunPos.getY();
+			sunPos.setY(-sunPos.getZ());
+			sunPos.setZ(tmp);
+			//outln(" --> ", sunPos);
+		}
+		else if(!PADrend.isCurrentCoordinateSystem_YUp()){
+			outln("Dynamic Sky: unsupported world Up Vector");
+			this.enabled(false);
+		}
+		
+		sun.setRelPosition(new Geometry.Vec3(0,0,0));
+		sun.rotateToWorldDir(sunPos);
+		sun.setRelPosition(sunPos*5000);
+		
+		skyShaderState.setUniform(new Rendering.Uniform('sunPosition',Rendering.Uniform.VEC3F,[ sunPos ]));
+	}
 
-    var c; //< final sky colors
-    {   // interpolate sky colors
-        var skyColors_1=false;
-        var skyY_1=false;
-        var skyColors_2=false;
-        var skyY_2=false;
-        foreach(this.colors as var y,var cArray){
-            if(!skyColors_2){
-                skyColors_1=skyColors_2=cArray;
-                skyY_1=skyY_2=y;
-                continue;
-            }
-            skyColors_1=skyColors_2;
-            skyY_1=skyY_2;
-            skyColors_2=cArray;
-            skyY_2=y;
-            if(new Number(y) >= sunHeight)
-                break;
-    //            out(y,"  ");
+	var c; //< final sky colors
+	{   // interpolate sky colors
+		var skyColors_1=false;
+		var skyY_1=false;
+		var skyColors_2=false;
+		var skyY_2=false;
+		foreach(this.colors as var y,var cArray){
+			if(!skyColors_2){
+				skyColors_1=skyColors_2=cArray;
+				skyY_1=skyY_2=y;
+				continue;
+			}
+			skyColors_1=skyColors_2;
+			skyY_1=skyY_2;
+			skyColors_2=cArray;
+			skyY_2=y;
+			if(new Number(y) >= sunHeight)
+				break;
+	//            out(y,"  ");
 
-        }
-    //        out("\r",sunHeight,"   ",skyY_1," ",skyY_2,"   ");
-        var mix = (sunHeight-skyY_1) / (skyY_2-skyY_1+0.0001);
-        c = skyColors_1.map( [skyColors_2,mix]->fn(key,value){
+		}
+	//        out("\r",sunHeight,"   ",skyY_1," ",skyY_2,"   ");
+		var mix = (sunHeight-skyY_1) / (skyY_2-skyY_1+0.0001);
+		c = skyColors_1.map( [skyColors_2,mix]->fn(key,value){
 			var skyColors_2=this[0];
 			var mix=this[1];
 			return (1.0-mix)*value + mix*skyColors_2[key];
 		});
-    }
+	}
 
-    // set sky colors
-    var skyColor1 = new Util.Color4f(c[0], c[1], c[2], 1.0);
-    skyShaderState.setUniform(new Rendering.Uniform('skyColor_1', Rendering.Uniform.VEC4F,[ skyColor1] ));
-    skyShaderState.setUniform(new Rendering.Uniform('skyColor_2', Rendering.Uniform.VEC4F,[ new Util.Color4f(c[ 3], c[ 4], c[ 5], 1.0)] ));
-    skyShaderState.setUniform(new Rendering.Uniform('skyColor_3', Rendering.Uniform.VEC4F,[ new Util.Color4f(c[ 6], c[ 7], c[ 8], 1.0)] ));
-    skyShaderState.setUniform(new Rendering.Uniform('cloudColor', Rendering.Uniform.VEC4F,[ new Util.Color4f(c[ 9], c[10], c[11], 1.0)] ));
+	// set sky colors
+	var skyColor1 = new Util.Color4f(c[0], c[1], c[2], 1.0);
+	skyShaderState.setUniform(new Rendering.Uniform('skyColor_1', Rendering.Uniform.VEC4F,[ skyColor1] ));
+	skyShaderState.setUniform(new Rendering.Uniform('skyColor_2', Rendering.Uniform.VEC4F,[ new Util.Color4f(c[ 3], c[ 4], c[ 5], 1.0)] ));
+	skyShaderState.setUniform(new Rendering.Uniform('skyColor_3', Rendering.Uniform.VEC4F,[ new Util.Color4f(c[ 6], c[ 7], c[ 8], 1.0)] ));
+	skyShaderState.setUniform(new Rendering.Uniform('cloudColor', Rendering.Uniform.VEC4F,[ new Util.Color4f(c[ 9], c[10], c[11], 1.0)] ));
 
-    // set cloud parameter
-    skyShaderState.setUniform(new Rendering.Uniform('cloudTime',Rendering.Uniform.FLOAT,[this.getCloudTime()*3600]));
-    skyShaderState.setUniform(new Rendering.Uniform('cloudDensity',Rendering.Uniform.FLOAT,[cloudDensity()]));
-    
-    // stars
-    skyShaderState.setUniform(new Rendering.Uniform('starsEnabled',Rendering.Uniform.BOOL,[starsEnabled()]));
+	// set cloud parameter
+	skyShaderState.setUniform(new Rendering.Uniform('cloudTime',Rendering.Uniform.FLOAT,[this.getCloudTime()*3600]));
+	skyShaderState.setUniform(new Rendering.Uniform('cloudDensity',Rendering.Uniform.FLOAT,[cloudDensity()]));
+	
+	// sun parameters
+	skyShaderState.setUniform(new Rendering.Uniform('maxSunBrightness',Rendering.Uniform.FLOAT,[maxSunBrightness()]));
+	
+	// stars
+	skyShaderState.setUniform(new Rendering.Uniform('starsEnabled',Rendering.Uniform.BOOL,[starsEnabled()]));
 
-    if(influenceSunLight()){
-        sun.setAmbientLightColor(new Util.Color4f([c[12]*0.3,c[13]*0.3,c[14]*0.3]));
-        sun.setDiffuseLightColor(new Util.Color4f([c[12]*0.7,c[13]*0.7,c[14]*0.7]));
-        sun.setSpecularLightColor(new Util.Color4f([c[12]*1.0,c[13]*1.0,c[14]*1.0]));
-    }
+	if(influenceSunLight()){
+		sun.setAmbientLightColor(new Util.Color4f([c[12]*0.3,c[13]*0.3,c[14]*0.3]));
+		sun.setDiffuseLightColor(new Util.Color4f([c[12]*0.7,c[13]*0.7,c[14]*0.7]));
+		sun.setSpecularLightColor(new Util.Color4f([c[12]*1.0,c[13]*1.0,c[14]*1.0]));
+	}
 
-    // set hazeColor for InfiniteGround
-    this.hazeColor = skyColor1;
+	// set hazeColor for InfiniteGround
+	this.hazeColor = skyColor1;
 };
 
 
@@ -344,8 +349,7 @@ plugin.ex_Init @(private) :=fn(){
 			GUI.DATA_WRAPPER : this.cloudDensity,
 			GUI.RANGE : [0.0,1.0],
 			GUI.RANGE_STEPS : 200
-		};
-		
+		};		
 		menu += '----';
 		menu += {
 			GUI.TYPE : GUI.TYPE_BOOL,
