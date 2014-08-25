@@ -102,7 +102,7 @@ static getCubeSmoothShader = fn(){
 		"	mat3 rot = mat3( right,up,cubeDirection); 						\n"
 		"	vec4 color2;													\n"
 		"	float w=0;														\n"
-		"   for(float d=0.02; d<0.1; d *= 1.2){								\n"
+		"   for(float d=0.02; d<0.2; d *= 1.2){								\n"
 		"   	for(float r=0; r<2.0*M_PI; r+=M_PI/32.0){					\n"
 		"			vec3 dir2 = rot * vec3( d*cos(r), d*-sin(r),1);			\n"
 		"			color2 += textureCube( t_envMapInput, dir2 ) * (1.0-d); \n"
