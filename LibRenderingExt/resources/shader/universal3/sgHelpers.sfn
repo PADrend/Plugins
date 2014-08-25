@@ -4,7 +4,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -13,13 +13,13 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-/*	sg_ . uses MinSG constants (uniform or attributes) for the calculation
-	h ... homogenous (vec4)
-	cs .. Clipping Space (frustum is the -1...1 cube)
-	es .. EyeSpace or ViewSpace
-	ms .. ModelSpace
-	ss .. ScreenSpace
-	ws .. WorldSpace
+/*	sg_ ... uses MinSG constants (uniform or attributes) for the calculation
+	h ..... homogeneous (vec4)
+	clip .. Clipping Space (frustum is the -1...1 cube)
+	cs .... CameraSpace (EyeSpace or ViewSpace)
+	ms .... ModelSpace
+	ss .... ScreenSpace
+	ws .... WorldSpace
 */
 
 // -------------------
@@ -30,17 +30,17 @@
 	uniform mat4 sg_matrix_modelToCamera;
 	uniform mat4 sg_matrix_modelToClipping;
 
-	//! [fs,vs] Convert an homogenous coordinate from Eye(=View)Space into WorldSpace.
-	vec4 sg_eyeToWorld(in vec4 hes)			{	return sg_matrix_cameraToWorld  * hes;	}
+	//! [fs,vs] Convert an homogeneous coordinate from Eye(=View)Space into WorldSpace.
+	vec4 sg_cameraToWorld(in vec4 hcs)			{	return sg_matrix_cameraToWorld  * hcs;	}
 
-	//! [fs,vs] Convert an homogenous coordinate from ModelSpace into Eye(=View)Space.
-	vec4 sg_modelToEye(in vec4 hms)			{	return sg_matrix_modelToCamera * hms;	}
+	//! [fs,vs] Convert an homogeneous coordinate from ModelSpace into Eye(=View)Space.
+	vec4 sg_modelToCamera(in vec4 hms)			{	return sg_matrix_modelToCamera * hms;	}
 
-	//! [fs,vs] Convert an homogenous coordinate from ModelSpace into WorldSpace.
-	vec4 sg_modelToWorld(vec4 hms)			{	return sg_matrix_cameraToWorld * sg_matrix_modelToCamera * hms;	}
+	//! [fs,vs] Convert an homogeneous coordinate from ModelSpace into WorldSpace.
+	vec4 sg_modelToWorld(vec4 hms)				{	return sg_matrix_cameraToWorld * sg_matrix_modelToCamera * hms;	}
 
-	//! [fs,vs] Convert an homogenous coordinate from ModelSpace into WorldSpace.
-	vec4 sg_modelToClipping(in vec4 hms)	{	return sg_matrix_modelToClipping * hms; }
+	//! [fs,vs] Convert an homogeneous coordinate from ModelSpace into WorldSpace.
+	vec4 sg_modelToClipping(in vec4 hms)		{	return sg_matrix_modelToClipping * hms; }
 //! \}
 
 // -------------------
@@ -64,7 +64,7 @@
 	uniform int							sg_lightCount;
 
 	//! [fs,vs] Add the light of the given light source to lightSum.
-	void addLighting(in sg_LightSourceParameters light, in vec3 position_es, in vec3 normal_es, in float shininess, inout CompositeColor result){
+	void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result){
 
 		// for DIRECTIONAL lights
 		float distPixToLight = 0.0; 
@@ -73,7 +73,7 @@
 		
 		// for POINT & SPOT lights
 		if(light.type != DIRECTIONAL){ 
-			pixToLight = light.position - position_es;
+			pixToLight = light.position - position_cs;
 			distPixToLight = length(pixToLight); 
 			pixToLight = normalize(pixToLight); 
 			attenuation	/= ( 	light.constant + light.linear * distPixToLight + light.quadratic * distPixToLight * distPixToLight);
@@ -92,13 +92,13 @@
 		// for ALL lights
 		result.ambient += light.ambient * attenuation;
 		
-		float norDotPixToLight = max(0.0, dot(normal_es, pixToLight));
+		float norDotPixToLight = max(0.0, dot(normal_cs, pixToLight));
 		if(norDotPixToLight != 0.0){
 			result.diffuse += light.diffuse * norDotPixToLight * attenuation;
 
 			if(shininess>0.0){
-				vec3 pixToEye = normalize(-position_es);
-				vec3 refl = reflect(-pixToLight, normal_es);
+				vec3 pixToEye = normalize(-position_cs);
+				vec3 refl = reflect(-pixToLight, normal_cs);
 				float eyeDotRefl = dot(pixToEye, refl);
 				if(eyeDotRefl>0.0)
 					result.specular += light.specular * pow(eyeDotRefl, shininess/4.0) * attenuation;
@@ -107,13 +107,13 @@
 	}
 
 	//! [fs,vs] Add the light of light #sgLightNr to lightSum.
-	void sg_addLight(in int sgLightNr,in vec3 position_es, in vec3 normal_es, in float shininess, inout CompositeColor lightSum){
-		vec3 n_es = normal_es;
+	void sg_addLight(in int sgLightNr,in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor lightSum){
+		vec3 n_cs = normal_cs;
 		#ifdef SG_FS
 		if(! gl_FrontFacing) 
-			n_es = -n_es;
+			n_cs = -n_cs;
 		#endif
-		addLighting(sg_LightSource[sgLightNr],position_es,n_es,shininess,lightSum);
+		addLighting(sg_LightSource[sgLightNr],position_cs,n_cs,shininess,lightSum);
 	}
 
 	//! [fs,vs] Returns the sg_Color attribute.
@@ -125,7 +125,7 @@
 //! \name Materials and Surface properties
 //!	\{
 	struct SurfaceProperties {
-		vec3 position_es, normal_es, tangent_es;
+		vec3 position_cs, normal_cs, tangent_cs;
 		vec4 ambient, diffuse, specular, emission;
 		float shininess;
 	};

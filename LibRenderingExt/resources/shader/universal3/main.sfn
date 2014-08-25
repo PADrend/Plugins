@@ -13,8 +13,8 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-varying vec3 var_normal_es;
-varying vec4 var_position_hes;
+varying vec3 var_normal_cs;
+varying vec4 var_position_hcs;
 
 // -------------------------------------------------
 // vs
@@ -24,13 +24,13 @@ float sg_getPointSize();						//!	\see sgHelper.sfn
 vec3 sg_getVertexPosition_ms();					//!	\see sgHelper.sfn
 vec3 sg_getVertexNormal_ms();					//!	\see sgHelper.sfn
 vec4 sg_modelToClipping(in vec4 hms);			//!	\see sgHelper.sfn
-vec4 sg_modelToEye(in vec4 hms);				//!	\see sgHelper.sfn
+vec4 sg_modelToCamera(in vec4 hms);				//!	\see sgHelper.sfn
 vec4 sg_modelToWorld(in vec4 hms);				//!	\see sgHelper.sfn
 
 // ----
 
 struct VertexProperties {
-	vec3 position_es, normal_es;
+	vec3 position_cs, normal_cs;
 	float pointSize;
 };
 
@@ -49,16 +49,16 @@ void main (void) {
     addVertexEffect(position_ms, normal_ms,pointSize);
 
 	VertexProperties vert;
-	vert.position_es = sg_modelToEye(vec4(position_ms,1.0)).xyz;
-	vert.normal_es = sg_modelToEye(vec4(normal_ms,0.0)).xyz; // \note the value is not normalized!
+	vert.position_cs = sg_modelToCamera(vec4(position_ms,1.0)).xyz;
+	vert.normal_cs = sg_modelToCamera(vec4(normal_ms,0.0)).xyz; // \note the value is not normalized!
 
 	provideSurfaceVars(vert);
 	provideSurfaceEffectVars(vert);
 	provideLightingVars(vert);
 	provideFragmentEffectVars(vert);
 
-	var_position_hes = vec4(vert.position_es,1.0);
-	var_normal_es = vert.normal_es;
+	var_position_hcs = vec4(vert.position_cs,1.0);
+	var_normal_cs = vert.normal_cs;
 	gl_PointSize = pointSize;
 	gl_Position = sg_modelToClipping(vec4(position_ms,1.0));
 }
@@ -75,7 +75,7 @@ struct CompositeColor {
 };
 
 struct SurfaceProperties {
-	vec3 position_es, normal_es, tangent_es;
+	vec3 position_cs, normal_cs, tangent_cs;
 	vec4 ambient, diffuse, specular, emission;
 	float shininess;
 };
@@ -89,8 +89,8 @@ void addFragmentEffect(in SurfaceProperties,inout CompositeColor);	//! \see frag
 void main (void) {
 	// init surface properties
 	SurfaceProperties surface;
-	surface.position_es = var_position_hes.xyz / var_position_hes.w;
-	surface.normal_es = normalize(var_normal_es);
+	surface.position_cs = var_position_hcs.xyz / var_position_hcs.w;
+	surface.normal_cs = normalize(var_normal_cs);
 
 	calcSurfaceProperties(surface);				// get surface properties (material, textures, ...)
 	addSurfaceEffects(surface);					// optionally add a surface effect (e.g. add snow)
@@ -100,7 +100,7 @@ void main (void) {
 
 	addFragmentEffect(surface,color);			// add effects (e.g. fog)
 	gl_FragColor = color.ambient+color.diffuse+color.specular;	// combine color components into one color.
-//	gl_FragColor = vec4(surface.normal_es,1.0)+vec4(0.5);
+//	gl_FragColor = vec4(surface.normal_cs,1.0)+vec4(0.5);
 }
 
 #endif

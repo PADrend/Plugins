@@ -18,7 +18,7 @@
 #ifdef SG_VERTEX_SHADER
 
 struct VertexProperties {
-	vec3 position_es, normal_es;
+	vec3 position_cs, normal_cs;
 	float pointSize;
 };
 
@@ -32,14 +32,14 @@ void provideSurfaceEffectVars(in VertexProperties vec){}
 //#extension GL_ARB_gpu_shader5
 
 struct SurfaceProperties {
-	vec3 position_es, normal_es, tangent_es;
+	vec3 position_cs, normal_cs, tangent_cs;
 	vec4 ambient, diffuse, specular, emission;
 	float shininess;
 };
 
 
 vec4 sg_modelToClipping(in vec4 hms);	//! \see sgHelpers.sfn
-vec4 sg_eyeToWorld(in vec4 hes);	//! \see sgHelpers.sfn
+vec4 sg_cameraToWorld(in vec4 hcs);	//! \see sgHelpers.sfn
 
 	
 uniform sampler2D sg_texture0;
@@ -61,8 +61,8 @@ uniform mat4 invLastCamMatrix;  //!!!!!!!!!!!!!!!!!!!!!! world to eye
 vec3 hvec4ToVec3(in vec4 hvec){	return hvec.xyz/hvec.w;	}
 
 
-vec3 lastEyePosToScreenPos(in vec3 pos_es){
-	return (hvec4ToVec3(sg_lastProjectionMatrix*vec4(pos_es,1.0)) + vec3(1.0))*0.5;
+vec3 lastEyePosToScreenPos(in vec3 pos_cs){
+	return (hvec4ToVec3(sg_lastProjectionMatrix*vec4(pos_cs,1.0)) + vec3(1.0))*0.5;
 }
 vec3 screenPosToLastEyePos(in vec3 pos_screen){
 	return hvec4ToVec3(sg_lastProjectionMatrixInverse*vec4(pos_screen*2.0-vec3(1.0),1.0));
@@ -82,11 +82,11 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 		return;
 
 	// project position into last frame's eye space
-	vec3 pos_es = hvec4ToVec3(invLastCamMatrix * sg_eyeToWorld(vec4(surface.position_es,1.0) ));
+	vec3 pos_cs = hvec4ToVec3(invLastCamMatrix * sg_cameraToWorld(vec4(surface.position_cs,1.0) ));
 
 	// project ray into last frame's eye space
-	vec3 currentRay_es = reflect( normalize(surface.position_es) , surface.normal_es);
-	vec3 ray_es = normalize( (invLastCamMatrix * sg_eyeToWorld(vec4(currentRay_es,0.0) )).xyz);
+	vec3 currentRay_cs = reflect( normalize(surface.position_cs) , surface.normal_cs);
+	vec3 ray_cs = normalize( (invLastCamMatrix * sg_cameraToWorld(vec4(currentRay_cs,0.0) )).xyz);
 
 
 	float f1 = 0.01;
@@ -99,13 +99,13 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 	{	// search intersection range f1...f2
 	//	{
 	//		vec3 pos2_world = camPosToWorldPos(pos_cam+vec3(1/1280.0,1/720.0,0));
-	//		stepSize = length(pos2_world-pos_es)*1.0;
+	//		stepSize = length(pos2_world-pos_cs)*1.0;
 	//	}
 		float stepSize = 0.10;
 		f = stepSize;
 		
 		for(int i=0;i<25;++i){ //*0.5
-			vec3 sample_screen = lastEyePosToScreenPos(pos_es + ray_es*f);
+			vec3 sample_screen = lastEyePosToScreenPos(pos_cs + ray_cs*f);
 			if(sample_screen.y<0.0||sample_screen.y>1.0||sample_screen.x<0.0||sample_screen.x>1.0){
 				return;
 			}
@@ -142,7 +142,7 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 		float f2b = closestF*1.1;
 		float stepSize = (f2b-f1)*0.1;
 		for(f=f1;f<f2b;f+=stepSize){ 
-			vec3 sample_screen = lastEyePosToScreenPos(pos_es + ray_es*f);
+			vec3 sample_screen = lastEyePosToScreenPos(pos_cs + ray_cs*f);
 //			if(sample_screen.y<0.0||sample_screen.y>1.0||sample_screen.x<0.0||sample_screen.x>1.0){
 //				return;
 //			}
@@ -171,7 +171,7 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 		
 		float actualDepth_screen;
 		for(int i=0;i<10;++i){
-			vec3 sample_screen = lastEyePosToScreenPos(pos_es + ray_es*f);
+			vec3 sample_screen = lastEyePosToScreenPos(pos_cs + ray_cs*f);
 			actualDepth_screen = lastDepthBufferLookup(sample_screen.xy);
 
 			
@@ -192,23 +192,23 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 				break;
 			}
 		}
-//		float sourceDepth_screen = texture2D(lastDepthBuffer, lastEyePosToScreenPos(pos_es).xy);
+//		float sourceDepth_screen = texture2D(lastDepthBuffer, lastEyePosToScreenPos(pos_cs).xy);
 //		if(1.0/sourceDepth_screen< 1.0/actualDepth_screen){
 ////			surface.ambient.b = 0.5;
 //			error += 0.1;
 //		}
-		vec3 intersection_es = vec3(lastEyePosToScreenPos(pos_es + ray_es*f).xy,actualDepth_screen);
-		vec3 intersectionRay_es = screenPosToLastEyePos(intersection_es)-pos_es;
+		vec3 intersection_cs = vec3(lastEyePosToScreenPos(pos_cs + ray_cs*f).xy,actualDepth_screen);
+		vec3 intersectionRay_cs = screenPosToLastEyePos(intersection_cs)-pos_cs;
 		
-		quality = max(dot(normalize(intersectionRay_es),ray_es),0);
-		if(length(intersectionRay_es)<0.2){ // allow lower quality rays near tight corners
-			quality = pow(quality,0.2-length(intersectionRay_es));
+		quality = max(dot(normalize(intersectionRay_cs),ray_cs),0);
+		if(length(intersectionRay_cs)<0.2){ // allow lower quality rays near tight corners
+			quality = pow(quality,0.2-length(intersectionRay_cs));
 		}
 		
 //		// use surface's secular alpha as reflectance value 
-//		float amount = min(surface.specular.a *  pow(quality,200.0) *  smoothstep(length(pos_es)*0.75,0.1,f),1.0);
+//		float amount = min(surface.specular.a *  pow(quality,200.0) *  smoothstep(length(pos_cs)*0.75,0.1,f),1.0);
 
-		float amount = min(sg_reflectionStrength *  pow(quality,200.0) *  smoothstep(length(pos_es)*0.75,0.1,f),1.0);
+		float amount = min(sg_reflectionStrength *  pow(quality,200.0) *  smoothstep(length(pos_cs)*0.75,0.1,f),1.0);
 
 		
 		// reduce reflections when reflecting points near the screen's border
@@ -219,7 +219,7 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 		 
 		vec4 reflectedColor = lastColorBufferLookup( best.xy );
 		surface.emission = mix(surface.emission,reflectedColor * surface.specular,amount);
-//			surface.reflectance *  pow(quality,200.0)/max(1,f/length(intersection_es))*0.5 );
+//			surface.reflectance *  pow(quality,200.0)/max(1,f/length(intersection_cs))*0.5 );
 		
 	}
 

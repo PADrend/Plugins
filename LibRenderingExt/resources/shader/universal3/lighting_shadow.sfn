@@ -23,19 +23,19 @@ varying vec4	var_shadowCoord;
 uniform mat4	sg_shadowMatrix;
 
 struct VertexProperties {
-	vec3 position_es, normal_es;
+	vec3 position_cs, normal_cs;
 	float pointSize;
 };
 
 //vec3 sg_getVertexPosition_ms();					//! \see sgHelper.sfn
-vec4 sg_eyeToWorld(in vec4 hes); 				//! \see sgHelper.sfn
+vec4 sg_cameraToWorld(in vec4 hcs); 				//! \see sgHelper.sfn
 
 
 //! \see main.sfn
 void provideLightingVars(in VertexProperties vec){
 	if(sg_shadowEnabled) {
 //		var_shadowCoord = sg_shadowMatrix * sg_modelToWorld( vec4(sg_Position, 1.0) );
-		var_shadowCoord = sg_shadowMatrix * sg_eyeToWorld( vec4(vec.position_es,1.0) );
+		var_shadowCoord = sg_shadowMatrix * sg_cameraToWorld( vec4(vec.position_cs,1.0) );
 	}
 }
 
@@ -50,7 +50,7 @@ struct CompositeColor {
 };
 
 struct SurfaceProperties {
-	vec3 position_es, normal_es, tangent_es;
+	vec3 position_cs, normal_cs, tangent_cs;
 	vec4 ambient, diffuse, specular, emission;
 	float shininess;
 };
@@ -77,7 +77,7 @@ uniform vec2 _shadowSamplingPoints[16] = vec2[16](
 );
 
 //! \see sgHelper.sfn
-void sg_addLight(in int sgLightNr,in vec3 position_es, in vec3 normal_es, in float shininess, inout CompositeColor lightSum);	
+void sg_addLight(in int sgLightNr,in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor lightSum);	
 int sg_getLightCount();		//! \see sgHelper.sfn
 
 
@@ -135,7 +135,7 @@ void calcLighting(in SurfaceProperties surface, out CompositeColor color){
 		lightSum.ambient = vec4(0.3);
 		lightSum.diffuse = vec4(0.7);
 	}else{
-		sg_addLight(0,surface.position_es, surface.normal_es, surface.shininess, lightSum);
+		sg_addLight(0,surface.position_cs, surface.normal_cs, surface.shininess, lightSum);
 		float s = getShadow();
 		lightSum.diffuse *= s;
 		lightSum.specular *= s;
@@ -143,7 +143,7 @@ void calcLighting(in SurfaceProperties surface, out CompositeColor color){
 	for(int i = 1; i < 8; i++){
 		if( i >= lightCount )
 			break;
-		sg_addLight(i,surface.position_es, surface.normal_es, surface.shininess, lightSum);
+		sg_addLight(i,surface.position_cs, surface.normal_cs, surface.shininess, lightSum);
 	}
 
 	lightSum.ambient.a = lightSum.diffuse.a = lightSum.specular.a = 1.0;

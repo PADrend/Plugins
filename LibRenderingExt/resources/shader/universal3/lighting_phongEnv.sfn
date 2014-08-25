@@ -19,7 +19,7 @@
 #ifdef SG_VERTEX_SHADER
 
 struct VertexProperties {
-	vec3 position_es, normal_es;
+	vec3 position_cs, normal_cs;
 	float pointSize;
 };
 
@@ -44,15 +44,15 @@ struct CompositeColor {
 };
 
 struct SurfaceProperties {
-	vec3 position_es, normal_es, tangent_es;
+	vec3 position_cs, normal_cs, tangent_cs;
 	vec4 ambient, diffuse, specular, emission;
 	float shininess;
 };
 
 //! \see sgHelper.sfn
-void sg_addLight(in int sgLightNr,in vec3 position_es, in vec3 normal_es, in float shininess, inout CompositeColor lightSum);	
+void sg_addLight(in int sgLightNr,in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor lightSum);	
 int sg_getLightCount();				//! \see sgHelper.sfn
-vec4 sg_eyeToWorld(in vec4 hes);	//! \see sgHelper.sfn
+vec4 sg_cameraToWorld(in vec4 hcs);	//! \see sgHelper.sfn
 
 //! \see main.sfn
 void calcLighting(in SurfaceProperties surface, out CompositeColor color){
@@ -71,18 +71,18 @@ void calcLighting(in SurfaceProperties surface, out CompositeColor color){
 	for(int i = 0; i < 8; i++){
 		if( i >= lightCount )
 			break;
-		sg_addLight(i,surface.position_es, surface.normal_es, surface.shininess, lightSum);
+		sg_addLight(i,surface.position_cs, surface.normal_cs, surface.shininess, lightSum);
 	}
 	
 	// Add environment reflection
 	if(sg_cubeEnvReflection_strength>0.0){
-		vec3 reflection_es = reflect( surface.position_es, surface.normal_es);
-		lightSum.specular += sg_cubeEnvReflection_strength * textureCube(sg_cubeEnvReflection_map, sg_eyeToWorld( vec4(reflection_es,0.0)).xyz );
+		vec3 reflection_cs = reflect( surface.position_cs, surface.normal_cs);
+		lightSum.specular += sg_cubeEnvReflection_strength * textureCube(sg_cubeEnvReflection_map, sg_cameraToWorld( vec4(reflection_cs,0.0)).xyz );
 	}
 	
 	// Add environment lighting
 	if(sg_cubeEnvDiffuse_strength>0.0){
-		lightSum.diffuse += sg_cubeEnvDiffuse_strength * textureCube(sg_cubeEnvDiffuse_map, sg_eyeToWorld( vec4(surface.normal_es,0.0)).xyz );
+		lightSum.diffuse += sg_cubeEnvDiffuse_strength * textureCube(sg_cubeEnvDiffuse_map, sg_cameraToWorld( vec4(surface.normal_cs,0.0)).xyz );
 	}
 	
 	lightSum.ambient.a = lightSum.diffuse.a = lightSum.specular.a = 1.0;

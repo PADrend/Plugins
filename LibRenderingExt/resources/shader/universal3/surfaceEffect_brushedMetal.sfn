@@ -24,7 +24,7 @@ vec3 sg_getVertexPosition_ms();					//!	\see sgHelper.sfn
 vec3 sg_getVertexNormal_ms();					//!	\see sgHelper.sfn
 
 struct VertexProperties {
-	vec3 position_es, normal_es;
+	vec3 position_cs, normal_cs;
 	float pointSize;
 };
 
@@ -45,20 +45,20 @@ uniform sampler2D sg_texture3,sg_texture4;
 uniform float sg_brushedMetallScaling = 4.0;
 
 struct SurfaceProperties {
-	vec3 position_es, normal_es, tangent_es;
+	vec3 position_cs, normal_cs, tangent_cs;
 	vec4 ambient, diffuse, specular, emission;
 	float shininess;
 };
 
-vec4 sg_eyeToWorld(in vec4 hes);			//!	\see sgHelper.sfn
-vec4 sg_modelToEye(in vec4 hms);			//!	\see sgHelper.sfn
+vec4 sg_cameraToWorld(in vec4 hcs);			//!	\see sgHelper.sfn
+vec4 sg_modelToCamera(in vec4 hms);			//!	\see sgHelper.sfn
 
 // temp;
 vec4 sg_modelToClipping(in vec4 hms);
 
 //! \see main.sfn
 void addSurfaceEffects(inout SurfaceProperties surface){
-	//vec4 ws_pos = sg_eyeToWorld(vec4(surface.position_es,1.0));
+	//vec4 ws_pos = sg_cameraToWorld(vec4(surface.position_cs,1.0));
 
 //	float SCALE = 4000.0; //1000.0; 
 //	float SCALE = 4.0; //1000.0; 
@@ -78,37 +78,37 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 	if(abs(v) > 0.6) v = 0.0;
 
 	
-//	surface.normal_es += sg_modelToEye( vec4(var_normal_ms,0.0) ).xyz;
-//	surface.normal_es = normalize( surface.normal_es );
+//	surface.normal_cs += sg_modelToCamera( vec4(var_normal_ms,0.0) ).xyz;
+//	surface.normal_cs = normalize( surface.normal_cs );
 	
 	
 	vec3 normal_ms = normalize(var_normal_ms) + ORIENTATION*v*0.05 ;
 	//vec3 
 	//surface.ambient = vec4(normal_ms,1.0);
-	surface.normal_es = normalize( sg_modelToEye( vec4(normal_ms,0.0) ).xyz );
+	surface.normal_cs = normalize( sg_modelToCamera( vec4(normal_ms,0.0) ).xyz );
 	surface.shininess *= 1.0+v*0.5;
 	
 	
-	// sg_eyeToWorld
+	// sg_cameraToWorld
 	
-	//float f = surface.normal_es.x*surface.normal_es.x + surface.normal_es.y* surface.normal_es.y;
+	//float f = surface.normal_cs.x*surface.normal_cs.x + surface.normal_cs.y* surface.normal_cs.y;
 	//surface.ambient += vec4(f,f,f,0);
 	
 	
 	// add some face reflection
-	vec4 obsPos_hws = sg_eyeToWorld( vec4(0,0,0,1) );
+	vec4 obsPos_hws = sg_cameraToWorld( vec4(0,0,0,1) );
 	vec3 obsPos_ws = obsPos_hws.xyz / obsPos_hws.w;
 	
-	vec4 frag_hws = sg_eyeToWorld( vec4(surface.position_es,1.0) );
+	vec4 frag_hws = sg_cameraToWorld( vec4(surface.position_cs,1.0) );
 	vec3 frag_ws = frag_hws.xyz / frag_hws.w;
 	
 	vec3 frag_relWs = frag_ws-obsPos_ws;
 	vec3 fragDir_ws = normalize(frag_relWs);
 	
-	vec3 normal_ws = normalize(sg_eyeToWorld( vec4(surface.normal_es,0) ).xyz);
+	vec3 normal_ws = normalize(sg_cameraToWorld( vec4(surface.normal_cs,0) ).xyz);
 	
-	//surface.ambient.rgb = normalize(cross( surface.normal_es, surface.position_es )) ;
-	//surface.ambient.rgb = normalize(surface.position_es);
+	//surface.ambient.rgb = normalize(cross( surface.normal_cs, surface.position_cs )) ;
+	//surface.ambient.rgb = normalize(surface.position_cs);
 	
 	// add some nice looking (but wrong) metallic effect
 	vec3 sideVec =  cross( normal_ws,fragDir_ws);
@@ -121,7 +121,7 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 //	
 //	surface.emission += vec4(length(reflect(fragDir_ws,normal_ws).xy),0.0,0.0,0.0);
 	
-	vec3 reflectionRay_ws = sg_eyeToWorld(vec4(reflect( normalize(surface.position_es) , surface.normal_es),0.0)).xyz;
+	vec3 reflectionRay_ws = sg_cameraToWorld(vec4(reflect( normalize(surface.position_cs) , surface.normal_cs),0.0)).xyz;
 	
 	vec4 clip=sg_modelToClipping(var_position_hms);
 	clip.xyz/=clip.w;
@@ -134,13 +134,13 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 //	}
 	
 	// global lighting
-//	vec3 normal_ws = sg_eyeToWorld(vec4(surface.normal_es,0.0)).xyz;
+//	vec3 normal_ws = sg_cameraToWorld(vec4(surface.normal_cs,0.0)).xyz;
 //	surface.ambient = vec4(0.0);
 //	surface.diffuse = vec4(0.0);
 //	surface.specular = vec4(0.0);
 	surface.emission += vec4(texture2D(sg_texture4,normal_ws.xy*0.5+0.5).xxx*0.8 ,0.0);
 	
-	//surface.normal_es = ORIENTATION*v*0.001;
+	//surface.normal_cs = ORIENTATION*v*0.001;
 	//surface.ambient *= 1.0-v;
 	
 	//surface.diffuse.r = 1.0;

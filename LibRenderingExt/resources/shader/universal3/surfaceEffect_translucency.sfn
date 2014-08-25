@@ -18,7 +18,7 @@
 #ifdef SG_VERTEX_SHADER
 
 struct VertexProperties {
-	vec3 position_es, normal_es;
+	vec3 position_cs, normal_cs;
 	float pointSize;
 };
 
@@ -32,7 +32,7 @@ void provideSurfaceEffectVars(in VertexProperties vec){}
 //#extension GL_ARB_gpu_shader5
 
 struct SurfaceProperties {
-	vec3 position_es, normal_es, tangent_es;
+	vec3 position_cs, normal_cs, tangent_cs;
 	vec4 ambient, diffuse, specular, emission;
 	float shininess;
 };
@@ -49,7 +49,7 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 	
 	CompositeColor transColor;
 	SurfaceProperties surface2 = surface;
-	surface2.normal_es *= -1.0;
+	surface2.normal_cs *= -1.0;
 	surface2.shininess = 2;
 //	surface2.specular = vec4(0.9,0.8,0.7,1.0);
 	surface2.diffuse = surface2.specular *0.5;

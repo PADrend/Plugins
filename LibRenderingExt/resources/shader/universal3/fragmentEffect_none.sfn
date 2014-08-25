@@ -18,7 +18,7 @@
 #ifdef SG_VERTEX_SHADER
 
 struct VertexProperties {
-	vec3 position_es, normal_es;
+	vec3 position_cs, normal_cs;
 	float pointSize;
 };
 
@@ -35,26 +35,26 @@ struct CompositeColor {
 };
 
 struct SurfaceProperties {
-	vec3 position_es, normal_es, tangent_es;
+	vec3 position_cs, normal_cs, tangent_cs;
 	vec4 ambient, diffuse, specular, emission;
 	float shininess;
 };
 
 
-//vec4 sg_eyeToWorld(in vec4 pos_hms); //! \see sgHelpers.sfn
+//vec4 sg_cameraToWorld(in vec4 pos_hms); //! \see sgHelpers.sfn
 
 //! \see main.sfn
 void addFragmentEffect(in SurfaceProperties surface, inout CompositeColor color){
 //////	// sphere map http://www.bluevoid.com/opengl/sig00/advanced00/notes/node184.html
-//////	vec3 dir_ws = normalize(sg_eyeToWorld(vec4(surface.position_es,0.0)).xyz );
-//////	vec3 normal_ws = normalize(sg_eyeToWorld(vec4(surface.normal_es,0.0)).xyz );
+//////	vec3 dir_ws = normalize(sg_cameraToWorld(vec4(surface.position_cs,0.0)).xyz );
+//////	vec3 normal_ws = normalize(sg_cameraToWorld(vec4(surface.normal_cs,0.0)).xyz );
 //////	vec3 r = dir_ws - dot(normal_ws,dir_ws) * 2.0 * normal_ws;
 //////	float p = sqrt(r.x*r.x+r.y*r.y+(r.z+1.0)*(r.z+1.0));
 //////	float s = r.x/(2.1*p)+0.5;
 //////	float t = r.y/(2.1*p)+0.5;
 //////
 //////// lookup map
-////////	vec3 dir_ws = normalize(sg_eyeToWorld(vec4(surface.normal_es,0.0)).xyz );
+////////	vec3 dir_ws = normalize(sg_cameraToWorld(vec4(surface.normal_cs,0.0)).xyz );
 ////////	float s = (dir_ws.x+1.0)*0.499;
 ////////	float t = (dir_ws.y+1.0)*0.499;
 //////	
@@ -68,8 +68,8 @@ void addFragmentEffect(in SurfaceProperties surface, inout CompositeColor color)
 ////////	color.diffuse = color.diffuse *0.0 + c*0.9;
 //////	
 //////	// darken / fog
-////////	color.ambient *= max(0.5,10.0-abs(surface.position_es.z))/10.0;
-////////	color.diffuse *= max(0.5,10.0-abs(surface.position_es.z))/10.0;
+////////	color.ambient *= max(0.5,10.0-abs(surface.position_cs.z))/10.0;
+////////	color.diffuse *= max(0.5,10.0-abs(surface.position_cs.z))/10.0;
 }
 
 

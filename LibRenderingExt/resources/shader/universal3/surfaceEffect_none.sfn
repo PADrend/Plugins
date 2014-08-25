@@ -18,7 +18,7 @@
 #ifdef SG_VERTEX_SHADER
 
 struct VertexProperties {
-	vec3 position_es, normal_es;
+	vec3 position_cs, normal_cs;
 	float pointSize;
 };
 
@@ -31,7 +31,7 @@ void provideSurfaceEffectVars(in VertexProperties vec){}
 #ifdef SG_FRAGMENT_SHADER
 
 struct SurfaceProperties {
-	vec3 position_es, normal_es, tangent_es;
+	vec3 position_cs, normal_cs, tangent_cs;
 	vec4 ambient, diffuse, specular, emission;
 	float shininess;
 };
