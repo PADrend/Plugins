@@ -91,7 +91,7 @@ SceneManagement.ex_Init := fn(...){
 
 		// --
 		// create default perspective camera
-		GLOBALS.camera = new MinSG.CameraNode();
+		GLOBALS.camera = new MinSG.CameraNode;
 		camera.name := "DefaultCamera";
 		var viewport = systemConfig.getValue('PADrend.Camera.viewport',false);
 		if(!viewport)
@@ -109,6 +109,8 @@ SceneManagement.ex_Init := fn(...){
 				this.applyVerticalAngle(systemConfig.getValue('PADrend.Camera.vAngle'));
 		});
 
+		frameContext.setCamera( camera );
+		
 		// --
 		// create dolly for camera
 		dolly = new MinSG.ListNode;
