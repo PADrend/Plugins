@@ -28,39 +28,39 @@ out("\n","-"*79,"\n");
 // ------------------
 
 {
-    out(("Loading Util scripts...").fillUp(40));
-    
-    if(EScript.VERSION<607){
+	out(("Loading Util scripts...").fillUp(40));
+	
+	if(EScript.VERSION<607){
 		loadOnce ("LibUtilExt/deprecated/DataWrapper.escript");
 		loadOnce ("LibUtilExt/deprecated/PriorityQueue.escript");
 		loadOnce ("LibUtilExt/deprecated/EScript_Utils.escript");
 		loadOnce ("LibUtilExt/deprecated/CommonTraits.escript");
-    }
-    
-    loadOnce ("LibUtilExt/PluginManagement.escript");
-    loadOnce ("LibUtilExt/deprecated/Listener.escript");
-    loadOnce ("LibUtilExt/Misc_Utils.escript");
+	}
+	
+	loadOnce ("LibUtilExt/PluginManagement.escript");
+	loadOnce ("LibUtilExt/deprecated/Listener.escript");
+	loadOnce ("LibUtilExt/Misc_Utils.escript");
 
-    loadOnce ("LibMinSGExt/Geometry_Utils.escript");
-    Std.require('LibMinSGExt/RendRayCaster');
-	loadOnce ("LibMinSGExt/MinSG_Utils.escript");
+	loadOnce ("LibMinSGExt/Geometry_Utils.escript");
+	Std.require('LibMinSGExt/RendRayCaster');
+	Std.require('LibMinSGExt/MinSG_Utils');
 	loadOnce ("LibMinSGExt/NodeExtensions.escript");
 	loadOnce ("LibMinSGExt/NodeTraits.escript");
 	loadOnce ("LibMinSGExt/Rendering_Utils.escript");	
 	loadOnce ("LibMinSGExt/SemanticObject.escript");	
 	loadOnce ("LibMinSGExt/MeshBuilderExtensions.escript");	
 
-    out("ok.\n");
+	out("ok.\n");
 }
 { // Declare some global variables
 
-    // universal globals
-    GLOBALS.Network:=void; // alias for Util.Network, if network support is available
+	// universal globals
+	GLOBALS.Network:=void; // alias for Util.Network, if network support is available
 
-    // PADrend dependent variables (\todo move to PADrend members)
-    GLOBALS.frameContext := void;
-    GLOBALS.renderingContext := void;
-    GLOBALS.camera := void;
+	// PADrend dependent variables (\todo move to PADrend members)
+	GLOBALS.frameContext := void;
+	GLOBALS.renderingContext := void;
+	GLOBALS.camera := void;
 }
 { // load and execute PADrend
 	loadPlugins( ["PADrend"],true,[__DIR__+"/../"] );

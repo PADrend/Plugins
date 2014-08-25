@@ -95,19 +95,28 @@ plugin.queryIntersection := fn( screenCoordinate, [MinSG.Node,void] rootNode=voi
 	return intersection;
 };
 
+
+/*! Calculate a Ray3 in world space starting from the given sceenPos (given as x,y or Vec2) 
+	on the near plane looking from the direction of the camera using the active frame camera settings.	*/
+static calcWorldRayOnScreenPos = fn(screenPosParams...){
+	var screenPos = new Geometry.Vec2(screenPosParams...);
+	var origin = frameContext.convertScreenPosToWorldPos(new Geometry.Vec3(screenPos.getX(),screenPos.getY(),0.0));
+	var target = frameContext.convertScreenPosToWorldPos(new Geometry.Vec3(screenPos.getX(),screenPos.getY(),1.0));
+	return new Geometry.Ray3(origin, (target-origin).normalize());
+};
+
+
 plugin.getPickingRay := fn( screenCoordinate ){
 	screenCoordinate = new Geometry.Vec2(screenCoordinate);
 	
-	frameContext.pushCamera();
 	var ray;
 	foreach( queryCameras(screenCoordinate) as var camera){
-		frameContext.setCamera(camera);
-		ray = frameContext.calcWorldRayOnScreenPos(screenCoordinate);
+		frameContext.pushAndSetCamera(camera);
+		ray = calcWorldRayOnScreenPos(screenCoordinate);
 		frameContext.popCamera();
-		break;
+		break; // return the ray for the first camera covering sceenCoordinate
 	}else{ // fallback: use the "official" activeCamera, even if the screenCoordinate is beyond its viewport.
-		frameContext.popCamera();
-		ray = frameContext.calcWorldRayOnScreenPos(screenCoordinate);
+		ray = calcWorldRayOnScreenPos(screenCoordinate);
 	}
 	return ray;
 };

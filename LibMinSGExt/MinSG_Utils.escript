@@ -69,48 +69,48 @@ MinSG.setScriptedStateExporter( fn(state,description){
 /*! Applies the transformations of all geomtryNodes to their meshes. Instantiated meshes are duplicated.
 	\note uses makeTransformationsLocal_allLeafs	*/
 MinSG.bakeTransformations := fn(MinSG.Node root, Geometry.Matrix4x4 worldMatrix=new Geometry.Matrix4x4()){
-    Util.info("bakeTransformations...\n");
+	Util.info("bakeTransformations...\n");
 	moveTransformationsIntoLeaves(root);
 
-    var geometryNodes=MinSG.collectGeoNodes(root);
-    var i=0;
-    foreach(geometryNodes as var gNode){
-        Util.info("\rApplying transformation ",++i,"/",geometryNodes.count(),"    ");
-        if(!gNode.hasMatrix())
-            continue;
-        var matrix=gNode.getMatrix();
-        var mesh=gNode.getMesh();
-        if(!mesh)
-            continue;
-        var newMesh=mesh.clone();
-        Rendering.transformMesh(newMesh,matrix);
-        gNode.setMesh(newMesh);
-        gNode.reset();
-    }
-    Util.info("\n");
+	var geometryNodes=MinSG.collectGeoNodes(root);
+	var i=0;
+	foreach(geometryNodes as var gNode){
+		Util.info("\rApplying transformation ",++i,"/",geometryNodes.count(),"    ");
+		if(!gNode.hasMatrix())
+			continue;
+		var matrix=gNode.getMatrix();
+		var mesh=gNode.getMesh();
+		if(!mesh)
+			continue;
+		var newMesh=mesh.clone();
+		Rendering.transformMesh(newMesh,matrix);
+		gNode.setMesh(newMesh);
+		gNode.reset();
+	}
+	Util.info("\n");
 };
 
 /*!	Remove empty GroupNodes; replace GroupNodes with a single child by that child.*/
 MinSG.cleanupTree := fn(MinSG.Node root, [MinSG.SceneManager,void] sceneManager=void){
-    Util.info( "cleanupTree...\n");
-    var counter=0;
+	Util.info( "cleanupTree...\n");
+	var counter=0;
 
-    var nodes=[root];
-    while(!nodes.empty()){
-        var node=nodes.popBack();
+	var nodes=[root];
+	while(!nodes.empty()){
+		var node=nodes.popBack();
 
-        var children=MinSG.getChildNodes(node);
+		var children=MinSG.getChildNodes(node);
 
-        if(children.count() == 0){ // is leaf node
-            if(node ---|> MinSG.GroupNode){ // remove empty leaf node
-                MinSG.destroy(node);
-            }
-        }else if (children.count() == 1){ // only single child
-            var child=children[0];
-            var states=node.getStates();
-            foreach(states as var state){
-                child.addState(state);
-            }
+		if(children.count() == 0){ // is leaf node
+			if(node ---|> MinSG.GroupNode){ // remove empty leaf node
+				MinSG.destroy(node);
+			}
+		}else if (children.count() == 1){ // only single child
+			var child=children[0];
+			var states=node.getStates();
+			foreach(states as var state){
+				child.addState(state);
+			}
 			// apply transformation
 			var m = node.getMatrix() * child.getMatrix();
 			if(m.convertsSafelyToSRT())
@@ -124,15 +124,15 @@ MinSG.cleanupTree := fn(MinSG.Node root, [MinSG.SceneManager,void] sceneManager=
 					sceneManager.registerNode(id,child);
 			}
 
-            node.getParent().addChild(child);
-            MinSG.destroy(node);
-            nodes+=child;
-        }else {
-            nodes.append(children);
-        }
-        Util.info("\r",++counter," ");
-    }
-    Util.info("\ndone.\n");
+			node.getParent().addChild(child);
+			MinSG.destroy(node);
+			nodes+=child;
+		}else {
+			nodes.append(children);
+		}
+		Util.info("\r",++counter," ");
+	}
+	Util.info("\ndone.\n");
 };
 
 MinSG.closeNodesHavingStates := fn(MinSG.Node node){
@@ -207,60 +207,60 @@ MinSG.collectTreeStatistics := fn(MinSG.Node root) {
 };
 
 MinSG.combineLeafs:=fn(MinSG.Node root,minNumber=2){
-    var nodes=[root];
-    var counter=0;
-    while(!nodes.empty()){
-        Util.info("\r",counter++," ");
-        var node=nodes.popBack();
-        var geoNodes=[];
-        var children=MinSG.getChildNodes(node);
-        foreach(children as var child){
-            if(child---|>MinSG.GeometryNode)
-                geoNodes+=child;
-            else
-                nodes+=child;
-        }
-        if(geoNodes.count()<minNumber) continue;
+	var nodes=[root];
+	var counter=0;
+	while(!nodes.empty()){
+		Util.info("\r",counter++," ");
+		var node=nodes.popBack();
+		var geoNodes=[];
+		var children=MinSG.getChildNodes(node);
+		foreach(children as var child){
+			if(child---|>MinSG.GeometryNode)
+				geoNodes+=child;
+			else
+				nodes+=child;
+		}
+		if(geoNodes.count()<minNumber) continue;
 
 
 		MinSG.bakeTransformations( node );
 
-        var combineGroups=new Map();
-        var i=0;
-        foreach(geoNodes as var gNode){
-            var mesh=gNode.getMesh();
+		var combineGroups=new Map();
+		var i=0;
+		foreach(geoNodes as var gNode){
+			var mesh=gNode.getMesh();
 
-            if(!mesh)
-                continue;
+			if(!mesh)
+				continue;
 
-            var s=mesh.getVertexDescription().toString();
-            foreach(gNode.getStates() as var state){
-                s+=":  "+state.toString();
-            }
+			var s=mesh.getVertexDescription().toString();
+			foreach(gNode.getStates() as var state){
+				s+=":  "+state.toString();
+			}
 //            out(s,"\n");
-            if(!combineGroups[s]){
-                var g=new ExtObject();
-                g.node:=void;
-                g.meshes:=[];
-                combineGroups[s]=g;
-            }
-            var g=combineGroups[s];
-            g.meshes+=mesh;
+			if(!combineGroups[s]){
+				var g=new ExtObject();
+				g.node:=void;
+				g.meshes:=[];
+				combineGroups[s]=g;
+			}
+			var g=combineGroups[s];
+			g.meshes+=mesh;
 
-            if(g.node)
-                MinSG.destroy(gNode);
-            else
-                g.node=gNode;
-        }
-        foreach(combineGroups as var g){
+			if(g.node)
+				MinSG.destroy(gNode);
+			else
+				g.node=gNode;
+		}
+		foreach(combineGroups as var g){
 
-            var newMesh=Rendering.combineMeshes(g.meshes);
-            g.node.setMesh(newMesh);
+			var newMesh=Rendering.combineMeshes(g.meshes);
+			g.node.setMesh(newMesh);
 //            g.node.createVBOFromMesh();
-            g.node.reset();
-        }
-    }
-    Util.info("\ndone.\n");
+			g.node.reset();
+		}
+	}
+	Util.info("\ndone.\n");
 };
 
 MinSG.getCombinedWorldBB := fn(Array nodes){
@@ -393,8 +393,8 @@ MinSG.removeAllStates := fn(MinSG.Node node){
 	\note if you want to keep the states in the inner nodes, call
 			closeNodesHavingStates in advance. */
 MinSG.removeOpenNodes := fn(MinSG.GroupNode root){
-    Util.info( "removeOpenNodes...\n");
-    var counter=0;
+	Util.info( "removeOpenNodes...\n");
+	var counter=0;
 
 	moveTransformationsIntoClosedNodes(root);
 	moveStatesIntoClosedNodes(root);
@@ -412,7 +412,32 @@ MinSG.removeOpenNodes := fn(MinSG.GroupNode root){
 		}
 	}
 	MinSG.destroy(wasteContainer);
-    Util.info("\ndone.\n");
+	Util.info("\ndone.\n");
+};
+
+/*! (static) Render the given sceneGraph with the given camera and flags.
+	\note If the clearColor is false, the rendering buffer is not cleared before rendering */
+MinSG.renderScene := fn( MinSG.FrameContext fc,
+							MinSG.Node _rootNode, [MinSG.AbstractCameraNode,void] _camera, 
+							Number _renderingFlags = MinSG.FRUSTUM_CULLING | MinSG.USE_WORLD_MATRIX, 
+							[Util.Color4f,false] _clearColor = new Util.Color4f(0,0,0,0), 
+							Number renderingLayers = 1 ){
+	var iMode = renderingContext.getImmediateMode();
+	renderingContext.setImmediateMode(false);
+	// force a reset of the opengl state 
+	renderingContext.applyChanges(true);
+	// \note The camera has to be enabled before the screen is cleared because it also defines the viewport to clear
+	fc.pushCamera();
+	if(_camera)
+		fc.setCamera(_camera);
+	if(_clearColor) 
+		renderingContext.clearScreen(_clearColor);
+	fc.displayNode(_rootNode, (new MinSG.RenderParam)
+												.setFlags(_renderingFlags)
+												.setRenderingLayers(renderingLayers));
+	fc.popCamera();
+	renderingContext.setImmediateMode(iMode);
+	renderingContext.applyChanges(true);
 };
 
 //! replaces colors and normals in meshes with smaller datatypes (bytes)
@@ -469,18 +494,6 @@ MinSG.updatePrototype := fn(MinSG.Node node, MinSG.Node newPrototype){
 	}
 };
 
-
-// ---------------------------
-// FrameContext extension
-
-/*! Calculate a Ray3 in world space starting from the given sceenPos (given as x,y or Vec2) 
-	on the near plane looking from the direction of the camera using the active frame camera settings.	*/
-MinSG.FrameContext.calcWorldRayOnScreenPos ::= fn(screenPosParams...){
-	var screenPos = new Geometry.Vec2(screenPosParams...);
-    var origin = this.convertScreenPosToWorldPos(new Geometry.Vec3(screenPos.getX(),screenPos.getY(),0.0));
-    var target = this.convertScreenPosToWorldPos(new Geometry.Vec3(screenPos.getX(),screenPos.getY(),1.0));
-    return new Geometry.Ray3(origin, (target-origin).normalize());
-};
 
 // ---------------------------
 // ShaderState extension
@@ -657,33 +670,37 @@ MinSG.calcNodeToSceneDistance := fn(MinSG.FrameContext fc, MinSG.Node rootNode, 
 
 //! Waiting screen.
 GLOBALS.showWaitingScreen:=fn(fancy=void){
-    if(void===fancy){ // use default
+	if(void===fancy){ // use default
 		fancy = thisFn.fancy;
-    }
-    if(!fancy){
+	}
+	if(!fancy){
 //        renderingContext.clearScreen(new Util.Color4f(0,37/256,79/256,0)); // upb-blue
 		renderingContext.clearScreen(new Util.Color4f(0, 0, 0, 0));
-        PADrend.SystemUI.swapBuffers();
-    }else{
-        if(!thisFn._waitingScreenShader){
-            thisFn._waitingScreenShader=Rendering.Shader.createShader(
-                "void main( void ){  gl_TexCoord[0] = gl_MultiTexCoord0;  gl_Position = ftransform();}",
-                "uniform sampler2D tex; \n"+
-                "void main(){ \n"+
-                " vec4 c1 = texture2D(tex,vec2(gl_TexCoord[0].s, gl_TexCoord[0].t)); \n"+
-                " float f = c1.r + c1.g + c1.b ; \n"+
-                " gl_FragColor = vec4( (c1.r+f)*0.1 , (c1.g+f)*0.1 , (c1.b+f)*0.1,0.0);}");
+		PADrend.SystemUI.swapBuffers();
+	}else{
+		if(!thisFn._waitingScreenShader){
+			thisFn._waitingScreenShader=Rendering.Shader.createShader(
+				"void main( void ){  gl_TexCoord[0] = gl_MultiTexCoord0;  gl_Position = ftransform();}",
+				"uniform sampler2D tex; \n"+
+				"void main(){ \n"+
+				" vec4 c1 = texture2D(tex,vec2(gl_TexCoord[0].s, gl_TexCoord[0].t)); \n"+
+				" float f = c1.r + c1.g + c1.b ; \n"+
+				" gl_FragColor = vec4( (c1.r+f)*0.1 , (c1.g+f)*0.1 , (c1.b+f)*0.1,0.0);}");
 			
 			thisFn._waitingScreenShader.setUniform(renderingContext,'tex',Rendering.Uniform.INT,[0]);
 
-        }
-        var t=Rendering.createTextureFromScreen();
+		}
+		var t=Rendering.createTextureFromScreen();
 		renderingContext.pushAndSetShader(thisFn._waitingScreenShader);
-        Rendering.drawTextureToScreen(renderingContext,new Geometry.Rect(0,0,renderingContext.getWindowWidth(),renderingContext.getWindowHeight()) , 
-                            t,new Geometry.Rect(0,0,1,1));
+		Rendering.drawTextureToScreen(renderingContext,new Geometry.Rect(0,0,renderingContext.getWindowWidth(),renderingContext.getWindowHeight()) , 
+							t,new Geometry.Rect(0,0,1,1));
 		renderingContext.popShader();
-        PADrend.SystemUI.swapBuffers();
-    }
+		PADrend.SystemUI.swapBuffers();
+	}
 };
 GLOBALS.showWaitingScreen.fancy := true;
 GLOBALS.showWaitingScreen._waitingScreenShader := void;
+
+
+// -------------------------
+return MinSG;
