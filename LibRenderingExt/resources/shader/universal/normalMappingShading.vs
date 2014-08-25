@@ -15,8 +15,8 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-uniform mat4 sg_modelViewMatrix;
-uniform mat4 sg_modelViewProjectionMatrix;
+uniform mat4 sg_matrix_modelToCamera;
+uniform mat4 sg_matrix_modelToClipping;
 uniform bool sg_normalMappingEnabled;
 
 attribute vec3 sg_Normal;
@@ -30,12 +30,12 @@ varying vec3 eyeSpaceBitangent;
 varying vec4 eyeSpacePosition;
 
 vec4 addLighting() {
-	eyeSpaceNormal = (sg_modelViewMatrix * vec4(sg_Normal,0)).xyz;
+	eyeSpaceNormal = (sg_matrix_modelToCamera * vec4(sg_Normal,0)).xyz;
 	if(sg_normalMappingEnabled){
-		eyeSpaceTangent = (sg_modelViewMatrix * vec4(sg_Tangent.xyz,0)).xyz;
-		eyeSpaceBitangent = (sg_modelViewMatrix * vec4(cross(sg_Normal.xyz, sg_Tangent.xyz) * sg_Tangent.w,0)).xyz;
+		eyeSpaceTangent = (sg_matrix_modelToCamera * vec4(sg_Tangent.xyz,0)).xyz;
+		eyeSpaceBitangent = (sg_matrix_modelToCamera * vec4(cross(sg_Normal.xyz, sg_Tangent.xyz) * sg_Tangent.w,0)).xyz;
 	}
 	
-	eyeSpacePosition = sg_modelViewMatrix * vec4(sg_Position,1);
+	eyeSpacePosition = sg_matrix_modelToCamera * vec4(sg_Position,1);
 	return sg_Color;
 }

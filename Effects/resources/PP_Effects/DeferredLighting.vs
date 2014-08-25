@@ -24,9 +24,9 @@ in vec2 sg_TexCoord0;
 
 out vec2 texCoord;
 
-uniform mat4 sg_modelViewProjectionMatrix;
+uniform mat4 sg_matrix_modelToClipping;
 
 void main(void) {
 	texCoord = sg_TexCoord0;
-	gl_Position = sg_modelViewProjectionMatrix * vec4(sg_Position, 1.0);
+	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position, 1.0);
 }

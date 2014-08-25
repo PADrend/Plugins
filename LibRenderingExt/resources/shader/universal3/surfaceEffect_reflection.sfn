@@ -45,7 +45,7 @@ vec4 sg_eyeToWorld(in vec4 hes);	//! \see sgHelpers.sfn
 uniform sampler2D sg_texture0;
 uniform sampler2D lastColorBuffer;
 uniform sampler2D lastDepthBuffer;
-uniform mat4 sg_projectionMatrix;  // eye->cam move to sg_helper!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+uniform mat4 sg_matrix_cameraToClipping;  // eye->cam move to sg_helper!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 uniform mat4 sg_lastProjectionMatrix;  
 uniform mat4 sg_lastProjectionMatrixInverse;  
 uniform mat4 sg_eyeToLastEye;  

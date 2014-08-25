@@ -27,12 +27,12 @@ out vec4 position;
 out vec3 normal;
 out vec4 color;
 
-uniform mat4 sg_modelViewMatrix;
-uniform mat4 sg_modelViewProjectionMatrix;
+uniform mat4 sg_matrix_modelToCamera;
+uniform mat4 sg_matrix_modelToClipping;
 
 void main() {
-	position = sg_modelViewMatrix * vec4(sg_Position, 1.0);
-	normal = normalize((sg_modelViewMatrix * vec4(sg_Normal, 0.0)).xyz);
+	position = sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
+	normal = normalize((sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz);
 	color = sg_Color;
-	gl_Position = sg_modelViewProjectionMatrix * vec4(sg_Position, 1.0);
+	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position, 1.0);
 }

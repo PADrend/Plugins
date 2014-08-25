@@ -26,21 +26,21 @@
 
 //! \name Coordinate transformations
 //!	\{
-	uniform mat4 sg_cameraInverseMatrix;
-	uniform mat4 sg_modelViewMatrix;
-	uniform mat4 sg_modelViewProjectionMatrix;
+	uniform mat4 sg_matrix_cameraToWorld;
+	uniform mat4 sg_matrix_modelToCamera;
+	uniform mat4 sg_matrix_modelToClipping;
 
 	//! [fs,vs] Convert an homogenous coordinate from Eye(=View)Space into WorldSpace.
-	vec4 sg_eyeToWorld(in vec4 hes)			{	return sg_cameraInverseMatrix  * hes;	}
+	vec4 sg_eyeToWorld(in vec4 hes)			{	return sg_matrix_cameraToWorld  * hes;	}
 
 	//! [fs,vs] Convert an homogenous coordinate from ModelSpace into Eye(=View)Space.
-	vec4 sg_modelToEye(in vec4 hms)			{	return sg_modelViewMatrix * hms;	}
+	vec4 sg_modelToEye(in vec4 hms)			{	return sg_matrix_modelToCamera * hms;	}
 
 	//! [fs,vs] Convert an homogenous coordinate from ModelSpace into WorldSpace.
-	vec4 sg_modelToWorld(vec4 hms)			{	return sg_cameraInverseMatrix * sg_modelViewMatrix * hms;	}
+	vec4 sg_modelToWorld(vec4 hms)			{	return sg_matrix_cameraToWorld * sg_matrix_modelToCamera * hms;	}
 
 	//! [fs,vs] Convert an homogenous coordinate from ModelSpace into WorldSpace.
-	vec4 sg_modelToClipping(in vec4 hms)	{	return sg_modelViewProjectionMatrix * hms; }
+	vec4 sg_modelToClipping(in vec4 hms)	{	return sg_matrix_modelToClipping * hms; }
 //! \}
 
 // -------------------

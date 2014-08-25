@@ -53,7 +53,7 @@ struct sg_LightSourceParameters {
 uniform sg_LightSourceParameters sg_LightSource[8];
 uniform int sg_lightCount;
 
-uniform mat4 sg_cameraMatrix;
+uniform mat4 sg_matrix_worldToCamera;
 
 void main(void) {
 	vec4 position = texture(sg_texture0, texCoord);
@@ -98,7 +98,7 @@ void main(void) {
 	for(int l = 0; l < sg_lightCount; l++) {
 		vec4 lightPos = vec4(sg_LightSource[l].position, 1.0);
 
-		lightPos = sg_cameraMatrix * lightPos;
+		lightPos = sg_matrix_worldToCamera * lightPos;
 		lightPos /= lightPos.w;
 
 		vec3 lightDir = lightPos.xyz - position.xyz;

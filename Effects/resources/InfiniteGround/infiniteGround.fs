@@ -53,7 +53,7 @@ uniform int type;
 uniform float scale;
 uniform vec3 viewerPos;
 uniform mat3 worldRot;
-uniform mat4 sg_cameraMatrix;
+uniform mat4 sg_matrix_worldToCamera;
 uniform float groundLevel;  // y-coordinate of the ground
 
 uniform bool useHaze;
@@ -85,7 +85,7 @@ uniform int sg_viewport[4];
 // general helper
 
 vec3 worldPosToEyePos(const in vec3 worldPos) {
-	vec4 v = sg_cameraMatrix * vec4(worldRot*worldPos, 1.0);
+	vec4 v = sg_matrix_worldToCamera * vec4(worldRot*worldPos, 1.0);
 	return v.xyz / v.w;
 }
 float sunGlow(const in vec3 worldLightDir) {

@@ -15,8 +15,8 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-uniform mat4 sg_cameraInverseMatrix;
-uniform mat4 sg_modelViewMatrix;
+uniform mat4 sg_matrix_cameraToWorld;
+uniform mat4 sg_matrix_modelToCamera;
 uniform bool sg_shadowEnabled;
 uniform mat4 sg_shadowMatrix;
 
@@ -26,6 +26,6 @@ varying vec4 shadowCoord;
 
 void addShadow(inout vec4 color) {
 	if(sg_shadowEnabled) {
-		shadowCoord = sg_shadowMatrix * sg_cameraInverseMatrix * sg_modelViewMatrix * vec4(sg_Position, 1.0);
+		shadowCoord = sg_shadowMatrix * sg_matrix_cameraToWorld * sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
 	}
 }

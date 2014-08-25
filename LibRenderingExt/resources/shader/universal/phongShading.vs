@@ -15,8 +15,8 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-uniform mat4 sg_modelViewMatrix;
-uniform mat4 sg_modelViewProjectionMatrix;
+uniform mat4 sg_matrix_modelToCamera;
+uniform mat4 sg_matrix_modelToClipping;
 
 attribute vec3 sg_Normal;
 attribute vec3 sg_Position;
@@ -26,7 +26,7 @@ varying vec3 eyeSpaceNormal;
 varying vec4 eyeSpacePosition;
 
 vec4 addLighting() {
-	eyeSpaceNormal = normalize((sg_modelViewMatrix * vec4(sg_Normal,0)).xyz);
-	eyeSpacePosition = sg_modelViewMatrix * vec4(sg_Position, 1);
+	eyeSpaceNormal = normalize((sg_matrix_modelToCamera * vec4(sg_Normal,0)).xyz);
+	eyeSpacePosition = sg_matrix_modelToCamera * vec4(sg_Position, 1);
 	return sg_Color;
 }
