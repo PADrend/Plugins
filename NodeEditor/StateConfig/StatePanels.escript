@@ -909,6 +909,15 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.LightingState, fn(MinSG.Ligh
 		this.dd.refresh();
 	};
 	entries += button;
+	entries += GUI.NEXT_ROW;
+	
+	entries += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "Enable/Disable light",
+		GUI.TOOLTIP : "If disabled, the specified Light is disabled for this subtree.",
+		GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( state->state.getEnableLight, state->state.setEnableLight )
+	};
+
 	return entries;
 });
 
