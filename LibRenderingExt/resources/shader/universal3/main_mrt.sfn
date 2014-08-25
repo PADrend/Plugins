@@ -18,8 +18,8 @@
 	Multi-Render-Target shader
 	Layers
 	0		...	"Normal" color including lighting and fragment effects
-	1		...	position in sg_mrt_eyeSpaceConversionMatrix * eyeSpace
-	2		... normal in sg_mrt_eyeSpaceConversionMatrix * eyeSpace
+	1		...	position in sg_mrt_matrix_cameraToCustom * cameraSpace
+	2		... normal in sg_mrt_matrix_cameraToCustom * cameraSpace
 	3		... surface ambient color (without lighting and fragment effects)
 	4		... surface diffuse color (without lighting and fragment effects)
 	5		... surface specular color (without lighting and fragment effects)
@@ -83,7 +83,7 @@ void main (void) {
 // fs
 #ifdef SG_FRAGMENT_SHADER
 
-uniform mat4 sg_mrt_eyeSpaceConversionMatrix = mat4(1.0);
+uniform mat4 sg_mrt_matrix_cameraToCustom = mat4(1.0);
 
 struct CompositeColor {
 	vec4 ambient, diffuse, specular;
@@ -118,9 +118,9 @@ void main (void) {
 	// 
 	
 	gl_FragData[0] = color.ambient+color.diffuse+color.specular;	// combine color components into one color.
-	vec4 pos_hxs = sg_mrt_eyeSpaceConversionMatrix * vec4( surface.position_cs,1.0);
+	vec4 pos_hxs = sg_mrt_matrix_cameraToCustom * vec4( surface.position_cs,1.0);
 	gl_FragData[1] = vec4( pos_hxs.xyz/pos_hxs.w , 1.0 );
-	gl_FragData[2] = vec4( normalize( (sg_mrt_eyeSpaceConversionMatrix * vec4(surface.normal_cs,0.0)).xyz), 1.0 );
+	gl_FragData[2] = vec4( normalize( (sg_mrt_matrix_cameraToCustom * vec4(surface.normal_cs,0.0)).xyz), 1.0 );
 	
 	gl_FragData[3] = surface.ambient;
 	gl_FragData[4] = surface.diffuse;
