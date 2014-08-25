@@ -54,6 +54,8 @@ trait.attributes.envMap_update ::= fn(){
 			renderingContext.popFBO();
 		}
 	}
+	envMap = Rendering.createSmoothedCubeMap(envMap);
+
 	var id = ""+this.envMap_targetStateId();
 	if(!id.empty()){
 		var state =  PADrend.getSceneManager().getRegisteredState( id );
@@ -87,6 +89,20 @@ trait.onInit += fn(MinSG.Node node){
 	};
 	node.envMap_updateOnTranslation.forceRefresh();
 
+	var active = new Std.DataWrapper;
+	node.envMap_autoUpdate := node.getNodeAttributeWrapper('envMap_autoUpdate', 0 );
+	node.envMap_autoUpdate.onDataChanged += [node,active]=>fn(node,active, value){
+		
+		if(value && value>0){
+			if(!active()){
+				active(true);
+				PADrend.planTask( value, [node,active] => fn(node,active){ 	if(active()){node.envMap_update();	return node.envMap_autoUpdate();	} });
+			}
+		}else{
+			active(false);
+		}
+	};
+	node.envMap_autoUpdate.forceRefresh();
 	
 	PADrend.planTask(0.1, node->node.envMap_update); // plan initial map creation
 };
@@ -116,6 +132,15 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				GUI.LABEL : "Resoultion",
 				GUI.DATA_WRAPPER : node.envMap_resolution,
 				GUI.OPTIONS : [16,32,64,128,256,512,1024]
+			},
+			{   GUI.TYPE : GUI.TYPE_NEXT_ROW},
+			{
+				GUI.TYPE : GUI.TYPE_NUMBER,
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS, 10, 20],
+				GUI.LABEL : "envMap_autoUpdate",
+				GUI.DATA_WRAPPER : node.envMap_autoUpdate,
+				GUI.OPTIONS : [0,1,10,30],
+				GUI.TOOLTIP : "If value!=0, the map is re-created each value seconds."
 			},
 			{   GUI.TYPE : GUI.TYPE_NEXT_ROW},
 			{
