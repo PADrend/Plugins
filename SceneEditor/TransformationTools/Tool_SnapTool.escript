@@ -178,6 +178,11 @@ TransformationTools.SnapTool2 := new Type;
 
 		this.refreshRelNodePositions(nodes); // if individual
 	};
+	static getRayCaster = fn(){
+		static caster;
+		@(once)	caster = new (Std.require('LibMinSGExt/RendRayCaster'));
+		return caster;
+	};
 	T.onDragging := fn(evt){
 		var nodes = this.getTransformedNodes();				//! \see TransformationTools.NodeTransformationHandlerTrait
 		if(nodes.empty()||!this.startPos)
@@ -211,8 +216,9 @@ TransformationTools.SnapTool2 := new Type;
 			var scene = PADrend.getCurrentScene();
 
 			var sceneMinY = scene.getWorldBB().getMinY();
+			
 			foreach(this.nodeRays as var node,var segment){
-				var intersection = this.rayCaster.queryIntersection(frameContext,scene,
+				var intersection = getRayCaster().queryIntersection(frameContext,scene,
 												metaNode.localPosToWorldPos(segment.getFirstPoint()),
 												metaNode.localPosToWorldPos(segment.getSecondPoint()));
 				if(!intersection){
