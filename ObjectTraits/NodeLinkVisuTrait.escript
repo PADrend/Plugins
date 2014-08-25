@@ -101,8 +101,7 @@ LinkState.doDisableState ::= fn(node,params){
 //	blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE_MINUS_SRC_ALPHA);
 	renderingContext.pushAndSetBlending(blending);
 	
-	renderingContext.pushMatrix();
-	renderingContext.resetMatrix();
+	renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
 
 	renderingContext.pushLine();
 	renderingContext.setLineWidth(2.0);
@@ -121,7 +120,7 @@ LinkState.doDisableState ::= fn(node,params){
 	
 	renderingContext.popMaterial();
 	renderingContext.popLine();
-	renderingContext.popMatrix();
+	renderingContext.popMatrix_modelToCamera();
 
 	renderingContext.popBlending();
 	

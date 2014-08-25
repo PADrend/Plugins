@@ -244,12 +244,11 @@ WaypointsPlugin.ex_AfterRenderingPass:=fn(...){
 		return;
 
 	var path = getCurrentPath();
-	renderingContext.pushMatrix();
-	renderingContext.resetMatrix();
-	renderingContext.multMatrix(path.getWorldMatrix());
+	renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
+	renderingContext.multMatrix_modelToCamera(path.getWorldMatrix());
 	renderingContext.applyChanges();
 	path.display(frameContext, MinSG.SHOW_META_OBJECTS);
-	renderingContext.popMatrix();
+	renderingContext.popMatrix_modelToCamera();
 };
 
 

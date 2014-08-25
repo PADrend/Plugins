@@ -61,11 +61,10 @@ plugin.drawHelperObjects := fn(camera) {
 		var scaleMatrix = new Geometry.Matrix4x4;
 		scaleMatrix.scale(scale, scale, scale);
 		renderingContext.pushAndSetLighting(false);
-		renderingContext.pushMatrix();
-		renderingContext.resetMatrix();
-		renderingContext.multMatrix(scaleMatrix);
+		renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
+		renderingContext.multMatrix_modelToCamera(scaleMatrix);
 		Rendering.drawCoordSys(renderingContext, 10.0);
-		renderingContext.popMatrix();
+		renderingContext.popMatrix_modelToCamera();
 		renderingContext.popLighting();
 	}
 	if(this.gridEnabled()) {

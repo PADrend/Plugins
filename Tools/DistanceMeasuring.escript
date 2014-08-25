@@ -302,7 +302,7 @@ Measurement.display:=fn(){
 		return;
 	var p2=pos2 ? pos2 : pos1;
 	var p3=new Geometry.Vec3(p2.getX(),pos1.getY(),p2.getZ());
-	renderingContext.resetMatrix();
+	renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
 
 	renderingContext.pushAndSetDepthBuffer(false, false, Rendering.Comparison.LESS);
 	renderingContext.pushLine();
@@ -355,6 +355,7 @@ Measurement.display:=fn(){
 	renderingContext.popLine();
 	renderingContext.popLighting();
 	renderingContext.popDepthBuffer();
+	renderingContext.pushAndSetMatrix_modelToCamera();
 };
 Measurement.getInfo:=fn(){
 //	var s=" "+this.pos1+" to "+this.pos2+"\n";

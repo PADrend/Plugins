@@ -46,6 +46,7 @@ RenderingPass._constructor ::= fn(_id,
 //! Render the stored scene
 RenderingPass.execute ::= fn(){
 	PADrend.renderScene( this.rootNode, this.camera, this.renderingFlags, this.clearColor, this.renderingLayers);
+	renderingContext.setImmediateMode(true);
 };
 
 RenderingPass.getCamera ::= 		fn(){	return camera;	};

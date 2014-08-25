@@ -220,8 +220,9 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 			});
 			p.addAction("Create coordinates",data->fn(){
 				out("Create uv coordinates for attribute '"+attrName+"' [");
-				renderingContext.resetMatrix();
-				var matrix=(new Geometry.Matrix4x4()).scale(scale,scale,scale) *  renderingContext.getProjectionMatrix() * renderingContext.getCameraMatrix() ;
+				renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
+				
+				var matrix=(new Geometry.Matrix4x4()).scale(scale,scale,scale) *  renderingContext.getMatrix_cameraToClip() * renderingContext.getMatrix_worldToCamera() ;
 
 				foreach( NodeEditor.getSelectedNodes() as var subtree){
 					var geoNodes=MinSG.collectGeoNodes(subtree);
@@ -234,6 +235,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 
 				}
 				out("]\n");
+				renderingContext.popMatrix_modelToCamera();
 
 				return true;
 

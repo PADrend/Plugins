@@ -117,9 +117,8 @@ plugin.init @(override) := fn() {
 												MinSG.SemanticObjects.isSemanticObject(node) ? COLOR_BG_SEM_OBJ : COLOR_BG_NODE  );
 				}
 
-				renderingContext.pushMatrix();
-				renderingContext.resetMatrix();
-				renderingContext.multMatrix(node.getWorldMatrix());
+				renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
+				renderingContext.multMatrix_modelToCamera(node.getWorldMatrix());
 
 				var bb = node.getBB();
 
@@ -133,7 +132,7 @@ plugin.init @(override) := fn() {
 				renderingContext.applyChanges();
 				Rendering.drawWireframeBox(renderingContext, bb, new Util.Color4f(1.0, 1.0, 1.0, 0.4));
 				Rendering.drawBox(renderingContext, bb, new Util.Color4f(1.0, 1.0, 1.0, 0.2));
-				renderingContext.popMatrix();
+				renderingContext.popMatrix_modelToCamera();
 				renderingContext.popPolygonOffset();
 				renderingContext.popLighting();
 				renderingContext.popDepthBuffer();
