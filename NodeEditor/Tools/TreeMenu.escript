@@ -108,6 +108,25 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.treeOperations',[
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL:"Close semantic objects",
+		GUI.ON_CLICK:fn(){
+			showWaitingScreen();
+			static counter = 0;
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				subtree.traverse( fn(node){
+					if(MinSG.SemanticObjects.isSemanticObject(node) ){
+						if(!node.isClosed()){
+							++counter;
+							node.setClosed(true);
+						}
+					}
+				});
+				PADrend.message("Number of closed nodes: " +counter);
+			}
+		}
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL:"Combine leafs",
 		GUI.ON_CLICK:fn(){
 			showWaitingScreen();
