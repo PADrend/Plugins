@@ -53,6 +53,8 @@ struct SurfaceProperties {
 void sg_addLight(in int sgLightNr,in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor lightSum);	
 int sg_getLightCount();				//! \see sgHelper.sfn
 vec4 sg_cameraToWorld(in vec4 hcs);	//! \see sgHelper.sfn
+vec3 rgb2hsv(in vec3 rgb);			//! \see sgHelper.sfn
+vec3 hsv2rgb(in vec3 hsv);			//! \see sgHelper.sfn
 
 //! \see main.sfn
 void calcLighting(in SurfaceProperties surface, out CompositeColor color){
@@ -63,7 +65,7 @@ void calcLighting(in SurfaceProperties surface, out CompositeColor color){
 
 	int lightCount = sg_getLightCount();
 
-	if(lightCount==0){ // default lighting
+	if(lightCount==0 && sg_cubeEnvReflection_strength<=0 && sg_cubeEnvDiffuse_strength<=0){ // default lighting
 		lightSum.ambient = vec4(0.3);
 		lightSum.diffuse = vec4(0.7);
 	}
@@ -77,12 +79,18 @@ void calcLighting(in SurfaceProperties surface, out CompositeColor color){
 	// Add environment reflection
 	if(sg_cubeEnvReflection_strength>0.0){
 		vec3 reflection_cs = reflect( surface.position_cs, surface.normal_cs);
-		lightSum.specular += sg_cubeEnvReflection_strength * textureCube(sg_cubeEnvReflection_map, sg_cameraToWorld( vec4(reflection_cs,0.0)).xyz );
+
+		vec3 lightHSV = rgb2hsv( textureCube(sg_cubeEnvReflection_map, sg_cameraToWorld( vec4(reflection_cs,0.0)).xyz ).rgb);
+		lightHSV.z = log(1.0+lightHSV.z); // (?) logarithmic brightness
+		lightSum.specular += vec4(sg_cubeEnvReflection_strength * hsv2rgb(lightHSV),0.0);
 	}
 	
 	// Add environment lighting
 	if(sg_cubeEnvDiffuse_strength>0.0){
-		lightSum.diffuse += sg_cubeEnvDiffuse_strength * textureCube(sg_cubeEnvDiffuse_map, sg_cameraToWorld( vec4(surface.normal_cs,0.0)).xyz );
+		vec3 lightHSV = rgb2hsv(textureCube(sg_cubeEnvDiffuse_map, sg_cameraToWorld( vec4(surface.normal_cs,0.0)).xyz ).rgb);
+		lightHSV.y *= 0.2; // (?) reduce color influence
+		lightHSV.z = log(1.0+lightHSV.z); // (?) logarithmic brightness
+		lightSum.diffuse += vec4(sg_cubeEnvDiffuse_strength * hsv2rgb(lightHSV),0.0);
 	}
 	
 	lightSum.ambient.a = lightSum.diffuse.a = lightSum.specular.a = 1.0;
