@@ -29,7 +29,7 @@ uniform bool starsEnabled;// = false;
 varying vec3 vpos; //, lpos;
 varying vec2 texCoord_1, texCoord_2, texCoord_3, skyPos_ws;
 
-uniform float maxSunBrightness = 10000.0; // to get values beyond 1.0 for hdr
+uniform float maxSunBrightness = 100.0; // to get values beyond 1.0 for hdr
 const float bloomingExponent = 4.0;
 const float bloomingScale = 1.0;
 const float wobble = 0.4;

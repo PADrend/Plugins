@@ -90,7 +90,7 @@ plugin.init @(override) := fn(){
 	this.cloudSpeed.forceRefresh();
 
 	this.cloudDensity := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.cloudDensity',0.6);
-	this.maxSunBrightness := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.maxSunBrightness',10000);
+	this.maxSunBrightness := DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.maxSunBrightness',100);
 
 	
 	// misc
@@ -361,6 +361,12 @@ plugin.ex_Init @(private) :=fn(){
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Influence sun light",
 			GUI.DATA_WRAPPER : this.influenceSunLight
+		};			
+		menu += {
+			GUI.TYPE : GUI.TYPE_NUMBER,
+			GUI.LABEL : "maxSunBrightness(hdr)",
+			GUI.DATA_WRAPPER : this.maxSunBrightness,
+			GUI.OPTIONS : [ 1,10,100,1000,10000 ]
 		};			
 		menu += {
 			GUI.TYPE : GUI.TYPE_BUTTON,
