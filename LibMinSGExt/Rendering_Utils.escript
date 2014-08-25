@@ -74,3 +74,76 @@ Rendering.RenderingContext.setGlobalUniform ::= fn(params...){
 
 //-------------------------------------
 
+static getCubeSmoothShader = fn(){
+	@(once) static shader = Rendering.Shader.createShader(
+		"void main( void){  gl_TexCoord[0] = gl_MultiTexCoord0; gl_Position = ftransform(); }",
+		"#version 120														\n"
+		"#define M_PI 3.1415926535897932384626433832795						\n"
+		"uniform int layer; 												\n"
+		"uniform samplerCube t_envMapInput; 								\n"
+		"void main(void){ 													\n"
+		"	vec3 cubeDirection;												\n"
+		"	vec2 v = gl_TexCoord[0].xy*2.0-1.0;								\n"
+		"	if(layer==0)		cubeDirection = vec3(  1.0, -v.y,	-v.x);	\n"
+		"	else if(layer==1)	cubeDirection = vec3( -1.0,	-v.y,	 v.x);	\n"
+		"	else if(layer==2)	cubeDirection = vec3(  v.x,  1.0,	 v.y);	\n"
+		"	else if(layer==3)	cubeDirection = vec3(  v.x, -1.0,	-v.y);	\n"
+		"	else if(layer==4)	cubeDirection = vec3(  v.x, -v.y,	 1.0);	\n"
+		"	else 				cubeDirection = vec3( -v.x, -v.y,	-1.0);	\n"
+		"	cubeDirection = normalize(cubeDirection);						\n"
+		"	vec4 inputColor = textureCube( t_envMapInput, cubeDirection );	\n"
+		"	vec3 right = cross(cubeDirection,vec3(0,1,0));					\n"
+		"	if( length(right)  <0.1 ){ 										\n"
+		"		right = cross(cubeDirection,vec3(1,0,0));					\n"
+		"		inputColor.r += 1.0; 										\n"
+		"	}																\n"
+		"	right = normalize(right);										\n"
+		"	vec3 up = cross(right,cubeDirection);							\n"
+		"	mat3 rot = mat3( right,up,cubeDirection); 						\n"
+		"	vec4 color2;													\n"
+		"	float w=0;														\n"
+		"   for(float d=0.02; d<0.1; d *= 1.2){								\n"
+		"   	for(float r=0; r<2.0*M_PI; r+=M_PI/32.0){					\n"
+		"			vec3 dir2 = rot * vec3( d*cos(r), d*-sin(r),1);			\n"
+		"			color2 += textureCube( t_envMapInput, dir2 ) * (1.0-d); \n"
+		"			w += (1.0-d);											\n"
+		"		}															\n"
+		"	}																\n"
+		"	color2 /= w;													\n"
+		"   gl_FragColor = color2; 											\n"
+		"}"
+	);
+	return shader;
+};
+
+static smoothCubeMap = fn(Rendering.Texture sourceMap,Rendering.Texture targetMap){
+	var shader = getCubeSmoothShader();
+	shader.setUniform(renderingContext, new Rendering.Uniform('t_envMapInput',Rendering.Uniform.INT, [0]));
+
+	renderingContext.pushAndSetTexture(0,sourceMap);
+	for(var layer=0;layer<6;++layer){
+		shader.setUniform(renderingContext, new Rendering.Uniform('layer',Rendering.Uniform.INT, [layer]));
+		(new (Std.require('LibRenderingExt/TextureProcessor')))
+			.setOutputTexture(targetMap,0,layer)
+			.setShader(shader)
+			.execute();
+	}
+	renderingContext.popTexture(0);
+};
+
+Rendering.createSmoothedCubeMap := fn(Rendering.Texture sourceMap, Number iterations = 10){
+	var t_input = sourceMap;
+	var t_output = Rendering.createHDRCubeTexture(sourceMap.getWidth(), true);
+	smoothCubeMap(t_input,t_output);
+
+	if(iterations>1){
+		t_input = Rendering.createHDRCubeTexture(sourceMap.getWidth(), true);
+		for(var i=1; i<iterations; ++i){
+			var t = t_input;
+			t_input = t_output;
+			t_output = t;
+			smoothCubeMap(t_input,t_output);
+		}
+	}
+	return t_output;
+};
