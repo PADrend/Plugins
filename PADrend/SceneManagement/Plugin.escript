@@ -145,7 +145,7 @@ SceneManagement.ex_Init := fn(...){
 			PADrend.getSceneManager().getBehaviourManager().registerBehaviour( new MinSG.SoundReceivingBehaviour(camera) );
 		}
 
-		out("ok.\n");
+		outln("ok.");
 	}
 	
 	{  // Create Scene
@@ -166,7 +166,7 @@ SceneManagement.ex_Init := fn(...){
 
 		getRootNode().addChild(dolly);
 		this.createNewSceneRoot("new MinSG.ListNode()",false);
-		out("ok.\n");
+		outln("ok.");
 	}
    	defaultSceneManager.addSearchPath( Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/" );
 

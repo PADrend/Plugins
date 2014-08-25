@@ -46,8 +46,6 @@ static eventQueue;
 PADrend.SystemUI.init := fn(){
 
 	var windowSize = systemConfig.getValue('PADrend.window.size',[1024,1024]);
-				
-						
 
 	{   // Create OpenGL Window
 
@@ -122,7 +120,7 @@ PADrend.SystemUI.init := fn(){
 		renderingContext.initGLState();
 		showWaitingScreen(false);
 
-		out("ok.\n");
+		outln("ok.");
 	}
 	Rendering.outputGLInformation();
 	if(systemConfig.getValue('PADrend.Rendering.GLDebugOutput', false)) {

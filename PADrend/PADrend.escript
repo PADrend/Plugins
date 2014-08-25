@@ -50,7 +50,7 @@ out("\n","-"*79,"\n");
 	loadOnce ("LibMinSGExt/SemanticObject.escript");	
 	loadOnce ("LibMinSGExt/MeshBuilderExtensions.escript");	
 
-	out("ok.\n");
+	outln("ok.");
 }
 { // Declare some global variables
 

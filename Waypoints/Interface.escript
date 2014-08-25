@@ -119,7 +119,7 @@ WaypointsPlugin.attachPath := fn(path, container){
 	if(container---|>MinSG.GroupNode){
 		container.addChild(path);
 		executeExtensions('Waypoints_PathListChanged');
-		out("ok.\n");
+		outln("ok.");
 	}else{
 		out("failed.\n");
 	}
