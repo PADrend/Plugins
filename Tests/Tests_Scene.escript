@@ -345,7 +345,7 @@ plugin.createSphereOfCubesScene := fn(Number overallCount, Number posVariance) {
 };
 
 plugin.createSphereOfCubes2Scene := fn(Number overallCount, Number posVariance) {
-	var scene = new MinSG.ListNode();
+	var scene = new MinSG.ListNode;
 	scene.name := "Test_Scene: Death Star of " + overallCount + " cubes (variance=" + posVariance + ")";
 
 	var generator = new Math.RandomNumberGenerator(42);
@@ -376,7 +376,7 @@ plugin.createSphereOfCubes2Scene := fn(Number overallCount, Number posVariance) 
 		
 		n.setRelPosition(pos);
 
-		n.lookAtAbs(new Geometry.Vec3(generator.normal(0, posVariance*0.1),generator.normal(0, posVariance*0.1),generator.normal(0, posVariance*0.1)));
+		n.rotateToWorldDir( (new Geometry.Vec3(generator.normal(0, posVariance*0.1),generator.normal(0, posVariance*0.1),generator.normal(0, posVariance*0.1)))-pos );
 		n.scale( generator.normal(1.0,0.1) );
 
 	}

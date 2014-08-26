@@ -54,8 +54,7 @@ T._constructor ::= fn(Number _resolution=10){
 T.setup @(private) ::= fn(Geometry.Vec3 source,Geometry.Vec3 target){
 	this.castCam.setNearFar(0,(target-source).length());
 	this.castCam.setRelPosition(source);
-	this.castCam.lookAtAbs(target);
-	this.castCam.rotateLocal_deg(180,new Geometry.Vec3(0,1,0));
+	this.castCam.rotateToWorldDir(source-target); // looking in -z
 };
 
 /*! Returns the first node (or void) intersecting the line from source to target.
