@@ -58,7 +58,7 @@ t.receiveToken::=fn(TMSim.Token token){
 	schedule(1);
 
 	// move
-	var srt=token.getSRT();
+	var srt=token.getRelTransformationSRT();
 	srt.setTranslation( getNode().getWorldBB().getCenter()+new Geometry.Vec3(0,0.5+0.2*slots.size(),0) );
 	token.moveTo( srt,1 );
 
@@ -161,7 +161,7 @@ t.receiveToken::=fn(TMSim.Token token){
 	schedule(transportationTime);
 
 	// move
-	var srt=token.getSRT();
+	var srt=token.getRelTransformationSRT();
 	srt.setTranslation( getNode().getWorldBB().getCenter()+new Geometry.Vec3(0,0.5,0) );
 	token.moveTo( srt,transportationTime );
 
@@ -258,11 +258,11 @@ t.createNewToken::=fn(){
 	var root = getProject().getSceneRootNode();
 	var token = new TMSim.Token("Token");
 	token.init(getProject());
-	var srt=token.getSRT();
+	var srt=token.getRelTransformationSRT();
 	srt.setTranslation( getNode().getWorldBB().getCenter() );
 	token.setPosition( srt );
 
-	srt=token.getSRT();
+	srt=token.getRelTransformationSRT();
 	srt.setTranslation( getNode().getWorldBB().getCenter()+new Geometry.Vec3(0,0.6,0) );
 	token.moveTo( srt,creationSpeed );
 
@@ -349,7 +349,7 @@ t.receiveToken::=fn(TMSim.Token token){
 
 	while(!times.empty() && times.front()+disposalTime < now){
 		var token=tokens.popFront();
-		out(token.getNode().getWorldPosition());
+		out(token.getNode().getWorldOrigin());
 
 		token.destroy();
 		times.popFront();
@@ -397,7 +397,7 @@ t.receiveToken::=fn(TMSim.Token token){
 	schedule(transportationTime);
 
 	// move
-	var srt=token.getSRT();
+	var srt=token.getRelTransformationSRT();
 	srt.setTranslation( getNode().getWorldBB().getCenter()+new Geometry.Vec3(1,0.5,0) );
 	token.moveTo( srt,transportationTime );
 

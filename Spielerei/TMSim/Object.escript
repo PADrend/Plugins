@@ -326,7 +326,7 @@ BaseObject.createNode:=fn(){
 
 BaseObject.setNodePosition:=fn(mixed){
 	if(mixed---|>Geometry.SRT){
-		getNode().setSRT(mixed);
+		getNode().setRelTransformation(mixed);
 	}else if(mixed---|>Geometry.Vec3){
 		getNode().setRelPosition(mixed);
 	}else warn("wrong type");

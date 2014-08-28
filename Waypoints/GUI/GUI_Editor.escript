@@ -177,10 +177,10 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 				var wp1 = markedWaypoints[0];
 				var wp2 = markedWaypoints[1];
 
-				var srt = wp1.getSRT();
+				var srt = wp1.getRelTransformationSRT();
 				var desc = WaypointsPlugin.getWaypointDescription(wp1);
 
-				WaypointsPlugin.changeWaypoint(wp1, void, WaypointsPlugin.getWaypointDescription(wp2), wp2.getSRT());
+				WaypointsPlugin.changeWaypoint(wp1, void, WaypointsPlugin.getWaypointDescription(wp2), wp2.getRelTransformationSRT());
 				WaypointsPlugin.changeWaypoint(wp2, void, desc, srt);
 			}
 		},
@@ -229,14 +229,14 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 
 				var wps = WaypointsPlugin.getCurrentPath().getWaypoints();
 				var oldViewport=camera.getViewport();
-				var oldSRT=PADrend.getDolly().getSRT();
+				var oldSRT=PADrend.getDolly().getRelTransformationSRT();
 
 				if(!dir.endsWith('/'))
 					dir+='/';
 
 				camera.setViewport(new Geometry.Rect(0,0,edtWidth.getText(),edtHeight.getText()));
 				foreach(wps as var wp){
-					PADrend.getDolly().setSRT(wp.getSRT());
+					PADrend.getDolly().setRelTransformation(wp.getRelTransformationSRT());
 					// -------------------
 					// ---- Render Scene
 					frameContext.beginFrame();
@@ -256,7 +256,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 					}
 					PADrend.SystemUI.swapBuffers();
 				}
-				PADrend.getDolly().setSRT(oldSRT);
+				PADrend.getDolly().setRelTransformation(oldSRT);
 				camera.setViewport(oldViewport);
 			});
 			fileDialog.folderSelector:=true;

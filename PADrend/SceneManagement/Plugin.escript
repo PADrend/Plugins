@@ -327,13 +327,13 @@ SceneManagement.initCoordinateSystem @(private) := fn( [PADrend.SceneManagement.
 		frameContext.setWorldRightVector ( new Geometry.Vec3(1,0,0) );
 		frameContext.setWorldUpVector ( new Geometry.Vec3(0,1,0) );
 		frameContext.setWorldFrontVector ( new Geometry.Vec3(0,0,1) );
-		this.dollyProxy.reset();
+		this.dollyProxy.resetRelTransformation();
 	}
 	else if(upAxis == this.UP_AXIS_Z){
 		frameContext.setWorldRightVector ( new Geometry.Vec3(1,0,0) );
 		frameContext.setWorldUpVector ( new Geometry.Vec3(0,0,1) );
 		frameContext.setWorldFrontVector ( new Geometry.Vec3(0,-1,0) );
-		this.dollyProxy.reset();
+		this.dollyProxy.resetRelTransformation();
 		this.dollyProxy.rotateLocal_deg( 90, this.dollyProxy.worldDirToLocalDir(new Geometry.Vec3(1,0,0)));
 	}
 	this.currentCoordinateSystem = upAxis;

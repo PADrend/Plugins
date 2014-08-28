@@ -23,24 +23,24 @@ trait.onInit += fn(MinSG.Node node){
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
 		outln("onAnimationInit (RotationTrait)");
-		this._rotationInitialSRT  := this.getSRT();
+		this._rotationInitialSRT  := this.getRelTransformationSRT();
 	};
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationPlay += fn(time,lastTime){
 //		outln("play");
-//		var srt = this.getSRT();
+//		var srt = this.getRelTransformationSRT();
 //		srt.rotateLocal_deg( (time-lastTime)*this.rotationSpeed(),new Geometry.Vec3(0,1,0) );
 
 		var srt = this._rotationInitialSRT.clone();
 		srt.rotateLocal_deg( (time*this.rotationSpeed())%360,new Geometry.Vec3(0,1,0) );
 
-		this.setSRT(srt);
+		this.setRelTransformation(srt);
 	};
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
 		outln("onAnimationStop (RotationTrait)");
 		if(this.isSet($_rotationInitialSRT) && this._rotationInitialSRT)
-			this.setSRT( this._rotationInitialSRT );
+			this.setRelTransformation( this._rotationInitialSRT );
 	};
 	
 	node.rotationSpeed := node.getNodeAttributeWrapper('rotationSpeed', 90.0 );

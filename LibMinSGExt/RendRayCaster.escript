@@ -99,9 +99,9 @@ T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 sourc
 			This introduces an additional overhead, but may be significantly faster for huge scenes. */
 T.queryNodeFromScreen ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec2 screenPos,Bool restrictSearchingDistance=false){
 	var cam=fc.getCamera();
-	var source=cam.getWorldPosition();
+	var source=cam.getWorldOrigin();
 	var bounds = rootNode.getWorldBB();
-	var dist = [cam.getFarPlane(), bounds.getDistance(cam.getWorldPosition()) + ( bounds.getExtentMax() * 1.415 /* sqrt(2) */ ) ].min();
+	var dist = [cam.getFarPlane(), bounds.getDistance(cam.getWorldOrigin()) + ( bounds.getExtentMax() * 1.415 /* sqrt(2) */ ) ].min();
 	var destination=source + (fc.convertScreenPosToWorldPos(new Geometry.Vec3(screenPos.getX(),screenPos.getY(),0))-source).normalize()*dist;
 	return this.queryNode(fc,rootNode,source,destination,restrictSearchingDistance);
 };
@@ -145,7 +145,7 @@ T.queryIntersection ::= fn(MinSG.FrameContext fc,[MinSG.Node,Array] rootNodes,Ge
 T.queryIntersectionFromScreen ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec2 screenPos){
 		Rendering.checkGLError();
 	var cam=fc.getCamera();
-	var source=cam.getWorldPosition();
+	var source=cam.getWorldOrigin();
 	var destination=source + (fc.convertScreenPosToWorldPos(new Geometry.Vec3(screenPos.getX(),screenPos.getY(),0))-source).normalize()*cam.getFarPlane();
 		Rendering.checkGLError();
 	return queryIntersection(fc,rootNode,source,destination);

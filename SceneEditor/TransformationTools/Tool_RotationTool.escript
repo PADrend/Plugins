@@ -139,10 +139,10 @@ TransformationTools.RotationTool := new Type;
 
 			//! \see TransformationTools.NodeTransformationHandlerTrait
 			foreach( this.getTransformedNodesOrigins() as var node,var origin){
-				if(node.hasSRT()){
-					node.setSRT( origin.toSRT() );
+				if(node.hasRelTransformationSRT()){
+					node.setRelTransformation( origin.toSRT() );
 				}else{
-					node.setMatrix(origin);
+					node.setRelTransformation(origin);
 				}				
 				node.rotateAroundWorldAxis_deg(deg,axis_ws);
 			}
@@ -165,7 +165,7 @@ TransformationTools.RotationTool := new Type;
 //		if(selectedNodes.count()==1){
 //		}else if(!selectedNodes.empty()){
 			// ...
-//			pivot_ws( new Geometry.Vec3(selectedNodes[0].getWorldPosition() ) );
+//			pivot_ws( new Geometry.Vec3(selectedNodes[0].getWorldOrigin() ) );
 //		}
 	};
 
@@ -179,12 +179,12 @@ TransformationTools.RotationTool := new Type;
 		var metaRootNode = this.getMetaNode();
 
 		if(localTransform()){
-			var wm = nodes[0].getWorldMatrix();
-			metaRootNode.setSRT(new Geometry.SRT(wm.transformPosition(0,0,0),wm.transformDirection(0,0,-1),wm.transformDirection(0,1,0),1.0));
+			var wm = nodes[0].getWorldTransformationMatrix();
+			metaRootNode.setRelTransformation(new Geometry.SRT(wm.transformPosition(0,0,0),wm.transformDirection(0,0,-1),wm.transformDirection(0,1,0),1.0));
 		}else{
-			metaRootNode.reset();
+			metaRootNode.resetRelTransformation();
 		}
-		metaRootNode.setWorldPosition(pivot_ws());
+		metaRootNode.setWorldOrigin(pivot_ws());
 	};
 
 
@@ -230,12 +230,12 @@ TransformationTools.RotationTool := new Type;
 							}
 
 							var nodes = [node];
-							var before = [node.getWorldPosition()];
+							var before = [node.getWorldOrigin()];
 							var after = [ node.localPosToWorldPos(pivot)];
 							foreach(MinSG.getChildNodes(node) as var c){
 								nodes += c;
-								before += c.getWorldPosition();
-								after += c.getWorldPosition();
+								before += c.getWorldOrigin();
+								after += c.getWorldOrigin();
 							}
 							var fun = fn(){
 								PADrend.message("Baking pivot...");
@@ -243,7 +243,7 @@ TransformationTools.RotationTool := new Type;
 								var positions = this[1];
 								var pivot = this[2];
 								foreach(nodes as var i,var node)
-									node.setWorldPosition(positions[i]);
+									node.setWorldOrigin(positions[i]);
 								TransformationTools.PivotHandling.storePivotAtNode( pivot,nodes[0] );
 							};
 							PADrend.executeCommand({
@@ -378,7 +378,7 @@ TransformationTools.RotationTool := new Type;
 			GUI.ON_CLICK : this->fn(){
 				this.applyNodeTransformations();						//! \see TransformationTools.NodeTransformationHandlerTrait
 				foreach( this.getTransformedNodes() as var node)		//! \see TransformationTools.NodeTransformationHandlerTrait
-					node.setSRT(node.getSRT().resetRotation());
+					node.setRelTransformation(node.getRelTransformationSRT().resetRotation());
 				this.applyNodeTransformations();						//! \see TransformationTools.NodeTransformationHandlerTrait
 			},
 			GUI.DATA_WRAPPER : stepSize,

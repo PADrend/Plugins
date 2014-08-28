@@ -76,16 +76,16 @@ MinSG.bakeTransformations := fn(MinSG.Node root, Geometry.Matrix4x4 worldMatrix=
 	var i=0;
 	foreach(geometryNodes as var gNode){
 		Util.info("\rApplying transformation ",++i,"/",geometryNodes.count(),"    ");
-		if(!gNode.hasMatrix())
+		if(!gNode.hasTransformation())
 			continue;
-		var matrix=gNode.getMatrix();
+		var matrix=gNode.getRelTransformationMatrix();
 		var mesh=gNode.getMesh();
 		if(!mesh)
 			continue;
 		var newMesh=mesh.clone();
 		Rendering.transformMesh(newMesh,matrix);
 		gNode.setMesh(newMesh);
-		gNode.reset();
+		gNode.resetRelTransformation();
 	}
 	Util.info("\n");
 };
@@ -112,11 +112,11 @@ MinSG.cleanupTree := fn(MinSG.Node root, [MinSG.SceneManager,void] sceneManager=
 				child.addState(state);
 			}
 			// apply transformation
-			var m = node.getMatrix() * child.getMatrix();
+			var m = node.getRelTransformationMatrix() * child.getRelTransformationMatrix();
 			if(m.convertsSafelyToSRT())
-				child.setSRT( m.toSRT() );
+				child.setRelTransformation( m.toSRT() );
 			else
-				child.setMatrix(m);
+				child.setRelTransformation(m);
 
 			if(sceneManager){
 				var id=sceneManager.getNameOfRegisteredNode(node);
@@ -257,7 +257,7 @@ MinSG.combineLeafs:=fn(MinSG.Node root,minNumber=2){
 			var newMesh=Rendering.combineMeshes(g.meshes);
 			g.node.setMesh(newMesh);
 //            g.node.createVBOFromMesh();
-			g.node.reset();
+			g.node.resetRelTransformation();
 		}
 	}
 	Util.info("\ndone.\n");
@@ -488,7 +488,7 @@ MinSG.updatePrototype := fn(MinSG.Node node, MinSG.Node newPrototype){
 		Runtime.warn("MinSG.updatePrototype: Node type changed :"+node+"--->"+newInstance+" Possible information loss.");
 
 		node.getParent().addChild(newInstance);
-		newInstance.setSRT(node.getSRT());
+		newInstance.setRelTransformation(node.getRelTransformationSRT());
 		MinSG.destroy(node);
 		return newInstance;
 	}
@@ -612,7 +612,7 @@ MinSG.calcNodeToSceneDistance := fn(MinSG.FrameContext fc, MinSG.Node rootNode, 
 	// render from object to scene
 	fbo.attachColorTexture(renderingContext,colorBuffer1);
 	fbo.attachDepthTexture(renderingContext,depthBuffer1);
-	cam.setWorldPosition(nodeWorldPos - dir * 0.5 * node.getWorldBB().getDiameter());
+	cam.setWorldOrigin(nodeWorldPos - dir * 0.5 * node.getWorldBB().getDiameter());
 	cam.rotateToWorldDir(-dir);
 	fc.setCamera(cam);
 	renderingContext.clearScreen(PADrend.getBGColor());
@@ -623,7 +623,7 @@ MinSG.calcNodeToSceneDistance := fn(MinSG.FrameContext fc, MinSG.Node rootNode, 
 	// render from scene to object
 	fbo.attachColorTexture(renderingContext,colorBuffer2);
 	fbo.attachDepthTexture(renderingContext,depthBuffer2);
-	cam.setWorldPosition(nodeWorldPos + dir * (zFar - 0.5 * node.getWorldBB().getDiameter()));
+	cam.setWorldOrigin(nodeWorldPos + dir * (zFar - 0.5 * node.getWorldBB().getDiameter()));
 	cam.rotateLocal_deg(180, new Geometry.Vec3(0, 1, 0));
 	fc.setCamera(cam);
 	renderingContext.clearScreen(PADrend.getBGColor());

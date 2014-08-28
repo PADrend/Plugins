@@ -37,17 +37,17 @@ static currentNode;
 
 static applySRT = fn(MinSG.Node node,Geometry.SRT newSRT, oldSRT = void){
 	if(!oldSRT){
-		oldSRT = node.getSRT();
+		oldSRT = node.getRelTransformationSRT();
 	}
 	var cmd = new Command({
 		Command.DESCRIPTION : "Transformation",
 		Command.EXECUTE : fn(){ // execute
 			if( this.newSRT && this.node)
-				node.setSRT(newSRT);
+				node.setRelTransformation(newSRT);
 		},
 		Command.UNDO : fn(){ // undo
 			if( this.oldSRT && this.node)
-				node.setSRT(oldSRT);
+				node.setRelTransformation(oldSRT);
 			out("Undo\n");
 		},
 		Command.FLAGS : Command.FLAG_EXECUTE_LOCALLY|Command.FLAG_SEND_TO_SLAVES,
@@ -64,7 +64,7 @@ static stopMoving = fn(){
 		return;
 	out("Stop moving...\n");
 
-	applySRT(currentNode,currentNode.getSRT(),backupSRT);
+	applySRT(currentNode,currentNode.getRelTransformationSRT(),backupSRT);
 	backupSRT=void;
 	currentNode = void;
 
@@ -79,7 +79,7 @@ static startMoving = fn(MinSG.Node node){
 	out("Start moving...\n");
 
 	backupCamera = PADrend.getCameraMover().getDolly();
-	backupSRT = node.getSRT();
+	backupSRT = node.getRelTransformationSRT();
 
 	PADrend.getCameraMover().setDolly(node);
 };
@@ -98,7 +98,7 @@ plugin.init @(override) := fn(){
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.ICON : "#TransformationSmall",
 			GUI.FLAGS : GUI.FLAT_BUTTON,
-			GUI.ICON_COLOR : node.hasMatrix() ? GUI.BLACK : new Util.Color4ub(128,128,128,128),
+			GUI.ICON_COLOR : node.hasTransformation() ? GUI.BLACK : new Util.Color4ub(128,128,128,128),
 			GUI.WIDTH : 15,
 			GUI.TOOLTIP : "Transformations",
 			GUI.ON_CLICK : [entry] => fn(entry){
@@ -156,7 +156,7 @@ plugin.init @(override) := fn(){
 			GUI.TYPE : GUI.TYPE_TEXT,
 			GUI.SIZE : [GUI.WIDTH_ABS, -30,0],
 			GUI.DATA_PROVIDER : [node] => fn(node){
-				return node.hasSRT() ? node.getSRT().toString() : "The node has no SRT.";
+				return node.hasRelTransformationSRT() ? node.getRelTransformationSRT().toString() : "The node has no SRT.";
 			},
 			GUI.DATA_REFRESH_GROUP : displayRefreshGroup,
 			GUI.FLAGS : GUI.LOCKED,
@@ -169,7 +169,7 @@ plugin.init @(override) := fn(){
 			GUI.TYPE : GUI.TYPE_TEXT,
 			GUI.SIZE : [GUI.WIDTH_ABS, -30,0],
 			GUI.DATA_PROVIDER : [node] => fn(node){
-				return node.hasMatrix() ? node.getMatrix().toString() : "The node has no matrix.";
+				return node.hasTransformation() ? node.getRelTransformationMatrix().toString() : "The node has no matrix.";
 			},
 			GUI.DATA_REFRESH_GROUP : displayRefreshGroup,
 			GUI.FLAGS : GUI.LOCKED,
@@ -257,10 +257,10 @@ plugin.init @(override) := fn(){
 			GUI.SIZE 			: 	[GUI.WIDTH_ABS, -30,0],
 			GUI.DATA_REFRESH_GROUP : manipulationRefreshGroup,
 			GUI.DATA_PROVIDER : [node] => fn(node){
-				return node.hasSRT() ? node.getSRT().getScale() : (node.getMatrix().transformDirection(1,0,0)).length();
+				return node.hasRelTransformationSRT() ? node.getRelTransformationSRT().getScale() : (node.getRelTransformationMatrix().transformDirection(1,0,0)).length();
 			},
 			GUI.ON_DATA_CHANGED :	[node] => fn(node,data) {
-				applySRT(node,node.getSRT().setScale(0 + data));
+				applySRT(node,node.getRelTransformationSRT().setScale(0 + data));
 			}
 		};
 		panel++;
@@ -272,11 +272,11 @@ plugin.init @(override) := fn(){
 			GUI.SIZE 			: 	[GUI.WIDTH_ABS, -30,0],
 			GUI.DATA_REFRESH_GROUP : manipulationRefreshGroup,
 			GUI.DATA_PROVIDER : [node] => fn(node){
-				var p = node.getMatrix().transformPosition(0,0,0);
+				var p = node.getRelTransformationMatrix().transformPosition(0,0,0);
 				return ""+p.getX()+","+p.getY()+","+p.getZ();
 			},
 			GUI.ON_DATA_CHANGED : [node] => fn(node,data) {
-				applySRT(node , node.getSRT().setTranslation(new Geometry.Vec3(parseJSON("["+data+"]"))));
+				applySRT(node , node.getRelTransformationSRT().setTranslation(new Geometry.Vec3(parseJSON("["+data+"]"))));
 			}
 		};
 		panel++;
@@ -296,13 +296,13 @@ plugin.init @(override) := fn(){
 			GUI.SIZE 			: [GUI.WIDTH_ABS, -30,0],
 			GUI.DATA_REFRESH_GROUP : manipulationRefreshGroup,
 			GUI.DATA_PROVIDER : [node] => fn(node){
-				var dir = node.hasSRT() ? node.getSRT().getDirVector() : node.getMatrix().transformDirection(0,0,1);
-				var up = node.hasSRT() ? node.getSRT().getUpVector() : node.getMatrix().transformDirection(0,1,0);
+				var dir = node.hasRelTransformationSRT() ? node.getRelTransformationSRT().getDirVector() : node.getRelTransformationMatrix().transformDirection(0,0,1);
+				var up = node.hasRelTransformationSRT() ? node.getRelTransformationSRT().getUpVector() : node.getRelTransformationMatrix().transformDirection(0,1,0);
 				return toJSON([[dir.getX(), dir.getY(), dir.getZ()], [up.getX(), up.getY(), up.getZ()]], false);
 			},
 			GUI.ON_DATA_CHANGED	: [node] => fn(node,data) {
 				var d = parseJSON(data);
-				var currentSRT = node.getSRT();
+				var currentSRT = node.getRelTransformationSRT();
 				var srt = new Geometry.SRT(currentSRT.getTranslation(),
 										   new Geometry.Vec3(d[0][0], d[0][1], d[0][2]),
 										   new Geometry.Vec3(d[1][0], d[1][1], d[1][2]),

@@ -278,7 +278,7 @@ MinSG.Evaluator.cubeMeasure::=fn( 	MinSG.Node sceneNode, Geometry.Vec3 position)
 	var screenY = (renderingContext.getWindowHeight()-screenDX) * 0.5;
 
 	foreach( directions as var dirAndUp ){
-		cam.setSRT(  new Geometry.SRT(position,dirAndUp[0],dirAndUp[1] ));
+		cam.setRelTransformation(  new Geometry.SRT(position,dirAndUp[0],dirAndUp[1] ));
 		frameContext.pushCamera();
 		frameContext.setCamera(cam);
 
@@ -303,7 +303,7 @@ MinSG.Evaluator.singleMeasure ::= fn( MinSG.Node scene, MinSG.AbstractCameraNode
 	var measurementCamera = cam.clone();
 	measurementCamera.setViewport(viewport);
 	measurementCamera.applyVerticalAngle( this.cameraAngle());
-	measurementCamera.setMatrix(cam.getWorldMatrix());
+	measurementCamera.setRelTransformation(cam.getWorldTransformationMatrix());
 
 	frameContext.pushCamera();
 	frameContext.setCamera(measurementCamera);

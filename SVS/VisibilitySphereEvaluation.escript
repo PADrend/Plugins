@@ -203,7 +203,7 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 										fbo.attachColorTexture(renderingContext, color);
 										fbo.attachDepthTexture(renderingContext, depth);
 										
-										var camera = MinSG.SVS.createSamplingCamera(config.visibilitySphere.getSphere(), node.getWorldMatrix(), resolution());
+										var camera = MinSG.SVS.createSamplingCamera(config.visibilitySphere.getSphere(), node.getWorldTransformationMatrix(), resolution());
 										frameContext.pushCamera();
 										config.visibilitySphere.evaluateAllSamples(frameContext, evaluator, camera, node);
 										frameContext.popCamera();
@@ -450,7 +450,7 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 										fbo.attachColorTexture(renderingContext, color);
 										fbo.attachDepthTexture(renderingContext, depth);
 
-										var camera = MinSG.SVS.createSamplingCamera(config.referenceVisibilitySphere.getSphere(), plugin.node.getWorldMatrix(), resolution());
+										var camera = MinSG.SVS.createSamplingCamera(config.referenceVisibilitySphere.getSphere(), plugin.node.getWorldTransformationMatrix(), resolution());
 										frameContext.pushCamera();
 
 										foreach(runs as var run) {
@@ -511,8 +511,8 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 										var worldSphere = MinSG.SVS.transformSphere(visibilitySphere.getSphere(), worldMatrix);
 										
 										var listNode = visibilitySphere.getTriangulationMinSGNodes();
-										listNode.setWorldPosition(worldSphere.getCenter());
-										listNode.setScale(worldSphere.getRadius());
+										listNode.setWorldOrigin(worldSphere.getCenter());
+										listNode.setRelScaling(worldSphere.getRadius());
 										
 										// Dye triangulation blue
 										var materialState = new MinSG.MaterialState;
@@ -523,7 +523,7 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 										listNode.addState(materialState);
 										
 										PADrend.getCurrentScene().addChild(listNode);
-									}).bindLastParams(config, plugin.node.getWorldMatrix()),
+									}).bindLastParams(config, plugin.node.getWorldTransformationMatrix()),
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 };

@@ -86,7 +86,7 @@ plugin.registerMenus:=fn(){
 				out("\n----\nSceneRoot: ",node,
 				"\nBB:\t",node.getWorldBB().toString(),
 				"\nGeometryNodes:\t",MinSG.countGeoNodes(node),
-				"\nCamera:\t",camera.getWorldPosition(),
+				"\nCamera:\t",camera.getWorldOrigin(),
 				"\n-------\n");
 			},
 			GUI.TOOLTIP : "Output scene information to stdout."

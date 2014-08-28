@@ -59,7 +59,6 @@ MeasurementPlugin.samplePath := fn(	DataWrapper outputFileName,
 	var angle = evaluator.getCameraAngle();
 	var rect = evaluator.measurementResolution;
 	var measurementCamera = PADrend.getActiveCamera().clone();
-	measurementCamera.setRelRotation_rad(0, new Geometry.Vec3(0, 0, 0));
 	measurementCamera.setViewport(rect);
 	measurementCamera.applyVerticalAngle(angle);
 
@@ -73,7 +72,7 @@ MeasurementPlugin.samplePath := fn(	DataWrapper outputFileName,
 
 			var srt = path.getPosition(time);
 
-			measurementCamera.setSRT(srt);
+			measurementCamera.setRelTransformation(srt);
 			frameContext.setCamera(measurementCamera);
 
 			for(var iteration = 0; iteration < pointIterations(); ++iteration) {

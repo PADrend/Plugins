@@ -35,7 +35,7 @@ TransformationTools.SnapTool := new Type;
 	T.onNodesSelected_static += fn(Array selectedNodes){
 		if(!selectedNodes.empty()){
 			var box = MinSG.getCombinedWorldBB(selectedNodes);
-			this.getMetaNode().setWorldPosition(box.getCenter().setY(box.getMaxY()));
+			this.getMetaNode().setWorldOrigin(box.getCenter().setY(box.getMaxY()));
 		}
     };
 
@@ -50,22 +50,22 @@ TransformationTools.SnapTool := new Type;
         n.onTranslationStart += this->fn(){
 			//! \see TransformationTools.NodeTransformationHandlerTrait
 			applyNodeTransformations();
-            this.originSRT = this.getMetaNode().getSRT();
+            this.originSRT = this.getMetaNode().getRelTransformationSRT();
         };
 
         //! \see EditNodes.TranslatablePlaneTrait
 		n.onTranslate += this->fn(v){
 		    var n = this.getMetaNode();
-            n.setSRT(this.originSRT);
+            n.setRelTransformation(this.originSRT);
             n.moveRel(n.worldDirToRelDir(v));
-            var pos = n.getWorldPosition();
+            var pos = n.getWorldOrigin();
             var direction = (pos-new Geometry.Vec3(pos.getX(),pos.getY()+2,pos.getZ())).normalize();
 			foreach( this.getTransformedNodesOrigins() as var node,var origin){
 				var newMatrix = origin.clone().translate(node.worldDirToLocalDir(v));
-				if(node.hasSRT()){
-					node.setSRT( newMatrix.toSRT() );
+				if(node.hasRelTransformationSRT()){
+					node.setRelTransformation( newMatrix.toSRT() );
 				}else{
-					node.setMatrix(newMatrix);
+					node.setRelTransformation(newMatrix);
 				}					
 				this.snapSelectedNode(pos,direction, node);
 			}
@@ -84,8 +84,8 @@ TransformationTools.SnapTool := new Type;
 	//! \see TransformationTools.FrameListenerTrait
 	T.onFrame_static += fn(){
         var editNode = this.getMetaNode();
-        var s = editNode.getScale();
-        editNode.setScale(s);
+        var s = editNode.getRelScaling();
+        editNode.setRelScaling(s);
         editNode.adjustProjSize();
 	};
 
@@ -154,7 +154,7 @@ TransformationTools.SnapTool2 := new Type;
 	
 		var snapNormal = this.getSnappingNormal();
 		//! \see TransformationTools.MetaNodeContainerTrait
-		this.getMetaNode().setWorldPosition( this.getNodeWorldAnchor(nodes[0]) );
+		this.getMetaNode().setWorldOrigin( this.getNodeWorldAnchor(nodes[0]) );
 
 		this.refreshRelNodePositions(nodes);
 	};
@@ -204,12 +204,12 @@ TransformationTools.SnapTool2 := new Type;
 
 
 		var metaNode = this.getMetaNode();				//! \see TransformationTools.MetaNodeContainerTrait
-		metaNode.setWorldPosition(newPos);
+		metaNode.setWorldOrigin(newPos);
 
 		if(nodes.count()==1){
 			var node = nodes[0];
-			var nodeAnchorOffset = node.getWorldPosition() - this.getNodeWorldAnchor(node);
-			node.setWorldPosition( newPos + nodeAnchorOffset  );
+			var nodeAnchorOffset = node.getWorldOrigin() - this.getNodeWorldAnchor(node);
+			node.setWorldOrigin( newPos + nodeAnchorOffset  );
 		}else{ // if individual
 			var sceneGround = PADrend.getCurrentSceneGroundPlane();
 			
@@ -226,8 +226,8 @@ TransformationTools.SnapTool2 := new Type;
 					if( sceneGround.planeTest( intersection )<0 )
 						intersection = sceneGround.getProjection(intersection);
 				}
-				var nodeAnchorOffset = node.getWorldPosition() - this.getNodeWorldAnchor(node);
-				node.setWorldPosition( intersection + nodeAnchorOffset  );
+				var nodeAnchorOffset = node.getWorldOrigin() - this.getNodeWorldAnchor(node);
+				node.setWorldOrigin( intersection + nodeAnchorOffset  );
 			}
 		}
 
@@ -252,7 +252,7 @@ TransformationTools.SnapTool2 := new Type;
 		//! \see NodeSelectionListenerTrait.UIToolTrait		
 		this.onNodesSelected += [n] => fn(arrowNode, ...){
 			// rotate arrow to point downwards
-			arrowNode.setSRT(new Geometry.SRT( new Geometry.Vec3(0,0,0),
+			arrowNode.setRelTransformation(new Geometry.SRT( new Geometry.Vec3(0,0,0),
 												PADrend.getWorldFrontVector(),
 												PADrend.getWorldUpVector()  ));
 			arrowNode.rotateLocal_deg(-90,0,0,1);
@@ -264,7 +264,7 @@ TransformationTools.SnapTool2 := new Type;
 		//! \see TransformationTools.FrameListenerTrait
 		this.onFrame += [n] => fn(arrowNode){
 			arrowNode.adjustProjSize(); //! \see EditNodes.AdjustableProjSizeTrait
-			this.castSegmentScaling = arrowNode.getScale();
+			this.castSegmentScaling = arrowNode.getRelScaling();
 		};
 
 		//! \see EditNodes.ColorTrait

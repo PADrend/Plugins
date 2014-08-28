@@ -217,11 +217,11 @@ plugin.ex_UIEvent:=fn(evt){
 			out(pos,"\n");
 			if(!pos) return Extension.CONTINUE;
 			
-			var camPos = GLOBALS.camera.getWorldPosition();
+			var camPos = GLOBALS.camera.getWorldOrigin();
 			var worldDir = (pos-camPos).normalize()*((pos-camPos).length()-jumpDistance());
 			//PADrend.getDolly().moveLocal(PADrend.getDolly().worldDirToLocalDir(worldDir) );
 			
-			//PADrend.Navigation.flyTo(PADrend.getDolly().getSRT().translateLocal( PADrend.getDolly().worldDirToLocalDir(worldDir) ),0.5); //  this doesn't work with d3fact scenes!
+			//PADrend.Navigation.flyTo(PADrend.getDolly().getRelTransformationSRT().translateLocal( PADrend.getDolly().worldDirToLocalDir(worldDir) ),0.5); //  this doesn't work with d3fact scenes!
 			if(!this.flyToHandler){
 				this.flyToHandler = new ExtObject({
 					$targetPos : void,
@@ -235,18 +235,18 @@ plugin.ex_UIEvent:=fn(evt){
 						var p3 = new Geometry.Vec2(1,1);
 						while( (Util.Timer.now()-start)<duration ){
 							var f = Geometry.interpolateCubicBezier(p0,p1,p2,p3,(Util.Timer.now()-start)/duration ).getY();
-							PADrend.getDolly().setWorldPosition( targetPos*f+sourcePos*(1-f));
+							PADrend.getDolly().setWorldOrigin( targetPos*f+sourcePos*(1-f));
 							yield Extension.CONTINUE;
 						}
-						PADrend.getDolly().setWorldPosition( targetPos );
+						PADrend.getDolly().setWorldOrigin( targetPos );
 						Tools.DistanceMeasuringPlugin.flyToHandler = void;
 						return Extension.REMOVE_EXTENSION;	
 					}
 				});
 				registerExtension('PADrend_AfterFrame',flyToHandler->flyToHandler.execute);
 			}
-			flyToHandler.sourcePos = PADrend.getDolly().getWorldPosition();
-			flyToHandler.targetPos = PADrend.getDolly().getWorldPosition()+worldDir;
+			flyToHandler.sourcePos = PADrend.getDolly().getWorldOrigin();
+			flyToHandler.targetPos = PADrend.getDolly().getWorldOrigin()+worldDir;
 			flyToHandler.duration = 0.5;
 			flyToHandler.start = Util.Timer.now();;
 
@@ -271,7 +271,7 @@ plugin.selectFirstPoint:=fn(Geometry.Vec3 pos){
 		this.measurement.pos1 = pos;
 	}
 	this.window.setEnabled(true);
-	selectSecondPoint(PADrend.getDolly().getWorldPosition());
+	selectSecondPoint(PADrend.getDolly().getWorldOrigin());
 };
 
 plugin.selectSecondPoint:=fn(Geometry.Vec3 pos){

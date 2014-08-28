@@ -212,7 +212,7 @@ plugin.repeatNode :=fn(Array nodes,ExtObject iteration,MinSG.GroupNode scene){
         for(var i =0; i<iteration.count();++i){
             var newNode = node.clone();
             scene+=newNode;
-            newNode.setMatrix(node.getWorldMatrix());
+            newNode.setRelTransformation(node.getWorldTransformationMatrix());
             newNode.moveLocal(newNode.worldDirToLocalDir(worldTranslation*(i+1)));
             nodesToSelect+=newNode;
         }

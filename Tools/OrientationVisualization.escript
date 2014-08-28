@@ -185,8 +185,8 @@ static showWindow = fn() {
 	registerExtension('PADrend_AfterRendering', [icon, resolution] => fn(icon, resolution, ...) {
 		var arrowsScenes = getArrowsScene();
 		var arrowsSRT = new Geometry.SRT;
-		arrowsSRT.setRotation(PADrend.getDolly().getSRT().getRotation().getInverse());
-		arrowsScenes.setSRT(arrowsSRT);
+		arrowsSRT.setRotation(PADrend.getDolly().getRelTransformationSRT().getRotation().getInverse());
+		arrowsScenes.setRelTransformation(arrowsSRT);
 
 		var fbo = new Rendering.FBO;
 		var colorTexture = Rendering.createStdTexture(resolution, resolution, true);
@@ -196,7 +196,7 @@ static showWindow = fn() {
 		fbo.attachDepthTexture(renderingContext, depthTexture);
 
 		var camera = new MinSG.CameraNodeOrtho;
-		camera.setWorldPosition(new Geometry.Vec3(0, 0, 2));
+		camera.setWorldOrigin(new Geometry.Vec3(0, 0, 2));
 		camera.setClippingPlanes(-1, 1, -1, 1);
 		camera.setNearFar(1, 3);
 		camera.setViewport(new Geometry.Rect(0, 0, resolution, resolution));

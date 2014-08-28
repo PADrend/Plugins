@@ -121,7 +121,7 @@ plugin.init @(override) := fn() {
 					GUI.LABEL : "Fly to node",
 					GUI.ON_CLICK : [node] => fn(node){
 						var box = node.getWorldBB();
-						var targetDir = (box.getCenter() - PADrend.getDolly().getWorldPosition()).normalize();
+						var targetDir = (box.getCenter() - PADrend.getDolly().getWorldOrigin()).normalize();
 						var target = new Geometry.SRT( box.getCenter() - targetDir * box.getExtentMax() * 1.0, -targetDir, PADrend.getWorldUpVector());
 						PADrend.Navigation.flyTo(target);
 					}

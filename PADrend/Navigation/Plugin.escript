@@ -86,8 +86,8 @@ PADrend.Navigation.ex_Init := fn(){
 static onKeyPressed = fn(evt){
 	// The keys are not handled in PADrend_KeyPressed as the keys defined in this plugin should even work in mouse view mode.
 	if(evt.key == Util.UI.KEY_SPACE) { // [space] (Panic! Reset camera)
-		PADrend.getDolly().setSRT(new Geometry.SRT());
-		PADrend.getDolly().setWorldPosition(PADrend.getCurrentScene().getWorldBB().getCenter());
+		PADrend.getDolly().setRelTransformation(new Geometry.SRT());
+		PADrend.getDolly().setWorldOrigin(PADrend.getCurrentScene().getWorldBB().getCenter());
 		PADrend.Navigation.getCameraMover().reset();
 		return true;
 	} else if(evt.key == Util.UI.KEY_KP5) { // numpad '5' (TopView)
@@ -130,28 +130,28 @@ static onKeyPressed = fn(evt){
 		return true;
 	} else if(evt.key == Util.UI.KEY_KP8) { // numpad '8' (RotateX around center)
 		var sceneCenter=PADrend.getCurrentScene().getWorldBB().getCenter();
-		var dist=(PADrend.getDolly().getWorldPosition()-sceneCenter).length();
+		var dist=(PADrend.getDolly().getWorldOrigin()-sceneCenter).length();
 		PADrend.getDolly().setRelPosition(sceneCenter);
 		PADrend.getDolly().rotateLocal_rad(Math.PI/8,1,0,0);
 		PADrend.getDolly().moveLocal(new Geometry.Vec3(0,0,1)*dist);
 		return true;
 	} else if(evt.key == Util.UI.KEY_KP2) { // numpad '2' (RotateX around center)
 		var sceneCenter=PADrend.getCurrentScene().getWorldBB().getCenter();
-		var dist=(PADrend.getDolly().getWorldPosition()-sceneCenter).length();
+		var dist=(PADrend.getDolly().getWorldOrigin()-sceneCenter).length();
 		PADrend.getDolly().setRelPosition(sceneCenter);
 		PADrend.getDolly().rotateLocal_rad(-Math.PI/8,1,0,0);
 		PADrend.getDolly().moveLocal(new Geometry.Vec3(0,0,1)*dist);
 		return true;
 	} else if(evt.key == Util.UI.KEY_KP4) { // numpad '4' (RotateY around center)
 		var sceneCenter=PADrend.getCurrentScene().getWorldBB().getCenter();
-		var dist=(PADrend.getDolly().getWorldPosition()-sceneCenter).length();
+		var dist=(PADrend.getDolly().getWorldOrigin()-sceneCenter).length();
 		PADrend.getDolly().setRelPosition(sceneCenter);
 		PADrend.getDolly().rotateRel_rad(-Math.PI/8,0,1,0);
 		PADrend.getDolly().moveLocal(new Geometry.Vec3(0,0,1)*dist);
 		return true;
 	} else if(evt.key == Util.UI.KEY_KP6) { // numpad '6' (RotateY around center)
 		var sceneCenter=PADrend.getCurrentScene().getWorldBB().getCenter();
-		var dist=(PADrend.getDolly().getWorldPosition()-sceneCenter).length();
+		var dist=(PADrend.getDolly().getWorldOrigin()-sceneCenter).length();
 		PADrend.getDolly().setRelPosition(sceneCenter);
 		PADrend.getDolly().rotateRel_rad(Math.PI/8,0,1,0);
 		PADrend.getDolly().moveLocal(new Geometry.Vec3(0,0,1)*dist);
@@ -161,21 +161,21 @@ static onKeyPressed = fn(evt){
 		var dir = new Geometry.Vec3(0, 1, 0);
 		var up = new Geometry.Vec3(0, 0, -1);
 		var pos = sceneBB.getCenter() + dir * ([sceneBB.getExtentX(), sceneBB.getExtentZ()].max());
-		PADrend.getDolly().setSRT(new Geometry.SRT(pos, dir, up));
+		PADrend.getDolly().setRelTransformation(new Geometry.SRT(pos, dir, up));
 		return true;
 	} else if(evt.key == Util.UI.KEY_KP7) { // numpad '7' (FrontView)
 		var sceneBB = PADrend.getCurrentScene().getWorldBB();
 		var dir = new Geometry.Vec3(0, 0, 1);
 		var up = new Geometry.Vec3(0, 1, 0);
 		var pos = sceneBB.getCenter() + dir * ([sceneBB.getExtentX(), sceneBB.getExtentY()].max());
-		PADrend.getDolly().setSRT(new Geometry.SRT(pos, dir, up));
+		PADrend.getDolly().setRelTransformation(new Geometry.SRT(pos, dir, up));
 		return true;
 	} else if(evt.key == Util.UI.KEY_KP9) { // numpad '9' (LeftView)
 		var sceneBB = PADrend.getCurrentScene().getWorldBB();
 		var dir = new Geometry.Vec3(-1, 0, 0);
 		var up = new Geometry.Vec3(0, 1, 0);
 		var pos = sceneBB.getCenter() + dir * ([sceneBB.getExtentY(), sceneBB.getExtentZ()].max());
-		PADrend.getDolly().setSRT(new Geometry.SRT(pos, dir, up));
+		PADrend.getDolly().setRelTransformation(new Geometry.SRT(pos, dir, up));
 		return true;
 	}
 	// [shift] + [0...9] jump to stored position
@@ -187,7 +187,7 @@ static onKeyPressed = fn(evt){
 			
 			if(PADrend.getEventContext().isCtrlPressed()){ // store
 				out("Storing current position at #",index,"\n");
-				this.storedPositions[index] = PADrend.getDolly().getSRT();
+				this.storedPositions[index] = PADrend.getDolly().getRelTransformationSRT();
 			} else {
 				var srt = this.storedPositions[index];
 				if(!srt){
@@ -223,18 +223,18 @@ PADrend.Navigation.flyTo := fn(Geometry.SRT targetSRT, Number duration=0.5){
 				var p3 = new Geometry.Vec2(1,1);
 				while( (Util.Timer.now()-start)<duration ){
 					var f = Geometry.interpolateCubicBezier(p0,p1,p2,p3,(Util.Timer.now()-start)/duration ).getY();
-					PADrend.getDolly().setSRT( new Geometry.SRT(sourceSRT,targetSRT,f));
+					PADrend.getDolly().setRelTransformation( new Geometry.SRT(sourceSRT,targetSRT,f));
 					yield Extension.CONTINUE;
 				}
-				PADrend.getDolly().setSRT( targetSRT );
+				PADrend.getDolly().setRelTransformation( targetSRT );
 				PADrend.Navigation.flyToHandler = void;
 				return Extension.REMOVE_EXTENSION;	
 			}
 		});
 		registerExtension('PADrend_AfterFrame',flyToHandler->flyToHandler.execute);
 	}
-	flyToHandler.sourceSRT = PADrend.getDolly().getSRT().clone();
-	flyToHandler.targetSRT = PADrend.getDolly().getParent().getWorldMatrix().inverse().toSRT() * targetSRT;
+	flyToHandler.sourceSRT = PADrend.getDolly().getRelTransformationSRT().clone();
+	flyToHandler.targetSRT = PADrend.getDolly().getParent().getWorldTransformationMatrix().inverse().toSRT() * targetSRT;
 	flyToHandler.duration = duration;
 	flyToHandler.start = Util.Timer.now();;
 

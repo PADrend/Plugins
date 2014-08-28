@@ -38,12 +38,12 @@ TransformationTools.ScaleTool := new Type;
 			scale = [scale,0.1].max(); // prevent creation of too small nodes.
 			//! \see TransformationTools.NodeTransformationHandlerTrait
 			foreach( this.getTransformedNodesOrigins() as var node,var origin){
-				if(node.hasSRT()){
-					node.setSRT( origin.toSRT() );
+				if(node.hasRelTransformationSRT()){
+					node.setRelTransformation( origin.toSRT() );
 				}else{
-					node.setMatrix(origin);
+					node.setRelTransformation(origin);
 				}
-				node.setWorldPosition( node.getWorldPosition() - (node.getWorldPosition()-origin_ws)*(1.0-scale)) ;
+				node.setWorldOrigin( node.getWorldOrigin() - (node.getWorldOrigin()-origin_ws)*(1.0-scale)) ;
 				node.scale(scale);
 			}
 //			out(scale);
@@ -68,7 +68,7 @@ TransformationTools.ScaleTool := new Type;
 			return;
 
 		if(localTransform()){
-			editNode.updateScalingBox(nodes[0].getBB(),nodes[0].getWorldMatrix());
+			editNode.updateScalingBox(nodes[0].getBB(),nodes[0].getWorldTransformationMatrix());
 		}else{
 			editNode.updateScalingBox(MinSG.getCombinedWorldBB(nodes),new Geometry.Matrix4x4);
 		}
@@ -105,7 +105,7 @@ TransformationTools.SnapTool := new Type;
 	T.onNodesSelected_static += fn(Array selectedNodes){
 		if(!selectedNodes.empty()){
 			var box = MinSG.getCombinedWorldBB(selectedNodes);
-			this.getMetaNode().setWorldPosition(box.getCenter().setY(box.getMaxY()));
+			this.getMetaNode().setWorldOrigin(box.getCenter().setY(box.getMaxY()));
 		}
     };
 
@@ -120,22 +120,22 @@ TransformationTools.SnapTool := new Type;
         n.onTranslationStart += this->fn(){
 			//! \see TransformationTools.NodeTransformationHandlerTrait
 			applyNodeTransformations();
-            this.originSRT = this.getMetaNode().getSRT();
+            this.originSRT = this.getMetaNode().getRelTransformationSRT();
         };
 
         //! \see EditNodes.TranslatablePlaneTrait
 		n.onTranslate += this->fn(v){
 		    var n = this.getMetaNode();
-            n.setSRT(this.originSRT);
+            n.setRelTransformation(this.originSRT);
             n.moveRel(n.worldDirToRelDir(v));
-            var pos = n.getWorldPosition();
+            var pos = n.getWorldOrigin();
             var direction = (pos-new Geometry.Vec3(pos.getX(),pos.getY()+2,pos.getZ())).normalize();
 			foreach( this.getTransformedNodesOrigins() as var node,var origin){
 				var newMatrix = origin.clone().translate(node.worldDirToLocalDir(v));
-				if(node.hasSRT()){
-					node.setSRT( newMatrix.toSRT() );
+				if(node.hasRelTransformationSRT()){
+					node.setRelTransformation( newMatrix.toSRT() );
 				}else{
-					node.setMatrix(newMatrix);
+					node.setRelTransformation(newMatrix);
 				}
 				this.snapSelectedNode(pos,direction, node);
 			}
@@ -154,8 +154,8 @@ TransformationTools.SnapTool := new Type;
 	//! \see TransformationTools.FrameListenerTrait
 	T.onFrame_static += fn(){
         var editNode = this.getMetaNode();
-        var s = editNode.getScale();
-        editNode.setScale(s);
+        var s = editNode.getRelScaling();
+        editNode.setRelScaling(s);
         editNode.adjustProjSize();
 	};
 

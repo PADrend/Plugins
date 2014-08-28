@@ -144,21 +144,21 @@ EditNodes.createScaleEditNode := fn(){
 	];
 
 	container.updateScalingBox := fn(Geometry.Box box,Geometry.Matrix4x4 worldMatrix){
-		this.reset();
+		this.resetRelTransformation();
 		var center_ws = worldMatrix.transformPosition(box.getCenter());
-		this.setWorldPosition(center_ws);
+		this.setWorldOrigin(center_ws);
 
 		var arrowScale = 0.5 * box.getExtentMax() * (worldMatrix*new Geometry.Vec4(1,0,0,0)).length();
 
 		var children = MinSG.getChildNodes(this);
 		foreach( this.__NE_Scale_arrows as var index,var arrowConfig){
 			var child = children[index];
-			child.reset();
+			child.resetRelTransformation();
 			var childPos_ws = worldMatrix.transformPosition( new Geometry.Vec3(
 						box.getMinX() + box.getExtentX()*arrowConfig[0],
 						box.getMinY() + box.getExtentY()*arrowConfig[1],
 						box.getMinZ() + box.getExtentZ()*arrowConfig[2]));
-			child.setWorldPosition( childPos_ws );
+			child.setWorldOrigin( childPos_ws );
 
 			child.rotateToWorldDir(center_ws-childPos_ws);
 			child.rotateLocal_deg(90,0,1,0);
@@ -182,7 +182,7 @@ EditNodes.createScaleEditNode := fn(){
 			var relPos = this.getRelPosition();
 
 			this.__NE_ScaleOrigin_ws.setValue( this.relPosToWorldPos(-relPos) ); // get the opposite point of the scaling box
-			this.__NE_ScaleInititalPos_ws.setValue( this.getWorldPosition() );
+			this.__NE_ScaleInititalPos_ws.setValue( this.getWorldOrigin() );
 			getParent().onScalingStart();
 		};
 		n.onTranslate += fn(v){

@@ -46,7 +46,7 @@ trait.attributes.envMap_update ::= fn(){
 					[ new Geometry.Vec3( 0,  0, -1), new Geometry.Vec3(0, -1, 0) ],
 					[ new Geometry.Vec3( 0,  0,  1), new Geometry.Vec3(0, -1, 0) ],
 				] as var layer,var dirArray){
-			camera.setSRT(new Geometry.SRT(position, dirArray[0], dirArray[1]));
+			camera.setRelTransformation(new Geometry.SRT(position, dirArray[0], dirArray[1]));
 			
 			fbo.attachColorTexture( renderingContext, envMap, 0, 0, layer );
 			renderingContext.pushAndSetFBO( fbo	);

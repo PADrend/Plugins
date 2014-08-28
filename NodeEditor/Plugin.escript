@@ -118,7 +118,7 @@ plugin.init @(override) := fn() {
 				}
 
 				renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
-				renderingContext.multMatrix_modelToCamera(node.getWorldMatrix());
+				renderingContext.multMatrix_modelToCamera(node.getWorldTransformationMatrix());
 
 				var bb = node.getBB();
 
@@ -356,9 +356,9 @@ plugin.init @(override) := fn() {
 				PADrend.message("Following Object stopped.");
 			follower.active = false;
 			follower = void;
-			var originalPos = camera.getWorldPosition();
+			var originalPos = camera.getWorldOrigin();
 			camera.setRelPosition(new Geometry.Vec3(0,0,0));
-			dolly.moveLocal( dolly.worldDirToLocalDir(originalPos-camera.getWorldPosition()  ));
+			dolly.moveLocal( dolly.worldDirToLocalDir(originalPos-camera.getWorldOrigin()  ));
 		}else if(NodeEditor.getSelectedNode()) {
 			PADrend.message("Following Object '"+NodeEditor.getSelectedNode()+"'");
 			follower = new ExtObject({
@@ -367,7 +367,7 @@ plugin.init @(override) := fn() {
 				$execute : fn(p...){
 					if(!active)
 						return Extension.REMOVE_EXTENSION;
-					PADrend.getDolly().setWorldPosition(node.getWorldBB().getCenter());
+					PADrend.getDolly().setWorldOrigin(node.getWorldBB().getCenter());
 					return Extension.CONTINUE;
 				}
 			});

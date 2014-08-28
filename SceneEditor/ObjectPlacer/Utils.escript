@@ -156,10 +156,10 @@ ObjectPlacer.defaultNodeInserter := fn(screenPos,MinSG.Node node){
 		scene += node;
 
 		// apply coordinate system corrections
-		if(scene.hasSRT()){ // remove scene's rotation
+		if(scene.hasRelTransformationSRT()){ // remove scene's rotation
 			var correctionSRT = new Geometry.SRT;
-			correctionSRT.setRotation( scene.getSRT().getRotation().getInverse() );
-			node.setSRT( node.getSRT() * correctionSRT );
+			correctionSRT.setRotation( scene.getRelTransformationSRT().getRotation().getInverse() );
+			node.setRelTransformation( node.getRelTransformationSRT() * correctionSRT );
 		}
 		if(PADrend.isSceneCoordinateSystem_YUp(scene) && PADrend.isSceneCoordinateSystem_ZUp(node)){
 			node.rotateLocal_deg(-90,new Geometry.Vec3(1,0,0));
@@ -173,7 +173,7 @@ ObjectPlacer.defaultNodeInserter := fn(screenPos,MinSG.Node node){
 															0.5-snappingNormal.z()*0.5);
 															
 //		var nodeAnchor = n.getBB().getCenter()+ new Geometry.Vec3(0,-n.getBB().getExtentY()*0.5,0);
-		node.setWorldPosition(pos-nodeAnchor);
+		node.setWorldOrigin(pos-nodeAnchor);
 		NodeEditor.selectNode(node);
 		
 		executeExtensions('ObjectPlacer_OnObjectInserted',node);

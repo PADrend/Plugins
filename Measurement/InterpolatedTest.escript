@@ -64,7 +64,7 @@ MeasurementPlugin.calculateAvgDistance := fn(path) {
 	var sum = 0.0;
 	for (var i=0; i<waypoints.count(); i++) {
 		if (i+1 < waypoints.count()) {
-			var difference = (waypoints[i+1].getSRT().getTranslation()) - (waypoints[i].getSRT().getTranslation());
+			var difference = (waypoints[i+1].getRelTransformationSRT().getTranslation()) - (waypoints[i].getRelTransformationSRT().getTranslation());
 			sum += difference.length();
 		}
 	}
@@ -129,26 +129,26 @@ MeasurementPlugin.InterpolatedTest.interpolateSRTs:=fn(stepdist) {
 	}
 
 	//add srt of the first waypoint into the list
-	srts += waypoints[0].getSRT();
+	srts += waypoints[0].getRelTransformationSRT();
 
 	//begin interpolating
 	for (var i=1; i<waypoints.count(); i++) {
 		//if stepdist is greater than zero do interpolating
 		if (stepdist > 0.0) {
 			//calculate distance between the current and the previous waypoints
-			var diff_vec = waypoints[i].getSRT().getTranslation() - waypoints[i-1].getSRT().getTranslation();
+			var diff_vec = waypoints[i].getRelTransformationSRT().getTranslation() - waypoints[i-1].getRelTransformationSRT().getTranslation();
 			var length = diff_vec.length();
 			var free = length;
 
 			//insert additional srts if they fit onto the connection between neighbouring waypoints
 			while (stepdist < free) {
 				var ratio = (length-free)/length;
-				var srt_new = new Geometry.SRT(waypoints[i-1].getSRT(), waypoints[i].getSRT(), ratio);
+				var srt_new = new Geometry.SRT(waypoints[i-1].getRelTransformationSRT(), waypoints[i].getRelTransformationSRT(), ratio);
 				srts += srt_new;
 				free -= stepdist;
 			}
 		}
-		srts += waypoints[i].getSRT();
+		srts += waypoints[i].getRelTransformationSRT();
 	}
 	return true;
 };
@@ -183,7 +183,7 @@ MeasurementPlugin.InterpolatedTest.executeBoxQualityEvaluator := fn(String scene
 			}
 		}
 
-		measurementCamera.setSRT(srts[frame]);
+		measurementCamera.setRelTransformation(srts[frame]);
 		frameContext.setCamera(measurementCamera);
 
 		evaluator.beginMeasure();
@@ -250,7 +250,7 @@ MeasurementPlugin.InterpolatedTest.executeCurrentScene := fn(String scenename, M
 			}
 		}
 
-		measurementCamera.setSRT(srts[frame]);
+		measurementCamera.setRelTransformation(srts[frame]);
 		frameContext.setCamera(measurementCamera);
 
 		renderingContext.clearScreen(new Util.Color4f(0.2, 0.2, 0.2, 1));
@@ -287,7 +287,7 @@ MeasurementPlugin.InterpolatedTest.executeCurrentScene := fn(String scenename, M
 			}
 		}
 
-		measurementCamera.setSRT(srts[frame]);
+		measurementCamera.setRelTransformation(srts[frame]);
 		frameContext.setCamera(measurementCamera);
 
 		renderingContext.clearScreen(new Util.Color4f(0.2, 0.2, 0.2, 1));

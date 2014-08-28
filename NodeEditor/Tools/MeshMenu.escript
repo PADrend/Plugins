@@ -116,7 +116,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 			var t=[];
 			foreach(nodes as var node){
 				a+=node.getMesh();
-				t+=node.getWorldMatrix();
+				t+=node.getWorldTransformationMatrix();
 			}
 			var m=Rendering.combineMeshes(a,t);
 			var g=new MinSG.GeometryNode();
@@ -229,7 +229,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 					foreach(geoNodes as var geoNode){
 						var mesh = geoNode.getMesh();
 
-						Rendering.calculateTextureCoordinates_projection(mesh, attrName, matrix * geoNode.getWorldMatrix() );
+						Rendering.calculateTextureCoordinates_projection(mesh, attrName, matrix * geoNode.getWorldTransformationMatrix() );
 						out(".");
 					}
 

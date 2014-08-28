@@ -202,7 +202,7 @@ WaypointsPlugin.ex_AfterFrame:=fn(...){
 //            d=d.pow(1.5);
             currentPos=new Geometry.SRT(this.flight_startPoint,this.flight_endPoint,d);
         }
-        PADrend.getDolly().setSRT(currentPos);
+        PADrend.getDolly().setRelTransformation(currentPos);
     } else if(this.isCameraAttached() && !this.isCameraPause()){
     	executeExtensions('Waypoints_SelectedWaypointChanged', this.getCameraTimestamp() );
     }
@@ -245,7 +245,7 @@ WaypointsPlugin.ex_AfterRenderingPass:=fn(...){
 
 	var path = getCurrentPath();
 	renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
-	renderingContext.multMatrix_modelToCamera(path.getWorldMatrix());
+	renderingContext.multMatrix_modelToCamera(path.getWorldTransformationMatrix());
 	renderingContext.applyChanges();
 	path.display(frameContext, MinSG.SHOW_META_OBJECTS);
 	renderingContext.popMatrix_modelToCamera();

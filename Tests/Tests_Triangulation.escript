@@ -41,7 +41,7 @@ plugin.execute := fn() {
 			triangulation.addPoint(new Geometry.Vec2(Rand.uniform(-5, 5), Rand.uniform(-5, 5)), i.toString());
 		}
 		var nodeTriangles = triangulation.createMinSGNodes();
-		nodeTriangles.setRelRotation_deg(90.0, 1.0, 0.0, 0.0);
+		nodeTriangles.rotateRel_deg(90.0, [1.0, 0.0, 0.0]);
 		scene.addChild(nodeTriangles);
 		{
 			var nodeLines = nodeTriangles.clone();

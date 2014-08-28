@@ -174,7 +174,7 @@ plugin.createGround @(private) := fn(){
 
 //!	[ext:PADrend_BeforeRenderingPass]
 plugin.ext_PADrend_BeforeRenderingPass @(private) := fn(renderingPass){
-	var pos = renderingPass.getCamera().getWorldPosition();
+	var pos = renderingPass.getCamera().getWorldOrigin();
 	var worldUp = PADrend.getWorldUpVector();
 	var worldRot = new Geometry.Matrix3x3;
 	worldRot.set(-1,0,0,0,1,0,0,0,1);
@@ -219,7 +219,7 @@ plugin.ext_PADrend_AfterRendering @(private) := fn(...){
 		groundShaderState.setUniform('hazeColor',  Rendering.Uniform.VEC3F,[ [hC.r(),hC.g(),hC.b()] ]);
 	}
 
-	var p=sun.getWorldPosition();
+	var p=sun.getWorldOrigin();
 	var up = PADrend.getWorldUpVector();
 	if(up.getX() ~= 1){
 		//out("Dynamic Sky: x-up ", sunPos);
@@ -254,7 +254,7 @@ plugin.ext_PADrend_AfterRendering @(private) := fn(...){
 		var mirror_cam = camera.clone();
 		
 		// setup mirror cam
-		var mirrorPos = camera.getWorldPosition();
+		var mirrorPos = camera.getWorldOrigin();
 		var wUp = new Geometry.Vec3(worldUp.getX(),worldUp.getY(),worldUp.getZ());
 				
 		if(worldUp.getX() ~= 1){
@@ -271,7 +271,7 @@ plugin.ext_PADrend_AfterRendering @(private) := fn(...){
 		var up = PADrend.getDolly().localDirToWorldDir(new Geometry.Vec3(0,1,0));
 		up = -up.reflect( wUp );
 		
-		mirror_cam.setSRT(new Geometry.SRT(mirrorPos, dir, up));
+		mirror_cam.setRelTransformation(new Geometry.SRT(mirrorPos, dir, up));
 		mirror_cam.setViewport(new Geometry.Rect(0,0,512,512));
 	
 		

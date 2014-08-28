@@ -180,7 +180,7 @@ plugin.createScreenshot := fn(path){
 	frameContext.beginFrame();
 	// set camera
 	var tempCamera=new MinSG.CameraNode;
-	tempCamera.setMatrix( PADrend.getActiveCamera().getWorldMatrix() );
+	tempCamera.setRelTransformation( PADrend.getActiveCamera().getWorldTransformationMatrix() );
 	tempCamera.setViewport( new Geometry.Rect(0,0,width,height));
 	tempCamera.applyVerticalAngle(90);
 	frameContext.pushAndSetCamera(tempCamera);

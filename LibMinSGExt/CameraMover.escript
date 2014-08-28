@@ -201,7 +201,7 @@ T.execute ::= fn(){
 	this.lastFrameTimestamp=tmp;
 
 	if(!this.moveWalkVec.isZero()){
-		var m = this.dolly.getSRT();
+		var m = this.dolly.getRelTransformationSRT();
 		var v = m*this.moveWalkVec - m*new Geometry.Vec3(0,0,0);
 		v.y(0);
 		if(v!=new Geometry.Vec3(0,0,0))

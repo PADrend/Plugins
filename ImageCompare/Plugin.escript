@@ -97,7 +97,7 @@ static ex_AfterRendering = fn(...) {
 	var rect = evaluator.measurementResolution;
 	
 	var measurementCamera = PADrend.getActiveCamera().clone();
-	measurementCamera.setMatrix(PADrend.getActiveCamera().getWorldMatrix());
+	measurementCamera.setRelTransformation(PADrend.getActiveCamera().getWorldTransformationMatrix());
 	measurementCamera.applyVerticalAngle(angle);
 	measurementCamera.setViewport(rect);
 	frameContext.pushAndSetCamera(measurementCamera);

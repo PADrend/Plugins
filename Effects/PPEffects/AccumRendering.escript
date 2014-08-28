@@ -32,7 +32,7 @@ Effect._constructor ::= fn() {
 Effect.begin @(override) ::= fn() {
 	
 	renderingContext.pushAndSetFBO(fbo);
-	var newSRT=PADrend.getDolly().getSRT();
+	var newSRT=PADrend.getDolly().getRelTransformationSRT();
 	if( this.srt == newSRT)
 		PADrend.EventLoop.doClearScreen = false;
 	else

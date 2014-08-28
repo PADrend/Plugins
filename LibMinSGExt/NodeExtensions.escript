@@ -251,7 +251,7 @@ MinSG.Node.getPivotPosition ::= fn()
 {
     if(MinSG.isSet($JointNode)) {
         if(this ---|> MinSG.JointNode) {
-            return this.getWorldPosition();
+            return this.getWorldOrigin();
         }
     }
      

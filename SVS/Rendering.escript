@@ -16,8 +16,8 @@ declareNamespace($SVS);
 SVS.getSphereNode := fn(Geometry.Sphere sphere) {
 	var sphereMesh = Rendering.MeshBuilder.createSphere(64, 64);
 	var sphereNode = new MinSG.GeometryNode(sphereMesh);
-	sphereNode.setWorldPosition(sphere.getCenter());
-	sphereNode.setScale(sphere.getRadius());
+	sphereNode.setWorldOrigin(sphere.getCenter());
+	sphereNode.setRelScaling(sphere.getRadius());
 	
 	var shaderState = new MinSG.ShaderState();
 	var path = Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/universal2/";
@@ -79,7 +79,7 @@ SVS.getCrossNode := fn() {
 
 //!	[static]
 SVS.setUpRendering := fn(plugin) {
-	var worldSphere = MinSG.SVS.transformSphere(plugin.sphere, plugin.node.getWorldMatrix());
+	var worldSphere = MinSG.SVS.transformSphere(plugin.sphere, plugin.node.getWorldTransformationMatrix());
 	
 	// Calculate the distance in a way that the bounding sphere fits into the viewing frustum.
 	var radius = worldSphere.getRadius();
@@ -106,7 +106,7 @@ SVS.setUpRendering := fn(plugin) {
 	sphereNode.addState(plugin.sphereTextureState);
 	
 	var crossNode = SVS.getCrossNode();
-	crossNode.setScale(0.05 * radius);
+	crossNode.setRelScaling(0.05 * radius);
 	
 	var sampleMaterialState = new MinSG.MaterialState();
 	sampleMaterialState.setAmbient(new Util.Color4f(0.3, 0.0, 0.0, 1.0));
@@ -124,7 +124,7 @@ SVS.setUpRendering := fn(plugin) {
 												var center = sphere.getCenter();
 												var radius = sphere.getRadius();
 												foreach(samples as var sample) {
-													cross.setWorldPosition(center + sample.getPosition() * radius);
+													cross.setWorldOrigin(center + sample.getPosition() * radius);
 													if(sample.selected) {
 														selectedMat.enableState(GLOBALS.frameContext);
 													} else {

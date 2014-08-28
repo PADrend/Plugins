@@ -66,7 +66,7 @@ trait.onInit += fn(MinSG.Node node){
 	// ------------------
 	
 	{
-		var wSRT =  node.getWorldSRT();
+		var wSRT =  node.getWorldTransformationSRT();
 		wSRT.setScale(1.0);
 		node._inverseWorldTrans := wSRT.inverse();
 		
@@ -79,7 +79,7 @@ trait.onInit += fn(MinSG.Node node){
 	//! \see  MinSG.TransformationObserverTrait		
 	node.onNodeTransformed += [transformedNodes] => fn(transformedNodes,node){
 		if(node==this){
-			var wSRT = this.getWorldSRT();
+			var wSRT = this.getWorldTransformationSRT();
 			wSRT.setScale(1.0);
 			this._inverseWorldTrans.setScale(1.0);
 	
@@ -90,10 +90,10 @@ trait.onInit += fn(MinSG.Node node){
 					var relWorldRotation = relWorldTransformation.getRotation();
 
 					foreach(transformedNodes as var cNode){
-						var clientWorldSRT = cNode.getWorldSRT();
+						var clientWorldSRT = cNode.getWorldTransformationSRT();
 						clientWorldSRT.setRotation( relWorldRotation * clientWorldSRT.getRotation());
 						clientWorldSRT.setTranslation( relWorldTransformation * clientWorldSRT.getTranslation() );
-						cNode.setWorldSRT(clientWorldSRT);
+						cNode.setWorldTransformation(clientWorldSRT);
 					}
 				}catch(e){ // finally
 					transformationInProgress = false;

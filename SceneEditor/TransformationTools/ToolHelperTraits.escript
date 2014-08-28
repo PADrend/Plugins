@@ -221,7 +221,7 @@ TransformationTools.NodeTransformationHandlerTrait := new Traits.GenericTrait("T
 			var aUndo = [];
 			var differenceFound = false;
 			foreach(_transfomredNodesOrigins as var node,var origin){
-				var newMatrix = node.getMatrix();
+				var newMatrix = node.getRelTransformationMatrix();
 				if(origin!=newMatrix)
 					differenceFound = true;
 				
@@ -229,7 +229,7 @@ TransformationTools.NodeTransformationHandlerTrait := new Traits.GenericTrait("T
 				aUndo+=[node,origin];
 			}
 			if(differenceFound){
-				var fun = fn(){foreach(this as var a)a[1].convertsSafelyToSRT() ? a[0].setSRT(a[1].toSRT()) : a[0].setMatrix(a[1]);	};
+				var fun = fn(){foreach(this as var a)a[1].convertsSafelyToSRT() ? a[0].setRelTransformation(a[1].toSRT()) : a[0].setRelTransformation(a[1]);	};
 				PADrend.executeCommand({
 					Command.DESCRIPTION : "Transform nodes",
 					Command.EXECUTE : 	aExecute->fun,
@@ -243,7 +243,7 @@ TransformationTools.NodeTransformationHandlerTrait := new Traits.GenericTrait("T
 	t.attributes.applyNodeTransformations ::= fn(){
 		_doApplyTransformations();
 		foreach(_transformedNodes as var node)
-			_transfomredNodesOrigins[node] = node.getMatrix();
+			_transfomredNodesOrigins[node] = node.getRelTransformationMatrix();
 		return this;	
 	};
 	
@@ -251,7 +251,7 @@ TransformationTools.NodeTransformationHandlerTrait := new Traits.GenericTrait("T
 		_doApplyTransformations();
 		_transformedNodes.swap(nodes.clone());
 		foreach(nodes as var node)
-			_transfomredNodesOrigins[node] = node.getMatrix();	
+			_transfomredNodesOrigins[node] = node.getRelTransformationMatrix();	
 		return this;	
 	};
 	

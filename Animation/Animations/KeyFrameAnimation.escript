@@ -64,7 +64,7 @@ KeyFrameAnimation.doEnter ::= fn(){
 		return;
 
 	if(!this.__status.originalSRT)
-		this.__status.originalSRT = node.getSRT(); 
+		this.__status.originalSRT = node.getRelTransformationSRT(); 
 };
 //
 ////! ---|> AnimationBase
@@ -100,9 +100,9 @@ KeyFrameAnimation.doExecute ::= fn(Number localTime){
 	// interpolate position
 	var tDiff = keyFrame2.time-time1;
 	if(tDiff<=0){
-		this.__status.node.setSRT(keyFrame2.srt );
+		this.__status.node.setRelTransformation(keyFrame2.srt );
 	}else{
-		this.__status.node.setSRT(new Geometry.SRT(srt1,keyFrame2.srt, (localTime-time1)/tDiff ));
+		this.__status.node.setRelTransformation(new Geometry.SRT(srt1,keyFrame2.srt, (localTime-time1)/tDiff ));
 	}
 };
 
@@ -150,7 +150,7 @@ KeyFrameAnimation.undo ::= fn(){
 	// restore original srt and unset values
 	if(this.__status.node && this.__status.originalSRT){
 		
-		this.__status.node.setSRT(this.__status.originalSRT);
+		this.__status.node.setRelTransformation(this.__status.originalSRT);
 		this.__status.originalSRT = void;
 	}
 	// call base type's function.
@@ -223,7 +223,7 @@ KeyFrameAnimation.getMenuEntries := fn(storyBoardPanel){
 				return;
 			}
 
-			var srt = animation.__status.node ? animation.__status.node.getSRT() : new Geometry.SRT();
+			var srt = animation.__status.node ? animation.__status.node.getRelTransformationSRT() : new Geometry.SRT();
 			animation.insertKeyFrame(insertionTime,srt);
 		}
 	};
@@ -318,7 +318,7 @@ KeyFrameAnimation.createAnimationBar ::= fn(storyBoardPanel){
 								var kf = animation.getKeyFrame(index);
 								var n = animation.findNode();
 								if(n){
-									animation.setKeyFrame(index,kf.time,n.getSRT());
+									animation.setKeyFrame(index,kf.time,n.getRelTransformationSRT());
 								}
 							}
 						};

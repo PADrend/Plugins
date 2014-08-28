@@ -61,7 +61,7 @@ plugin.init @(override) := fn(){
 
 plugin.resize := fn(){
 //
-//	var dist = (PADrend.getDolly().getWorldPosition() - GLOBALS.camera.getWorldPosition()).length();
+//	var dist = (PADrend.getDolly().getWorldOrigin() - GLOBALS.camera.getWorldOrigin()).length();
 //	dist = dist * (GLOBALS.JumpNRunPlugin.size() / this.size()) - dist;
 //	GLOBALS.camera.moveLocal(0, 0, dist);
 //
@@ -70,10 +70,10 @@ plugin.resize := fn(){
 	if(!enabled)
 		return $REMOVE;
 	// reimplement when MinSG.MESH_AUTO_CENTER_BOTTOM works
-	this.avatar.reset();
+	this.avatar.resetRelTransformation();
 	this.avatar.scale(1 / this.avatar.getWorldBB().getExtentY());
 	this.avatar.scale(this.size());
-	this.avatar.moveLocal(0, -this.avatar.getBB().getMaxY()*this.avatar.getScale(), 0);
+	this.avatar.moveLocal(0, -this.avatar.getBB().getMaxY()*this.avatar.getRelScaling(), 0);
 };
 
 /*!	(public interface) */
@@ -99,7 +99,7 @@ plugin.enable:=fn(){
 	}
 	var camera = PADrend.getActiveCamera();
 
-	camera.reset();
+	camera.resetRelTransformation();
 	camera.rotateLocal_deg(-30, 1,0,0);
 	camera.moveLocal(0,0,this.size()*2);
 	PADrend.getDolly().addChild(this.avatar);
@@ -109,11 +109,11 @@ plugin.enable:=fn(){
 		this.behaviour = new MinSG.ScriptedNodeBehaviour(this.avatar);
 		this.behaviour.lastTime := Util.Timer.now();
 		this.behaviour.mode := 'run';
-		this.behaviour.lastPos := PADrend.getDolly().getWorldPosition();
+		this.behaviour.lastPos := PADrend.getDolly().getWorldOrigin();
 		this.behaviour.doExecute = [this] => fn(plugin){
 			var time = this.getCurrentTime();
 
-			var pos = PADrend.getDolly().getWorldPosition();
+			var pos = PADrend.getDolly().getWorldOrigin();
 			var dist = (pos- this.lastPos).length();
 			var duration = time-lastTime;
 			if(duration ~= 0) {
@@ -177,7 +177,7 @@ plugin.disable:=fn(){
 	enabled = false;
 
 	PADrend.getDolly().removeChild(this.avatar);
-	PADrend.getActiveCamera().reset();
+	PADrend.getActiveCamera().resetRelTransformation();
 	PADrend.getCameraMover().initActions();
 	if(this.behaviour){
 		PADrend.getSceneManager().getBehaviourManager().removeBehaviour(this.behaviour);

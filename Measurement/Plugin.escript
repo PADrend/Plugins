@@ -245,7 +245,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 				// run along path
 				var stop=false;
 				for(var time = 0; time<=path.getMaxTime() && !stop; time+=stepSize){
-					PADrend.getDolly().setSRT(path.getWorldPosition(time));
+					PADrend.getDolly().setRelTransformation(path.getWorldPosition(time));
 					frameContext.beginFrame();
 					PADrend.renderScene( PADrend.getRootNode(), PADrend.getActiveCamera(), PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers());
 					frameContext.endFrame(true);

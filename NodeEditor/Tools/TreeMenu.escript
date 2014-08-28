@@ -48,11 +48,11 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.transformations',[
 				});
 				subtree.traverse(stats->fn(node){
 					++overall;
-					if(node.hasMatrix()){
-						if(node.hasSRT()){
+					if(node.hasTransformation()){
+						if(node.hasRelTransformationSRT()){
 							++srts;
 						}else{
-							node.setSRT(node.getMatrix().toSRT());
+							node.setRelTransformation(node.getRelTransformationMatrix().toSRT());
 							++conversions;
 						}
 					}

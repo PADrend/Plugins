@@ -166,8 +166,8 @@ EditNodes.TranslatableAxisTrait := new Traits.GenericTrait("EditNodes.Translatab
 		//! \see EditNodes.DraggableTrait
 		node.onDraggingStart += fn(evt){
 			// store the nodes translation axis in world space
-			this.__NE_TranslAxis_axis_ws = new Geometry.Line3(this.getWorldPosition(),
-										(this.getWorldMatrix() * new Geometry.Vec4(1,0,0,0)).xyz().normalize());
+			this.__NE_TranslAxis_axis_ws = new Geometry.Line3(this.getWorldOrigin(),
+										(this.getWorldTransformationMatrix() * new Geometry.Vec4(1,0,0,0)).xyz().normalize());
 			// store initial closest point to the mouse
 			this.__NE_TranslAxis_initialPos_ws = __NE_TranslAxis_axis_ws.getClosestPointToRay(
 										Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ));
@@ -217,8 +217,8 @@ EditNodes.TranslatablePlaneTrait := new Traits.GenericTrait("EditNodes.Translata
 		//! \see EditNodes.DraggableTrait
 		node.onDraggingStart += fn(evt){
 			// store the nodes translation plane in world space
-			this.__NE_TranslPlane_plane_ws = new Geometry.Plane( this.getWorldPosition(),
-									(this.getWorldMatrix() * new Geometry.Vec4(0,0,1,0)).xyz().normalize()); // plane normal
+			this.__NE_TranslPlane_plane_ws = new Geometry.Plane( this.getWorldOrigin(),
+									(this.getWorldTransformationMatrix() * new Geometry.Vec4(0,0,1,0)).xyz().normalize()); // plane normal
 			// store initial intersection
 			this.__NE_TranslPlane_initialPos_ws = __NE_TranslPlane_plane_ws.getIntersection(
 									Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ));
@@ -275,9 +275,9 @@ EditNodes.RotatableTrait := new Traits.GenericTrait("EditNodes.RotatableTrait");
 			var d = __EditNode_rotationData;
 
 			// store the nodes translation plane in world space
-			d.plane_ws = new Geometry.Plane( this.getWorldPosition(),
-									(this.getWorldMatrix() * new Geometry.Vec4(0,0,1,0)).xyz().normalize()); // plane normal
-			d.pivot_ws = this.getWorldPosition();
+			d.plane_ws = new Geometry.Plane( this.getWorldOrigin(),
+									(this.getWorldTransformationMatrix() * new Geometry.Vec4(0,0,1,0)).xyz().normalize()); // plane normal
+			d.pivot_ws = this.getWorldOrigin();
 
 			var intersection = d.plane_ws.getIntersection( Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ));
 			d.initialDir_ws = intersection ? (intersection-d.pivot_ws).normalize() : new Geometry.Vec3(1,0,0);

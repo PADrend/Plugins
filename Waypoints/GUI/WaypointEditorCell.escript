@@ -65,7 +65,7 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 
 		this.btnSetPos.setSwitch(false);
 		this.btnSetPos.newSRT := void;
-		this.btnSetPos.oldSRT := waypoint.getSRT();
+		this.btnSetPos.oldSRT := waypoint.getRelTransformationSRT();
 
 		this.update();
 	};
@@ -87,7 +87,7 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 		GUI.LABEL				:	"Save",
 		GUI.TOOLTIP				:	"Save changes",
 		GUI.ON_CLICK			:	[cell,waypoint] => fn(cell, waypoint) {
-										waypoint.setSRT(cell.btnSetPos.oldSRT);
+										waypoint.setRelTransformation(cell.btnSetPos.oldSRT);
 										WaypointsPlugin.changeWaypoint(waypoint,
 											cell.edtTime.getData(),
 											cell.edtDesc.getData(),
@@ -102,7 +102,7 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 		GUI.LABEL				:	"Cancel",
 		GUI.TOOLTIP				:	"Cancel edit",
 		GUI.ON_CLICK			:	[cell,waypoint] => fn(cell, waypoint) {
-										waypoint.setSRT(cell.btnSetPos.oldSRT);
+										waypoint.setRelTransformation(cell.btnSetPos.oldSRT);
 										cell.createViewGUI();
 									},
 		GUI.SIZE				:	[GUI.HEIGHT_ABS, 0, 33]
@@ -136,8 +136,8 @@ WaypointsPlugin.createWaypointCell := fn(MinSG.Waypoint waypoint, listView) {
 		GUI.TOOLTIP				:	"Set waypoint's SRT to current camera's SRT",
 		GUI.FLAGS				:	GUI.FLAT_BUTTON,
 		GUI.ON_CLICK			:	[waypoint] => fn(MinSG.Waypoint waypoint) {
-										this.newSRT = PADrend.getDolly().getSRT();
-										waypoint.setSRT(this.newSRT);
+										this.newSRT = PADrend.getDolly().getRelTransformationSRT();
+										waypoint.setRelTransformation(this.newSRT);
 									}
 	});
 	cell.btnSetPos.newSRT := void;

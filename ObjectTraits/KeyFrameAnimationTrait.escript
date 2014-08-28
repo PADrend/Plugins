@@ -77,7 +77,7 @@ trait.onInit += fn(MinSG.Node node){
 	node.onAnimationInit += fn(time){
 		outln("onAnimationInit (KeyFrameAnimationTrait)");
 		this._animationStartingTime  := time;
-		this._animationInitialSRT  := (this.animationKeyFrames()[0]---|> Geometry.SRT) ? this.animationKeyFrames()[0] : this.getSRT();
+		this._animationInitialSRT  := (this.animationKeyFrames()[0]---|> Geometry.SRT) ? this.animationKeyFrames()[0] : this.getRelTransformationSRT();
 	};
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationPlay += fn(time,lastTime){
@@ -96,7 +96,7 @@ trait.onInit += fn(MinSG.Node node){
 		}
 		if(prevLocation==nextLocation){
 			if(prevLocation---|>Geometry.SRT){
-				this.setSRT(prevLocation);
+				this.setRelTransformation(prevLocation);
 			}else{
 				this.setRelPosition( prevLocation );
 			}
@@ -105,7 +105,7 @@ trait.onInit += fn(MinSG.Node node){
 			
 			var d = (prevTime==nextTime ? 0.0 : ((relTime-prevTime) / (nextTime-prevTime)) );
 			if(prevLocation---|>Geometry.SRT){
-				this.setSRT( new Geometry.SRT(prevLocation,nextLocation,d));
+				this.setRelTransformation( new Geometry.SRT(prevLocation,nextLocation,d));
 			}else{
 				this.setRelPosition( prevLocation*d + nextLocation*(1-d) );
 			}
@@ -115,7 +115,7 @@ trait.onInit += fn(MinSG.Node node){
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
 		outln("stop");
-		this.setSRT( this._animationInitialSRT );
+		this.setRelTransformation( this._animationInitialSRT );
 	};
 	
 };
@@ -160,7 +160,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				GUI.WIDTH : 40,
 				GUI.ON_CLICK : [node,node.animationKeyFrames,time] => fn(node,keyFrames,time){
 					var map = keyFrames().clone();
-					map[time] = node.getSRT();
+					map[time] = node.getRelTransformationSRT();
 					keyFrames(map);
 				}
 			};
@@ -169,7 +169,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				GUI.WIDTH : 40,
 				GUI.LABEL : "Apply",
 				GUI.ON_CLICK : [node,node.animationKeyFrames,time] => fn(node,keyFrames,time){
-					node.setSRT(keyFrames()[time]);
+					node.setRelTransformation(keyFrames()[time]);
 				}
 			};
 			entries += {
@@ -194,7 +194,7 @@ Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
 				var last = 0;
 				foreach(map as var t, var location)
 					last = t+1;
-				map[last] = node.getSRT();
+				map[last] = node.getRelTransformationSRT();
 				keyFrames(map);
 				refreshCallback();
 			}

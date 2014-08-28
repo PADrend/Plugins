@@ -156,8 +156,8 @@ WaypointsPlugin.changeWaypoint := fn(wp,timestamp,desc,srt = void){
 			}
 
 			if(this.srt != void){
-				this.old_srt = wp.getSRT();
-				wp.setSRT(this.srt);
+				this.old_srt = wp.getRelTransformationSRT();
+				wp.setRelTransformation(this.srt);
 				if(this.path.isSet($enableShotUpdates) && this.path.enableShotUpdates){
 					WaypointsPlugin.updateScreenshots([wp]);
 				}
@@ -189,7 +189,7 @@ WaypointsPlugin.changeWaypoint := fn(wp,timestamp,desc,srt = void){
 			}
 
 			if(this.old_srt != void){
-				wp.setSRT(this.old_srt);
+				wp.setRelTransformation(this.old_srt);
 				if(this.path.isSet($enableShotUpdates) && this.path.enableShotUpdates){
 					WaypointsPlugin.updateScreenshots([wp]);
 				}
@@ -222,7 +222,7 @@ WaypointsPlugin.closeLoop := fn(){
 	if(wps.empty())
 		return;
 
-	WaypointsPlugin.createWaypoint(wps[0].getSRT(),wps[wps.count()-1].getTime()+1);
+	WaypointsPlugin.createWaypoint(wps[0].getRelTransformationSRT(),wps[wps.count()-1].getTime()+1);
 };
 
 WaypointsPlugin.collectPaths := fn(subtree = PADrend.getRootNode()){
@@ -293,7 +293,7 @@ WaypointsPlugin.createWaypoint := fn(Geometry.SRT srt, timestamp = void){
 
 //! Add a waypoint to the selected path at the current position (SRT) of the camera.
 WaypointsPlugin.createWaypointAtCam := fn(timestamp = void){
-	WaypointsPlugin.createWaypoint(	WaypointsPlugin.getCurrentPath().getWorldMatrix().inverse() * PADrend.getDolly().getSRT(), timestamp);
+	WaypointsPlugin.createWaypoint(	WaypointsPlugin.getCurrentPath().getWorldToLocalMatrix() * PADrend.getDolly().getRelTransformationSRT(), timestamp);
 
 };
 
@@ -325,7 +325,7 @@ WaypointsPlugin.flyTo := fn(timestamp,flight_time = 1.0,path = void){
 
 	var now = PADrend.getSyncClock();
 	this.flight_startTime = now;
-	this.flight_startPoint = PADrend.getDolly().getSRT();
+	this.flight_startPoint = PADrend.getDolly().getRelTransformationSRT();
 	this.flight_endTime = now+flight_time;
 	this.flight_endPoint = path.getWorldPosition(timestamp);
 
@@ -459,7 +459,7 @@ WaypointsPlugin.removeWaypoint := fn(wp){
 				if(!wp)
 					return;
 
-				this.srt := wp.getSRT();
+				this.srt := wp.getRelTransformationSRT();
 				this.desc := WaypointsPlugin.getWaypointDescription(wp);
 				MinSG.destroy(wp);
 
@@ -571,8 +571,8 @@ WaypointsPlugin.setTimecodesByDistance := fn(MinSG.PathNode path, Number speed) 
 	// timecode.
 	for(var i = 1; i < wps.count(); ++i) {
 		// distance from last to this position
-		var lastSRT = wps[i-1].getSRT();
-		var curSRT = wps[i].getSRT();
+		var lastSRT = wps[i-1].getRelTransformationSRT();
+		var curSRT = wps[i].getRelTransformationSRT();
 
 		var distance = curSRT.getUpVector().dot(lastSRT.getUpVector())//.length()
 			+curSRT.getDirVector().dot(lastSRT.getDirVector())//.length()
@@ -600,14 +600,14 @@ WaypointsPlugin.updateScreenshots := fn(wps = void){
 	}
 
 	var oldViewport = camera.getViewport();
-	var oldSRT = PADrend.getDolly().getSRT();
+	var oldSRT = PADrend.getDolly().getRelTransformationSRT();
 
 	//var tmpFileName = "./waypointsShotTMPFile.bmp";
 
 	//var wps = path.getWaypoints();
 	camera.setViewport(new Geometry.Rect(0,0,120,90));
 	foreach(wps as var wp){
-		PADrend.getDolly().setSRT(path.getWorldPosition ( wp.getTime() ));
+		PADrend.getDolly().setRelTransformation(path.getWorldPosition ( wp.getTime() ));
 
 		// -------------------
 		// ---- Render Scene
@@ -627,7 +627,7 @@ WaypointsPlugin.updateScreenshots := fn(wps = void){
 
 		PADrend.SystemUI.swapBuffers();
 	}
-	PADrend.getDolly().setSRT(oldSRT);
+	PADrend.getDolly().setRelTransformation(oldSRT);
 	camera.setViewport(oldViewport);
 
 	executeExtensions('Waypoints_PathChanged', WaypointsPlugin.getCurrentPath() );

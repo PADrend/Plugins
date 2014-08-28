@@ -90,7 +90,7 @@ TransformationTools.AnchorTool := new Type;
 		this.setMetaNode(metaRoot);											//! \see TransformationTools.MetaNodeContainerTrait
 		this.enableMetaNode();												//! \see TransformationTools.MetaNodeContainerTrait
 
-		metaRoot.setSRT( node.getWorldSRT() );
+		metaRoot.setRelTransformation( node.getWorldTransformationSRT() );
 		
 		foreach(anchors as var anchorName,var anchor){
 			var location = anchor();
@@ -128,7 +128,7 @@ TransformationTools.AnchorTool := new Type;
 					editNode.setRelPosition(location);
 				}else{
 					editNode.activate();
-					editNode.setSRT(location);
+					editNode.setRelTransformation(location);
 				}
 			};
 			updateEditNode(location);
@@ -156,20 +156,20 @@ TransformationTools.AnchorTool := new Type;
 
 				ctxt.axisMarkerNode := new MinSG.GeometryNode(EditNodes.createLineAxisMesh());
 				ctxt.editNode.getParent() += ctxt.axisMarkerNode;
-				ctxt.axisMarkerNode.setSRT(ctxt.editNode.getSRT());
+				ctxt.axisMarkerNode.setRelTransformation(ctxt.editNode.getRelTransformationSRT());
 				ctxt.markerNode.setAnnotation("["+ctxt.anchorName+"]\n"+ctxt.initalRelPos );				//! \see EditNodes.AnnotatableTrait
 			};
 			
 			translatorNode.onTranslate += [ctxt] => this->fn(ctxt, worldTranslation){
-				var relTranslation = this.roundTranslationVector(ctxt.editNode.worldDirToRelDir(worldTranslation),ctxt.editNode.getScale());
+				var relTranslation = this.roundTranslationVector(ctxt.editNode.worldDirToRelDir(worldTranslation),ctxt.editNode.getRelScaling());
 				var newRelPos = (ctxt.initalRelPos + relTranslation).round(0.001);
 				ctxt.editNode.setRelPosition( newRelPos ); 
-				ctxt.axisMarkerNode.setSRT( ctxt.editNode.getSRT());
+				ctxt.axisMarkerNode.setRelTransformation( ctxt.editNode.getRelTransformationSRT());
 				ctxt.markerNode.setAnnotation("["+ctxt.anchorName+"]\n"+newRelPos);				//! \see EditNodes.AnnotatableTrait
 			};
 
 			translatorNode.onTranslationStop += [ctxt] => this->fn(ctxt, worldTranslation){
-				var relTranslation = this.roundTranslationVector(ctxt.editNode.worldDirToRelDir(worldTranslation),ctxt.editNode.getScale());
+				var relTranslation = this.roundTranslationVector(ctxt.editNode.worldDirToRelDir(worldTranslation),ctxt.editNode.getRelScaling());
 				var newRelPos = (ctxt.initalRelPos + relTranslation).round(0.001);
 				
 				var oldLocation = ctxt.anchor();
@@ -199,25 +199,25 @@ TransformationTools.AnchorTool := new Type;
 			editNode += rotationNode;
 
 			rotationNode.onRotationStart += [ctxt] => fn(ctxt){
-				ctxt.originalSRT := ctxt.editNode.getSRT();
+				ctxt.originalSRT := ctxt.editNode.getRelTransformationSRT();
 				ctxt.axisMarkerNode := new MinSG.GeometryNode(EditNodes.createLineAxisMesh());
 				ctxt.editNode.getParent() += ctxt.axisMarkerNode;
-				ctxt.axisMarkerNode.setSRT(ctxt.editNode.getSRT());				
+				ctxt.axisMarkerNode.setRelTransformation(ctxt.editNode.getRelTransformationSRT());				
 			};
 			rotationNode.onRotate += [ctxt] => fn(ctxt, deg,axis_ws){
 				deg = deg.round(1.0);
-				ctxt.editNode.setSRT(ctxt.originalSRT);
+				ctxt.editNode.setRelTransformation(ctxt.originalSRT);
 				ctxt.editNode.rotateAroundWorldAxis_deg(deg,axis_ws);
-				ctxt.axisMarkerNode.setSRT( ctxt.editNode.getSRT());
+				ctxt.axisMarkerNode.setRelTransformation( ctxt.editNode.getRelTransformationSRT());
 		
 				ctxt.markerNode.setAnnotation("["+ctxt.anchorName+"]\n"+deg);				//! \see EditNodes.AnnotatableTrait
 
 			};
 			rotationNode.onRotationStop += [ctxt] => fn(ctxt, deg,axis_ws){
 				deg = deg.round(1.0);
-				ctxt.editNode.setSRT(ctxt.originalSRT);
+				ctxt.editNode.setRelTransformation(ctxt.originalSRT);
 				ctxt.editNode.rotateAroundWorldAxis_deg(deg,axis_ws);
-				var newLocation = ctxt.editNode.getSRT();
+				var newLocation = ctxt.editNode.getRelTransformationSRT();
 				newLocation.setScale(1.0);
 				
 				PADrend.executeCommand({

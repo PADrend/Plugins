@@ -157,7 +157,7 @@ tests += new Tests.AutomatedTest( "MinSG: create/load/save scenes",fn(){
 			parentNode.addChild(n);
 			parentNode = n;
 			
-			randomPos = n.getWorldPosition();
+			randomPos = n.getWorldOrigin();
 			sceneManager.registerNode("lastRandomNode",n);
 		}
 		
@@ -243,7 +243,7 @@ tests += new Tests.AutomatedTest( "MinSG: create/load/save scenes",fn(){
 		addResult( "tag test", a.count()==1 && sceneManager.getRegisteredNode("WurzelId") == a[0]);
 		
 		// check transformations
-		var pos = sceneManager.getRegisteredNode("lastRandomNode").getWorldPosition();
+		var pos = sceneManager.getRegisteredNode("lastRandomNode").getWorldOrigin();
 		addResult( "transformations",  pos.getX().round(0.1) ~= randomPos.getX().round(0.1) && pos.getY().round(0.1) ~= randomPos.getY().round(0.1) && pos.getZ().round(0.1) ~= randomPos.getZ().round(0.1) );
 		
 		// check instances

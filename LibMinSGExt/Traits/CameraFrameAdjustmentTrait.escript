@@ -46,10 +46,10 @@ static updateCameras = fn(dolly, [Array,void] frame){
 			var relFrameNormal = camera.worldDirToRelDir(wFrameNormal);
 			if(relFrameNormal.isZero()){ // camera on plane? move it a little bit...
 				outln("Camera is in the projection plane! Moving the camera away...");
-				camera.setWorldPosition( camera.getWorldPosition()+wFrameNormal.normalize()*0.01 );
+				camera.setWorldOrigin( camera.getWorldOrigin()+wFrameNormal.normalize()*0.01 );
 				relFrameNormal = camera.worldDirToRelDir(wFrameNormal);
 			}
-			camera.setSRT( new Geometry.SRT(camera.getRelPosition(), 					// position
+			camera.setRelTransformation( new Geometry.SRT(camera.getRelPosition(), 					// position
 											-relFrameNormal,							// direction
 											camera.worldDirToRelDir(wFrameUp)));		// up-vector
 

@@ -42,7 +42,7 @@ CameraWindowPlugin.createOptionPanel := fn(MinSG.AbstractCameraNode camera) {
 			GUI.LABEL				:	"Copy Active Transformation",
 			GUI.TOOLTIP				:	"Apply the position and direction of the active camera to the selected camera",
 			GUI.ON_CLICK			:	[camera] => fn(camera) {
-											camera.setMatrix(PADrend.getActiveCamera().getWorldMatrix());
+											camera.setRelTransformation(PADrend.getActiveCamera().getWorldTransformationMatrix());
 										},
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};

@@ -109,7 +109,7 @@ SpielereiPlugin.registerMenus := fn(){
 
 					var depthTexture=Rendering.createDepthTexture(width,height);
 					var cam=new MinSG.CameraNode( 90.0, width/height, 1.0,5000);
-					var pos=camera.getWorldPosition();
+					var pos=camera.getWorldOrigin();
 					cam.setViewport(new Geometry.Rect(0,0,width,height));
 
 					var meshes=[];
@@ -133,7 +133,7 @@ SpielereiPlugin.registerMenus := fn(){
 						
 						fbo.attachDepthTexture(renderingContext,depthTexture);
 
-						cam.setSRT( new Geometry.SRT(pos,dir,up) );
+						cam.setRelTransformation( new Geometry.SRT(pos,dir,up) );
 						
 						PADrend.renderScene(PADrend.getRootNode(), cam, PADrend.getRenderingFlags(), PADrend.getBGColor(),PADrend.getRenderingLayers());
 

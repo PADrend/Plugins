@@ -51,9 +51,9 @@ gui.registerComponentProvider('NodeEditor_MiscToolsMenu.helper',[
 				var states=node.getStates();
 				var bb=node.getBB();
 				// find lower center
-				var pos=node.getSRT() * ((bb.getCorner( Geometry.CORNER_xyz ) + bb.getCorner( Geometry.CORNER_XyZ )) * 0.5);
-				var width=[bb.getExtentX(),bb.getExtentZ()].max()*node.getSRT().getScale();
-				var height=bb.getExtentY()*node.getSRT().getScale();
+				var pos=node.getRelTransformationSRT() * ((bb.getCorner( Geometry.CORNER_xyz ) + bb.getCorner( Geometry.CORNER_XyZ )) * 0.5);
+				var width=[bb.getExtentX(),bb.getExtentZ()].max()*node.getRelTransformationSRT().getScale();
+				var height=bb.getExtentY()*node.getRelTransformationSRT().getScale();
 				var billboard=new MinSG.BillboardNode( new Geometry.Rect(-width*0.5,0,width,height),false,true);
 				foreach(states as var state)
 					billboard.addState(state);

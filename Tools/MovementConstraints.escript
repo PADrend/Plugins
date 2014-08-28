@@ -105,7 +105,7 @@ plugin.init @(override) := fn(){
 };
 
 static applyConstraints = fn(dolly){
-	var srt = dolly.getSRT();
+	var srt = dolly.getRelTransformationSRT();
 	var changed = false;
 	if(restrictHeight()){
 		if(! (srt.getTranslation().y()~=height() ) ){
@@ -120,7 +120,7 @@ static applyConstraints = fn(dolly){
 		}
 	}
 	if(changed)
-		dolly.setSRT(srt);
+		dolly.setRelTransformation(srt);
 	
 };
 

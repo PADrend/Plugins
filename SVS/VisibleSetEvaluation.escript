@@ -17,7 +17,7 @@ SVS.createMeasurementCamera := fn(	MinSG.GroupNode node,
 													Geometry.Vec3 viewingDirection, 
 													Number resolution) {
 	var sphere = visibilitySphere.getSphere();
-	var worldMatrix = node.getWorldMatrix();
+	var worldMatrix = node.getWorldTransformationMatrix();
 	var camera = MinSG.SVS.createSamplingCamera(sphere,
 																worldMatrix,
 																resolution);

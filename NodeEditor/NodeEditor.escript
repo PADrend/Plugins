@@ -123,7 +123,7 @@ NodeEditor.jumpToSelection := fn(time=0.5){
 	if( getSelectedNode() ){
 		var box = MinSG.combineNodesWorldBBs(selectedNodes);
 
-		var targetDir = (box.getCenter() - PADrend.getDolly().getWorldPosition()).normalize();
+		var targetDir = (box.getCenter() - PADrend.getDolly().getWorldOrigin()).normalize();
 		var target = new Geometry.SRT( box.getCenter() - targetDir * box.getExtentMax() * 1.0, -targetDir, PADrend.getWorldUpVector());
 		PADrend.Navigation.flyTo(target);
 	}

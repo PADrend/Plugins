@@ -66,8 +66,8 @@ plugin.init @(override) := fn() {
 
 	this.addOption("Reset camera  >",false,fn(value){
         if( (value & Util.UI.MASK_HAT_RIGHT) > 0){
-			PADrend.getDolly().setSRT(new Geometry.SRT());
-			PADrend.getDolly().setWorldPosition(PADrend.getCurrentScene().getWorldBB().getCenter());
+			PADrend.getDolly().setRelTransformation(new Geometry.SRT());
+			PADrend.getDolly().setWorldOrigin(PADrend.getCurrentScene().getWorldBB().getCenter());
 			PADrend.Navigation.getCameraMover().reset();
 		}
 		return true;

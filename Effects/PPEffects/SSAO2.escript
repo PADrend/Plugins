@@ -198,8 +198,8 @@ Effect.beginPass @(override) ::= fn(PADrend.RenderingPass pass){
 
 	// ----------
 	
-    var sg_eyeToLastEye = camera.getWorldMatrix().inverse() * lastFrameData.lastCamMatrix;  // eye to world,  world to last eye
-    lastFrameData.lastCamMatrix = camera.getWorldMatrix();
+    var sg_eyeToLastEye = camera.getWorldToLocalMatrix() * lastFrameData.lastCamMatrix;  // eye to world,  world to last eye
+    lastFrameData.lastCamMatrix = camera.getWorldTransformationMatrix();
 
     renderingContext.setGlobalUniform('sg_eyeToLastEye',Rendering.Uniform.MATRIX_4X4F,[sg_eyeToLastEye]);
   

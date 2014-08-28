@@ -61,7 +61,7 @@ Token.moveTo::=fn(Geometry.SRT absSrt,duration){
 		MinSG.destroy(path);
 		path=void;
 	}
-	var start=getSRT();
+	var start=getRelTransformationSRT();
 	path=new MinSG.PathNode();
 	path.setLooping(false);
 	path.createWaypoint(start,project.getTime());
@@ -89,13 +89,13 @@ Token.makePhysical::=fn(){
 };
 
 
-Token.getSRT::=fn(){
-	return getNode().getSRT();
+Token.getRelTransformationSRT::=fn(){
+	return getNode().getRelTransformationSRT();
 };
 
 
 Token.setPosition::=fn(Geometry.SRT srt){
-	getNode().setSRT(srt);
+	getNode().setRelTransformation(srt);
 	out(".");
 };
 

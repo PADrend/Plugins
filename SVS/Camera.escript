@@ -33,9 +33,9 @@ SVS.configureCameraUsingSamples := fn(MinSG.CameraNodeOrtho camera, Geometry.Sph
 
 //!	[static]
 SVS.setUpCameraWindow := fn(plugin) {
-	var windowCamera = MinSG.SVS.createSamplingCamera(plugin.sphere, plugin.node.getWorldMatrix(), 512);
+	var windowCamera = MinSG.SVS.createSamplingCamera(plugin.sphere, plugin.node.getWorldTransformationMatrix(), 512);
 	
-	registerExtension('PADrend_AfterFrame', this -> (SVS.configureCameraUsingSamples).bindLastParams(windowCamera, plugin.sphere, plugin.node.getWorldMatrix(), plugin.samples));
+	registerExtension('PADrend_AfterFrame', this -> (SVS.configureCameraUsingSamples).bindLastParams(windowCamera, plugin.sphere, plugin.node.getWorldTransformationMatrix(), plugin.samples));
 	
 	var window = gui.createWindow(300, 330, "SVS Camera", GUI.ONE_TIME_WINDOW);
 	window.setPosition(0, 30);

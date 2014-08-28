@@ -135,7 +135,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 						  Number frustumAngle,
 						  Number resolution) {
 		var worldSphere = MinSG.SVS.transformSphere(visibilitySphere.getSphere(),
-																  node.getWorldMatrix());
+																  node.getWorldTransformationMatrix());
 		var radius = worldSphere.getRadius();
 		// Make sure that the camera is not exactly on the sphere surface
 		var cameraDistance = 1.001;
@@ -161,7 +161,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 		// Make sure the sphere is enclosed by near and far plane
 		camera.setNearFar(cameraDistance - radius, cameraDistance + radius);
 
-		camera.setWorldPosition(worldSphere.getCenter() + viewingDirection * cameraDistance);
+		camera.setWorldOrigin(worldSphere.getCenter() + viewingDirection * cameraDistance);
 		camera.rotateToWorldDir(viewingDirection);
 
 		return camera;
@@ -422,7 +422,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 									}
 									var camera = createCamera(selectedNode(), visibilitySphere(), samples[sampleIndex()].getPosition(), frustumAngle(), resolution());
 									var dolly = PADrend.getCameraMover().getDolly();
-									dolly.setSRT(camera.getSRT());
+									dolly.setRelTransformation(camera.getRelTransformationSRT());
 									PADrend.getActiveCamera().setAngles(camera.getAngles());
 									PADrend.getActiveCamera().setNearFar(camera.getNearPlane(), camera.getFarPlane());
 								}.bindFirstParams(createCamera, selectedNode, visibilitySphere, sampleIndex, frustumAngle, resolution),

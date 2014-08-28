@@ -156,7 +156,7 @@ SkeletalAnimation.insertPose ::= fn(time){
     
     foreach(keyFrames[i].poses as var pose)
     {
-        pose.addValue(pose.getNode().getMatrix(), time, MinSG.SkeletalAbstractPose.LINEAR, i);
+        pose.addValue(pose.getNode().getRelTransformationMatrix(), time, MinSG.SkeletalAbstractPose.LINEAR, i);
         pose.restart();
     }
     
@@ -208,7 +208,7 @@ SkeletalAnimation.updateKeyFrame ::= fn(index)
 {
     foreach(keyFrames[index].poses as var pose)
     {
-        pose.updateValueAtIndex(pose.getNode().getMatrix(), index);
+        pose.updateValueAtIndex(pose.getNode().getRelTransformationMatrix(), index);
         pose.restart();
     }
     

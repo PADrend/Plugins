@@ -133,7 +133,7 @@ TransformationTools.TranslationTool := new Type;
 
 			if(smartSteps()){
 				var snap = 1;
-				var currentScaling = this.translationEditNode.getScale();
+				var currentScaling = this.translationEditNode.getRelScaling();
 				foreach(gridSizes as var scaling, var grid){
 					if(scaling>currentScaling)
 						break;
@@ -154,10 +154,10 @@ TransformationTools.TranslationTool := new Type;
 			//! \see TransformationTools.NodeTransformationHandlerTrait
 			foreach( this.getTransformedNodesOrigins() as var node,var origin){
 				var newMatrix = origin.clone().translate(node.worldDirToLocalDir(v));
-				if(node.hasSRT()){
-					node.setSRT( newMatrix.toSRT() );
+				if(node.hasRelTransformationSRT()){
+					node.setRelTransformation( newMatrix.toSRT() );
 				}else{
-					node.setMatrix(newMatrix);
+					node.setRelTransformation(newMatrix);
 				}
 			}
 			// snap (experimental)
@@ -165,7 +165,7 @@ TransformationTools.TranslationTool := new Type;
 				var node = this.getTransformedNodes()[0];
 				var root = node;
 				while(root.hasParent()) root=root.getParent();
-				this.snapNode( this.getTransformedNodes()[0],this.anchors, root, this.translationEditNode.getScale()*0.2 );
+				this.snapNode( this.getTransformedNodes()[0],this.anchors, root, this.translationEditNode.getRelScaling()*0.2 );
 			}
 		};
 
@@ -176,10 +176,10 @@ TransformationTools.TranslationTool := new Type;
 			//! \see TransformationTools.NodeTransformationHandlerTrait
 			foreach( this.getTransformedNodesOrigins() as var node,var origin){
 				var newMatrix = origin.clone().translate(node.worldDirToLocalDir(v));
-				if(node.hasSRT()){
-					node.setSRT( newMatrix.toSRT() );
+				if(node.hasRelTransformationSRT()){
+					node.setRelTransformation( newMatrix.toSRT() );
 				}else{
-					node.setMatrix(newMatrix);
+					node.setRelTransformation(newMatrix);
 				}
 			}
 			// snap (experimental)
@@ -187,7 +187,7 @@ TransformationTools.TranslationTool := new Type;
 				var node = this.getTransformedNodes()[0];
 				var root = node;
 				while(root.hasParent()) root=root.getParent();
-				this.snapNode( this.getTransformedNodes()[0],this.anchors, root, this.translationEditNode.getScale()*0.2 );
+				this.snapNode( this.getTransformedNodes()[0],this.anchors, root, this.translationEditNode.getRelScaling()*0.2 );
 			}
 			
 			//! \see TransformationTools.NodeTransformationHandlerTrait
@@ -214,12 +214,12 @@ TransformationTools.TranslationTool := new Type;
 
 		var metaRootNode = this.getMetaNode();
 		if(localTransform()){
-			var wm = nodes[0].getWorldMatrix();
-			metaRootNode.setSRT(new Geometry.SRT(wm.transformPosition(0,0,0),
+			var wm = nodes[0].getWorldTransformationMatrix();
+			metaRootNode.setRelTransformation(new Geometry.SRT(wm.transformPosition(0,0,0),
 									wm.transformDirection(0,0,-1),wm.transformDirection(0,1,0),1.0));
 		}else{
-			metaRootNode.reset();
-			metaRootNode.setWorldPosition(MinSG.getCombinedWorldBB(nodes).getCenter());
+			metaRootNode.resetRelTransformation();
+			metaRootNode.setWorldOrigin(MinSG.getCombinedWorldBB(nodes).getCenter());
 		}
 	};
 
