@@ -163,7 +163,7 @@ SpielereiPlugin.registerMenus := fn(){
 //						out("Mesh simplification\t\t\t\tTriangles: ", m.getIndexCount() / 3, "\tVertices: ", m.getVertexCount(), "\n");
 
 						frameContext.setCamera(cam);
-						var transMat = (renderingContext.getMatrix_cameraToClip() * renderingContext.getMatrix_worldToCamera()).inverse();
+						var transMat = (renderingContext.getMatrix_cameraToClipping() * renderingContext.getMatrix_worldToCamera()).inverse();
 						Rendering._transformMeshCoordinates(m, Rendering.VertexAttributeIds.POSITION, transMat);
 
 						meshes += m;

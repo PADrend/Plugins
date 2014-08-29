@@ -64,10 +64,10 @@ Effect.end @(override) :=fn(){
 
 	// pass 1: Calculate AO
 	renderingContext.pushAndSetShader(shader);
-	var m = renderingContext.getMatrix_cameraToClip().inverse();
+	var m = renderingContext.getMatrix_cameraToClipping().inverse();
 	
 	shader.setUniform(renderingContext,'inverseProjectionMatrix' , Rendering.Uniform.MATRIX_4X4F,[m]);
-	shader.setUniform(renderingContext,'projectionMatrix' , Rendering.Uniform.MATRIX_4X4F,[renderingContext.getMatrix_cameraToClip()]);
+	shader.setUniform(renderingContext,'projectionMatrix' , Rendering.Uniform.MATRIX_4X4F,[renderingContext.getMatrix_cameraToClipping()]);
 	
 	shader.setUniform(renderingContext,'distancePow' , Rendering.Uniform.FLOAT,[settings['distancePow']() ]);
 	shader.setUniform(renderingContext,'samplingRadius' , Rendering.Uniform.FLOAT,[settings['samplingRadius']() ]);

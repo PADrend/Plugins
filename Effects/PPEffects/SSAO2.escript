@@ -108,10 +108,10 @@ Effect.end @(override) ::= fn(){
 
 	// pass 1: Add SSAO
 	renderingContext.pushAndSetShader(shader);
-	var m = renderingContext.getMatrix_cameraToClip().inverse();
+	var m = renderingContext.getMatrix_cameraToClipping().inverse();
 	
 	shader.setUniform(renderingContext,'inverseProjectionMatrix' , Rendering.Uniform.MATRIX_4X4F,[m]);
-//	shader.setUniform(renderingContext,'projectionMatrix' , Rendering.Uniform.MATRIX_4X4F,[renderingContext.getMatrix_cameraToClip()]);
+//	shader.setUniform(renderingContext,'projectionMatrix' , Rendering.Uniform.MATRIX_4X4F,[renderingContext.getMatrix_cameraToClipping()]);
 	
 	shader.setUniform(renderingContext,'debugBlend' , Rendering.Uniform.FLOAT,[settings['debugBlend']() ]);
 	shader.setUniform(renderingContext,'debugBorder' , Rendering.Uniform.FLOAT,[settings['debugBorder']() ]);
@@ -162,8 +162,8 @@ Effect.beginPass @(override) ::= fn(PADrend.RenderingPass pass){
 	var lastFrameData = this.renderPassInfo[pass.getId()];
 	if(!lastFrameData){
 		lastFrameData = new ExtObject;
-		lastFrameData.lastProjectionMatrix := renderingContext.getMatrix_cameraToClip();
-		lastFrameData.sg_lastProjectionMatrixInverse := renderingContext.getMatrix_cameraToClip().inverse();
+		lastFrameData.lastProjectionMatrix := renderingContext.getMatrix_cameraToClipping();
+		lastFrameData.sg_lastProjectionMatrixInverse := renderingContext.getMatrix_cameraToClipping().inverse();
 		lastFrameData.lastCamMatrix := renderingContext.getMatrix_worldToCamera();
 			
 		this.renderPassInfo[pass.getId()] = lastFrameData;
@@ -203,7 +203,7 @@ Effect.beginPass @(override) ::= fn(PADrend.RenderingPass pass){
 
     renderingContext.setGlobalUniform('sg_eyeToLastEye',Rendering.Uniform.MATRIX_4X4F,[sg_eyeToLastEye]);
   
-//  	lastFrameData.lastProjectionMatrix = renderingContext.getMatrix_cameraToClip().clone();
+//  	lastFrameData.lastProjectionMatrix = renderingContext.getMatrix_cameraToClipping().clone();
   	lastFrameData.lastProjectionMatrix = camera.getFrustum().getProjectionMatrix();
   	lastFrameData.sg_lastProjectionMatrixInverse = lastFrameData.lastProjectionMatrix.inverse();
 
