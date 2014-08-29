@@ -26,21 +26,29 @@
 
 //! \name Coordinate transformations
 //!	\{
+	uniform mat4 sg_matrix_cameraToClipping;
 	uniform mat4 sg_matrix_cameraToWorld;
 	uniform mat4 sg_matrix_modelToCamera;
 	uniform mat4 sg_matrix_modelToClipping;
-
-	//! [fs,vs] Convert an homogeneous coordinate from Eye(=View)Space into WorldSpace.
+	uniform mat4 sg_matrix_worldToCamera;
+	
+	//! [fs,vs] Convert an homogeneous coordinate from Camera(=Eye,View)Space into WorldSpace.
 	vec4 sg_cameraToWorld(in vec4 hcs)			{	return sg_matrix_cameraToWorld  * hcs;	}
+
+	//! [fs,vs] Convert an homogeneous coordinate from CameraSpace into WorldSpace.
+	vec4 sg_cameraToClipping(in vec4 hcs)		{	return sg_matrix_cameraToClipping * hcs; }
 
 	//! [fs,vs] Convert an homogeneous coordinate from ModelSpace into Eye(=View)Space.
 	vec4 sg_modelToCamera(in vec4 hms)			{	return sg_matrix_modelToCamera * hms;	}
 
+	//! [fs,vs] Convert an homogeneous coordinate from ModelSpace into ClippingSpace.
+	vec4 sg_modelToClipping(in vec4 hms)		{	return sg_matrix_modelToClipping * hms; }
+
 	//! [fs,vs] Convert an homogeneous coordinate from ModelSpace into WorldSpace.
 	vec4 sg_modelToWorld(vec4 hms)				{	return sg_matrix_cameraToWorld * sg_matrix_modelToCamera * hms;	}
 
-	//! [fs,vs] Convert an homogeneous coordinate from ModelSpace into WorldSpace.
-	vec4 sg_modelToClipping(in vec4 hms)		{	return sg_matrix_modelToClipping * hms; }
+	//! [fs,vs] Convert an homogeneous coordinate from WorldSpace into CameraSpace.
+	vec4 sg_worldToCamera(in vec4 hws)			{	return sg_matrix_worldToCamera * hws; }
 //! \}
 
 // -------------------
