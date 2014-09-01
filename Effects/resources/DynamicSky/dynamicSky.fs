@@ -35,6 +35,8 @@ const float bloomingScale = 1.0;
 const float wobble = 0.4;
 const float cloudCutLine = 0.08; // 0.05-0.015
 
+uniform mat4 sg_matrix_worldToCamera; // used for mrt
+
 void main(void){
 
 	// Always output nearly maximum depth. Maximum depth (= 1.0) gets clipped.
@@ -62,6 +64,8 @@ void main(void){
 	// used to smoothly blend  out clouds near the horizon
 	float noCloudsNearHorizon =  1.0 - clamp( pow(1.0+norm.y+cloudCutLine,48.0),0.0,1.0);
 
+	
+	vec3 normal_ws = vec3(0,-1,0); // used for mrt
 	// this can reduce the number of calculations and texture lookups
 	if(noCloudsNearHorizon>0.20){
 		// ---------------------------
@@ -81,7 +85,6 @@ void main(void){
 		vec3 cNorm = normalize(texture2D(BumpMap, texCoord_1).xyz +
 							   0.5*texture2D(BumpMap, texCoord_2).xyz +
 							   0.25*texture2D(BumpMap, texCoord_3b).xyz);
-
 		// ---------------------------
 		// -- add clouds to skyColor
 		// \note if cloudDensity is high, the blooming is reduced
@@ -92,6 +95,8 @@ void main(void){
 		cloudStrength = pow(clamp((cloudDepth-(1.0-cloudDensity))*4.0,0.0,noCloudsNearHorizon),3.0 );
 		
 		skyColor = mix( skyColor, cloudColor.rgb  * cloudBrightness, cloudStrength );
+		normal_ws = normalize(mix( normal_ws, cNorm,cloudStrength));
+
 	}
 
 	// ---------------------------
@@ -112,6 +117,16 @@ void main(void){
 		skyColor += vec3(coreSunPower);
 	}
 
-	gl_FragColor = vec4( skyColor,1.0);
-//    gl_FragColor = vec4(cNorm*abs(dot(cNorm, lightDir)) ,0.0);
+//	gl_FragColor = vec4( skyColor,1.0); // "normal" color
+	
+	// multiple render targets \see universal3/main_mrt.sfn
+	{
+		gl_FragData[0] = vec4( skyColor,1.0);		// "normal" color
+		vec4 pos_hcs = sg_matrix_worldToCamera * vec4(vpos,1.0);
+		gl_FragData[1] = vec4( pos_hcs.xyz/pos_hcs.w,0.0); 									// pos_cs
+		gl_FragData[2] = vec4( (sg_matrix_worldToCamera * vec4(normal_ws,0.0)).xyz,0.0); 	// normal_cs
+		gl_FragData[3] = vec4( skyColor,1.0); 												// ambient (emission)
+		gl_FragData[4] = vec4( 0.0); 														// diffuse
+		gl_FragData[5] = vec4( 0.0); 														// specular
+	}
 }

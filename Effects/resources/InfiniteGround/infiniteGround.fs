@@ -84,7 +84,7 @@ uniform int sg_viewport[4];
 // ----------------------------------------------------------------
 // general helper
 
-vec3 worldPosToEyePos(const in vec3 worldPos) {
+vec3 worldPosToCamPos(const in vec3 worldPos) {
 	vec4 v = sg_matrix_worldToCamera * vec4(worldRot*worldPos, 1.0);
 	return v.xyz / v.w;
 }
@@ -135,7 +135,7 @@ float fresnel(float NdotL, float fresnelBias, float fresnelPow) {
 	float facing = (1.0 - NdotL);
 	return max(fresnelBias + (1.0 - fresnelBias) * pow(facing, fresnelPow), 0.0);
 }
-void calculateWater(const in vec2 groundPos, const in vec3 worldLightDir,  out vec3 eyeGroundIntersection,
+void calculateWater(const in vec2 groundPos, const in vec3 worldLightDir,  out vec3 groundPos_cam,
 					out vec3 color, out vec3 worldNormal , const in vec3 worldGroundIntersection) {
 
 	vec3 f0 = texture2D(texture_1, (groundPos * 2.0) / noiseScale + wave0.xy).rgb;
@@ -155,11 +155,11 @@ void calculateWater(const in vec2 groundPos, const in vec3 worldLightDir,  out v
 	color = ((refl * reflection) + ( waterColor2 *(1.0-reflection))  )* fres + waterColor;
 	
 	// add some height (modified depth values) to the waves
-	eyeGroundIntersection = worldPosToEyePos(worldGroundIntersection + vec3(0.0,1.0,0.0)*( f0.r*0.2 +f1.g*0.15 +f2.b*0.1+f3.r*0.05 ));
+	groundPos_cam = worldPosToCamPos(worldGroundIntersection + vec3(0.0,1.0,0.0)*( f0.r*0.2 +f1.g*0.15 +f2.b*0.1+f3.r*0.05 ));
 }
 // ----------------------------------------------------------------
-float calcFragmentDepth(const in vec3 eyeGroundIntersection){
-	vec4 windowCoord = gl_ProjectionMatrix * vec4(eyeGroundIntersection, 1.0);
+float calcFragmentDepth(const in vec3 groundPos_cam){
+	vec4 windowCoord = gl_ProjectionMatrix * vec4(groundPos_cam, 1.0);
 	// Clamp here to prevent clipping.
 	return  clamp(0.5 + 0.5 * windowCoord.z / windowCoord.w, 0.0, 0.99999);
 }
@@ -182,15 +182,18 @@ void main(void) {
 
 	// ground intersection
 	vec3 worldGroundIntersection = viewerPos - worldDistance * nWorldDir;
-	vec3 eyeGroundIntersection = worldPosToEyePos(worldGroundIntersection);
-
+	vec3 groundPos_cam = worldPosToCamPos(worldGroundIntersection);
+	gl_FragData[1] = vec4( groundPos_cam,0.0); 											// pos_cs
+	gl_FragData[2] = vec4( (sg_matrix_worldToCamera * vec4(0.0,1.0,0.0,0.0)).xyz,0.0); 	// normal_cs
+	gl_FragData[4] = vec4( 0.0); 														// diffuse
+	gl_FragData[5] = vec4( 0.0); 														// specular
 
 	vec3 worldLightDir = normalize(sunPosition.xyz);
 
 	// fragment completely in haze?
 	if(useHaze && worldDistance >= hazeFar) {
-		gl_FragColor = vec4( hazeColor + vec3(sunGlow(worldLightDir)) , 1.0);
-		gl_FragDepth = calcFragmentDepth(eyeGroundIntersection);
+		gl_FragData[0] = gl_FragData[3] = vec4( hazeColor + vec3(sunGlow(worldLightDir)) , 1.0);
+		gl_FragDepth = calcFragmentDepth(groundPos_cam);
 		return;
 	}
 	vec3 worldNormal = vec3(0.0, 1.0, 0.0);
@@ -206,14 +209,14 @@ void main(void) {
 	} else if(type == TYPE_CHESSBOARD) {
 		calculateChessboard(groundPos, color);
 	} else if(type == TYPE_WATER) {
-		calculateWater(groundPos, worldLightDir, eyeGroundIntersection, color, worldNormal,worldGroundIntersection);
+		calculateWater(groundPos, worldLightDir, groundPos_cam, color, worldNormal,worldGroundIntersection);
 	} else if(type == TYPE_GRID) {
 		if(mod(groundPos.x+0.01,1.0)>0.02 && mod(groundPos.y+0.01,1.0)>0.02 )
 			discard;
 		color = vec3(1.0,1.0,1.0);
 	} 
 	// set the depth value
-	gl_FragDepth = calcFragmentDepth(eyeGroundIntersection);
+	gl_FragDepth = calcFragmentDepth(groundPos_cam);
 
 	{
 		// add lighting (sunlight)
@@ -234,5 +237,12 @@ void main(void) {
 		color += sunGlow(worldLightDir);
 	}
 
-	gl_FragColor = vec4(color, 1.0);
+//	gl_FragColor = vec4(color, 1.0);
+	
+	// multiple render targets \see universal3/main_mrt.sfn
+	{
+		gl_FragData[0] = vec4( color,1.0);											// "normal" color
+		gl_FragData[3] = vec4( color,1.0); 											// ambient (emission)
+	}
+
 }
