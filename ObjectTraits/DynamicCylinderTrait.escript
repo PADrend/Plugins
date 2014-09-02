@@ -21,7 +21,7 @@
 	\see MinSG.PersistentNodeTrait
 	\todo generate texture coordinates
 */
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/DynamicCylinderTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/DynamicCylinderTrait');
 
 trait.onInit += fn(MinSG.GeometryNode node){
 	var cylRadius = node.getNodeAttributeWrapper('cylRadius', node.getBB().getExtentX()*0.5 );

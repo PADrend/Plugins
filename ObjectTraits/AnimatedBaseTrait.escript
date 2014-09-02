@@ -56,7 +56,7 @@ AnimationHandler._call ::= fn(caller,mode,time=0){
 	}
 };
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/AnimatedBaseTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/AnimatedBaseTrait');
 
 trait.onInit += fn(MinSG.Node node){
 

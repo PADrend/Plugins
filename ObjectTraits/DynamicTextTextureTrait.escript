@@ -12,7 +12,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/DynamicTextTextureTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/DynamicTextTextureTrait');
     static font =  GUI.FONT_ID_LARGE;
     static textState;
 	static createTexture = fn(String text){

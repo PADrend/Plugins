@@ -23,7 +23,7 @@
 	\todo visualize locations?
 	\todo support position locations
 */
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/KeyFrameAnimationTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/KeyFrameAnimationTrait');
 
 trait.onInit += fn(MinSG.Node node){
 	node.animationSpeed :=  node.getNodeAttributeWrapper('animationSpeed', 1.0 );

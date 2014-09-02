@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/DynamicBoxTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/DynamicBoxTrait');
 
 trait.onInit += fn(MinSG.GeometryNode node){
 	var boxDimX = new Std.DataWrapper(node.getBB().getExtentX());

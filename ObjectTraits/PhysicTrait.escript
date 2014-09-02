@@ -12,7 +12,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/PhysicTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/PhysicTrait');
 
 
 trait.onInit += fn( node){

@@ -104,7 +104,7 @@ static highlightState = new MetaNodeState;
 
 // ----------------------------------
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/MetaObjectTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/MetaObjectTrait');
 
 trait.onInit += fn(MinSG.GeometryNode node){
 	node += highlightState;

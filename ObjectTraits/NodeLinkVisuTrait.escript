@@ -128,7 +128,7 @@ LinkState.doDisableState ::= fn(node,params){
 };
 
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/NodeLinkVisuTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/NodeLinkVisuTrait');
 
 trait.onInit += fn(MinSG.Node node){
 

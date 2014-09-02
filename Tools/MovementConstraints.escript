@@ -82,8 +82,9 @@ plugin.init @(override) := fn(){
 		if(b){
 			var dolly = PADrend.getDolly();
 			//! \see MinSG.TransformationObserverTrait
-			if(!Traits.queryTrait(dolly,MinSG.TransformationObserverTrait))
-				Traits.addTrait(dolly,MinSG.TransformationObserverTrait);
+			var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
+			if(!Traits.queryTrait(dolly,TransformationObserverTrait))
+				Traits.addTrait(dolly,TransformationObserverTrait);
 			
 			clear += Std.addRevocably( dolly.onNodeTransformed, [dolly] => fn(dolly,node){
 				static active;

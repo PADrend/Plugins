@@ -17,7 +17,7 @@
  
  */
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/ButtonTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/ButtonTrait');
 
 trait.onInit += fn(MinSG.Node node){
 

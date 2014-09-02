@@ -12,7 +12,7 @@
  */
 
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/TransformationProxyTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/TransformationProxyTrait');
 
 
 static transformationInProgress = false;
@@ -73,8 +73,9 @@ trait.onInit += fn(MinSG.Node node){
 	}
 
 	//! \see  MinSG.TransformationObserverTrait
-	if(!Traits.queryTrait(node, MinSG.TransformationObserverTrait))
-		Traits.addTrait(node, MinSG.TransformationObserverTrait);
+	var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
+	if(!Traits.queryTrait(node, TransformationObserverTrait))
+		Traits.addTrait(node, TransformationObserverTrait);
 		
 	//! \see  MinSG.TransformationObserverTrait		
 	node.onNodeTransformed += [transformedNodes] => fn(transformedNodes,node){

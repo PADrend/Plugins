@@ -77,7 +77,7 @@ SceneManagement.init := fn(){
 
 	{
 		registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+2);
-		registerExtension('PADrend_OnSceneRegistered', MinSG.initPersistentNodeTraits);
+		registerExtension('PADrend_OnSceneRegistered', Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree);
 	}
 	
 	return true;

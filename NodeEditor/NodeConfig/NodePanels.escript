@@ -115,15 +115,16 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.Node, fn(node){
 			};
 		}
 	}
+	@(once) static PersistentNodeTrait = Std.require('LibMinSGExt/Traits/PersistentNodeTrait');
 	
 	if(node.isInstance()){
-		var inheritedTraits = MinSG.getLocalPersistentNodeTraitNames(node.getPrototype());
+		var inheritedTraits = PersistentNodeTrait.getLocalPersistentNodeTraitNames(node.getPrototype());
 		if(!inheritedTraits.empty()){
 			entries += GUI.NEXT_ROW;
 			entries += "PersistentNodeTraits (inherited): "+inheritedTraits.implode(", ");
 		}
 	}
-	var localTraits = MinSG.getLocalPersistentNodeTraitNames(node);
+	var localTraits = PersistentNodeTrait.getLocalPersistentNodeTraitNames(node);
 	if(!localTraits.empty()){
 		entries += GUI.NEXT_ROW;
 		entries += "PersistentNodeTraits (local): "+localTraits.implode(", ");

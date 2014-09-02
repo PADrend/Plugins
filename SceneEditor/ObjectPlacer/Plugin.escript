@@ -39,7 +39,7 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn(){
 	registerExtension('PADrend_Init',this->this.ex_Init);
-	registerExtension('ObjectPlacer_OnObjectInserted',	MinSG.initPersistentNodeTraits );
+	registerExtension('ObjectPlacer_OnObjectInserted',	Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree );
 
 	var modules = [
         __DIR__+"/BuiltinLib.escript",

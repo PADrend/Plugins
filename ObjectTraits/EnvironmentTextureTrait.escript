@@ -23,7 +23,7 @@
 	- envMap_updateOnTranslation	(DataWrapper,Bool) If true, the texture is refreshed when the node is moved.
 
 */
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/EnvironmentTextureTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/EnvironmentTextureTrait');
 
 trait.attributes.envMap_update ::= fn(){
 	var resolution = this.envMap_resolution();
@@ -78,8 +78,9 @@ trait.onInit += fn(MinSG.Node node){
 	
 	node.envMap_updateOnTranslation.onDataChanged += [node]=>fn(node,b){
 		if(b){
-			if(!Traits.queryTrait(node,MinSG.TransformationObserverTrait))
-				Traits.addTrait( node,MinSG.TransformationObserverTrait );
+			var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
+			if(!Traits.queryTrait(node, TransformationObserverTrait))
+				Traits.addTrait( node, TransformationObserverTrait );
 			node.onNodeTransformed += fn(...){
 				if( this.envMap_updateOnTranslation() )
 					this.envMap_update();

@@ -84,16 +84,18 @@ t.onInit += fn( MinSG.GroupNode dolly ){
 	frameWrapper.onDataChanged += [dolly] => updateCameras;
 
 	//! \see MinSG.TransformationObserverTrait
-	if(!Traits.queryTrait(dolly,MinSG.TransformationObserverTrait))
-		Traits.addTrait(dolly,MinSG.TransformationObserverTrait);
+	var TransformationObserverTrait = module('./TransformationObserverTrait');
+	if(!Traits.queryTrait(dolly, TransformationObserverTrait))
+		Traits.addTrait(dolly, TransformationObserverTrait);
 	dolly.onNodeTransformed += [dolly,frameWrapper] => fn(dolly,frameWrapper,node){	
 		if(node!=dolly)
 			updateCameras(dolly,frameWrapper());	
 	};
 	
 	//! \see MinSG.NodeAddedObserverTrait
-	if(!Traits.queryTrait(dolly,MinSG.NodeAddedObserverTrait))
-		Traits.addTrait(dolly,MinSG.NodeAddedObserverTrait);
+	var NodeAddedObserverTrait = module('./NodeAddedObserverTrait');
+	if(!Traits.queryTrait(dolly, NodeAddedObserverTrait))
+		Traits.addTrait(dolly, NodeAddedObserverTrait);
 	dolly.onNodeAdded += [dolly,frameWrapper]=>fn(dolly,frameWrapper,...){	updateCameras(dolly,frameWrapper());	};
 
 	dolly.setFrame := [frameWrapper] => fn(frameWrapper, [Array,void,false] frame){	frameWrapper(frame ? frame : void); /* allow false for backward compatibility */	};

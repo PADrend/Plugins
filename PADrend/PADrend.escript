@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2008-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2007-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2007-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2011 David Maicher
  * Copyright (C) 2009 Jan Krems
  * Copyright (C) 2011 Ralf Petring <ralf@petring.net>
@@ -18,34 +18,29 @@
  **	[PADrend] PADrend/PADrend.escript
  **/
 
-out("-"*79,"\n");
-out("PADrend 1.0.0 (Platform for Algorithm Development and rendering)\n\n");
-out("http://www.padrend.de/\n");
-out("Libs:\t",EScript.VERSION_STRING,"\n\t",MinSG.VERSION, "\n");
-out("Build:\t", (SIZE_OF_PTR==8?64:32)," bit ", BUILD_TYPE ,"\n");
-out("\n","-"*79,"\n");
+outln("-"*79);
+outln("PADrend 1.0.0 (Platform for Algorithm Development and rendering)\n");
+outln("http://www.padrend.de/");
+outln("Libs:\t",EScript.VERSION_STRING,"\n\t",MinSG.VERSION);
+outln("Build:\t", (SIZE_OF_PTR==8?64:32)," bit ", BUILD_TYPE );
+outln("\n","-"*79);
+
+if(EScript.VERSION<607)
+	throw "Incompatible EScript version!";
 
 // ------------------
 
 {
 	out(("Loading Util scripts...").fillUp(40));
 	
-	if(EScript.VERSION<607){
-		loadOnce ("LibUtilExt/deprecated/DataWrapper.escript");
-		loadOnce ("LibUtilExt/deprecated/PriorityQueue.escript");
-		loadOnce ("LibUtilExt/deprecated/EScript_Utils.escript");
-		loadOnce ("LibUtilExt/deprecated/CommonTraits.escript");
-	}
 	
 	loadOnce ("LibUtilExt/PluginManagement.escript");
 	loadOnce ("LibUtilExt/deprecated/Listener.escript");
 	loadOnce ("LibUtilExt/Misc_Utils.escript");
 
 	loadOnce ("LibMinSGExt/Geometry_Utils.escript");
-	Std.require('LibMinSGExt/RendRayCaster');
 	Std.require('LibMinSGExt/MinSG_Utils');
 	loadOnce ("LibMinSGExt/NodeExtensions.escript");
-	loadOnce ("LibMinSGExt/NodeTraits.escript");
 	loadOnce ("LibMinSGExt/Rendering_Utils.escript");	
 	loadOnce ("LibMinSGExt/SemanticObject.escript");	
 	loadOnce ("LibMinSGExt/MeshBuilderExtensions.escript");	

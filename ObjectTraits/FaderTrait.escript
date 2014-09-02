@@ -23,7 +23,7 @@
 
 */
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/FaderTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/FaderTrait');
 
 trait.onInit += fn(MinSG.Node node){
     var blendingValue = new DataWrapper(0); // 0 fully visible ... 1 invisible(deactivated)

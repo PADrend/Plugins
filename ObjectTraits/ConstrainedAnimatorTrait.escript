@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/ConstrainedAnimatorTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/ConstrainedAnimatorTrait');
 
 trait.onInit += fn(MinSG.Node node){
 	//! \see ObjectTraits/Helper/ContinuousActionPerformerTrait

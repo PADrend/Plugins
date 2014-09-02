@@ -57,7 +57,7 @@ static storeEntries = fn(MinSG.Node node,Array entries){
 
 // ------------------------------
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/NodeLinkTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/NodeLinkTrait');
 
 trait.onInit += fn(MinSG.Node node){
 	

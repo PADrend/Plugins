@@ -209,7 +209,7 @@ plugin.init @(override) := fn() {
 					var c = node.clone();
 					node.getParent() += c;
 					newNodes += c;
-					MinSG.initPersistentNodeTraits(c);
+					Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(c);
 				}
 			}
 			PADrend.message(""+newNodes.count()+" nodes duplicated." );
@@ -267,7 +267,7 @@ plugin.init @(override) := fn() {
 					var n2=node.clone();
 					MinSG.changeParentKeepTransformation(n2,parentNode);
 					clones+=n2;
-					MinSG.initPersistentNodeTraits(n2);
+					Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(n2);
 
 					out(".");
 				}

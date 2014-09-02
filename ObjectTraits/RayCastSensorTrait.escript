@@ -21,7 +21,7 @@
 	\note Adds the ObjectTraits/NodeLinkTrait to the subject node.
 	\note Adds the ObjectTraits/Helper/NodeSensorTrait to the subject node.
 */
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/RayCastSensorTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/RayCastSensorTrait');
 
 
 static rayCast = fn(sensorNode,Array geomNodes){

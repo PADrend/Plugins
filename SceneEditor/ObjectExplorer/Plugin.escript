@@ -182,7 +182,7 @@ plugin.initGUI := fn(){
 
 	gui.registerComponentProvider('ObjectEditor_ObjectConfig.5_traits',fn(MinSG.Node node,refreshCallback){
 		var entries = [];
-		foreach( MinSG.getLocalPersistentNodeTraitNames(node) as var traitName){
+		foreach( Std.require('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node) as var traitName){
 			var provider = traitRegistry.getGUIProvider(traitName);
 			if( provider ){
 				
@@ -227,7 +227,7 @@ plugin.initGUI := fn(){
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Add object trait",
 				GUI.MENU : [node,refreshCallback] => fn(node,refreshCallback){
-					var enabledTraitNames =  new Set(MinSG.getLocalPersistentNodeTraitNames(node));
+					var enabledTraitNames =  new Set(Std.require('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node));
 					
 					var entries = [];
 					foreach( traitRegistry.getTraits() as var name,var trait ){

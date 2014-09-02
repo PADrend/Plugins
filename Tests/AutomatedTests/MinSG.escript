@@ -103,9 +103,13 @@ tests += new Tests.AutomatedTest( "MinSG: tree observer",fn(){
 	var moved = [];
 
 	var root = new MinSG.ListNode;
-	Traits.addTrait(root,MinSG.NodeAddedObserverTrait, added->added.pushBack ); //! \see MinSG.NodeAddedObserverTrait
-	Traits.addTrait(root,MinSG.TransformationObserverTrait, moved->moved.pushBack ); //! \see MinSG.TransformationObserverTrait
-	Traits.addTrait(root,MinSG.NodeRemovedObserverTrait, [removed]=>fn(removed,parent,node){removed+=[parent,node,node.isDestroyed()];} ); //! \see MinSG.NodeRemovedObserverTrait
+	var NodeAddedObserverTrait = Std.require('LibMinSGExt/Traits/NodeAddedObserverTrait');
+	var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
+	var NodeRemovedObserverTrait = Std.require('LibMinSGExt/Traits/NodeRemovedObserverTrait');
+	
+	Traits.addTrait(root, NodeAddedObserverTrait, added->added.pushBack ); //! \see MinSG.NodeAddedObserverTrait
+	Traits.addTrait(root, TransformationObserverTrait, moved->moved.pushBack ); //! \see MinSG.TransformationObserverTrait
+	Traits.addTrait(root, NodeRemovedObserverTrait, [removed]=>fn(removed,parent,node){removed+=[parent,node,node.isDestroyed()];} ); //! \see MinSG.NodeRemovedObserverTrait
 
 	var c1 = new MinSG.ListNode;
 	root += c1;
@@ -460,7 +464,7 @@ tests += new Tests.AutomatedTest( "MinSG: Persistent node traits",fn(){
 	declareNamespace($MinSG,$_Test);
 	
 	var traitName = 'MinSG/_Test/PersistentNodeTestTrait';
-	var t = new MinSG.PersistentNodeTrait(traitName);
+	var t = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))(traitName);
 	Std._unregisterModule(traitName);
 	Std._registerModule(traitName,t);
 	
@@ -481,13 +485,14 @@ tests += new Tests.AutomatedTest( "MinSG: Persistent node traits",fn(){
 	var n2 = MinSG.Node.createInstance(n1); // trait is not yet initialized
 	root += n2;
 
-	MinSG.initPersistentNodeTraits(root); // trait of n1 is not touched; n2 is initialized.
+	var PersistentNodeTrait = Std.require('LibMinSGExt/Traits/PersistentNodeTrait');
+	PersistentNodeTrait.initTraitsInSubtree(root); // trait of n1 is not touched; n2 is initialized.
 
 	return	t.initCounter == 2 && 
 			n1.foo == "bar" && n1.m0 == 1 && n1.m1 == 2 &&
 			n2.foo == "bar" && n2.m0 == 1 && n2.m1 == 2 &&
-			MinSG.getLocalPersistentNodeTraitNames(n1) == [t.getName()] &&
-			MinSG.getLocalPersistentNodeTraitNames(n2) == [] && MinSG.getPersistentNodeTraitNames(n2) == [t.getName()] &&
+			PersistentNodeTrait.getLocalPersistentNodeTraitNames(n1) == [t.getName()] &&
+			PersistentNodeTrait.getLocalPersistentNodeTraitNames(n2) == [] && PersistentNodeTrait.getPersistentNodeTraitNames(n2) == [t.getName()] &&
 			true;
 			
 });

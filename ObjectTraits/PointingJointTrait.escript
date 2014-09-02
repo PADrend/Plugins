@@ -41,7 +41,7 @@ static addRevocably = fn( array, callback ){
 };
 
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/PointingJointTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/PointingJointTrait');
 
 trait.onInit += fn(MinSG.Node node){
     node.__mountNode := new DataWrapper;
@@ -91,9 +91,9 @@ trait.onInit += fn(MinSG.Node node){
 	var registerTransformationListener = [updateLocation] => fn(updateLocation,revoce, newNode){
 		revoce();
 		//! \see  MinSG.TransformationObserverTrait
-		if(!Traits.queryTrait(newNode, MinSG.TransformationObserverTrait))
-			Traits.addTrait(newNode, MinSG.TransformationObserverTrait);
-		//! \see  MinSG.TransformationObserverTrait
+		var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
+		if(!Traits.queryTrait(newNode, TransformationObserverTrait))
+			Traits.addTrait(newNode, TransformationObserverTrait);
 		revoce += addRevocably( newNode.onNodeTransformed, updateLocation);
 	};
 

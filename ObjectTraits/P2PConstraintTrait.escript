@@ -24,7 +24,7 @@
 
 */
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/P2PConstraintTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/P2PConstraintTrait');
 
 trait.onInit += fn(MinSG.Node node){
     node.__targetNode := new DataWrapper;

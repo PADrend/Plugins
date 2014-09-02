@@ -37,7 +37,7 @@ static addRevocably = fn( array, callback ){
 };
 
 
-static trait = new MinSG.PersistentNodeTrait('ObjectTraits/NodeLinkHighlightTrait');
+static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/NodeLinkHighlightTrait');
 
 trait.onInit += fn(MinSG.Node node){
 
