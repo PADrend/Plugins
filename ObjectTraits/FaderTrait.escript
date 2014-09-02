@@ -78,8 +78,7 @@ trait.onInit += fn(MinSG.Node node){
     @(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
 
 	//! \see ObjectTraits/NodeLinkTrait
-	if(!Traits.queryTrait(node,NodeLinkTrait))
-		Traits.addTrait(node,NodeLinkTrait);
+	Traits.assureTrait(node,NodeLinkTrait);
 
 	static roleName = "fade";
 
@@ -118,11 +117,7 @@ trait.onInit += fn(MinSG.Node node){
 	};
 
 // ----------------------------
-
-	@(once) static AnimatedBaseTrait = Std.require('ObjectTraits/AnimatedBaseTrait');
-
-	if(!Traits.queryTrait(node,AnimatedBaseTrait))
-		Traits.addTrait(node,AnimatedBaseTrait);
+	Traits.assureTrait(node,Std.require('ObjectTraits/AnimatedBaseTrait'));
 
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationInit += [blendingValue] => fn(blendingValue, time){

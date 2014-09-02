@@ -57,8 +57,7 @@ GUI.DraggableTrait := new Traits.GenericTrait("GUI.DraggableTrait");
 
 	t.onInit += fn(GUI.Component c,Array mouseButtons = [Util.UI.MOUSE_BUTTON_LEFT, Util.UI.MOUSE_BUTTON_RIGHT] ){
 		//! \see MouseButtonListenerTrait
-		if(!Traits.queryTrait(c, MouseButtonListenerTrait))
-			Traits.addTrait(c, MouseButtonListenerTrait);
+		Traits.assureTrait(c, MouseButtonListenerTrait);
 	
 		(c->fn(mouseButtons){ _dragging_possibleButtons = mouseButtons;	})(mouseButtons.clone());
 		c.onMouseButton += fn(evt){

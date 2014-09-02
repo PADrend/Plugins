@@ -51,11 +51,8 @@ trait.onInit += fn(MinSG.Node node){
 
     // ---------------------------------------------------------
 
-    @(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
-
 	//! \see ObjectTraits/NodeLinkTrait
-	if(!Traits.queryTrait(node,NodeLinkTrait))
-		Traits.addTrait(node,NodeLinkTrait);
+	Traits.assureTrait(node,Std.require('ObjectTraits/NodeLinkTrait'));
 
 
 	var updateLocation = [node] => fn(node, ...){
@@ -91,9 +88,7 @@ trait.onInit += fn(MinSG.Node node){
 	var registerTransformationListener = [updateLocation] => fn(updateLocation,revoce, newNode){
 		revoce();
 		//! \see  MinSG.TransformationObserverTrait
-		var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
-		if(!Traits.queryTrait(newNode, TransformationObserverTrait))
-			Traits.addTrait(newNode, TransformationObserverTrait);
+		Traits.assureTrait(newNode, Std.require('LibMinSGExt/Traits/TransformationObserverTrait'));
 		revoce += addRevocably( newNode.onNodeTransformed, updateLocation);
 	};
 

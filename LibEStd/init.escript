@@ -103,6 +103,14 @@ if(EScript.VERSION>=701){
 
 
 // --------------------------------------------------
+// Traits
+Std.Traits.assureTrait := fn( object, trait ){
+	if(!Std.Traits.queryTrait(object,trait))
+		Std.Traits.addTrait(object,trait);
+};
+
+
+// --------------------------------------------------
 // DataWrapper
 
 Std.DataWrapper.createFromConfig ::= Std.DataWrapper.createFromEntry;

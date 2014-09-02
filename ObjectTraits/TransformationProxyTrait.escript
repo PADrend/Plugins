@@ -21,11 +21,8 @@ trait.onInit += fn(MinSG.Node node){
 
 	node.transformationProxyEnabled := new DataWrapper(true);
 	
-	@(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
-
 	//! \see ObjectTraits/NodeLinkTrait
-	if(!Traits.queryTrait(node,NodeLinkTrait))
-		Traits.addTrait(node,NodeLinkTrait);	
+	Traits.assureTrait(node,module('./NodeLinkTrait'));	
 	
 	static roleName = "transform";
 	
@@ -73,9 +70,7 @@ trait.onInit += fn(MinSG.Node node){
 	}
 
 	//! \see  MinSG.TransformationObserverTrait
-	var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
-	if(!Traits.queryTrait(node, TransformationObserverTrait))
-		Traits.addTrait(node, TransformationObserverTrait);
+	Traits.assureTrait(node, Std.require('LibMinSGExt/Traits/TransformationObserverTrait'));
 		
 	//! \see  MinSG.TransformationObserverTrait		
 	node.onNodeTransformed += [transformedNodes] => fn(transformedNodes,node){

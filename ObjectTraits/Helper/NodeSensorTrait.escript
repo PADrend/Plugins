@@ -65,21 +65,15 @@ trait.onInit += fn(MinSG.Node node){
 			var handler = [rootNode] => querySensor;
 
 			//! \see MinSG.NodeAddedObserverTrait
-			var NodeAddedObserverTrait = Std.require('LibMinSGExt/Traits/NodeAddedObserverTrait');
-			if(!Traits.queryTrait(dolly, NodeAddedObserverTrait))
-				Traits.addTrait(dolly, NodeAddedObserverTrait);
+			Traits.assureTraitassureTrait(dolly, Std.require('LibMinSGExt/Traits/NodeAddedObserverTrait'));
 			rootNode.onNodeAdded += handler;
 			
 			//! \see MinSG.NodeRemovedObserverTrait
-			var NodeRemovedObserverTrait = Std.require('LibMinSGExt/Traits/NodeRemovedObserverTrait');
-			if(!Traits.queryTrait(rootNode, NodeRemovedObserverTrait))
-				Traits.addTrait(rootNode, NodeRemovedObserverTrait);
+			Traits.assureTrait(rootNode, Std.require('LibMinSGExt/Traits/NodeRemovedObserverTrait'));
 			rootNode.onNodeRemoved += handler;
 			
 			//! \see MinSG.TransformationObserverTrait
-			var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
-			if(!Traits.queryTrait(rootNode, TransformationObserverTrait))
-				Traits.addTrait(rootNode, TransformationObserverTrait);
+			Traits.assureTrait(rootNode, Std.require('LibMinSGExt/Traits/TransformationObserverTrait'));
 			rootNode.onNodeTransformed += handler;
 			
 			node.onNodeTransformed += handler;

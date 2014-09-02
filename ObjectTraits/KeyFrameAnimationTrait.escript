@@ -69,9 +69,7 @@ trait.onInit += fn(MinSG.Node node){
 	node.animationKeyFrames := keyFrames;
 
 
-	@(once) static AnimatedBaseTrait = Std.require('ObjectTraits/AnimatedBaseTrait');
-	if(!Traits.queryTrait(node,AnimatedBaseTrait))
-		Traits.addTrait(node,AnimatedBaseTrait);
+	Traits.assureTrait(node,Std.require('ObjectTraits/AnimatedBaseTrait'));
 	
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationInit += fn(time){

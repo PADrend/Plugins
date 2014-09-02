@@ -43,8 +43,7 @@ var t = new Traits.GenericTrait("GUI.ContextMenuTrait");
 
 t.attributes.contextMenuProvider @(init) := Array;
 t.onInit += fn(GUI.Component c,Number menuWidth = 150){
-	if(!Traits.queryTrait(c, MouseButtonListenerTrait))
-		Traits.addTrait(c, MouseButtonListenerTrait);
+	Traits.assureTrait(c, MouseButtonListenerTrait);
 	
 	//! \see MouseButtonListenerTrait
 	c.onMouseButton += [menuWidth] => fn(menuWidth, buttonEvent){

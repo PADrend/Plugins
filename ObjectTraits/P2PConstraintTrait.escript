@@ -34,16 +34,11 @@ trait.onInit += fn(MinSG.Node node){
 
     // ---------------------------------------------------------
 
-    @(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
-    @(once) static physicTrait = Std.require('ObjectTraits/PhysicTrait');
-
 	//! \see ObjectTraits/PhysicTrait
-    if(!Traits.queryTrait(node,physicTrait))
-		Traits.addTrait(node,physicTrait);
+	Traits.assureTrait(node,Std.require('ObjectTraits/PhysicTrait'));
 
 	//! \see ObjectTraits/NodeLinkTrait
-	if(!Traits.queryTrait(node,NodeLinkTrait))
-		Traits.addTrait(node,NodeLinkTrait);
+	Traits.assureTrait(node,Std.require('ObjectTraits/NodeLinkTrait'));
 
 	// ---------------------------------------------------
 

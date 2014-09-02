@@ -47,14 +47,10 @@ static rayCast = fn(sensorNode,Array geomNodes){
 trait.onInit += fn(MinSG.Node node){
 
 	//! \see ObjectTraits/Helper/NodeLinkTrait
-	@(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
-	if(!Traits.queryTrait(node,NodeLinkTrait))
-		Traits.addTrait(node,NodeLinkTrait);	
+	Traits.assureTrait(node,module('./NodeLinkTrait'));	
 
 	//! \see ObjectTraits/Helper/NodeSensorTrait
-	@(once) static NodeSensorTrait = Std.require('ObjectTraits/Helper/NodeSensorTrait');
-	if(!Traits.queryTrait(node,NodeSensorTrait))
-		Traits.addTrait(node,NodeSensorTrait);
+	Traits.assureTrait(node,module('./Helper/NodeSensorTrait'));
 
 
 	//! \see ObjectTraits/Helper/NodeLinkTrait

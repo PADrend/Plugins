@@ -106,8 +106,7 @@ EditNodes.DraggableTrait := new Traits.GenericTrait("EditNodes.DraggableTrait");
 	t.attributes.onDraggingStop @(init) := MultiProcedure;
 
 	t.onInit += fn(MinSG.Node node){
-		if(!Traits.queryTrait(node,EditNodes.ClickableTrait))
-			Traits.addTrait(node,EditNodes.ClickableTrait);
+		Traits.assureTrait(node,EditNodes.ClickableTrait);
 
 		//! \see EditNodes.ClickableTrait
 		node.onClick += fn(evt){
@@ -160,8 +159,7 @@ EditNodes.TranslatableAxisTrait := new Traits.GenericTrait("EditNodes.Translatab
 	t.attributes.__NE_TranslAxis_currentTranslation_ws @(private) := void;
 
 	t.onInit += fn(MinSG.Node node){
-		if(!Traits.queryTrait(node,EditNodes.DraggableTrait))
-			Traits.addTrait(node,EditNodes.DraggableTrait);
+		Traits.assureTrait(node,EditNodes.DraggableTrait);
 
 		//! \see EditNodes.DraggableTrait
 		node.onDraggingStart += fn(evt){
@@ -211,8 +209,7 @@ EditNodes.TranslatablePlaneTrait := new Traits.GenericTrait("EditNodes.Translata
 	t.attributes.__NE_TranslPlane_currentTranslation_ws @(private) := void;
 
 	t.onInit += fn(MinSG.Node node){
-		if(!Traits.queryTrait(node,EditNodes.DraggableTrait))
-			Traits.addTrait(node,EditNodes.DraggableTrait);
+		Traits.assureTrait(node,EditNodes.DraggableTrait);
 
 		//! \see EditNodes.DraggableTrait
 		node.onDraggingStart += fn(evt){
@@ -260,8 +257,7 @@ EditNodes.RotatableTrait := new Traits.GenericTrait("EditNodes.RotatableTrait");
 	t.attributes.onRotationStop @(init) := MultiProcedure; // fn(Number angle_deg, Geometry.Line3 axis_ws)
 
 	t.onInit += fn(MinSG.Node node){
-		if(!Traits.queryTrait(node,EditNodes.DraggableTrait))
-			Traits.addTrait(node,EditNodes.DraggableTrait);
+		Traits.assureTrait(node,EditNodes.DraggableTrait);
 
 		node.__EditNode_rotationData @(private) := new ExtObject({
 			$plane_ws : void,

@@ -44,9 +44,7 @@ trait.onInit += fn(MinSG.Node node){
 	node.__NodeLinkHighlightTrait_revoce := new (Std.require('Std/MultiProcedure'));
 	
 	//! \see ObjectTraits/NodeLinkTrait
-    @(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
-	if(!Traits.queryTrait(node,NodeLinkTrait))
-		Traits.addTrait(node,NodeLinkTrait);
+	Traits.assureTrait(node,Std.require('ObjectTraits/NodeLinkTrait'));
 
 	static linkedNodeState;
 	@(once){

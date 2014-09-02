@@ -60,11 +60,9 @@ static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('Obje
 
 trait.onInit += fn(MinSG.Node node){
 
-	@(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
 	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/Helper/AnimatorBaseTrait');
 
-	if(!Traits.queryTrait(node,NodeLinkTrait))
-		Traits.addTrait(node,NodeLinkTrait);
+	Traits.assureTrait(node,module('./NodeLinkTrait'));
 	
 	var handler = new AnimationHandler(node);
 
@@ -79,8 +77,7 @@ trait.onInit += fn(MinSG.Node node){
 		node.__myAnimatorNode := animatorNode;
 
 		if(animatorNode){
-			if(!Traits.queryTrait(animatorNode,AnimatorBaseTrait))
-				Traits.addTrait(animatorNode,AnimatorBaseTrait);
+			Traits.assureTrait(animatorNode,AnimatorBaseTrait);
 				
 			animatorNode.animationCallbacks += handler;	//! \see ObjectTraits/Helper/AnimatorBaseTrait
 		}

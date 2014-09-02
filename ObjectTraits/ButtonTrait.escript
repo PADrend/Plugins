@@ -21,10 +21,7 @@ static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('Obje
 
 trait.onInit += fn(MinSG.Node node){
 
-	@(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
-
-	if(!Traits.queryTrait(node,NodeLinkTrait))
-		Traits.addTrait(node,NodeLinkTrait);	
+	Traits.assureTrait(node,module('./NodeLinkTrait'));	
 	
 	node.buttonFn1 := node.getNodeAttributeWrapper('buttonFn1', "animationPlay" );
 	node.buttonFn2 := node.getNodeAttributeWrapper('buttonFn2', "animationPause" );

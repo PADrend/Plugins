@@ -15,14 +15,10 @@ static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('Obje
 
 trait.onInit += fn(MinSG.Node node){
 	//! \see ObjectTraits/Helper/ContinuousActionPerformerTrait
-	@(once) static ActionPerformerTrait = Std.require('ObjectTraits/Helper/ContinuousActionPerformerTrait');
-	if(!Traits.queryTrait(node,ActionPerformerTrait))
-		Traits.addTrait(node,ActionPerformerTrait);
+	Traits.assureTrait(node, module('./Helper/ContinuousActionPerformerTrait'));
 	
 	//! \see ObjectTraits/Helper/AnimatorBaseTrait
-	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/Helper/AnimatorBaseTrait');
-	if(!Traits.queryTrait(node,AnimatorBaseTrait))
-		Traits.addTrait(node,AnimatorBaseTrait);
+	Traits.assureTrait(node, module('./Helper/AnimatorBaseTrait'));
 	
 	
 	node.animatorSpeed := node.getNodeAttributeWrapper('animatorSpeed',1.0);

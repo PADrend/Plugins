@@ -89,10 +89,8 @@ ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlace
 	var t = ObjectPlacer.DraggableObjectCreatorTrait;
 
 	t.onInit += fn(GUI.Component component,objectInserter,objectCreator){
+		Traits.assureTrait(component,GUI.DraggableTrait);
 		
-	
-		if(!Traits.queryTrait(component,GUI.DraggableTrait))
-			Traits.addTrait(component,GUI.DraggableTrait);
 		component.onDrag += fn(evt){
 			var hasDraggingMarker = Traits.queryTrait(this,GUI.DraggingMarkerTrait);
 			var hasDraggingConnector = Traits.queryTrait(this,GUI.DraggingConnectorTrait);

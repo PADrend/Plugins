@@ -15,10 +15,7 @@
 static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/RotationTrait');
 
 trait.onInit += fn(MinSG.Node node){
-	@(once) static AnimatedBaseTrait = Std.require('ObjectTraits/AnimatedBaseTrait');
-
-	if(!Traits.queryTrait(node,AnimatedBaseTrait))
-		Traits.addTrait(node,AnimatedBaseTrait);
+	Traits.assureTrait(node,module('./AnimatedBaseTrait'));
 	
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationInit += fn(time){

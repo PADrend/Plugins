@@ -79,8 +79,7 @@ trait.onInit += fn(MinSG.Node node){
 	node.envMap_updateOnTranslation.onDataChanged += [node]=>fn(node,b){
 		if(b){
 			var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
-			if(!Traits.queryTrait(node, TransformationObserverTrait))
-				Traits.addTrait( node, TransformationObserverTrait );
+			Traits.assureTrait( node, TransformationObserverTrait );
 			node.onNodeTransformed += fn(...){
 				if( this.envMap_updateOnTranslation() )
 					this.envMap_update();
