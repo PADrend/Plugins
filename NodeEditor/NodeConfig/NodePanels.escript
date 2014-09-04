@@ -351,7 +351,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GeometryNode, fn(node){
 																foreach(this[0].getVertexDescription().getAttributes() as var attribute) {
 																	// Omit the attribute that is to be deleted.
 																	if(attribute.getName() != this[1].getName()) {
-																		newVertexDesc.appendAttribute(attribute.getName(), attribute.getNumValues(), attribute.getDataType());
+																		newVertexDesc.appendAttribute(attribute.getName(), attribute.getNumValues(), attribute.getDataType(),attribute.getNormalize());
 																	}
 																}
 																Rendering.convertVertices(this[0], newVertexDesc);
