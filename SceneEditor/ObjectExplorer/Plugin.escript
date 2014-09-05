@@ -195,7 +195,7 @@ plugin.initGUI := fn(){
 					GUI.FLAGS : GUI.BACKGROUND | GUI.USE_SCISSOR,
 					GUI.PROPERTIES : traitTitleProperties,
 					GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,40,16 ],
-					GUI.TOOLTIP : info ? info['description'] : void
+					GUI.TOOLTIP : info ? ("["+traitId+"]\n\n"+info['description']): "["+traitId+"]"
 				};
 				var trait = Std.require(traitId);
 				if(trait.getRemovalAllowed()){
@@ -245,7 +245,7 @@ plugin.initGUI := fn(){
 									gui.closeAllMenus();
 									refreshCallback();
 								},
-								GUI.TOOLTIP : info['description']
+								GUI.TOOLTIP : "["+moduleId+"]\n\n"+info['description']
 							};
 						}
 					}

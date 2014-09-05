@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Geometry/DynamicCylinderTrait",
+	"aliases" : ["ObjectTraits/DynamicCylinderTrait"],
+	"description" : "Create a cylinder mesh (needs GeometryNode)",
+	"displayName" : "Geometry/Cylinder"
+}

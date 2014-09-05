@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/ContinuousAnimatorTrait",
+	"aliases" : ["ObjectTraits/ContinuousAnimatorTrait"],
+	"description" : "Continuously running animator ",
+	"displayName" : "Animation/ContinuousAnimator"
+}

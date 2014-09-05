@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Basic/TransformationProxyTrait",
+	"aliases" : ["ObjectTraits/TransformationProxyTrait"],
+	"description" : "Move linked nodes like this node (roleName ''transform'' )",
+	"displayName" : "Basic/TransformationProxy"
+}

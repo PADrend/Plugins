@@ -1,0 +1,5 @@
+{
+	"moduleId" : "ObjectTraits/Misc/DynamicTextTextureTrait",
+	"description" : "Add a created texture to the node.",
+	"displayName" : "Misc/DynamicTextTexture"
+}

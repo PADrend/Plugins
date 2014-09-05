@@ -17,7 +17,7 @@
 	- node.animationSpeed 		DataWrapper( Number )
 	- node.animationKeyFrames 	DataWrapper( { time->SRT|Vec3 } )
 	
-	\see ObjectTraits/AnimatedBaseTrait
+	\see ObjectTraits/Animation/_AnimatedBaseTrait
 	
 	\todo support other interpolation methods.
 	\todo visualize locations?
@@ -70,15 +70,15 @@ trait.onInit += fn(MinSG.Node node){
 	node.animationKeyFrames := keyFrames;
 
 
-	Traits.assureTrait(node,module('./AnimatedBaseTrait'));
+	Traits.assureTrait(node,module('./_AnimatedBaseTrait'));
 	
-	//! \see ObjectTraits/AnimatedBaseTrait
+	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
 		outln("onAnimationInit (KeyFrameAnimationTrait)");
 		this._animationStartingTime  := time;
 		this._animationInitialSRT  := (this.animationKeyFrames()[0]---|> Geometry.SRT) ? this.animationKeyFrames()[0] : this.getRelTransformationSRT();
 	};
-	//! \see ObjectTraits/AnimatedBaseTrait
+	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationPlay += fn(time,lastTime){
 		if(this.animationKeyFrames().empty())
 			return;
@@ -111,7 +111,7 @@ trait.onInit += fn(MinSG.Node node){
 		}
 
 	};
-	//! \see ObjectTraits/AnimatedBaseTrait
+	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
 		outln("stop");
 		this.setRelTransformation( this._animationInitialSRT );

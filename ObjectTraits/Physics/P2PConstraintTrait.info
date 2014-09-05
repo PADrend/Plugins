@@ -1,0 +1,5 @@
+{
+	"moduleId" : "ObjectTraits/Physics/P2PConstraintTrait",
+	"description" : "Physics joint",
+	"displayName" : "Physics/P2PConstraintTrait"
+}

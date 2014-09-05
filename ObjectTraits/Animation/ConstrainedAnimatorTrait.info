@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/ConstraintAnimatorTrait",
+	"aliases" : ["ObjectTraits/ConstraintAnimatorTrait"],
+	"description" : "Animator with minimum and maximum.",
+	"displayName" : "Animation/ConstraintAnimator"
+}

@@ -56,14 +56,13 @@ AnimationHandler._call ::= fn(caller,mode,time=0){
 	}
 };
 
-var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
-static trait = new PersistentNodeTrait(module.getId());
+static trait = new Std.Traits.GenericTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
 
 	@(once) static AnimatorBaseTrait = module('./_AnimatorBaseTrait');
 
-	Traits.assureTrait(node,module('./NodeLinkTrait'));
+	Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));
 	
 	var handler = new AnimationHandler(node);
 
@@ -119,7 +118,7 @@ trait.onInit += fn(MinSG.Node node){
 };
 
 trait.allowRemoval();
-trait.onRemove += fn(node){
+trait.onRemove := fn(node){
 	node.onAnimationStop(0);
 	node.onAnimationStop.clear();
 	node.onAnimationPlay.clear();

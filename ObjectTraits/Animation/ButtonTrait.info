@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/ButtonTrait",
+	"aliases" : ["ObjectTraits/ButtonTrait"],
+	"description" : "Nodes triggers an animation on click (and scales).",
+	"displayName" : "Animation/Button"
+}

@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/PointingJointTrait",
+	"aliases" : ["ObjectTraits/PointingJointTrait"],
+	"description" : "Orientate the node to point towards another.",
+	"displayName" : "Animation/PointingJoint"
+}

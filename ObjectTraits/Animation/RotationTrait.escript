@@ -16,14 +16,14 @@ var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
-	Traits.assureTrait(node,module('./AnimatedBaseTrait'));
+	Traits.assureTrait(node,module('./_AnimatedBaseTrait'));
 	
-	//! \see ObjectTraits/AnimatedBaseTrait
+	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
 		outln("onAnimationInit (RotationTrait)");
 		this._rotationInitialSRT  := this.getRelTransformationSRT();
 	};
-	//! \see ObjectTraits/AnimatedBaseTrait
+	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationPlay += fn(time,lastTime){
 //		outln("play");
 //		var srt = this.getRelTransformationSRT();
@@ -34,7 +34,7 @@ trait.onInit += fn(MinSG.Node node){
 
 		this.setRelTransformation(srt);
 	};
-	//! \see ObjectTraits/AnimatedBaseTrait
+	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
 		outln("onAnimationStop (RotationTrait)");
 		if(this.isSet($_rotationInitialSRT) && this._rotationInitialSRT)

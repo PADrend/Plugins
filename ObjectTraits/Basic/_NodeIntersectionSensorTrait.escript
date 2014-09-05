@@ -65,7 +65,7 @@ trait.onInit += fn(MinSG.Node node){
 			var handler = [rootNode] => querySensor;
 
 			//! \see MinSG.NodeAddedObserverTrait
-			Traits.assureTraitassureTrait(dolly, module('LibMinSGExt/Traits/NodeAddedObserverTrait'));
+			Traits.assureTrait(rootNode, module('LibMinSGExt/Traits/NodeAddedObserverTrait'));
 			rootNode.onNodeAdded += handler;
 			
 			//! \see MinSG.NodeRemovedObserverTrait
@@ -76,6 +76,8 @@ trait.onInit += fn(MinSG.Node node){
 			Traits.assureTrait(rootNode, module('LibMinSGExt/Traits/TransformationObserverTrait'));
 			rootNode.onNodeTransformed += handler;
 			
+			//! \see MinSG.TransformationObserverTrait
+			Traits.assureTrait(node, module('LibMinSGExt/Traits/TransformationObserverTrait'));
 			node.onNodeTransformed += handler;
 		}
 		

@@ -18,8 +18,8 @@ trait.onInit += fn(MinSG.Node node){
 	//! \see ObjectTraits/Basic/_ContinuousActionPerformerTrait
 	Traits.assureTrait(node, module('../Basic/_ContinuousActionPerformerTrait'));
 	
-	//! \see ObjectTraits/Helper/AnimatorBaseTrait
-	Traits.assureTrait(node, module('./Helper/AnimatorBaseTrait'));
+	//! \see ObjectTraits/Animation/_AnimatorBaseTrait
+	Traits.assureTrait(node, module('./_AnimatorBaseTrait'));
 	
 	
 	node.animatorSpeed := node.getNodeAttributeWrapper('animatorSpeed',1.0);

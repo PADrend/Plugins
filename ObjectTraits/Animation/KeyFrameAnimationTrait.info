@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/KeyFrameAnimationTrait",
+	"aliases" : ["ObjectTraits/KeyFrameAnimationTrait"],
+	"description" : "Animate along predefined path.",
+	"displayName" : "Animation/KeyFrameAnimation"
+}

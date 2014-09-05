@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Basic/MetaObjectTrait",
+	"aliases" : ["ObjectTraits/MetaObjectTrait"],
+	"description" : "Display node as metaNode (layer #3)",
+	"displayName" : "Basic/MetaObjectTrait"
+}

@@ -106,7 +106,7 @@ trait.onInit += fn(MinSG.Node node){
 		connectTo(cNode);
 
 
-	//! \see ObjectTraits/NodeLinkTrait
+	//! \see ObjectTraits/Basic/NodeLinkTrait
 	node.onNodesUnlinked += [connectedNodes,myBlendingState] => fn(connectedNodes,myBlendingState, role,Array nodes){
 		if(role==roleName){
 			foreach(nodes as var node){
@@ -118,18 +118,18 @@ trait.onInit += fn(MinSG.Node node){
 	};
 
 // ----------------------------
-	Traits.assureTrait(node,module('./AnimatedBaseTrait'));
+	Traits.assureTrait(node,module('./_AnimatedBaseTrait'));
 
-	//! \see ObjectTraits/AnimatedBaseTrait
+	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationInit += [blendingValue] => fn(blendingValue, time){
 //		outln("onAnimationInit (FaderTrait)");
 		blendingValue(time);
 	};
-	//! \see ObjectTraits/AnimatedBaseTrait
+	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationPlay += [blendingValue] => fn(blendingValue,time,lastTime){
 		blendingValue(time);
 	};
-	//! \see ObjectTraits/AnimatedBaseTrait
+	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationStop += [blendingValue] => fn(blendingValue,...){
 //		outln("onAnimationStop (FaderTrait)");
         blendingValue( 0.0 );

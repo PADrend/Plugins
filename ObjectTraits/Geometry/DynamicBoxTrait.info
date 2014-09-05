@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Geometry/DynamicBoxTrait",
+	"aliases" : ["ObjectTraits/DynamicBoxTrait"],
+	"description" : "Create a box mesh (needs GeometryNode)",
+	"displayName" : "Geometry/Box"
+}

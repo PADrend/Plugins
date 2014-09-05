@@ -39,8 +39,8 @@ registry.scanTraitsInFolder := fn(String folder){
 			}
 			objectTraitInfos[moduleId] = info;
 			foreach( info.get('aliases',[]) as var alias){
-				module.setModuleAlias( alias,moduleId );
-				outln("Setting alias: ",alias,"->",moduleId);
+				module._setModuleAlias( alias,moduleId );
+//				outln("Setting alias: ",alias,"->",moduleId);
 			}
 			
 		}catch(e){

@@ -22,7 +22,7 @@ static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
 
-	Traits.assureTrait(node,module('./NodeLinkTrait'));	
+	Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));
 	
 	node.buttonFn1 := node.getNodeAttributeWrapper('buttonFn1', "animationPlay" );
 	node.buttonFn2 := node.getNodeAttributeWrapper('buttonFn2', "animationPause" );

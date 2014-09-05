@@ -127,12 +127,12 @@ LinkState.doDisableState ::= fn(node,params){
 	return MinSG.STATE_OK;
 };
 
-
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait( module.getId() );
 
 trait.onInit += fn(MinSG.Node node){
 
-	node.__NodeLinkTrait_revoce := new Std.MultiProcedure);
+	node.__NodeLinkTrait_revoce := new Std.MultiProcedure;
 	
 	//! \see ObjectTraits/NodeLinkTrait
 	Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));

@@ -13,7 +13,7 @@
 
 /*! The AnimatorBaseTrait is a helper trait used for Animator Traits.
 	It adds the following members:
-	- animationCallbacks: a MultiProcedure where animated nodes can register their animation handler \see AnimatedBaseTrait
+	- animationCallbacks: a MultiProcedure where animated nodes can register their animation handler \see _AnimatedBaseTrait
 	
 	\note the specific animator trait is responsible for repeatedly calling the animationCallbacks.
 */

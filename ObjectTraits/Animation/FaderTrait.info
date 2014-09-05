@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/FaderTrait",
+	"aliases" : ["ObjectTraits/FaderTrait"],
+	"description" : "Animated Fading animation",
+	"displayName" : "Animation/Fader"
+}

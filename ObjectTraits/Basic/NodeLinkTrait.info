@@ -1,6 +1,6 @@
 {
 	"moduleId" : "ObjectTraits/Basic/NodeLinkTrait",
 	"aliases" : ["ObjectTraits/NodeLinkTrait"],
-	"description" : "Connect nodes with links",
-	"displayName" : "NodeLink"
+	"description" : "Basis for connecting nodes.",
+	"displayName" : "Basic/NodeLink"
 }

@@ -1,0 +1,5 @@
+{
+	"moduleId" : "ObjectTraits/Misc/RayCastSensorTrait",
+	"description" : "Measure distance to geometry in linked node.",
+	"displayName" : "Misc/RayCastSensor"
+}
