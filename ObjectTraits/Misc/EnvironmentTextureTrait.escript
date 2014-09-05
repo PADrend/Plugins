@@ -23,7 +23,8 @@
 	- envMap_updateOnTranslation	(DataWrapper,Bool) If true, the texture is refreshed when the node is moved.
 
 */
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/EnvironmentTextureTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.attributes.envMap_update ::= fn(){
 	var resolution = this.envMap_resolution();
@@ -78,7 +79,7 @@ trait.onInit += fn(MinSG.Node node){
 	
 	node.envMap_updateOnTranslation.onDataChanged += [node]=>fn(node,b){
 		if(b){
-			var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
+			var TransformationObserverTrait = module('LibMinSGExt/Traits/TransformationObserverTrait');
 			Traits.assureTrait( node, TransformationObserverTrait );
 			node.onNodeTransformed += fn(...){
 				if( this.envMap_updateOnTranslation() )
@@ -109,7 +110,7 @@ trait.onInit += fn(MinSG.Node node){
 
 trait.allowRemoval();
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [

@@ -12,7 +12,8 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/DynamicTextTextureTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
     static font =  GUI.FONT_ID_LARGE;
     static textState;
 	static createTexture = fn(String text){
@@ -90,7 +91,7 @@ trait.onInit += fn( node){
 
 trait.allowRemoval();
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [

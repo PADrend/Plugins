@@ -11,11 +11,12 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/ConstrainedAnimatorTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
-	//! \see ObjectTraits/Helper/ContinuousActionPerformerTrait
-	Traits.assureTrait(node, module('./Helper/ContinuousActionPerformerTrait'));
+	//! \see ObjectTraits/Basic/_ContinuousActionPerformerTrait
+	Traits.assureTrait(node, module('../Basic/_ContinuousActionPerformerTrait'));
 	
 	//! \see ObjectTraits/Helper/AnimatorBaseTrait
 	Traits.assureTrait(node, module('./Helper/AnimatorBaseTrait'));
@@ -78,7 +79,7 @@ trait.onInit += fn(MinSG.Node node){
 		this._animatorTargetTime = endTime ? endTime : startingTime + (targetPosition-_animatorPos()).abs() / this.animatorSpeed();
 		
 		if(!this._animatorTargetPos)
-			this.addActionHandler(this->handler);	//! \see ObjectTraits/Helper/ContinuousActionPerformerTrait
+			this.addActionHandler(this->handler);	//! \see ObjectTraits/Basic/_ContinuousActionPerformerTrait
 		
 		this._animatorSourceTime = startingTime;
 		this._animatorSourcePos = _animatorPos();
@@ -105,7 +106,7 @@ trait.onRemove += fn(node){
 	
 };
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [

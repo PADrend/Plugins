@@ -13,23 +13,45 @@
 
 static objectTraitRegistry = new Map; // displayableName -> trait
 static objectTraitGUIRegistry = new Map; // traitName -> guiProvider(obj)
+static objectTraitInfos = new Map; // traitName -> { ... }
 
 var registry = new Namespace;
 
 registry.registerTrait := fn(trait,String displayableName=""){
-	assert( trait---|> MinSG.PersistentNodeTrait );
 	if(displayableName.empty())
 		displayableName = trait.getName();
 	objectTraitRegistry[displayableName] = trait;
 };
 
 registry.registerTraitConfigGUI := fn(trait, provider ){
-	assert( trait---|> MinSG.PersistentNodeTrait );
 	Std.Traits.requireTrait(provider, Std.Traits.CallableTrait); //! \see Traits.CallableTrait
 	objectTraitGUIRegistry[trait.getName()] = provider;
 };
 
+registry.scanTraitsInFolder := fn(String folder){
+	foreach(Util.getFilesInDir( folder, ".info", true ) as var f){
+		try{
+			var info = parseJSON( Util.loadFile( f ) );
+			var moduleId = info['moduleId'];
+			if(!moduleId){
+				Runtime.warn("ObjectRegistry.scanTraitsInFolder: No 'moduleId' in "+f);
+				continue;
+			}
+			objectTraitInfos[moduleId] = info;
+			foreach( info.get('aliases',[]) as var alias){
+				module.setModuleAlias( alias,moduleId );
+				outln("Setting alias: ",alias,"->",moduleId);
+			}
+			
+		}catch(e){
+			Runtime.warn( e );
+		}
+	}
+	print_r(objectTraitInfos);
+};
+
 registry.getTraits := 		fn(){	return objectTraitRegistry.clone();	};
+registry.getTraitInfos := 	fn(){	return objectTraitInfos.clone();	};
 registry.getGUIProvider :=	fn(String traitName){	return objectTraitGUIRegistry[traitName];	};
 registry.getTrait :=		fn(String traitName){	return objectTraitRegistry[traitName];	};
 

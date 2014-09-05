@@ -56,11 +56,12 @@ AnimationHandler._call ::= fn(caller,mode,time=0){
 	}
 };
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/AnimatedBaseTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
 
-	@(once) static AnimatorBaseTrait = Std.require('ObjectTraits/Helper/AnimatorBaseTrait');
+	@(once) static AnimatorBaseTrait = module('./_AnimatorBaseTrait');
 
 	Traits.assureTrait(node,module('./NodeLinkTrait'));
 	

@@ -21,11 +21,12 @@
 	\note Adds the ObjectTraits/NodeLinkTrait to the subject node.
 	\note Adds the ObjectTraits/Helper/NodeSensorTrait to the subject node.
 */
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/RayCastSensorTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 
 static rayCast = fn(sensorNode,Array geomNodes){
-	@(once) static rayCaster = new (Std.require('LibMinSGExt/RendRayCaster'));
+	@(once) static rayCaster = new (module('LibMinSGExt/RendRayCaster'));
 	
 	geomNodes = geomNodes.clone();
 	geomNodes.removeValue(sensorNode);
@@ -84,7 +85,7 @@ trait.onRemove += fn(node){
 	// remove links?
 };
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait, fn(node,refreshCallback){
 		var entries = [	];

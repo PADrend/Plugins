@@ -12,7 +12,8 @@
  */
 
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/RotationTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
 	Traits.assureTrait(node,module('./AnimatedBaseTrait'));
@@ -45,7 +46,7 @@ trait.onInit += fn(MinSG.Node node){
 
 trait.allowRemoval();
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [

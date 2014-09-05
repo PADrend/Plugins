@@ -12,11 +12,12 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/PhysicTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 
 trait.onInit += fn( node){
-    @(once) static PhysicSceneTrait = Std.require('Physics/PhysicSceneTrait');
+    @(once) static PhysicSceneTrait = module('Physics/PhysicSceneTrait');
 
 
     var world = Physics.getWorld( node );
@@ -56,7 +57,7 @@ trait.onInit += fn( node){
 };
 
 trait.allowRemoval();
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [

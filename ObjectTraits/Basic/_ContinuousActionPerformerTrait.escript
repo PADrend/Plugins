@@ -16,7 +16,7 @@
 			
 	- node.addActionHandler(callback)	A yieldable callback called once after each frame.
 */
-static trait = new Traits.GenericTrait('ObjectTraits/Helper/ContinuousActionPerformerTrait');
+static trait = new Traits.GenericTrait( module.getId() );
 
 trait.onInit += fn(MinSG.Node node){
 

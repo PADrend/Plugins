@@ -128,14 +128,14 @@ LinkState.doDisableState ::= fn(node,params){
 };
 
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/NodeLinkVisuTrait');
+static trait = new PersistentNodeTrait( module.getId() );
 
 trait.onInit += fn(MinSG.Node node){
 
-	node.__NodeLinkTrait_revoce := new (Std.require('Std/MultiProcedure'));
+	node.__NodeLinkTrait_revoce := new Std.MultiProcedure);
 	
 	//! \see ObjectTraits/NodeLinkTrait
-	Traits.assureTrait(node,Std.require('ObjectTraits/NodeLinkTrait'));
+	Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));
 
 	static linkedNodeState = new MinSG.MaterialState;
 	linkedNodeState.setTempState(true);
@@ -183,7 +183,7 @@ trait.onRemove += fn(node){
 	node.__NodeLinkTrait_revoce();
 };
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [

@@ -104,7 +104,8 @@ static highlightState = new MetaNodeState;
 
 // ----------------------------------
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/MetaObjectTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.GeometryNode node){
 	node += highlightState;
@@ -118,7 +119,7 @@ trait.onRemove += fn(node){
 	node.setRenderingLayers( 1 ); // layer 0 (2^0)
 };
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);//,"MetaObject");
 	registry.registerTraitConfigGUI(trait, fn(node,refreshCallback){
 		return [	];

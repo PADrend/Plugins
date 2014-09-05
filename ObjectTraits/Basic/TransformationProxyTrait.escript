@@ -12,7 +12,8 @@
  */
 
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/TransformationProxyTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 
 static transformationInProgress = false;
@@ -70,7 +71,7 @@ trait.onInit += fn(MinSG.Node node){
 	}
 
 	//! \see  MinSG.TransformationObserverTrait
-	Traits.assureTrait(node, Std.require('LibMinSGExt/Traits/TransformationObserverTrait'));
+	Traits.assureTrait(node, module('LibMinSGExt/Traits/TransformationObserverTrait'));
 		
 	//! \see  MinSG.TransformationObserverTrait		
 	node.onNodeTransformed += [transformedNodes] => fn(transformedNodes,node){
@@ -110,7 +111,7 @@ trait.onRemove += fn(node){
 //	node.buttonLinkRole(void);
 };
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [

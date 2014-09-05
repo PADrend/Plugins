@@ -11,14 +11,15 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/ContinuousAnimatorTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
 	//! \see ObjectTraits/Helper/AnimatorBaseTrait
-	Traits.assureTrait(node, module('./Helper/AnimatorBaseTrait'));
+	Traits.assureTrait(node, module('./_AnimatorBaseTrait'));
 
-	//! \see ObjectTraits/Helper/ContinuousActionPerformerTrait
-	Traits.assureTrait(node, module('./Helper/ContinuousActionPerformerTrait'));
+	//! \see ObjectTraits/Basic/_ContinuousActionPerformerTrait
+	Traits.assureTrait(node, module('../Basic/_ContinuousActionPerformerTrait'));
 	
 	node.animatorSpeed := node.getNodeAttributeWrapper('animatorSpeed',1.0);
 	
@@ -30,7 +31,7 @@ trait.onInit += fn(MinSG.Node node){
 				startingTime = PADrend.getSyncClock();
 			this._animatorIsActive = true;
 			
-			//! \see ObjectTraits/Helper/ContinuousActionPerformerTrait
+			//! \see ObjectTraits/Basic/_ContinuousActionPerformerTrait
 			this.addActionHandler( [startingTime]=>this->fn(startingTime, ...){
 				var lastTime = startingTime;
 				while( !this.isDestroyed() && this._animatorIsActive){
@@ -64,7 +65,7 @@ trait.onRemove += fn(node){
 	
 };
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [ 

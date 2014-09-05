@@ -41,7 +41,8 @@ static addRevocably = fn( array, callback ){
 };
 
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/PointingJointTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
     node.__mountNode := new DataWrapper;
@@ -52,7 +53,7 @@ trait.onInit += fn(MinSG.Node node){
     // ---------------------------------------------------------
 
 	//! \see ObjectTraits/NodeLinkTrait
-	Traits.assureTrait(node,Std.require('ObjectTraits/NodeLinkTrait'));
+	Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));
 
 
 	var updateLocation = [node] => fn(node, ...){
@@ -88,7 +89,7 @@ trait.onInit += fn(MinSG.Node node){
 	var registerTransformationListener = [updateLocation] => fn(updateLocation,revoce, newNode){
 		revoce();
 		//! \see  MinSG.TransformationObserverTrait
-		Traits.assureTrait(newNode, Std.require('LibMinSGExt/Traits/TransformationObserverTrait'));
+		Traits.assureTrait(newNode, module('LibMinSGExt/Traits/TransformationObserverTrait'));
 		revoce += addRevocably( newNode.onNodeTransformed, updateLocation);
 	};
 
@@ -157,7 +158,7 @@ trait.onInit += fn(MinSG.Node node){
 
 trait.allowRemoval();
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [

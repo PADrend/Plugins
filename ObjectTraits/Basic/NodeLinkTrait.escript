@@ -24,7 +24,7 @@
 	
 	\see LibMinSGExt/TreeQuery
 */
-static TreeQuery = Std.require('LibMinSGExt/TreeQuery');
+static TreeQuery = module('LibMinSGExt/TreeQuery');
 static queryRelNodes = fn(MinSG.Node source,String query){
 	return TreeQuery.execute(query,PADrend.getSceneManager(),[source]).toArray();
 };
@@ -57,7 +57,8 @@ static storeEntries = fn(MinSG.Node node,Array entries){
 
 // ------------------------------
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/NodeLinkTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
 	
@@ -129,7 +130,7 @@ trait.onRemove += fn(node){
 	//!!!!!!!!!!!!!!!!!!!!!1
 };
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		var entries = [];

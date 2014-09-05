@@ -11,7 +11,8 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/DynamicBoxTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.GeometryNode node){
 	var boxDimX = new Std.DataWrapper(node.getBB().getExtentX());
@@ -37,7 +38,7 @@ trait.onInit += fn(MinSG.GeometryNode node){
 
 trait.allowRemoval();
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [ 

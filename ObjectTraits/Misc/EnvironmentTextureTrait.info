@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Misc/EnvironmentTextureTrait",
+	"aliases" : ["ObjectTraits/EnvironmentTextureTrait"],
+	"description" : "Automatically create an environment cube map.",
+	"displayName" : "EnvironmentMapCreator"
+}

@@ -23,7 +23,8 @@
 
 */
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/FaderTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
     var blendingValue = new DataWrapper(0); // 0 fully visible ... 1 invisible(deactivated)
@@ -75,7 +76,7 @@ trait.onInit += fn(MinSG.Node node){
     // ---------------------------------------------------------
 
     // store connected nodes in 'connectedNodes'
-    @(once) static NodeLinkTrait = Std.require('ObjectTraits/NodeLinkTrait');
+    @(once) static NodeLinkTrait = module('../Basic/NodeLinkTrait');
 
 	//! \see ObjectTraits/NodeLinkTrait
 	Traits.assureTrait(node,NodeLinkTrait);
@@ -117,7 +118,7 @@ trait.onInit += fn(MinSG.Node node){
 	};
 
 // ----------------------------
-	Traits.assureTrait(node,Std.require('ObjectTraits/AnimatedBaseTrait'));
+	Traits.assureTrait(node,module('./AnimatedBaseTrait'));
 
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationInit += [blendingValue] => fn(blendingValue, time){
@@ -138,7 +139,7 @@ trait.onInit += fn(MinSG.Node node){
 
 trait.allowRemoval();
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 });
 

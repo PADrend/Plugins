@@ -23,7 +23,8 @@
 	\todo visualize locations?
 	\todo support position locations
 */
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/KeyFrameAnimationTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
 	node.animationSpeed :=  node.getNodeAttributeWrapper('animationSpeed', 1.0 );
@@ -69,7 +70,7 @@ trait.onInit += fn(MinSG.Node node){
 	node.animationKeyFrames := keyFrames;
 
 
-	Traits.assureTrait(node,Std.require('ObjectTraits/AnimatedBaseTrait'));
+	Traits.assureTrait(node,module('./AnimatedBaseTrait'));
 	
 	//! \see ObjectTraits/AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
@@ -120,7 +121,7 @@ trait.onInit += fn(MinSG.Node node){
 
 trait.allowRemoval();
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		var entries = [

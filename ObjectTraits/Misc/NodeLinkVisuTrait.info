@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Misc/NodeLinkVisuTrait",
+	"aliases" : ["ObjectTraits/NodeLinkVisuTrait"],
+	"description" : "Show NodeLink connections between nodes (on meta layer).",
+	"displayName" : "NodeLinkVisu"
+}

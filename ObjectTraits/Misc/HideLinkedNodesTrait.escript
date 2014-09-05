@@ -11,47 +11,21 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-/*!
-    
-
-    Links
-		...
-
-	Properties
-		linkNames
-
-*/
-static addRevocably = fn( array, callback ){
-	array += callback;
-	var revocer = fn(){
-		if(thisFn.array){
-			thisFn.array -= thisFn.callback;
-			thisFn.array = void;
-			thisFn.callback = void;
-		}
-		return $REMOVE;
-	}.clone();
-	revocer.array := array;
-	revocer.callback := callback;
-	return revocer;
-};
-
-
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/NodeLinkHighlightTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait( module.getId() );
 
 trait.onInit += fn(MinSG.Node node){
 
-	node.__NodeLinkHighlightTrait_revoce := new (Std.require('Std/MultiProcedure'));
+	node.__NodeLinkHighlightTrait_revoce := new Std.MultiProcedure;
 	
 	//! \see ObjectTraits/NodeLinkTrait
-	Traits.assureTrait(node,Std.require('ObjectTraits/NodeLinkTrait'));
+	Traits.assureTrait(node, module('../Basic/NodeLinkTrait') );
 
 	static linkedNodeState;
 	@(once){
-		linkedNodeState = new MinSG.PolygonModeState;
+		linkedNodeState = new MinSG.BlendingState;
 		
-		
-		linkedNodeState.setParameters(linkedNodeState.getParameters().setMode(Rendering.PolygonModeParameters.POINT));
+//		linkedNodeState.setParameters(linkedNodeState.getParameters().setMode(Rendering.PolygonModeParameters.POINT));
 		linkedNodeState.setTempState(true);
 	}
 	
@@ -60,7 +34,7 @@ trait.onInit += fn(MinSG.Node node){
 		
 		//! \see ObjectTraits/NodeLinkTrait
 		foreach(node.getLinkedNodes() as var n){
-			node.__NodeLinkHighlightTrait_revoce += addRevocably( n, linkedNodeState);
+			node.__NodeLinkHighlightTrait_revoce += Std.addRevocably( n, linkedNodeState);
 			
 			n.deactivate();
 			node.__NodeLinkHighlightTrait_revoce += [n] => fn(node){ node.activate(); return $REMOVE;	};
@@ -83,7 +57,7 @@ trait.onRemove += fn(node){
 	node.__NodeLinkHighlightTrait_revoce();
 };
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [

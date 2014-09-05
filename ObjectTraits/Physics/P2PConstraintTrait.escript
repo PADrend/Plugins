@@ -24,7 +24,8 @@
 
 */
 
-static trait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))('ObjectTraits/P2PConstraintTrait');
+var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
+static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
     node.__targetNode := new DataWrapper;
@@ -35,10 +36,10 @@ trait.onInit += fn(MinSG.Node node){
     // ---------------------------------------------------------
 
 	//! \see ObjectTraits/PhysicTrait
-	Traits.assureTrait(node,Std.require('ObjectTraits/PhysicTrait'));
+	Traits.assureTrait(node,module('./PhysicTrait'));
 
 	//! \see ObjectTraits/NodeLinkTrait
-	Traits.assureTrait(node,Std.require('ObjectTraits/NodeLinkTrait'));
+	Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));
 
 	// ---------------------------------------------------
 
@@ -80,7 +81,7 @@ trait.onInit += fn(MinSG.Node node){
 
 trait.allowRemoval();
 
-Std.onModule('ObjectTraits/ObjectTraitRegistry', fn(registry){
+module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [

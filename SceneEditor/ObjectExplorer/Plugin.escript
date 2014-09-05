@@ -182,21 +182,22 @@ plugin.initGUI := fn(){
 
 	gui.registerComponentProvider('ObjectEditor_ObjectConfig.5_traits',fn(MinSG.Node node,refreshCallback){
 		var entries = [];
-		foreach( Std.require('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node) as var traitName){
-			var provider = traitRegistry.getGUIProvider(traitName);
+		foreach( Std.require('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node) as var traitId){
+			var info = traitRegistry.getTraitInfos()[traitId];
+			var provider = traitRegistry.getGUIProvider(traitId);
 			if( provider ){
-				
 				entries += {	GUI.TYPE : GUI.TYPE_NEXT_ROW	};
 				entries += '----';
 				entries += {	GUI.TYPE : GUI.TYPE_NEXT_ROW	};
 				entries += {
 					GUI.TYPE : GUI.TYPE_LABEL,
-					GUI.LABEL : " "+traitName,
+					GUI.LABEL : " "+(info ? info.get('displayName',traitId) : traitId),
 					GUI.FLAGS : GUI.BACKGROUND | GUI.USE_SCISSOR,
 					GUI.PROPERTIES : traitTitleProperties,
 					GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,40,16 ],
+					GUI.TOOLTIP : info ? info['description'] : void
 				};
-				var trait = traitRegistry.getTrait(traitName);;
+				var trait = Std.require(traitId);
 				if(trait.getRemovalAllowed()){
 					entries += {
 						GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
@@ -230,19 +231,21 @@ plugin.initGUI := fn(){
 					var enabledTraitNames =  new Set(Std.require('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node));
 					
 					var entries = [];
-					foreach( traitRegistry.getTraits() as var name,var trait ){
-						if(enabledTraitNames.contains(trait.getName())){
-							entries += name + " (enabled)";
+					foreach( traitRegistry.getTraitInfos() as var moduleId,var info ){
+						var displayName = info.get('displayName',moduleId);
+						if(enabledTraitNames.contains(moduleId)){
+							entries += displayName + " (enabled)";
 						}else{
 							entries += {
 								GUI.TYPE : GUI.TYPE_BUTTON,
-								GUI.LABEL : name,
+								GUI.LABEL : displayName,
 								GUI.WIDTH : 200,
-								GUI.ON_CLICK : [node,trait,refreshCallback] => fn(node,trait,refreshCallback){
-									Traits.addTrait(node,trait);
+								GUI.ON_CLICK : [node,moduleId,refreshCallback] => fn(node,moduleId,refreshCallback){
+									Traits.addTrait(node,Std.require(moduleId) );
 									gui.closeAllMenus();
 									refreshCallback();
-								}
+								},
+								GUI.TOOLTIP : info['description']
 							};
 						}
 					}

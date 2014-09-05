@@ -24,7 +24,7 @@
 	\note Adds the MinSG.NodeRemovedObserverTrait to nodeSensor_rootNode.
 	\note Adds the MinSG.TransformationObserverTrait to nodeSensor_rootNode and the subject node
 */
-static trait = new Traits.GenericTrait('ObjectTraits/Helper/NodeSensorTrait');
+static trait = new Traits.GenericTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
 	
@@ -65,15 +65,15 @@ trait.onInit += fn(MinSG.Node node){
 			var handler = [rootNode] => querySensor;
 
 			//! \see MinSG.NodeAddedObserverTrait
-			Traits.assureTraitassureTrait(dolly, Std.require('LibMinSGExt/Traits/NodeAddedObserverTrait'));
+			Traits.assureTraitassureTrait(dolly, module('LibMinSGExt/Traits/NodeAddedObserverTrait'));
 			rootNode.onNodeAdded += handler;
 			
 			//! \see MinSG.NodeRemovedObserverTrait
-			Traits.assureTrait(rootNode, Std.require('LibMinSGExt/Traits/NodeRemovedObserverTrait'));
+			Traits.assureTrait(rootNode, module('LibMinSGExt/Traits/NodeRemovedObserverTrait'));
 			rootNode.onNodeRemoved += handler;
 			
 			//! \see MinSG.TransformationObserverTrait
-			Traits.assureTrait(rootNode, Std.require('LibMinSGExt/Traits/TransformationObserverTrait'));
+			Traits.assureTrait(rootNode, module('LibMinSGExt/Traits/TransformationObserverTrait'));
 			rootNode.onNodeTransformed += handler;
 			
 			node.onNodeTransformed += handler;
