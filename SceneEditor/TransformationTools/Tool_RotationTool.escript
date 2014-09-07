@@ -381,7 +381,6 @@ TransformationTools.RotationTool := new Type;
 					node.setRelTransformation(node.getRelTransformationSRT().resetRotation());
 				this.applyNodeTransformations();						//! \see TransformationTools.NodeTransformationHandlerTrait
 			},
-			GUI.DATA_WRAPPER : stepSize,
 			GUI.OPTIONS : [1,5,15,45,0.1,0.01]
 		},
 

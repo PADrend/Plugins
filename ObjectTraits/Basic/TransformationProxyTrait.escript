@@ -17,89 +17,117 @@ static trait = new PersistentNodeTrait(module.getId());
 
 
 static transformationInProgress = false;
+static LINK_ROLE_RELATIVE = 'transform';
+static LINK_ROLE_SNAP = 'transformSnap'; // snap lower center of bounding boxes(rotation and pos)
+static LINK_ROLE_SNAP_POS = 'transformSnapPos'; // snap lower center of bounding boxes (only
+static LINK_ROLES = [LINK_ROLE_RELATIVE,LINK_ROLE_SNAP,LINK_ROLE_SNAP_POS];
 
 trait.onInit += fn(MinSG.Node node){
-
 	node.transformationProxyEnabled := new DataWrapper(true);
 	
-	//! \see ObjectTraits/NodeLinkTrait
+	//! \see ObjectTraits/BasicNodeLinkTrait
 	Traits.assureTrait(node,module('./NodeLinkTrait'));	
 	
-	static roleName = "transform";
+	//! \see ObjectTraits/Basic/NodeLinkTrait
+	foreach(LINK_ROLES as var role)
+		node.availableLinkRoleNames += role;
 	
-	//! \see ObjectTraits/NodeLinkTrait
-	node.availableLinkRoleNames += roleName;
-	
-	var transformedNodes = new Std.Set; 
-	var connectTo = [transformedNodes] => fn(transformedNodes, MinSG.Node newNode){
-		transformedNodes += newNode;
+	var transformedNodes = new Map; // node -> [role, originalSRT ]
+	var connectTo = [transformedNodes] => fn(transformedNodes, MinSG.Node newNode,role){
+		transformedNodes[newNode] = [role, newNode.getRelTransformationSRT()];
 	};
 	var disconnectFrom = [transformedNodes] => fn(transformedNodes, MinSG.Node removedNode){
-		transformedNodes -= removedNode;
-	};
-	
-
-	//! \see ObjectTraits/NodeLinkTrait
-	node.onNodesLinked += [connectTo] => fn(connectTo, role,Array nodes){
-		if(role==roleName){
-			foreach(nodes as var node)
-				connectTo(node);
+		if(transformedNodes[removedNode]){
+			removedNode.setRelTransformation( transformedNodes[removedNode][1] );
+			transformedNodes.unset( removedNode );
 		}
 	};
 	
-	//! \see ObjectTraits/NodeLinkTrait
+	var localToWorld_SRT =  node.getWorldTransformationSRT();
+	localToWorld_SRT.setScale(1.0);
+
+	var transformConnectedNodes = [transformedNodes, localToWorld_SRT.inverse()] => fn(transformedNodes,lastWorldToLocal_SRT, node){
+		var localToWorld_SRT = node.getWorldTransformationSRT();
+		localToWorld_SRT.setScale(1.0);
+		lastWorldToLocal_SRT.setScale(1.0);
+
+		if(node.transformationProxyEnabled() && !transformationInProgress){
+			transformationInProgress = true;
+			try{
+				var relWorldTransformation = localToWorld_SRT * lastWorldToLocal_SRT;
+				var relWorldRotation = relWorldTransformation.getRotation();
+				var worldLocation = node.localPosToWorldPos( node.getBB().getRelPosition(0.5,0,0.5) );
+
+				foreach(transformedNodes as var cNode, var mixed){
+					var role = mixed[0];
+					var clientWorldSRT = cNode.getWorldTransformationSRT();
+
+					switch(role){
+						case LINK_ROLE_RELATIVE:{
+							clientWorldSRT.setRotation( relWorldRotation * clientWorldSRT.getRotation());
+							clientWorldSRT.setTranslation( relWorldTransformation * clientWorldSRT.getTranslation() );
+							cNode.setWorldTransformation(clientWorldSRT);
+							break;
+						}
+						case LINK_ROLE_SNAP:{
+							clientWorldSRT.setRotation( localToWorld_SRT.getRotation() );
+							cNode.setWorldTransformation(clientWorldSRT);
+							var cWorldPosition = cNode.localPosToWorldPos( cNode.getBB().getRelPosition(0.5,0,0.5) );
+							cNode.moveLocal( cNode.worldDirToLocalDir( worldLocation-cWorldPosition ));
+							break;
+						}
+						case LINK_ROLE_SNAP_POS:{
+							var cWorldPosition = cNode.localPosToWorldPos( cNode.getBB().getRelPosition(0.5,0,0.5) );
+							cNode.moveLocal( cNode.worldDirToLocalDir( worldLocation-cWorldPosition ));
+							break;
+						}
+						default: 
+							Runtime.warn("TransformationProxyTrait: invalid link role '"+role+"'");
+					}
+					
+				}
+			}catch(e){ // finally
+				transformationInProgress = false;
+				throw(e);
+			}
+			transformationInProgress = false;
+		}
+		lastWorldToLocal_SRT.setValue( localToWorld_SRT.inverse() );
+		
+	};
+
+	//! \see ObjectTraits/Basic/NodeLinkTrait
+	node.onNodesLinked += [connectTo,transformConnectedNodes] => fn(connectTo,transformConnectedNodes, role,Array nodes){
+		if( LINK_ROLES.contains(role) ){
+			foreach(nodes as var node)
+				connectTo(node,role);
+			transformConnectedNodes(this);
+		}
+	};
+	
+	//! \see ObjectTraits/Basic/NodeLinkTrait
 	node.onNodesUnlinked += [disconnectFrom] => fn(disconnectFrom, role,Array nodes){
-		if(role==roleName){
+		if( LINK_ROLES.contains(role) ){
 			foreach(nodes as var node)
 				disconnectFrom(node);
 		}
 	};
 	
 	// connect to existing links
-	var connectedNodes = node.getLinkedNodes(roleName);
+
 	//! \see ObjectTraits/NodeLinkTrait
-	foreach(node.getLinkedNodes(roleName) as var cNode)
-		connectTo(cNode);
+	foreach( LINK_ROLES as var role){
+		foreach(node.getLinkedNodes(role) as var cNode)
+			connectTo(cNode,role);
+	}
+	transformConnectedNodes(node);
 		
 	// ------------------
-	
-	{
-		var wSRT =  node.getWorldTransformationSRT();
-		wSRT.setScale(1.0);
-		node._inverseWorldTrans := wSRT.inverse();
-		
-	}
-
 	//! \see  MinSG.TransformationObserverTrait
 	Traits.assureTrait(node, module('LibMinSGExt/Traits/TransformationObserverTrait'));
-		
-	//! \see  MinSG.TransformationObserverTrait		
-	node.onNodeTransformed += [transformedNodes] => fn(transformedNodes,node){
-		if(node==this){
-			var wSRT = this.getWorldTransformationSRT();
-			wSRT.setScale(1.0);
-			this._inverseWorldTrans.setScale(1.0);
-	
-			if(node.transformationProxyEnabled() && !transformationInProgress){
-				transformationInProgress = true;
-				try{
-					var relWorldTransformation = wSRT * this._inverseWorldTrans;
-					var relWorldRotation = relWorldTransformation.getRotation();
-
-					foreach(transformedNodes as var cNode){
-						var clientWorldSRT = cNode.getWorldTransformationSRT();
-						clientWorldSRT.setRotation( relWorldRotation * clientWorldSRT.getRotation());
-						clientWorldSRT.setTranslation( relWorldTransformation * clientWorldSRT.getTranslation() );
-						cNode.setWorldTransformation(clientWorldSRT);
-					}
-				}catch(e){ // finally
-					transformationInProgress = false;
-					throw(e);
-				}
-				transformationInProgress = false;
-			}
-			this._inverseWorldTrans := wSRT.inverse();
-		}
+	node.onNodeTransformed += [transformConnectedNodes] => fn(transformConnectedNodes, node){
+		if(node==this)
+			transformConnectedNodes(this);
 	};
 };
 
