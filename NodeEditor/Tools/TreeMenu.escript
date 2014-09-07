@@ -94,37 +94,7 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.transformations',[
 gui.registerComponentProvider('NodeEditor_TreeToolsMenu.treeOperations',[
 	'----',
 	"*Tree operations*",
-	{
-		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL:"Close nodes having states",
-		GUI.ON_CLICK:fn(){
-			showWaitingScreen();
-			foreach(NodeEditor.getSelectedNodes() as var subtree){
-				MinSG.closeNodesHavingStates(subtree);
-				out("closed all nodes with states: ", subtree);
-			}
-		},
-		GUI.TOOLTIP: "MinSG.closeNodesHavingStates(subtree)"
-	},
-	{
-		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL:"Close semantic objects",
-		GUI.ON_CLICK:fn(){
-			showWaitingScreen();
-			static counter = 0;
-			foreach(NodeEditor.getSelectedNodes() as var subtree){
-				subtree.traverse( fn(node){
-					if(MinSG.SemanticObjects.isSemanticObject(node) ){
-						if(!node.isClosed()){
-							++counter;
-							node.setClosed(true);
-						}
-					}
-				});
-				PADrend.message("Number of closed nodes: " +counter);
-			}
-		}
-	},
+
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL:"Combine leafs",
@@ -215,50 +185,6 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.treeOperations',[
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL:"Remove duplicate Textures",
-		GUI.ON_CLICK:fn(){
-
-			var textures = new Map();
-			var nodes = MinSG.collectNodes(NodeEditor.getSelectedNode());
-
-			var node;
-			foreach(nodes as node){
-				foreach( node.getStates() as var state){
-					if(state ---|> MinSG.TextureState){
-							var file = state.getTexture().getFileName();
-							if(!textures[file]) {
-								textures[file] = state;
-								Util.info("new tex: ",file,"\n");
-							}
-						}
-				}
-			}
-			foreach(nodes as node){
-				foreach( node.getStates() as var state){
-					if(state ---|> MinSG.TextureState){
-							var file = state.getTexture().getFileName();
-							node.removeState(state);
-							node.addState(textures[file]);
-						}
-				}
-			}
-		},
-		GUI.TOOLTIP:  "Removes duplicate Textures inside the selected subtree"
-	},
-	{
-		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL:"Remove open Nodes",
-		GUI.ON_CLICK:fn(){
-			showWaitingScreen();
-			foreach(NodeEditor.getSelectedNodes() as var subtree){
-				if(subtree ---|> MinSG.GroupNode)
-					MinSG.removeOpenNodes(subtree);
-			}
-		},
-		GUI.TOOLTIP: "Remove all (open) inner nodes and empty leafs.\nThe transformations are preserved; the states of the inner nodes are not."
-	},
-	{
-		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Shrink meshes",
 		GUI.ON_CLICK : fn() {
 			MinSG.shrinkMeshes(NodeEditor.getSelectedNode());
@@ -329,25 +255,6 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.treeOperations',[
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL:"Tree cleanup",
-		GUI.ON_CLICK:fn(){
-			showWaitingScreen();
-			out("Tree cleanup...\n");
-			var n = NodeEditor.getSelectedNode();
-			if(n==PADrend.getCurrentScene()){
-				foreach(MinSG.getChildNodes(n) as var child)
-					MinSG.cleanupTree(child,PADrend.getSceneManager());
-				out("SceneRoot...\n");
-			}else{
-				MinSG.cleanupTree(n,PADrend.getSceneManager());
-			}
-
-		},
-		GUI.TOOLTIP: "Remove empty GroupNodes and replace \nGroupNodes with single child by that child."
-	},
-
-	{
-		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL:"Remove State",
 		GUI.ON_CLICK:fn(){
 			showWaitingScreen();
@@ -388,6 +295,119 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.treeOperations',[
 		GUI.TOOLTIP: "Remove the selected state from the scene."
 	},
 ]);
+gui.registerComponentProvider('NodeEditor_TreeToolsMenu.cleanups',[
+	"*Cleanups*",
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL:"Close nodes having states",
+		GUI.ON_CLICK:fn(){
+			showWaitingScreen();
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				MinSG.closeNodesHavingStates(subtree);
+				out("closed all nodes with states: ", subtree);
+			}
+		},
+		GUI.TOOLTIP: "MinSG.closeNodesHavingStates(subtree)"
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL:"Close semantic objects",
+		GUI.ON_CLICK:fn(){
+			showWaitingScreen();
+			static counter = 0;
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				subtree.traverse( fn(node){
+					if(MinSG.SemanticObjects.isSemanticObject(node) ){
+						if(!node.isClosed()){
+							++counter;
+							node.setClosed(true);
+						}
+					}
+				});
+				PADrend.message("Number of closed nodes: " +counter);
+			}
+		}
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL:"Remove duplicate Textures",
+		GUI.ON_CLICK:fn(){
+
+			var textures = new Map();
+			var nodes = MinSG.collectNodes(NodeEditor.getSelectedNode());
+
+			var node;
+			foreach(nodes as node){
+				foreach( node.getStates() as var state){
+					if(state ---|> MinSG.TextureState){
+							var file = state.getTexture().getFileName();
+							if(!textures[file]) {
+								textures[file] = state;
+								Util.info("new tex: ",file,"\n");
+							}
+						}
+				}
+			}
+			foreach(nodes as node){
+				foreach( node.getStates() as var state){
+					if(state ---|> MinSG.TextureState){
+							var file = state.getTexture().getFileName();
+							node.removeState(state);
+							node.addState(textures[file]);
+						}
+				}
+			}
+		},
+		GUI.TOOLTIP:  "Removes duplicate Textures inside the selected subtree"
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL:"Remove open Nodes",
+		GUI.ON_CLICK:fn(){
+			showWaitingScreen();
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				if(subtree ---|> MinSG.GroupNode)
+					MinSG.removeOpenNodes(subtree);
+			}
+		},
+		GUI.TOOLTIP: "Remove all (open) inner nodes and empty leafs.\nThe transformations are preserved; the states of the inner nodes are not."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL:"Remove invalid NodeTraits",
+		GUI.ON_CLICK:fn(){
+			static PersistentNodeTrait = Std.require('LibMinSGExt/Traits/PersistentNodeTrait');
+			showWaitingScreen();
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				subtree.traverse( fn(node){
+					PersistentNodeTrait.removeInvalidTraitNames(node);
+					if(node.isInstance())
+						PersistentNodeTrait.removeInvalidTraitNames( node.getPrototype() );
+				});
+			}
+		},
+		GUI.TOOLTIP: "Remove all (open) inner nodes and empty leafs.\nThe transformations are preserved; the states of the inner nodes are not."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL:"Tree cleanup",
+		GUI.ON_CLICK:fn(){
+			showWaitingScreen();
+			out("Tree cleanup...\n");
+			var n = NodeEditor.getSelectedNode();
+			if(n==PADrend.getCurrentScene()){
+				foreach(MinSG.getChildNodes(n) as var child)
+					MinSG.cleanupTree(child,PADrend.getSceneManager());
+				out("SceneRoot...\n");
+			}else{
+				MinSG.cleanupTree(n,PADrend.getSceneManager());
+			}
+
+		},
+		GUI.TOOLTIP: "Remove empty GroupNodes and replace \nGroupNodes with single child by that child."
+	},
+]);
+
 
 gui.registerComponentProvider('NodeEditor_TreeToolsMenu.prototypes',[
 	'----',

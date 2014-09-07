@@ -83,9 +83,10 @@ T.initTraitsInSubtree ::= fn(MinSG.Node root){
 		foreach( getPersistentNodeTraitNames(node) as var traitName ){
 			try{
 				if(!Std.Traits.queryTrait(node,traitName)){
-					outln("Adding trait ",traitName," to ",node);
 					var trait = Std.require(traitName);
-					Std.Traits.addTrait(node,trait);
+					
+					outln("Adding trait ",traitName," to ",node);
+					Std.Traits.assureTrait(node,trait); // assureTrait instead of addTrait as the traitName may be a deprecated alias.
 //					Traits.addTraitByName(node,traitName);
 				}
 			}catch(e){
@@ -95,6 +96,18 @@ T.initTraitsInSubtree ::= fn(MinSG.Node root){
 		}
 	}
 };
+T.removeInvalidTraitNames ::= fn(MinSG.Node node){
+	var names = getLocalPersistentNodeTraitNames(node);
+	if(!names.empty()){
+		var names2 = [];
+		foreach(names as var traitName){
+			if( Std.Traits.queryTrait(node,traitName) )
+				names2 += traitName;
+		}
+		setPersistentTraitNames(node,names2);
+	}
+};
+
 
 //! (static)
 T.getLocalPersistentNodeTraitNames ::= getLocalPersistentNodeTraitNames;
