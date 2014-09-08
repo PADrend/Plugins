@@ -1,0 +1,5 @@
+{
+	"moduleId" : "ObjectTraits/Misc/ImportSubtreeTrait",
+	"description" : "Store filename of subtree's source and allow re-loading'.",
+	"displayName" : "Misc/ImportSubtree"
+}
