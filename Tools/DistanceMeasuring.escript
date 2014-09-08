@@ -355,7 +355,7 @@ Measurement.display:=fn(){
 	renderingContext.popLine();
 	renderingContext.popLighting();
 	renderingContext.popDepthBuffer();
-	renderingContext.pushAndSetMatrix_modelToCamera();
+	renderingContext.popMatrix_modelToCamera();
 };
 Measurement.getInfo:=fn(){
 //	var s=" "+this.pos1+" to "+this.pos2+"\n";

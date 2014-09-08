@@ -2,5 +2,5 @@
 	"moduleId" : "ObjectTraits/Animation/RotationTrait",
 	"aliases" : ["ObjectTraits/RotationTrait"],
 	"description" : "Animated rotation (around y-axis)",
-	"displayName" : "Animation/NodeLink"
+	"displayName" : "Animation/Rotation"
 }
