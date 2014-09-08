@@ -1,0 +1,5 @@
+{
+	"moduleId" : "ObjectTraits/Misc/ExternalScriptTrait",
+	"description" : "Use a specialized script for controlling the node.",
+	"displayName" : "Misc/ExternalScript"
+}
