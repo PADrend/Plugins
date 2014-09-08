@@ -218,6 +218,26 @@ plugin.init @(override) := fn() {
 		}
 
 		return false;
+	};
+	keyMap[Util.UI.KEY_I] = fn(){					// [ctrl] + [i] instanciate   // \todo USE COMMAND
+		if(PADrend.getEventContext().isCtrlPressed()){
+			var newNodes = [];
+			foreach(NodeEditor.getSelectedNodes() as var node){
+				if(!node.hasParent() || !node.getParent().hasParent()){
+					PADrend.message("Can't duplicate scene or root.");
+				}else{
+					var c = MinSG.Node.createInstance(node);
+					node.getParent() += c;
+					newNodes += c;
+					Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(c);
+				}
+			}
+			PADrend.message(""+newNodes.count()+" nodes instanciated." );
+			NodeEditor.selectNodes(newNodes);
+			return true;
+		}
+
+		return false;
 	};	
 	keyMap[Util.UI.KEY_J] = fn(){					// [j] Jump to selection
 		NodeEditor.jumpToSelection();
