@@ -46,13 +46,14 @@ trait.onInit += fn(MinSG.Node node){
 	var localToWorld_SRT =  node.getWorldTransformationSRT();
 	localToWorld_SRT.setScale(1.0);
 
-	var transformConnectedNodes = [transformedNodes, localToWorld_SRT.inverse()] => fn(transformedNodes,lastWorldToLocal_SRT, node){
+	var transformConnectedNodes = [transformedNodes, localToWorld_SRT.inverse(),new Std.DataWrapper(false)] => 
+			fn(transformedNodes,lastWorldToLocal_SRT,transformationInProgress, node){
 		var localToWorld_SRT = node.getWorldTransformationSRT();
 		localToWorld_SRT.setScale(1.0);
 		lastWorldToLocal_SRT.setScale(1.0);
 
-		if(node.transformationProxyEnabled() && !transformationInProgress){
-			transformationInProgress = true;
+		if(node.transformationProxyEnabled() && !transformationInProgress()){
+			transformationInProgress(true);
 			try{
 				var relWorldTransformation = localToWorld_SRT * lastWorldToLocal_SRT;
 				var relWorldRotation = relWorldTransformation.getRotation();
@@ -87,10 +88,10 @@ trait.onInit += fn(MinSG.Node node){
 					
 				}
 			}catch(e){ // finally
-				transformationInProgress = false;
+				transformationInProgress(false);
 				throw(e);
 			}
-			transformationInProgress = false;
+			transformationInProgress(false);
 		}
 		lastWorldToLocal_SRT.setValue( localToWorld_SRT.inverse() );
 		
