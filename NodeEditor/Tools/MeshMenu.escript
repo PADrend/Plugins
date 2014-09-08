@@ -84,8 +84,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 				out("Create tangent vectors [");
 
 				foreach( NodeEditor.getSelectedNodes() as var subtree){
-					var geoNodes=MinSG.collectGeoNodes(subtree);
-					foreach(geoNodes as var geoNode){
+					foreach(MinSG.collectGeoNodes(subtree) as var geoNode){
 						var mesh = geoNode.getMesh();
 						try{
 							Rendering.calculateTangentVectors(mesh,uvName,tanName);
@@ -145,8 +144,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 		GUI.LABEL : "Reverse mesh winding",
 		GUI.ON_CLICK : fn() {
 			foreach(NodeEditor.getSelectedNodes() as var subtree){
-				var geoNodes=MinSG.collectGeoNodes(subtree);
-				foreach(geoNodes as var geoNode){
+				foreach(MinSG.collectGeoNodes(subtree) as var geoNode){
 					var mesh = geoNode.getMesh();
 					Rendering.reverseMeshWinding(mesh);
 					out(".");
@@ -161,8 +159,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 		GUI.LABEL : "Recalculate normals",
 		GUI.ON_CLICK : fn() {
 			foreach(NodeEditor.getSelectedNodes() as var subtree){
-				var geoNodes=MinSG.collectGeoNodes(subtree);
-				foreach(geoNodes as var geoNode){
+				foreach(MinSG.collectGeoNodes(subtree) as var geoNode){
 					var mesh = geoNode.getMesh();
 					Rendering.calculateNormals(mesh);
 					out(".");
@@ -177,14 +174,33 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 		GUI.LABEL : "Remove duplicated vertices",
 		GUI.ON_CLICK : fn() {
 			foreach(NodeEditor.getSelectedNodes() as var subtree){
-				var geoNodes=MinSG.collectGeoNodes(subtree);
-				foreach(geoNodes as var geoNode){
+				foreach(MinSG.collectGeoNodes(subtree) as var geoNode){
 					var mesh = geoNode.getMesh();
 					Rendering.eliminateDuplicateVertices(mesh);
 					out(".");
 				}
 			}
 			out("\n");
+		}
+	},	
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Embed meshes",
+		GUI.TOOLTIP : "Removes the filenames from meshes so that they are embedded into the minsg-file.",
+		GUI.ON_CLICK : fn() {
+			var count = 0;
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				foreach( MinSG.collectGeoNodes(subtree) as var geoNode){
+					var filename = geoNode.getMesh().getFileName();
+					if(!filename.empty()){
+						outln("Removing '"+filename.toString()+"'.");
+						geoNode.getMesh().setFileName();
+						++count;
+					}
+				}
+			}
+			PADrend.message(""+count+" meshes embedded.");
+			
 		}
 	},
 	'----'
@@ -264,6 +280,47 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 					mesh._markAsChanged();
 					out(".");
 				}
+			}
+			out("\n");
+		},
+		GUI.TOOLTIP : "Flip the y-texture coordinate to repair some objects."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Scale texture coords *0.9 ",
+		GUI.ON_CLICK : fn() {
+			var meshes = new Std.Set;
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				foreach(MinSG.collectGeoNodes(subtree) as var geoNode){
+					meshes += geoNode.getMesh();
+				}
+			}
+			foreach(meshes as var mesh){
+				var acc = Rendering.TexCoordAttributeAccessor.create(mesh,Rendering.VertexAttributeIds.TEXCOORD0);
+				for(var i = 0;acc.checkRange(i);++i)
+					acc.setCoordinate(i, acc.getCoordinate(i)*0.9);
+				mesh._markAsChanged();
+				out(".");
+			}
+			out("\n");
+		},
+		GUI.TOOLTIP : "Flip the y-texture coordinate to repair some objects."
+	},{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Scale texture coords /0.9 ",
+		GUI.ON_CLICK : fn() {
+			var meshes = new Std.Set;
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				foreach(MinSG.collectGeoNodes(subtree) as var geoNode){
+					meshes += geoNode.getMesh();
+				}
+			}
+			foreach(meshes as var mesh){
+				var acc = Rendering.TexCoordAttributeAccessor.create(mesh,Rendering.VertexAttributeIds.TEXCOORD0);
+				for(var i = 0;acc.checkRange(i);++i)
+					acc.setCoordinate(i, acc.getCoordinate(i)/0.9);
+				mesh._markAsChanged();
+				out(".");
 			}
 			out("\n");
 		},
