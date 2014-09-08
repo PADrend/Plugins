@@ -17,10 +17,11 @@ static trait = new PersistentNodeTrait(module.getId());
 
 
 static transformationInProgress = false;
-static LINK_ROLE_RELATIVE = 'transform';
+static LINK_ROLE_ABS_DELTA = 'transform';
+static LINK_ROLE_REL_DELTA = 'transformRel';
 static LINK_ROLE_SNAP = 'transformSnap'; // snap lower center of bounding boxes(rotation and pos)
 static LINK_ROLE_SNAP_POS = 'transformSnapPos'; // snap lower center of bounding boxes (only
-static LINK_ROLES = [LINK_ROLE_RELATIVE,LINK_ROLE_SNAP,LINK_ROLE_SNAP_POS];
+static LINK_ROLES = [LINK_ROLE_ABS_DELTA,LINK_ROLE_REL_DELTA,LINK_ROLE_SNAP,LINK_ROLE_SNAP_POS];
 
 trait.onInit += fn(MinSG.Node node){
 	node.transformationProxyEnabled := new DataWrapper(true);
@@ -45,18 +46,24 @@ trait.onInit += fn(MinSG.Node node){
 	
 	var localToWorld_SRT =  node.getWorldTransformationSRT();
 	localToWorld_SRT.setScale(1.0);
+	var localToRel_SRT =  node.getRelTransformationSRT();
+	localToRel_SRT.setScale(1.0);
 
-	var transformConnectedNodes = [transformedNodes, localToWorld_SRT.inverse(),new Std.DataWrapper(false)] => 
-			fn(transformedNodes,lastWorldToLocal_SRT,transformationInProgress, node){
+	var transformConnectedNodes = [transformedNodes, localToWorld_SRT.inverse(),localToRel_SRT.inverse(),new Std.DataWrapper(false)] => 
+			fn(transformedNodes,lastWorldToLocal_SRT,lastRelToLocal_SRT ,transformationInProgress, node){
 		var localToWorld_SRT = node.getWorldTransformationSRT();
 		localToWorld_SRT.setScale(1.0);
 		lastWorldToLocal_SRT.setScale(1.0);
-
+		
+		var localToRel_SRT = node.getRelTransformationSRT();
+		localToRel_SRT.setScale(1.0);
+		lastRelToLocal_SRT.setScale(1.0);
+		
 		if(node.transformationProxyEnabled() && !transformationInProgress()){
 			transformationInProgress(true);
 			try{
-				var relWorldTransformation = localToWorld_SRT * lastWorldToLocal_SRT;
-				var relWorldRotation = relWorldTransformation.getRotation();
+				var deltaWorldTransformation = localToWorld_SRT * lastWorldToLocal_SRT;
+				var deltaWorldRotation = deltaWorldTransformation.getRotation();
 				var worldLocation = node.localPosToWorldPos( node.getBB().getRelPosition(0.5,0,0.5) );
 
 				foreach(transformedNodes as var cNode, var mixed){
@@ -64,10 +71,15 @@ trait.onInit += fn(MinSG.Node node){
 					var clientWorldSRT = cNode.getWorldTransformationSRT();
 
 					switch(role){
-						case LINK_ROLE_RELATIVE:{
-							clientWorldSRT.setRotation( relWorldRotation * clientWorldSRT.getRotation());
-							clientWorldSRT.setTranslation( relWorldTransformation * clientWorldSRT.getTranslation() );
+						case LINK_ROLE_ABS_DELTA:{
+							clientWorldSRT.setRotation( deltaWorldRotation * clientWorldSRT.getRotation());
+							clientWorldSRT.setTranslation( deltaWorldTransformation * clientWorldSRT.getTranslation() );
 							cNode.setWorldTransformation(clientWorldSRT);
+							break;
+						}
+						case LINK_ROLE_REL_DELTA:{
+							var deltaRelTransformation = localToRel_SRT * lastRelToLocal_SRT;
+							cNode.setRelTransformation( cNode.getRelTransformationSRT() * deltaRelTransformation);
 							break;
 						}
 						case LINK_ROLE_SNAP:{
@@ -94,6 +106,7 @@ trait.onInit += fn(MinSG.Node node){
 			transformationInProgress(false);
 		}
 		lastWorldToLocal_SRT.setValue( localToWorld_SRT.inverse() );
+		lastRelToLocal_SRT.setValue( localToRel_SRT.inverse() );
 		
 	};
 
