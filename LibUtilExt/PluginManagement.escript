@@ -328,3 +328,5 @@ Util.onPlugin @(public) :=  fn( String pluginName, callback ){
 GLOBALS.loadPlugins := Util.loadPlugins;
 GLOBALS.requirePlugin := Util.requirePlugin;
 GLOBALS.queryPlugin := Util.queryPlugin;
+
+return Util;

@@ -93,23 +93,23 @@ PADrend.getSyncClock := Util.Timer.now;
  * ---|> Plugin
  */
 PADrend.init := fn(){
-    var start = clock();
-    
+	var start = clock();
+	
 	{	// basic initializations
 		registerExtension('PADrend_Message',fn(s){	out("[[--   ",s,"   --]]\n"); });
 	
 		this.syncVars = new DataWrapperContainer;
 		
 		if(systemConfig.getValue('PADrend.enableInfoOutput', false)) {
-        	Util.enableInfo();
+			Util.enableInfo();
 		} else {
 			Util.disableInfo();
 		}
 	
 		// Paths
-        this.userPath = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.user',"./");
-        this.dataPath = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.data',"data/");
-        this.scenePath = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.scene',dataPath()+"scene/");
+		this.userPath = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.user',"./");
+		this.dataPath = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.data',"data/");
+		this.scenePath = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.scene',dataPath()+"scene/");
 
 		// assure paths end with "/"
 		foreach([this.userPath,this.dataPath,this.scenePath] as var p){
@@ -121,17 +121,17 @@ PADrend.init := fn(){
 		this.configCache = new Std.JSONDataStore( true );
 		this.configCache.init( systemConfig.getValue('PADrend.configCacheFile',this.userPath()+"config.tmp"),false);
   
-        showWaitingScreen.fancy = systemConfig.getValue('PADrend.fancyWaitScreen',false);
+		showWaitingScreen.fancy = systemConfig.getValue('PADrend.fancyWaitScreen',false);
 	}
 	
-    {	// PADrend modules
+	{	// PADrend modules
 
 		PADrend.message("Loading PADrend modules...\n");
-       
+	   
 		// Load all modules which are not explicitly disabled.
 		var configuredModules = systemConfig.getValue('PADrend.modules',new Map());
 		var modulesToLoad=[];
-        foreach( {
+		foreach( {
 					"CommandHandling" : true,
 					"EventLoop" : true,
 					"GUI" : true,
@@ -150,10 +150,10 @@ PADrend.init := fn(){
 				modulesToLoad += "PADrend/"+moduleName;
 			}
 		}
-        loadPlugins(modulesToLoad,true,[this.getBaseFolder()+"/../"]);
-    }
-    
-    // init network
+		loadPlugins(modulesToLoad,true,[this.getBaseFolder()+"/../"]);
+	}
+	
+	// init network
 	if(Util.isSet($Network)){
 		out("Init network system".fillUp(40));
 		if(Util.Network.init()){
@@ -164,11 +164,11 @@ PADrend.init := fn(){
 		}
 	}
 	
-    {	// Plugins
-        PADrend.message("Loading Plugins...\n");
-        
+	{	// Plugins
+		PADrend.message("Loading Plugins...\n");
+		
 		var enabledPluginNames=[];
-        foreach( systemConfig.getValue('PADrend.plugins',{
+		foreach( systemConfig.getValue('PADrend.plugins',{
 					"Effects" : true,
 					"NodeEditor" : true,
 					"SceneEditor" : true,
@@ -178,7 +178,7 @@ PADrend.init := fn(){
 			if(enabled)
 				enabledPluginNames += pluginName;
 		}
-		this.pluginFolders = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.plugins',[
+		this.pluginFolders = Std.DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.plugins',[
 													IO.condensePath(__DIR__+"/../../extPlugins/"),
 													IO.condensePath(__DIR__+"/../")]);
 		// set plugin folders as module search paths
@@ -186,13 +186,13 @@ PADrend.init := fn(){
 			Std.addModuleSearchPath(folder);
 		
 		loadPlugins(enabledPluginNames,true, this.pluginFolders() );
-    }
-    
-    
-    PADrend.message("Initializing PADrend... (",clock()-start,"s)\n");
+	}
+	
 
+	PADrend.message("Plugins loaded (",(clock()-start).round(0.01)," sec)\n");
+	outln("Call extensions [PADrend_Init]...");
 	// [ext:PADrend_Init]
-    executeExtensions('PADrend_Init');
+	Util.executeExtensions('PADrend_Init');
 	PADrend.message("PADrend started in ",(clock()-start).round(0.01)," sec.\n");
 
 	// Execute optional autorun script

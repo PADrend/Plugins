@@ -21,34 +21,8 @@ var plugin = new Plugin({
 			Plugin.REQUIRES : []
 });
 
-plugin.init = fn() {
-
-//	foreach([
-//				'ObjectTraits/ButtonTrait',
-//				'ObjectTraits/ConstrainedAnimatorTrait',
-//				'ObjectTraits/ContinuousAnimatorTrait',
-//				'ObjectTraits/DynamicBoxTrait',
-//				'ObjectTraits/DynamicCylinderTrait',
-//				'ObjectTraits/FaderTrait',
-//				'ObjectTraits/KeyFrameAnimationTrait',
-//				'ObjectTraits/MetaObjectTrait',
-//				'ObjectTraits/NodeLinkHighlightTrait',
-//				'ObjectTraits/NodeLinkTrait',
-//				'ObjectTraits/NodeLinkVisuTrait',
-//				'ObjectTraits/PointingJointTrait',
-//				'ObjectTraits/RayCastSensorTrait',
-//				'ObjectTraits/RotationTrait',
-//				'ObjectTraits/TransformationProxyTrait',
-//				'ObjectTraits/DynamicTextTextureTrait',
-//				'ObjectTraits/PhysicTrait',
-//				'ObjectTraits/P2PConstraintTrait',
-//				'ObjectTraits/EnvironmentTextureTrait'
-//			] as var t)
-//		Std.require( t );
-
+plugin.init @(override) := fn(){
 	Std.require('ObjectTraits/ObjectTraitRegistry').scanTraitsInFolder( __DIR__ );
-				
-		
 	return true;
 };
 

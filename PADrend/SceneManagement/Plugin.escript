@@ -19,13 +19,11 @@
 
 loadOnce("LibUtilExt/Command.escript");
 
-/***
- **   ---|> Plugin
- **/
+
 PADrend.SceneManagement := new Plugin({
 		Plugin.NAME : 'PADrend/SceneManagement',
 		Plugin.DESCRIPTION : "Scene management and root node handling",
-		Plugin.VERSION : 0.1,
+		Plugin.VERSION : 1.0,
 		Plugin.AUTHORS : "Claudius, Ralf & Benjamin",
 		Plugin.OWNER : "All",
 		Plugin.REQUIRES : ['PADrend'],
@@ -67,11 +65,7 @@ static dolly = void;
 SceneManagement._defaultLight := void; // directional light 0; formerly known as PADrend.sun
 
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-SceneManagement.init := fn(){
+SceneManagement.init @(override) := fn(){
 	
 	defaultSceneManager = new (Std.require( 'LibMinSGExt/SceneManagerExt' ));
 
@@ -87,7 +81,7 @@ SceneManagement.init := fn(){
 //! [ext:PADrend_Init]
 SceneManagement.ex_Init := fn(...){
 	{	//  create Camera and dolly
-		out("Creating Camera".fillUp(40));
+		outln("Creating SceneGraph elements...");
 
 		// --
 		// create default perspective camera
@@ -144,13 +138,9 @@ SceneManagement.ex_Init := fn(...){
 			Sound.initSoundSystem();
 			PADrend.getSceneManager().getBehaviourManager().registerBehaviour( new MinSG.SoundReceivingBehaviour(camera) );
 		}
-
-		outln("ok.");
 	}
 	
 	{  // Create Scene
-		out("Create Root-Node ".fillUp(40));
-	
 		rootNode = new MinSG.ListNode;
 		getRootNode().name := "RootNode";
 
@@ -165,8 +155,7 @@ SceneManagement.ex_Init := fn(...){
 		}
 
 		getRootNode().addChild(dolly);
-		this.createNewSceneRoot("new MinSG.ListNode()",false);
-		outln("ok.");
+		this.createNewSceneRoot("new MinSG.ListNode",false);
 	}
    	defaultSceneManager.addSearchPath( Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/" );
 

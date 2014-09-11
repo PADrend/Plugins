@@ -11,22 +11,11 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:PADrend] PADrend/Serialization/Plugin.escript
- **
- **/
-if(EScript.VERSION<607){
-	loadOnce("LibUtilExt/deprecated/ObjectSerialization.escript");
-}
-// static ObjectSerialization = Std.require('Std/ObjectSerialization');
 
-/***
- **   ---|> Plugin
- **/
 PADrend.Serialization := new Plugin({
 		Plugin.NAME : 'PADrend/Serialization',
 		Plugin.DESCRIPTION : "De-/serialization of Objects",
-		Plugin.VERSION : 0.1,
+		Plugin.VERSION : 1.0,
 		Plugin.AUTHORS : "Claudius",
 		Plugin.OWNER : "All",
 		Plugin.REQUIRES : ['PADrend'],
@@ -37,11 +26,7 @@ PADrend.Serialization := new Plugin({
 
 PADrend.Serialization.typeRegistry @(private) := void;
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-PADrend.Serialization.init := fn(){
+PADrend.Serialization.init @(override) := fn(){
 	loadOnce("LibUtilExt/CommonSerializers.escript");
 
 	this.typeRegistry = new  ObjectSerialization.TypeRegistry;

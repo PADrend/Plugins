@@ -47,7 +47,7 @@ registry.scanTraitsInFolder := fn(String folder){
 			Runtime.warn( e );
 		}
 	}
-	print_r(objectTraitInfos);
+//	print_r(objectTraitInfos);
 };
 
 registry.getTraits := 		fn(){	return objectTraitRegistry.clone();	};

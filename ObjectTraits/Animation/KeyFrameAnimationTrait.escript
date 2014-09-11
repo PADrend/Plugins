@@ -114,7 +114,8 @@ trait.onInit += fn(MinSG.Node node){
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
 		outln("stop");
-		this.setRelTransformation( this._animationInitialSRT );
+		if(this.isSet($_animationInitialSRT) && this._animationInitialSRT)
+			this.setRelTransformation( this._animationInitialSRT );
 	};
 	
 };

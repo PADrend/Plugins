@@ -14,16 +14,16 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[PADrend] PADrend/PADrend.escript
- **/
 
+ // header 
 outln("-"*79);
-outln("PADrend 1.0.0 (Platform for Algorithm Development and rendering)\n");
-outln("http://www.padrend.de/");
-outln("Libs:\t",EScript.VERSION_STRING,"\n\t",MinSG.VERSION);
+outln("PADrend 1.0.0 -- Platform for Algorithm Development and rendering (PADrend.de)");
+outln("-"*79);
 outln("Build:\t", (SIZE_OF_PTR==8?64:32)," bit ", BUILD_TYPE );
-outln("\n","-"*79);
+out("Libs:");
+foreach( Util.getLibVersionStrings() as var lib,var version)
+	outln("\t",version);
+outln("-"*79);
 
 if(EScript.VERSION<607)
 	throw "Incompatible EScript version!";
@@ -31,10 +31,8 @@ if(EScript.VERSION<607)
 // ------------------
 
 {
-	out(("Loading Util scripts...").fillUp(40));
+	outln("Loading Util scripts...");
 	
-	
-	loadOnce ("LibUtilExt/PluginManagement.escript");
 	loadOnce ("LibUtilExt/deprecated/Listener.escript");
 	loadOnce ("LibUtilExt/Misc_Utils.escript");
 
@@ -45,7 +43,6 @@ if(EScript.VERSION<607)
 	loadOnce ("LibMinSGExt/SemanticObject.escript");	
 	loadOnce ("LibMinSGExt/MeshBuilderExtensions.escript");	
 
-	outln("ok.");
 }
 { // Declare some global variables
 
@@ -58,5 +55,5 @@ if(EScript.VERSION<607)
 	GLOBALS.camera := void;
 }
 { // load and execute PADrend
-	loadPlugins( ["PADrend"],true,[__DIR__+"/../"] );
+	Std.require('LibUtilExt/PluginManagement').loadPlugins( ["PADrend"],true,[__DIR__+"/../"] );
 }
