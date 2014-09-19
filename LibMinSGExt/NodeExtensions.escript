@@ -20,132 +20,26 @@
 // Node extension
 
 
-/*! Anchors
-	Anchors are locations (Vec3 or SRT) stored in a Node in Node-local coordinates.
-	They can be used as pivot points, for snapping, as marker, etc.
-	Anchors are accessed by DataWrappers containing a Vec3, SRT or false (for invalid anchors). They are automatically stored as node attribute.
-	
-	\code
-		// add an unitialized 'snappingPoint' anchor to A node:
-		myNode.createAnchor('snappingPoint');
-		// ...
-		myNode.getAnchor('snappingPoint')(new Geometry.Vec3(1,2,3)); // update the anchor's location
-	\endcode
-	
-	Internal nodeAttribute format:
-		type: string (json encoded)
-		value: '{ 	"AttrName for Vec3 anchor" : [x,y,z],
-					"AttrName for SRT anchor" : [x,y,z,xd,yd,zd,xup,yup,zup],
-					...	}'
-*/
+/*! Anchors \deprecated Use NodeAnchors-module instead */
+static NodeAnchors = module('./NodeAnchors');
 
-//! (internal) Set anchor wrappers as node attribute
-MinSG.Node._updateAnchorAttributes @(private) ::= fn(...){
-	if(!this.isSet($__anchors)){
-		return; // should not happen...
-	}
-	var m = new Map;
-	foreach(this.__anchors as var anchorName,var anchorWrapper){
-		var location = anchorWrapper();
-		if(!location){
-			continue;
-		}else if(location---|>Geometry.Vec3){
-			m[anchorName] = location.toArray();
-		}else if(location---|>Geometry.SRT){
-			var a = location.getTranslation().toArray();
-			a.append( location.getDirVector().toArray() );
-			a.append( location.getUpVector().toArray() );
-			m[anchorName] = a;
-		}else{
-			Runtime.warn("MinSG.Node._updateAnchorAttributes: invalid anchor data: '"+location+"'");
-		}
-	}
-	if(m.empty()){
-		this.unsetNodeAttribute('anchors');
-	}else{
-		this.setNodeAttribute('anchors',toJSON(m,false));
-	}
+//! Create and return a new anchor-DataWrapper (see description above) 		\deprecated Use NodeAnchors.createAnchor instead 
+MinSG.Node.createAnchor ::= 	fn(p...){		return NodeAnchors.createAnchor(this,p...);		};
 
-};
-/*! (internal) Init anchor wrappers from node attribute
-	@return true iff there are anchors
-*/
-MinSG.Node._initAnchors @(private) ::= fn(){
-	if(this.isSet($__anchors)) // already initialized
-		return true;
-	var attr = this.getNodeAttribute('anchors');
-	if(!attr) // no anchors present
-		return false;
+//! Returns the node's anchor-DataWrapper with the given  @p name or void.	 \deprecated Use NodeAnchors.getAnchor instead 
+MinSG.Node.getAnchor ::= 		fn(p...){		return NodeAnchors.getAnchor(this,p...);		};
 
-	var m = parseJSON(attr); // { name : [numbers*] }
-	if(!m---|>Map){
-		Runtime.warn("MinSG.Node._initAnchors: invalid anchor data: '"+attr+"'");
-		return false;
-	}
-	this.__anchors := new Map;
-	foreach(m as var attrName, var locationValues){
-		var location;
-		if(locationValues.count()==3){
-			location = new Geometry.Vec3(locationValues);
-		}else if(locationValues.count()==9){
-			location = new Geometry.SRT( 
-								new Geometry.Vec3(locationValues[0],locationValues[1],locationValues[2]),	// pos
-								new Geometry.Vec3(locationValues[3],locationValues[4],locationValues[5]),	// dir
-								new Geometry.Vec3(locationValues[6],locationValues[7],locationValues[8]));	// up
-		}else{
-			Runtime.warn("MinSG.Node._initAnchors: invalid value data: '"+locationValues+"'");
-			continue;
-		}
-		var anchor = DataWrapper.createFromValue( location );
-		anchor.onDataChanged += this->this._updateAnchorAttributes;
-		this.__anchors[attrName] = anchor;
-	}
-	return true;
-};
+//! Return a map of the node's anchor-DataWrappers							 \deprecated Use NodeAnchors.getAnchors instead 
+MinSG.Node.getAnchors ::= 		fn(p...){		return NodeAnchors.getAnchors(this,p...);		};
 
-//! Create and return a new anchor-DataWrapper (see description above)
-MinSG.Node.createAnchor ::= fn(String anchorName, [Geometry.Vec3,Geometry.SRT,false] location=false){
-	if(!_initAnchors()){ // this is the first anchor
-		this.__anchors := new Map;
-	}
-	var anchor = getAnchor(anchorName);
-	if(!anchor){
-		// create new anchor
-		anchor = DataWrapper.createFromValue( void );
-		anchor.onDataChanged += this->this._updateAnchorAttributes;
-		this.__anchors[anchorName] = anchor;
-	}
-	anchor(location);
-	return anchor;
-};
+//! Returns the node's or its prototype's anchor-DataWrapper with the given @p name or void.	 \deprecated Use NodeAnchors.findAnchor instead 
+MinSG.Node.findAnchor ::= 		fn(p...){		return NodeAnchors.findAnchor(this,p...);		};
 
-//! Returns the node's anchor-DataWrapper with the given  @p name or void.
-MinSG.Node.getAnchor ::= fn(String anchorName){
-	return this._initAnchors() ? this.__anchors[anchorName] : void;
-};
-//! Return a map of the node's anchor-DataWrappers
-MinSG.Node.getAnchors ::= fn(){
-	return this._initAnchors() ? this.__anchors.clone() : new Map;
-};
-//! Returns the node's or its prototype's anchor-DataWrapper with the given @p name or void.
-MinSG.Node.findAnchor ::= fn(String anchorName){
-	var anchor;
-	if( this._initAnchors() ) 
-		anchor = this.__anchors[anchorName];
-	if( !anchor && this.isInstance() )
-		anchor = this.getPrototype().getAnchor(anchorName);
-	return anchor;
-};
-//! Return a map of the node's (and its prototype's) anchor-DataWrappers
-MinSG.Node.findAnchors ::= fn(){
-	return this.isInstance() ? this.getPrototype().getAnchors().merge( this.getAnchors() ) : this.getAnchors();
-};
-//! Sets the anchor-DataWrapper with the given @p name to false -- it then no longer stored as node attribute.
-MinSG.Node.invalidateAnchor ::= fn(String anchorName){
-	var anchor = this.getAnchor(anchorName);
-	if(anchor)
-		anchor(false);
-};
+//! Return a map of the node's (and its prototype's) anchor-DataWrappers	 \deprecated Use NodeAnchors.findAnchors instead 
+MinSG.Node.findAnchors ::= 		fn(p...){		return NodeAnchors.findAnchors(this,p...);		};
+
+//! Sets the anchor-DataWrapper with the given @p name to false -- it then no longer stored as node attribute.  \deprecated Use NodeAnchors.invalidateAnchor instead 
+MinSG.Node.invalidateAnchor ::= fn(p...){		return NodeAnchors.invalidateAnchor(this,p...);		};
 
 // -------------
 
@@ -247,8 +141,7 @@ MinSG.GroupNode."-=" ::= fn( [MinSG.Node,MinSG.State] obj){
 	return this;
 };
 
-MinSG.Node.getPivotPosition ::= fn()
-{
+MinSG.Node.getPivotPosition ::= fn(){
     if(MinSG.isSet($JointNode)) {
         if(this ---|> MinSG.JointNode) {
             return this.getWorldOrigin();
@@ -274,3 +167,5 @@ MinSG.GroupState."-=" ::= fn( MinSG.State obj){
 	this.removeState(obj);
 	return this;
 };
+
+return MinSG;

@@ -23,6 +23,7 @@ loadOnce(__DIR__+"/ToolHelperTraits.escript");
 
 //---------------------------------------------------------------------------------
 
+static NodeAnchors = Std.require('LibMinSGExt/NodeAnchors');
 
 TransformationTools.AnchorTool := new Type;
 {
@@ -82,7 +83,7 @@ TransformationTools.AnchorTool := new Type;
 			return;
 		var node = selectedNodes[0];
 		
-		var anchors = node.findAnchors();
+		var anchors = NodeAnchors.findAnchors(node);
 		if(anchors.empty())
 			return;
 
@@ -135,7 +136,7 @@ TransformationTools.AnchorTool := new Type;
 			anchor.onDataChanged += updateEditNode;
 		
 			// anchor is defined in prototype -> just show, but do not edit.
-			if(!node.getAnchor(anchorName)){ 
+			if(!NodeAnchors.getAnchor(node,anchorName)){ 
 				// only the marker is visible -> smaller projected size required
 				Traits.addTrait( editNode, EditNodes.AdjustableProjSizeTrait,10,30);	//! \see EditNodes.AdjustableProjSizeTrait
 				//! \see TransformationTools.FrameListenerTrait
@@ -245,7 +246,7 @@ TransformationTools.AnchorTool := new Type;
 			return entries;
 		}
 		var node = this.getSelectedNodes()[0];
-		foreach(node.findAnchors() as var name,var anchor){
+		foreach( NodeAnchors.findAnchors(node) as var name,var anchor){
 			if(!anchor())
 				continue;
 			if(!node.getAnchor(name)){
@@ -332,7 +333,7 @@ TransformationTools.AnchorTool := new Type;
 			GUI.LABEL : "New Anchor",
 			GUI.MENU : [node] => fn(node){
 				
-				var name = DataWrapper.createFromValue("anchor#"+node.findAnchors().count());
+				var name = DataWrapper.createFromValue("anchor#"+NodeAnchors.findAnchors(node).count());
 				var dir = DataWrapper.createFromValue(false);
 				return [
 					"Anchor name:",
@@ -349,11 +350,11 @@ TransformationTools.AnchorTool := new Type;
 						GUI.TYPE : GUI.TYPE_BUTTON,
 						GUI.LABEL : "Create",
 						GUI.ON_CLICK : [node,name,dir] => fn(node,name,dir){
-							var a = node.getAnchor(name());
+							var a = NodeAnchors.getAnchor(node,name());
 							if(a && a()){
 								Runtime.warn("Anchor '"+name()+"' overwritten.");
 							}else{
-								a = node.createAnchor(name());
+								a = NodeAnchors.createAnchor(node,name());
 							}
 							a( dir() ? new Geometry.SRT : new Geometry.Vec3 );
 							NodeEditor.selectNodes(NodeEditor.getSelectedNodes());
