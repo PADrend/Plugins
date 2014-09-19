@@ -22,37 +22,37 @@ loadOnce(__DIR__+"/ToolHelperTraits.escript");
 
 
 //---------------------------------------------------------------------------------
+static NodeAnchors = Std.require('LibMinSGExt/NodeAnchors');
 
-
-declareNamespace($TransformationTools,$PivotHandling);
-
-TransformationTools.PivotHandling.storePivotAtNode := fn([Geometry.Vec3,false] pivot,MinSG.Node node){
-
-	var newPivot = pivot ? toJSON(pivot.toArray(),false) : false;
-	var oldPivot = node.findNodeAttribute('NodeEdit.Pivot');
-	if(newPivot==oldPivot)
-		return;
-
-	var fun = fn(){
-		var node = this[0];
-		var pivot = this[1];
-		if(pivot){
-			node.setNodeAttribute('NodeEdit.Pivot',pivot);
-		}else{
-			node.unsetNodeAttribute('NodeEdit.Pivot');
-		}
-		NodeEditor.selectNodes( NodeEditor.getSelectedNodes() );
-	};
-	PADrend.executeCommand({
-		Command.DESCRIPTION : "Transform pivot",
-		Command.EXECUTE : 	[node,newPivot]->fun,
-		Command.UNDO : 		[node,oldPivot]->fun
-	});
+static _updatePivot = fn(MinSG.Node node, [Geometry.Vec3,false] pivot){
+	var newPivot = pivot ? pivot.toArray() : false;
+	var oldPivot = node.isSet( $__rotationPivot) ? node.__rotationPivot : false;
+	if(newPivot!=oldPivot){
+		var fun = fn(node,pivot){
+			node.__rotationPivot := pivot;
+			NodeEditor.selectNodes( NodeEditor.getSelectedNodes() );
+		};
+		PADrend.executeCommand({
+			Command.DESCRIPTION : "Transform pivot",
+			Command.EXECUTE : 	[node,newPivot]=>fun,
+			Command.UNDO : 		[node,oldPivot]=>fun
+		});
+	}
 };
 
-TransformationTools.PivotHandling.getPivot := fn(MinSG.Node node){
-	var attr = node.findNodeAttribute('NodeEdit.Pivot');
-	return attr ? new Geometry.Vec3(parseJSON(attr)) : new Geometry.Vec3;
+static _findPivot = fn(MinSG.Node node){
+	if(node.isSet( $__rotationPivot) && node.__rotationPivot)
+		return new Geometry.Vec3(node.__rotationPivot);
+	var anchor = NodeAnchors.findAnchor(node,'pivot');
+	if( anchor ){
+		if(anchor().isA(Geometry.SRT))
+			return anchor().getTranslation();
+		if(anchor().isA(Geometry.Vec3))
+			return anchor().clone();
+	}
+	if( node.isInstance() )
+		return _findPivot(node.getPrototype());
+	return new Geometry.Vec3;
 };
 
 TransformationTools.RotationTool := new Type;
@@ -62,18 +62,18 @@ TransformationTools.RotationTool := new Type;
 	//! \see TransformationTools.GenericNodeTransformToolTrait
 	Traits.addTrait(T,TransformationTools.GenericNodeTransformToolTrait);
 
-	T.pivot_ws @(private,init) := fn(){	return DataWrapper.createFromValue(void);	};
+	T.pivot_ws @(init) := fn(){	return DataWrapper.createFromValue(void);	};
 	T.editNode @(private) := void;
 	T.stepSize @(private,init) := fn(){	return DataWrapper.createFromValue(1);	};
 	T.localTransform @(init) := fn(){	return DataWrapper.createFromValue(true);	};
 
 	//! (internal) Call to store the current pivot at the node if necessary.
-	T.storePivotAtNode @(private) ::= fn(){
+	T.storePivotAtNode ::= fn(){
 		//! \see TransformationTools.NodeTransformationHandlerTrait
 		var nodes = getTransformedNodes();
 		if(nodes.count()==1 && pivot_ws()){
 			var localPivot = nodes[0].worldPosToLocalPos(pivot_ws());
-			TransformationTools.PivotHandling.storePivotAtNode( localPivot,nodes[0] );
+			_updatePivot( nodes[0], localPivot );
 		}
 	};
 
@@ -108,7 +108,7 @@ TransformationTools.RotationTool := new Type;
 		editNode += pivotEditNode;
 		pivotEditNode.scale(0.5);
 
-		pivotEditNode.onTranslationStart += this->fn(axisMarkerNode){
+		pivotEditNode.onTranslationStart += [axisMarkerNode] => this->fn(axisMarkerNode){
 			this.initialPivot_ws @(private) := pivot_ws().clone();
 			axisMarkerNode.activate();
 			//! \see TransformationTools.NodeTransformationHandlerTrait
@@ -117,16 +117,16 @@ TransformationTools.RotationTool := new Type;
 				this.editNode.setAnnotation("Free Pivot");
 			else
 				this.editNode.setAnnotation("Bound Pivot");
-		}.bindLastParams(axisMarkerNode);
+		};
 		pivotEditNode.onTranslate += this->fn(v){
 			this.pivot_ws(new Geometry.Vec3( initialPivot_ws + v) );
 		};
-		pivotEditNode.onTranslationStop += this->fn(v,axisMarkerNode){
+		pivotEditNode.onTranslationStop += [axisMarkerNode] => this->fn(axisMarkerNode,v){
 			axisMarkerNode.deactivate();
 			this.initialPivot_ws = void;
 			this.storePivotAtNode();
 			this.editNode.hideAnnotation();
-		}.bindLastParams(axisMarkerNode);
+		};
 
 		// ----------
 		var rotationNode = EditNodes.createRotationEditNode();
@@ -160,7 +160,7 @@ TransformationTools.RotationTool := new Type;
 	T.onNodesSelected_static += fn(Array selectedNodes){
 		// reset pivot
 		if(!selectedNodes.empty()){
-			pivot_ws( selectedNodes[0].localPosToWorldPos( TransformationTools.PivotHandling.getPivot(selectedNodes[0]) ) );
+			pivot_ws( selectedNodes[0].localPosToWorldPos( _findPivot(selectedNodes[0]) ) );
 		}
 //		if(selectedNodes.count()==1){
 //		}else if(!selectedNodes.empty()){
@@ -206,7 +206,7 @@ TransformationTools.RotationTool := new Type;
 
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
-			GUI.LABEL : "Pivot >",
+			GUI.LABEL : "Pivot",
 			GUI.MENU : this->fn(){
 				// proxy
 				var refreshGroup = new GUI.RefreshGroup;
@@ -223,7 +223,7 @@ TransformationTools.RotationTool := new Type;
 							var node = this.getTransformedNodes()[0];
 							if(!(node---|>MinSG.ListNode))
 								return;
-							var pivot = TransformationTools.PivotHandling.getPivot(node);
+							var pivot = _findPivot(node);
 							if(pivot.length()==0){
 								PADrend.message("Baking pivot skipped.");
 								return;
@@ -244,7 +244,7 @@ TransformationTools.RotationTool := new Type;
 								var pivot = this[2];
 								foreach(nodes as var i,var node)
 									node.setWorldOrigin(positions[i]);
-								TransformationTools.PivotHandling.storePivotAtNode( pivot,nodes[0] );
+								_updatePivot( nodes[0],pivot );
 							};
 							PADrend.executeCommand({
 								Command.DESCRIPTION : "Bake pivot",
@@ -306,12 +306,46 @@ TransformationTools.RotationTool := new Type;
 							"[0,0.5,0.5]","[1,0.5,0.5]",
 
 						]
-					},bakePivot...];
+					},
+					{
+						GUI.TYPE : GUI.TYPE_MENU,
+						GUI.LABEL : "From anchor",
+						GUI.MENU_WIDTH : 200,
+						GUI.MENU_PROVIDER : [this] => fn(tool){
+							var entries = ["*Anchors*"];
+							foreach( tool.getTransformedNodes() as var node){
+								foreach( NodeAnchors.findAnchors(node) as var anchorName,var anchor ){
+									entries += {
+										GUI.TYPE : GUI.TYPE_BUTTON,
+										GUI.LABEL : anchorName + "@" + node,
+										GUI.ON_CLICK : [tool,node,anchorName] => fn(tool,node,anchorName){
+											var anchor = NodeAnchors.findAnchor(node,anchorName)();
+											tool.pivot_ws(  node.localPosToWorldPos( anchor.isA(Geometry.SRT)?anchor.getTranslation() : anchor ) );
+										}
+									};
+								}
+							}
+							tool.storePivotAtNode();
+							return entries;
+							
+						}
+					},					
+					{
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Store as anchor",
+						GUI.TOOLTIP : "Store current pivot as 'pivot'-anchor.",
+						GUI.ON_CLICK : [this] => fn(tool){
+							foreach( tool.getTransformedNodes() as var node)
+								NodeAnchors.createAnchor( node,'pivot', node.worldPosToLocalPos(tool.pivot_ws()) );							
+						}
+					},
+					
+					bakePivot...];
 			}
 		},
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
-			GUI.LABEL : "Rotate >",
+			GUI.LABEL : "Rotate",
 			GUI.MENU : this->fn(){
                 var value = DataWrapper.createFromValue(0);
 				var refreshGroup = new GUI.RefreshGroup;
@@ -328,14 +362,14 @@ TransformationTools.RotationTool := new Type;
 						GUI.TYPE : GUI.TYPE_NUMBER,
 						GUI.WIDTH : 40,
 						GUI.DATA_WRAPPER: value,
-						GUI.ON_DATA_CHANGED : this->fn(value,localAxis,dataWrapper){
+						GUI.ON_DATA_CHANGED : [arr[1],value] => this->fn(localAxis,dataWrapper, value){
 							this.applyNodeTransformations();                        //! \see TransformationTools.NodeTransformationHandlerTrait
 							foreach( this.getTransformedNodes() as var node)		//! \see TransformationTools.NodeTransformationHandlerTrait
 								node.rotateLocal_deg(value,localAxis);
 							this.applyNodeTransformations();                        //! \see TransformationTools.NodeTransformationHandlerTrait
 							outln("Rotated about the local Axis (",localAxis,")",value," deg.");
 							dataWrapper(0);
-						}.bindLastParams(arr[1],value)
+						}
 					};
 				}
                 var worldContainer = gui.create({
@@ -350,7 +384,7 @@ TransformationTools.RotationTool := new Type;
 						GUI.TYPE : GUI.TYPE_NUMBER,
 						GUI.WIDTH : 40,
 						GUI.DATA_WRAPPER: value,
-						GUI.ON_DATA_CHANGED : this->fn(value,localAxis,dataWrapper){
+						GUI.ON_DATA_CHANGED : [arr[1],value] => this->fn(localAxis,dataWrapper, value){
 							this.applyNodeTransformations();                        //! \see TransformationTools.NodeTransformationHandlerTrait
 							foreach( this.getTransformedNodes() as var node){		//! \see TransformationTools.NodeTransformationHandlerTrait
 								var worldAxis = node.localDirToWorldDir(localAxis);
@@ -359,7 +393,7 @@ TransformationTools.RotationTool := new Type;
 							this.applyNodeTransformations();                        //! \see TransformationTools.NodeTransformationHandlerTrait
 							outln("Rotated about the world Axis (",localAxis,")",value," deg.");
 							dataWrapper(0);
-						}.bindLastParams(arr[1],value)
+						}
 					};
 				}
 				return ["Local Rotation",localContainer,"World Rotation",worldContainer];
