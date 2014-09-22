@@ -478,7 +478,7 @@ tests += new Tests.AutomatedTest( "Util/TypeBasedHandler" , fn(){
 // -----------------------------------------------------------------------------------------------
 
 tests += new Tests.AutomatedTest( "Util/XML" , fn(){
-	loadOnce("LibUtilExt/XML_Utils.escript");
+	static XML_Utils = Std.require('LibUtilExt/XML_Utils');
 	
 	var tmpDir = new Util.TemporaryDirectory("TestsUtil");
 	var filename1 = tmpDir.getPath()+"test1.xml";
@@ -491,27 +491,27 @@ tests += new Tests.AutomatedTest( "Util/XML" , fn(){
 		'<attribute name="thing" value="bar" />\n'+
 		'</scene>',true
 	);
-	var m1 = Util.loadXML(filename1);
+	var m1 = XML_Utils.loadXML(filename1);
 //	print_r(m1);
 	
 	// \todo Re-enable when #448 is fixed!
 	addResult("loadXML", (m1 == {
-		Util.XML_NAME : "scene",
-		Util.XML_ATTRIBUTES : new Map(),
-		Util.XML_CHILDREN : [{
-			Util.XML_NAME : "attribute",
-			Util.XML_ATTRIBUTES : {	"name" : "tags", "type" : "json" },
-			Util.XML_DATA : "foo"
+		XML_Utils.XML_NAME : "scene",
+		XML_Utils.XML_ATTRIBUTES : new Map(),
+		XML_Utils.XML_CHILDREN : [{
+			XML_Utils.XML_NAME : "attribute",
+			XML_Utils.XML_ATTRIBUTES : {	"name" : "tags", "type" : "json" },
+			XML_Utils.XML_DATA : "foo"
 		},{
-			Util.XML_NAME : "attribute",
-			Util.XML_ATTRIBUTES : {	"name" : "thing", "value" : "bar" }
+			XML_Utils.XML_NAME : "attribute",
+			XML_Utils.XML_ATTRIBUTES : {	"name" : "thing", "value" : "bar" }
 		}]
 	}));
 	
-	Util.saveXML(filename2,m1);
-	addResult("saveXML", Util.loadXML(filename2) == m1);
+	XML_Utils.saveXML(filename2,m1);
+	addResult("saveXML", XML_Utils.loadXML(filename2) == m1);
 	
-//	out(Util.generateXML(m));
+//	out(XML_Utils.generateXML(m));
 //	return result;
 });
 

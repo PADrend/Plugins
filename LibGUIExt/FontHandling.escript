@@ -86,21 +86,22 @@ GUI.GUI_Manager.createBitmapFont ::= fn(filename,
 	\note Recommended font options: Match char height 'enabled', font smoothing 'enabled', supersampling 'disabled', charset 'utf8'
 	\note if a xml-parser warning '</font>' occurs, the broken 'kernings' tag has to be removed by hand. */
 GUI.GUI_Manager.createBitmapFontFromFNT ::= fn(filename){
-	loadOnce("LibUtilExt/XML_Utils.escript");
+	static XML_Utils = Std.require('LibUtilExt/XML_Utils');
+	
 	var font;
 	var lineHeight = 10;
-	var fontInfo = Util.loadXML(filename);
-	foreach(fontInfo[Util.XML_CHILDREN] as var m){
-		var type = m[Util.XML_NAME];
+	var fontInfo = XML_Utils.loadXML(filename);
+	foreach(fontInfo[XML_Utils.XML_CHILDREN] as var m){
+		var type = m[XML_Utils.XML_NAME];
 		if(type=='info'){
-//			out("face:\t",m[Util.XML_ATTRIBUTES]['face'],"\n");
+//			out("face:\t",m[XML_Utils.XML_ATTRIBUTES]['face'],"\n");
 		}else if(type=='common'){
-			lineHeight = m[Util.XML_ATTRIBUTES]['lineHeight'];
+			lineHeight = m[XML_Utils.XML_ATTRIBUTES]['lineHeight'];
 		}else if(type=='pages'){
-			if(m[Util.XML_CHILDREN].count()!=1){
+			if(m[XML_Utils.XML_CHILDREN].count()!=1){
 				throw new Exception("Only fonts with one page are currently supported.");
 			}
-			var bitmapFile = m[Util.XML_CHILDREN][0][Util.XML_ATTRIBUTES]['file'];
+			var bitmapFile = m[XML_Utils.XML_CHILDREN][0][XML_Utils.XML_ATTRIBUTES]['file'];
 			
 			// add path extracted from filename
 			bitmapFile = filename.substr(0,filename.rFind("/")+1)+bitmapFile;
@@ -112,10 +113,10 @@ GUI.GUI_Manager.createBitmapFontFromFNT ::= fn(filename){
 		}else if(type=='chars'){
 			if(!font)
 				throw new Exception("No bitmap info found in '"+filename+"'");
-			foreach(m[Util.XML_CHILDREN] as var charInfo){
-				if(!charInfo[Util.XML_NAME]=='char')
+			foreach(m[XML_Utils.XML_CHILDREN] as var charInfo){
+				if(!charInfo[XML_Utils.XML_NAME]=='char')
 					continue;
-				var attr = charInfo[Util.XML_ATTRIBUTES];
+				var attr = charInfo[XML_Utils.XML_ATTRIBUTES];
 				var unicode = 0+attr['id'];
 				font.addGlyph( unicode, 
 					attr['width'],attr['height'],

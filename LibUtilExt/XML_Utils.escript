@@ -11,10 +11,8 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[PADrend] Util/XMLImport.escript
- **/
-
+// static N = new Namespace;
+ 
 Util.XML_NAME := $name;
 Util.XML_ATTRIBUTES := $attributes;
 Util.XML_CHILDREN := $children;
@@ -102,16 +100,16 @@ Util.loadXML := fn(filename){
 		$openTags : [root]
 	});
 	
-	var reader = new Util.MicroXMLReader();
+	var reader = new Util.MicroXMLReader;
 	
 	//! ---|> MicroXMLReader
-	reader.data := context->fn(tag,data){
+	reader.data @(override) := context->fn(tag,data){
 		if(!data.empty())
 			openTags.back()[Util.XML_DATA] = data;
 		return true;
 	};
 	//! ---|> MicroXMLReader
-	reader.enter := context->fn(tag){
+	reader.enter @(override) := context->fn(tag){
 		var m = {
 			Util.XML_NAME : tag.name,
 			Util.XML_ATTRIBUTES : tag.attributes
@@ -127,7 +125,7 @@ Util.loadXML := fn(filename){
 		return true;		
 	};
 	//! ---|> MicroXMLReader	
-	reader.leave := context->fn(tag){
+	reader.leave @(override) := context->fn(tag){
 		openTags.popBack();
 		return true;		
 	};	
@@ -145,3 +143,4 @@ Util.saveXML := fn(filename,Map root){
 	if(!Util.saveFile(filename,Util.generateXML(root)))
 		throw new Exception("Could not save xml file '"+filename+"'");
 };
+return Util;
