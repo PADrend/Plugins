@@ -95,25 +95,6 @@ GLOBALS.ExtensionPoint := Util.ExtensionPoint; //! \deprecated global alias
 	/*! The extension point should no longer be used; when registering an extension, a warning is shown.	*/
 	T.DEPRECATED ::= Util.EXTPOINT_DEPRECATED;
 
-	//! (static)
-	T._extensionPointsRegistry ::= new Map;
-
-	//! (static) Create a new extensionPoint and store it in the singleton extensionPoint registry.
-	T.create ::= fn(name,Number flags = 0) {
-		var extPoint = new ExtensionPoint(flags);
-		if(ExtensionPoint._extensionPointsRegistry[name]){
-			Runtime.warn("Extension point '"+name+"' already exists.");
-		}
-			
-		ExtensionPoint._extensionPointsRegistry[name] = extPoint;
-		return extPoint;
-	};
-
-	//! (static)
-	T.get ::= fn(name) {
-		return ExtensionPoint._extensionPointsRegistry[name];
-	};
-
 	// ----------
 
 	T.extensions @(private,init) := Array;
@@ -247,51 +228,5 @@ GLOBALS.ExtensionPoint := Util.ExtensionPoint; //! \deprecated global alias
 // ----------------------------
 
 
-//! (public)
-Util.registerExtension := fn(name, fun,[Number,Bool] priority = Util.EXTENSION_PRIORITY_MEDIUM) {
-	var extensionPoint = ExtensionPoint.get(name);
-	if(!extensionPoint){
-		Runtime.warn("Unknown extension point: "+name);
-		return;
-	}
-	if(extensionPoint.isDeprecated()){
-		Runtime.warn("Extending deprecated extension point '"+name+"' with extension '"+fun.toDbgString()+"'.");
-	}
-	return extensionPoint.registerExtension(fun,priority);
-};
-GLOBALS.registerExtension := Util.registerExtension; //! \deprecated global alias
-
-Util.registerExtensionRevocably := fn( name, fun, p...) {
-	Util.registerExtension( name, fun, p...);
-	return [name,fun] => fn(name,fun){
-		Util.removeExtension( name, fun );
-		return $REMOVE;
-	};
-};
-
-//! (public)
-Util.removeExtension := fn(name, fun) {
-	var extensionPoint = ExtensionPoint.get(name);
-	if(!extensionPoint){
-		Runtime.warn("Unknown extension point: "+name);
-		return;
-	}
-	extensionPoint.removeExtension(fun);
-};
-GLOBALS.removeExtension := Util.removeExtension; //! \deprecated global alias
-
-
-/*! (public) If the extensionPoint is a chainOfResponsibility, the execution is stopped after the
-	first extension results true. Then true is returned.	*/
-Util.executeExtensions := fn(name,params...) {
-	var extensionPoint = ExtensionPoint.get(name);
-	if(!extensionPoint){
-		Runtime.warn("Unknown extension point: "+name);
-		return;
-	}
-	
-	return extensionPoint.execute(params);
-};
-GLOBALS.executeExtensions := Util.executeExtensions; //! \deprecated global alias
-
+return Util.ExtensionPoint;
 

@@ -16,11 +16,9 @@
  ** Plugin management
  **/
  
-loadOnce(__DIR__+"/Extension.escript");
- if(EScript.VERSION < 607){ // deprecated
-	loadOnce(__DIR__+"/deprecated/EScript_Utils.escript");
-	loadOnce(__DIR__+"/deprecated/EScript_info.escript");
- }
+static ExtensionPoint = module('./ExtensionPoint');
+static ExtensionRegistry = module('./ExtensionRegistry');
+
 
 // -------------------------------------------------
 // --- Plugin
@@ -186,7 +184,7 @@ Util.loadPlugins @(public) := fn( Array filenames, showNotification = true, Arra
 							name = mixed[0];
 							flags = mixed[1];
 						}
-						plugin.addExtensionPoint(name,ExtensionPoint.create(name,flags));
+						plugin.addExtensionPoint(name, ExtensionRegistry.createExtensionPoint(name,flags));
 					}
 				}
 			}catch(e){
