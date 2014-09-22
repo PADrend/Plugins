@@ -16,6 +16,7 @@
  ** 2010-05 Claudius
  **/
 declareNamespace($TMSim);
+static Listener = Std.require('LibUtilExt/deprecated/Listener');
 
 GLOBALS.TMSim:=new Plugin({
 		Plugin.NAME : 'Spielerei_TMSim',

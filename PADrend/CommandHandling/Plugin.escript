@@ -16,7 +16,7 @@
  **
  **/
 
-loadOnce("LibUtilExt/Command.escript");
+Std.require('LibUtilExt/Command');
 
 /***
  **   ---|> Plugin
@@ -55,7 +55,7 @@ PADrend.CommandHandling._commandHistory := void;
  */
 PADrend.CommandHandling.init := fn(){
 
-	this._commandHistory = new CommandHistory();
+	this._commandHistory = new CommandHistory;
 	{
 		registerExtension('PADrend_KeyPressed',this->ex_KeyPressed);
 		registerExtension('PADrend_Init',this->ex_Init);

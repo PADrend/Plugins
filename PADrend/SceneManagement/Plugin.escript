@@ -16,10 +16,6 @@
  **	[Plugin:PADrend] PADrend/SceneManagement/Plugin.escript
  **
  **/
-
-loadOnce("LibUtilExt/Command.escript");
-
-
 PADrend.SceneManagement := new Plugin({
 		Plugin.NAME : 'PADrend/SceneManagement',
 		Plugin.DESCRIPTION : "Scene management and root node handling",
@@ -94,6 +90,8 @@ SceneManagement.ex_Init := fn(...){
 		camera.setNearFar(systemConfig.getValue('PADrend.Camera.near',0.1),systemConfig.getValue('PADrend.Camera.far',5000));
 		camera.applyVerticalAngle(systemConfig.getValue('PADrend.Camera.vAngle',90));
 		// when the application window is resized:
+		
+		static Listener = Std.require('LibUtilExt/deprecated/Listener');
 		Listener.add( Listener.TYPE_APP_WINDOW_SIZE_CHANGED, camera->fn(evt,newSize){
 			// update viewport only when it has not been fixed in the config
 			if(! systemConfig.getValue('PADrend.Camera.viewport',false))

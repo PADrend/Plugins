@@ -60,8 +60,8 @@ tests += new Tests.AutomatedTest( "Util/DestructionMonitor" , fn(){
 // -----------------------------------------------------------------------------------------------
 
 tests += new Tests.AutomatedTest( "Util/Command" , fn(){
-	loadOnce("LibUtilExt/Command.escript");
-	var hist = new CommandHistory();
+	Std.require('LibUtilExt/Command');
+	var hist = new CommandHistory;
 	
 	var obj = new ExtObject( {$m1:1} );
 	
@@ -267,7 +267,7 @@ tests += new Tests.AutomatedTest( "Util/EScript extensions" , fn(){
 		
 	// MultiProcedure
 	{
-		var f = new MultiProcedure();
+		var f = new Std.MultiProcedure;
 		f+="this should not be there";
 		f+=fn(result,a){result+=a; };
 		f+=fn(result,a){result+=(a+1); };
@@ -290,7 +290,7 @@ tests += new Tests.AutomatedTest( "Util/EScript extensions" , fn(){
 	{
 		
 		var o = new ExtObject( {
-				$f : new MultiProcedure(), 
+				$f : new Std.MultiProcedure, 
 				$m : 1
 		});
 		
@@ -383,9 +383,10 @@ tests += new Tests.AutomatedTest( "Util/Generated comparison functions" , fn(){
 // -----------------------------------------------------------------------------------------------
 
 tests += new Tests.AutomatedTest( "Util/Listener" , fn(){
-	var notifier = new Notifier();
+	static Listener = Std.require('LibUtilExt/deprecated/Listener');
+	var notifier = new Notifier;
 	
-	var obj =  new ExtObject();
+	var obj =  new ExtObject;
 	obj.a := 0;
 	notifier.add( "_test" , obj->fn(type,data){
 		a += data;

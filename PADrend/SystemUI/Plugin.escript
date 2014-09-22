@@ -16,6 +16,8 @@
  **	[Plugin:PADrend] PADrend/SystemUI/Plugin.escript
  **
  **/
+ 
+static Listener = Std.require('LibUtilExt/deprecated/Listener');
 
 /*! Notified when the application window is resized; data is [width,height] */
 GLOBALS.Listener.TYPE_APP_WINDOW_SIZE_CHANGED := 'TYPE_APP_WINDOW_SIZE_CHANGED';

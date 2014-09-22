@@ -66,3 +66,4 @@ Notifier.notify ::= fn(type,data = void){
 
 // global listener
 GLOBALS.Listener := new Notifier;
+return Listener;

@@ -35,7 +35,7 @@
  **
  ** @note Uses Listener.escript
  **/
-loadOnce(__DIR__+"/deprecated/Listener.escript");
+static Listener = module('./deprecated/Listener');
 
 /**
  * [public, event]
@@ -210,3 +210,5 @@ CommandHistory.execute ::= fn(Command cmd){
 		Listener.notify( Listener.CMD_UNDO_REDO_CHANGED, this);
 	}
 };
+
+return Command;

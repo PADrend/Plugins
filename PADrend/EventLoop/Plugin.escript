@@ -252,6 +252,7 @@ plugin.singleFrame := fn() {
 				}
 			} else if (evt.type == Util.UI.EVENT_RESIZE) {
 				renderingContext.setWindowClientArea(0, 0, evt.width, evt.height);
+				static Listener = Std.require('LibUtilExt/deprecated/Listener');
 				Listener.notify(Listener.TYPE_APP_WINDOW_SIZE_CHANGED, [evt.width, evt.height]);
 			} else if (evt.type == Util.UI.EVENT_QUIT) {
 				plugin.stop();

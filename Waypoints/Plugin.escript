@@ -86,7 +86,7 @@ GLOBALS.WaypointsPlugin:=new Plugin({
 });
 
 
-loadOnce("LibUtilExt/Command.escript");
+Std.require('LibUtilExt/Command');
 
 loadOnce(__DIR__+"/Interface.escript");
 loadOnce(__DIR__+"/GUI/GUI.escript");
@@ -135,7 +135,7 @@ WaypointsPlugin.init:=fn() {
 	}
 	{
 		// Command history (Util/Command.escript)
-		this.cmdHistory:=new CommandHistory();
+		this.cmdHistory:=new CommandHistory;
 	}
 	
 	Util.requirePlugin('PADrend/RemoteControl').registerFunctions({

@@ -24,8 +24,8 @@ GUI.init := fn(Util.UI.Window window, Util.UI.EventContext eventContext) {
 		gui.setWindow(window);
 		gui.initDefaultFonts();  // see FontHandling.escript
 		gui._destructionMonitor := void; // (optional for debugging) Util.DestructionMonitor
-		gui.onMouseMove := new MultiProcedure(); // \todo (Cl) replace by @(init) alternative below when Type._supportsInit() is implemented.
-		gui.onMouseButton := new MultiProcedure(); // \todo (Cl) replace by @(init) alternative below when Type._supportsInit() is implemented.
+		gui.onMouseMove := new Std.MultiProcedure; // \todo (Cl) replace by @(init) alternative below when Type._supportsInit() is implemented.
+		gui.onMouseButton := new Std.MultiProcedure; // \todo (Cl) replace by @(init) alternative below when Type._supportsInit() is implemented.
 	}
 	if(!GLOBALS.gui.isSet($windows)){
 		GLOBALS.gui.windows := new Map();

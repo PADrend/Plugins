@@ -19,6 +19,7 @@
 ** GUI construction for the editor part of the Waypoints-Plugin.
 **/
 loadOnce(__DIR__+"/WaypointEditorCell.escript");
+static Listener = Std.require('LibUtilExt/deprecated/Listener');
 
 WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 	var pan = gui.create({

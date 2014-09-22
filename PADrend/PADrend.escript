@@ -33,7 +33,6 @@ if(EScript.VERSION<607)
 {
 	outln("Loading Util scripts...");
 	
-	loadOnce ("LibUtilExt/deprecated/Listener.escript");
 	loadOnce ("LibUtilExt/Misc_Utils.escript");
 
 	loadOnce ("LibMinSGExt/Geometry_Utils.escript");

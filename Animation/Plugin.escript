@@ -27,6 +27,7 @@ GLOBALS.AnimationPlugin:=new Plugin({
 			Plugin.REQUIRES : ["NodeEditor","PADrend","PADrend/Serialization"]
 });
 
+static Listener = Std.require('LibUtilExt/deprecated/Listener');
 loadOnce(__DIR__+"/PlaybackContext.escript");
 loadOnce(__DIR__+"/Animations/AnimationBase.escript");
 loadOnce(__DIR__+"/Animations/Story.escript");
@@ -51,7 +52,7 @@ AnimationPlugin.init:=fn(){
 
 	Listener.ANIMATION_PLUGIN_ACTIVE_STORY_CHANGED := $ANIMATION_PLUGIN_ACTIVE_STORY_CHANGED;
 
-    { // Register ExtensionPointHandler:
+	{ // Register ExtensionPointHandler:
 		registerExtension('PADrend_Init',this->fn(){
 			gui.registerComponentProvider('PADrend_PluginsMenu.animation',{
 				GUI.TYPE : GUI.TYPE_BUTTON,
@@ -59,12 +60,12 @@ AnimationPlugin.init:=fn(){
 				GUI.ON_CLICK : fn() { AnimationPlugin.showWindow(0, 50, 600, 300); }
 			});
 		});
-    }
-    this.stories = [];
+	}
+	this.stories = [];
 
 	this.createNewStory();
 
-    return true;
+	return true;
 };
 
 

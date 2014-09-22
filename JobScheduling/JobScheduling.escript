@@ -17,18 +17,15 @@
  ** \todo
  **    - timeouts with automatic re-scheduling
  **/
- 
-loadOnce("LibUtilExt/Command.escript");
-
 
 //! Namespace
-GLOBALS.JobScheduling := new Namespace();
+GLOBALS.JobScheduling := new Namespace;
  
 //! static
 
 // called by a scheduler whenever a new job is available
-JobScheduling.onJobAvailable := new MultiProcedure(); 		// parameter: { 'jobId':jobId, 'workerId': workerId, 'workload': workload]
-JobScheduling.onResultAvailable := new MultiProcedure(); 	// parameter: { 'jobId':jobId, 'result':result }
-JobScheduling.onWorkerAvailable := new MultiProcedure();	// parameter: workerId
+JobScheduling.onJobAvailable := new Std.MultiProcedure; 		// parameter: { 'jobId':jobId, 'workerId': workerId, 'workload': workload]
+JobScheduling.onResultAvailable := new Std.MultiProcedure; 	// parameter: { 'jobId':jobId, 'result':result }
+JobScheduling.onWorkerAvailable := new Std.MultiProcedure;	// parameter: workerId
 
 // ------------------------------------------------------------------
