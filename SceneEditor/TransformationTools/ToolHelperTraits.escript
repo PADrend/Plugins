@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -10,11 +10,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:SceneEditor/TransformationTools/ToolHelperTraits.escript]
- **/
-
-declareNamespace($TransformationTools);
+static ToolHelperTraits = new Namespace;
 
 // -----------------------------------------------------------------------------------
 
@@ -27,18 +23,18 @@ declareNamespace($TransformationTools);
 	- onToolDeactivation_static		Static MultiProcedure called whenever the tool is disabled.
 	- onToolDeactivation			MultiProcedure called whenever the tool is disabled.
 */
-TransformationTools.UIToolTrait := new Traits.GenericTrait("TransformationTools.UIToolTrait");
+ToolHelperTraits.UIToolTrait := new Traits.GenericTrait("ToolHelperTraits.UIToolTrait");
 {
-	var t = TransformationTools.UIToolTrait;
+	var t = ToolHelperTraits.UIToolTrait;
 
 	t.attributes.onToolActivation_static ::= void;
-	t.attributes.onToolActivation @(init) := MultiProcedure;
+	t.attributes.onToolActivation @(init) := Std.MultiProcedure;
 	
 	t.attributes.onToolDeactivation_static ::= void;
-	t.attributes.onToolDeactivation @(init) := MultiProcedure;
+	t.attributes.onToolDeactivation @(init) := Std.MultiProcedure;
 	
 	t.attributes.onToolInitOnce_static ::= void;
-	t.attributes.onToolInitOnce @(init) := MultiProcedure;
+	t.attributes.onToolInitOnce @(init) := Std.MultiProcedure;
 	
 	t.attributes.activateTool ::= fn(){
 		if(onToolInitOnce){
@@ -76,12 +72,12 @@ TransformationTools.UIToolTrait := new Traits.GenericTrait("TransformationTools.
 	- onFrame_static			Static MultiProcedure called before each frame while enabled.
 
 */
-TransformationTools.FrameListenerTrait := new Traits.GenericTrait("TransformationTools.FrameListenerTrait");
+ToolHelperTraits.FrameListenerTrait := new Traits.GenericTrait("ToolHelperTraits.FrameListenerTrait");
 {
-	var t = TransformationTools.FrameListenerTrait;
+	var t = ToolHelperTraits.FrameListenerTrait;
 	
 	t.attributes.onFrame_static ::= void;
-	t.attributes.onFrame @(init) := MultiProcedure;
+	t.attributes.onFrame @(init) := Std.MultiProcedure;
 	t.attributes._revoceFrameListener @(private) := void; // void | MultiProcedure
 
 	t.attributes.enableFrameListener ::= fn(){
@@ -130,15 +126,15 @@ TransformationTools.FrameListenerTrait := new Traits.GenericTrait("Transformatio
 
 	\see NodeEditor Plugin
 */
-TransformationTools.NodeSelectionListenerTrait := new Traits.GenericTrait("TransformationTools.NodeSelectionListenerTrait");
+ToolHelperTraits.NodeSelectionListenerTrait := new Traits.GenericTrait("ToolHelperTraits.NodeSelectionListenerTrait");
 {
-	var t = TransformationTools.NodeSelectionListenerTrait;
+	var t = ToolHelperTraits.NodeSelectionListenerTrait;
 	
 	t.attributes._nodeSelectionChangedHandler @(private) := void; 
 	t.attributes._selectedNodes @(private,init) := Array;
 
 	t.attributes.onNodesSelected_static ::= void;
-	t.attributes.onNodesSelected @(init) := MultiProcedure;
+	t.attributes.onNodesSelected @(init) := Std.MultiProcedure;
 
 	t.attributes.startNodeSelectionListener ::= fn(){
 		if(!_nodeSelectionChangedHandler){
@@ -182,9 +178,9 @@ TransformationTools.NodeSelectionListenerTrait := new Traits.GenericTrait("Trans
 	
 	\see PADrend.GUI
 */
-TransformationTools.ContextMenuProviderTrait := new Traits.GenericTrait("TransformationTools.ContextMenuProviderTrait");
+ToolHelperTraits.ContextMenuProviderTrait := new Traits.GenericTrait("ToolHelperTraits.ContextMenuProviderTrait");
 {
-	var t = TransformationTools.ContextMenuProviderTrait;
+	var t = ToolHelperTraits.ContextMenuProviderTrait;
 	
 	//! ---o
 	t.attributes.doCreateContextMenu ::= fn(){	return [];	};
@@ -208,9 +204,9 @@ TransformationTools.ContextMenuProviderTrait := new Traits.GenericTrait("Transfo
 
 	\see PADrend.CommandHandling
 */
-TransformationTools.NodeTransformationHandlerTrait := new Traits.GenericTrait("TransformationTools.NodeTransformationHandlerTrait");
+ToolHelperTraits.NodeTransformationHandlerTrait := new Traits.GenericTrait("ToolHelperTraits.NodeTransformationHandlerTrait");
 {
-	var t = TransformationTools.NodeTransformationHandlerTrait;
+	var t = ToolHelperTraits.NodeTransformationHandlerTrait;
 	
 	t.attributes._transfomredNodesOrigins @(init,private):= Map; //!< During transformation, this contains node -> original matrix.
 	t.attributes._transformedNodes @(init,private):= Array; 
@@ -271,9 +267,9 @@ TransformationTools.NodeTransformationHandlerTrait := new Traits.GenericTrait("T
 
 	\see PADrend.NodeInteraction
 */
-TransformationTools.MetaNodeContainerTrait := new Traits.GenericTrait("TransformationTools.MetaNodeContainerTrait");
+ToolHelperTraits.MetaNodeContainerTrait := new Traits.GenericTrait("ToolHelperTraits.MetaNodeContainerTrait");
 {
-	var t = TransformationTools.MetaNodeContainerTrait;
+	var t = ToolHelperTraits.MetaNodeContainerTrait;
 	
 	t.attributes._metaNode @(private) := void;
 	
@@ -312,78 +308,79 @@ TransformationTools.MetaNodeContainerTrait := new Traits.GenericTrait("Transform
 
 /*! Adds and initializes a bunch of traits useful for a transformation tool.
 
-	- general UITool enabling and disabling 		\see TransformationTools.UIToolTrait
-	- per frame actions								\see TransformationTools.FrameListenerTrait
-	- extension to the right click context menu		\see TransformationTools.ContextMenuProviderTrait
-	- an interactive meta node						\see TransformationTools.MetaNodeContainerTrait
-	- a listener for changed node selections		\see TransformationTools.NodeSelectionListenerTrait
-	- wrapping node transformations in commands		\see TransformationTools.NodeTransformationHandlerTrait
+	- general UITool enabling and disabling 		\see ToolHelperTraits.UIToolTrait
+	- per frame actions								\see ToolHelperTraits.FrameListenerTrait
+	- extension to the right click context menu		\see ToolHelperTraits.ContextMenuProviderTrait
+	- an interactive meta node						\see ToolHelperTraits.MetaNodeContainerTrait
+	- a listener for changed node selections		\see ToolHelperTraits.NodeSelectionListenerTrait
+	- wrapping node transformations in commands		\see ToolHelperTraits.NodeTransformationHandlerTrait
 
 */
-TransformationTools.GenericNodeTransformToolTrait := new Traits.GenericTrait("TransformationTools.GenericNodeTransformToolTrait");
+ToolHelperTraits.GenericNodeTransformToolTrait := new Traits.GenericTrait("ToolHelperTraits.GenericNodeTransformToolTrait");
 {
-	var t = TransformationTools.GenericNodeTransformToolTrait;
+	var t = ToolHelperTraits.GenericNodeTransformToolTrait;
 	
 	t.onInit += fn(obj){
-		//! \see TransformationTools.UIToolTrait
-		Traits.addTrait(obj,TransformationTools.UIToolTrait);
+		//! \see ToolHelperTraits.UIToolTrait
+		Traits.addTrait(obj,ToolHelperTraits.UIToolTrait);
 
-		//! \see TransformationTools.FrameListenerTrait
-		Traits.addTrait(obj,TransformationTools.FrameListenerTrait);
+		//! \see ToolHelperTraits.FrameListenerTrait
+		Traits.addTrait(obj,ToolHelperTraits.FrameListenerTrait);
 
-		//! \see TransformationTools.ContextMenuProviderTrait
-		Traits.addTrait(obj,TransformationTools.ContextMenuProviderTrait);
+		//! \see ToolHelperTraits.ContextMenuProviderTrait
+		Traits.addTrait(obj,ToolHelperTraits.ContextMenuProviderTrait);
 
-		//! \see TransformationTools.MetaNodeContainerTrait
-		Traits.addTrait(obj,TransformationTools.MetaNodeContainerTrait);
+		//! \see ToolHelperTraits.MetaNodeContainerTrait
+		Traits.addTrait(obj,ToolHelperTraits.MetaNodeContainerTrait);
 
-		//! \see TransformationTools.NodeSelectionListenerTrait
-		Traits.addTrait(obj,TransformationTools.NodeSelectionListenerTrait);
+		//! \see ToolHelperTraits.NodeSelectionListenerTrait
+		Traits.addTrait(obj,ToolHelperTraits.NodeSelectionListenerTrait);
 
-		//! \see TransformationTools.NodeTransformationHandlerTrait
-		Traits.addTrait(obj,TransformationTools.NodeTransformationHandlerTrait);
+		//! \see ToolHelperTraits.NodeTransformationHandlerTrait
+		Traits.addTrait(obj,ToolHelperTraits.NodeTransformationHandlerTrait);
 
 
-		//! \see TransformationTools.NodeSelectionListenerTrait
+		//! \see ToolHelperTraits.NodeSelectionListenerTrait
 		obj.onNodesSelected_static += fn(Array selectedNodes){
 			if(selectedNodes.empty()){
-				//! \see TransformationTools.FrameListenerTrait
+				//! \see ToolHelperTraits.FrameListenerTrait
 				disableFrameListener();
 
-				//! \see TransformationTools.MetaNodeContainerTrait
+				//! \see ToolHelperTraits.MetaNodeContainerTrait
 				disableMetaNode();
 			}else{
-				//! \see TransformationTools.FrameListenerTrait
+				//! \see ToolHelperTraits.FrameListenerTrait
 				enableFrameListener();
 
-				//! \see TransformationTools.MetaNodeContainerTrait
+				//! \see ToolHelperTraits.MetaNodeContainerTrait
 				enableMetaNode();
 			}
-			//! \see TransformationTools.NodeTransformationHandlerTrait
+			//! \see ToolHelperTraits.NodeTransformationHandlerTrait
 			setTransformedNodes(selectedNodes);
 		};
 
 		
-		//! \see TransformationTools.UIToolTrait
+		//! \see ToolHelperTraits.UIToolTrait
 		obj.onToolActivation_static += fn(){
-			//! \see TransformationTools.NodeSelectionListenerTrait
+			//! \see ToolHelperTraits.NodeSelectionListenerTrait
 			startNodeSelectionListener();
 			
-			//! \see TransformationTools.ContextMenuProviderTrait
+			//! \see ToolHelperTraits.ContextMenuProviderTrait
 			enableContextMenu();
 		};
 		
 		
-		//! \see TransformationTools.UIToolTrait
+		//! \see ToolHelperTraits.UIToolTrait
 		obj.onToolDeactivation_static += fn(){
-			//! \see TransformationTools.ContextMenuProviderTrait
+			//! \see ToolHelperTraits.ContextMenuProviderTrait
 			disableContextMenu();
 
-			//! \see TransformationTools.NodeSelectionListenerTrait
+			//! \see ToolHelperTraits.NodeSelectionListenerTrait
 			finalizeNodeSelectionListener();
 		};	
 	};
 }
 
+return ToolHelperTraits;
 
 //---------------------------------------------------------------------------------

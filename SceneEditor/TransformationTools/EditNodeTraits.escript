@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 20132014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -12,21 +12,22 @@
  */
 /****
  **	[Plugin:NodeEditor/EditNodeTraits]
- ** Collection of traits for editNodes (meta nodes for direct interactions in the 3-d-space).
+ ** Collection of traits for EditNodes (meta nodes for direct interactions in the 3-d-space).
  **
  ** \note this file depends on PADrend (e.g. extension 'PADrend_UIEvent'), but all other dependencies to high-level
  **			plugins should be avoided.
  **
  **/
 
-declareNamespace($EditNodes);
+
+static EditNodeTraits = new Namespace;
 
 // --------------------------------------------------------------------------------
 /*!
 */
-EditNodes.AnnotatableTrait := new Traits.GenericTrait("EditNodes.AnnotatableTrait");
+EditNodeTraits.AnnotatableTrait := new Traits.GenericTrait("EditNodeTraits.AnnotatableTrait");
 {
-	var t = EditNodes.AnnotatableTrait;
+	var t = EditNodeTraits.AnnotatableTrait;
 	
 	t.attributes._activeAnnotationMessage @(private) := void; 
 	
@@ -52,9 +53,9 @@ EditNodes.AnnotatableTrait := new Traits.GenericTrait("EditNodes.AnnotatableTrai
 	>	self Node.pushColor(Util.Color4f color)
 	>	self Node.popColor()
 */
-EditNodes.ColorTrait := new Traits.GenericTrait("EditNodes.ColorTrait");
+EditNodeTraits.ColorTrait := new Traits.GenericTrait("EditNodeTraits.ColorTrait");
 {
-	var t = EditNodes.ColorTrait;
+	var t = EditNodeTraits.ColorTrait;
 	t.attributes.popColor ::= fn(){
 		var m;
 		foreach(this.getStates() as var s) // get the last material state
@@ -83,9 +84,9 @@ EditNodes.ColorTrait := new Traits.GenericTrait("EditNodes.ColorTrait");
 
 	>	void Node.onClick(UI.Event)		(extendable MultiProcedure)
 */
-EditNodes.ClickableTrait := new Traits.GenericTrait("EditNodes.ClickableTrait");
+EditNodeTraits.ClickableTrait := new Traits.GenericTrait("EditNodeTraits.ClickableTrait");
 {
-	var t = EditNodes.ClickableTrait;
+	var t = EditNodeTraits.ClickableTrait;
 	t.attributes.onClick @(init) := MultiProcedure;
 	t.onInit += fn(MinSG.Node node){};
 }
@@ -96,19 +97,19 @@ EditNodes.ClickableTrait := new Traits.GenericTrait("EditNodes.ClickableTrait");
 	>	void Node.onDragging(UI.Event)			(extendable MultiProcedure)
 	>	void Node.onDraggingStop()				(extendable MultiProcedure)
 
-	\note Adds the EditNodes.ClickableTrait if not already present.
+	\note Adds the EditNodeTraits.ClickableTrait if not already present.
 */
-EditNodes.DraggableTrait := new Traits.GenericTrait("EditNodes.DraggableTrait");
+EditNodeTraits.DraggableTrait := new Traits.GenericTrait("EditNodeTraits.DraggableTrait");
 {
-	var t = EditNodes.DraggableTrait;
+	var t = EditNodeTraits.DraggableTrait;
 	t.attributes.onDraggingStart @(init) := MultiProcedure;
 	t.attributes.onDragging @(init) := MultiProcedure;
 	t.attributes.onDraggingStop @(init) := MultiProcedure;
 
 	t.onInit += fn(MinSG.Node node){
-		Traits.assureTrait(node,EditNodes.ClickableTrait);
+		Traits.assureTrait(node,EditNodeTraits.ClickableTrait);
 
-		//! \see EditNodes.ClickableTrait
+		//! \see EditNodeTraits.ClickableTrait
 		node.onClick += fn(evt){
 			onDraggingStart(evt);
 
@@ -144,12 +145,12 @@ EditNodes.DraggableTrait := new Traits.GenericTrait("EditNodes.DraggableTrait");
 	>	void Node.onTranslate(Geometry.Vec3 worldTranslation)		(extendable MultiProcedure)
 	>	void Node.onTranslationStop(Geometry.Vec3 worldTranslation)	(extendable MultiProcedure)
 
-	\note Adds the EditNodes.DraggableTrait if not already present.
-	\see EditNodes.DraggableTrait
+	\note Adds the EditNodeTraits.DraggableTrait if not already present.
+	\see EditNodeTraits.DraggableTrait
 */
-EditNodes.TranslatableAxisTrait := new Traits.GenericTrait("EditNodes.TranslatableAxisTrait");
+EditNodeTraits.TranslatableAxisTrait := new Traits.GenericTrait("EditNodeTraits.TranslatableAxisTrait");
 {
-	var t = EditNodes.TranslatableAxisTrait;
+	var t = EditNodeTraits.TranslatableAxisTrait;
 	t.attributes.onTranslate @(init) := MultiProcedure; // fn(Geometry.Vec3)
 	t.attributes.onTranslationStart @(init) := MultiProcedure; //fn(){...}
 	t.attributes.onTranslationStop @(init) := MultiProcedure; //fn(){Geometry.Vec3}
@@ -159,9 +160,9 @@ EditNodes.TranslatableAxisTrait := new Traits.GenericTrait("EditNodes.Translatab
 	t.attributes.__NE_TranslAxis_currentTranslation_ws @(private) := void;
 
 	t.onInit += fn(MinSG.Node node){
-		Traits.assureTrait(node,EditNodes.DraggableTrait);
+		Traits.assureTrait(node,EditNodeTraits.DraggableTrait);
 
-		//! \see EditNodes.DraggableTrait
+		//! \see EditNodeTraits.DraggableTrait
 		node.onDraggingStart += fn(evt){
 			// store the nodes translation axis in world space
 			this.__NE_TranslAxis_axis_ws = new Geometry.Line3(this.getWorldOrigin(),
@@ -173,7 +174,7 @@ EditNodes.TranslatableAxisTrait := new Traits.GenericTrait("EditNodes.Translatab
 			onTranslationStart();
 		};
 
-		//! \see EditNodes.DraggableTrait
+		//! \see EditNodeTraits.DraggableTrait
 		node.onDragging += fn(evt){
 			var newPos_ws = __NE_TranslAxis_axis_ws.getClosestPointToRay(
 								Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ));
@@ -181,7 +182,7 @@ EditNodes.TranslatableAxisTrait := new Traits.GenericTrait("EditNodes.Translatab
 			onTranslate(__NE_TranslAxis_currentTranslation_ws);
 		};
 
-		//! \see EditNodes.DraggableTrait
+		//! \see EditNodeTraits.DraggableTrait
 		node.onDraggingStop += fn(){
 			onTranslationStop(__NE_TranslAxis_currentTranslation_ws);
 		};
@@ -194,12 +195,12 @@ EditNodes.TranslatableAxisTrait := new Traits.GenericTrait("EditNodes.Translatab
 	>	void Node.onTranslate(Geometry.Vec3 worldTranslation)		(extendable MultiProcedure)
 	>	void Node.onTranslationStop(Geometry.Vec3 worldTranslation)	(extendable MultiProcedure)
 
-	\note Adds the EditNodes.DraggableTrait if not already present.
-	\see EditNodes.DraggableTrait
+	\note Adds the EditNodeTraits.DraggableTrait if not already present.
+	\see EditNodeTraits.DraggableTrait
 */
-EditNodes.TranslatablePlaneTrait := new Traits.GenericTrait("EditNodes.TranslatablePlaneTrait");
+EditNodeTraits.TranslatablePlaneTrait := new Traits.GenericTrait("EditNodeTraits.TranslatablePlaneTrait");
 {
-	var t = EditNodes.TranslatablePlaneTrait;
+	var t = EditNodeTraits.TranslatablePlaneTrait;
 	t.attributes.onTranslate @(init) := MultiProcedure; // fn(Geometry.Vec3)
 	t.attributes.onTranslationStart @(init) := MultiProcedure; //fn(){...}
 	t.attributes.onTranslationStop @(init) := MultiProcedure; //fn(){Geometry.Vec3}
@@ -209,9 +210,9 @@ EditNodes.TranslatablePlaneTrait := new Traits.GenericTrait("EditNodes.Translata
 	t.attributes.__NE_TranslPlane_currentTranslation_ws @(private) := void;
 
 	t.onInit += fn(MinSG.Node node){
-		Traits.assureTrait(node,EditNodes.DraggableTrait);
+		Traits.assureTrait(node,EditNodeTraits.DraggableTrait);
 
-		//! \see EditNodes.DraggableTrait
+		//! \see EditNodeTraits.DraggableTrait
 		node.onDraggingStart += fn(evt){
 			// store the nodes translation plane in world space
 			this.__NE_TranslPlane_plane_ws = new Geometry.Plane( this.getWorldOrigin(),
@@ -223,7 +224,7 @@ EditNodes.TranslatablePlaneTrait := new Traits.GenericTrait("EditNodes.Translata
 			onTranslationStart();
 		};
 
-		//! \see EditNodes.DraggableTrait
+		//! \see EditNodeTraits.DraggableTrait
 		node.onDragging += fn(evt){
 			var newPos_ws = __NE_TranslPlane_plane_ws.getIntersection(
 									Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ) );
@@ -233,7 +234,7 @@ EditNodes.TranslatablePlaneTrait := new Traits.GenericTrait("EditNodes.Translata
 			}
 		};
 
-		//! \see EditNodes.DraggableTrait
+		//! \see EditNodeTraits.DraggableTrait
 		node.onDraggingStop += fn(){
 			onTranslationStop(__NE_TranslPlane_currentTranslation_ws);
 		};
@@ -246,18 +247,18 @@ EditNodes.TranslatablePlaneTrait := new Traits.GenericTrait("EditNodes.Translata
 	>	void Node.onRotationStart()												(extendable MultiProcedure)
 	>	void Node.onRotationStop(Number angle_deg, Geometry.Line3 axis_ws)		(extendable MultiProcedure)
 
-	\note Adds the EditNodes.DraggableTrait if not already present.
-	\see EditNodes.DraggableTrait
+	\note Adds the EditNodeTraits.DraggableTrait if not already present.
+	\see EditNodeTraits.DraggableTrait
 */
-EditNodes.RotatableTrait := new Traits.GenericTrait("EditNodes.RotatableTrait");
+EditNodeTraits.RotatableTrait := new Traits.GenericTrait("EditNodeTraits.RotatableTrait");
 {
-	var t = EditNodes.RotatableTrait;
+	var t = EditNodeTraits.RotatableTrait;
 	t.attributes.onRotate @(init) := MultiProcedure; // fn(Number angle_deg, Geometry.Line3 axis_ws)
 	t.attributes.onRotationStart @(init) := MultiProcedure; //fn(){...}
 	t.attributes.onRotationStop @(init) := MultiProcedure; // fn(Number angle_deg, Geometry.Line3 axis_ws)
 
 	t.onInit += fn(MinSG.Node node){
-		Traits.assureTrait(node,EditNodes.DraggableTrait);
+		Traits.assureTrait(node,EditNodeTraits.DraggableTrait);
 
 		node.__EditNode_rotationData @(private) := new ExtObject({
 			$plane_ws : void,
@@ -266,7 +267,7 @@ EditNodes.RotatableTrait := new Traits.GenericTrait("EditNodes.RotatableTrait");
 			$currentAngle_deg : 0
 		});
 
-		//! \see EditNodes.DraggableTrait
+		//! \see EditNodeTraits.DraggableTrait
 		node.onDraggingStart += fn(evt){
 			var d = __EditNode_rotationData;
 
@@ -281,7 +282,7 @@ EditNodes.RotatableTrait := new Traits.GenericTrait("EditNodes.RotatableTrait");
 			onRotationStart();
 		};
 
-		//! \see EditNodes.DraggableTrait
+		//! \see EditNodeTraits.DraggableTrait
 		node.onDragging += fn(evt){
 			var d = __EditNode_rotationData;
 			var intersection = d.plane_ws.getIntersection( Util.requirePlugin('PADrend/Picking').getPickingRay( [evt.x,evt.y] ));
@@ -295,7 +296,7 @@ EditNodes.RotatableTrait := new Traits.GenericTrait("EditNodes.RotatableTrait");
 			}
 		};
 
-		//! \see EditNodes.DraggableTrait
+		//! \see EditNodeTraits.DraggableTrait
 		node.onDraggingStop += fn(){
 			var d = __EditNode_rotationData;
 			onRotationStop(d.currentAngle_deg,new Geometry.Line3(d.pivot_ws,d.plane_ws.getNormal()));
@@ -315,9 +316,9 @@ EditNodes.RotatableTrait := new Traits.GenericTrait("EditNodes.RotatableTrait");
 	\note The adjustProjSize() method has to be called repeatedly at a time when the frameContext
 		is set with the proper projection matrix.
 */
-EditNodes.AdjustableProjSizeTrait := new Traits.GenericTrait("EditNodes.AdjustableProjSizeTrait");
+EditNodeTraits.AdjustableProjSizeTrait := new Traits.GenericTrait("EditNodeTraits.AdjustableProjSizeTrait");
 {
-	var t = EditNodes.AdjustableProjSizeTrait;
+	var t = EditNodeTraits.AdjustableProjSizeTrait;
 	t.attributes.__NE_AdjSize_minSquared @(private) := 0;
 	t.attributes.__NE_AdjSize_maxSquared @(private) := 0;
 
@@ -337,5 +338,6 @@ EditNodes.AdjustableProjSizeTrait := new Traits.GenericTrait("EditNodes.Adjustab
 	};
 }
 
+return EditNodeTraits;
 //---------------------------------------------------------------------------------
 

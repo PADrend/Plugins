@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -16,10 +16,7 @@
  ** Graphical tools for transforming nodes
  **/
 
-declareNamespace($TransformationTools);
-
-//! ---|> Plugin
-TransformationTools.plugin := new Plugin({
+var plugin = new Plugin({
 		Plugin.NAME : 'SceneEditor/TransformationTools3',
 		Plugin.DESCRIPTION : 'Transform nodes.',
 		Plugin.VERSION : 3.0,
@@ -29,16 +26,7 @@ TransformationTools.plugin := new Plugin({
 		Plugin.EXTENSION_POINTS : [	]
 });
 
-var plugin = TransformationTools.plugin;
-
-
 plugin.init @(override) := fn(){
-	loadOnce(__DIR__+"/Tool_AnchorTool.escript");
-	loadOnce(__DIR__+"/Tool_RotationTool.escript");
-	loadOnce(__DIR__+"/Tool_ScaleTool.escript");
-	loadOnce(__DIR__+"/Tool_SnapTool.escript");
-	loadOnce(__DIR__+"/Tool_TranslationTool.escript");
-
 	registerExtension('PADrend_Init',this->this.ex_Init);
 	return true;
 };
@@ -49,37 +37,37 @@ plugin.ex_Init:=fn(){
 	registerMenus();
 
 	{
-		var t = new TransformationTools.TranslationTool;
+		var t = new (Std.require('SceneEditor/TransformationTools/Tool_TranslationTool'));
 		PADrend.registerUITool('TransformationTools3_Move')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 	{
-		var t = new TransformationTools.RotationTool;
+		var t = new (Std.require('SceneEditor/TransformationTools/Tool_RotationTool'));
 		PADrend.registerUITool('TransformationTools3_Rotate')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 
 	}{
-		var t = new TransformationTools.ScaleTool;
+		var t = new (Std.require('SceneEditor/TransformationTools/Tool_ScaleTool'));
 		PADrend.registerUITool('TransformationTools3_Scale')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 	{
-		var t = new TransformationTools.SnapTool;
+		var t = new (Std.require('SceneEditor/TransformationTools/Tool_SnapTool'));
 		PADrend.registerUITool('TransformationTools3_Snap')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}	
 	{
-		var t = new TransformationTools.SnapTool2;
+		var t = new (Std.require('SceneEditor/TransformationTools/Tool_SnapTool2'));
 		PADrend.registerUITool('TransformationTools3_Snap2')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 	{
-		var t = new TransformationTools.AnchorTool;
+		var t = new (Std.require('SceneEditor/TransformationTools/Tool_AnchorTool'));
 		PADrend.registerUITool('TransformationTools3_Anchor')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);

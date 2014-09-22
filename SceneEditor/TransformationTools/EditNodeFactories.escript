@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -16,7 +16,9 @@
  **
  **/
 
-declareNamespace($EditNodes);
+static EditNodeTraits = module('./EditNodeTraits');
+ 
+static EditNodeFactories = new Namespace;
 
 //---------------------------------------------------------------------------------
 
@@ -26,27 +28,27 @@ declareNamespace($EditNodes);
 	>	void Node.onTranslate(Geometry.Vec3 worldTranslation)		(extendable MultiProcedure)
 	>	void Node.onTranslationStop(Geometry.Vec3 worldTranslation)	(extendable MultiProcedure)
 */
-EditNodes.createTranslationEditNode := fn(){
+EditNodeFactories.createTranslationEditNode := fn(){
 	var container = new MinSG.ListNode;
 
 	container.onTranslate := new MultiProcedure; // fn(Geometry.Vec3)
 	container.onTranslationStart := new MultiProcedure; //fn(){...}
 	container.onTranslationStop := new MultiProcedure; //fn(){Geometry.Vec3}
 
-	var arrow = EditNodes.getArrowMeshToXAxis();
-	var ring = EditNodes.getRingSegmentMesh();
+	var arrow = EditNodeFactories.getArrowMeshToXAxis();
+	var ring = EditNodeFactories.getRingSegmentMesh();
 
 	//			0 mesh	1 translationTrait					2 color						3 rotation
-	foreach( [	[arrow,	EditNodes.TranslatableAxisTrait,	new Util.Color4f(1,0,0,1.0),false],
-				[arrow,	EditNodes.TranslatableAxisTrait,	new Util.Color4f(0,1,0,1.0),new Geometry.Vec3(0,0,1)],
-				[arrow,	EditNodes.TranslatableAxisTrait,	new Util.Color4f(0,0,1,1.0),new Geometry.Vec3(0,-1,0)],
-				[ring,	EditNodes.TranslatablePlaneTrait,	new Util.Color4f(1,1,0,1.0),false],
-				[ring,	EditNodes.TranslatablePlaneTrait,	new Util.Color4f(0,1,1,1.0),new Geometry.Vec3(0,-1,0)],
-				[ring,	EditNodes.TranslatablePlaneTrait,	new Util.Color4f(1,0,1,1.0),new Geometry.Vec3(1,0,0)]
+	foreach( [	[arrow,	EditNodeTraits.TranslatableAxisTrait,	new Util.Color4f(1,0,0,1.0),false],
+				[arrow,	EditNodeTraits.TranslatableAxisTrait,	new Util.Color4f(0,1,0,1.0),new Geometry.Vec3(0,0,1)],
+				[arrow,	EditNodeTraits.TranslatableAxisTrait,	new Util.Color4f(0,0,1,1.0),new Geometry.Vec3(0,-1,0)],
+				[ring,	EditNodeTraits.TranslatablePlaneTrait,	new Util.Color4f(1,1,0,1.0),false],
+				[ring,	EditNodeTraits.TranslatablePlaneTrait,	new Util.Color4f(0,1,1,1.0),new Geometry.Vec3(0,-1,0)],
+				[ring,	EditNodeTraits.TranslatablePlaneTrait,	new Util.Color4f(1,0,1,1.0),new Geometry.Vec3(1,0,0)]
 			]	as var properties){
 
 		var n = new MinSG.GeometryNode( properties[0] );
-		Traits.addTrait( n,EditNodes.ColorTrait,properties[2] );
+		Traits.addTrait( n,EditNodeTraits.ColorTrait,properties[2] );
 		Traits.addTrait( n,properties[1] );
 
 		if(properties[3])
@@ -69,7 +71,7 @@ EditNodes.createTranslationEditNode := fn(){
 };
 
 //---------------------------------------------------------------------------------
-EditNodes.createRotationEditNode := fn(){
+EditNodeFactories.createRotationEditNode := fn(){
 	var container = new MinSG.ListNode;
 
 	container.onRotate := new MultiProcedure; // fn(Number angle_deg, Geometry.Vec3 axis_ws, Geometry.Vec3 pivot_ws)
@@ -82,9 +84,9 @@ EditNodes.createRotationEditNode := fn(){
 				[new Util.Color4f(0,0,1,1),new Geometry.Vec3(0,1,0)]
 			]	as var properties){
 
-		var n = new MinSG.GeometryNode( EditNodes.getRingMesh() );
-		Traits.addTrait( n, EditNodes.ColorTrait, properties[0] );
-		Traits.addTrait( n, EditNodes.RotatableTrait );
+		var n = new MinSG.GeometryNode( EditNodeFactories.getRingMesh() );
+		Traits.addTrait( n, EditNodeTraits.ColorTrait, properties[0] );
+		Traits.addTrait( n, EditNodeTraits.RotatableTrait );
 		if(properties[1])
 			n.rotateLocal_deg(90,properties[1]);
 
@@ -114,7 +116,7 @@ EditNodes.createRotationEditNode := fn(){
 	>	void Node.onScalingStop(Number scale, Geometry.Vec3 origin_ws)		(extendable MultiProcedure)
 	>	updateScalingBox(Box,Matrix)	Has to be called repeatedly to update the nodes layout.
 */
-EditNodes.createScaleEditNode := fn(){
+EditNodeFactories.createScaleEditNode := fn(){
 	var container = new MinSG.ListNode;
 
 	container.onScale := new MultiProcedure; // fn(Number scale, Geometry.Vec3 origin_ws)
@@ -167,13 +169,13 @@ EditNodes.createScaleEditNode := fn(){
 	};
 
 
-	var arrow = EditNodes.getSmallArrowMesh();
+	var arrow = EditNodeFactories.getSmallArrowMesh();
 
 	foreach(container.__NE_Scale_arrows as var arrowConfig){
 
 		var n = new MinSG.GeometryNode( arrow );
-		Traits.addTrait( n,EditNodes.ColorTrait, arrowConfig[3] );
-		Traits.addTrait( n,EditNodes.TranslatableAxisTrait );
+		Traits.addTrait( n,EditNodeTraits.ColorTrait, arrowConfig[3] );
+		Traits.addTrait( n,EditNodeTraits.TranslatableAxisTrait );
 		n.__NE_ScaleOrigin_ws @(private) := new Geometry.Vec3;
 		n.__NE_ScaleInititalPos_ws @(private) := new Geometry.Vec3;
 
@@ -214,7 +216,7 @@ EditNodes.createScaleEditNode := fn(){
 	>	void Node.onTranslate(Geometry.Vec3 worldTranslation)		(extendable MultiProcedure)
 	>	void Node.onTranslationStop(Geometry.Vec3 worldTranslation)	(extendable MultiProcedure)
 */
-EditNodes.createSnapEditNode := fn(){
+EditNodeFactories.createSnapEditNode := fn(){
 	var container = new MinSG.ListNode;
 
 	container.onTranslate := new MultiProcedure; // fn(Geometry.Vec3)
@@ -222,15 +224,15 @@ EditNodes.createSnapEditNode := fn(){
 	container.onTranslationStop := new MultiProcedure; //fn(){Geometry.Vec3}
 
 	var arrow = Rendering.MeshBuilder.createArrow(0.025, 1.0);
-	var ring = EditNodes.createRingSegmentMesh(0.0,360, 0.3, 0, 0.5);
+	var ring = EditNodeFactories.createRingSegmentMesh(0.0,360, 0.3, 0, 0.5);
 
-    foreach( [	[arrow,	EditNodes.TranslatableAxisTrait,	new Util.Color4f(1,0,0,0.5),new Geometry.Vec3(0,0,1)],
-				[ring,	EditNodes.TranslatablePlaneTrait,	new Util.Color4f(1,0,0,0.5),new Geometry.Vec3(1,0,0)]
+    foreach( [	[arrow,	EditNodeTraits.TranslatableAxisTrait,	new Util.Color4f(1,0,0,0.5),new Geometry.Vec3(0,0,1)],
+				[ring,	EditNodeTraits.TranslatablePlaneTrait,	new Util.Color4f(1,0,0,0.5),new Geometry.Vec3(1,0,0)]
 			]	as var properties){
         var n = new MinSG.GeometryNode( properties[0]);
         n.rotateRel_deg(-90,properties[3]);
         n.moveRel(new Geometry.Vec3(0,1,0));
-        Traits.addTrait( n,EditNodes.ColorTrait,properties[2] );
+        Traits.addTrait( n,EditNodeTraits.ColorTrait,properties[2] );
         Traits.addTrait( n,properties[1] );
 
         //! \see TranslatablePlaneTrait
@@ -258,7 +260,7 @@ EditNodes.createSnapEditNode := fn(){
 
 // --------------------------------------------------------------------------------
 
-EditNodes.createLineAxisMesh := fn(){
+EditNodeFactories.createLineAxisMesh := fn(){
 	var mb = new Rendering.MeshBuilder;
 	mb.normal(new Geometry.Vec3(0,0,1));
 	mb.color(new Util.Color4f(0.2,0,0,0.1)).position(new Geometry.Vec3(1000,0,0)).addVertex();
@@ -283,7 +285,7 @@ EditNodes.createLineAxisMesh := fn(){
 	return m;
 };
 
-EditNodes.createRingSegmentMesh  := fn(startDeg,endDeg,stepSize,minR,maxR){
+EditNodeFactories.createRingSegmentMesh  := fn(startDeg,endDeg,stepSize,minR,maxR){
 //	if(!ringMesh){
 //		ringMesh = Rendering.MeshBuilder.createRingSector(minR, maxR, 16, 90.0);
 //		var backSide = ringMesh.clone();
@@ -315,13 +317,13 @@ EditNodes.createRingSegmentMesh  := fn(startDeg,endDeg,stepSize,minR,maxR){
 };
 
 
-EditNodes.getArrowMeshToXAxis  := fn(){
+EditNodeFactories.getArrowMeshToXAxis  := fn(){
 	if(!thisFn.isSet($mesh))
 		thisFn.mesh := Rendering.MeshBuilder.createArrow(0.025, 1.0);
 	return thisFn.mesh;
 };
 
-EditNodes.getArrowMeshFromXAxis  := fn(){
+EditNodeFactories.getArrowMeshFromXAxis  := fn(){
 	if(!thisFn.isSet($mesh)){
 		var extr = new MeshCreation.Extruder;
 		extr.closeExtrusion = true;
@@ -340,7 +342,7 @@ EditNodes.getArrowMeshFromXAxis  := fn(){
 	return thisFn.mesh;
 };
 
-EditNodes.getCubeMesh  := fn(){
+EditNodeFactories.getCubeMesh  := fn(){
 	if(!thisFn.isSet($mesh)){
 		var mb = new Rendering.MeshBuilder;
 		mb.addBox(new Geometry.Box(0.0, 0.0, 0.0, 1.0, 1.0, 1.0));
@@ -349,20 +351,20 @@ EditNodes.getCubeMesh  := fn(){
 	return thisFn.mesh;
 };
 
-EditNodes.getSmallArrowMesh  := fn(){
+EditNodeFactories.getSmallArrowMesh  := fn(){
 	if(!thisFn.isSet($mesh))
 		thisFn.mesh := Rendering.MeshBuilder.createArrow(0.025, 0.25);
 	return thisFn.mesh;
 };
 
-EditNodes.getRingSegmentMesh  := fn(){
+EditNodeFactories.getRingSegmentMesh  := fn(){
 	if(!thisFn.isSet($mesh)){
 		thisFn.mesh := createRingSegmentMesh(0,90,5,0.2,0.5);
 	}
 	return thisFn.mesh;
 };
 
-EditNodes.getRingMesh  := fn(){
+EditNodeFactories.getRingMesh  := fn(){
 	if(!thisFn.isSet($mesh)){
 		thisFn.mesh := createRingSegmentMesh(0,360,5,0.4,0.5);
 	}
@@ -370,7 +372,7 @@ EditNodes.getRingMesh  := fn(){
 };
 
 
-
+return EditNodeFactories;
 
 //---------------------------------------------------------------------------------
 
