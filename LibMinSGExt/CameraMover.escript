@@ -305,9 +305,9 @@ T.setDolly ::= 		fn(MinSG.Node newCamera)	{	this.dolly=newCamera;	};
 
 //! This method is part of the ongoing HID-redesign \see #677
 T.registerGamepad ::= fn(gamepad){
-	Traits.requireTrait(gamepad,HID.ControllerAnalogAxisTrait); //! \see HID.ControllerAnalogAxisTrait
+	Traits.requireTrait(gamepad, Std.require('LibUtilExt/HID_ControllerTraits').ControllerAnalogAxisTrait); //! \see HIDTraits.ControllerAnalogAxisTrait
 	
-	//! \see HID.ControllerAnalogAxisTrait
+	//! \see HIDTraits.ControllerAnalogAxisTrait
 	gamepad.onAnalogAxisChanged += this->fn(axis,value){
 		if(axis==0){ // move left/right
 			this.moveLocalVec.x(value.sign()*(value*0.8).pow(2));

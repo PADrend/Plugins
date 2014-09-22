@@ -229,6 +229,7 @@ tests += new Tests.AutomatedTest( "Util/DataWrapper" , fn(){
 });
 // -----------------------------------------------------------------------------------------------
 tests += new Tests.AutomatedTest( "Util/ExtensionPoint" , fn(){
+	var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
 	var extensionPoint = new ExtensionPoint;
 	extensionPoint.registerExtension( fn(arr){ arr+="foo"; }, Extension.LOW_PRIORITY);
 	var bar = fn(arr){ arr+="bar"; };

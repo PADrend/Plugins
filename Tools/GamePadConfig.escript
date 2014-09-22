@@ -83,10 +83,10 @@ plugin.addOption @(public) := fn(p...){	options += new this.Option(p...);	};
 
 //!	[ext:PADrend_Init]
 plugin.ex_Init:=fn() {
-	var gamepads = PADrend.HID.getDevicesByTraits( HID.ControllerHatTrait  ); //! \see HID.ControllerHatTrait
+	var gamepads = PADrend.HID.getDevicesByTraits( Std.require('LibUtilExt/HID_ControllerTraits').ControllerHatTrait  ); //! \see HIDTraits.ControllerHatTrait
 	foreach(gamepads as var gamepad){
 		
-		//! \see HID.ControllerHatTrait
+		//! \see HIDTraits.ControllerHatTrait
 		gamepad.registerHatListener(0,this->fn(hatId,value){
 			var OSD = Util.requirePlugin('GUITools/OSD');
 			if( (value & Util.UI.MASK_HAT_UP) > 0){

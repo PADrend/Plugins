@@ -14,7 +14,7 @@
  **	LibUtilExt/HID_ControllerTraits.escript
  **/
     
-declareNamespace( $HID );
+static HIDTraits = new Namespace; 
 
 /*! Basic HID-Trait required by all HIDs. 
 	Adds the following methods:
@@ -26,9 +26,9 @@ declareNamespace( $HID );
 	- void setDeviceId(String)
 
 */
-HID.DeviceBaseTrait := new Traits.GenericTrait("HID.DeviceBaseTrait");
+HIDTraits.DeviceBaseTrait := new Traits.GenericTrait("HIDTraits.DeviceBaseTrait");
 {
-	var t = HID.DeviceBaseTrait;
+	var t = HIDTraits.DeviceBaseTrait;
 	
 	t.attributes.hidID @(private) := void;
 	
@@ -68,13 +68,16 @@ HID.DeviceBaseTrait := new Traits.GenericTrait("HID.DeviceBaseTrait");
 	- sendButtonEvent(Number buttonId, Bool pressed) Needs to be called to invoke
 													the Button listener.
 													
-	\note requires HID.DeviceBaseTrait
+	\note requires HIDTraits.DeviceBaseTrait
 */
-HID.ControllerButtonTrait := new Traits.GenericTrait("HID.ControllerButtonTrait");
+HIDTraits.ControllerButtonTrait := new Traits.GenericTrait("HIDTraits.ControllerButtonTrait");
 {
-	var t = HID.ControllerButtonTrait;
+	var t = HIDTraits.ControllerButtonTrait;
 	
-	t.attributes.onButton @(init) := 	fn(){	return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);};
+	t.attributes.onButton @(init) := 	fn(){	
+		var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
+		return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);
+	};
 
 	t.attributes.getButtonCount ::= 	fn(){	return this._buttonStatus.count(); };
 	t.attributes.getButtonStatus ::= 	fn(Number buttonId){	return this._buttonStatus[buttonId]; };
@@ -92,10 +95,10 @@ HID.ControllerButtonTrait := new Traits.GenericTrait("HID.ControllerButtonTrait"
 		return this.onButton(buttonId,pressed);
 	};
 	t.onInit += fn(obj,numberOfButtons){
-		Traits.requireTrait(obj,HID.DeviceBaseTrait);		//! \see HID.DeviceBaseTrait
+		Traits.requireTrait(obj,HIDTraits.DeviceBaseTrait);		//! \see HIDTraits.DeviceBaseTrait
 		obj._buttonStatus @(init,private) := (new Array).resize(numberOfButtons,false);
 		
-		//! \see HID.DeviceBaseTrait
+		//! \see HIDTraits.DeviceBaseTrait
 		obj.onResetDevice_static += fn(){
 			foreach(this._buttonStatus as var id,var value)
 				this._buttonStatus[id] = false;
@@ -117,13 +120,16 @@ HID.ControllerButtonTrait := new Traits.GenericTrait("HID.ControllerButtonTrait"
 	- sendAxisEvent(Number axisId, Number value)	Needs to be called to invoke
 													the axes listener.
 	\note The axis values should be normalized in the range from -1.0 to 1.0!
-	\note requires HID.DeviceBaseTrait
+	\note requires HIDTraits.DeviceBaseTrait
 */
-HID.ControllerAnalogAxisTrait := new Traits.GenericTrait("HID.ControllerAnalogAxisTrait");
+HIDTraits.ControllerAnalogAxisTrait := new Traits.GenericTrait("HIDTraits.ControllerAnalogAxisTrait");
 {
-	var t = HID.ControllerAnalogAxisTrait;
+	var t = HIDTraits.ControllerAnalogAxisTrait;
 	
-	t.attributes.onAnalogAxisChanged @(init) := 	fn(){	return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);};
+	t.attributes.onAnalogAxisChanged @(init) := 	fn(){	
+		var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
+		return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);
+	};
 
 	t.attributes.getAnalogAxisCount ::= 	fn(){	return this._axesStatus.count(); };
 	t.attributes.getAnalogAxisValue ::= 	fn(Number axisId){	return this._axesStatus[axisId]; };
@@ -141,10 +147,10 @@ HID.ControllerAnalogAxisTrait := new Traits.GenericTrait("HID.ControllerAnalogAx
 		return this.onAnalogAxisChanged(axisId,value);
 	};
 	t.onInit += fn(obj,numberOfAxes){
-		Traits.requireTrait(obj,HID.DeviceBaseTrait);		//! \see HID.DeviceBaseTrait
+		Traits.requireTrait(obj,HIDTraits.DeviceBaseTrait);		//! \see HIDTraits.DeviceBaseTrait
 		obj._axesStatus @(init,private) := (new Array).resize(numberOfAxes,0.0);
 		
-		//! \see HID.DeviceBaseTrait
+		//! \see HIDTraits.DeviceBaseTrait
 		obj.onResetDevice_static += fn(){
 			foreach(this._axesStatus as var id,var value)
 				this._axesStatus[id] = 0;
@@ -167,13 +173,16 @@ HID.ControllerAnalogAxisTrait := new Traits.GenericTrait("HID.ControllerAnalogAx
 													the hats listener.
 	\note The value is a bit combination of:
 			Util.UI.MASK_HAT_DOWN, Util.UI.MASK_HAT_UP, Util.UI.MASK_HAT_LEFT, Util.UI.MASK_HAT_RIGHT
-	\note requires HID.DeviceBaseTrait
+	\note requires HIDTraits.DeviceBaseTrait
 */
-HID.ControllerHatTrait := new Traits.GenericTrait("HID.ControllerHatTrait");
+HIDTraits.ControllerHatTrait := new Traits.GenericTrait("HIDTraits.ControllerHatTrait");
 {
-	var t = HID.ControllerHatTrait;
+	var t = HIDTraits.ControllerHatTrait;
 	
-	t.attributes.onHatChanged @(init) := 	fn(){	return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);};
+	t.attributes.onHatChanged @(init) := fn(){	
+		var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
+		return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);
+	};
 
 	t.attributes.getHatCount ::= 	fn(){	return this._hatsStatus.count(); };
 	t.attributes.getHatValue ::= 	fn(Number hatId){	return this._hatsStatus[hatId]; };
@@ -191,10 +200,10 @@ HID.ControllerHatTrait := new Traits.GenericTrait("HID.ControllerHatTrait");
 		return this.onHatChanged(hatId,value);
 	};
 	t.onInit += fn(obj,numberOfHats){
-		Traits.requireTrait(obj,HID.DeviceBaseTrait);		//! \see HID.DeviceBaseTrait
+		Traits.requireTrait(obj,HIDTraits.DeviceBaseTrait);		//! \see HIDTraits.DeviceBaseTrait
 		obj._hatsStatus @(init,private) := (new Array).resize(numberOfHats,0.0);
 		
-		//! \see HID.DeviceBaseTrait
+		//! \see HIDTraits.DeviceBaseTrait
 		obj.onResetDevice_static += fn(){
 			foreach(this.getHatCount as var id,var value)
 				this.getHatCount[id] = 0;
@@ -215,14 +224,17 @@ HID.ControllerHatTrait := new Traits.GenericTrait("HID.ControllerHatTrait");
 													\see LibUtilExt/Extension.escript
 
 	- sendTransformationEvent(SRT|void)				Needs to be called to invoke the transformation listener.
-	\note requires HID.DeviceBaseTrait
+	\note requires HIDTraits.DeviceBaseTrait
 */
-HID.Controller_Room6D_Trait := new Traits.GenericTrait("HID.Controller_Room6D_Trait");
+HIDTraits.Controller_Room6D_Trait := new Traits.GenericTrait("HIDTraits.Controller_Room6D_Trait");
 {
-	var t = HID.Controller_Room6D_Trait;
+	var t = HIDTraits.Controller_Room6D_Trait;
 	
 	t.attributes._controllerRoomSRT @(private) := void;
-	t.attributes.onRoomTransformationChanged @(init) := fn(){	return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);};
+	t.attributes.onRoomTransformationChanged @(init) := fn(){	
+		var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
+		return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);
+	};
 
 	t.attributes.getRoomTransformation ::= 		fn(){	return this._controllerRoomSRT; };
 	t.attributes.isTransformationValid ::=		fn(){	return true & this._controllerRoomSRT;	};
@@ -232,9 +244,9 @@ HID.Controller_Room6D_Trait := new Traits.GenericTrait("HID.Controller_Room6D_Tr
 		return this.onRoomTransformationChanged(_controllerRoomSRT);
 	};
 	t.onInit += fn(obj){
-		Traits.requireTrait(obj,HID.DeviceBaseTrait);		//! \see HID.DeviceBaseTrait
+		Traits.requireTrait(obj,HIDTraits.DeviceBaseTrait);		//! \see HIDTraits.DeviceBaseTrait
 				
-		//! \see HID.DeviceBaseTrait
+		//! \see HIDTraits.DeviceBaseTrait
 		obj.onResetDevice_static += fn(){
 			this._controllerRoomSRT = void;
 		};
@@ -245,16 +257,17 @@ HID.Controller_Room6D_Trait := new Traits.GenericTrait("HID.Controller_Room6D_Tr
 
 /*! Add this trait to a device object to mark it as gamepad device.
 	A gamepad needs to have at least buttons and analog axes.
-	\see HID.ControllerButtonTrait
-	\see HID.ControllerAnalogAxisTrait	*/
-HID.GamepadDeviceTrait := new Traits.GenericTrait("HID.GamepadDeviceTrait");
+	\see HIDTraits.ControllerButtonTrait
+	\see HIDTraits.ControllerAnalogAxisTrait	*/
+HIDTraits.GamepadDeviceTrait := new Traits.GenericTrait("HIDTraits.GamepadDeviceTrait");
 {
-	var t = HID.GamepadDeviceTrait;
+	var t = HIDTraits.GamepadDeviceTrait;
 
 	t.onInit += fn(obj){
-		Traits.requireTrait(obj,HID.ControllerButtonTrait);
-		Traits.requireTrait(obj,HID.ControllerAnalogAxisTrait);
+		Traits.requireTrait(obj,HIDTraits.ControllerButtonTrait);
+		Traits.requireTrait(obj,HIDTraits.ControllerAnalogAxisTrait);
 	};
 
 }
 
+return HIDTraits;
