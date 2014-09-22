@@ -28,7 +28,7 @@ GLOBALS.PADrend := new Plugin({
 		Plugin.VERSION : 1.0,
 		Plugin.AUTHORS : "Claudius, Ralf & Benjamin",
 		Plugin.OWNER : "All",
-		Plugin.REQUIRES : ['LibUtilExt'],
+		Plugin.REQUIRES : [],
 		Plugin.EXTENSION_POINTS : [
 
 			// -------------------------------------

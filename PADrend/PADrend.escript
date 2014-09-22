@@ -54,5 +54,5 @@ if(EScript.VERSION<607)
 	GLOBALS.camera := void;
 }
 { // load and execute PADrend
-	Std.require('LibUtilExt/PluginManagement').loadPlugins( ["PADrend"],true,[__DIR__+"/../"] );
+	Std.require('LibUtilExt/PluginRegistry').loadPlugins( ["PADrend"],true,[__DIR__+"/../"] );
 }

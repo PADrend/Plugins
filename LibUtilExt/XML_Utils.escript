@@ -13,22 +13,24 @@
  */
 // static N = new Namespace;
  
-Util.XML_NAME := $name;
-Util.XML_ATTRIBUTES := $attributes;
-Util.XML_CHILDREN := $children;
-Util.XML_DATA := $data;
+static XML_Utils = new Namespace;
+
+XML_Utils.XML_NAME := $name;
+XML_Utils.XML_ATTRIBUTES := $attributes;
+XML_Utils.XML_CHILDREN := $children;
+XML_Utils.XML_DATA := $data;
 
 /*! Convert a map consisting of the constants defined above into a XML formatted string. */
-Util.generateXML := fn(Map root, String header = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"){
+XML_Utils.generateXML := fn(Map root, String header = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"){
 	var worker = new ExtObject({
 		$tagToString : fn(Map m,level){
 			var s = "\t"*level;
 			
-			var name = m[Util.XML_NAME];
+			var name = m[XML_Utils.XML_NAME];
 			if(name){
 				s+="<"+name+attributesToString(m);
-				var children = m[Util.XML_CHILDREN];
-				var data = m[Util.XML_DATA];
+				var children = m[XML_Utils.XML_CHILDREN];
+				var data = m[XML_Utils.XML_DATA];
 				if( (children && !children.empty()) || data){
 					s+=">\n";
 					if(data)
@@ -43,7 +45,7 @@ Util.generateXML := fn(Map root, String header = "<?xml version=\"1.0\" encoding
 					s+="/>\n";
 				}
 			}else{ // root node
-				var children = m[Util.XML_CHILDREN];
+				var children = m[XML_Utils.XML_CHILDREN];
 				if(children && !children.empty()){
 					foreach(children as var c)
 						s+=tagToString(c,level);
@@ -53,7 +55,7 @@ Util.generateXML := fn(Map root, String header = "<?xml version=\"1.0\" encoding
 		},
 		$attributesToString : fn(Map m){
 			var s="";
-			var attributes = m[Util.XML_ATTRIBUTES];
+			var attributes = m[XML_Utils.XML_ATTRIBUTES];
 			if(attributes){
 				foreach(attributes as var key,var value){
 					s+=" "+key+"=\""+value.replaceAll({'"':'&quot;'})+"\"";
@@ -79,22 +81,22 @@ Util.generateXML := fn(Map root, String header = "<?xml version=\"1.0\" encoding
 	---->
 
 		{
-			Util.XML_NAME : "scene",
-			Util.XML_ATTRIBUTES : new Map,
-			Util.XML_CHILDREN : [{
-				Util.XML_NAME : "attribute",
-				Util.XML_ATTRIBUTES : {	"name" : "tags", "type" : "json" },
-				Util.XML_DATA : "foo"
+			XML_Utils.XML_NAME : "scene",
+			XML_Utils.XML_ATTRIBUTES : new Map,
+			XML_Utils.XML_CHILDREN : [{
+				XML_Utils.XML_NAME : "attribute",
+				XML_Utils.XML_ATTRIBUTES : {	"name" : "tags", "type" : "json" },
+				XML_Utils.XML_DATA : "foo"
 			},{
-				Util.XML_NAME : "attribute",
-				Util.XML_ATTRIBUTES : {	"name" : "thing", "value" : "bar" }
+				XML_Utils.XML_NAME : "attribute",
+				XML_Utils.XML_ATTRIBUTES : {	"name" : "thing", "value" : "bar" }
 			}]
 		}
 
 	*/
-Util.loadXML := fn(filename){
+XML_Utils.loadXML := fn(filename){
 	var root = {
-		Util.XML_CHILDREN : []
+		XML_Utils.XML_CHILDREN : []
 	};
 	var context = new ExtObject({
 		$openTags : [root]
@@ -105,21 +107,21 @@ Util.loadXML := fn(filename){
 	//! ---|> MicroXMLReader
 	reader.data @(override) := context->fn(tag,data){
 		if(!data.empty())
-			openTags.back()[Util.XML_DATA] = data;
+			openTags.back()[XML_Utils.XML_DATA] = data;
 		return true;
 	};
 	//! ---|> MicroXMLReader
 	reader.enter @(override) := context->fn(tag){
 		var m = {
-			Util.XML_NAME : tag.name,
-			Util.XML_ATTRIBUTES : tag.attributes
+			XML_Utils.XML_NAME : tag.name,
+			XML_Utils.XML_ATTRIBUTES : tag.attributes
 		};
 
 		var current = openTags.back();
-		if(!current[Util.XML_CHILDREN]){
-			current[Util.XML_CHILDREN] = [];
+		if(!current[XML_Utils.XML_CHILDREN]){
+			current[XML_Utils.XML_CHILDREN] = [];
 		}
-		current[Util.XML_CHILDREN] += m;
+		current[XML_Utils.XML_CHILDREN] += m;
 
 		openTags.pushBack(m);
 		return true;		
@@ -133,14 +135,19 @@ Util.loadXML := fn(filename){
 	var success = reader.parse( filename );
 	if(!success)
 		throw new Exception("Could not parse xml file '"+filename+"'");
-	if(root[Util.XML_CHILDREN].count()!=1)
-		throw new Exception("Invalid number of root tags:"+root[Util.XML_CHILDREN].count()+" (should be 1)");
-	return root[Util.XML_CHILDREN][0];
+	if(root[XML_Utils.XML_CHILDREN].count()!=1)
+		throw new Exception("Invalid number of root tags:"+root[XML_Utils.XML_CHILDREN].count()+" (should be 1)");
+	return root[XML_Utils.XML_CHILDREN][0];
 };
 
 //! Save a XML file.
-Util.saveXML := fn(filename,Map root){
-	if(!Util.saveFile(filename,Util.generateXML(root)))
+XML_Utils.saveXML := fn(filename,Map root){
+	if(!Util.saveFile(filename,XML_Utils.generateXML(root)))
 		throw new Exception("Could not save xml file '"+filename+"'");
 };
-return Util;
+
+Util.loadXML := XML_Utils.loadXML;
+Util.generateXML := XML_Utils.generateXML;
+Util.saveXML := XML_Utils.saveXML;
+
+return XML_Utils;

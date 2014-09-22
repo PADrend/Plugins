@@ -15,4 +15,4 @@
 if(!GLOBALS.isSet($Network))
 	GLOBALS.Network := Util.Network;
 
-//----------------------------
+return Util.Network;

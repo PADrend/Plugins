@@ -18,7 +18,7 @@ var plugin = new Plugin({
 		Plugin.AUTHORS : "Benjamin Eikel",
 		Plugin.OWNER : "All",
 		Plugin.LICENSE : "Mozilla Public License, v. 2.0",
-		Plugin.REQUIRES : ['LibUtilExt', 'PADrend/GUI'],
+		Plugin.REQUIRES : ['PADrend/GUI'],
 		Plugin.EXTENSION_POINTS : []
 });
 
