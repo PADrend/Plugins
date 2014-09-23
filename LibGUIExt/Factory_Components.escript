@@ -624,20 +624,29 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			
 		// drag and drop
 		if( description[GUI.DRAGGING_ENABLED] ){
+			static DraggableTrait;
+			static DraggingMarkerTrait;
+			static DraggingConnectorTrait;
+			@(once){
+				DraggableTrait = Std.require('LibGUIExt/Traits/DraggableTrait');
+				DraggingMarkerTrait = Std.require('LibGUIExt/Traits/DraggingMarkerTrait');
+				DraggingConnectorTrait = Std.require('LibGUIExt/Traits/DraggingConnectorTrait');
+			}
+
 			//! \see GUI.DraggableTrait
-			if(!Traits.queryTrait(component,GUI.DraggableTrait)){
+			if(!Traits.queryTrait(component,DraggableTrait)){
 				if(description[GUI.DRAGGING_BUTTONS])
-					Traits.addTrait(component,GUI.DraggableTrait, description[GUI.DRAGGING_BUTTONS] );
+					Traits.addTrait(component,DraggableTrait, description[GUI.DRAGGING_BUTTONS] );
 				else
-					Traits.addTrait(component,GUI.DraggableTrait);
+					Traits.addTrait(component,DraggableTrait);
 			}
 			if(description[GUI.DRAGGING_MARKER]){
 				if(description[GUI.DRAGGING_MARKER]===true)
-					Traits.addTrait(component,GUI.DraggingMarkerTrait); // use default
+					Traits.addTrait(component, DraggingMarkerTrait); // use default
 				else
-					Traits.addTrait(component,GUI.DraggingMarkerTrait, description[GUI.DRAGGING_MARKER] );
+					Traits.addTrait(component, DraggingMarkerTrait, description[GUI.DRAGGING_MARKER] );
 				if(description[GUI.DRAGGING_CONNECTOR]){
-					Traits.addTrait(component,GUI.DraggingConnectorTrait);
+					Traits.addTrait(component, DraggingConnectorTrait);
 				}
 			}
 			if(description[GUI.ON_DRAG])

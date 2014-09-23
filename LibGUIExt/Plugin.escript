@@ -41,7 +41,6 @@ var plugin = new Plugin({
 plugin.init:=fn() {
 	loadOnce(__DIR__+"/ComponentExtensions.escript");
 	loadOnce(__DIR__+"/ComponentRegistry.escript");
-	loadOnce(__DIR__+"/ComponentTraits.escript");
 	loadOnce(__DIR__+"/Factory_ComponentGroups.escript");
 	loadOnce(__DIR__+"/Factory_Dialogs.escript");
 	loadOnce(__DIR__+"/Factory_Components.escript");

@@ -16,9 +16,9 @@
 	
 static TypeBasedHandler = Std.require('LibUtilExt/TypeBasedHandler');
 
-GUI.ObjectConfigurator := new Type;
-GUI.ObjectConfigurator._fillTreeEntry @(init) := fn(){	return new TypeBasedHandler(true);	};
-GUI.ObjectConfigurator._configPanelRegistry  @(init) := fn(){	return new TypeBasedHandler(true);	};
+var T = new Type;
+T._fillTreeEntry @(init) := fn(){	return new TypeBasedHandler(true);	};
+T._configPanelRegistry  @(init) := fn(){	return new TypeBasedHandler(true);	};
 
 /*! Register a config panel factory for a given Type (Node, State or Behaviour).
 	The factory method has to accept two parameters:
@@ -32,7 +32,7 @@ GUI.ObjectConfigurator._configPanelRegistry  @(init) := fn(){	return new TypeBas
 		There may be more than one handler registered for one type.
 	\deprecated Use normal gui registries instead!
 */
-GUI.ObjectConfigurator.addConfigPanelProvider ::= fn(Type type,fun){
+T.addConfigPanelProvider ::= fn(Type type,fun){
 	_configPanelRegistry += [type,fun];
 };
 
@@ -47,7 +47,7 @@ GUI.ObjectConfigurator.addConfigPanelProvider ::= fn(Type type,fun){
 	\note
 		There may be more than one handler registered for one type.	
 	\see See createConfigTreeEntry() for functions defined on the entry. */
-GUI.ObjectConfigurator.addEntryProvider := fn(Type type,fun){
+T.addEntryProvider := fn(Type type,fun){
 	_fillTreeEntry += [type,fun];
 };
 
@@ -60,7 +60,7 @@ GUI.ObjectConfigurator.addEntryProvider := fn(Type type,fun){
 	- entry.rebuild()				//!< recreate this entry
 	\note The isActiveEntry is set, if the entry is the only top-level entry.
 			E.g. some subentries may be initially expanded then.	*/
-GUI.ObjectConfigurator.createConfigTreeEntry ::= fn(obj,Bool isActiveEntry=false){
+T.createConfigTreeEntry ::= fn(obj,Bool isActiveEntry=false){
 
 	var entry = gui.create({
 		GUI.TYPE : GUI.TYPE_TREE_GROUP,
@@ -131,7 +131,7 @@ GUI.ObjectConfigurator.createConfigTreeEntry ::= fn(obj,Bool isActiveEntry=false
 
 //! Create a config panel for the given object.
 //! \deprecated Use normal gui registries instead!
-GUI.ObjectConfigurator.createConfigPanel ::= fn(obj){
+T.createConfigPanel ::= fn(obj){
 	var p = gui.create({
 		GUI.TYPE : GUI.TYPE_PANEL,
 		GUI.FLAGS : GUI.AUTO_LAYOUT,
@@ -165,7 +165,7 @@ GUI.ObjectConfigurator.createConfigPanel ::= fn(obj){
 		myConfigurator.update(myObject).
 	\deprecated Use normal gui registries instead!
 */
-GUI.ObjectConfigurator.initConfigPanel ::= fn(GUI.Container configPanelContainer, [String,void] _panelProviderPrefix){
+T.initConfigPanel ::= fn(GUI.Container configPanelContainer, [String,void] _panelProviderPrefix){
 
 	configPanelContainer.__configuredObject := void;	
 	
@@ -256,7 +256,7 @@ GUI.ObjectConfigurator.initConfigPanel ::= fn(GUI.Container configPanelContainer
 		// show the entries for several objects.
 		myConfigurator.update( [myObject1,myObject2,myObject3] ).
 */
-GUI.ObjectConfigurator.initTreeView ::= fn(GUI.TreeView treeView){
+T.initTreeView ::= fn(GUI.TreeView treeView){
 
 	
 	/*! ---o
@@ -265,7 +265,7 @@ GUI.ObjectConfigurator.initTreeView ::= fn(GUI.TreeView treeView){
 		// show additional config options - if you like.
 	};
 	
-	treeView.update := (fn(Array elements,configurator){
+	treeView.update := [this] => fn(configurator, Array elements){
 		this.destroyContents();
 		var firstEntry;
 		var entryIsActive = (elements.count() == 1);
@@ -281,7 +281,7 @@ GUI.ObjectConfigurator.initTreeView ::= fn(GUI.TreeView treeView){
 		}else {
 			this.doConfigure(elements.front());
 		}
-	}).bindLastParams(this);
+	};
 
 
 	// when a entry is selected ---> show additional config options (by using doConfigure)
@@ -308,14 +308,16 @@ GUI.ObjectConfigurator.initTreeView ::= fn(GUI.TreeView treeView){
 		// show the entries for several objects.
 		myConfigurator.update( [myObject1,myObject2,myObject3] ).
 */
-GUI.ObjectConfigurator.initTreeViewConfigPanelCombo ::= fn(GUI.TreeView treeView, GUI.Container configPanelContainer, [String,void] _panelProviderPrefix = void){
+T.initTreeViewConfigPanelCombo ::= fn(GUI.TreeView treeView, GUI.Container configPanelContainer, [String,void] _panelProviderPrefix = void){
 	initConfigPanel(configPanelContainer,_panelProviderPrefix);
 	initTreeView(treeView);
 	
 	//! Whenever an object is selected for configuration in the tree view, a corresponding config panel is shown in the configPanelContainer
-	treeView.doConfigure := (fn(data,configPanelContainer){
+	treeView.doConfigure := [configPanelContainer] => fn(configPanelContainer, data){
 		configPanelContainer.update(data);
-	}).bindLastParams(configPanelContainer);	
+	};
 };
-
+ 
+GUI.ObjectConfigurator := T; //! \deprecated alias
+return T;
 // --------------------------------------------------------------------------------------------------
