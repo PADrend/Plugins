@@ -86,6 +86,7 @@ plugin.init := fn(){
 	return true;
 };
 
+static TOOLBAR_ID = 'PADrend_ToolsToolbar';
 
 plugin.createToolbar := fn(){
 	var layouter = (new GUI.FlowLayouter).setMargin(0).setPadding(3).enableAutoBreak();
@@ -94,7 +95,7 @@ plugin.createToolbar := fn(){
 	var width = 10;
 	foreach(gui.createComponents({ 
 						GUI.TYPE : GUI.TYPE_COMPONENTS,
-						GUI.PROVIDER : 'PADrend_ToolsToolbar',
+						GUI.PROVIDER : TOOLBAR_ID,
 						GUI.FILTER : [componentFilter] => fn(componentFilter,p){
 							foreach(componentFilter() as var groupName)
 								p.unset(groupName);
@@ -113,7 +114,7 @@ plugin.createToolbar := fn(){
 		GUI.SIZE : GUI.SIZE_MAXIMIZE,
 		GUI.CONTEXT_MENU_PROVIDER : [this.componentFilter] => fn(componentFilter){
 			var entries = [];
-			foreach(gui.getRegisteredComponentProviders('PADrend_ToolsToolbar') as var name,var p){
+			foreach(gui.getRegisteredComponentProviders(TOOLBAR_ID) as var name,var p){
 				entries += {
 					GUI.TYPE : GUI.TYPE_BOOL,
 					GUI.DATA_PROVIDER : [componentFilter,name] => fn(componentFilter,name){		return componentFilter().contains(name);		},
@@ -133,7 +134,7 @@ plugin.createToolbar := fn(){
 		}
 	
 	});
-//	Traits.addTrait()
+	container._componentId := TOOLBAR_ID;
 	
 	this.toolbar = gui.create({
 		GUI.TYPE : GUI.TYPE_WINDOW,
