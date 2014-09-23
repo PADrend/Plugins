@@ -87,13 +87,17 @@ ObjectPlacer.AcceptsObjectCreatorsTrait := new Traits.GenericTrait("ObjectPlacer
 ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlacer.DraggableObjectCreatorTrait");
 {
 	var t = ObjectPlacer.DraggableObjectCreatorTrait;
+	
+	static DraggableTrait = Std.require('LibGUIExt/Traits/DraggableTrait');
+	static DraggingMarkerTrait = Std.require('LibGUIExt/Traits/DraggingMarkerTrait');
+	static DraggingConnectorTrait = Std.require('LibGUIExt/Traits/DraggingConnectorTrait');
 
 	t.onInit += fn(GUI.Component component,objectInserter,objectCreator){
-		Traits.assureTrait(component,GUI.DraggableTrait);
+		Traits.assureTrait(component, DraggableTrait);
 		
 		component.onDrag += fn(evt){
-			var hasDraggingMarker = Traits.queryTrait(this,GUI.DraggingMarkerTrait);
-			var hasDraggingConnector = Traits.queryTrait(this,GUI.DraggingConnectorTrait);
+			var hasDraggingMarker = Traits.queryTrait(this, DraggingMarkerTrait);
+			var hasDraggingConnector = Traits.queryTrait(this, DraggingConnectorTrait);
 		
 			if(hasDraggingMarker)
 				getDraggingMarker().setEnabled(false);	//! \see GUI.DraggingMarkerTrait

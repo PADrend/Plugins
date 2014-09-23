@@ -51,7 +51,7 @@ Effect._constructor:=fn(){
 		'useNoise' : DataWrapper.createFromValue( shader.getUniform('useNoise').getData()[0] ),
 	};
 
-	this.presetManager := new PresetManager( PADrend.configCache, 'Effects.SSAO', settings );
+	this.presetManager := new (Std.require('LibGUIExt/PresetManager'))( PADrend.configCache, 'Effects.SSAO', settings );
 
 	renderingContext.popShader();
 };

@@ -49,7 +49,7 @@ Effect._constructor:=fn(){
 		'radiusIncrease' : DataWrapper.createFromValue( 0+shader.getUniform('radiusIncrease').getData()[0] ),
 		'fxaa' : DataWrapper.createFromValue(true ),
 	};
-	this.presetManager := new PresetManager( PADrend.configCache, 'Effects.SSAO2', settings );
+	this.presetManager := new (Std.require('LibGUIExt/PresetManager'))( PADrend.configCache, 'Effects.SSAO2', settings );
 
 	renderingContext.popShader();
 	// -------

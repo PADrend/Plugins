@@ -21,8 +21,7 @@
  
 declareNamespace($NodeEditor);
 
-loadOnce("LibGUIExt/ObjectConfigurator.escript");
-NodeEditor._objConfigurator := new GUI.ObjectConfigurator;
+NodeEditor._objConfigurator := new (Std.require('LibGUIExt/ObjectConfigurator'));
 
 // --------------------------------------------------------------------------------------------------------------
 
