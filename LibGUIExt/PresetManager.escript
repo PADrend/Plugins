@@ -47,18 +47,17 @@
  
  */
 
-GLOBALS.PresetManager := new Type();
-var PresetManager = GLOBALS.PresetManager;
-PresetManager._printableName ::= $PresetManager;
+var T = new Type;
+T._printableName ::= $T;
 
-PresetManager.config @(private) := void;
-PresetManager.keyBase @(private) := void;
-PresetManager.settings @(private) := void;
-PresetManager.activePreset @(private) := void;
-PresetManager.configChanged @(private) := void;
+T.config @(private) := void;
+T.keyBase @(private) := void;
+T.settings @(private) := void;
+T.activePreset @(private) := void;
+T.configChanged @(private) := void;
 
 //! (ctro)
-PresetManager._constructor ::= fn(Std.JSONDataStore _config,String _keyBase,[ExtObject,Map] _settings){
+T._constructor ::= fn(Std.JSONDataStore _config,String _keyBase,[ExtObject,Map] _settings){
 	config = _config;
 	keyBase = _keyBase+'.';
 	
@@ -92,7 +91,7 @@ PresetManager._constructor ::= fn(Std.JSONDataStore _config,String _keyBase,[Ext
 	activePreset.forceRefresh(); // init data
 };
 
-PresetManager.createGUI ::= fn(GUI.Container container){
+T.createGUI ::= fn(GUI.Container container){
 	container+={
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "Preset",
@@ -121,22 +120,23 @@ PresetManager.createGUI ::= fn(GUI.Container container){
 	};
 };
 
-PresetManager.getPresetNames ::= fn(){	return activePreset.getOptions();	};
+T.getPresetNames ::= fn(){	return activePreset.getOptions();	};
 
-PresetManager.removeActivePreset ::= fn(newPreset="default"){
+T.removeActivePreset ::= fn(newPreset="default"){
 	var presets = config.getValue(keyBase + 'presets').clone();
 	presets.unset( activePreset() );
 	config.setValue(keyBase + 'presets',presets);
 	activePreset(newPreset);
 };
 
-PresetManager.selectPreset ::= fn(String presetName){	activePreset(presetName);	};
-PresetManager.storeActivePreset ::= fn(){	
-	var m = new Map();
+T.selectPreset ::= fn(String presetName){	activePreset(presetName);	};
+T.storeActivePreset ::= fn(){	
+	var m = new Map;
 	foreach(settings as var key,var dataWrapper )
 		m[key] = dataWrapper();
 	config.setValue(keyBase + 'presets.'+activePreset(),m);
 	configChanged(false);
 };
 
+return T;
 // ------------------------------------------------------------------

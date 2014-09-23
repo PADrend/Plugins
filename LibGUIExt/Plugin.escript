@@ -50,7 +50,6 @@ plugin.init:=fn() {
 	loadOnce(__DIR__+"/IconHandling.escript");
 	loadOnce(__DIR__+"/MenuHandling.escript");
 	loadOnce(__DIR__+"/NewComponents.escript");
-	loadOnce(__DIR__+"/PresetManager.escript");
 
 	return true;
 };
