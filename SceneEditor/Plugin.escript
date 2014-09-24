@@ -5,7 +5,7 @@
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
  * Copyright (C) 2009-2013 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2013 Mouns R. Husan Almarrani
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -91,6 +91,7 @@ plugin.init := fn(){
 		__DIR__+"/VisualHelper/Plugin.escript",
 		__DIR__+"/NodeRepeater/Plugin.escript",
 		__DIR__+"/ObjectExplorer/Plugin.escript",
+		__DIR__+"/GroupStorage/Plugin.escript",
 	];
 	loadPlugins( modules,true);
 
@@ -110,7 +111,7 @@ plugin.showWindow := fn(){
 		}
 	});
 
-	Traits.addTrait(window, Std.require('LibGUIExt/Traits/StorableRectTrait'), 
+	Traits.addTrait(window, Std.require('LibGUIExt/Traits/StorableRectTrait'),
 						DataWrapper.createFromConfig(PADrend.configCache, "SceneEditor.winRect", [100,100,300,350]));
 
 	var tabPanel =gui.create({

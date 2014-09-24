@@ -7,7 +7,7 @@
  * Copyright (C) 2010-2011 David Maicher
  * Copyright (C) 2012 Mouns R. Husan Almarrani
  * Copyright (C) 2010-2011 Ralf Petring <ralf@petring.net>
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -41,7 +41,7 @@ static nodeClipboardMode = $COPY; // || $CUT
 static NodeEditor;
 
 plugin.init @(override) := fn() {
-	
+
 	NodeEditor = Std.require('NodeEditor/NodeEditor');
 
 	/// Register ExtensionPointHandler:
@@ -72,9 +72,9 @@ plugin.init @(override) := fn() {
 		}
 		return false;
 	});
-	
+
 	registerExtension('PADrend_OnSceneSelected', NodeEditor.selectNode); // automatically select the scene
-	
+
 	var modules = [
 				__DIR__+"/GUI/Plugin.escript",
 				__DIR__+"/Transformations.escript",
@@ -93,7 +93,7 @@ plugin.init @(override) := fn() {
 	{	// highlight selected nodes
 		static revoce = new Std.MultiProcedure;
 
-		NodeEditor.onSelectionChanged += fn(selectedNodes){		
+		NodeEditor.onSelectionChanged += fn(selectedNodes){
 			revoce();
 			if(!selectedNodes.empty())
 				revoce += Util.registerExtensionRevocably('PADrend_AfterRenderingPass', [selectedNodes] => highlightNodes );
@@ -110,7 +110,7 @@ plugin.init @(override) := fn() {
 				if(!node || node==PADrend.getCurrentScene() || node==PADrend.getRootNode())
 					continue;
 
-				
+
 				if(!skipAnnotations){
 					frameContext.showAnnotation(node,NodeEditor.getString(node),0,true,
 												node.isInstance() ? COLOR_TEXT_INSTANCE : COLOR_TEXT_ORIGINAL,
@@ -142,7 +142,7 @@ plugin.init @(override) := fn() {
 	}
 	// ----------------------------
 	// keyboard input
-	static keyMap = new Map;	
+	static keyMap = new Map;
 	registerExtension('PADrend_KeyPressed', fn(evt) {
 		var handler = keyMap[evt.key];
 		return handler ? handler() : false;
@@ -238,7 +238,7 @@ plugin.init @(override) := fn() {
 		}
 
 		return false;
-	};	
+	};
 	keyMap[Util.UI.KEY_J] = fn(){					// [j] Jump to selection
 		NodeEditor.jumpToSelection();
 		return true;
@@ -302,62 +302,28 @@ plugin.init @(override) := fn() {
 		return false;
 	};
 
-	// [0...9] restore selection
-	// [ctrl] + [0...9] store selection
-	static storedSelections = [];
-	foreach( [Util.UI.KEY_0, Util.UI.KEY_1, Util.UI.KEY_2, Util.UI.KEY_3, Util.UI.KEY_4, Util.UI.KEY_5] as var index,var sym){
+	// [1...9] restore selection
+	// [ctrl] + [1...9] store selection
+	static selectedNodesStorage = Std.require('NodeEditor/SelectedNodesStorage');
+	foreach( [ Util.UI.KEY_1, Util.UI.KEY_2, Util.UI.KEY_3, Util.UI.KEY_4, Util.UI.KEY_5,
+				Util.UI.KEY_6, Util.UI.KEY_7, Util.UI.KEY_8, Util.UI.KEY_9] as var index,var sym){
 		keyMap[sym] = [index] => this->fn(index){
 			if(PADrend.getEventContext().isShiftPressed()) // no shift
 				return false;
 
 			if(PADrend.getEventContext().isCtrlPressed()){ // store
-				outln("Storing current selection at #",index);
+				outln("Storing current selection at #",index + 1);
 				var selection = NodeEditor.getSelectedNodes().clone();
-				storedSelections[index] = selection;
-
-				// TEMP This is a temporary solution which is eventually replaced by the scene editor's group management feature
-				var ids = [];
-				foreach(selection as var node){
-					var id = PADrend.getSceneManager().getNameOfRegisteredNode(node);
-					if(id)
-						ids += id;
-				}
-				var selectionRegistry = PADrend.getCurrentScene().getNodeAttribute('NodeEditor_selections');
-				if(!selectionRegistry)
-					selectionRegistry = new Map;
-
-				if(ids.empty()){
-					selectionRegistry.unset(index);
-				}else{
-					selectionRegistry[index] = ids;
-				}
-				if(selectionRegistry.empty()){
-					PADrend.getCurrentScene().unsetNodeAttribute('NodeEditor_selections');
-				}else{
-					PADrend.getCurrentScene().setNodeAttribute('NodeEditor_selections',selectionRegistry);
-				}
-
+				selectedNodesStorage.storeSelection(index + 1, selection);
 			} else {
-				var selection = storedSelections[index];
+				var selection = selectedNodesStorage.getStoredSelection(index + 1);
 				if(!selection){
-					var selectionRegistry = PADrend.getCurrentScene().getNodeAttribute('NodeEditor_selections');
-					if(selectionRegistry && selectionRegistry[index]){
-						selection = [];
-						foreach(selectionRegistry[index] as var nodeId){
-							var n = PADrend.getSceneManager().getRegisteredNode(nodeId);
-							if(n)
-								selection += n;
-						}
-						storedSelections[index] = selection;
-					}
-				}
-				if(!selection){
-					Runtime.warn("No selection stored at #"+index);
+					Runtime.warn("No selection stored at #"+index + 1);
 				}else{
 					if(selection == NodeEditor.getSelectedNodes()){
 						NodeEditor.jumpToSelection();
 					} else {
-						outln("Restoring selection #",index);
+						outln("Restoring selection #",index + 1);
 						NodeEditor.selectNodes(selection);
 
 					}
@@ -405,10 +371,10 @@ plugin.init @(override) := fn() {
 
 plugin.setObjectIdentifier := 	fn(fun){		objectIdentifier = fun;	};
 static objectIdentifier = fn(node){
-	
+
 	var semObj = MinSG.SemanticObjects.isSemanticObject(node) ? node :	MinSG.SemanticObjects.getContainingSemanticObject(node);
 	if( semObj ){
-		
+
 		//! \todo This should be integrated into the selection method.
 		while(true){
 			var next = MinSG.SemanticObjects.getContainingSemanticObject(semObj);
