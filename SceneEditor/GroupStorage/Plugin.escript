@@ -25,37 +25,32 @@ plugin.init := fn() {
 	return true;
 };
 
+static COLOR_PASSIVE = new Util.Color4f(0.5,0.5,0.5,1.0);
+static COLOR_ACTIVE = new Util.Color4f(0.2,0.2,1.0,1.0);
+
 plugin.registerGUIComponents := fn(){
-	// update , store new nodes
-	// plugin menu
-	gui.registerComponentProvider('PADrend_ToolsToolbar.transform3_GroupStorage', fn(){
+	gui.registerComponentProvider('PADrend_ToolsToolbar.30_selectionStorage', fn(){
 		var panel = gui.create({
 			GUI.TYPE : GUI.TYPE_CONTAINER,
-			GUI.SIZE : [GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 35, 35],
-			GUI.LAYOUT : GUI.LAYOUT_FLOW
+			GUI.SIZE : [GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 25, 25],
+			GUI.LAYOUT : GUI.LAYOUT_TIGHT_FLOW,
 		});
+		panel += { GUI.TYPE : GUI.TYPE_NEXT_ROW,GUI.SPACING : 2 };
 		for(var index = 1; index< 10; index++){
-			var label;
-			if(selectedNodesStorage.getStoredSelection(index))
-				label = index;
-			else
-				label = "";
+
 			var button = gui.create({
 				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : label,
-				GUI.SIZE: [10,10],
-				GUI.FLAGS : GUI.AUTO_LAYOUT|GUI.BORDER,
-				GUI.TOOLTIP: "Store selected node(s) in [1..9] tiles.",
+				GUI.LABEL : index,
+				GUI.SIZE: [8,8],
+				GUI.COLOR : COLOR_PASSIVE,
+				GUI.FLAGS : GUI.FLAT_BUTTON,
+				GUI.FONT : GUI.FONT_ID_SYSTEM,
 				GUI.ON_CLICK: [index] => fn(index){
 					var selection = selectedNodesStorage.getStoredSelection(index);
-					if(!selection){
+					if(selection.empty()){
 						var selectedNodes = NodeEditor.getSelectedNodes().clone();
-						if(selectedNodes.size() > 0){
-							selectedNodesStorage.storeSelection(index, selectedNodes);
-							outln("GUI Storing current selection at #",index);
-						}
-						else
-							outln("No selected node(s)");
+						selectedNodesStorage.storeSelection(index, selectedNodes);
+						PADrend.message("Storing selected nodes at #",index);
 					}else{
 						if(selection == NodeEditor.getSelectedNodes()){
 							NodeEditor.jumpToSelection();
@@ -70,10 +65,10 @@ plugin.registerGUIComponents := fn(){
 
 				},
 				GUI.CONTEXT_MENU_PROVIDER : [index] => fn(index){
-                    return [
+					return [
 						{
 							GUI.TYPE : GUI.TYPE_BUTTON,
-							GUI.LABEL : "Update",
+							GUI.LABEL : "[CTRL]+["+index+"] Update stored selection",
 							GUI.ON_CLICK : [index] => fn(index){
 								var selectedNodes = NodeEditor.getSelectedNodes().clone();
 								if(selectedNodes.size() > 0){
@@ -85,31 +80,45 @@ plugin.registerGUIComponents := fn(){
 								}
 						},
 						{
-							GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
-							GUI.LABEL : "Clear",
-							GUI.REQUEST_MESSAGE : "Remove behaviour from node?",
+							GUI.TYPE : GUI.TYPE_BUTTON,
+							GUI.LABEL : "Clear stored selection",
 							GUI.ON_CLICK : [index] => fn(index){
 								selectedNodesStorage.deleteStoredSlection(index);
 								outln("GUI cleared current selection at #",index);
 							}
 						}
 
-                    ];
-                }
+					];
+				}
 			});
 			panel += button;
-			index ==3 | index ==6 ? panel++ : void ;
-			selectedNodesStorage.onSelectionChanged += [index, button]=>fn(buttonId, button, index, selection){
+			if(index ==3 || index ==6) panel++;
+			var updateButton = [index, button]=>fn(buttonId, button, index, selection){
 				if(button.isDestroyed())
-					return;
+					return $REMOVE;
 				if(buttonId == index){
-					if(this.getStoredSelection(index))
-						button.setText(""+index);
-					else
-						button.setText("");
+					if( selection && !selection.empty()){
+						button.setColor( COLOR_ACTIVE );
+						var t = "["+index+"] Select/goTo stored nodes ("+selection.count()+"):";
+						foreach(selection as var i,var n){
+							if(i>10){
+								t += "\n... ";
+								break;
+							}
+							t += "\n"+NodeEditor.getNodeString(n);
+						}
+						button.setTooltip(t);
+					}
+					else{
+						button.setColor( COLOR_PASSIVE );
+						button.setTooltip( "[CTRL]+["+index+"] Update stored selection.");
+						
+					}
 				}
 
 			};
+			selectedNodesStorage.onSelectionChanged += updateButton;
+			updateButton( index,selectedNodesStorage.getStoredSelection(index) );
 		};
 		return [panel];
 	});

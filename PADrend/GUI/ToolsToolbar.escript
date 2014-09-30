@@ -103,7 +103,7 @@ plugin.createToolbar := fn(){
 						}
 					}) as var e){
 		e.layout();
-		width+=e.getWidth()+3;
+		width+=e.getWidth()+5;
 		entries+=e;
 	}
 	var container = gui.create({
