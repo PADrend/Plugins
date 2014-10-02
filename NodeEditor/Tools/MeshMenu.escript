@@ -208,14 +208,16 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 		GUI.LABEL : "Split polygons",
 		GUI.TOOLTIP: "Split the polygons, whoch have side length > Max. poly. side length",
 		GUI.ON_CLICK : fn() {
-			var maxSideLengths = [];
-			foreach( NodeEditor.getSelectedNodes() as var node){
-				if(node.isA(MinSG.GeometryNode))
-					maxSideLengths += Rendering.getLongestSideLength(node.getMesh());
-			}
-			var maxSideLength = maxSideLengths.max();
+			static getMaxSideLength = fn(){
+				var maxSideLengths = [];
+				foreach( NodeEditor.getSelectedNodes() as var node){
+					if(node.isA(MinSG.GeometryNode))
+						maxSideLengths += Rendering.getLongestSideLength(node.getMesh());
+				}
+				return  maxSideLengths.max();
+			};
 
-			var lengthWrapper = DataWrapper.createFromValue(maxSideLength);
+			var lengthWrapper = DataWrapper.createFromValue(getMaxSideLength());
 			gui.openDialog({
 				GUI.TYPE : GUI.TYPE_POPUP_DIALOG,
 				GUI.LABEL : "Split polygons",
@@ -243,6 +245,12 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 
 							}
 						],
+						["Refresh",[lengthWrapper]=>fn(lengthWrapper){
+							lengthWrapper(getMaxSideLength());
+							return true;
+							}
+						],
+
 						"Cancel"
 					]
 				});
