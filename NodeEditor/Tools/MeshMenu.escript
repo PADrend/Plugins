@@ -9,7 +9,7 @@
  * Copyright (C) 2010-2011 Jonas Knoll
  * Copyright (C) 2010 Paul Justus
  * Copyright (C) 2010-2012 Ralf Petring <ralf@petring.net>
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -62,7 +62,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 			var data = new ExtObject();
 			data.tanName := Rendering.VertexAttributeIds.TANGENT;
 			data.uvName := Rendering.VertexAttributeIds.TEXCOORD0;
-	
+
 			var p = gui.createPopupWindow( 400, 120,"Tangent space calculation" );
 			p.addOption("Create tangent-space vectors for selected meshes");
 
@@ -182,7 +182,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 			}
 			out("\n");
 		}
-	},	
+	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Embed meshes",
@@ -200,7 +200,54 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 				}
 			}
 			PADrend.message(""+count+" meshes embedded.");
-			
+
+		}
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Split polygons",
+		GUI.TOOLTIP: "Split the polygons, whoch have side length > Max. poly. side length",
+		GUI.ON_CLICK : fn() {
+			var maxSideLengths = [];
+			foreach( NodeEditor.getSelectedNodes() as var node){
+				if(node.isA(MinSG.GeometryNode))
+					maxSideLengths += Rendering.getLongestSideLength(node.getMesh());
+			}
+			var maxSideLength = maxSideLengths.max();
+
+			var lengthWrapper = DataWrapper.createFromValue(maxSideLength);
+			gui.openDialog({
+				GUI.TYPE : GUI.TYPE_POPUP_DIALOG,
+				GUI.LABEL : "Split polygons",
+				GUI.SIZE : [350, 100],
+				GUI.OPTIONS :[
+						{
+							GUI.TYPE : GUI.TYPE_NUMBER,
+							GUI.LABEL : "Max. poly. side length",
+							GUI.DATA_WRAPPER: lengthWrapper,
+							GUI.WIDTH : 100
+						}
+
+					],
+				GUI.ACTIONS		:	[
+						["Split polygon", [lengthWrapper]=>fn(lengthWrapper){
+								var nodes = NodeEditor.getSelectedNodes();
+								out("Polygons are splited");
+								if(nodes.size() > 0){
+									foreach (nodes as var  node){
+										Rendering.splitLargeTriangles(node.getMesh(), lengthWrapper());
+
+									}
+								}
+								return true;
+
+							}
+						],
+						"Cancel"
+					]
+				});
+
+
 		}
 	},
 	'----'
@@ -237,7 +284,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 			p.addAction("Create coordinates",data->fn(){
 				out("Create uv coordinates for attribute '"+attrName+"' [");
 				renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
-				
+
 				var matrix=(new Geometry.Matrix4x4()).scale(scale,scale,scale) *  renderingContext.getMatrix_cameraToClipping() * renderingContext.getMatrix_worldToCamera() ;
 
 				foreach( NodeEditor.getSelectedNodes() as var subtree){
@@ -270,12 +317,12 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 				foreach(geoNodes as var geoNode){
 					var mesh = geoNode.getMesh();
 					var acc = Rendering.TexCoordAttributeAccessor.create(mesh,Rendering.VertexAttributeIds.TEXCOORD0);
-					
+
 					for(var i = 0;acc.checkRange(i);++i){
 						var p = acc.getCoordinate(i);
 						p.setY(1 - p.getY());
 						acc.setCoordinate(i,p);
-						
+
 					}
 					mesh._markAsChanged();
 					out(".");
@@ -957,13 +1004,13 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshFixes',[
 					bb.invalidate();
 					for(var i=0;posAcc.checkRange(i);++i)
 						bb.include( normalAcc.getPosition(i) );
-					
+
 					if(bb.getExtentMax()<0.1){
 						Rendering.calculateNormals(mesh);
 						out("*");
 					}else{
 						var offset = bb.getCenter();
-						
+
 						for(var i=0;posAcc.checkRange(i);++i){
 							normalAcc.setPosition(i, (normalAcc.getPosition(i)-offset).normalize() );
 						}
@@ -972,7 +1019,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshFixes',[
 //							normalAcc.setPosition(i, (normalAcc.getPosition(i)-posAcc.getPosition(i)).normalize() );
 						out("+");
 					}
-					
+
 				}
 			}
 			outln("Finisehd.");
