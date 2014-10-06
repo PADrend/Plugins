@@ -233,13 +233,13 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 					],
 				GUI.ACTIONS		:	[
 						["Split polygon", [lengthWrapper]=>fn(lengthWrapper){
-								var nodes = NodeEditor.getSelectedNodes();
-								out("Polygons are splited");
-								if(nodes.size() > 0){
-									foreach (nodes as var  node){
-										Rendering.splitLargeTriangles(node.getMesh(), lengthWrapper());
+								var nodes = [];
+								foreach( NodeEditor.getSelectedNodes() as var subtree)
+									nodes.append( MinSG.collectNodes(subtree,MinSG.GeometryNode) );
 
-									}
+								foreach(nodes as var node){
+									Rendering.splitLargeTriangles(node.getMesh(), lengthWrapper());
+									out(".");
 								}
 								return true;
 
