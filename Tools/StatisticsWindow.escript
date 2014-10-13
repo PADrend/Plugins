@@ -299,28 +299,41 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 	fontSize.onDataChanged += rebuildLabels;
 
 	// Rebuild the panel when the value is changed
-	var menuEntries = [];
 	showFpsLabel.onDataChanged += rebuildLabels;
-	menuEntries +=	{
-						GUI.TYPE			:	GUI.TYPE_BOOL,
-						GUI.LABEL			:	"frame rate",
-						GUI.DATA_WRAPPER	:	showFpsLabel
-					};
+	window.contextMenuProvider += [
+		{
+			GUI.TYPE			:	GUI.TYPE_BOOL,
+			GUI.LABEL			:	"frame rate",
+			GUI.DATA_WRAPPER	:	showFpsLabel
+		}
+	];
+	
+	var refreshConfigData =  [windowConfigPrefix,rebuildLabels,counterConfigData] => fn(windowConfigPrefix,rebuildLabels,counterConfigData){
+		for(var counter = 0; counter < PADrend.frameStatistics.getNumCounters(); ++counter) {
+			var description = PADrend.frameStatistics.getDescription(counter);
+			counterConfigData[counter] = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".Counters." + description, false);
+			// Rebuild the panel when a counter is changed
+			counterConfigData[counter].onDataChanged += rebuildLabels;
+		}
+	};
 
-	for(var counter = 0; counter < PADrend.frameStatistics.getNumCounters(); ++counter) {
-		var description = PADrend.frameStatistics.getDescription(counter);
-		counterConfigData[counter] = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".Counters." + description, false);
-		// Rebuild the panel when a counter is changed
-		counterConfigData[counter].onDataChanged += rebuildLabels;
-		menuEntries +=	{
-							GUI.TYPE			:	GUI.TYPE_BOOL,
-							GUI.LABEL			:	description,
-							GUI.DATA_WRAPPER	:	counterConfigData[counter]
-						};
-	}
 	// \see GUI.ContextMenuTrait
-	window.contextMenuProvider += menuEntries;
+	window.contextMenuProvider += [refreshConfigData,counterConfigData] => fn(refreshConfigData,counterConfigData){
+		refreshConfigData();
+		var menuEntries = [];
 
+		for(var counter = 0; counter < PADrend.frameStatistics.getNumCounters(); ++counter) {
+			var description = PADrend.frameStatistics.getDescription(counter);
+			menuEntries +=	{
+								GUI.TYPE			:	GUI.TYPE_BOOL,
+								GUI.LABEL			:	description,
+								GUI.DATA_WRAPPER	:	counterConfigData[counter]
+							};
+		}
+	
+		return menuEntries;
+	};
+	refreshConfigData();
 	rebuildLabels();
 	window += page;
 
