@@ -50,7 +50,7 @@ PADrend.SceneManagement := new Plugin({
 		]
 });
 
-var SceneManagement = PADrend.SceneManagement;
+static SceneManagement = PADrend.SceneManagement;
 
 static registeredScenes = [];
 static rootNode = void;
@@ -280,6 +280,33 @@ SceneManagement.selectScene := fn(scene) {
 	executeExtensions('PADrend_OnSceneSelected',scene);
 };
 
+/*! Select scene given by @p filename or by node. 
+	If necessary, the file is loaded or registered.
+	If a scene with the same filename has been registered, it is not loaded again.	*/
+SceneManagement.assureScene := fn( [MinSG.Node,String] mixed){
+	if(mixed.isA(MinSG.Node)){
+		var scene = mixed;
+		if(scene != activeScene ){
+			if(!registeredScenes.contains(scene))
+				SceneManagement.registerScene(scene);
+			SceneManagement.selectScene(scene);
+		}
+		return scene;
+	}else{
+		var filename = mixed;
+		foreach( registeredScenes as var scene ){
+			if(scene.isSet($filename) && scene.filename == filename){
+				SceneManagement.selectScene( scene );
+				return scene;
+			}
+		}
+		var scene = SceneManagement.loadScene(filename);
+		if(!scene)
+			Runtime.exception("Could not load scene '"+filename+"'");
+		SceneManagement.selectScene( scene );
+		return scene;
+	}
+};
 
 
 // --------------------------------------------------------------------------------------------
