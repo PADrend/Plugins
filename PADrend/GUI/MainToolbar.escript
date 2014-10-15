@@ -126,6 +126,7 @@ plugin.registerStdToolbarEntries := fn() {
 			GUI.ON_ACCEPT : [scene] => fn(scene, filename){
 						
 				var save = [scene,filename] => fn(scene,filename){
+					showWaitingScreen();
 					PADrend.message("Save scene \""+filename+"\"");
 					if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
 						PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());
@@ -283,6 +284,7 @@ plugin.registerStdToolbarEntries := fn() {
 					var scene = PADrend.getCurrentScene();
 					var filename = scene.isSet($filename) ? scene.filename : void;
 					if(filename){
+						showWaitingScreen();
 						PADrend.message("Save scene \""+filename+"\"");
 						if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
 							PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());

@@ -19,8 +19,8 @@ static trait = new PersistentNodeTrait(module.getId());
 static transformationInProgress = false;
 static LINK_ROLE_ABS_DELTA = 'transform';
 static LINK_ROLE_REL_DELTA = 'transformRel';
-static LINK_ROLE_SNAP = 'transformSnap'; // snap lower center of bounding boxes(rotation and pos)
-static LINK_ROLE_SNAP_POS = 'transformSnapPos'; // snap lower center of bounding boxes (only
+static LINK_ROLE_SNAP = 'transformSnap'; // snap lower center of target's bounding box to proxy's origin(rotation and position)
+static LINK_ROLE_SNAP_POS = 'transformSnapPos'; // snap lower center of target's bounding box to proxy's origin (only position)
 static LINK_ROLES = [LINK_ROLE_ABS_DELTA,LINK_ROLE_REL_DELTA,LINK_ROLE_SNAP,LINK_ROLE_SNAP_POS];
 
 trait.onInit += fn(MinSG.Node node){
@@ -64,7 +64,7 @@ trait.onInit += fn(MinSG.Node node){
 			try{
 				var deltaWorldTransformation = localToWorld_SRT * lastWorldToLocal_SRT;
 				var deltaWorldRotation = deltaWorldTransformation.getRotation();
-				var worldLocation = node.localPosToWorldPos( node.getBB().getRelPosition(0.5,0,0.5) );
+				var worldLocation = node.getWorldOrigin();
 
 				foreach(transformedNodes as var cNode, var mixed){
 					var role = mixed[0];
