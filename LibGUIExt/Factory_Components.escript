@@ -611,6 +611,9 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			if(!Traits.queryTrait(component, ContextMenuTrait))
 				Traits.addTrait(component, ContextMenuTrait,description.get(GUI.CONTEXT_MENU_WIDTH,150));
 			component.contextMenuProvider += description[GUI.CONTEXT_MENU_PROVIDER];
+			
+			@(once) static triangle = this._createTriangleAtCornerShape(GUI.BLACK,5);
+			component.addComponentHoverProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_ADDITIONAL_BACKGROUND_SHAPE,triangle),1,false);
 		}
 		
 		// mouse button listener
