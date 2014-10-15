@@ -20,6 +20,15 @@
 var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
 
+static TreeQuery = module('LibMinSGExt/TreeQuery');
+static queryRelNodes = fn(MinSG.Node source,String query){
+	return TreeQuery.execute(query,PADrend.getSceneManager(),[source]).toArray();
+};
+static createRelativeNodeQuery = fn(MinSG.Node source,MinSG.Node target){
+	return TreeQuery.createRelativeNodeQuery(PADrend.getSceneManager(),source,target);
+};
+
+
 trait.onInit += fn(MinSG.Node node){
 
 	Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));
@@ -32,12 +41,31 @@ trait.onInit += fn(MinSG.Node node){
 	node.availableLinkRoleNames += "switch";
 	
 	node.buttonState := new DataWrapper(false);
+	node._buttonFixedNextSwitchTime := void; // internal
 	node.buttonState.onDataChanged += [node]=>fn(node, value){
 		if(value) //! TEMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			node.setRelScaling(1.5);
 		else
 			node.setRelScaling(1.0);
-		var time = PADrend.getSyncClock();
+		var time;
+		if(node._buttonFixedNextSwitchTime) {
+			time = node._buttonFixedNextSwitchTime;
+			node._buttonFixedNextSwitchTime = void;
+		}else{
+			time = PADrend.getSyncClock();
+			// distribute
+			var pathToButton = createRelativeNodeQuery(PADrend.getCurrentScene(),node);
+			
+			@(once) static CommandHandling = Util.requirePlugin('PADrend/CommandHandling');
+			CommandHandling.executeRemoteCommand( [pathToButton,time,value]=>fn(pathToButton,time,value){
+				var button = Std.require('LibMinSGExt/TreeQuery').execute(pathToButton,PADrend.getSceneManager(),[PADrend.getCurrentScene()]).toArray().front();
+				button._buttonFixedNextSwitchTime = time;
+				button.buttonState(value);
+			} );
+			
+			outln("Switch remote: ",pathToButton," ",time," ",value);
+		}
+		
 		
 		//! \see ObjectTraits/NodeLinkTrait
 		var nodes = node.getLinkedNodes( node.buttonLinkRole() );
