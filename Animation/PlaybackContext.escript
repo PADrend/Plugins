@@ -80,6 +80,7 @@ PlaybackContext.isPlaying ::= fn(){
 	return this.playing;
 };
 
+static Command = Std.require('LibUtilExt/Command');
 PlaybackContext.jumpRel ::= fn(tDiff){
 	if(tDiff < -this.currentTime)
 		tDiff = -this.currentTime;

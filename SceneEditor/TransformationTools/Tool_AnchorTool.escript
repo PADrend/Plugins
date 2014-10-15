@@ -174,6 +174,7 @@ Tool.onNodesSelected_static += fn(Array selectedNodes){
 				newLocation = oldLocation.clone();
 				newLocation.setTranslation(newRelPos);
 			}
+			static Command = Std.require('LibUtilExt/Command');
 			PADrend.executeCommand({
 				Command.DESCRIPTION : "Transform anchor",
 				Command.EXECUTE : 	[newLocation] => ctxt.anchor ,

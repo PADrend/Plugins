@@ -35,6 +35,8 @@ static backupCamera;
 static backupSRT;
 static currentNode;
 
+static Command = Std.require('LibUtilExt/Command');
+
 static applySRT = fn(MinSG.Node node,Geometry.SRT newSRT, oldSRT = void){
 	if(!oldSRT){
 		oldSRT = node.getRelTransformationSRT();

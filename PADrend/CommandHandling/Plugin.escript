@@ -16,7 +16,7 @@
  **
  **/
 
-Std.require('LibUtilExt/Command');
+static Command = Std.require('LibUtilExt/Command');
 
 /***
  **   ---|> Plugin
@@ -47,7 +47,7 @@ PADrend.CommandHandling := new Plugin({
 
 // -------------------
 
-PADrend.CommandHandling._commandHistory := void;
+static _commandHistory;
 
 /**
  * Plugin initialization.
@@ -55,11 +55,9 @@ PADrend.CommandHandling._commandHistory := void;
  */
 PADrend.CommandHandling.init := fn(){
 
-	this._commandHistory = new CommandHistory;
-	{
-		registerExtension('PADrend_KeyPressed',this->ex_KeyPressed);
-		registerExtension('PADrend_Init',this->ex_Init);
-	}
+	_commandHistory = new (Std.require('LibUtilExt/CommandHistory'));
+	Util.registerExtension('PADrend_KeyPressed',this->ex_KeyPressed);
+	Util.registerExtension('PADrend_Init',this->ex_Init);
 	
 	return true;
 };
@@ -102,6 +100,11 @@ PADrend.CommandHandling.executeCommand := fn(cmd){ //[Command,Map,UserFunction,D
 		_commandHistory.execute(cmd);
 	}
 };
+
+PADrend.CommandHandling.executeRemoteCommand := fn(cmd){
+	PADrend.CommandHandling.executeCommand( new Command({ 	Command.EXECUTE : cmd,	Command.FLAGS : Command.FLAG_SEND_TO_SLAVES }) );	
+};
+
 
 PADrend.CommandHandling.redoCommand := fn(){
 	var cmd = _commandHistory.getRedoTop();

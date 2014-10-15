@@ -283,17 +283,12 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		GUI.LABEL : "Undo",
 		GUI.ON_CLICK : WaypointsPlugin -> WaypointsPlugin.getCommandHistory().undo,
 		GUI.ON_INIT : fn(description){
-			Listener.add( Listener.CMD_UNDO_REDO_CHANGED,
-				this->fn(type,sender){
-					if(sender != WaypointsPlugin.getCommandHistory())
-						return;
-
-					if(!sender.canUndo())
-						this.setTooltip("Nothing to be undone");
-					else {
-						this.setTooltip("Undo \""+sender.getUndoTop().getDescription()+"\"");
-					}
-				});
+			WaypointsPlugin.getCommandHistory().onUndoRedoChanged += this->fn(){
+				if(!WaypointsPlugin.getCommandHistory().canUndo())
+					this.setTooltip("Nothing to be undone.");
+				else 
+					this.setTooltip("Undo \""+WaypointsPlugin.getCommandHistory().getUndoTop().getDescription()+"\"");
+			};
 		},
 		GUI.ICON : iconPath+"Undo32.png",
 		GUI.TOOLTIP : "Nothing to be undone"
@@ -303,17 +298,13 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		GUI.LABEL : "Redo",
 		GUI.ON_CLICK : WaypointsPlugin -> WaypointsPlugin.getCommandHistory().redo,
 		GUI.ON_INIT : fn(description){
-			Listener.add( Listener.CMD_UNDO_REDO_CHANGED,
-				this->fn(type,sender){
-					if(sender != WaypointsPlugin.getCommandHistory())
-						return;
+			WaypointsPlugin.getCommandHistory().onUndoRedoChanged += this->fn(){
+				if(!WaypointsPlugin.getCommandHistory().canRedo())
+					this.setTooltip("Nothing to be redone.");
+				else 
+					this.setTooltip("Redo \""+WaypointsPlugin.getCommandHistory().getRedoTop().getDescription()+"\"");
 
-					if(!sender.canRedo())
-						this.setTooltip("Nothing to be redone");
-					else {
-						this.setTooltip("Redo \""+sender.getRedoTop().getDescription()+"\"");
-					}
-				});
+			};
 		},
 		GUI.ICON : iconPath+"Redo32.png",
 		GUI.TOOLTIP : "Nothing to be redone"

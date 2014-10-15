@@ -23,7 +23,7 @@ var tests = [];
 
 // extended Object Serialization tests
 tests += new Tests.AutomatedTest( "PADrend ObjectSerialization" , fn(){
-
+	static Command = Std.require('LibUtilExt/Command');
 	// function with bound params
 	var f1 = (fn(a,b,c){	return a*b-c; }).bindLastParams(10,1);
 	var s_f1 = PADrend.serialize( f1);

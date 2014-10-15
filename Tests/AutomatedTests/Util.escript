@@ -60,7 +60,8 @@ tests += new Tests.AutomatedTest( "Util/DestructionMonitor" , fn(){
 // -----------------------------------------------------------------------------------------------
 
 tests += new Tests.AutomatedTest( "Util/Command" , fn(){
-	Std.require('LibUtilExt/Command');
+	static Command = Std.require('LibUtilExt/Command');
+	static CommandHistory = Std.require('LibUtilExt/CommandHistory');
 	var hist = new CommandHistory;
 	
 	var obj = new ExtObject( {$m1:1} );

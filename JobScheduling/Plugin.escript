@@ -93,7 +93,8 @@ plugin.announceSchedulers := fn(){
 		}
 	}
 	activeWorkerSets.swap(newWorkers);
-
+	
+	static Command = Std.require('LibUtilExt/Command');
 	// update slave-instances
 	PADrend.executeCommand(new Command({
 		Command.EXECUTE : (fn(workerSetInfo){

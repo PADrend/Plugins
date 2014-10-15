@@ -168,7 +168,7 @@ AnimationPlugin.selectStory := fn(Animation.Story story){
 	
 	var path  = this.getStoryPath(story);
 	if(path.front()!="???"){
-
+		static Command = Std.require('LibUtilExt/Command');
 		// send command to connected clients
 		PADrend.executeCommand( new Command({	
 				Command.EXECUTE : (fn(path){ 	AnimationPlugin.selectStoryByPath(path);	}).bindLastParams( path ),

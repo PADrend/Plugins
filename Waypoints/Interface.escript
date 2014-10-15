@@ -17,7 +17,7 @@
 **
 ** The <public> parts of the Waypoints-Plugin.
 **/
-
+static Command = Std.require('LibUtilExt/Command');
 
 WaypointsPlugin.followPathBehavior := void;
 

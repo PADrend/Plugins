@@ -226,6 +226,7 @@ ToolHelperTraits.NodeTransformationHandlerTrait := new Traits.GenericTrait("Tool
 			}
 			if(differenceFound){
 				var fun = fn(){foreach(this as var a)a[1].convertsSafelyToSRT() ? a[0].setRelTransformation(a[1].toSRT()) : a[0].setRelTransformation(a[1]);	};
+				static Command = Std.require('LibUtilExt/Command');
 				PADrend.executeCommand({
 					Command.DESCRIPTION : "Transform nodes",
 					Command.EXECUTE : 	aExecute->fun,

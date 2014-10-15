@@ -111,6 +111,8 @@ Scheduler.empty ::= fn(){
 	return pendingJobs.empty() && activeJobs.empty() && finishedJobs.empty();
 };
 
+static Command = Std.require('LibUtilExt/Command');
+
 //! Should be called on every frame.
 Scheduler.execute ::= fn(){
 	var now = clock();

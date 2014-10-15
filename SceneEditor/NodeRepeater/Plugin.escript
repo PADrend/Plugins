@@ -155,6 +155,7 @@ plugin.showWindow := fn(){
         GUI.WIDTH : 50,
         GUI.LABEL:"Create",
         GUI.ON_CLICK :this->fn(container){
+        	static Command = Std.require('LibUtilExt/Command');
             var nodes = NodeEditor.getSelectedNodes();
             PADrend.executeCommand({
                 Command.DESCRIPTION : "Node Repeat",

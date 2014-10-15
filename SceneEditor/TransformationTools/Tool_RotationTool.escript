@@ -25,6 +25,7 @@ static _updatePivot = fn(MinSG.Node node, [Geometry.Vec3,false] pivot){
 			node.__rotationPivot := pivot;
 			NodeEditor.selectNodes( NodeEditor.getSelectedNodes() );
 		};
+		static Command = Std.require('LibUtilExt/Command');
 		PADrend.executeCommand({
 			Command.DESCRIPTION : "Transform pivot",
 			Command.EXECUTE : 	[node,newPivot]=>fun,

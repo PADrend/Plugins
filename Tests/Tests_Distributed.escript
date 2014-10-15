@@ -87,7 +87,7 @@ plugin.execute:=fn(){
 	});
 
 	// ---
-
+	static Command = Std.require('LibUtilExt/Command');
 	tests += new DistTest( "Command transmission" , fn(){
 		GLOBALS.__TestPlugin_DistributetTests_m1 := 0;
 		

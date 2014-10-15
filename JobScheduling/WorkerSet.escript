@@ -56,7 +56,7 @@ WorkerSet._constructor ::= fn(String _schedulerId,Number _capacity){
 			activeJobs+=new JobScheduling.Job(data['jobId'],data['workload']);
 		}
 	};
-	
+	static Command = Std.require('LibUtilExt/Command');
 	for(var i=0;i<capacity;++i){
 		var workerId = createWorkerId();
 		availableWorkers[workerId] = true;
