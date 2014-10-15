@@ -123,7 +123,23 @@ Effect.end @(override) ::= fn(){
 	shader.setUniform(renderingContext,'numSteps' , Rendering.Uniform.INT,[settings['numSteps']() ]);
 	shader.setUniform(renderingContext,'radiusIncrease' , Rendering.Uniform.FLOAT,[settings['radiusIncrease']() ]);
 
+	
+	{	// haze \see Effects/InfiniteGround
+		var p = Util.queryPlugin('Effects_InfiniteGround');
+		if(p && p.enabled() && p.hazeEnabled()){
+			shader.setUniform( renderingContext, 'hazeNear_cs', Rendering.Uniform.FLOAT, [p.hazeNear()] );
+			shader.setUniform( renderingContext, 'hazeFar_cs', Rendering.Uniform.FLOAT, [p.hazeFar()]);
+			var color = p.getHazeColor();
+			shader.setUniform( renderingContext, 'hazeColor',  Rendering.Uniform.VEC3F,[ [color.r(),color.g(),color.b()] ]);
+		}else{
+			shader.setUniform( renderingContext, 'hazeNear_cs', Rendering.Uniform.FLOAT, [0] );
+			shader.setUniform( renderingContext, 'hazeFar_cs', Rendering.Uniform.FLOAT, [0]);
+		}
+		
+	}
+		
 
+		
 	if( settings['fxaa']() ){
 		fbo.attachColorTexture(renderingContext,colorTexture_3);
 

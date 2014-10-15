@@ -40,6 +40,11 @@ uniform float initialRadius = 4;
 uniform int numDirections = 5;
 uniform int numSteps = 5;
 
+
+uniform float hazeFar_cs = -1.0;
+uniform float hazeNear_cs = -1.0;
+uniform vec3 hazeColor;
+
 /*! if useNoise is defined, the sampled points are perturbed by reflecting them by an pseudo randomized
 	plane. */
 uniform bool useNoise = false;
@@ -74,7 +79,12 @@ void main(){
 			return; 
 		}
 		eyeSpacePos = camToEye(pos_cs,depth); // don't use getEyePos as we already have the depth value.
-		if(eyeSpacePos.z<-10000.0 || pos_cs.x<debugBorder){
+
+		if(eyeSpacePos.z<-100000.0 || pos_cs.x<debugBorder){
+			if(hazeFar_cs!=hazeNear_cs){
+				originalColor.rgb = mix(originalColor.rgb,hazeColor,(clamp(-eyeSpacePos.z, hazeNear_cs,hazeFar_cs)-hazeNear_cs) / (hazeFar_cs-hazeNear_cs) );
+			}
+
 			gl_FragColor = vec4(originalColor.rgb,calcLuma(originalColor.rgb)); // luma needed for fxaa
 			return;
 		}
@@ -135,7 +145,11 @@ void main(){
 		// reduce color in RGB-space (not so good...)
 	//		baseColor *= min(blocking/counter + intensityOffset,1.0);	
 		
-
+		if(hazeFar_cs!=hazeNear_cs){
+			color.rgb = mix(color.rgb,hazeColor,(clamp(-eyeSpacePos.z, hazeNear_cs,hazeFar_cs)-hazeNear_cs) / (hazeFar_cs-hazeNear_cs) );
+		}
+		 
+		
 		gl_FragColor = vec4(color.rgb,calcLuma(color.rgb)); // luma needed for fxaa
 	}
 	return;

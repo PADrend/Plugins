@@ -21,19 +21,17 @@
  */
 
 
-declareNamespace($Effects);
 
 //!	Effects.InfiniteGround ---|> Plugin
-Effects.InfiniteGround := new Plugin({
+static plugin = new Plugin({
 			Plugin.NAME : "Effects_InfiniteGround",
-			Plugin.VERSION : "1.0",
+			Plugin.VERSION : "1.1",
 			Plugin.DESCRIPTION : "Display of a infinite ground plane.",
 			Plugin.AUTHORS : "Sascha Brandt, Benjamin Eikel, Robert Gmyr, Claudius Jaehn",
 			Plugin.OWNER : "All",
 			Plugin.REQUIRES : []
 });
 
-var plugin = Effects.InfiniteGround;
 
 plugin.autoGroundLevel @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.autoGroundLevel',true);
 plugin.enabled @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.enabled',false);
@@ -46,54 +44,30 @@ plugin.type @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.Infin
 plugin.waterRefraction @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.waterRefraction',0.1);
 plugin.waterReflection @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.waterReflection',0.5);
 
-plugin.groundNode @(private) := void;
-plugin.groundShaderState @(private) := void;
+static resourcesFolder = __DIR__+"/resources";
+
+plugin.getHazeColor := fn(){
+	var skyPlugin = Util.queryPlugin('Effects_DynamicSky');
+	return (skyPlugin && skyPlugin.isEnabled() && skyPlugin.getHazeColor()) ? skyPlugin.getHazeColor() :  PADrend.getBGColor();
+};
+
 	
 plugin.init @(override) := fn(){
-	registerExtension('PADrend_Init',this->this.registerGUI);
+	registerExtension('PADrend_Init', registerGUI);
 
-	static revoce = new Std.MultiProcedure;
-	// enabled
-	this.enabled.onDataChanged += this->fn( b ){
-		revoce();
-		if(b){
-			if(groundNode){
-				this.groundNode.activate();
-			}else{
-				this.createGround();
+	{	// enabled
+		static revoce = new Std.MultiProcedure;
+		this.enabled.onDataChanged += fn( b ){
+			revoce();
+			if(b){
+				revoce += Std.addRevocably(PADrend.getRootNode(), getEnvState());
+				revoce += Util.registerExtensionRevocably('PADrend_AfterRendering', ext_PADrend_AfterRendering,Extension.LOW_PRIORITY*2); // should be executed after the camera is set
+				plugin.type.forceRefresh();
 			}
-			revoce += Util.registerExtensionRevocably('PADrend_AfterRendering',this->this.ext_PADrend_AfterRendering,Extension.LOW_PRIORITY*2); // should be executed after the camera is set
-			revoce += Util.registerExtensionRevocably('PADrend_BeforeRenderingPass',this->this.ext_PADrend_BeforeRenderingPass);
-
-		}else{
-			if(groundNode)
-				groundNode.deactivate();
-		}
-	};
-	registerExtension('PADrend_Init',this.enabled->this.enabled.forceRefresh);
-
-	// type
-	this.type.onDataChanged += this->fn(t){
-		if(this.groundShaderState){
-			if(t == 0) { // grass
-				groundShaderState.setUniform('texture_1', Rendering.Uniform.INT, [1]);
-				groundShaderState.setUniform('type', Rendering.Uniform.INT, [0]);
-			}else if(t == 1) { // concrete
-				groundShaderState.setUniform('texture_1', Rendering.Uniform.INT, [2]);
-				groundShaderState.setUniform('type', Rendering.Uniform.INT, [1]);
-			}else if(t == 2) { // check board
-				groundShaderState.setUniform('type', Rendering.Uniform.INT, [2]);
-			}else if(t == 3) { // water
-				groundShaderState.setUniform('texture_1', Rendering.Uniform.INT, [3]);
-				groundShaderState.setUniform('texture_2', Rendering.Uniform.INT, [4]);
-				groundShaderState.setUniform('type', Rendering.Uniform.INT, [3]);
-			}else if(t == 4) { // white
-				groundShaderState.setUniform('type', Rendering.Uniform.INT, [4]);
-			}else if(t == 5) { // grid
-				groundShaderState.setUniform('type', Rendering.Uniform.INT, [5]);
-			}
-		}
-	};
+		};
+		registerExtension('PADrend_Init',this.enabled->this.enabled.forceRefresh);
+		
+	}
 	
 	// haze (near should be smaller or equal to far)
 	this.hazeFar.onDataChanged += [this.hazeNear] => fn(hazeNear, value){
@@ -121,105 +95,132 @@ plugin.init @(override) := fn(){
 	return true;
 };
 
-plugin.createGround @(private) := fn(){
-	// create ground dome
-	var dome=new MinSG.GeometryNode;
-	dome.setMesh(Rendering.MeshBuilder.createDome(100,40,40,1));
-	this.groundNode = new MinSG.EnvironmentState;
+static TYPE_GRASS = 0;
+static TYPE_CONCRETE = 1;
+static TYPE_CHECKBOARD = 2;
+static TYPE_WATER = 3;
+static TYPE_WHITE = 4;
+static TYPE_GRID = 5;
 
-	groundNode.setEnvironment(dome);
-	dome.moveRel(0,0,0);
-	dome.rotateRel_deg(180, new Geometry.Vec3(1, 0, 0));
-	PADrend.getRootNode().addState(groundNode);
-	
-	// create fbo for render water reflections
-	this.fbo := new Rendering.FBO;
-	renderingContext.pushAndSetFBO(this.fbo);
-	this.mirrorTexture := Rendering.createStdTexture(512, 512, false);
-	this.fbo.attachColorTexture(renderingContext,mirrorTexture);
-	this.depthTexture:=Rendering.createDepthTexture(512, 512);
-	this.fbo.attachDepthTexture(renderingContext,depthTexture);
-	renderingContext.popFBO();
-	
-	var resourcesFolder = __DIR__+"/resources";
-	
-	// load textures
-	var noise = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/DynamicSky/dynamic_sky1.bmp"));
-	noise.setTextureUnit(0);
-	dome.addState(noise);
-	var meadow1 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/meadow1.bmp"));
-	meadow1.getTexture().createMipmaps(renderingContext);
-	meadow1.setTextureUnit(1);
-	dome.addState(meadow1);
-	var meadow2 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/concrete2.bmp"));
-	meadow2.getTexture().createMipmaps(renderingContext);
-	meadow2.setTextureUnit(2);
-	dome.addState(meadow2);    
-	var water_normal = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/water_normal.jpg"));
-	water_normal.setTextureUnit(3);
-	dome.addState(water_normal);
-	var mirror_tex = new MinSG.TextureState(mirrorTexture);
-	mirror_tex.setTextureUnit(4);
-	dome.addState(mirror_tex);
-
-	// load Shader
-	this.groundShaderState=new MinSG.ShaderState(Rendering.Shader.loadShader(resourcesFolder+"/InfiniteGround/infiniteGround.vs",
-																	   resourcesFolder+"/InfiniteGround/infiniteGround.fs"));
-	dome.addState(groundShaderState);
-	groundShaderState.setUniform('noise', Rendering.Uniform.INT, [0]);
-
-
-	this.type.forceRefresh();
+static getShaderState = fn(){
+	static shaderState;
+	if(!shaderState){
+		// load Shader
+		shaderState = new MinSG.ShaderState(Rendering.Shader.loadShader(resourcesFolder+"/InfiniteGround/infiniteGround.vs",
+																		   resourcesFolder+"/InfiniteGround/infiniteGround.fs"));
+		shaderState.setUniform('noise', Rendering.Uniform.INT, [0]);
+		
+		// listen on type changes
+		plugin.type.onDataChanged += fn(t){
+			shaderState.setUniform('type', Rendering.Uniform.INT, [t]);
+			switch(t){
+			case TYPE_GRASS: { 
+				shaderState.setUniform('texture_1', Rendering.Uniform.INT, [1]);
+				break;
+			}
+			case TYPE_CONCRETE: { 
+				shaderState.setUniform('texture_1', Rendering.Uniform.INT, [2]);
+				break;
+			}
+			case TYPE_WATER: { 
+				shaderState.setUniform('texture_1', Rendering.Uniform.INT, [3]);
+				shaderState.setUniform('texture_2', Rendering.Uniform.INT, [4]);
+				break;
+			}
+			}
+		};
+	}
+	return shaderState;
 };
+static getDomeNode = fn(){
+	static dome;
+	if(!dome){
+		dome = new MinSG.GeometryNode;
+		dome.setMesh(Rendering.MeshBuilder.createDome(100,40,40,1));
 
-//!	[ext:PADrend_BeforeRenderingPass]
-plugin.ext_PADrend_BeforeRenderingPass @(private) := fn(renderingPass){
-	var pos = renderingPass.getCamera().getWorldOrigin();
-	var worldUp = PADrend.getWorldUpVector();
-	var worldRot = new Geometry.Matrix3x3;
-	worldRot.set(-1,0,0,0,1,0,0,0,1);
+		var updatePositionState = new MinSG.ScriptedState;
+		updatePositionState.doEnableState @(override) := fn(node, rp) {
+			
+			var pos = frameContext.getCamera().getWorldOrigin();
+			var worldUp = PADrend.getWorldUpVector();
+			var worldRot = new Geometry.Matrix3x3;
+			worldRot.set(-1,0,0,0,1,0,0,0,1);
 
-	if(worldUp.getX() ~= 1){
-		var tmp = pos.getX();
-		pos.setX(-pos.getY());
-		pos.setY(tmp);
-		worldRot.set(0,-1,0,1,0,0,0,0,1);
+			if(worldUp.getX() ~= 1){
+				var tmp = pos.getX();
+				pos.setX(-pos.getY());
+				pos.setY(tmp);
+				worldRot.set(0,-1,0,1,0,0,0,0,1);
+			}
+			else if(worldUp.getZ() ~= 1){
+				var tmp = -pos.getY();
+				pos.setY(pos.getZ());
+				pos.setZ(tmp);
+				worldRot.set(-1,0,0,0,0,-1,0,1,0);
+			}
+			else if(!(worldUp.getY() ~= 1)){
+				outln("Infinite Ground: unsupported world Up Vector");
+			}
+			var shaderState = getShaderState();
+			shaderState.setUniform('viewerPos',Rendering.Uniform.VEC3F,[ [-pos.getX(), pos.getY(), pos.getZ()] ]);
+			shaderState.setUniform('worldRot',Rendering.Uniform.MATRIX_3X3F,[ worldRot ]);
+		};
+		dome += updatePositionState;
+
+		// load textures
+		var noise = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/DynamicSky/dynamic_sky1.bmp"));
+		noise.setTextureUnit(0);
+		dome += noise;
+		var meadow1 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/meadow1.bmp"));
+		meadow1.getTexture().createMipmaps(renderingContext);
+		meadow1.setTextureUnit(1);
+		dome += meadow1;
+		var meadow2 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/concrete2.bmp"));
+		meadow2.getTexture().createMipmaps(renderingContext);
+		meadow2.setTextureUnit(2);
+		dome += meadow2;
+
+		dome += getShaderState();
+		
 	}
-	else if(worldUp.getZ() ~= 1){
-		var tmp = -pos.getY();
-		pos.setY(pos.getZ());
-		pos.setZ(tmp);
-		worldRot.set(-1,0,0,0,0,-1,0,1,0);
+	return dome;
+};
+static getEnvState = fn(){
+	static envState;
+	if(!envState){
+		// create ground dome
+		var dome = getDomeNode();
+		envState = new MinSG.EnvironmentState;
+
+		envState.setEnvironment(dome);
+		dome.moveRel(0,0,0);
+		dome.rotateRel_deg(180, new Geometry.Vec3(1, 0, 0));
 	}
-	else if(!(worldUp.getY() ~= 1)){
-		outln("Infinite Ground: unsupported world Up Vector");
-	}
-	groundShaderState.setUniform('viewerPos',Rendering.Uniform.VEC3F,[ [-pos.getX(), pos.getY(), pos.getZ()] ]);
-	groundShaderState.setUniform('worldRot',Rendering.Uniform.MATRIX_3X3F,[ worldRot ]);
+	return envState;
 };
 
 //!	[ext:PADrend_AfterRenderingPass]
-plugin.ext_PADrend_AfterRendering @(private) := fn(...){
+static ext_PADrend_AfterRendering = fn(...){
  
 	var sun = PADrend.getDefaultLight();
 	
-	groundShaderState.setUniform('scale', Rendering.Uniform.FLOAT, [this.scale()]);
-	if(this.autoGroundLevel() && PADrend.getCurrentScene())
-		groundShaderState.setUniform('groundLevel',Rendering.Uniform.FLOAT,[PADrend.getCurrentSceneGroundPlane( this.groundLevel() ).getOffset() ]);
+	var shaderState = getShaderState();
+	shaderState.setUniform('scale', Rendering.Uniform.FLOAT, [plugin.scale()]);
+	if(plugin.autoGroundLevel() && PADrend.getCurrentScene())
+		shaderState.setUniform('groundLevel',Rendering.Uniform.FLOAT,[PADrend.getCurrentSceneGroundPlane( plugin.groundLevel() ).getOffset() ]);
 	else
-		groundShaderState.setUniform('groundLevel',Rendering.Uniform.FLOAT,[this.groundLevel()]);
+		shaderState.setUniform('groundLevel',Rendering.Uniform.FLOAT,[plugin.groundLevel()]);
 
-	groundShaderState.setUniform('useHaze', Rendering.Uniform.BOOL, [this.hazeEnabled()]);
-	groundShaderState.setUniform('hazeNear', Rendering.Uniform.FLOAT, [this.hazeNear()]);
-	groundShaderState.setUniform('hazeFar', Rendering.Uniform.FLOAT, [this.hazeFar()]);
-	
 	{	// haze
-		var skyPlugin = Util.queryPlugin('Effects_DynamicSky');
-		var hC = (skyPlugin && skyPlugin.isEnabled() && skyPlugin.getHazeColor()) ? skyPlugin.getHazeColor() :  PADrend.getBGColor();
-		groundShaderState.setUniform('hazeColor',  Rendering.Uniform.VEC3F,[ [hC.r(),hC.g(),hC.b()] ]);
+		shaderState.setUniform('useHaze', Rendering.Uniform.BOOL, [plugin.hazeEnabled()]);
+		shaderState.setUniform('hazeNear', Rendering.Uniform.FLOAT, [plugin.hazeNear()]);
+		shaderState.setUniform('hazeFar', Rendering.Uniform.FLOAT, [plugin.hazeFar()]);
+
+		var hC = plugin.getHazeColor();
+		shaderState.setUniform('hazeColor',  Rendering.Uniform.VEC3F,[ [hC.r(),hC.g(),hC.b()] ]);
 	}
 
-	var p=sun.getWorldOrigin();
+	var p = sun.getWorldOrigin();
 	var up = PADrend.getWorldUpVector();
 	if(up.getX() ~= 1){
 		//out("Dynamic Sky: x-up ", sunPos);
@@ -235,28 +236,45 @@ plugin.ext_PADrend_AfterRendering @(private) := fn(...){
 		p.setZ(tmp);
 		//outln(" --> ", sunPos);
 	}
-	groundShaderState.setUniform('sunPosition',Rendering.Uniform.VEC3F,[ p]);
+	shaderState.setUniform('sunPosition',Rendering.Uniform.VEC3F,[ p]);
 	var c = sun.getAmbientLightColor();
-	groundShaderState.setUniform('sunAmbient',Rendering.Uniform.VEC3F,[ [c.r(),c.g(),c.b()] ]);
+	shaderState.setUniform('sunAmbient',Rendering.Uniform.VEC3F,[ [c.r(),c.g(),c.b()] ]);
 	c = sun.getDiffuseLightColor();
-	groundShaderState.setUniform('sunDiffuse',Rendering.Uniform.VEC3F,[ [c.r(),c.g(),c.b()] ]);
-	groundShaderState.setUniform('time',Rendering.Uniform.FLOAT,[ PADrend.getSyncClock() ]);
-	groundShaderState.setUniform('refraction',Rendering.Uniform.FLOAT,[ this.waterRefraction() ]);
-	groundShaderState.setUniform('reflection',Rendering.Uniform.FLOAT,[ this.waterReflection() ]);
+	shaderState.setUniform('sunDiffuse',Rendering.Uniform.VEC3F,[ [c.r(),c.g(),c.b()] ]);
+	shaderState.setUniform('time',Rendering.Uniform.FLOAT,[ PADrend.getSyncClock() ]);
 	
-	if(type()==3 && this.waterReflection() > 0.0) {
-		var level = this.autoGroundLevel() ? PADrend.getCurrentScene().getWorldBB().getMinY() : this.groundLevel();	//! \todo use getCurrentSceneGroundPlane
-		if(pos.getY()<=level)
-			return;
+	if(plugin.type()==TYPE_WATER && plugin.waterReflection() > 0.0) {
+		shaderState.setUniform('refraction',Rendering.Uniform.FLOAT,[ plugin.waterRefraction() ]);
+		shaderState.setUniform('reflection',Rendering.Uniform.FLOAT,[ plugin.waterReflection() ]);
 		
+		static fbo;
+		@(once){
+			fbo = new Rendering.FBO;
+			renderingContext.pushAndSetFBO(fbo);
+			var mirrorTexture = Rendering.createStdTexture(512, 512, false);
+			fbo.attachColorTexture(renderingContext,mirrorTexture);
+			fbo.attachDepthTexture(renderingContext,Rendering.createDepthTexture(512, 512));
+			renderingContext.popFBO();
+
+			var water_normal = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/water_normal.jpg"));
+			water_normal.setTextureUnit(3);
+			getDomeNode() += water_normal;
+			var mirror_tex = new MinSG.TextureState(mirrorTexture);
+			mirror_tex.setTextureUnit(4);
+			getDomeNode() += mirror_tex;
+
+		}
 		renderingContext.pushAndSetFBO(fbo);  
-				
+
 		var mirror_cam = camera.clone();
 		
 		// setup mirror cam
+		var worldUp = PADrend.getWorldUpVector();
+
 		var mirrorPos = camera.getWorldOrigin();
 		var wUp = new Geometry.Vec3(worldUp.getX(),worldUp.getY(),worldUp.getZ());
 				
+		var level = plugin.autoGroundLevel() ? PADrend.getCurrentScene().getWorldBB().getMinY() : plugin.groundLevel();	//! \todo use getCurrentSceneGroundPlane
 		if(worldUp.getX() ~= 1){
 			mirrorPos.setX(2 * level - mirrorPos.getX());
 		} else if(worldUp.getZ() ~= 1){
@@ -284,13 +302,13 @@ plugin.ext_PADrend_AfterRendering @(private) := fn(...){
 	}
 };
 
-plugin.registerGUI @(private) := fn(){
+static registerGUI = fn(){
 	gui.registerComponentProvider('Effects_MainMenu.20_infiniteGround',[
 		"*Infinite Ground*",
 		{
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Enabled",
-			GUI.DATA_WRAPPER : this.enabled
+			GUI.DATA_WRAPPER : plugin.enabled
 		},
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
@@ -307,41 +325,41 @@ plugin.registerGUI @(private) := fn(){
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.RANGE : [0,5],
 			GUI.RANGE_STEPS : 5,
-			GUI.DATA_WRAPPER : this.type
+			GUI.DATA_WRAPPER : plugin.type
 		},
 		{
 			GUI.LABEL : "Scale",
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.RANGE : [0.1,10],
-			GUI.DATA_WRAPPER : this.scale
+			GUI.DATA_WRAPPER : plugin.scale
 		},
 		{
 			GUI.LABEL : "Ground level",
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.RANGE : [-10,+10],
-			GUI.DATA_WRAPPER : this.groundLevel
+			GUI.DATA_WRAPPER : plugin.groundLevel
 		},
 		{
 			GUI.LABEL : "Auto ground level",
 			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.DATA_WRAPPER : this.autoGroundLevel,
+			GUI.DATA_WRAPPER : plugin.autoGroundLevel,
 		},
 		{
 			GUI.LABEL : "Use haze",
 			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.DATA_WRAPPER : this.hazeEnabled
+			GUI.DATA_WRAPPER : plugin.hazeEnabled
 		},
 		{
 			GUI.LABEL				:	"Haze near",
 			GUI.TYPE				:	GUI.TYPE_RANGE,
 			GUI.RANGE				:	[0, 1000],
-			GUI.DATA_WRAPPER		:	this.hazeNear,
+			GUI.DATA_WRAPPER		:	plugin.hazeNear,
 		},
 		{
 			GUI.LABEL				:	"Haze far",
 			GUI.TYPE				:	GUI.TYPE_RANGE,
 			GUI.RANGE				:	[10, 1010],
-			GUI.DATA_WRAPPER		:	this.hazeFar
+			GUI.DATA_WRAPPER		:	plugin.hazeFar
 		},
 		{
 			GUI.TYPE				:	GUI.TYPE_MENU,
@@ -354,10 +372,10 @@ plugin.registerGUI @(private) := fn(){
 												GUI.RANGE				:	[0.5, 10.0],
 												GUI.RANGE_STEPS			:	19,
 												GUI.DATA_VALUE			:	1,
-												GUI.ON_DATA_CHANGED		:	this->fn(scale) {
+												GUI.ON_DATA_CHANGED		:	fn(scale) {
 																				var bb = PADrend.getCurrentScene().getWorldBB();
-																				this.hazeNear(scale * bb.getExtentMax());
-																				this.hazeFar(this.hazeNear() * 3);
+																				plugin.hazeNear(scale * bb.getExtentMax());
+																				plugin.hazeFar(plugin.hazeNear() * 3);
 																			}
 											}
 										],
@@ -367,13 +385,13 @@ plugin.registerGUI @(private) := fn(){
 			GUI.LABEL : "reflection factor",
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.RANGE : [0,1],
-			GUI.DATA_WRAPPER : this.waterReflection
+			GUI.DATA_WRAPPER : plugin.waterReflection
 		},
 		{
 			GUI.LABEL : "refraction factor",
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.RANGE : [0,1],
-			GUI.DATA_WRAPPER : this.waterRefraction
+			GUI.DATA_WRAPPER : plugin.waterRefraction
 		}
 	]);
 
@@ -381,6 +399,8 @@ plugin.registerGUI @(private) := fn(){
 
 // --------------------------------
 // interface
+declareNamespace($Effects);
+Effects.InfiniteGround := plugin;
 
 plugin.disable := fn(){		this.enabled(false);	};
 plugin.enable := fn(){		this.enabled(true);	};
