@@ -45,7 +45,7 @@ plugin.init = fn() {
 
 plugin.ex_Init := fn() {
 	// Activate the out-of-core system.
-	MinSG.OutOfCore.setUp(GLOBALS.frameContext, PADrend.getSceneManager());
+	MinSG.OutOfCore.setUp(GLOBALS.frameContext);
 	
 	// Add the out-of-core cache levels.
 	var configString = 'OutOfCore.CacheLevel';
