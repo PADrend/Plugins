@@ -22,7 +22,7 @@
  * - getDescription: Description to display command in GUI-elements
  * - flags that indicate where the Command should be executed: locally, remotely (e.g. via MultiView) or both.
  */
-var Command = new Type;
+static Command = new Type;
 
 Command.EXECUTE ::= $_doExecute;
 Command.UNDO ::= $_doUndo;
