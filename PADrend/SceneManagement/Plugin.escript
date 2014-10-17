@@ -144,12 +144,13 @@ SceneManagement.ex_Init := fn(...){
 
 		setConfigInfo('PADrend.sun',"Global directional light source.");
 		if(systemConfig.getValue('PADrend.sun.enabled',true)){
-			this._defaultLight = new MinSG.LightNode();
+			this._defaultLight = new MinSG.LightNode;
 			this.initDefaultLightParameters();
-			getRootNode().addChild(_defaultLight);
+			getRootNode() += this._defaultLight;
 			this.lightingState := new MinSG.LightingState();
-			lightingState.setLight(_defaultLight);
-			getRootNode().addState(lightingState);
+			lightingState.setLight(this._defaultLight);
+			getRootNode() += this.lightingState;
+			defaultSceneManager.registerNode( "L:Sun",this._defaultLight );
 		}
 
 		getRootNode().addChild(dolly);
