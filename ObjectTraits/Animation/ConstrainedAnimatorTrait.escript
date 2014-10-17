@@ -14,6 +14,17 @@
 var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
 
+
+static simpleSmootTime = fn(relTime,smoothness){
+	if(smoothness == 0||relTime<0||relTime>=1.0){
+		return relTime;
+	}else{
+		//! \see http://en.wikipedia.org/wiki/Smoothstep
+		var s = relTime*relTime*(3.0-2.0*relTime);
+		return smoothness * s + (1.0-smoothness) * relTime;
+	}
+};
+
 trait.onInit += fn(MinSG.Node node){
 	//! \see ObjectTraits/Basic/_ContinuousActionPerformerTrait
 	Traits.assureTrait(node, module('../Basic/_ContinuousActionPerformerTrait'));
@@ -26,6 +37,7 @@ trait.onInit += fn(MinSG.Node node){
 	node.animatorMax := node.getNodeAttributeWrapper('animatorMax',1.0);
 	node.animatorMin := node.getNodeAttributeWrapper('animatorMin',0.0);
 	node.animatorSmoothness := node.getNodeAttributeWrapper('animatorSmoothness',0.3);
+	node.animatorRepeat := node.getNodeAttributeWrapper('animatorRepeat',false);
 
 	node._animatorSourcePos := false;
 	node._animatorSourceTime := false;
@@ -42,16 +54,18 @@ trait.onInit += fn(MinSG.Node node){
 	
 	
 	static handler = fn(...){
-		var smoothness = animatorSmoothness();
-		var p0 = new Geometry.Vec2(0.0, 0);
-		var p1 = new Geometry.Vec2(smoothness, 0);
-		var p2 = new Geometry.Vec2(smoothness, 1);
-		var p3 = new Geometry.Vec2(1.0, 1);
-		
+	
 		while( !this.isDestroyed() && this._animatorTargetPos){
 			var relTime = (PADrend.getSyncClock()-this._animatorSourceTime) / (_animatorTargetTime-this._animatorSourceTime);
 
 			if(relTime>=1.0){
+//				if(this.animatorRepeat()){
+//					this._animatorTargetTime += this.animatorMax();
+//					this._animatorSourceTime += this.animatorMax();
+//					this._animatorPos( 0 );
+//					continue;
+//				}
+
 				var pos = this._animatorTargetPos;
 				this._animatorTargetPos = void; // finished
 				this._animatorPos(pos);
@@ -60,7 +74,8 @@ trait.onInit += fn(MinSG.Node node){
 				this.animationCallbacks("pause",pos);
 				break;
 			}else if(relTime>=0.0){
-				var smoothedTime = Geometry.interpolateCubicBezier(p0,p1,p2,p3,relTime).y();
+				var smoothedTime = simpleSmootTime( relTime,this.animatorSmoothness() );
+//				Geometry.interpolateCubicBezier(p0,p1,p2,p3,relTime).y();
 				
 				var pos = _animatorTargetPos* smoothedTime + (1 - smoothedTime)*_animatorSourcePos;
 				this._animatorPos(pos);
@@ -111,9 +126,23 @@ module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [
 			{
+				GUI.TYPE : GUI.TYPE_NUMBER,
+				GUI.LABEL : "min",
+				GUI.SIZE : [GUI.WIDTH_FILL_REL | GUI.HEIGHT_ABS,0.5,15 ],
+				GUI.DATA_WRAPPER : node.animatorMin
+			},	
+			{
+				GUI.TYPE : GUI.TYPE_NUMBER,
+				GUI.LABEL : "max",
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.DATA_WRAPPER : node.animatorMax
+			},	
+			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+			{
 				GUI.TYPE : GUI.TYPE_RANGE,
-				GUI.RANGE : [0.0,1.0],
+				GUI.RANGE : [0.0,node.animatorMax()],
 				GUI.LABEL : "pos",
+				GUI.RANGE_STEP_SIZE : 0.05,
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node._animatorPos
 			},	
@@ -124,6 +153,22 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.LABEL : "speed",
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.animatorSpeed
+			},	
+			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+			{
+				GUI.TYPE : GUI.TYPE_RANGE,
+				GUI.RANGE : [0.0,1],
+				GUI.RANGE_STEP_SIZE : 0.1,
+				GUI.LABEL : "smoothness",
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.DATA_WRAPPER : node.animatorSmoothness
+			},	
+			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+			{
+				GUI.TYPE : GUI.TYPE_BOOL,
+				GUI.LABEL : "repeat",
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.DATA_WRAPPER : node.animatorRepeat
 			},	
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
