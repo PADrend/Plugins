@@ -205,6 +205,35 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Split connected parts",
+		GUI.TOOLTIP : "Split a single selected mesh into connected sub-meshes.",
+		GUI.ON_CLICK : fn() {
+			var n = NodeEditor.getSelectedNode();
+			if(!n.isA(MinSG.GeometryNode)){
+				Runtime.warn("SplitMesh: select single GeometryNode.");
+				return;
+			}
+			showWaitingScreen();
+			var m = n.getMesh();
+			var t = new Util.Timer;
+			var parts = Std.require('LibRenderingExt/splitMeshIntoConnectedParts')(m,0.01);
+			if(parts.count()<=1){
+				PADrend.message("SplitMesh: Only one conntected component. ("+t.getSeconds()+")");
+				return;
+			}
+			var states = n.getStates();
+			foreach( parts as var m2){
+				var n2 = new MinSG.GeometryNode(m2);
+				n.getParent() += n2;
+				n2.setRelTransformation( n.getRelTransformationSRT() );
+				foreach(states as var s)
+					n2 += s;
+			}
+			PADrend.message("SplitMesh: Splitted into ",parts.count()," conntected component. ("+t.getSeconds()+")");
+		}
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Split polygons",
 		GUI.TOOLTIP: "Split the polygons, whoch have side length > Max. poly. side length",
 		GUI.ON_CLICK : fn() {
