@@ -113,6 +113,10 @@ plugin.init @(override) := fn(){
 	leftEyeHeadOffset = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.lOffset',"-0.03 0 0");
 	rightEyeHeadOffset = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.rOffset',"0.03 0 0");
 	
+	PADrend.syncVars.addDataWrapper('Effects.Stereo.lOffset', leftEyeHeadOffset);
+	PADrend.syncVars.addDataWrapper('Effects.Stereo.rOffset', rightEyeHeadOffset);
+
+	
 	registerExtension('PADrend_Init',this->fn(){
 
 		leftEyeHeadOffset.onDataChanged += fn(str){
