@@ -33,9 +33,9 @@ trait.attributes.reloadSubtree ::= fn(){
 trait.onInit += fn(MinSG.GroupNode node){
 	node.subtreeFilename := node.getNodeAttributeWrapper('subtreeFilename', "" );
 	node.subtreeImportOptions := node.getNodeAttributeWrapper('subtreeImportOptions', 
-														MinSG.SceneManager.IMPORT_OPTION_REUSE_EXISTING_STATES|
-														MinSG.SceneManager.IMPORT_OPTION_USE_TEXTURE_REGISTRY|
-														MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY );
+														MinSG.SceneManagement.IMPORT_OPTION_REUSE_EXISTING_STATES|
+														MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY|
+														MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY );
 };
 
 trait.allowRemoval();
@@ -54,11 +54,11 @@ module.on('../ObjectTraitRegistry', fn(registry){
 			}
 		];
 		foreach({
-					"Reuse exisiting states" : MinSG.SceneManager.IMPORT_OPTION_REUSE_EXISTING_STATES,
-					"Cache textures in TextureRegistry" : MinSG.SceneManager.IMPORT_OPTION_USE_TEXTURE_REGISTRY,
-					"Cache meshes in MeshRegistry (file)" : MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY,
-					"Cache meshes in MeshRegistry (hash)" : MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY,
-					"COLLADA: Invert transparency" : MinSG.SceneManager.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY
+					"Reuse exisiting states" : MinSG.SceneManagement.IMPORT_OPTION_REUSE_EXISTING_STATES,
+					"Cache textures in TextureRegistry" : MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY,
+					"Cache meshes in MeshRegistry (file)" : MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY,
+					"Cache meshes in MeshRegistry (hash)" : MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY,
+					"COLLADA: Invert transparency" : MinSG.SceneManagement.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY
 				} as var label, var bit){
 			entries += {	GUI.TYPE : GUI.TYPE_NEXT_ROW	};
 			entries += {

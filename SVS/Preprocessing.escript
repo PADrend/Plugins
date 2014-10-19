@@ -24,7 +24,7 @@ SVS.getDefaultSamplePositions := fn() {
 	return thisFn.samples;
 };
 
-SVS.preprocessSubtree := fn(MinSG.SceneManager sceneManager, 
+SVS.preprocessSubtree := fn(MinSG.SceneManagement.SceneManager sceneManager, 
 										  MinSG.FrameContext frameContext,
 										  MinSG.GroupNode rootNode,
 										  Array positions,
@@ -86,7 +86,7 @@ SVS.writePreprocessingInfoFile := fn(MinSG.Node rootNode,
 	return fileName;
 };
 
-SVS.multiplePreprocessingRuns := fn(MinSG.SceneManager sceneManager, 
+SVS.multiplePreprocessingRuns := fn(MinSG.SceneManagement.SceneManager sceneManager, 
 												  MinSG.FrameContext frameContext,
 												  MinSG.GroupNode rootNode,
 												  Array positions,
@@ -131,7 +131,7 @@ SVS.multiplePreprocessingRuns := fn(MinSG.SceneManager sceneManager,
 
 				// Save the scene with the same name as the info file (different extension)
 				var sceneFile = infoFile.replace(".json", ".minsg");
-				sceneManager.saveMinSGFile(new Util.FileName(sceneFile), [rootNode]);
+				MinSG.SceneManagement.saveMinSGFile(sceneManager,new Util.FileName(sceneFile), [rootNode]);
 
 				// Remove all results from the current scene
 				foreach(MinSG.collectNodesWithAttribute(rootNode, "VisibilitySphere") as var node) {

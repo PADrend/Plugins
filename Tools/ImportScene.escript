@@ -293,12 +293,12 @@ plugin.import := fn(){
 	
 	out("found ",files.count(), " files\n");
 	
-	var flags =	  MinSG.SceneManager.IMPORT_OPTION_USE_TEXTURE_REGISTRY
-				| MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY
-				| MinSG.SceneManager.IMPORT_OPTION_USE_MESH_HASHING_REGISTRY;
+	var flags =	  MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY
+				| MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY
+				| MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_HASHING_REGISTRY;
 	if(invertTransparency)
-		flags |= MinSG.SceneManager.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY;
-	var context = PADrend.getSceneManager().createImportContext(flags);
+		flags |= MinSG.SceneManagement.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY;
+	var context = MinSG.SceneManagement.createImportContext( PADrend.getSceneManager(),flags);
 
 	var x = 0;
 	foreach(files as var file) {
@@ -314,7 +314,7 @@ plugin.import := fn(){
 		var loadedScene = void;
 		try {
 			if(ext == ".dae" || ext == ".DAE"){
-				loadedScene = PADrend.getSceneManager().loadCOLLADA(context, file);
+				loadedScene = MinSG.SceneManagement.loadCOLLADA( context, file);
 			}
 			else if(ext == ".minsg")
 				loadedScene = PADrend.getSceneManager().loadMinSG(context, file);

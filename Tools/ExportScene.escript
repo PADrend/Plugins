@@ -132,7 +132,7 @@ plugin.exportScene := fn(){
             outln("saving meshes (",meshes.count(),") and textures (",textures.count(),")");
 			var minsgFile = (this -> this.exporter[type])(folder, name, meshes, textures);
             outln("saving scene ", minsgFile);
-            PADrend.getSceneManager().saveMinSGFile(new Util.FileName(minsgFile),[scene]);
+            MinSG.SceneManagement.saveMinSGFile( PADrend.getSceneManager(),new Util.FileName(minsgFile),[scene]);
             out("...flush... this may realy take some more minutes\n");
             Util.flush(minsgFile);
             // Saving the file may alter its properties (e.g. name), so re-select it to provoce an update where necessary.

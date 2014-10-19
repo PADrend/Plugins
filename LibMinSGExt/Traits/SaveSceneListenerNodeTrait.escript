@@ -24,30 +24,22 @@
 MinSG.SaveSceneListenerNodeTrait := new Std.Traits.GenericTrait('MinSG.SaveSceneListenerNodeTrait');
 {
 	var t = MinSG.SaveSceneListenerNodeTrait;
-	var MARKER_ATTRIBUTE = '$sic$containsOnSaveMethod';// privateAttribute
-	var saveFn = MinSG.SceneManager.saveMinSGFile;
+	static MARKER_ATTRIBUTE = '$sic$containsOnSaveMethod';// privateAttribute
 	
-	// annotate saveMinSGFile
-	MinSG.SceneManager.saveMinSGFile @(override) ::= [MARKER_ATTRIBUTE,saveFn] => fn(MARKER_ATTRIBUTE,saveFn, filename, nodes, p... ){
-		foreach(nodes as var root){
-			foreach(MinSG.collectNodesWithAttribute(root,MARKER_ATTRIBUTE) as var node){
-				if(node.isSet($onSaveScene))
-					node.onSaveScene(this);
-			}
+	t.onInit += fn( MinSG.Node node){
+		@(once){
+			// annotate saveMinSGFile
+			MinSG.SceneManagement.saveMinSGFile @(override) ::= 
+						[MinSG.SceneManagement.saveMinSGFile] => fn(saveFn, sceneManager, filename, nodes, p... ){
+				foreach(nodes as var root){
+					foreach(MinSG.collectNodesWithAttribute(root,MARKER_ATTRIBUTE) as var node){
+						if(node.isSet($onSaveScene))
+							node.onSaveScene(this);
+					}
+				}
+				return (this->saveFn)(sceneManager,filename,nodes,p...);
+			};
 		}
-		return (this->saveFn)(filename,nodes,p...);
-	};
-
-	t.onInit += [MARKER_ATTRIBUTE] => fn(MARKER_ATTRIBUTE, MinSG.Node node){
-		/*
-		\todo EScript.VERSION >= 607
-			@(once){
-				static originalSaveFun;
-				// init saveMinSGFile hook only if necessary
-			}
-		
-		*/
-		
 		node.setNodeAttribute(MARKER_ATTRIBUTE,true); 
 		node.onSaveScene := new MultiProcedure;
 	};

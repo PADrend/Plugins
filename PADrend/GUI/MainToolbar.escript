@@ -129,9 +129,9 @@ plugin.registerStdToolbarEntries := fn() {
 					showWaitingScreen();
 					PADrend.message("Save scene \""+filename+"\"");
 					if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
-						PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());
+						MinSG.SceneManagement.saveCOLLADA(filename,PADrend.getRootNode());
 					} else {
-						PADrend.getSceneManager().saveMinSGFile(filename,[scene]);
+						MinSG.SceneManagement.saveMinSGFile( PADrend.getSceneManager(),filename,[scene]);
 					}
 					scene.filename :=  filename;
 					addToRecentSceneList(filename);
@@ -165,8 +165,8 @@ plugin.registerStdToolbarEntries := fn() {
 				var config = new ExtObject({
 					$scale : DataWrapper.createFromValue(1.0),
 					$importOptions : PADrend.configCache.getValue('PADrend.importOptions', 
-											MinSG.SceneManager.IMPORT_OPTION_USE_TEXTURE_REGISTRY | 
-											MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY)
+											MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | 
+											MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY)
 				});
 				var f=new GUI.FileDialog("Load Scene",PADrend.getScenePath(),[".minsg", ".dae", ".DAE"],
 					[config] => fn(config,filename){
@@ -212,7 +212,7 @@ plugin.registerStdToolbarEntries := fn() {
 					GUI.TYPE			:	GUI.TYPE_BIT,
 					GUI.DATA_OBJECT		:	config,
 					GUI.DATA_ATTRIBUTE	:	$importOptions,
-					GUI.DATA_BIT		:	MinSG.SceneManager.IMPORT_OPTION_REUSE_EXISTING_STATES
+					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_REUSE_EXISTING_STATES
 				};
 				optionPanel++;
 				optionPanel += {
@@ -220,7 +220,7 @@ plugin.registerStdToolbarEntries := fn() {
 					GUI.TYPE			:	GUI.TYPE_BIT,
 					GUI.DATA_OBJECT		:	config,
 					GUI.DATA_ATTRIBUTE	:	$importOptions,
-					GUI.DATA_BIT		:	MinSG.SceneManager.IMPORT_OPTION_USE_TEXTURE_REGISTRY
+					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY
 				};
 				optionPanel++;			
 				optionPanel += {
@@ -228,7 +228,7 @@ plugin.registerStdToolbarEntries := fn() {
 					GUI.TYPE			:	GUI.TYPE_BIT,
 					GUI.DATA_OBJECT		:	config,
 					GUI.DATA_ATTRIBUTE	:	$importOptions,
-					GUI.DATA_BIT		:	MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY,
+					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY,
 					GUI.TOOLTIP : "If GeometryNodes use the same mesh file (during this import process), \nload and use the mesh only once."
 					
 				};
@@ -238,7 +238,7 @@ plugin.registerStdToolbarEntries := fn() {
 					GUI.TYPE			:	GUI.TYPE_BIT,
 					GUI.DATA_OBJECT		:	config,
 					GUI.DATA_ATTRIBUTE	:	$importOptions,
-					GUI.DATA_BIT		:	MinSG.SceneManager.IMPORT_OPTION_USE_MESH_HASHING_REGISTRY,
+					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_HASHING_REGISTRY,
 					GUI.TOOLTIP : "If GeometryNodes use the same mesh based on its structure (during this import process), \nload and use the mesh only once."
 				};
 				optionPanel++;
@@ -247,7 +247,7 @@ plugin.registerStdToolbarEntries := fn() {
 					GUI.TYPE			:	GUI.TYPE_BIT,
 					GUI.DATA_OBJECT		:	config,
 					GUI.DATA_ATTRIBUTE	:	$importOptions,
-					GUI.DATA_BIT		:	MinSG.SceneManager.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY,
+					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY,
 					GUI.TOOLTIP : "Use this for scenes exported from 3dMax"
 				};
 				f.init();
@@ -287,9 +287,9 @@ plugin.registerStdToolbarEntries := fn() {
 						showWaitingScreen();
 						PADrend.message("Save scene \""+filename+"\"");
 						if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
-							PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());
+							MinSG.SceneManagement.saveCOLLADA(filename,PADrend.getRootNode());
 						} else {
-							PADrend.getSceneManager().saveMinSGFile(filename,[scene]);
+							MinSG.SceneManagement.saveMinSGFile( PADrend.getSceneManager(),filename,[scene]);
 						}
 						// Re-select it to provoke an update where necessary.
 						executeExtensions('PADrend_OnSceneSelected',scene );
@@ -449,12 +449,12 @@ plugin.registerStdToolbarEntries := fn() {
 					out("Exporting meshes to ",folder,"\n");
 					showWaitingScreen();
 					if(optionPanel.exportType.getValue()=='mmf'){
-						PADrend.getSceneManager().saveMeshesInSubtreeAsMMF(
+						MinSG.SceneManagement.saveMeshesInSubtreeAsMMF(
 								PADrend.getCurrentScene(),
 								folder,
 								optionPanel.exportRegisteredCB.isChecked());
 					} else{ //ply
-						PADrend.getSceneManager().saveMeshesInSubtreeAsPLY(
+						MinSG.SceneManagement.saveMeshesInSubtreeAsPLY(
 								PADrend.getCurrentScene(),
 								folder,
 								optionPanel.exportRegisteredCB.isChecked());

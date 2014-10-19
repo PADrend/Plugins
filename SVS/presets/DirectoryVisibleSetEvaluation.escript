@@ -10,9 +10,9 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var importContext = PADrend.getSceneManager().createImportContext(MinSG.SceneManager.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY);
+var importContext = MinSG.SceneManagement.createImportContext( PADrend.getSceneManager(),MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY);
 var internalLoadScene =	[importContext] => fn(importContext, fileName) {
-							var nodeArray = PADrend.getSceneManager().loadMinSGFile(importContext, fileName);
+							var nodeArray = MinSG.SceneManagement.loadMinSGFile(importContext, fileName);
 							var sceneRoot = void;
 							if(!nodeArray) {
 								outln("Could not load scene from file '", fileName, "'");

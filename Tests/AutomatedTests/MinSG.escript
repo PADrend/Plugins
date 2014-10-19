@@ -146,7 +146,7 @@ tests += new Tests.AutomatedTest( "MinSG: create/load/save scenes",fn(){
 	var sceneString = "";
 	// create and save a scene
 	{
-		var sceneManager = new MinSG.SceneManager;
+		var sceneManager = new (Std.require('LibMinSGExt/SceneManagerExt'));
 		var root = new MinSG.ListNode;
 		root.setNodeAttribute("WurzelTag",true);
 		sceneManager.registerNode("WurzelId",root);
@@ -232,16 +232,16 @@ tests += new Tests.AutomatedTest( "MinSG: create/load/save scenes",fn(){
 		}
 		
 		// save scene
-		sceneManager.saveMinSGFile(filename + ".minsg",[root]);
+		MinSG.SceneManagement.saveMinSGFile(sceneManager,filename + ".minsg",[root]);
 
-		sceneString = sceneManager.saveMinSGString([root]);
+		sceneString = MinSG.SceneManagement.saveMinSGString(sceneManager,[root]);
 		// cleanup
 		MinSG.destroy(root);
 	}
 
 	// re-load scene, check properties and save again
 	{
-		var sceneManager = new MinSG.SceneManager();
+		var sceneManager = new (Std.require('LibMinSGExt/SceneManagerExt'));
 		var root = sceneManager.loadScene(filename + ".minsg");
 		var a = MinSG.collectNodesWithAttribute(root,"WurzelTag");
 		addResult( "tag test", a.count()==1 && sceneManager.getRegisteredNode("WurzelId") == a[0]);
@@ -284,7 +284,7 @@ tests += new Tests.AutomatedTest( "MinSG: create/load/save scenes",fn(){
 					s.getDistributionType() == MinSG.BudgetAnnotationState.DISTRIBUTE_EVEN);
 
 		// save again
-		sceneManager.saveMinSGFile(filename + "b.minsg",[root]);
+		MinSG.SceneManagement.saveMinSGFile(sceneManager,filename + "b.minsg",[root]);
 		// cleanup
 		MinSG.destroy(root);
 	}
@@ -294,11 +294,11 @@ tests += new Tests.AutomatedTest( "MinSG: create/load/save scenes",fn(){
 	{
 		addResult("save scene to string", !sceneString.empty());
 
-		var importContext = PADrend.getSceneManager().createImportContext();
-		var nodes = PADrend.getSceneManager().loadMinSGString(importContext, sceneString);
+		var importContext = MinSG.SceneManagement.createImportContext( PADrend.getSceneManager() );
+		var nodes = MinSG.SceneManagement.loadMinSGString(importContext, sceneString);
 		addResult("load scene from string", nodes && !nodes.empty());
 
-		var newSceneString = PADrend.getSceneManager().saveMinSGString(nodes);
+		var newSceneString =  MinSG.SceneManagement.saveMinSGString( PADrend.getSceneManager(),nodes );
 		addResult("identical strings (save/load/save)", sceneString == newSceneString);
 	}
 
@@ -310,7 +310,7 @@ tests += new Tests.AutomatedTest( "MinSG: NodeQuery",fn(){
 	Std._unregisterModule('LibMinSGExt/TreeQuery'); // force reload
 	
 	var TQuery = Std.require('LibMinSGExt/TreeQuery');
-	var sm = new MinSG.SceneManager;
+	var sm = new (Std.require('LibMinSGExt/SceneManagerExt'));
 	
 	{
 		var ok = true;
@@ -341,7 +341,7 @@ tests += new Tests.AutomatedTest( "MinSG: NodeQuery",fn(){
 		
 		var ok = true;
 		
-		var sceneManager = new MinSG.SceneManager;
+		var sceneManager = new (Std.require('LibMinSGExt/SceneManagerExt'));
 
 		/*
 					root
@@ -424,7 +424,7 @@ tests += new Tests.AutomatedTest( "LibMinSGExt/NodeTagFunctions",fn(){
 
 	var tagFunctions = Std.require('LibMinSGExt/NodeTagFunctions');
 	// instance
-	var sm = new MinSG.SceneManager;
+	var sm = new (Std.require('LibMinSGExt/SceneManagerExt'));
 	var root = new MinSG.ListNode;
 	tagFunctions.addTag(root,"root");
 	

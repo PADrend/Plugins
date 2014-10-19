@@ -34,7 +34,8 @@
 	Unsupported prominent XPath-features are axes (axis::param) and predicates ([condition()]).
 */
 
-static Set = Std.require('Std/Set');
+static Set = module('Std/Set');
+static SceneManager = module('./SceneManagerExt');
 
 
 // ---------------------------------------
@@ -646,7 +647,7 @@ static functionRegistry = {
 	
 
 */
-static createContext = fn(MinSG.SceneManager sm,input=void,[Map,void] variables=void){
+static createContext = fn(SceneManager sm,input=void,[Map,void] variables=void){
 	var ctxt = new ExtObject;
 	ctxt.sceneManager := sm;
 	ctxt.functions := functionRegistry;
@@ -710,7 +711,7 @@ static createQueryToAncestor = fn(MinSG.Node source, MinSG.Node ancestor){
 
 //collectRefId(sm)  id is in the subtree Or an instance of the node is in the subtree
 
-static createRelativeNodeQuery = fn(MinSG.SceneManager sm, MinSG.Node source, MinSG.Node target){
+static createRelativeNodeQuery = fn(SceneManager sm, MinSG.Node source, MinSG.Node target){
 	if(source == target)
 		return "self";
 	if(target.getParent()==source && source.countChildren() == 1)

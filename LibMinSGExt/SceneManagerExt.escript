@@ -14,7 +14,52 @@
 // ------------------------------
 // SceneManager extensions
 
-var T = MinSG.SceneManager;
+var T = MinSG.SceneManagement.SceneManager;
+
+
+// deprecated aliases. Remove after 2015-04!
+MinSG.SceneManager := T;
+
+T.IMPORT_OPTION_NONE ::= MinSG.SceneManagement.IMPORT_OPTION_NONE;
+T.IMPORT_OPTION_REUSE_EXISTING_STATES ::= MinSG.SceneManagement.IMPORT_OPTION_REUSE_EXISTING_STATES;
+T.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY ::= MinSG.SceneManagement.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY;
+T.IMPORT_OPTION_USE_TEXTURE_REGISTRY ::= MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY;
+T.IMPORT_OPTION_USE_MESH_HASHING_REGISTRY ::= MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_HASHING_REGISTRY;
+T.IMPORT_OPTION_USE_MESH_REGISTRY ::= MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY;
+T.createImportContext ::= fn( p...){
+	Runtime.warn( "sceneManager.createImportContext is deprecated!" );
+	return MinSG.SceneManagement.createImportContext(this,p...);
+};
+T.loadCOLLADA ::= fn( p...){
+	Runtime.warn( "sceneManager.loadCOLLADA is deprecated!" );
+	return MinSG.SceneManagement.loadCOLLADA(this,p...);
+};
+T.loadMinSGFile ::= fn( p...){
+	Runtime.warn( "sceneManager.loadMinSGFile is deprecated!" );
+	return MinSG.SceneManagement.loadMinSGFile(this,p...);
+};
+T.saveMeshesInSubtreeAsPLY ::= fn( p...){
+	Runtime.warn( "sceneManager.saveMeshesInSubtreeAsPLY is deprecated!" );
+	return MinSG.SceneManagement.saveMeshesInSubtreeAsPLY(p...);
+};
+T.saveMeshesInSubtreeAsMMF ::= fn( p...){
+	Runtime.warn( "sceneManager.saveMeshesInSubtreeAsMMF is deprecated!" );
+	return MinSG.SceneManagement.saveMeshesInSubtreeAsMMF(p...);
+};
+T.saveMinSGFile ::= fn( p...){
+	Runtime.warn( "sceneManager.saveMinSGFile is deprecated!" );
+	return MinSG.SceneManagement.saveMinSGFile(this, p...);
+};
+T.saveMinSGString ::= fn( p...){
+	Runtime.warn( "sceneManager.saveMinSGString is deprecated!" );
+	return MinSG.SceneManagement.saveMinSGString(this, p...);
+};
+T.saveCOLLADA ::= fn( p...){
+	Runtime.warn( "sceneManager.saveCOLLADA is deprecated!" );
+	return MinSG.SceneManagement.saveCOLLADA(p...);
+};
+
+//------------------------
 
 T.__searchPaths @(init,private) := Array; 
 T.__workspaceRootPath @(private) := false; // String or false; The folder in which the current
@@ -30,10 +75,10 @@ T.loadScene ::= fn(String filename, Number importOptions=0){
 	if(filename.endsWith(".dae") || filename.endsWith(".DAE")) {
 	    outln("Loading Collada: ",filename);
 
-		sceneRoot = this.loadCOLLADA(filename, importOptions);
+		sceneRoot = MinSG.SceneManagement.loadCOLLADA(this, filename, importOptions);
 	} else {
 	    Util.info("Loading MinSG: ",filename,"\n");
-	    var importContext = this.createImportContext(importOptions);
+	    var importContext = MinSG.SceneManagement.createImportContext(this,importOptions);
     
 	    var f = new Util.FileName( filename );
 	    importContext.addSearchPath( f.getFSName() + "://" + f.getDir() );
@@ -41,7 +86,7 @@ T.loadScene ::= fn(String filename, Number importOptions=0){
 	    foreach(this.__searchPaths as var p)
 			importContext.addSearchPath(p);
 	    
-    	var nodeArray = this.loadMinSGFile(importContext,filename);
+    	var nodeArray = MinSG.SceneManagement.loadMinSGFile(importContext,filename);
     	if(!nodeArray){
 			Runtime.warn("Could not load scene from file '"+filename+"'");
     	}else if(nodeArray.count()>1){

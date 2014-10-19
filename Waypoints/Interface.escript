@@ -658,7 +658,7 @@ WaypointsPlugin.savePath := fn(filename,path = void){
 		out("\aNo path found!\n");
 		return;
 	}
-	out( PADrend.getSceneManager().saveMinSGFile(filename,[path]) ? "ok\n" : "failed\n");
+	out( MinSG.SceneManagement.saveMinSGFile( PADrend.getSceneManager(),filename,[path]) ? "ok\n" : "failed\n");
 };
 
 /**
@@ -670,7 +670,7 @@ WaypointsPlugin.savePath := fn(filename,path = void){
 */
 WaypointsPlugin.loadPath := fn(filename){
 	try{
-		var nodeArray = PADrend.getSceneManager().loadMinSGFile(filename);
+		var nodeArray = MinSG.SceneManagement.loadMinSGFile( PADrend.getSceneManager(), filename);
 
 		if (! nodeArray ) {
 			return false;

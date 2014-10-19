@@ -210,7 +210,7 @@ SceneManagement.getSceneList :=		fn(){	return registeredScenes;	};
 
 SceneManagement.getSceneManager :=	fn(){	return activeScene&&activeScene.isSet($__sceneManager) ? activeScene.__sceneManager : defaultSceneManager;	};
 
-SceneManagement.loadScene := fn(filename,Number importOptions = MinSG.SceneManager.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY){
+SceneManagement.loadScene := fn(filename,Number importOptions = MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY){
 	showWaitingScreen();
 	var sceneRoot=PADrend.getSceneManager().loadScene(filename,importOptions);
 	if(sceneRoot)

@@ -58,9 +58,9 @@ plugin.registerGUIProviders := fn(){
 						var save = [node,filename] => fn(node,filename){
 							PADrend.message("Save node \""+filename+"\"");
 							if(filename.endsWith(".dae")||filename.endsWith(".DAE")) {
-								PADrend.getSceneManager().saveCOLLADA(filename,PADrend.getRootNode());
+								MinSG.SceneManagement.saveCOLLADA(filename,PADrend.getRootNode());
 							} else {
-								PADrend.getSceneManager().saveMinSGFile(filename,[node]);
+								MinSG.SceneManagement.saveMinSGFile( PADrend.getSceneManager(),filename,[node]);
 							}
 						};
 						

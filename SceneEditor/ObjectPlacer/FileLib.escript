@@ -336,7 +336,7 @@ plugin.createPrototype := fn(file){
 	if(file.endsWith('.mmf')){
 		newPrototype = new MinSG.GeometryNode(Rendering.loadMesh(file));
 	}else{
-		newPrototype = PADrend.getSceneManager().loadScene(file,MinSG.SceneManager.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManager.IMPORT_OPTION_USE_MESH_REGISTRY);
+		newPrototype = PADrend.getSceneManager().loadScene(file,MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY);
 		MinSG.SemanticObjects.markAsSemanticObject(newPrototype);
 	}
 	if(!newPrototype){

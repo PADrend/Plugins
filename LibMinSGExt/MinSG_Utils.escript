@@ -91,7 +91,7 @@ MinSG.bakeTransformations := fn(MinSG.Node root, Geometry.Matrix4x4 worldMatrix=
 };
 
 /*!	Remove empty GroupNodes; replace GroupNodes with a single child by that child.*/
-MinSG.cleanupTree := fn(MinSG.Node root, [MinSG.SceneManager,void] sceneManager=void){
+MinSG.cleanupTree := fn(MinSG.Node root, [MinSG.SceneManagement.SceneManager,void] sceneManager=void){
 	Util.info( "cleanupTree...\n");
 	var counter=0;
 
