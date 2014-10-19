@@ -61,8 +61,10 @@ static updateCameras = fn(dolly, [Array,void] frame){
 			// - calculate and set the frustum's angles
 			var distanceToPlane = -localFrameTopLeft.getZ();
 			
-			if(distanceToPlane==0)
+			if(distanceToPlane==0){
+				updateInProgress = false;
 				return;
+			}
 			
 			var leftAngle 	= 	(localFrameTopLeft.getX()/distanceToPlane).atan().radToDeg();
 			var rightAngle 	= 	(localFrameBottomRight.getX()/distanceToPlane).atan().radToDeg();
