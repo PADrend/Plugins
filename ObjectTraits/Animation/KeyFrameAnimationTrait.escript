@@ -179,11 +179,11 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.DATA_VALUE : time,
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.ON_DATA_CHANGED : [refreshCallback,node.animationKeyFrames,index] => fn(refreshCallback,keyFrames,index,newTime){
-					var arr = keyFrames().clone();
-					var entry = arr[index];
+					var arr = keyFrames().clone();// create new array to detect update
+					var entry = arr[index].clone(); // create new array to detect update
 					entry[0] = newTime;
+					arr[index] = entry;
 					keyFrames(sortKeyFrames(arr));
-
 					refreshCallback();
 				}
 			};
@@ -193,11 +193,11 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.LABEL : "Update",
 				GUI.WIDTH : 40,
 				GUI.ON_CLICK : [node,node.animationKeyFrames,index] => fn(node,keyFrames,index){
-					var arr = keyFrames().clone();
-					var entry = arr[index];
+					var arr = keyFrames().clone();// create new array to detect update
+					var entry = arr[index].clone(); // create new array to detect update
 					entry[1] = node.getRelTransformationSRT();
+					arr[index] = entry;
 					keyFrames(sortKeyFrames(arr));
-
 				}
 			};
 			entries += {
@@ -213,8 +213,7 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.LABEL : "Delete",
 				GUI.WIDTH : 40,
 				GUI.ON_CLICK : [refreshCallback,node.animationKeyFrames,index] => fn(refreshCallback,keyFrames,index){
-
-					var arr = keyFrames().clone();
+					var arr = keyFrames().clone(); // create new array to detect update
 					arr.removeIndex(index);
 					keyFrames(sortKeyFrames(arr));
 					refreshCallback();
