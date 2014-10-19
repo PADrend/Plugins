@@ -58,12 +58,19 @@ static activeScene = void;
 static defaultSceneManager = void;
 static dolly = void;
 
-SceneManagement._defaultLight := void; // directional light 0; formerly known as PADrend.sun
+static _defaultLight; // directional light 0; formerly known as PADrend.sun
+
+
+static SceneManager = Std.require( 'LibMinSGExt/SceneManagerExt' );
+static initSceneManager = fn(sceneManager){
+	sceneManager.addSearchPath( Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/" );
+	sceneManager.registerNode( "L:Sun", _defaultLight );
+};
 
 
 SceneManagement.init @(override) := fn(){
 	
-	defaultSceneManager = new (Std.require( 'LibMinSGExt/SceneManagerExt' ));
+	defaultSceneManager = new SceneManager;
 
 	{
 		registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+2);
@@ -144,19 +151,18 @@ SceneManagement.ex_Init := fn(...){
 
 		setConfigInfo('PADrend.sun',"Global directional light source.");
 		if(systemConfig.getValue('PADrend.sun.enabled',true)){
-			this._defaultLight = new MinSG.LightNode;
+			_defaultLight = new MinSG.LightNode;
 			this.initDefaultLightParameters();
-			getRootNode() += this._defaultLight;
-			this.lightingState := new MinSG.LightingState();
-			lightingState.setLight(this._defaultLight);
+			getRootNode() += _defaultLight;
+			this.lightingState := new MinSG.LightingState;
+			lightingState.setLight( _defaultLight );
 			getRootNode() += this.lightingState;
-			defaultSceneManager.registerNode( "L:Sun",this._defaultLight );
 		}
 
 		getRootNode().addChild(dolly);
 		this.createNewSceneRoot("new MinSG.ListNode",false);
 	}
-   	defaultSceneManager.addSearchPath( Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/" );
+	initSceneManager( defaultSceneManager );
 
 };
 
@@ -201,20 +207,58 @@ SceneManagement.deleteScene := fn(scene) {
 
 SceneManagement.getCurrentScene :=	fn(){	return activeScene;	};
 
-SceneManagement.getDefaultLight :=	fn(){	return this._defaultLight;	};
+SceneManagement.getDefaultLight :=	fn(){	return _defaultLight;	};
 
 //! Returns the unique global root node.
 SceneManagement.getRootNode :=		fn(){	return rootNode;	};
 
 SceneManagement.getSceneList :=		fn(){	return registeredScenes;	};
 
-SceneManagement.getSceneManager :=	fn(){	return activeScene&&activeScene.isSet($__sceneManager) ? activeScene.__sceneManager : defaultSceneManager;	};
+SceneManagement.getDefaultSceneManager :=	fn( ){	return defaultSceneManager;	};
 
-SceneManagement.loadScene := fn(filename,Number importOptions = MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY){
+SceneManagement.getSceneManager :=	fn( [MinSG.Node,void] scene=void){
+	if( !scene )
+		scene = activeScene;
+	return scene&&scene.isSet($__sceneManager) ? scene.__sceneManager : defaultSceneManager;
+};
+
+	
+SceneManagement.getNamedMapOfAvaiableSceneManagers := fn(){
+	var m = new Map;
+	var i = 0;
+	foreach(registeredScenes as var scene){
+		var sceneManager = SceneManagement.getSceneManager(scene);
+		if(!m[sceneManager]){
+			if(sceneManager == SceneManagement.getDefaultSceneManager())
+				m[sceneManager] = "default";
+			else
+				m[sceneManager] = "#"+ (++i);
+		}
+	}
+	return m;
+};
+
+SceneManagement.createNewSceneManager := fn(){
+	var sceneManager = new SceneManager;
+	initSceneManager( sceneManager );
+	return sceneManager;
+};
+
+//! if @p sceneManager is true, a new one is created; if it is void, the default sceneManager is used.
+SceneManagement.loadScene := fn(filename,
+								Number importOptions = MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY, 
+								[SceneManager,true,void] sceneManager = void){
 	showWaitingScreen();
-	var sceneRoot=PADrend.getSceneManager().loadScene(filename,importOptions);
-	if(sceneRoot)
+	
+	if(!sceneManager)
+		sceneManager = SceneManagement.getDefaultSceneManager();
+	else if(true===sceneManager)
+		sceneManager = SceneManagement.createNewSceneManager();
+	var sceneRoot = sceneManager.loadScene(filename,importOptions);
+	if(sceneRoot){
+		sceneRoot.__sceneManager := sceneManager;
 		this.registerScene(sceneRoot);
+	}
 	return sceneRoot;
 };
 
@@ -283,8 +327,9 @@ SceneManagement.selectScene := fn(scene) {
 
 /*! Select scene given by @p filename or by node. 
 	If necessary, the file is loaded or registered.
-	If a scene with the same filename has been registered, it is not loaded again.	*/
-SceneManagement.assureScene := fn( [MinSG.Node,String] mixed){
+	If a scene with the same filename has been registered, it is not loaded again.
+	Additional parameters are passed to loadScene(...) if called.	*/
+SceneManagement.assureScene := fn( [MinSG.Node,String] mixed,p...){
 	if(mixed.isA(MinSG.Node)){
 		var scene = mixed;
 		if(scene != activeScene ){
@@ -301,7 +346,7 @@ SceneManagement.assureScene := fn( [MinSG.Node,String] mixed){
 				return scene;
 			}
 		}
-		var scene = SceneManagement.loadScene(filename);
+		var scene = SceneManagement.loadScene(filename,p...);
 		if(!scene)
 			Runtime.exception("Could not load scene '"+filename+"'");
 		SceneManagement.selectScene( scene );

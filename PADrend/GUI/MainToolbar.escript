@@ -166,7 +166,8 @@ plugin.registerStdToolbarEntries := fn() {
 					$scale : DataWrapper.createFromValue(1.0),
 					$importOptions : PADrend.configCache.getValue('PADrend.importOptions', 
 											MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | 
-											MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY)
+											MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY),
+					$sceneManager : new Std.DataWrapper(void)
 				});
 				var f=new GUI.FileDialog("Load Scene",PADrend.getScenePath(),[".minsg", ".dae", ".DAE"],
 					[config] => fn(config,filename){
@@ -175,14 +176,14 @@ plugin.registerStdToolbarEntries := fn() {
 						PADrend.message("Load scene \""+filename+"\"...");
 
 						PADrend.configCache.setValue('PADrend.importOptions', config.importOptions);
-						var node=PADrend.loadScene(filename, /*sceneNode,*/ config.importOptions);
+						var node=PADrend.loadScene(filename, /*sceneNode,*/ config.importOptions, config.sceneManager());
 						if(!node){
 							PADrend.message("Loading scene '"+filename+"' failed.");
 						}else{
 							PADrend.message("Scene loaded '"+filename+"'");
 							PADrend.selectScene(node);
 								
-							var scale=config.scale();
+							var scale = config.scale();
 							if(scale!=1.0)
 								node.scale(scale);
 							
@@ -249,6 +250,21 @@ plugin.registerStdToolbarEntries := fn() {
 					GUI.DATA_ATTRIBUTE	:	$importOptions,
 					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY,
 					GUI.TOOLTIP : "Use this for scenes exported from 3dMax"
+				};
+				optionPanel++;
+				optionPanel += {
+					GUI.LABEL			:	"ID-Namspace",
+					GUI.TYPE			:	GUI.TYPE_SELECT,
+					GUI.SIZE			:	[GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,5,15],
+					GUI.DATA_WRAPPER	:	config.sceneManager,
+					GUI.OPTIONS_PROVIDER : fn(){
+						var options = [ ];
+						foreach( PADrend.SceneManagement.getNamedMapOfAvaiableSceneManagers() as var sceneManager,var name)
+							options += [sceneManager,name];
+						options += [true,"create new namespace"];
+						return options;
+					},
+					GUI.TOOLTIP : "Use existing id-namespace or create a new one.\nNode and State ids are unique in a namespace and are \n lost when Nodes are transferred into another namespace."
 				};
 				f.init();
 			}
@@ -597,27 +613,28 @@ plugin.registerStdToolbarEntries := fn() {
 		});
 
 		// SceneNode options
-		var sceneRootOptions = ["new MinSG.ListNode()"];
+		var sceneRootOptions = ["new MinSG.ListNode"];
 		if(MinSG.isSet($LooseOctree)) {
-			sceneRootOptions += "new MinSG.LooseOctree()";
+			sceneRootOptions += "new MinSG.LooseOctree";
 		}
 		if(MinSG.isSet($RTree)) {
 			sceneRootOptions += "new MinSG.RTree(2, 50)";
 		}
 	
-		var textField = gui.create({
+		var constructionString = new Std.DataWrapper("new MinSG.ListNode");
+		container += {
 			GUI.TYPE				:	GUI.TYPE_TEXT,
 			GUI.OPTIONS				:	sceneRootOptions,
+			GUI.DATA_WRAPPER		:	constructionString,
 			GUI.SIZE				:	[GUI.WIDTH_REL, 0.7, 0]
-		});
-		container += textField;
+		};
 
 		container += {
 			GUI.TYPE				:	GUI.TYPE_BUTTON,
 			GUI.LABEL				:	"New scene",
-			GUI.ON_CLICK			:	(fn(textField) {
-											PADrend.createNewSceneRoot(textField.getData());
-										}).bindLastParams(textField),
+			GUI.ON_CLICK			:[constructionString]=> fn(constructionString) {
+											PADrend.createNewSceneRoot(constructionString());
+										},
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 0, 0]
 		};
 		sceneMenu += container;
@@ -697,11 +714,14 @@ plugin.registerStdToolbarEntries := fn() {
 				}else{
 					entry.selectLabel.setText("   #"+index+"    ");
 				}
-				var a=[];
-				if(scene.isSet($name) && scene.name!="") a += scene.name;
-				if(scene.isSet($constructionString) && scene.constructionString!="") a += "[ "+scene.constructionString+" ]";
-				if(scene.isSet($filename) && scene.filename!="") a += "[ "+scene.filename+" ]";
-				entry.nameLabel.setText( a.implode(" : "));
+				var parts = [];
+				if(scene.isSet($name) && scene.name!="") parts += scene.name;
+				if(scene.isSet($constructionString) && scene.constructionString!="") parts += "[ "+scene.constructionString+" ]";
+				if(scene.isSet($filename) && scene.filename!="") parts += "[ "+scene.filename+" ]";
+				
+				parts += "ID-Namspace: " + PADrend.SceneManagement.getNamedMapOfAvaiableSceneManagers()[ PADrend.SceneManagement.getSceneManager(scene) ];
+				
+				entry.nameLabel.setText( parts.implode(" : "));
 			}
 		};
 
