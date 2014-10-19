@@ -33,72 +33,78 @@ trait.onInit += fn(MinSG.Node node){
 	Traits.assureTrait(node, module('./_AnimatorBaseTrait'));
 	
 	
-	node.animatorSpeed := node.getNodeAttributeWrapper('animatorSpeed',1.0);
+	node.animatorDefaultSpeed := node.getNodeAttributeWrapper('animatorSpeed',1.0);
 	node.animatorMax := node.getNodeAttributeWrapper('animatorMax',1.0);
 	node.animatorMin := node.getNodeAttributeWrapper('animatorMin',0.0);
 	node.animatorSmoothness := node.getNodeAttributeWrapper('animatorSmoothness',0.3);
-	node.animatorRepeat := node.getNodeAttributeWrapper('animatorRepeat',false);
 
-	node._animatorSourcePos := false;
+	node._animatorRepeating := false;
+	node._animatorSourceLocalTime := false;
 	node._animatorSourceTime := false;
-	node._animatorTargetPos := false;
+	node._animatorTargetLocalTime := false;
 	node._animatorTargetTime := false;
-	node._animatorPos := new DataWrapper(node.animatorMin());
-	node._animatorPos.onDataChanged += node->fn(pos){
+	node._animatorLocalTime := new DataWrapper(node.animatorMin());
+	node._animatorLocalTime.onDataChanged += node->fn(localTime){
 		//! \see ObjectTraits/Helper/AnimatorBaseTrait
-		this.animationCallbacks("play",pos);
+		this.animationCallbacks("play",localTime);
 	};
 	
 	node.animatorGoToMin := fn(time=void){		this.animatorGoTo(this.animatorMin(),time);	};
 	node.animatorGoToMax := fn(time=void){		this.animatorGoTo(this.animatorMax(),time);	};
 	
-	
+	node.animationPlay := fn(startingTime=void){		this.animatorGoTo(this.animatorMax(),startingTime,void,true);	};
+		
 	static handler = fn(...){
 	
-		while( !this.isDestroyed() && this._animatorTargetPos){
-			var relTime = (PADrend.getSyncClock()-this._animatorSourceTime) / (_animatorTargetTime-this._animatorSourceTime);
+		while( !this.isDestroyed() && this._animatorTargetLocalTime){
+			var relTime = (PADrend.getSyncClock()-this._animatorSourceTime) / ( this._animatorTargetTime-this._animatorSourceTime);
 
-			if(relTime>=1.0){
-//				if(this.animatorRepeat()){
-//					this._animatorTargetTime += this.animatorMax();
-//					this._animatorSourceTime += this.animatorMax();
-//					this._animatorPos( 0 );
-//					continue;
-//				}
+			if(relTime>=1.0){ //finished
+				if(this._animatorRepeating){
+					this._animatorSourceLocalTime = this.animatorMin();
+					this._animatorTargetLocalTime = this.animatorMax();
+					this._animatorSourceTime = this._animatorTargetTime;
+					this._animatorTargetTime += (this.animatorMax() - this.animatorMin()) / this.animatorDefaultSpeed();
+					
+					this._animatorLocalTime(this.animatorMin());
+					continue;
+				}
 
-				var pos = this._animatorTargetPos;
-				this._animatorTargetPos = void; // finished
-				this._animatorPos(pos);
+				var localTime = this._animatorTargetLocalTime;
+				this._animatorTargetLocalTime = void; // finished
+				this._animatorLocalTime(localTime);
 
 				//! \see ObjectTraits/Helper/AnimatorBaseTrait
-				this.animationCallbacks("pause",pos);
+				this.animationCallbacks("pause",localTime);
 				break;
 			}else if(relTime>=0.0){
 				var smoothedTime = simpleSmootTime( relTime,this.animatorSmoothness() );
 //				Geometry.interpolateCubicBezier(p0,p1,p2,p3,relTime).y();
 				
-				var pos = _animatorTargetPos* smoothedTime + (1 - smoothedTime)*_animatorSourcePos;
-				this._animatorPos(pos);
+				var localTime = _animatorTargetLocalTime* smoothedTime + (1 - smoothedTime)*_animatorSourceLocalTime;
+				this._animatorLocalTime(localTime);
 			}
 			yield;
 		}
 		return $REMOVE;
 	};
 	
-	node.animatorGoTo := fn( Number targetPosition, startingTime = void, endTime = void ){
-		if(targetPosition == _animatorPos())
+	node.animatorGoTo := fn( Number targetLocalTime, startingTime = void, endTime = void, repeat = false ){
+		this._animatorRepeating = repeat;
+		
+		if(targetLocalTime == _animatorLocalTime() && !repeat)
 			return;
 		if(!startingTime)
 			startingTime = PADrend.getSyncClock();
 
-		this._animatorTargetTime = endTime ? endTime : startingTime + (targetPosition-_animatorPos()).abs() / this.animatorSpeed();
+		this._animatorTargetTime = endTime ? endTime : startingTime + (targetLocalTime-_animatorLocalTime()).abs() / this.animatorDefaultSpeed();
 		
-		if(!this._animatorTargetPos)
+		if(!this._animatorTargetLocalTime)
 			this.addActionHandler(this->handler);	//! \see ObjectTraits/Basic/_ContinuousActionPerformerTrait
 		
 		this._animatorSourceTime = startingTime;
-		this._animatorSourcePos = _animatorPos();
-		this._animatorTargetPos = targetPosition;
+		this._animatorSourceLocalTime = _animatorLocalTime();
+		this._animatorTargetLocalTime = targetLocalTime;
 	};
 	
 //	node.animationPlay := fn( time=void ){
@@ -106,10 +112,10 @@ trait.onInit += fn(MinSG.Node node){
 //	};
 	node.animationStop := fn( time=void ){
 		this.animationCallbacks("stop",time ? time : PADrend.getSyncClock());
-		this._animatorTargetPos = void;
+		this._animatorTargetLocalTime = void;
 		this._animatorTargetTime = void;
-		this._animatorSourcePos = void;
-		this._animatorPos( this.animatorMin() );
+		this._animatorSourceLocalTime = void;
+		this._animatorLocalTime( this.animatorMin() );
 	};
 	
 };
@@ -141,10 +147,10 @@ module.on('../ObjectTraitRegistry', fn(registry){
 			{
 				GUI.TYPE : GUI.TYPE_RANGE,
 				GUI.RANGE : [0.0,node.animatorMax()],
-				GUI.LABEL : "pos",
+				GUI.LABEL : "localTime",
 				GUI.RANGE_STEP_SIZE : 0.05,
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
-				GUI.DATA_WRAPPER : node._animatorPos
+				GUI.DATA_WRAPPER : node._animatorLocalTime
 			},	
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
@@ -152,7 +158,7 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.RANGE : [0.1,10],
 				GUI.LABEL : "speed",
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
-				GUI.DATA_WRAPPER : node.animatorSpeed
+				GUI.DATA_WRAPPER : node.animatorDefaultSpeed
 			},	
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
@@ -165,29 +171,28 @@ module.on('../ObjectTraitRegistry', fn(registry){
 			},	
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
-				GUI.TYPE : GUI.TYPE_BOOL,
-				GUI.LABEL : "repeat",
-				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
-				GUI.DATA_WRAPPER : node.animatorRepeat
-			},	
-			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
-			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "stop",
-				GUI.WIDTH : 70,
+				GUI.WIDTH : 50,
 				GUI.ON_CLICK : node->node.animationStop
 			},
 			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "min",
-				GUI.WIDTH : 70,
+				GUI.WIDTH : 50,
 				GUI.ON_CLICK : node->node.animatorGoToMin
 			},	
 			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "max",
-				GUI.WIDTH : 70,
+				GUI.WIDTH : 50,
 				GUI.ON_CLICK : node->node.animatorGoToMax
+			},	
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "play",
+				GUI.WIDTH : 50,
+				GUI.ON_CLICK : node->node.animationPlay
 			},	
 		];
 	});
