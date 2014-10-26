@@ -15,11 +15,12 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
+var Version = Std.require('PADrend/Version');
  // header 
 outln("-"*79);
-outln("PADrend 1.0.0 -- Platform for Algorithm Development and rendering (PADrend.de)");
+outln(Version.VERSION_FULL_STRING);
 outln("-"*79);
-outln("Build:\t", (SIZE_OF_PTR==8?64:32)," bit ", BUILD_TYPE );
+outln("Build:\t", Version.BUILD );
 out("Libs:");
 foreach( Util.getLibVersionStrings() as var lib,var version)
 	outln("\t",version);

@@ -96,7 +96,10 @@ static refresh = fn(...){
 				return m;
 			},
 			GUI.CONTEXT_MENU_WIDTH : 200,
-			GUI.TOOLTIP : autoTooltip() ? "PADrend 1.0.0 \nPlatform for Algorithm Development and rendering (PADrend.de)" : "",
+			GUI.TOOLTIP : autoTooltip() ? {
+					var Version = Std.require('PADrend/Version');
+					Version.VERSION_FULL_STRING + "\nBuild: "+ Version.BUILD;
+				} : "",
 			GUI.FLAGS : GUI.BACKGROUND
 		});
 		if(whiteBackground())
