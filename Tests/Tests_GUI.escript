@@ -168,18 +168,20 @@ plugin.showWindow:=fn(){
 		component.add(label);
 		component.setPosition(Rand.uniform(300,1700),Rand.uniform(0,1700));
 
-		var con1=gui.createButton(10,10,"");
-		con1.setExtLayout(
-			GUI.POS_X_ABS|GUI.REFERENCE_X_RIGHT|GUI.ALIGN_X_RIGHT|
-			GUI.POS_Y_ABS|GUI.REFERENCE_Y_CENTER|GUI.ALIGN_Y_CENTER,
-			new Geometry.Vec2(0,0) );
-		component.add(con1);
+		var con1 = gui.create({
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.SIZE : [10,10],
+			GUI.POSITION : [GUI.POS_X_ABS|GUI.REFERENCE_X_RIGHT|GUI.ALIGN_X_RIGHT|
+				GUI.POS_Y_ABS|GUI.REFERENCE_Y_CENTER|GUI.ALIGN_Y_CENTER, 0,0],
+			GUI.ON_CLICK : fn(){
+				var connectors=GUI.findConnectors(panel,this);
+				print_r(connectors);
+			}
+		});
+
+		component += con1;
 		component.con1:=con1;
 		con1.panel:=panel;
-		con1.onClick=fn(){
-			var connectors=GUI.findConnectors(panel,this);
-			print_r(connectors);
-		};
 		con1.getConnectionVectors:=fn(){
 			var connectors=GUI.findConnectors(panel,this);
 			var vecs=[];
@@ -278,8 +280,8 @@ plugin.showWindow:=fn(){
 	b.setPosition( 0,100 );
 	b.onClick=fn(){
 		var p=gui.createPopupWindow( 300,50,"Are you sure?");
-		p.addAction("Yes", fn(){out("Yes!\n");} );
-		p.addAction("Perhaps", fn(){ out("Think again!\n"); return true;});
+		p.addAction("Yes", fn(){outln("Yes!");} );
+		p.addAction("Perhaps", fn(){ outln("Think again!"); return true;});
 		p.addAction("No");
 		p.init();
 	};
@@ -689,7 +691,7 @@ plugin.showWindow:=fn(){
 					{
 						GUI.TYPE : GUI.TYPE_BUTTON,
 						GUI.LABEL : "stuff",
-						GUI.ON_CLICK : fn(){out("Stuff!");}
+						GUI.ON_CLICK : fn(){outln("Stuff!");}
 					}
 				]
 			},

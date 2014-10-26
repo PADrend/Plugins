@@ -73,7 +73,7 @@ CommandHistory.canRedo ::=		fn(){		return !this.redoStack.empty();		};
 
 //!	Undo the latest action and add it to the redo-stack.
 CommandHistory.undo ::= fn(){
-	if(canUndo()){
+	if(this.canUndo()){
 		var cmd = this.undoStack.popBack();
 		this.redoStack.pushBack(cmd);
 		cmd.undo();

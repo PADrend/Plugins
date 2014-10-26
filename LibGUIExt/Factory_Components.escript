@@ -665,7 +665,7 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 		// ----
 
 		// set optional tooltip
-		if( description[GUI.TOOLTIP] )
+		if( description[GUI.TOOLTIP] && !description[GUI.TOOLTIP].empty())
 			component.setTooltip(description[GUI.TOOLTIP]);
 
 		// set optional font

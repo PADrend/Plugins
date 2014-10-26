@@ -147,7 +147,7 @@ N.loadPlugins := fn( Array filenames, showNotification = true, Array searchPaths
 			var pluginsWithOpenRequirements = [];
 			foreach(todo as var p)
 				pluginsWithOpenRequirements+=p.getName();
-			Runtime.log(Runtime.LOG_ERROR,"Could not init all plugins, probably because of a cyclic dependency: "+pluginsWidthOpenRequirements.implode(","));
+			Runtime.log(Runtime.LOG_ERROR,"Could not init all plugins, probably because of a cyclic dependency: "+pluginsWithOpenRequirements.implode(","));
 		}
 	}
 
@@ -156,7 +156,7 @@ N.loadPlugins := fn( Array filenames, showNotification = true, Array searchPaths
 		var pluginName = plugin.getName();
 		try{
 			if(showNotification)
-				out("Initializing ",pluginName,"...\n");
+				outln("Initializing ",pluginName,"...");
 
 			var success = plugin.init();
 			if(!success && showNotification){
