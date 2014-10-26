@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Jan Krems
  * Copyright (C) 2012 Ralf Petring <ralf@petring.net>
  * 
@@ -18,11 +18,169 @@
 **
 ** GUI construction for the editor part of the Waypoints-Plugin.
 **/
-loadOnce(__DIR__+"/WaypointEditorCell.escript");
-static Listener = Std.require('LibUtilExt/deprecated/Listener');
+static PathManagement = Std.require('Waypoints/PathManagement');
 
-WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
-	var pan = gui.create({
+static createWaypointCell = fn(MinSG.Waypoint waypoint, listView) {
+	var cell = gui.create({
+		GUI.TYPE				:	GUI.TYPE_CONTAINER,
+		GUI.LAYOUT				:	GUI.LAYOUT_FLOW,
+		GUI.SIZE				:	GUI.SIZE_MAXIMIZE
+	});
+
+	cell.txtDesc := gui.create({
+		GUI.TYPE				:	GUI.TYPE_LABEL,
+		GUI.LABEL				:	"",
+		GUI.TOOLTIP				:	"Description",
+		GUI.TEXT_ALIGNMENT		:	GUI.TEXT_ALIGN_MIDDLE,
+		GUI.SIZE				:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.3, 33]
+	});
+	cell.edtDesc := gui.create({
+		GUI.TYPE				:	GUI.TYPE_TEXT,
+		GUI.LABEL				:	"Description",
+		GUI.SIZE				:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.3, 33]
+	});
+
+	cell.txtTime := gui.create({
+		GUI.TYPE				:	GUI.TYPE_LABEL,
+		GUI.LABEL				:	"",
+		GUI.TOOLTIP				:	"Time",
+		GUI.TEXT_ALIGNMENT		:	GUI.TEXT_ALIGN_MIDDLE,
+		GUI.SIZE				:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.2, 33]
+	});
+	cell.edtTime := gui.create({
+		GUI.TYPE				:	GUI.TYPE_NUMBER,
+		GUI.LABEL				:	"Time",
+		GUI.SIZE				:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.2, 33]
+	});
+
+	cell.createEditGUI := [waypoint] => fn(MinSG.Waypoint waypoint) {
+		this.clear();
+
+		this.add(this.iconArea);
+		this.add(this.edtTime);
+		this.add(this.edtDesc);
+		this.add(this.btnSetPos);
+		this.add(this.btnCancel);
+		this.add(this.btnSave);
+
+		this.btnSetPos.setSwitch(false);
+		this.btnSetPos.newSRT := void;
+		this.btnSetPos.oldSRT := waypoint.getRelTransformationSRT();
+
+		this.update();
+	};
+
+	cell.createViewGUI := fn() {
+		this.clear();
+
+		this.add(this.iconArea);
+		this.add(this.txtTime);
+		this.add(this.txtDesc);
+		this.add(this.btnFlyTo);
+		this.add(this.btnEdit);
+
+		this.update();
+	};
+
+	cell.btnSave := gui.create({
+		GUI.TYPE				:	GUI.TYPE_BUTTON,
+		GUI.LABEL				:	"Save",
+		GUI.TOOLTIP				:	"Save changes",
+		GUI.ON_CLICK			:	[cell,waypoint] => fn(cell, waypoint) {
+										waypoint.setRelTransformation(cell.btnSetPos.oldSRT);
+										PathManagement.updateWaypoint(waypoint,
+											cell.edtTime.getData(),
+											cell.edtDesc.getData(),
+											cell.btnSetPos.newSRT
+										);
+										cell.createViewGUI();
+									},
+		GUI.SIZE				:	[GUI.HEIGHT_ABS, 0, 33]
+	});
+	cell.btnCancel := gui.create({
+		GUI.TYPE				:	GUI.TYPE_BUTTON,
+		GUI.LABEL				:	"Cancel",
+		GUI.TOOLTIP				:	"Cancel edit",
+		GUI.ON_CLICK			:	[cell,waypoint] => fn(cell, waypoint) {
+										waypoint.setRelTransformation(cell.btnSetPos.oldSRT);
+										cell.createViewGUI();
+									},
+		GUI.SIZE				:	[GUI.HEIGHT_ABS, 0, 33]
+	});
+
+	cell.btnEdit := gui.create({
+		GUI.TYPE				:	GUI.TYPE_BUTTON,
+		GUI.ICON				:	__DIR__ + "/../resources/Edit32.png",
+		GUI.LABEL				:	"",
+		GUI.TOOLTIP				:	"Edit waypoint",
+		GUI.FLAGS				:	GUI.FLAT_BUTTON,
+		GUI.ON_CLICK			:	cell -> cell.createEditGUI
+	});
+
+	cell.btnFlyTo := gui.create({
+		GUI.TYPE				:	GUI.TYPE_BUTTON,
+		GUI.ICON				:	__DIR__ + "/../resources/Goto32.png",
+		GUI.LABEL				:	"",
+		GUI.TOOLTIP				:	"Fly to waypoint",
+		GUI.FLAGS				:	GUI.FLAT_BUTTON,
+		GUI.ON_CLICK			:	[waypoint,listView] => fn(MinSG.Waypoint waypoint, listView) {
+										PathManagement.flyTo(waypoint.getTime());
+										listView.setData(waypoint);
+									}
+	});
+
+	cell.btnSetPos := gui.create({
+		GUI.TYPE				:	GUI.TYPE_BUTTON,
+		GUI.ICON				:	__DIR__ + "/../resources/Position32.png",
+		GUI.LABEL				:	"",
+		GUI.TOOLTIP				:	"Set waypoint's SRT to current camera's SRT",
+		GUI.FLAGS				:	GUI.FLAT_BUTTON,
+		GUI.ON_CLICK			:	[waypoint] => fn(MinSG.Waypoint waypoint) {
+										this.newSRT = PADrend.getDolly().getRelTransformationSRT();
+										waypoint.setRelTransformation(this.newSRT);
+									}
+	});
+	cell.btnSetPos.newSRT := void;
+	cell.btnSetPos.oldSRT := void;
+
+	cell.iconArea := gui.create({
+		GUI.TYPE				:	GUI.TYPE_CONTAINER,
+		GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 44, 33]
+	});
+	cell.update := [waypoint] => fn(MinSG.Waypoint waypoint) {
+		this.iconArea.clear();
+
+		if(waypoint != void){
+			// update gui
+			var tmp=PathManagement.getWaypointDescription(waypoint);
+			this.edtDesc.setData(tmp);
+			this.txtDesc.setText(tmp);
+
+			tmp=waypoint.getTime();
+			this.edtTime.setData(tmp);
+			this.txtTime.setText(tmp);
+
+			if(waypoint.isSet($shotIcon)) {
+				iconArea += {
+					GUI.TYPE				:	GUI.TYPE_ICON,
+					GUI.ICON				:	gui.createIcon(waypoint.shotIcon.getImageData(), waypoint.shotIcon.getImageRect()),
+					GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 44, 33]
+				};
+			}
+		} else {
+			// hide gui, show error
+			this.edtDesc.setData("!!!! ERROR !!!!");
+			this.txtDesc.setText("!!!! ERROR !!!!");
+		}
+	};
+
+	cell.createViewGUI();
+
+	return cell;
+};
+
+return fn(tabbedPanel){
+	var panel = gui.create({
 		GUI.TYPE				:	GUI.TYPE_CONTAINER,
 		GUI.LAYOUT				:	GUI.LAYOUT_FLOW,
 		GUI.SIZE				:	GUI.SIZE_MAXIMIZE
@@ -35,22 +193,16 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		GUI.LIST_ENTRY_HEIGHT	:	35
 	});
 
-	WaypointsPlugin.updatePath := [tw] => fn(listView, [MinSG.PathNode, void] path) {
+	registerExtension('Waypoints_PathChanged', [tw] => fn(listView, [MinSG.PathNode, void] path) {
 		listView.clear();
-		if(!path) {
+		if(!path)
 			return;
-		}
 		var waypoints = path.getWaypoints();
-		if(!waypoints) {
+		if(!waypoints)
 			return;
-		}
-		
-		foreach(waypoints as var waypoint) {
+		foreach(waypoints as var waypoint)
 			listView += [waypoint, createWaypointCell(waypoint, listView)];
-		}
-	};
-
-	registerExtension('Waypoints_PathChanged', WaypointsPlugin -> WaypointsPlugin.updatePath);
+	});
 
 	/**
 	* Button-bar
@@ -67,7 +219,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "+Below",
 		GUI.ON_CLICK : [tw] => fn(listView) {
-			var path = WaypointsPlugin.getCurrentPath();
+			var path = PathManagement.getActivePath();
 			if(!path)
 				return;
 
@@ -101,7 +253,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 				}
 
 				// add waypoint at nextTime
-				WaypointsPlugin.createWaypointAtCam( nextTime);
+				PathManagement.createWaypointAtCam( nextTime);
 				// Select the new waypoint
 				listView.setData(path.getWaypoint(nextTime));
 			}
@@ -113,12 +265,12 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Add",
 		GUI.ON_CLICK : [tw] => fn(listView) {
-			var path = WaypointsPlugin.getCurrentPath();
+			var path = PathManagement.getActivePath();
 			if(!path)
 				return;
 
 			var nextTime=path.countChildren() == 0 ? 0 : path.getMaxTime()+1;
-			WaypointsPlugin.createWaypointAtCam( nextTime);
+			PathManagement.createWaypointAtCam( nextTime);
 			// Select the new waypoint
 			listView.setData(path.getWaypoint(nextTime));
 		},
@@ -129,7 +281,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "+Loop",
 		GUI.ON_CLICK : [tw] => fn(listView) {
-			var path = WaypointsPlugin.getCurrentPath();
+			var path = PathManagement.getActivePath();
 			if(!path)
 				return;
 
@@ -137,7 +289,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 				return;
 
 			var nextTime=path.getMaxTime()+1;
-			WaypointsPlugin.closeLoop();
+			PathManagement.closeLoop();
 			// Select the new waypoint
 			listView.setData(path.getWaypoint(nextTime));
 		},
@@ -148,7 +300,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Reload",
 		GUI.ON_CLICK : fn(){
-			executeExtensions('Waypoints_PathChanged', WaypointsPlugin.getCurrentPath());
+			executeExtensions('Waypoints_PathChanged', PathManagement.getActivePath());
 		},
 		GUI.ICON : iconPath+"Reload32.png",
 		GUI.TOOLTIP : "Refresh list of waypoints"
@@ -160,7 +312,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 			var markedWaypoints = listView.getData();
 			listView.setData(void);
 			foreach(markedWaypoints as var waypoint) {
-				WaypointsPlugin.removeWaypoint(waypoint);
+				PathManagement.removeWaypoint(waypoint);
 			}
 		},
 		GUI.ICON : iconPath+"Trash32.png",
@@ -179,10 +331,10 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 				var wp2 = markedWaypoints[1];
 
 				var srt = wp1.getRelTransformationSRT();
-				var desc = WaypointsPlugin.getWaypointDescription(wp1);
+				var desc = PathManagement.getWaypointDescription(wp1);
 
-				WaypointsPlugin.changeWaypoint(wp1, void, WaypointsPlugin.getWaypointDescription(wp2), wp2.getRelTransformationSRT());
-				WaypointsPlugin.changeWaypoint(wp2, void, desc, srt);
+				PathManagement.updateWaypoint(wp1, void, PathManagement.getWaypointDescription(wp2), wp2.getRelTransformationSRT());
+				PathManagement.updateWaypoint(wp2, void, desc, srt);
 			}
 		},
 		GUI.ICON : iconPath+"Swap32.png",
@@ -198,7 +350,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 				GUI.TYPE 			:	GUI.TYPE_BUTTON,
 				GUI.LABEL			:	"Set to indices",
 				GUI.TOOLTIP			:	"Calculate timestamps from indices",
-				GUI.ON_CLICK		:	WaypointsPlugin -> WaypointsPlugin.setTimecodesToIndices
+				GUI.ON_CLICK		:	PathManagement -> PathManagement.setTimecodesToIndices
 			},
 			"*From distance*",
 			{
@@ -211,7 +363,7 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 				GUI.LABEL			:	"Calculate",
 				GUI.TOOLTIP			:	"Calculate by distance and speed (slider)",
 				GUI.ON_CLICK		:	[tw, speedDataWrapper] => fn(listView, speed) {
-											WaypointsPlugin.setTimecodesByDistance(WaypointsPlugin.getCurrentPath(), speed());
+											PathManagement.setTimecodesByDistance(PathManagement.getActivePath(), speed());
 										}
 			}
 
@@ -225,10 +377,10 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		GUI.ON_CLICK : fn(){
 			// choose directory and size
 			var fileDialog=new GUI.FileDialog("Save screenshots",PADrend.getDataPath(),[""],fn(files){
-				if(!WaypointsPlugin.getCurrentPath())
+				if(!PathManagement.getActivePath())
 					return;
 
-				var wps = WaypointsPlugin.getCurrentPath().getWaypoints();
+				var wps = PathManagement.getActivePath().getWaypoints();
 				var oldViewport=camera.getViewport();
 				var oldSRT=PADrend.getDolly().getRelTransformationSRT();
 
@@ -281,13 +433,13 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 	toolbarEntries+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Undo",
-		GUI.ON_CLICK : WaypointsPlugin -> WaypointsPlugin.getCommandHistory().undo,
+		GUI.ON_CLICK : fn(){ PathManagement.getCommandHistory().undo(); },
 		GUI.ON_INIT : fn(description){
-			WaypointsPlugin.getCommandHistory().onUndoRedoChanged += this->fn(){
-				if(!WaypointsPlugin.getCommandHistory().canUndo())
+			PathManagement.getCommandHistory().onUndoRedoChanged += this->fn(){
+				if(!PathManagement.getCommandHistory().canUndo())
 					this.setTooltip("Nothing to be undone.");
 				else 
-					this.setTooltip("Undo \""+WaypointsPlugin.getCommandHistory().getUndoTop().getDescription()+"\"");
+					this.setTooltip("Undo \""+PathManagement.getCommandHistory().getUndoTop().getDescription()+"\"");
 			};
 		},
 		GUI.ICON : iconPath+"Undo32.png",
@@ -296,13 +448,13 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 	toolbarEntries+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Redo",
-		GUI.ON_CLICK : WaypointsPlugin -> WaypointsPlugin.getCommandHistory().redo,
+		GUI.ON_CLICK : fn(){ PathManagement.getCommandHistory().redo(); },
 		GUI.ON_INIT : fn(description){
-			WaypointsPlugin.getCommandHistory().onUndoRedoChanged += this->fn(){
-				if(!WaypointsPlugin.getCommandHistory().canRedo())
+			PathManagement.getCommandHistory().onUndoRedoChanged += this->fn(){
+				if(!PathManagement.getCommandHistory().canRedo())
 					this.setTooltip("Nothing to be redone.");
 				else 
-					this.setTooltip("Redo \""+WaypointsPlugin.getCommandHistory().getRedoTop().getDescription()+"\"");
+					this.setTooltip("Redo \""+PathManagement.getCommandHistory().getRedoTop().getDescription()+"\"");
 
 			};
 		},
@@ -310,13 +462,13 @@ WaypointsPlugin.createEditorTab:=fn(tabbedPanel){
 		GUI.TOOLTIP : "Nothing to be redone"
 	};
 
-	pan += toolbarEntries;
-	pan++;
+	panel += toolbarEntries;
+	panel++;
 
-	pan += tw;
+	panel += tw;
 
 	var tab=tabbedPanel.addTab("Path-Editor",
-		pan
+		panel
 		);
 	tab.setTooltip("Editor for paths");
 };

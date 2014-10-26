@@ -47,7 +47,7 @@ NodeEditor.registerConfigPanelProvider( MinSG.FollowPathBehaviour, fn(MinSG.Foll
 		var p=behaviour.getPath();
 		clear();
 		addOption( void," --- ");
-		foreach(WaypointsPlugin.collectPaths() as var path ){
+		foreach(WaypointsPlugin.getRegisteredPaths() as var path ){
 			addOption( path,NodeEditor.getString(path));
 		}
 		setData(p);

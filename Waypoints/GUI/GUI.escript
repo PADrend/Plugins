@@ -17,146 +17,142 @@
 **
 ** GUI construction for the Waypoints-Plugin.
 **/
+static PathManagement = Std.require('Waypoints/PathManagement');
 
-WaypointsPlugin.getWaypointDescription:=fn(wp,def=""){
-	var desc = wp.getNodeAttribute('desc');
-	return desc ? desc : def;
-};
-
-WaypointsPlugin.setWaypointDescription:=fn(wp,desc){
-	if(desc=="")
-		wp.unsetNodeAttribute('desc');
-	else
-		wp.setNodeAttribute('desc',desc);
-};
-
-WaypointsPlugin.createPathMenu := fn() {
-	var paths = WaypointsPlugin.collectPaths();
+static createPathMenu = fn() {
 	var pathListEntries = [];
-	foreach(paths as var path) {
+	print_r(PathManagement.getRegisteredPaths());
+	foreach(PathManagement.getRegisteredPaths() as var path) {
 		pathListEntries += [path, {
 			GUI.TYPE				:	GUI.TYPE_CONTAINER,
 			GUI.LAYOUT				:	GUI.LAYOUT_FLOW,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS, 10, 0],
 			GUI.CONTENTS			:	[
-											path.name ? path.name : NodeEditor.getString(path.getParent()) + ":" + NodeEditor.getString(path.toString()),
-											{
-												GUI.TYPE				:	GUI.TYPE_MENU,
-												GUI.LABEL				:	"->",
-												GUI.TOOLTIP				:	"Path opertions ...",
-												GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 20, 15],
-												GUI.MENU				:	[
-																				"*Attach to ...*",
-																				{
-																					GUI.TYPE		:	GUI.TYPE_BUTTON,
-																					GUI.LABEL		:	"... root",
-																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
-																											WaypointsPlugin.attachPath(path,PADrend.getRootNode());
-																										}
-																				},
-																				{
-																					GUI.TYPE		:	GUI.TYPE_BUTTON,
-																					GUI.LABEL		:	"... scene",
-																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
-																											WaypointsPlugin.attachPath(path,PADrend.getCurrentScene());
-																										}
-																				},
-																				{
-																					GUI.TYPE		:	GUI.TYPE_BUTTON,
-																					GUI.LABEL		:	"... selected node",
-																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
-																											WaypointsPlugin.attachPath(path,NodeEditor.getSelectedNode());
-																										}
-																				},
-																				"----",
-																				{
-																					GUI.TYPE		:	GUI.TYPE_BUTTON,
-																					GUI.LABEL		:	"Select PathNode",
-																					GUI.TOOLTIP		:	"Select PathNode in NodeEditor",
-																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
-																											NodeEditor.selectNode(path);
-																										}
-																				},
-																				"----",
-																				{
-																					GUI.TYPE		:	GUI.TYPE_BUTTON,
-																					GUI.LABEL		:	"Delete",
-																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
-																											MinSG.destroy(path);
-																											executeExtensions('Waypoints_PathListChanged');
-																											gui.closeAllMenus();
-																										}
-																				}
-																			]
-											}
-										]
+				NodeEditor.getString(path.toString()) + " @ " + NodeEditor.getString(path.getParent()),
+				{
+					GUI.TYPE				:	GUI.TYPE_MENU,
+					GUI.LABEL				:	"->",
+					GUI.TOOLTIP				:	"Path opertions ...",
+					GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 20, 15],
+					GUI.MENU				:	[
+						"*Attach to ...*",
+						{
+							GUI.TYPE		:	GUI.TYPE_BUTTON,
+							GUI.LABEL		:	"... root",
+							GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
+								PADrend.getRootNode() += path;
+								gui.closeAllMenus();
+							}
+						},
+						{
+							GUI.TYPE		:	GUI.TYPE_BUTTON,
+							GUI.LABEL		:	"... scene",
+							GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
+								PADrend.getCurrentScene() += path;
+								gui.closeAllMenus();
+							}
+						},
+						{
+							GUI.TYPE		:	GUI.TYPE_BUTTON,
+							GUI.LABEL		:	"... selected node",
+							GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
+								NodeEditor.getSelectedNode() += path;
+								gui.closeAllMenus();
+							}
+						},
+						"----",
+						{
+							GUI.TYPE		:	GUI.TYPE_BUTTON,
+							GUI.LABEL		:	"Select in NodeEditor",
+							GUI.TOOLTIP		:	"Select PathNode in NodeEditor",
+							GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
+								NodeEditor.selectNode(path);
+							}
+						},
+						"----",
+						{
+							GUI.TYPE		:	GUI.TYPE_BUTTON,
+							GUI.LABEL		:	"Delete",
+							GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
+								PathManagement.unregisterPath(path);
+								MinSG.destroy(path);
+								gui.closeAllMenus();
+							}
+						}
+					]
+				}
+			]
 		}];
 	}
 
-	var pathMenu = [];
-	pathMenu += {
+	var entries = [];
+	entries += {
 		GUI.TYPE				:	GUI.TYPE_LIST,
 		GUI.OPTIONS				:	pathListEntries,
 		GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 500, 150],
-		GUI.DATA_PROVIDER		:	WaypointsPlugin -> WaypointsPlugin.getCurrentPath,
+		GUI.DATA_PROVIDER		:	PathManagement -> PathManagement.getActivePath,
 		GUI.ON_DATA_CHANGED		:	fn(data) {
-											if(!data || data.empty()) {
-												return;
-											}
-											WaypointsPlugin.activatePath(data[0]);
-									}
+				if( data && !data.empty()) 
+					PathManagement.activatePath(data[0]);
+		}
 	};
-	return pathMenu;
+	entries += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Scan for PathNodes in current scene",
+		GUI.ON_CLICK : fn(){
+			PathManagement.scanForPathNodes( PADrend.getRootNode());
+			gui.closeAllMenus();
+		}
+	};
+	return entries;
 };
 
 /**
 * Creates the panel used to select the path, create a path, load, save etc.
 */
-WaypointsPlugin.addPathMenu:=fn(panel=void){
+static addPathMenu = fn(panel){
 	var toolBar = [];
 	toolBar += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
-		GUI.LABEL				:	"New",
+		GUI.LABEL				:	"New path",
 		GUI.TOOLTIP				:	"Create new path",
 		GUI.ON_CLICK			:	fn() {
-										var newPath = WaypointsPlugin.createPath();
-										WaypointsPlugin.activatePath(newPath);
-									},
+			var newPath = PathManagement.createPath();
+			PathManagement.activatePath(newPath);
+		},
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 	toolBar += {
 		GUI.TYPE				:	GUI.TYPE_MENU,
-		GUI.LABEL				:	"Select ...",
-		GUI.MENU		:	this -> createPathMenu,
+		GUI.LABEL				:	"Select path >>",
+		GUI.MENU				:	createPathMenu,
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 	toolBar += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
-		GUI.LABEL				:	"Load ...",
-		GUI.TOOLTIP				:	"Load a path from file",
+		GUI.LABEL				:	"Load path ...",
+		GUI.TOOLTIP				:	"Load a path from a file",
 		GUI.ON_CLICK			:	fn() {
-										fileDialog("Load path", systemConfig.getValue('Waypoint.path', "."), ".path",
-											WaypointsPlugin -> WaypointsPlugin.loadPath);
-									},
+			fileDialog("Load path", systemConfig.getValue('Waypoint.path', "."), ".path",
+				PathManagement -> PathManagement.loadPath);
+		},
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 	toolBar += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
-		GUI.LABEL				:	"Save ...",
-		GUI.TOOLTIP				:	"Save the current path to file",
+		GUI.LABEL				:	"Save path ...",
+		GUI.TOOLTIP				:	"Save the current path to a file",
 		GUI.ON_CLICK			:	fn() {
-										fileDialog("Save path", systemConfig.getValue('Waypoint.path', "."), ".path",
-											WaypointsPlugin -> WaypointsPlugin.savePath);
-									},
+			fileDialog("Save path", systemConfig.getValue('Waypoint.path', "."), ".path",
+				PathManagement -> PathManagement.savePath);
+		},
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 	toolBar += {
-		GUI.TYPE				:	GUI.TYPE_BUTTON,
+		GUI.TYPE				:	GUI.TYPE_BOOL,
 		GUI.LABEL				:	"Show",
 		GUI.TOOLTIP				:	"Show/Hide current path in the scene",
-		GUI.ON_CLICK			:	this -> fn() {
-										showPath = !showPath;
-									},
+		GUI.DATA_WRAPPER		:	PathManagement.showPath,
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 
@@ -167,7 +163,7 @@ WaypointsPlugin.addPathMenu:=fn(panel=void){
 	return component;
 };
 
-WaypointsPlugin.createMainWindowTab @(private) := fn() {
+return fn() {
 	// page-panel
 	var page = gui.create({
 		GUI.TYPE : GUI.TYPE_CONTAINER,
@@ -176,25 +172,23 @@ WaypointsPlugin.createMainWindowTab @(private) := fn() {
 	});
 
 	// Toolbar
-	var toolbar=this.addPathMenu(page);
+	addPathMenu(page);
 
 	// main
 	var subTabs = gui.create({	
 		GUI.TYPE : GUI.TYPE_TABBED_PANEL,
 		GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_FILL_ABS,4,4],
 	});
-	this.createNavigatorTab(subTabs);
-	this.createEditorTab(subTabs);
+	module('./GUI_Navigator')(subTabs);
+	module('./GUI_Editor')(subTabs);
 
 	page.nextRow();
 	page.add(subTabs);
 
 	// -------------------------------------------------------------------
 
-	executeExtensions('Waypoints_PathChanged', WaypointsPlugin.getCurrentPath() );
-	executeExtensions('Waypoints_SelectedWaypointChanged', WaypointsPlugin.getSelectedWaypoint() );
-	executeExtensions('Waypoints_PathAttachmentChanged', 'pig' );
-	executeExtensions('Waypoints_PathAttachmentChanged', 'cam' );
+	executeExtensions('Waypoints_PathChanged', PathManagement.getActivePath() );
+	executeExtensions('Waypoints_SelectedWaypointChanged', PathManagement.animation_currentTime() );
 
 	return {
 		GUI.TYPE : GUI.TYPE_TAB,

@@ -108,7 +108,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 												var slashPos = scene.filename.rFind("/");
 												suggestions += scene.filename.substr(slashPos + 1, scene.filename.rFind(".") - slashPos - 1);
 											}
-											var path = WaypointsPlugin.getCurrentPath();
+											var path = WaypointsPlugin.getActivePath();
 											if(path && path.isSet($name) && !path.name.empty()) {
 												var slashPos = path.name.rFind("/");
 												suggestions += path.name.substr(slashPos + 1, path.name.rFind(".") - slashPos - 1);
@@ -229,7 +229,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 			GUI.LABEL : "execute",
 			GUI.ON_CLICK : configData->fn(){
 				// init
-				var path = WaypointsPlugin.getCurrentPath();
+				var path = WaypointsPlugin.getActivePath();
 				if(!path)
 					return;
 
@@ -347,7 +347,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 		button0.avgDistOutput := avgDistOutput;
 		button0.setTooltip("calculate average distance between two neighbouring waypoints for current path");
 		button0.onClick = fn() {
-			avgDistOutput.setText(MeasurementPlugin.calculateAvgDistance(WaypointsPlugin.getCurrentPath()););
+			avgDistOutput.setText(MeasurementPlugin.calculateAvgDistance(WaypointsPlugin.getActivePath()););
 		};
 		panel.nextColumn();
 		panel.add(button0);

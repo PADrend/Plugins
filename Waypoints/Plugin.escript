@@ -16,13 +16,12 @@
  */
 /****
  **	[Plugin:Waypoints] Waypoints/Plugin.escript
- ** 2008-11
  **/
 
 /***
  **   WaypointsPlugin ---|> Plugin
  **/
-GLOBALS.WaypointsPlugin:=new Plugin({
+GLOBALS.WaypointsPlugin := new Plugin({
 		Plugin.NAME : 'Waypoints',
 		Plugin.DESCRIPTION : 
 			"Manages and creates paths (MinSG.PathNodes).\n"+
@@ -47,19 +46,6 @@ GLOBALS.WaypointsPlugin:=new Plugin({
 
 			/**
 			 * [public, event]
-			 * Executed when the path list has/was changed. That is when
-			 * 1. a new path is added (loaded/created)
-			 * 2. a path is removed (not implemented yet)
-			 *
-			 * Argument: WaypointsPlugin
-			 *
-			 * Changes:
-			 * 1. count of paths (WaypointsPlugin.getPaths)
-			 */
-			'Waypoints_PathListChanged',
-
-			/**
-			 * [public, event]
 			 * Executed when the current waypoint has/was changed. That is when
 			 * 1. The target of "flyTo" has been reached
 			 *
@@ -70,190 +56,60 @@ GLOBALS.WaypointsPlugin:=new Plugin({
 			 */
 			'Waypoints_SelectedWaypointChanged',
 
-			/**
-			 * [public, event]
-			 * Executed when something gets attached/detached to/from
-			 * the current path.
-			 *
-			 * Argument: A string ("cam", "pig", etc.)
-			 *
-			 * Changes:
-			 * 1. If the pig is attached (WaypointsPlugin.isPigAttached)
-			 * 2. If the camera is attached (WaypointsPlugin.isCameraAttached)
-			 */
-			'Waypoints_PathAttachmentChanged'
 		]
 });
 
 
-static Command = Std.require('LibUtilExt/Command');
+static PathManagement = Std.require('Waypoints/PathManagement');
 
-loadOnce(__DIR__+"/Interface.escript");
-loadOnce(__DIR__+"/GUI/GUI.escript");
-loadOnce(__DIR__+"/GUI/GUI_Editor.escript");
-loadOnce(__DIR__+"/GUI/GUI_Navigator.escript");
-
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-WaypointsPlugin.init:=fn() {
+WaypointsPlugin.init @(override) := fn() {
 	Util.requirePlugin('NodeEditor');
 
+	registerExtension('PADrend_Init', fn(){
+		// load inital path if set in config
+		var f = systemConfig.getValue('Waypoint.initialPath',false);
+		if(f)
+			PathManagement.loadPath(f);
 
-	{	// Register ExtensionPointHandler:
-		registerExtension('PADrend_AfterFrame',    			this->this.ex_AfterFrame);
-		registerExtension('PADrend_AfterRenderingPass',    this->this.ex_AfterRenderingPass);
-		registerExtension('PADrend_Init',               this->this.ex_Init);
-        registerExtension('PADrend_KeyPressed',         this->this.ex_KeyPressed);
-	}
-    {   //  variables
-        this.paths:=void;//[];	// buffered path-list, void means not valid
-        this.curPath:=void;	// current/selected path
-        this.showPath:=false;
-
-        // inserting of waypoints
-        this.insertIndex:=0;
-
-        // flight control
-        this.flight_startTime:=void;
-        this.flight_startPoint:=void;
-        this.flight_endTime:=void;
-        this.flight_endPoint:=void;
-        this.flight_targetIndex:=0;
-        this.flight_time:=systemConfig.getValue('Waypoint.flightTime',1.0);
-        this.polynomPoints:=[ new Geometry.Vec2(0,0),new Geometry.Vec2(0.3,0.2),new Geometry.Vec2(0.8,0.9),new Geometry.Vec2(1,1)];
-
-        // attaching objects
-        this.pig:=void;				// used to store the pig-node (so it has not to be created every time)
-		this.pigAttached:=false;
-		this.pigSpeed:=1.0;
-		this.pigPause:=false;
-		this.cameraAttached:=false;
-		this.cameraSpeed:=1.0;
-		this.cameraPause:=false;
-	}
-	{
-		// Command history (Util/Command.escript)
-		this.cmdHistory := new (Std.require('LibUtilExt/CommandHistory'));
-	}
+		PathManagement.animation_attachedCamera(PADrend.getDolly());
 	
+		gui.registerComponentProvider('PADrend_MainWindowTabs.20_Waypoints',fn(){
+			return Std.require('Waypoints/GUI/GUI')();
+		});
+
+	});
+      
 	Util.requirePlugin('PADrend/RemoteControl').registerFunctions({
 		// [ [time,description]* ] 
 		'Waypoints.getWaypointList' : this->fn(){
-			var path = WaypointsPlugin.getCurrentPath();
+			var path = PathManagement.getActivePath();
 			if(!path){
 				PADrend.message("No active path.");
 				return [];
 			}
 			var wps = [];
 			foreach(path.getWaypoints() as var wp){
-				wps += [wp.getTime(), WaypointsPlugin.getWaypointDescription(wp)];
+				wps += [wp.getTime(), PathManagement.getWaypointDescription(wp)];
 			}
 			return wps;
 		},
 		'Waypoints.flyTo' : this->fn(time){
-			WaypointsPlugin.flyTo(time,2.5);
+			PathManagement.flyTo(time,2.5);
 		}
 	});
 	return true;
 };
-
-// see Util/Command.escript
-WaypointsPlugin.getCommandHistory:=fn(){
-	return this.cmdHistory;
-};
-
-/**
- * [ext:PADrend_Init
- */
-WaypointsPlugin.ex_Init:=fn(){
-	// used for attaching camera/pig to the path
-	this.behaviourManager:=new MinSG.BehaviourManager();
-
-	// load inital path if set in config
-	var f=systemConfig.getValue('Waypoint.initialPath',false);
-	if(f)
-		loadPath(f);
-
-	gui.registerComponentProvider('PADrend_MainWindowTabs.20_Waypoints',this->createMainWindowTab);
-};
-
-
-
-/**
- * [ext:PADrend_AfterFrame]
- */
-WaypointsPlugin.ex_AfterFrame:=fn(...){
-    this.behaviourManager.executeBehaviours(PADrend.getSyncClock());
-
-    if(flight_endPoint){
-        var currentPos;
-        var now=PADrend.getSyncClock();
-        if(now>flight_endTime){
-            currentPos=this.flight_endPoint;
-            this.flight_startTime=false;
-            this.flight_startPoint=void;
-            this.flight_endTime=false;
-            this.flight_endPoint=void;
-        }else{
-            var d = (now-flight_startTime) / (flight_endTime-flight_startTime);
-            d = Geometry.interpolate2dPolynom(this.polynomPoints,d);
-//            d=d.pow(1.5);
-            currentPos=new Geometry.SRT(this.flight_startPoint,this.flight_endPoint,d);
-        }
-        PADrend.getDolly().setRelTransformation(currentPos);
-    } else if(this.isCameraAttached() && !this.isCameraPause()){
-    	executeExtensions('Waypoints_SelectedWaypointChanged', this.getCameraTimestamp() );
-    }
-};
-
-WaypointsPlugin.getCameraTimestamp:=fn(){
-	var time = this.followPathBehavior.getPosition();
-	var maxTime = curPath.getMaxTime();
-	if(time > maxTime && maxTime!=0 )
-		time-=(time/maxTime).floor() * maxTime;
-	while(time < 0){
-		time += maxTime;
-	}
-	return time;
-};
-
-/**
- * [ext:PADrend_KeyPressed]
- */
-WaypointsPlugin.ex_KeyPressed:=fn(evt) {
-	if (evt.key == Util.UI.KEY_P){  // add way [p]oint
-        WaypointsPlugin.createWaypointAtCam();
-        return true;
-	}else if (evt.key==Util.UI.KEY_KPMULTIPLY){  // '*' on keypad
-		WaypointsPlugin.flyToNextWaypoint();
-	    return true;
-	}else if (evt.key==Util.UI.KEY_KPDIVIDE){  // '/' on keypad
-		WaypointsPlugin.flyToPrevWaypoint();
-	    return true;
-	}
-
-    return false;
-};
-/**
- * [ext:PADrend_AfterRenderingPass]
- */
-WaypointsPlugin.ex_AfterRenderingPass:=fn(...){
-	if(!showPath || !getCurrentPath())
-		return;
-
-	var path = getCurrentPath();
-	renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
-	renderingContext.multMatrix_modelToCamera(path.getWorldTransformationMatrix());
-	renderingContext.applyChanges();
-	path.display(frameContext, MinSG.SHOW_META_OBJECTS);
-	renderingContext.popMatrix_modelToCamera();
-};
-
-
-/*! Shortcut for use in console. */
-GLOBALS.flyTo:=WaypointsPlugin->WaypointsPlugin.flyTo;
+  
+// public interface
+WaypointsPlugin.animation_speed := PathManagement.animation_speed;
+WaypointsPlugin.createPath := PathManagement.createPath;
+WaypointsPlugin.createWaypointAtCam := PathManagement.createWaypointAtCam;
+WaypointsPlugin.flyTo := PathManagement.flyTo;
+WaypointsPlugin.getActivePath := PathManagement.getActivePath;
+WaypointsPlugin.getRegisteredPaths := PathManagement.getRegisteredPaths;
+WaypointsPlugin.loadPath := PathManagement.loadPath;
+WaypointsPlugin.removeWaypoint := PathManagement.removeWaypoint;
+WaypointsPlugin.setWaypointDescription := PathManagement.setWaypointDescription;
 
 return WaypointsPlugin;
 // ------------------------------------------------------------------------------

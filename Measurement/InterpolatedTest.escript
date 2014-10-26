@@ -85,7 +85,7 @@ MeasurementPlugin.InterpolatedTest._constructor := fn(data) {
 	this.renderFlags := data['renderFlags']?data['renderFlags']:PADrend.getRenderingFlags();
 	this.statistics := data['statistics']?data['statistics']:PADrend.frameStatistics;
 	this.camera := data['camera,']?data['camera,']:GLOBALS.camera;
-	this.path := data['path']?data['path']:WaypointsPlugin.getCurrentPath();
+	this.path := data['path']?data['path']:WaypointsPlugin.getActivePath();
 
 	// list of srts (extracted from waypoints of selected path)
 	this.srts := [];

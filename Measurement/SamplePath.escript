@@ -24,7 +24,7 @@ MeasurementPlugin.samplePath := fn(	DataWrapper outputFileName,
 									DataWrapper pointIterations, 
 									DataWrapper pathIterations, 
 									DataWrapper stepSize) {
-	var path = WaypointsPlugin.getCurrentPath();
+	var path = WaypointsPlugin.getActivePath();
 	if(!path) {
 		throw "Invalid camera path.";
 	}
