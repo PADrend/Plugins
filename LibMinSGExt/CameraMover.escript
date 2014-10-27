@@ -140,7 +140,7 @@ T._actions @(private,init) := fn(){
 				}else{
 					var pivot = this.getPivot();
 					this.dolly.rotateAroundLocalAxis_rad( dx*0.01, new Geometry.Line3( pivot, [1,0,0]));
-					this.dolly.rotateAroundRelAxis_rad( dy*0.01, new Geometry.Line3( pivot, [0,1,0]));
+					this.dolly.rotateAroundRelAxis_rad( dy*0.01, new Geometry.Line3( this.dolly.localPosToRelPos( pivot ), [0,1,0]));
 				}
 			},
 			Util.UI.MASK_MOUSE_BUTTON_LEFT : fn(evt) {
