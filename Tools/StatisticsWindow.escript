@@ -182,7 +182,7 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 			GUI.ON_CLICK			:	[windowConfigPrefix, window] => fn(String configKey, GUI.Window window) {
 											window.close();
 											gui.markForRemoval(window);
-											PADrend.configCache.unsetValue(configKey);
+											PADrend.configCache.unset(configKey);
 										}
 		},
 		"*Statistics Counters*"
