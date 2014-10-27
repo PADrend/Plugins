@@ -966,7 +966,7 @@ GUI.GUI_Manager._componentFactories ::= {
 			GUI.TOOLTIP : "open file explorer",
 			GUI.WIDTH : 20,
 			GUI.ON_CLICK : [tf, input.description.get(GUI.ENDINGS,[""]), input.description.get(GUI.DIR,".") ]=>fn(tf,endings,dir){
-					var f = new GUI.FileDialog("Select a file",dir, endings, [tf] => fn(tf, filename){
+					var f = new (Std.require('LibGUIExt/FileDialog'))("Select a file",dir, endings, [tf] => fn(tf, filename){
 						if(tf.isDestroyed()){
 							Runtime.warn("Trying to set data to a destroyed text field.");
 							return;

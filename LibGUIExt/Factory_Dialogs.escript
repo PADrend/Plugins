@@ -28,6 +28,8 @@ loadOnce(__DIR__+"/Factory_Components.escript");
 									The parameter is a string with the selected filenames 
 									imploded with ';'. The this object is the dialog itself, 
 									so that this.getFolder() gets the current folder.
+		GUI.ON_FILE_CHANGED :	(optional) callback: fn( Array )
+		GUI.ON_FOLDER_CHANGED :	(optional) callback: fn( String )
 		GUI.OPTIONS : 			(optional) Array of components. Each component is placed in a separate row.
 
 	Folder dialog				Dialog for selecting a folder.
@@ -91,7 +93,7 @@ GUI.GUI_Manager._dialogFactories ::= {
 		}
 		
 		
-		var d = new GUI.FileDialog( input.title,
+		var d = new (Std.require('LibGUIExt/FileDialog'))( input.title,
 						dir,
 						input.description.get(GUI.ENDINGS,[""]),
 						input.description.get(GUI.ON_ACCEPT,fn(files){print_r(files);}));
@@ -101,12 +103,26 @@ GUI.GUI_Manager._dialogFactories ::= {
 		// add option panel
 		var options = input.description[GUI.OPTIONS];
 		if(options){
-			var optionPanel = d.createOptionPanel();
+			var entries = [];
+			var panelWidth = 100;
 			foreach(this.createComponents(options) as var option){
-				optionPanel += option;
+				var entry = this.createComponent(option);
+				entries += entry;
+				entry.layout();
+				if(entry.getWidth()>panelWidth)
+					panelWidth = entry.getWidth();
+			}
+
+			var optionPanel = d.createOptionPanel(panelWidth+20);
+			foreach( entries as var entry){
+				optionPanel += entry;
 				optionPanel++;
 			}
 		}
+		if( input.description[GUI.ON_FILES_CHANGED])
+			d.onSelectionChanged += input.description[GUI.ON_FILES_CHANGED];
+		if( input.description[GUI.ON_FOLDER_CHANGED])
+			d.onFolderChanged += input.description[GUI.ON_FOLDER_CHANGED];
 		result.dialog = d;
 	},
 	GUI.TYPE_FOLDER_DIALOG : fn(input,result){

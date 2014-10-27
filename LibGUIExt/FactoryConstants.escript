@@ -56,6 +56,8 @@ GUI.ON_CLICK := 'onClick';
 GUI.ON_DATA_CHANGED := 'onDataChanged';
 GUI.ON_DRAG := $ON_DRAG;
 GUI.ON_DROP := $ON_DROP;
+GUI.ON_FILES_CHANGED := 'ON_FILES_CHANGED';		//! \see GUI.FileDialog
+GUI.ON_FOLDER_CHANGED := 'ON_FOLDER_CHANGED';		//! \see GUI.FileDialog
 GUI.ON_INIT := 'onInit';
 GUI.ON_MOUSE_BUTTON := $ON_MOUSE_BUTTON;
 GUI.ON_START_DRAGGING := $ON_START_DRAGGING;
@@ -114,3 +116,5 @@ GUI.TYPE_TREE := 'tree';
 GUI.TYPE_TREE_GROUP := 'treeSubGroup';
 GUI.TYPE_WINDOW := 'window';
 GUI.WIDTH := 'width';
+
+return GUI;

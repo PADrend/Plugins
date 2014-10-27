@@ -169,8 +169,12 @@ plugin.registerStdToolbarEntries := fn() {
 											MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY),
 					$sceneManager : new Std.DataWrapper(void)
 				});
-				var f=new GUI.FileDialog("Load Scene",PADrend.getScenePath(),[".minsg", ".dae", ".DAE"],
-					[config] => fn(config,filename){
+				gui.openDialog({
+					GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+					GUI.LABEL : "Load Scene ...",
+					GUI.DIR : PADrend.getScenePath(),
+					GUI.ENDINGS : [".minsg", ".dae", ".DAE"],
+					GUI.ON_ACCEPT  : [config] => fn(config,filename){
 						// Collect flags.
 						out("Load Scene \"",filename,"\"...");
 						PADrend.message("Load scene \""+filename+"\"...");
@@ -190,83 +194,72 @@ plugin.registerStdToolbarEntries := fn() {
 							addToRecentSceneList( filename );
 						}
 
-					}
-				);
-				//sceneLoadOptionPanel
-				var optionPanel=f.createOptionPanel(250);
-				optionPanel += "Options";
-				optionPanel++;
-				optionPanel += '----';
-				optionPanel++;
-				
-				optionPanel += {
-					GUI.TYPE			:	GUI.TYPE_NUMBER,
-					GUI.LABEL			:	"Scale:",
-					GUI.DATA_WRAPPER	:	config.scale,
-					GUI.OPTIONS			:	[1.0,0.1,0.01,0.001],
-					GUI.WIDTH			:	200,
-				};
-				optionPanel++;
-				
-				optionPanel += {
-					GUI.LABEL			:	"Reuse exisiting states",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	config,
-					GUI.DATA_ATTRIBUTE	:	$importOptions,
-					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_REUSE_EXISTING_STATES
-				};
-				optionPanel++;
-				optionPanel += {
-					GUI.LABEL			:	"Cache textures in TextureRegistry",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	config,
-					GUI.DATA_ATTRIBUTE	:	$importOptions,
-					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY
-				};
-				optionPanel++;			
-				optionPanel += {
-					GUI.LABEL			:	"Cache meshes in MeshRegistry (file)",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	config,
-					GUI.DATA_ATTRIBUTE	:	$importOptions,
-					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY,
-					GUI.TOOLTIP : "If GeometryNodes use the same mesh file (during this import process), \nload and use the mesh only once."
-					
-				};
-				optionPanel++;
-				optionPanel += {
-					GUI.LABEL			:	"Cache meshes in MeshRegistry (hash)",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	config,
-					GUI.DATA_ATTRIBUTE	:	$importOptions,
-					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_HASHING_REGISTRY,
-					GUI.TOOLTIP : "If GeometryNodes use the same mesh based on its structure (during this import process), \nload and use the mesh only once."
-				};
-				optionPanel++;
-				optionPanel += {
-					GUI.LABEL			:	"COLLADA: Invert transparency",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	config,
-					GUI.DATA_ATTRIBUTE	:	$importOptions,
-					GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY,
-					GUI.TOOLTIP : "Use this for scenes exported from 3dMax"
-				};
-				optionPanel++;
-				optionPanel += {
-					GUI.LABEL			:	"ID-Namspace",
-					GUI.TYPE			:	GUI.TYPE_SELECT,
-					GUI.SIZE			:	[GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,5,15],
-					GUI.DATA_WRAPPER	:	config.sceneManager,
-					GUI.OPTIONS_PROVIDER : fn(){
-						var options = [ ];
-						foreach( PADrend.SceneManagement.getNamedMapOfAvaiableSceneManagers() as var sceneManager,var name)
-							options += [sceneManager,name];
-						options += [true,"create new namespace"];
-						return options;
 					},
-					GUI.TOOLTIP : "Use existing id-namespace or create a new one.\nNode and State ids are unique in a namespace and are \n lost when Nodes are transferred into another namespace."
-				};
-				f.init();
+					GUI.OPTIONS : [
+						"Options",
+						'----',
+						{
+							GUI.TYPE			:	GUI.TYPE_NUMBER,
+							GUI.LABEL			:	"Scale:",
+							GUI.DATA_WRAPPER	:	config.scale,
+							GUI.OPTIONS			:	[1.0,0.1,0.01,0.001],
+							GUI.SIZE			:	[GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,15,15],
+						},
+						{
+							GUI.LABEL			:	"Reuse exisiting states",
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$importOptions,
+							GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_REUSE_EXISTING_STATES
+						},
+						{
+							GUI.LABEL			:	"Cache textures in TextureRegistry",
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$importOptions,
+							GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY
+						},
+						{
+							GUI.LABEL			:	"Cache meshes in MeshRegistry (file)",
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$importOptions,
+							GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY,
+							GUI.TOOLTIP : "If GeometryNodes use the same mesh file (during this import process), \nload and use the mesh only once."
+							
+						},
+						{
+							GUI.LABEL			:	"Cache meshes in MeshRegistry (hash)",
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$importOptions,
+							GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_HASHING_REGISTRY,
+							GUI.TOOLTIP : "If GeometryNodes use the same mesh based on its structure (during this import process), \nload and use the mesh only once."
+						},
+						{
+							GUI.LABEL			:	"COLLADA: Invert transparency",
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$importOptions,
+							GUI.DATA_BIT		:	MinSG.SceneManagement.IMPORT_OPTION_DAE_INVERT_TRANSPARENCY,
+							GUI.TOOLTIP : "Use this for scenes exported from 3dMax"
+						},
+						{
+							GUI.LABEL			:	"ID-Namspace",
+							GUI.TYPE			:	GUI.TYPE_SELECT,
+							GUI.SIZE			:	[GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,15,15],
+							GUI.DATA_WRAPPER	:	config.sceneManager,
+							GUI.OPTIONS_PROVIDER : fn(){
+								var options = [ ];
+								foreach( PADrend.SceneManagement.getNamedMapOfAvaiableSceneManagers() as var sceneManager,var name)
+									options += [sceneManager,name];
+								options += [true,"create new namespace"];
+								return options;
+							},
+							GUI.TOOLTIP : "Use existing id-namespace or create a new one.\nNode and State ids are unique in a namespace and are \n lost when Nodes are transferred into another namespace."
+						},
+					]
+				});
 			}
 
 		},
@@ -333,65 +326,68 @@ plugin.registerStdToolbarEntries := fn() {
 			GUI.LABEL		:	"Load Mesh ...",
 			GUI.TOOLTIP		:	"Show a dialog to choose a file, read a mesh from that file, and add it to the current scene.\nSupported types: .mmf, .obj, .ply, .md2, .mvbo, .ngc",
 			GUI.ON_CLICK	:	fn() {
-
-				var f=new GUI.FileDialog("Load Mesh",PADrend.getDataPath(),[".obj",".ply",".mmf",".mvbo",".MVBO",".ngc", ".md2", ".MD2", ".xyz"],
-					fn(filename){
+				var config = new ExtObject;
+				config.meshOptions := 0;
+				config.id := new Std.DataWrapper("");
+				
+				gui.openDialog({
+					GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+					GUI.LABEL : "Load Mesh",
+					GUI.DIR : PADrend.getDataPath(),
+					GUI.ENDINGS : [".obj",".ply",".mmf",".mvbo",".MVBO",".ngc", ".md2", ".MD2", ".xyz"],
+					GUI.ON_ACCEPT  : [config] => fn(config,filename){
 						out("Load Mesh \"",filename,"\"...");
 						PADrend.message("Load Mesh \""+filename+"\"...");
 						showWaitingScreen();
-						var start=clock();
+						var start = clock();
 
-						var n=MinSG.loadModel(filename, optionPanel.meshOptions);
+						var n = MinSG.loadModel(filename, config.meshOptions);
 						if(!n)
 							return;
 						PADrend.getCurrentScene().addChild(n);
-						var id=optionPanel.idTF.getText().trim();
-						if(id!=""){
+						var id = config.id().trim();
+						if(id.empty()){
 							PADrend.getSceneManager().registerNode(id,n);
 						}	out("\nDone. ",(clock()-start)," sek\n");
 
 						out("\nDone. ",(clock()-start)," sek\n");
-					}
-				);
-				//meshLoadOptionPanel
-				var optionPanel=f.createOptionPanel();
-				optionPanel += "Mesh options";
-				optionPanel++;
-
-				optionPanel.meshOptions:=0;
-				optionPanel += {
-					GUI.LABEL			:	"AUTO_CENTER",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	optionPanel,
-					GUI.DATA_ATTRIBUTE	:	$meshOptions,
-					GUI.DATA_BIT		:	MinSG.MESH_AUTO_CENTER
-				};
-				optionPanel++;
-				optionPanel += {
-					GUI.LABEL			:	"AUTO_CENTER_BOTTOM",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	optionPanel,
-					GUI.DATA_ATTRIBUTE	:	$meshOptions,
-					GUI.DATA_BIT		:	MinSG.MESH_AUTO_CENTER_BOTTOM
-				};
-				optionPanel++;
-				optionPanel += {
-					GUI.LABEL			:	"AUTO_SCALE",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	optionPanel,
-					GUI.DATA_ATTRIBUTE	:	$meshOptions,
-					GUI.DATA_BIT		:	MinSG.MESH_AUTO_SCALE
-				};
-				optionPanel++;
-				optionPanel += gui.createLabel("Node options");
-				optionPanel++;
-				optionPanel += gui.createLabel("Node id:");
-				optionPanel += optionPanel.idTF:=gui.createTextfield(100,15,"");
-				optionPanel.idTF.setTooltip("The created Node is registered at the \nsceneManager with this id.");
-				optionPanel.onSelectionChanged=fn(file){
-					idTF.setText(file);
-				};
-				f.init();
+					},
+					GUI.ON_FILES_CHANGED : [config.id] => fn( id, arr ){
+						id( arr.empty() ? "" : arr.front() );
+					},
+					GUI.OPTIONS : [
+						"*Mesh options*",
+						{
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.LABEL			:	"AUTO_CENTER",
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$meshOptions,
+							GUI.DATA_BIT		:	MinSG.MESH_AUTO_CENTER
+						},						
+						{
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.LABEL			:	"AUTO_CENTER_BOTTOM",
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$meshOptions,
+							GUI.DATA_BIT		:	MinSG.MESH_AUTO_CENTER_BOTTOM
+						},
+						{
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.LABEL			:	"AUTO_SCALE",
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$meshOptions,
+							GUI.DATA_BIT		:	MinSG.MESH_AUTO_SCALE
+						},
+						"*Node options*",
+						{
+							GUI.TYPE			:	GUI.TYPE_TEXT,
+							GUI.LABEL			:	"Node id",
+							GUI.DATA_WRAPPER	:	config.id,
+							GUI.TOOLTIP			:	"The created Node is registered at the \nsceneManager with this id."
+						}
+						
+					]
+				});
 			}
 		},
     
@@ -399,154 +395,162 @@ plugin.registerStdToolbarEntries := fn() {
 			GUI.LABEL		:	"Load Meshes ...",
 			GUI.TOOLTIP		:	"Show a dialog to choose a directory, read all meshes from that directory, and add them to the current scene.\nSupported types: .mmf, .obj, .ply, .md2, .mvbo, .ngc",
 			GUI.ON_CLICK	:	fn() {
+				var config = new ExtObject;
+				config.meshOptions := 0;
 
-				var f=new GUI.FileDialog("Load all Meshes in folder",PADrend.getDataPath(),[".mmf",".obj",".ply"], fn(filename){
-
-					var folder = this.getFolder();
-					out("Load Meshes \"",folder,"\"...");
-					PADrend.message("Load Meshs \""+folder+"\"...");
-					showWaitingScreen();
-					var start=clock();
-					var count=0;
-					foreach(Util.getFilesInDir(folder,[".obj",".ply",".mmf",".mvbo",".MVBO",".ngc", ".md2", ".MD2", ".xyz"]) as var file){
-						 var n=MinSG.loadModel(file, optionPanel.meshOptions);
-						if(!n)
-							continue;
-						PADrend.getCurrentScene().addChild(n);
-						if((count++ % 10)==0)
-							out(".");
-//						out(file);
-					}
-					out("\nDone. ",(clock()-start)," sek\n");
+				gui.openDialog({
+					GUI.TYPE : GUI.TYPE_FOLDER_DIALOG,
+					GUI.LABEL : "Load all Meshes in folder",
+					GUI.DIR : PADrend.getDataPath(),
+					GUI.ENDINGS : [".obj",".ply",".mmf",".mvbo",".MVBO",".ngc", ".md2", ".MD2", ".xyz"],
+					GUI.ON_ACCEPT : [config] => fn(config, folder){
+						out("Load Meshes \"",folder,"\"...");
+						PADrend.message("Load Meshs \""+folder+"\"...");
+						showWaitingScreen();
+						var start=clock();
+						var count=0;
+						foreach(Util.getFilesInDir(folder,[".obj",".ply",".mmf",".mvbo",".MVBO",".ngc", ".md2", ".MD2", ".xyz"]) as var file){
+							 var n=MinSG.loadModel(file, config.meshOptions);
+							if(!n)
+								continue;
+							PADrend.getCurrentScene().addChild(n);
+							if((count++ % 10)==0)
+								out(".");
+	//						out(file);
+						}
+						out("\nDone. ",(clock()-start)," sek\n");
+					},
+					GUI.OPTIONS : [
+						"Mesh options",
+						{
+							GUI.LABEL			:	"AUTO_CENTER",
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$meshOptions,
+							GUI.DATA_BIT		:	MinSG.MESH_AUTO_CENTER
+						},
+						{
+							GUI.LABEL			:	"AUTO_CENTER_BOTTOM",
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$meshOptions,
+							GUI.DATA_BIT		:	MinSG.MESH_AUTO_CENTER_BOTTOM
+						},
+						{
+							GUI.LABEL			:	"AUTO_SCALE",
+							GUI.TYPE			:	GUI.TYPE_BIT,
+							GUI.DATA_OBJECT		:	config,
+							GUI.DATA_ATTRIBUTE	:	$meshOptions,
+							GUI.DATA_BIT		:	MinSG.MESH_AUTO_SCALE
+						}
+					]
 				});
-				f.folderSelector = true;
-				//meshLoadOptionPanel
-				var optionPanel=f.createOptionPanel();
-				optionPanel += "Mesh options";
-				optionPanel++;
-
-				optionPanel.meshOptions:=0;
-				optionPanel += {
-					GUI.LABEL			:	"AUTO_CENTER",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	optionPanel,
-					GUI.DATA_ATTRIBUTE	:	$meshOptions,
-					GUI.DATA_BIT		:	MinSG.MESH_AUTO_CENTER
-				};
-				optionPanel++;
-				optionPanel += {
-					GUI.LABEL			:	"AUTO_CENTER_BOTTOM",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	optionPanel,
-					GUI.DATA_ATTRIBUTE	:	$meshOptions,
-					GUI.DATA_BIT		:	MinSG.MESH_AUTO_CENTER_BOTTOM
-				};
-				optionPanel++;
-				optionPanel += {
-					GUI.LABEL			:	"AUTO_SCALE",
-					GUI.TYPE			:	GUI.TYPE_BIT,
-					GUI.DATA_OBJECT		:	optionPanel,
-					GUI.DATA_ATTRIBUTE	:	$meshOptions,
-					GUI.DATA_BIT		:	MinSG.MESH_AUTO_SCALE
-				};
-				optionPanel++;
-				optionPanel += gui.createLabel("Node options");
-				optionPanel++;
-
-				f.init();
 			}
 		},
 		{
 			GUI.LABEL		:	"Save Meshes ...",
 			GUI.TOOLTIP		:	"Show a dialog to choose a directory, and write all meshes that are used by the current scene into that directory.\nSupported types: .mmf, .ply",
 			GUI.ON_CLICK	:	fn() {
-				var f=new GUI.FileDialog("Export Meshes",PADrend.getDataPath(),[""],fn(filename){
-					var folder=this.getFolder();//IO.dirname(filename);
-					out("Exporting meshes to ",folder,"\n");
-					showWaitingScreen();
-					if(optionPanel.exportType.getValue()=='mmf'){
-						MinSG.SceneManagement.saveMeshesInSubtreeAsMMF(
-								PADrend.getCurrentScene(),
-								folder,
-								optionPanel.exportRegisteredCB.isChecked());
-					} else{ //ply
-						MinSG.SceneManagement.saveMeshesInSubtreeAsPLY(
-								PADrend.getCurrentScene(),
-								folder,
-								optionPanel.exportRegisteredCB.isChecked());
-					}
-					Util.flush(folder);
+				var exportRegisteredCB = new Std.DataWrapper(false);
+				var exportFormat = new Std.DataWrapper("mmf");
+				var currentFolder = new Std.DataWrapper;
+				var dbfsName = new Std.DataWrapper("new.dbfs");
+				var zipName = new Std.DataWrapper("new.zip");
+				currentFolder.onDataChanged += [dbfsName] => fn(dbfsName,folder){	dbfsName(folder+"/new.dbfs");	};
+				currentFolder.onDataChanged += [zipName] => fn(zipName,folder){	zipName(folder+"/new.zip");	};
+				currentFolder(PADrend.getDataPath());
+
+				gui.openDialog({
+					GUI.TYPE : GUI.TYPE_FOLDER_DIALOG,
+					GUI.LABEL : "Export all Meshes to ...",
+					GUI.DIR : PADrend.getDataPath(),
+					GUI.ON_ACCEPT : [exportRegisteredCB,exportFormat] => fn(exportRegisteredCB,exportFormat, folder){
+												
+						outln("Exporting meshes to ",folder);
+						showWaitingScreen();
+						if(exportFormat()=='mmf'){
+							MinSG.SceneManagement.saveMeshesInSubtreeAsMMF(
+									PADrend.getCurrentScene(),
+									folder,
+									exportRegisteredCB());
+						} else{ //ply
+							MinSG.SceneManagement.saveMeshesInSubtreeAsPLY(
+									PADrend.getCurrentScene(),
+									folder,
+									exportRegisteredCB());
+						}
+						Util.flush(folder);
+					},
+					GUI.ON_FOLDER_CHANGED : [currentFolder]=>fn(currentFolder,folder){	currentFolder(folder);	},
+					GUI.OPTIONS : [
+						"*Mesh export options*",
+						{
+							GUI.LABEL			:	"Export already registered nodes",
+							GUI.TYPE			:	GUI.TYPE_BOOL,
+							GUI.DATA_WRAPPER	:	exportRegisteredCB
+						},
+						{
+							GUI.TYPE 			: 	GUI.TYPE_SELECT,
+							GUI.LABEL			:	"Export format:",
+							GUI.DATA_WRAPPER	: 	exportFormat,
+							GUI.OPTIONS			:	[ ['mmf',"mmf - MinSG mesh format"],['ply',"ply - Standord PLY"]]
+
+						},
+						'----',
+						"*Create new dbfs-container*",
+						{
+							GUI.TYPE 			: 	GUI.TYPE_TEXT,
+							GUI.Label			:	"Filename",
+							GUI.DATA_WRAPPER	: 	dbfsName
+
+						},
+						{
+							GUI.TYPE			:	GUI.TYPE_BUTTON,
+							GUI.LABEL			:	"Create",
+							GUI.TOOLTIP			:	"Create a .dbfs container file with the name in the file name box.\n\n   !!!Re-enter this folder to refresh!!! ",
+							GUI.ON_CLICK		:	[dbfsName]=>fn(dbfsName){
+								var archiveName = dbfsName();
+								var pPos = archiveName.find("://");
+								if(pPos)
+									archiveName=archiveName.substr(pPos+3);
+								archiveName="dbfs://"+archiveName;
+								if(!archiveName.endsWith(".dbfs"))
+									archiveName += ".dbfs";
+								out("Creating file:",archiveName,"\n");
+								Util.saveFile(archiveName+"$./info.txt","MinSG dbfs file container\n"+Util.createTimeStamp());
+								Util.flush(archiveName);
+//								refresh();
+							},
+
+						},
+						'----',
+						"*Create new zip-container*",
+						{
+							GUI.TYPE 			: 	GUI.TYPE_TEXT,
+							GUI.Label			:	"Filename",
+							GUI.DATA_WRAPPER	: 	zipName
+
+						},
+						{
+							GUI.TYPE			:	GUI.TYPE_BUTTON,
+							GUI.LABEL			:	"Create",
+							GUI.TOOLTIP			:	"Create a .zip container file with the name in the file name box\n\n   !!!Re-enter this folder to refresh!! ",
+							GUI.ON_CLICK		:	[zipName]=>fn(zipName){
+								var archiveName = zipName();
+								var pPos = archiveName.find("://");
+								if(pPos)
+									archiveName = archiveName.substr(pPos+3);
+								archiveName= "zip://"+archiveName;
+								if(!archiveName.endsWith(".zip"))
+									archiveName += ".zip";
+								out("Creating file:",archiveName,"\n");
+								Util.saveFile(archiveName+"$./info.txt","MinSG zip file container\n"+Util.createTimeStamp());
+								Util.flush(archiveName);
+//								refresh();
+							}
+						}
+					]
 				});
-				f.folderSelector = true;
-				//meshExportOptionPanel
-				var optionPanel=f.createOptionPanel();
-
-				optionPanel += gui.createLabel("Mesh export options");
-				optionPanel.nextRow(5);
-				optionPanel += gui.createLabel("Export to: ");
-				optionPanel.dirLabel:=gui.createLabel(100,20,"dir...",GUI.LOWERED_BORDER);
-				optionPanel.dirLabel.setTooltip("This is the directory the meshes will be exported to.");
-				optionPanel +=  optionPanel.dirLabel ;
-				optionPanel.onDirChanged=fn(dir){
-					dirLabel.setText(dir);
-				};
-				optionPanel.nextRow(5);
-				optionPanel += optionPanel.exportRegisteredCB:=gui.createCheckbox("Export already registered nodes",false);
-				optionPanel++;
-
-				optionPanel += optionPanel.exportType:=gui.createRadioButtonSet("Export format:");
-				optionPanel.exportType.addOption('mmf');
-				optionPanel.exportType.addOption('ply');
-				optionPanel.exportType.setValue('mmf');
-				optionPanel.nextRow(30);
-				{
-					var b=gui.createButton(150,20,"Create new DBFS file");
-					b.setTooltip("Create a .dbfs container file with the name in the file name box.");
-					optionPanel += b;
-					b.onClick=f->fn(){
-						var files=getCurrentFiles();
-						if(files.empty())
-							return;
-						var dbFile=files[0];
-						var pPos = dbFile.find("://");
-						if(pPos)
-							dbFile=dbFile.substr(pPos+3);
-						dbFile="dbfs://"+dbFile;
-						if(!dbFile.endsWith(".dbfs"))
-							dbFile += ".dbfs";
-						out("Creating file:",dbFile,"\n");
-						Util.saveFile(dbFile+"$./info.txt","MinSG dbfs file container\n"+Util.createTimeStamp());
-						Util.flush(dbFile);
-						refresh();
-					};
-				}
-				optionPanel.nextRow(5);
-				{
-					var b = gui.createButton(150, 20, "Create new ZIP file");
-					b.setTooltip("Create a .zip archive cotainer file with the name in the file name box.");
-					optionPanel += b;
-					b.onClick = f -> fn() {
-						var files=getCurrentFiles();
-						if(files.empty()) {
-							return;
-						}
-						var archiveFile = files[0];
-						var pPos = archiveFile.find("://");
-						if(pPos) {
-							archiveFile = archiveFile.substr(pPos+3);
-						}
-						archiveFile = "zip://" + archiveFile;
-						if(!archiveFile.endsWith(".zip")) {
-							archiveFile += ".zip";
-						}
-						out("Creating file: ", archiveFile, "\n");
-						Util.saveFile(archiveFile + "$./info.txt", "MinSG archive file container\n" + Util.createTimeStamp() + "\n");
-						Util.flush(archiveFile);
-						refresh();
-					};
-				}
-
-				f.init();
 			}
 		}
 	]);
@@ -558,7 +562,7 @@ plugin.registerStdToolbarEntries := fn() {
 			GUI.LABEL		:	"Load Script ...",
 			GUI.TOOLTIP		:	"Show a dialog to choose a file, and load that file and execute it.\nSupported types: .escript",
 			GUI.ON_CLICK	:	fn() {
-				fileDialog("Load Script",".",[".escript"],
+				GUI._openFileDialog("Load Script",".",[".escript"],
 					fn(filename){
 						PADrend.message("Load Script \""+filename+"\"...");
 						out("\n");

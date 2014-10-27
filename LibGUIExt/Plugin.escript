@@ -44,7 +44,7 @@ plugin.init:=fn() {
 	loadOnce(__DIR__+"/Factory_ComponentGroups.escript");
 	loadOnce(__DIR__+"/Factory_Dialogs.escript");
 	loadOnce(__DIR__+"/Factory_Components.escript");
-	loadOnce(__DIR__+"/FileDialog.escript");
+	Std.require('LibGUIExt/FileDialog');
 	loadOnce(__DIR__+"/FontHandling.escript");
 	loadOnce(__DIR__+"/GUI_Utils.escript");
 	loadOnce(__DIR__+"/IconHandling.escript");

@@ -1118,7 +1118,7 @@ NodeEditor.addConfigTreeEntryProvider(MinSG.ShaderState,fn( obj,entry ){
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Export programs",
 				GUI.ON_CLICK : entry->fn(){
-					fileDialog("Save shader program list ",PADrend.getUserPath(),".shader",this->fn(filename){
+					GUI._openFileDialog("Save shader program list ",PADrend.getUserPath(),".shader",this->fn(filename){
 						var shaderState = this.getObject();
 						var s=toJSON(shaderState.getStateAttribute(MinSG.ShaderState.STATE_ATTR_SHADER_FILES));
 						out("\n",s);
@@ -1131,7 +1131,7 @@ NodeEditor.addConfigTreeEntryProvider(MinSG.ShaderState,fn( obj,entry ){
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Import programs",
 				GUI.ON_CLICK : entry->fn(){
-					fileDialog("Import shader program list ",PADrend.getUserPath(),".shader",this->fn(filename){
+					GUI._openFileDialog("Import shader program list ",PADrend.getUserPath(),".shader",this->fn(filename){
 						PADrend.message("Importing shader from ",filename);
 						var data = parseJSON(IO.fileGetContents(filename));
 						var shaderState = this.getObject();

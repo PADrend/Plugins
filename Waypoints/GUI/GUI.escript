@@ -17,7 +17,6 @@
 **
 ** GUI construction for the Waypoints-Plugin.
 **/
-static PathManagement = Std.require('Waypoints/PathManagement');
 
 static createPathMenu = fn() {
 	var pathListEntries = [];
@@ -29,59 +28,59 @@ static createPathMenu = fn() {
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS, 10, 0],
 			GUI.CONTENTS			:	[
 				NodeEditor.getString(path.toString()) + " @ " + NodeEditor.getString(path.getParent()),
-				{
-					GUI.TYPE				:	GUI.TYPE_MENU,
-					GUI.LABEL				:	"->",
-					GUI.TOOLTIP				:	"Path opertions ...",
-					GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 20, 15],
-					GUI.MENU				:	[
-						"*Attach to ...*",
-						{
-							GUI.TYPE		:	GUI.TYPE_BUTTON,
-							GUI.LABEL		:	"... root",
-							GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
+											{
+												GUI.TYPE				:	GUI.TYPE_MENU,
+												GUI.LABEL				:	"->",
+												GUI.TOOLTIP				:	"Path opertions ...",
+												GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 20, 15],
+												GUI.MENU				:	[
+																				"*Attach to ...*",
+																				{
+																					GUI.TYPE		:	GUI.TYPE_BUTTON,
+																					GUI.LABEL		:	"... root",
+																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
 								PADrend.getRootNode() += path;
 								gui.closeAllMenus();
-							}
-						},
-						{
-							GUI.TYPE		:	GUI.TYPE_BUTTON,
-							GUI.LABEL		:	"... scene",
-							GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
+																										}
+																				},
+																				{
+																					GUI.TYPE		:	GUI.TYPE_BUTTON,
+																					GUI.LABEL		:	"... scene",
+																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
 								PADrend.getCurrentScene() += path;
 								gui.closeAllMenus();
-							}
-						},
-						{
-							GUI.TYPE		:	GUI.TYPE_BUTTON,
-							GUI.LABEL		:	"... selected node",
-							GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
+																										}
+																				},
+																				{
+																					GUI.TYPE		:	GUI.TYPE_BUTTON,
+																					GUI.LABEL		:	"... selected node",
+																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
 								NodeEditor.getSelectedNode() += path;
 								gui.closeAllMenus();
-							}
-						},
-						"----",
-						{
-							GUI.TYPE		:	GUI.TYPE_BUTTON,
+																										}
+																				},
+																				"----",
+																				{
+																					GUI.TYPE		:	GUI.TYPE_BUTTON,
 							GUI.LABEL		:	"Select in NodeEditor",
-							GUI.TOOLTIP		:	"Select PathNode in NodeEditor",
-							GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
-								NodeEditor.selectNode(path);
-							}
-						},
-						"----",
-						{
-							GUI.TYPE		:	GUI.TYPE_BUTTON,
-							GUI.LABEL		:	"Delete",
-							GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
+																					GUI.TOOLTIP		:	"Select PathNode in NodeEditor",
+																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
+																											NodeEditor.selectNode(path);
+																										}
+																				},
+																				"----",
+																				{
+																					GUI.TYPE		:	GUI.TYPE_BUTTON,
+																					GUI.LABEL		:	"Delete",
+																					GUI.ON_CLICK	:	[path] => fn(MinSG.PathNode path) {
 								PathManagement.unregisterPath(path);
-								MinSG.destroy(path);
-								gui.closeAllMenus();
-							}
-						}
-					]
-				}
-			]
+																											MinSG.destroy(path);
+																											gui.closeAllMenus();
+																										}
+																				}
+																			]
+											}
+										]
 		}];
 	}
 
@@ -94,7 +93,7 @@ static createPathMenu = fn() {
 		GUI.ON_DATA_CHANGED		:	fn(data) {
 				if( data && !data.empty()) 
 					PathManagement.activatePath(data[0]);
-		}
+											}
 	};
 	entries += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -102,7 +101,7 @@ static createPathMenu = fn() {
 		GUI.ON_CLICK : fn(){
 			PathManagement.scanForPathNodes( PADrend.getRootNode());
 			gui.closeAllMenus();
-		}
+									}
 	};
 	return entries;
 };
@@ -119,7 +118,7 @@ static addPathMenu = fn(panel){
 		GUI.ON_CLICK			:	fn() {
 			var newPath = PathManagement.createPath();
 			PathManagement.activatePath(newPath);
-		},
+									},
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 	toolBar += {
@@ -133,9 +132,9 @@ static addPathMenu = fn(panel){
 		GUI.LABEL				:	"Load path ...",
 		GUI.TOOLTIP				:	"Load a path from a file",
 		GUI.ON_CLICK			:	fn() {
-			fileDialog("Load path", systemConfig.getValue('Waypoint.path', "."), ".path",
+										GUI._openFileDialog("Load path", systemConfig.getValue('Waypoint.path', "."), ".path",
 				PathManagement -> PathManagement.loadPath);
-		},
+									},
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 	toolBar += {
@@ -143,9 +142,9 @@ static addPathMenu = fn(panel){
 		GUI.LABEL				:	"Save path ...",
 		GUI.TOOLTIP				:	"Save the current path to a file",
 		GUI.ON_CLICK			:	fn() {
-			fileDialog("Save path", systemConfig.getValue('Waypoint.path', "."), ".path",
+										GUI._openFileDialog("Save path", systemConfig.getValue('Waypoint.path', "."), ".path",
 				PathManagement -> PathManagement.savePath);
-		},
+									},
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 	toolBar += {

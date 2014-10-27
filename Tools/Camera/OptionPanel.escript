@@ -240,12 +240,11 @@ CameraWindowPlugin.createOptionPanel := fn(MinSG.AbstractCameraNode camera) {
 		GUI.LABEL				:	"Save Camera Image ...",
 		GUI.TOOLTIP				:	"Open a dialog to choose a file to save the camera image to ",
 		GUI.ON_CLICK			:	[displayCameraImageData.icon] => fn(GUI.Icon icon) {
-										var dialog = new GUI.FileDialog("Save Camera Image", PADrend.getDataPath(), [".png", ".bmp"],
+										GUI._openFileDialog("Save Camera Image", PADrend.getDataPath(), [".png", ".bmp"],
 											[icon] => fn(GUI.Icon icon, fileName) {
 												Util.saveBitmap(icon.getImageData().getBitmap(), fileName);
 											}
 										);
-										dialog.init();
 									},
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};

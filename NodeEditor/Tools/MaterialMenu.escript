@@ -164,7 +164,7 @@ gui.registerComponentProvider('NodeEditor_MaterialMenu',[
 		GUI.TYPE : GUI.TYPE_BUTTON, 
 		GUI.LABEL : "Export color properties",
 		GUI.ON_CLICK : fn() {
-			fileDialog("Export color properties","./",".matProp", fn(filename){
+			GUI._openFileDialog("Export color properties","./",".matProp", fn(filename){
 				out("Export color values to \"",filename,"\"...");
 				var states=MinSG.collectStates(NodeEditor.getSelectedNode(),MinSG.MaterialState);
 				var m=new Map();
@@ -188,7 +188,7 @@ gui.registerComponentProvider('NodeEditor_MaterialMenu',[
 		GUI.TYPE : GUI.TYPE_BUTTON, 
 		GUI.LABEL : "Import color properties",
 		GUI.ON_CLICK : fn() {
-			fileDialog("Import color properties","./",".matProp", fn(filename){
+			GUI._openFileDialog("Import color properties","./",".matProp", fn(filename){
 				out("Import color values from \"",filename,"\"...\n");
 				var s=IO.fileGetContents(filename);
 				if(!s){

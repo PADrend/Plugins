@@ -265,12 +265,11 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 		GUI.LABEL				:	"Save Color",
 		GUI.TOOLTIP				:	"Save the texture to a file.",
 		GUI.ON_CLICK			:	(fn(MinSG.TextureState textureState) {
-										var dialog = new GUI.FileDialog("Save Texture", ".", [".png"],
+										GUI._openFileDialog("Save Texture", ".", [".png"],
 											(fn(fileName, Rendering.Texture texture) {
 												Rendering.saveTexture(GLOBALS.renderingContext, texture, fileName);
 											}).bindLastParams(textureState.getTexture())
 										);
-										dialog.init();
 									}).bindLastParams(plugin.sphereTextureState),
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.5, 0]
 	};
@@ -279,13 +278,12 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 		GUI.LABEL				:	"Load Color",
 		GUI.TOOLTIP				:	"Load the texture from a file.",
 		GUI.ON_CLICK			:	(fn(MinSG.TextureState textureState) {
-										var dialog = new GUI.FileDialog("Load Texture", ".", [".png"],
+										GUI._openFileDialog("Load Texture", ".", [".png"],
 											(fn(fileName, MinSG.TextureState textureState) {
 												textureState.setTexture(Rendering.createTextureFromFile(fileName, false, true));
 												textureState.activate();
 											}).bindLastParams(textureState)
 										);
-										dialog.init();
 									}).bindLastParams(plugin.sphereTextureState),
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
@@ -299,12 +297,12 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 											Runtime.warn("Cannot save visibility sphere. Current visibility sphere not available.");
 											return;
 										}
-										var dialog = new GUI.FileDialog("Save Visibility Sphere", ".", [".visibilitysphere"],
+										GUI._openFileDialog("Save Visibility Sphere", ".", [".visibilitysphere"],
 											(fn(fileName, ExtObject config) {
 												Util.saveFile(fileName, PADrend.serialize(config.visibilitySphere));
 											}).bindLastParams(config)
 										);
-										dialog.init();
+
 									}).bindLastParams(config),
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.5, 0]
 	};
@@ -313,13 +311,12 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 		GUI.LABEL				:	"Load",
 		GUI.TOOLTIP				:	"Load the current visibility sphere from a file.",
 		GUI.ON_CLICK			:	(fn(ExtObject config, GUI.RefreshGroup refreshGroup) {
-										var dialog = new GUI.FileDialog("Load Visibility Sphere", ".", [".visibilitysphere"],
+										GUI._openFileDialog("Load Visibility Sphere", ".", [".visibilitysphere"],
 											(fn(fileName, ExtObject config, GUI.RefreshGroup refreshGroup) {
 												config.visibilitySphere = PADrend.deserialize(Util.loadFile(fileName));
 												refreshGroup.refresh();
 											}).bindLastParams(config, refreshGroup)
 										);
-										dialog.init();
 									}).bindLastParams(config, refreshGroup),
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
@@ -329,13 +326,12 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 		GUI.LABEL				:	"Load Reference",
 		GUI.TOOLTIP				:	"Load the reference visibility sphere from a file.",
 		GUI.ON_CLICK			:	(fn(ExtObject config, GUI.RefreshGroup refreshGroup) {
-										var dialog = new GUI.FileDialog("Load Visibility Sphere", ".", [".visibilitysphere"],
+										GUI._openFileDialog("Load Visibility Sphere", ".", [".visibilitysphere"],
 											(fn(fileName, ExtObject config, GUI.RefreshGroup refreshGroup) {
 												config.referenceVisibilitySphere = PADrend.deserialize(Util.loadFile(fileName));
 												refreshGroup.refresh();
 											}).bindLastParams(config, refreshGroup)
 										);
-										dialog.init();
 									}).bindLastParams(config, refreshGroup),
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
@@ -389,13 +385,11 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 											Runtime.warn("Cannot save values of a visibility sphere. No values stored in spherical sample points.");
 											return;
 										}
-										var dialog = new GUI.FileDialog("Save Visibility Sphere Values", ".", [".tsv"],
+										GUI._openFileDialog("Save Visibility Sphere Values", ".", [".tsv"],
 											(fn(fileName, MinSG.SVS.VisibilitySphere visibilitySphere) {
 												SVS.saveVisibilitySphereValues(visibilitySphere, fileName);
 											}).bindLastParams(visibilitySphere)
-										);
-										dialog.init();
-										
+										);										
 									}).bindLastParams(config),
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};

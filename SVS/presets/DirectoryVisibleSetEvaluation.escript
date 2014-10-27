@@ -29,7 +29,7 @@ var internalLoadScene =	[importContext] => fn(importContext, fileName) {
 							return sceneRoot;
 						};
 
-var dialog = new GUI.FileDialog("Select Directory", "data/SVS/scene", [".minsg"], [internalLoadScene] => fn(internalLoadScene, fileName) {
+GUI._openFileDialog("Select Directory", "data/SVS/scene", [".minsg"], [internalLoadScene] => fn(internalLoadScene, fileName) {
 	var directory = this.getFolder();
 	showWaitingScreen();
 
@@ -66,4 +66,4 @@ var dialog = new GUI.FileDialog("Select Directory", "data/SVS/scene", [".minsg"]
 		SVS.measureVisibleSetQuality(svsNode, visibilitySphere, resolution);
 	}
 });
-dialog.init();
+

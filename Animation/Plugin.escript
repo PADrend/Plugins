@@ -407,20 +407,26 @@ AnimationPlugin.showWindow:=fn(posX, posY, widht, height){
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Open story...",
 				GUI.ON_CLICK : this->fn(){
-					var f=new GUI.FileDialog("Open story",PADrend.getDataPath(), [".story"], this->fn(filename){
-						this.loadStory(filename);
+					gui.openDialog({
+						GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+						GUI.LABEL : "Open story",
+						GUI.DIR : PADrend.getDataPath(),
+						GUI.ENDINGS : [".story"],
+						GUI.ON_ACCEPT  : this->fn(filename){	this.loadStory(filename);	}
 					});
-					f.init();
 				}
 			},			
 			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Import story...",
 				GUI.ON_CLICK : this->fn(){
-					var f=new GUI.FileDialog("Import story",PADrend.getDataPath(), [".story"], this->fn(filename){
-						this.importStory(filename);
+					gui.openDialog({
+						GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+						GUI.LABEL : "Import story",
+						GUI.DIR : PADrend.getDataPath(),
+						GUI.ENDINGS : [".story"],
+						GUI.ON_ACCEPT  : this->fn(filename){	this.importStory(filename);	}
 					});
-					f.init();
 				},
 				GUI.TOOLTIP : "Load and add a story as one animation block into the current story."
 			},
@@ -428,10 +434,13 @@ AnimationPlugin.showWindow:=fn(posX, posY, widht, height){
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Merge story...",
 				GUI.ON_CLICK : this->fn(){
-					var f=new GUI.FileDialog("Merge story",PADrend.getDataPath(), [".story"], this->fn(filename){
-						this.mergeStory(filename);
+					gui.openDialog({
+						GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+						GUI.LABEL : "Merge story",
+						GUI.DIR : PADrend.getDataPath(),
+						GUI.ENDINGS : [".story"],
+						GUI.ON_ACCEPT  : this->fn(filename){	this.mergeStory(filename);	}
 					});
-					f.init();
 				},
 				GUI.TOOLTIP : "Add the animations of a saved story into the current story."
 			},
@@ -442,17 +451,27 @@ AnimationPlugin.showWindow:=fn(posX, posY, widht, height){
 					if(this.activeStory.isSet($filename)){
 						this.saveCurrentStory(this.activeStory.filename);
 					}else{
-						var f=new GUI.FileDialog("Save story",PADrend.getDataPath(), [".story"], this->fn(filename){this.saveCurrentStory(filename);});
-						f.init();
+						gui.openDialog({
+							GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+							GUI.LABEL : "Save story",
+							GUI.DIR : PADrend.getDataPath(),
+							GUI.ENDINGS : [".story"],
+							GUI.ON_ACCEPT  : this->fn(filename){	this.saveCurrentStory(filename);	}
+						});
 					}
 				}
 			},
 			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Save story as...",
-				GUI.ON_CLICK : this->fn(){ 
-					var f=new GUI.FileDialog("Save story",PADrend.getDataPath(), [".story"], this->fn(filename){this.saveCurrentStory(filename);});
-					f.init();
+				GUI.ON_CLICK : this->fn(){
+					gui.openDialog({
+						GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+						GUI.LABEL : "Save story",
+						GUI.DIR : PADrend.getDataPath(),
+						GUI.ENDINGS : [".story"],
+						GUI.ON_ACCEPT  : this->fn(filename){	this.saveCurrentStory(filename);	}
+					});					
 				}
 			}
 		]

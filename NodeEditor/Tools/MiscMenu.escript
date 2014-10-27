@@ -91,7 +91,7 @@ gui.registerComponentProvider('NodeEditor_MiscToolsMenu.helper',[
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "GraphViz export ...",
 		GUI.ON_CLICK : fn(){
-			fileDialog("Export for GraphViz", PADrend.getDataPath(), ".dot",
+			GUI._openFileDialog("Export for GraphViz", PADrend.getDataPath(), ".dot",
 				fn(fileName) {
 					MinSG.GraphVizOutput.treeToFile(NodeEditor.getSelectedNode(),
 													PADrend.getSceneManager(),

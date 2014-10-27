@@ -563,12 +563,16 @@ plugin.showWindow:=fn(){
 		GUI.TYPE  : GUI.TYPE_BUTTON,
 		GUI.LABEL : "...",
 		GUI.WIDTH : 20,
-		GUI.ON_CLICK : [obj,refreshGroup]->fn(){
-			var f=new GUI.FileDialog("select a txt file",".",[".txt"],this->fn(filename){
-				this[0].file=filename; // obj
-				this[1].refresh(); // refreshGroup
+		GUI.ON_CLICK : [obj,refreshGroup]=>fn(obj,refreshGroup){
+			gui.openDialog({
+				GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+				GUI.LABEL : "select a txt file",
+				GUI.ENDINGS : [".txt"],
+				GUI.ON_ACCEPT : [obj,refreshGroup]=>fn(obj,refreshGroup,filename){
+					obj.file=filename; 
+					refreshGroup.refresh(); 
+				}
 			});
-			f.init();
 		}
 	};
 	p++;

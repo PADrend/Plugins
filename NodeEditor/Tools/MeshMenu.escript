@@ -430,7 +430,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.export',[
 				out("No Mesh available!\n");
 				return;
 			}
-			fileDialog("Filename for mesh export", PADrend.getDataPath(), ".mmf",
+			GUI._openFileDialog("Filename for mesh export", PADrend.getDataPath(), ".mmf",
 				mesh->fn(filename) {
 					out("Exporting ",filename,this,"\n");
 					showWaitingScreen();
@@ -454,7 +454,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.export',[
 				out("No Mesh available!\n");
 				return;
 			}
-			fileDialog("Filename for mesh export", PADrend.getDataPath(), ".ply",
+			GUI._openFileDialog("Filename for mesh export", PADrend.getDataPath(), ".ply",
 				mesh->fn(filename) {
 					showWaitingScreen();
 					out("Exporting ",filename,this,"\n");
