@@ -922,18 +922,18 @@ GUI.GUI_Manager._componentFactories ::= {
 	GUI.TYPE_CRITICAL_BUTTON : fn(input,result){
 		var description2 = input.description.clone();
 		description2[GUI.TYPE] = GUI.TYPE_BUTTON;
-		description2[GUI.ON_CLICK] = (fn(message,action){
+		description2[GUI.ON_CLICK] = [input.description.get(GUI.REQUEST_MESSAGE, input.description[GUI.LABEL]), input.description[GUI.ON_CLICK]] => fn(message,action){
 			gui.openMenu(getAbsPosition()-new Geometry.Vec2(10,10),[{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : message,
 				GUI.WIDTH : 220,
 				GUI.HEIGHT : 30,
-				GUI.ON_CLICK : this->(fn(action){
+				GUI.ON_CLICK : [action] => this->fn(action){
 					(this->action)();
 					gui.closeAllMenus();
-				}).bindLastParams(action)
+				}
 			}]);
-		}).bindLastParams( input.description.get(GUI.REQUEST_MESSAGE, input.description[GUI.LABEL]), input.description[GUI.ON_CLICK] );
+		};
 
 		result.component = this._createComponentFromDescription(description2,input.width?input.width:100,input.insideMenu);
 		result.component.addProperty(new GUI.ColorProperty(GUI.PROPERTY_BUTTON_HOVERED_TEXT_COLOR, GUI.RED));
@@ -1011,7 +1011,7 @@ GUI.GUI_Manager._componentFactories ::= {
 			GUI.POSITION : [GUI.POS_X_ABS|GUI.REFERENCE_X_RIGHT|GUI.ALIGN_X_RIGHT|
 							GUI.POS_Y_ABS|GUI.REFERENCE_Y_BOTTOM|GUI.ALIGN_Y_BOTTOM, 0,0],
 			GUI.SIZE : [ GUI.WIDTH_REL|GUI.HEIGHT_REL , relButtonWidth, 1.0],
-			GUI.ON_CLICK : this->fn(target,endings,folder){
+			GUI.ON_CLICK : [tf,input.description.get(GUI.ENDINGS,[]),input.description.get(GUI.DIR,".")] => this->fn(target,endings,folder){
 				this.openDialog({
 					GUI.TYPE : GUI.TYPE_FOLDER_DIALOG,
 					GUI.LABEL : "Select a folder",
@@ -1022,7 +1022,7 @@ GUI.GUI_Manager._componentFactories ::= {
 						this.onDataChanged(folder);
 					}
 				});
-			}.bindLastParams(tf,input.description.get(GUI.ENDINGS,[]),input.description.get(GUI.DIR,"."))
+			}
 		});
 		result.component+=button;
 		button.setPosition(result.component.getWidth()-20,0);
@@ -1442,8 +1442,8 @@ GUI.GUI_Manager._componentFactories ::= {
 		var inverseMappingFunction = input.description.get(GUI.RANGE_INV_FN, false);
 		if(input.description[GUI.RANGE_FN_BASE]) {
 			var base = input.description[GUI.RANGE_FN_BASE];
-			mappingFunction = (fn(v, Number b) { return (b).pow(v); }).bindLastParams(base);
-			inverseMappingFunction = (fn(v, Number b) { return (v).log(b); }).bindLastParams(base);
+			mappingFunction = [base]=>fn(Number b, v) { return (b).pow(v); };
+			inverseMappingFunction = [base]=>fn(Number b, v) { return (v).log(b); };
 		}
 		var range = input.description[GUI.RANGE];
 		var steps = input.description[GUI.RANGE_STEP_SIZE] ?

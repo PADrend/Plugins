@@ -69,7 +69,7 @@ plugin.ex_AfterFrame := fn(...) {
 			$button : gui.create({
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : " ",
-				GUI.ON_CLICK : (fn(level){	Runtime.resetLogCounter(level);	}).bindLastParams(props[0]),
+				GUI.ON_CLICK : [props[0]]=>fn(level){	Runtime.resetLogCounter(level);	},
 				GUI.WIDTH: 40,
 				GUI.HEIGHT : 17,
 				GUI.FLAGS : GUI.FLAT_BUTTON,
@@ -112,7 +112,7 @@ plugin.ex_AfterFrame := fn(...) {
 					observer.button.setFlag(GUI.FLAT_BUTTON,true);
 				}
 
-				PADrend.planTask(duration+0.1,(fn(observers,window){
+				PADrend.planTask(duration+0.1,[observers,window]=>fn(observers,window){
 					var now = clock();
 					var allZero = true;
 					foreach(observers as var observer){
@@ -125,7 +125,7 @@ plugin.ex_AfterFrame := fn(...) {
 						window.setEnabled(false);
 					}
 					window.minimize();
-				}).bindLastParams(observers,window));
+				});
 			}
 		}
 		yield;

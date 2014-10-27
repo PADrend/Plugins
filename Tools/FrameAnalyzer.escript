@@ -119,9 +119,9 @@ plugin.createMainWindowTab @(private) := fn() {
 				GUI.RANGE				:	[0, 7],
 				GUI.RANGE_FN_BASE		:	10,
 				GUI.DATA_VALUE			:	this.frameStatChart.getRange(i),
-				GUI.ON_DATA_CHANGED		:	(fn(data, type, chart) {
+				GUI.ON_DATA_CHANGED		:	[i, this.frameStatChart]=>fn( type, chart,data) {
 												chart.setRange(type, data);
-											}).bindLastParams(i, this.frameStatChart),
+											},
 				GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 			};
 			page++;

@@ -176,10 +176,10 @@ Tool.onToolInitOnce_static += fn(){
 	n.onDragging += this->onDragging;
 
 	//! \see EditNodeTraits.DraggableTrait
-	n.onDraggingStop += fn(tool){
+	n.onDraggingStop += [this] => fn(tool){
 		this.popColor();								//! \see EditNodeTraits.ColorTrait
 		tool.applyNodeTransformations();				//! \see ToolHelperTraits.NodeTransformationHandlerTrait
-	}.bindLastParams(this);
+	};
 
 	// --------
 	this.nodeMarkerNode = new MinSG.GeometryNode;

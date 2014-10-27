@@ -145,10 +145,10 @@ plugin.createLibEntry @(private) := fn(id, path,scanRecursively,includeMeshes){
 		GUI.CONTEXT_MENU_PROVIDER : [{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Remove library",
-			GUI.ON_CLICK : this->fn(id){
+			GUI.ON_CLICK : [id] => this->fn(id){
 				this.registeredLibraries( registeredLibraries().clone().unset(id);  );
 				gui.closeAllMenus();
-			}.bindLastParams(id)
+			}
 		}],
 		GUI.LABEL :  "Files ("+path+")",
 		GUI.OPTIONS_PROVIDER : [this,id, path,scanRecursively,includeMeshes] => fn(plugin,id, path,scanRecursively,includeMeshes){

@@ -20,7 +20,6 @@
 
 declareNamespace($SceneEditor);
 
-//! ---|> Plugin
 SceneEditor.plugin := new Plugin({
 		Plugin.NAME : 'SceneEditor',
 		Plugin.DESCRIPTION : 'Editing Scene.',
@@ -36,7 +35,7 @@ var plugin = SceneEditor.plugin;
 plugin.windowEnabled @(private) := DataWrapper.createFromValue(false);
 plugin.window @(private):= void;
 
-plugin.init := fn(){
+plugin.init @(override) := fn(){
 
 	windowEnabled.onDataChanged += this->fn(value){
 		if(value){
@@ -86,7 +85,6 @@ plugin.init := fn(){
         __DIR__+"/Selection/Plugin.escript",
         __DIR__+"/TransformationTools/Plugin.escript",
         __DIR__+"/ObjectPlacer/Plugin.escript",
-        __DIR__+"/Group/Plugin.escript",
         __DIR__+"/SceneMetaInfo/Plugin.escript",
 		__DIR__+"/VisualHelper/Plugin.escript",
 		__DIR__+"/NodeRepeater/Plugin.escript",

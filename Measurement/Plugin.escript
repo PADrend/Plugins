@@ -81,11 +81,10 @@ MeasurementPlugin.createTab @(private) := fn() {
 			GUI.FLAGS				:	GUI.LOCKED
 		};
 		registerExtension('Evaluator_OnEvaluatorDescriptionChanged',
-			(fn(evaluator, description, dataWrapper) {
-				if(evaluator) {
+			[evaluatorName] => fn(dataWrapper, evaluator, description) {
+				if(evaluator) 
 					dataWrapper(description);
-				}
-			}).bindLastParams(evaluatorName));
+			});
 		panel++;
 		
 		var outputFileName = DataWrapper.createFromValue("output.tsv");

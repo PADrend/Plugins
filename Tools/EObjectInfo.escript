@@ -135,7 +135,7 @@ static createObjInfoGUI = fn(String command){
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Object",
 				GUI.WIDTH : 150,
-				GUI.ON_CLICK : this->(fn(command){open(command);}).bindLastParams(command+".getObject()"),
+				GUI.ON_CLICK : [command+".getObject()"] => this->fn(command){open(command);},
 				GUI.TOOLTIP : ".getObject()"
 			};
 			infoPanel+=obj.getObject().toDbgString();
@@ -144,7 +144,7 @@ static createObjInfoGUI = fn(String command){
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Function",
 				GUI.WIDTH : 150,
-				GUI.ON_CLICK : this->(fn(command){open(command);}).bindLastParams(command+".getFunction()"),
+				GUI.ON_CLICK : [command+".getFunction()"] => this->fn(command){open(command);},
 				GUI.TOOLTIP : ".getFunction()"
 			};
 			infoPanel+=obj.getFunction().toDbgString();

@@ -101,24 +101,6 @@ plugin.init @(override) := fn() {
 
 	NodeEditor.addConfigTreeEntryProvider(MinSG.AbstractBehaviour,fn( behaviour,entry ){
 		entry.setColor( NodeEditor.BEHAVIOUR_COLOR );
-////		entry.addOption({
-////			GUI.TYPE : GUI.TYPE_BOOL,
-////			GUI.LABEL : "",
-////			GUI.WIDTH : 15,
-////			GUI.TOOLTIP : "Is this Behaviour active?",
-////			GUI.DATA_PROVIDER : (fn(behaviour){	return behaviour.isActive();	}).bindLastParams(behaviour),
-////			GUI.ON_DATA_CHANGED : (fn(data,behaviour){	if(data) { behaviour.activate(); } else { behaviour.deactivate(); }	}).bindLastParams(behaviour)
-////		});
-	//	entry.addMenuProvider(fn(entry,menu){
-	//		menu['20_selection'] = [ '----' ,
-	//			"TODO: Select all containing nodes"
-	//		];
-	//		menu['30_behaviour'] = [ '----' ,
-	//			"TODO: Destroy behaviour",
-	//			"TODO: Add to all selected nodes",
-	//			"TODO: remove from all selected nodes",
-	//		];
-	//	});
 	});
 	// ------
 	NodeEditor.BehavioursConfigurator := new Type();
