@@ -612,7 +612,7 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 				Traits.addTrait(component, ContextMenuTrait,description.get(GUI.CONTEXT_MENU_WIDTH,150));
 			component.contextMenuProvider += description[GUI.CONTEXT_MENU_PROVIDER];
 			
-			@(once) static triangle = this._createTriangleAtCornerShape(GUI.BLACK,5);
+			@(once) static triangle = this._createTriangleAtCornerShape(GUI.BLACK,6);
 			component.addComponentHoverProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_ADDITIONAL_BACKGROUND_SHAPE,triangle),1,false);
 		}
 		
@@ -630,10 +630,12 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			static DraggableTrait;
 			static DraggingMarkerTrait;
 			static DraggingConnectorTrait;
+			static draggingHoverMarker;
 			@(once){
 				DraggableTrait = Std.require('LibGUIExt/Traits/DraggableTrait');
 				DraggingMarkerTrait = Std.require('LibGUIExt/Traits/DraggingMarkerTrait');
 				DraggingConnectorTrait = Std.require('LibGUIExt/Traits/DraggingConnectorTrait');
+				draggingHoverMarker = this._createShadowedRectShape(GUI.NO_COLOR,new Util.Color4ub(255,255,255,128),true);
 			}
 
 			//! \see GUI.DraggableTrait
@@ -642,6 +644,7 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 					Traits.addTrait(component,DraggableTrait, description[GUI.DRAGGING_BUTTONS] );
 				else
 					Traits.addTrait(component,DraggableTrait);
+				component.addComponentHoverProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_ADDITIONAL_BACKGROUND_SHAPE,draggingHoverMarker),1,false);
 			}
 			if(description[GUI.DRAGGING_MARKER]){
 				if(description[GUI.DRAGGING_MARKER]===true)
