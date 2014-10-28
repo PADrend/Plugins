@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -18,28 +18,31 @@
  ** Story-Animation-Type
  **/
 
-loadOnce(__DIR__+"/AnimationBase.escript");
-loadOnce(__DIR__+"/../PlaybackContext.escript");
+static AnimationBase = module('./AnimationBase');
+static PlaybackContext = module('../PlaybackContext');
+
 
 // -----------------------------------------------------------------
 // Story ---|> AnimationBase
-Animation.Story := new Type(Animation.AnimationBase);
-var Story = Animation.Story;
-Traits.addTrait(Story,Traits.PrintableNameTrait,$Story);
+static T = new Type(AnimationBase);
 
-Story.animations := void;
-Story.typeName ::= "Story";
 
-Animation.constructableAnimationTypes["Story (animation group)"] = Story;
+module('../Utils').constructableAnimationTypes["Story (animation group)"] = T;
+
+Traits.addTrait(T,Traits.PrintableNameTrait,$Story);
+
+T.animations := void;
+T.typeName ::= "Story";
+
 
 //! (ctor)
-Story._constructor ::= fn(name="Story",startTime=0)@(super(name,startTime,1)){
+T._constructor ::= fn(name="Story",startTime=0)@(super(name,startTime,1)){
 	this.animations = [];
 	this.__status.updatingChildren := false;
 	this.__status.animationsSorted := false; // -1 : false : 1
 };
 
-Story.addAnimation ::= fn(Animation.AnimationBase animation){
+T.addAnimation ::= fn(AnimationBase animation){
 	var added = false;
 	
 	if(!this.animations.contains(animation)){
@@ -67,19 +70,19 @@ Story.addAnimation ::= fn(Animation.AnimationBase animation){
 };
 
 //! ---|> AnimationBase
-Story.destroy ::= fn(){
+T.destroy @(override) ::= fn(){
 
 	var tmp = this.animations.clone(); // clone the array as the a.detroy may change the animation array.
 	foreach(tmp as var a) 
 		a.destroy();
 	
 	// call base type's function.
-	(this->Animation.AnimationBase.destroy)();
+	(this->AnimationBase.destroy)();
 		
 };
 
 //! ---|> AnimationBase
-Story.doExecute ::= fn(Number localTime){
+T.doExecute @(override) ::= fn(Number localTime){
 
 	// moving forward through time? ---> sort animations by starting time; earliest starting time first.
 	if(localTime >= this.__status.lastTime && this.__status.animationsSorted != 1){
@@ -110,25 +113,25 @@ Story.doExecute ::= fn(Number localTime){
 	}
 };
 
-Story.removeAnimation ::= fn(Animation.AnimationBase animation){
+T.removeAnimation ::= fn(AnimationBase animation){
 	if(animation.getStory() == this)
 		animation.setStory(void);
 };
 
 //! ---|> AnimationBase
-Story.undo ::= fn(){
+T.undo  @(override) ::= fn(){
 	// make shure all animations are undone (in the right order)
 	this.doExecute(-0.1);
 //	out(" ",this.name," undo \n");
 };
 
 
-Story.getAnimations ::= fn(){
+T.getAnimations ::= fn(){
 	return this.animations.clone();
 };
 
 //! (internal) called if an animation has changed.
-Story._updateAnimations ::= fn(){
+T._updateAnimations ::= fn(){
 	if(this.__status.updatingChildren)
 		return;
 		
@@ -162,7 +165,7 @@ Story._updateAnimations ::= fn(){
 	this.__status.updatingChildren =  false;
 };
 	
-Story.adaptStartingTime := fn(){
+T.adaptStartingTime := fn(){
 	if(this.__status.updatingChildren)
 		return;
 		
@@ -194,12 +197,12 @@ Story.adaptStartingTime := fn(){
 	this.__status.updatingChildren =  false;
 };
 
-PADrend.Serialization.registerType( Animation.Story, "Animation.Story")
-	.initFrom( PADrend.Serialization.getTypeHandler(Animation.AnimationBase) ) //! --|> AnimationBase
-	.addDescriber( fn(ctxt,Animation.Story obj,Map d){
+PADrend.Serialization.registerType( T, "Animation.Story")
+	.initFrom( PADrend.Serialization.getTypeHandler(AnimationBase) ) //! --|> AnimationBase
+	.addDescriber( fn(ctxt,T obj,Map d){
 		d['animations'] = ctxt.createDescription(obj.animations);
 	})
-	.addInitializer( fn(ctxt,Animation.Story obj,Map d){
+	.addInitializer( fn(ctxt,T obj,Map d){
 		foreach(d['animations'] as var aDescription )
 			obj.addAnimation( ctxt.createObject(aDescription) );
 	});
@@ -208,7 +211,7 @@ PADrend.Serialization.registerType( Animation.Story, "Animation.Story")
 // -----------------------------------------------------------------
 // GUI: Story
 
-Story.createStoryBoardPanel ::= fn(Animation.PlaybackContext playbackContext){
+T.createStoryBoardPanel ::= fn( PlaybackContext playbackContext){
 	var panel = gui.create({
 		GUI.TYPE : GUI.TYPE_PANEL,
 		GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_CHILDREN_ABS,4,2],
@@ -281,19 +284,19 @@ Story.createStoryBoardPanel ::= fn(Animation.PlaybackContext playbackContext){
 			GUI.ON_CLICK : this.story->fn(){
 				var s = PADrend.serialize(this);
 				out(s);
-				Animation.animationClipboard = s;
+				module('../Utils').animationClipboard = s;
 			}
 		};
 		entries += {
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Paste",
 			GUI.ON_CLICK : [this, localPos]->fn(){
-				if(!Animation.animationClipboard){
+				if(!module('../Utils').animationClipboard){
 					Runtime.warn("Clipboard is empty.");
 					return;
 				}
 				try{
-					var animation = PADrend.deserialize(Animation.animationClipboard);
+					var animation = PADrend.deserialize(module('../Utils').animationClipboard);
 					animation.setStartTime( this[0].getTimeForPosition(this[1].getX()) );
 					animation.setRow( (this[1].getY()/this[0].rowSize).floor() );
 					this[0].story.addAnimation(animation);
@@ -310,7 +313,7 @@ Story.createStoryBoardPanel ::= fn(Animation.PlaybackContext playbackContext){
 			}
 		};
 		entries += "----";
-		foreach(Animation.constructableAnimationTypes as var name,var type){
+		foreach(module('../Utils').constructableAnimationTypes as var name,var type){
 			entries += { // temp
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Add "+name,
@@ -319,7 +322,7 @@ Story.createStoryBoardPanel ::= fn(Animation.PlaybackContext playbackContext){
 					animation.setStartTime( this[0].getTimeForPosition(this[1].getX()) );
 					animation.setRow( (this[1].getY()/this[0].rowSize).floor() );
 					// if the animation animates a node, try to assign the currently selected node.
-					if(animation---|>Animation.NodeAnimation){
+					if( animation.isA(module('./NodeAnimation')) ){
 						if(animation.setSelectedNode())
 							animation.setName( animation.getName()+":"+animation.getNodeId() );
 					}
@@ -411,9 +414,9 @@ Story.createStoryBoardPanel ::= fn(Animation.PlaybackContext playbackContext){
 };
 
 //! ---|> AnimationBase
-Story.getMenuEntries := fn(storyBoardPanel){
+T.getMenuEntries  @(override) := fn(storyBoardPanel){
 	// call base type's function.
-	var m = (this->Animation.AnimationBase.getMenuEntries)(storyBoardPanel);
+	var m = (this->AnimationBase.getMenuEntries)(storyBoardPanel);
 	m+="----";
 	m+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -426,3 +429,4 @@ Story.getMenuEntries := fn(storyBoardPanel){
 	return m;
 };
 
+return T;

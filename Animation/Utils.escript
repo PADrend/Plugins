@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -19,22 +19,24 @@
  **
  **/
 
-GLOBALS.Animation := new Namespace();
+static NS = new Namespace;
 
 // used for copy and paste
-Animation.animationClipboard := void; 
+NS.animationClipboard := void; 
 
 // Registry for creatable Types of Animations:   Name(=short name) -> Type
-Animation.constructableAnimationTypes := new Map();
+NS.constructableAnimationTypes := new Map();
 
-Animation.loadAnimation := fn(filename){
+NS.loadAnimation := fn(filename){
 	var s = Util.loadFile(filename);
 	var obj = PADrend.deserialize(s);
-	if(! (obj---|>Animation.AnimationBase) )
+	if(! obj.isA(module('./Animations/AnimationBase') ))
 		Runtime.exception("Could not load Animation.");
 	return obj;
 };
 
-Animation.saveAnimation := fn(filename,Animation.AnimationBase animation){
+NS.saveAnimation := fn(filename,animation){
+	assert(animation.isA(module('./Animations/AnimationBase')));
 	return Util.saveFile(filename,PADrend.serialize(animation));
 };
+return NS;

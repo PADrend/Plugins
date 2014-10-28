@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -17,28 +17,23 @@
  **
  ** abstract base type for all animations
  **/
-
-loadOnce(__DIR__+"/../Animation.escript");
-
 // -----------------------------------------------------------------
 // AnimationBase
+static T = new Type;
 
-Animation.AnimationBase := new Type();
-var AnimationBase = Animation.AnimationBase;
-Traits.addTrait(AnimationBase,Traits.PrintableNameTrait,$AnimationBase);
+Traits.addTrait(T, Traits.PrintableNameTrait,$AnimationBase);
 
+T.story := void;
+T.name := void;
+T.startTime := 0; 	//! Relative to its story in integer timesteps
+T.duration := 1; 	//! Seconds
+T.row := 0;   		//! Row in a storyboard.
+T.__updateListener := void;
+T.__status := void;
 
-AnimationBase.story := void;
-AnimationBase.name := void;
-AnimationBase.startTime := 0; 	//! Relative to its story in integer timesteps
-AnimationBase.duration := 1; 	//! Seconds
-AnimationBase.row := 0;   		//! Row in a storyboard.
-AnimationBase.__updateListener := void;
-AnimationBase.__status := void;
+T.typeName ::= "AnimationBase";
 
-AnimationBase.typeName ::= "AnimationBase";
-
-AnimationBase._constructor ::= fn(_name="AnimationBase",_startTime=0,_duration=1){
+T._constructor ::= fn(_name="AnimationBase",_startTime=0,_duration=1){
 	this.__updateListener = [];
 	this.__status = new ExtObject( {
 		$lastTime : -1,
@@ -49,7 +44,7 @@ AnimationBase._constructor ::= fn(_name="AnimationBase",_startTime=0,_duration=1
 	this.duration = _duration;
 };
 
-AnimationBase.execute ::= fn(Number localTime){
+T.execute ::= fn(Number localTime){
 	if(!this.__status) //  this animation has been destroyed
 		return;
 	
@@ -84,75 +79,75 @@ AnimationBase.execute ::= fn(Number localTime){
 
 /*! ---o
 	Called in every step when the animation is active.	*/
-AnimationBase.doExecute ::= fn(Number localTime){
+T.doExecute ::= fn(Number localTime){
 	out(" ",this.name,"(",localTime,") ");
 };
 
 /*! ---o
 	Called before the animation is (re-)activated. */
-AnimationBase.doEnter ::= fn(){
+T.doEnter ::= fn(){
 //	out(" ",this.name," init \n");
 };
 
 /*! ---o
 	Called when the animation was active, but the current playback time imoved after the animation's ending. */
-AnimationBase.doLeave ::= fn(){
+T.doLeave ::= fn(){
 	this.doExecute(this.getDuration());
 //	out(" ",this.name," exit \n");
 };
 
 /*! ---o
 	Called when the animation was active, but the current playback time jumped before ths beginning. */
-AnimationBase.undo ::= fn(){
+T.undo ::= fn(){
 //	this.doExecute(0);
 //	out(" ",this.name," undo \n");
 };
 
-AnimationBase.getDuration ::= fn(){
+T.getDuration ::= fn(){
 	return this.duration;
 };
 
-AnimationBase.getEndTime ::= fn(){
+T.getEndTime ::= fn(){
 	return this.startTime + this.duration;
 };
 
 //! ---o
-AnimationBase.getInfo ::= fn(){
+T.getInfo ::= fn(){
 	return this.getName() + "\n" + 
 		getTypeName() +" from "+getStartTime().format(2,false)+"s to "+this.getEndTime().format(2,false)+"s ("+this.getDuration()+"s)";
 };
 
-AnimationBase.getName ::= fn(){
+T.getName ::= fn(){
 	return this.name;
 };
 
-AnimationBase.getRow ::= fn(){
+T.getRow ::= fn(){
 	return this.row;
 };
 
-AnimationBase.getStartTime ::= fn(){
+T.getStartTime ::= fn(){
 	return this.startTime;
 };
-AnimationBase.getStory ::= fn(){
+T.getStory ::= fn(){
 	return this.story;
 };
 
-AnimationBase.getTypeName ::= fn(){
+T.getTypeName ::= fn(){
 	return this.typeName;
 };
 
-AnimationBase.isActive ::= fn(){
+T.isActive ::= fn(){
 	return this.__status.active;
 };
 
-AnimationBase.setName ::= fn(String newName){
+T.setName ::= fn(String newName){
 	if(this.name!=newName){
 		this.name = newName;
 		this._updated($NAME_CHANGED,newName);
 	}
 };
 
-AnimationBase.setDuration ::= fn(Number newDuration){
+T.setDuration ::= fn(Number newDuration){
 	if(newDuration<0)
 		newDuration=0;
 	if(newDuration!=this.duration){
@@ -161,14 +156,14 @@ AnimationBase.setDuration ::= fn(Number newDuration){
 	}
 };
 
-AnimationBase.setStartTime ::= fn(Number newStartTime){
+T.setStartTime ::= fn(Number newStartTime){
 	if(newStartTime!=this.startTime){
 		this.startTime = newStartTime;
 		this._updated($START_TIME_CHANGED,duration);	
 	}
 };
 
-AnimationBase.setRow ::= fn(Number newRow){
+T.setRow ::= fn(Number newRow){
 	if(newRow!=this.row){
 		this.row = newRow;
 		this._updated($ROW_CHANGED,newRow);	
@@ -176,8 +171,9 @@ AnimationBase.setRow ::= fn(Number newRow){
 };
 
 //! (interal) Called by Story.addAnimation(...)
-AnimationBase.setStory ::= fn( [Animation.Story,void] newStory ){
+T.setStory ::= fn( newStory ){
 	if(newStory!=story){
+		assert( void===newStory || newStory.isA( module('./Story')) );
 		this.story = newStory;
 		if(newStory)
 			newStory.addAnimation(this);
@@ -186,7 +182,7 @@ AnimationBase.setStory ::= fn( [Animation.Story,void] newStory ){
 };
 
 //! (internal)
-AnimationBase._updated ::= fn(type,data=void){
+T._updated ::= fn(type,data=void){
 	var tmp = [];
 	var evt = new ExtObject( {$animation:this,$type:type, $data:data });
 	foreach(this.__updateListener as var l){
@@ -196,16 +192,16 @@ AnimationBase._updated ::= fn(type,data=void){
 	this.__updateListener.swap(tmp);
 };
 
-AnimationBase.addUpdateListener ::= fn(listener){
+T.addUpdateListener ::= fn(listener){
 	this.__updateListener += listener;
 };
 
-AnimationBase.removeUpdateListener ::= fn(listener){
+T.removeUpdateListener ::= fn(listener){
 	this.__updateListener.removeValue(listener);
 };
 
 //! ---o
-AnimationBase.destroy ::= fn(){
+T.destroy ::= fn(){
 	if(this.__status){
 		if(this.__status.lastTime>0){  // needs to be undone?
 			this.undo();
@@ -216,15 +212,15 @@ AnimationBase.destroy ::= fn(){
 	}
 };
 
-PADrend.Serialization.registerType( Animation.AnimationBase, "Animation.AnimationBase")
+PADrend.Serialization.registerType( T, "Animation.AnimationBase")
 	.enableIdentityTracking()
-	.addDescriber( fn(ctxt,Animation.AnimationBase obj,Map d){
+	.addDescriber( fn(ctxt, T obj,Map d){
 		d['name'] = obj.getName();
 		d['startTime'] = obj.getStartTime();
 		d['duration'] = obj.getDuration();
 		d['row'] = obj.getRow();
 	})
-	.addInitializer( fn(ctxt,Animation.AnimationBase obj,Map d){
+	.addInitializer( fn(ctxt, T obj,Map d){
 		obj.setName( d['name'] );
 		obj.setStartTime( d['startTime'] );
 		obj.setDuration( d['duration'] );
@@ -235,7 +231,7 @@ PADrend.Serialization.registerType( Animation.AnimationBase, "Animation.Animatio
 // GUI
 
 //! ---o
-AnimationBase.getMenuEntries := fn(storyBoardPanel){
+T.getMenuEntries := fn(storyBoardPanel){
 	var m=[];
 	m+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -243,7 +239,7 @@ AnimationBase.getMenuEntries := fn(storyBoardPanel){
 		GUI.ON_CLICK : this->fn(){
 			var s = PADrend.serialize(this);
 			out(s);
-			Animation.animationClipboard = s;
+			module('../Utils').animationClipboard = s;
 		}
 	};
 	m+={
@@ -276,7 +272,7 @@ AnimationBase.getMenuEntries := fn(storyBoardPanel){
 };
 
 //! ---o
-AnimationBase.createAnimationBar ::= fn(storyBoardPanel){
+T.createAnimationBar ::= fn(storyBoardPanel){
 	var animationBar = gui.create({
 		GUI.TYPE : GUI.TYPE_CONTAINER,
 		GUI.WIDTH : 100,
@@ -378,4 +374,5 @@ AnimationBase.createAnimationBar ::= fn(storyBoardPanel){
 	animationBar.refresh();
 	return animationBar;
 };
+return T;
 

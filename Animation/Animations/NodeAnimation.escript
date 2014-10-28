@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -18,27 +18,26 @@
  ** abstract NodeAnimation-Type
  **/
 
-loadOnce(__DIR__+"/AnimationBase.escript");
+static AnimationBase = module('./AnimationBase');
 
-// -----------------------------------------------------------------
 // NodeAnimation ---|> AnimationBase
-Animation.NodeAnimation := new Type(Animation.AnimationBase);
-var NodeAnimation = Animation.NodeAnimation;
-Traits.addTrait(NodeAnimation,Traits.PrintableNameTrait,$NodeAnimation);
+static T = new Type(AnimationBase);
 
-NodeAnimation.nodeId := "";
+Traits.addTrait(T,Traits.PrintableNameTrait,$NodeAnimation);
 
-NodeAnimation.typeName ::= "NodeAnimation";
+T.nodeId := "";
+
+T.typeName ::= "NodeAnimation";
 
 //! (ctor)
-NodeAnimation._constructor ::= fn(_name="NodeAnimation",_startTime=0,_duration=1)@(super(_name,_startTime,_duration)){
+T._constructor ::= fn(_name="NodeAnimation",_startTime=0,_duration=1)@(super(_name,_startTime,_duration)){
 	this.__status.node := void;
 };
 
 //! ---|> AnimationBase
-NodeAnimation.doEnter ::= fn(){
+T.doEnter @(override) ::= fn(){
 	// call base type's function.
-	(this->Animation.AnimationBase.doEnter)();
+	(this->AnimationBase.doEnter)();
 
 	if(!this.nodeId.empty()){
 		this.__status.node = this.findNode();
@@ -49,38 +48,38 @@ NodeAnimation.doEnter ::= fn(){
 };
 
 ////! ---|> AnimationBase
-//NodeAnimation.doLeave ::= fn(){
+//T.doLeave ::= fn(){
 //	// call base type's function.
 //	(this->Animation.AnimationBase.doLeave)();
 //	this.__status.node := void;
 //};
 
 //! ---|> AnimationBase
-NodeAnimation.undo ::= fn(){
+T.undo @(override) ::= fn(){
 	this.__status.node := void;
 	
 	// call base type's function.
-	(this->Animation.AnimationBase.undo)();
+	(this->AnimationBase.undo)();
 };
 
 //! ---|> AnimationBase
-NodeAnimation.getInfo ::= fn(){
-	return (this->Animation.AnimationBase.getInfo)() + "\nNode:"+getNodeId();	
+T.getInfo @(override) ::= fn(){
+	return (this->AnimationBase.getInfo)() + "\nNode:"+getNodeId();	
 };
 	
-NodeAnimation.getNodeId ::= fn(){
+T.getNodeId ::= fn(){
 	return this.nodeId;
 };
 
-NodeAnimation.getNode ::= fn(){
+T.getNode ::= fn(){
 	return this.__status.node;
 };
 
-NodeAnimation.findNode ::= fn(){
+T.findNode ::= fn(){
 	return PADrend.getSceneManager().getRegisteredNode(this.nodeId);
 };
 
-NodeAnimation.setNodeId ::= fn(String newNodeId){
+T.setNodeId ::= fn(String newNodeId){
 	if(newNodeId!=this.nodeId){
 		var wasActive = this.nodeId;
 		// make shure that the old node is reverted to its original state
@@ -100,7 +99,7 @@ NodeAnimation.setNodeId ::= fn(String newNodeId){
 };
 
 //! Try to select currently selected node, returns true on success.
-NodeAnimation.setSelectedNode ::= fn(){
+T.setSelectedNode ::= fn(){
 	var n = NodeEditor.getSelectedNode();
 	if(!n){
 		return false;
@@ -113,18 +112,18 @@ NodeAnimation.setSelectedNode ::= fn(){
 	return true;
 };
 
-PADrend.Serialization.registerType( Animation.NodeAnimation, "Animation.NodeAnimation")
-	.initFrom( PADrend.Serialization.getTypeHandler(Animation.AnimationBase) ) //! --|> AnimationBase
-	.addDescriber( fn(ctxt,Animation.NodeAnimation obj,Map d){		d['nodeId'] = obj.getNodeId();	})
-	.addInitializer( fn(ctxt,Animation.NodeAnimation obj,Map d){	obj.setNodeId(d['nodeId']);	});
+PADrend.Serialization.registerType( T, "Animation.NodeAnimation")
+	.initFrom( PADrend.Serialization.getTypeHandler(AnimationBase) ) //! --|> AnimationBase
+	.addDescriber( fn(ctxt,T obj,Map d){		d['nodeId'] = obj.getNodeId();	})
+	.addInitializer( fn(ctxt,T obj,Map d){	obj.setNodeId(d['nodeId']);	});
 
 // -----------------------------------------------------------------
 // GUI
 
 //! ---o
-NodeAnimation.getMenuEntries := fn(storyBoardPanel){
+T.getMenuEntries @(override) := fn(storyBoardPanel){
 	// call base type's function.
-	var m = (this->Animation.AnimationBase.getMenuEntries)(storyBoardPanel);
+	var m = (this->AnimationBase.getMenuEntries)(storyBoardPanel);
 	m+="----";
 	var idInput = gui.create({
 		GUI.TYPE : GUI.TYPE_TEXT,
@@ -170,3 +169,5 @@ NodeAnimation.getMenuEntries := fn(storyBoardPanel){
 	};
 	return m;
 };
+
+return T;

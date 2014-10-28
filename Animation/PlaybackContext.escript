@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -16,36 +16,32 @@
  ** 2011-04 Claudius
  **/
 
-loadOnce( __DIR__+"/Animation.escript" );
-loadOnce( __DIR__+"/Animations/Story.escript" );
+static T = new Type;
 
-Animation.PlaybackContext := new Type();
-var PlaybackContext = Animation.PlaybackContext;
+T.story := void;
+T.playing := void;
+T.looping := true;
+T.clockStartingTime := 0; // real seconds
+T.currentTime := 0; // animation seconds
+T.extensionRegistered := false;
+T.timeUpdatedListener := void;
 
-PlaybackContext.story := void;
-PlaybackContext.playing := void;
-PlaybackContext.looping := true;
-PlaybackContext.clockStartingTime := 0; // real seconds
-PlaybackContext.currentTime := 0; // animation seconds
-PlaybackContext.extensionRegistered := false;
-PlaybackContext.timeUpdatedListener := void;
-
-PlaybackContext.timeScale := 1.0; // animation seconds / real seconds
-
+T.timeScale := 1.0; // animation seconds / real seconds
 
 //! (ctor)
-PlaybackContext._constructor ::= fn( Animation.Story _story ){
+T._constructor ::= fn( _story ){
+	assert( _story.isA(module('./Animations/Story')) );
 	this.story = _story;
 	this.timeUpdatedListener = [];
 };
 
 
 //! @param listener   void | $REMOVE  fn(PlaybackContext){ ... }
-PlaybackContext.addListener ::= fn(listener){
+T.addListener ::= fn(listener){
 	this.timeUpdatedListener += listener;
 };
 
-PlaybackContext.execute ::= fn( [Number,void] time = void){
+T.execute ::= fn( [Number,void] time = void){
 	if(!time) 
 		time = currentTime;
 	time = (time*100).round() * 0.01;
@@ -63,25 +59,25 @@ PlaybackContext.execute ::= fn( [Number,void] time = void){
 		this.pause();
 };
 
-PlaybackContext.getCurrentTime ::= fn(){
+T.getCurrentTime ::= fn(){
 	return this.currentTime;
 };
 
-PlaybackContext.getStory ::= fn(){
+T.getStory ::= fn(){
 	return this.story;
 };
 
-PlaybackContext.getTimeScale ::= fn(){
+T.getTimeScale ::= fn(){
 	return this.timeScale;
 };
 
 
-PlaybackContext.isPlaying ::= fn(){
+T.isPlaying ::= fn(){
 	return this.playing;
 };
 
 static Command = Std.require('LibUtilExt/Command');
-PlaybackContext.jumpRel ::= fn(tDiff){
+T.jumpRel ::= fn(tDiff){
 	if(tDiff < -this.currentTime)
 		tDiff = -this.currentTime;
 	this.clockStartingTime-=tDiff/this.timeScale;
@@ -89,24 +85,24 @@ PlaybackContext.jumpRel ::= fn(tDiff){
 	this.execute(currentTime);
 	
 	PADrend.executeCommand( new Command({	
-			Command.EXECUTE : (fn(currentTime,clockStartingTime){ 
+			Command.EXECUTE : [currentTime,clockStartingTime]=>fn(currentTime,clockStartingTime){ 
 				var ctxt=AnimationPlugin.playbackContext;
 				ctxt.jumpTo(currentTime);
 				ctxt.clockStartingTime=clockStartingTime;
-			}).bindLastParams(currentTime,clockStartingTime),
+			},
 			Command.FLAGS : Command.FLAG_SEND_TO_SLAVES }) 
 	);
 };
 
-PlaybackContext.jumpTo ::= fn(t){
+T.jumpTo ::= fn(t){
 	this.jumpRel(t-currentTime);
 };
 
-PlaybackContext.pause ::= fn(){
+T.pause ::= fn(){
 	this.playing = false;
 };
 
-PlaybackContext.play ::= fn(){
+T.play ::= fn(){
 	this.clockStartingTime = PADrend.getSyncClock()- (this.currentTime/this.timeScale);
 	
 	this.playing = true;
@@ -122,20 +118,20 @@ PlaybackContext.play ::= fn(){
 	}
 	// send command to connected clients
 	PADrend.executeCommand( new Command({	
-			Command.EXECUTE : (fn(clockStartingTime){ 
-				var ctxt=AnimationPlugin.playbackContext;
+			Command.EXECUTE : [clockStartingTime]=>fn(clockStartingTime){ 
+				var ctxt = AnimationPlugin.playbackContext;
 				ctxt.play();
-				ctxt.clockStartingTime=clockStartingTime;
-			}).bindLastParams(clockStartingTime),
+				ctxt.clockStartingTime = clockStartingTime;
+			},
 			Command.FLAGS : Command.FLAG_SEND_TO_SLAVES }) 
 	);
 };
 
-PlaybackContext.setLooping ::= fn(Bool l){
+T.setLooping ::= fn(Bool l){
 	this.looping = l;
 };
 
-PlaybackContext.setTimeScale ::= fn(newTimeScale){
+T.setTimeScale ::= fn(newTimeScale){
 	if(newTimeScale<=0.01)
 		newTimeScale = 0.01;
 	this.timeScale = newTimeScale;
@@ -153,17 +149,18 @@ PlaybackContext.setTimeScale ::= fn(newTimeScale){
 	
 };
 
-PlaybackContext.stop ::= fn(){
+T.stop ::= fn(){
 	this.playing = false;
 	this.execute(-0.01); // move before the start to disable all animations
 	
 	PADrend.executeCommand( new Command({	
-		Command.EXECUTE : (fn(clockStartingTime){ 
+		Command.EXECUTE : [clockStartingTime]=>fn(clockStartingTime){ 
 			var ctxt = AnimationPlugin.playbackContext;
 			ctxt.stop();
 			ctxt.clockStartingTime = clockStartingTime;
-		}).bindLastParams(clockStartingTime),
+		},
 		Command.FLAGS : Command.FLAG_SEND_TO_SLAVES }) 
 	);
 };
 
+return T;

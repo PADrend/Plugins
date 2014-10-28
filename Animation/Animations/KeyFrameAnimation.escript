@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -18,35 +18,36 @@
  ** KeyFrameAnimation-Type
  **/
 
-loadOnce(__DIR__+"/NodeAnimation.escript");
+static NodeAnimation = module('./NodeAnimation');
 
 // -----------------------------------------------------------------
 // KeyFrameAnimation ---|> NodeAnimation ---|> AnimationBase
-Animation.KeyFrameAnimation := new Type(Animation.NodeAnimation);
-var KeyFrameAnimation = Animation.KeyFrameAnimation;
-Traits.addTrait(KeyFrameAnimation,Traits.PrintableNameTrait,$KeyFrameAnimation);
+static T = new Type(NodeAnimation);
 
-KeyFrameAnimation.keyFrames := void;
-KeyFrameAnimation.typeName ::= "KeyFrameAnimation";
+module('../Utils').constructableAnimationTypes["KeyFrameAnimation"] = T;
 
-Animation.constructableAnimationTypes["KeyFrameAnimation"] = KeyFrameAnimation;
+Traits.addTrait(T,Traits.PrintableNameTrait,$KeyFrameAnimation);
+
+T.keyFrames := void;
+T.typeName ::= "KeyFrameAnimation";
 
 // ----------------------------------------------------------
-KeyFrameAnimation.KeyFrame := new Type();
-KeyFrameAnimation.KeyFrame.srt := void;
-KeyFrameAnimation.KeyFrame.time := 0;
+static KeyFrame = new Type;
+KeyFrame.srt := void;
+KeyFrame.time := 0;
 //! (ctor) KeyFrame
-KeyFrameAnimation.KeyFrame._constructor ::= fn(_time=0.0,Geometry.SRT _srt=new Geometry.SRT()){
+KeyFrame._constructor ::= fn(_time=0.0,Geometry.SRT _srt=new Geometry.SRT()){
 	this.time = _time;
 	this.srt = _srt;
 //	out("####\n");
 };
+T.KeyFrame ::= T;
 // ----------------------------------------------------------
 
 
 
 //! (ctor)
-KeyFrameAnimation._constructor ::= fn(_name="KeyFrameAnimation",_startTime=0,_duration=1)@(super(_name,_startTime,_duration)){
+T._constructor ::= fn(_name="KeyFrameAnimation",_startTime=0,_duration=1)@(super(_name,_startTime,_duration)){
 	this.__status.originalSRT := void;
 	this.keyFrames = [];
 	
@@ -54,10 +55,10 @@ KeyFrameAnimation._constructor ::= fn(_name="KeyFrameAnimation",_startTime=0,_du
 };
 
 //! ---|> AnimationBase
-KeyFrameAnimation.doEnter ::= fn(){
+T.doEnter @(override)  ::= fn(){
 
 	// call base type's function.
-	(this->Animation.NodeAnimation.doEnter)();
+	(this->NodeAnimation.doEnter)();
 
 	var node = this.getNode();
 	if(!node)
@@ -68,13 +69,13 @@ KeyFrameAnimation.doEnter ::= fn(){
 };
 //
 ////! ---|> AnimationBase
-//KeyFrameAnimation.doLeave ::= fn(){
+//T.doLeave ::= fn(){
 //	// call base type's function.
-//	(this->Animation.NodeAnimation.doLeave)();
+//	(this->NodeAnimation.doLeave)();
 //};
 
 //! ---|> AnimationBase
-KeyFrameAnimation.doExecute ::= fn(Number localTime){
+T.doExecute @(override)  ::= fn(Number localTime){
 	if(!this.__status.node || this.keyFrames.empty() || !this.__status.originalSRT )
 		return;
 
@@ -106,11 +107,11 @@ KeyFrameAnimation.doExecute ::= fn(Number localTime){
 	}
 };
 
-KeyFrameAnimation.getKeyFrame ::= fn(index){
+T.getKeyFrame ::= fn(index){
 	return this.keyFrames[index];
 };
 
-KeyFrameAnimation.insertKeyFrame ::= fn( time, Geometry.SRT srt){
+T.insertKeyFrame ::= fn( time, Geometry.SRT srt){
 	foreach(this.keyFrames as var kf){
 		if(kf.time == time){
 			Runtime.warn("There is already a key frame at "+time+"s.");
@@ -127,12 +128,12 @@ KeyFrameAnimation.insertKeyFrame ::= fn( time, Geometry.SRT srt){
 		this.keyFrames[i+1] = this.keyFrames[i];
 	}
 	++i;
-	this.keyFrames[i] = new Animation.KeyFrameAnimation.KeyFrame();
+	this.keyFrames[i] = new KeyFrame;
 	
 	this.setKeyFrame(i,time,srt);
 };
 
-KeyFrameAnimation.removeKeyFrame ::= fn( index){
+T.removeKeyFrame ::= fn( index){
 	if(!this.keyFrames[index])
 		return;
 	
@@ -146,7 +147,7 @@ KeyFrameAnimation.removeKeyFrame ::= fn( index){
 };
 
 //! ---|> AnimationBase
-KeyFrameAnimation.undo ::= fn(){
+T.undo @(override) ::= fn(){
 	// restore original srt and unset values
 	if(this.__status.node && this.__status.originalSRT){
 		
@@ -154,11 +155,11 @@ KeyFrameAnimation.undo ::= fn(){
 		this.__status.originalSRT = void;
 	}
 	// call base type's function.
-	(this->Animation.NodeAnimation.undo)();
+	(this->NodeAnimation.undo)();
 };
 
 
-KeyFrameAnimation.setKeyFrame ::= fn( index, time, Geometry.SRT srt){
+T.setKeyFrame ::= fn( index, time, Geometry.SRT srt){
 	if(index >= this.keyFrames.count()){
 		Runtime.warn();
 		return;
@@ -185,8 +186,8 @@ KeyFrameAnimation.setKeyFrame ::= fn( index, time, Geometry.SRT srt){
 };
 
 
-PADrend.Serialization.registerType( Animation.KeyFrameAnimation.KeyFrame, "Animation.KeyFrameAnimation.KeyFrame")
-	.addDescriber( fn(ctxt,Animation.KeyFrameAnimation.KeyFrame obj,Map d){
+PADrend.Serialization.registerType( KeyFrame, "Animation.KeyFrameAnimation.KeyFrame")
+	.addDescriber( fn(ctxt,KeyFrame obj,Map d){
 		d['time'] = obj.time;
 		d['srt'] = ctxt.createDescription(obj.srt);
 	})
@@ -195,18 +196,18 @@ PADrend.Serialization.registerType( Animation.KeyFrameAnimation.KeyFrame, "Anima
 	});
 
 
-PADrend.Serialization.registerType( Animation.KeyFrameAnimation, "Animation.KeyFrameAnimation")
-	.initFrom( PADrend.Serialization.getTypeHandler(Animation.NodeAnimation) ) //! --|> NodeAnimation
-	.addDescriber( fn(ctxt,Animation.KeyFrameAnimation obj,Map d){		d['keyFrames'] = ctxt.createDescription(obj.keyFrames);	})
-	.addInitializer( fn(ctxt,Animation.KeyFrameAnimation obj,Map d){	obj.keyFrames = ctxt.createObject(d['keyFrames']);	});
+PADrend.Serialization.registerType( T, "Animation.KeyFrameAnimation")
+	.initFrom( PADrend.Serialization.getTypeHandler(NodeAnimation) ) //! --|> NodeAnimation
+	.addDescriber( fn(ctxt, T obj,Map d){		d['keyFrames'] = ctxt.createDescription(obj.keyFrames);	})
+	.addInitializer( fn(ctxt, T obj,Map d){	obj.keyFrames = ctxt.createObject(d['keyFrames']);	});
 
 // -----------------------------------------------------------------
 // GUI
 
 //! ---|> AnimationBase
-KeyFrameAnimation.getMenuEntries := fn(storyBoardPanel){
+T.getMenuEntries @(override) := fn(storyBoardPanel){
 	// call base type's function.
-	var m = (this->Animation.NodeAnimation.getMenuEntries)(storyBoardPanel);
+	var m = (this->NodeAnimation.getMenuEntries)(storyBoardPanel);
 	m+="----";
 	m+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -232,9 +233,9 @@ KeyFrameAnimation.getMenuEntries := fn(storyBoardPanel){
 };
 
 //! ---|> AnimationBase
-KeyFrameAnimation.createAnimationBar ::= fn(storyBoardPanel){
+T.createAnimationBar @(override) ::= fn(storyBoardPanel){
 	// call base type's function.
-	var animationBar = (this->Animation.NodeAnimation.createAnimationBar)(storyBoardPanel);
+	var animationBar = (this->NodeAnimation.createAnimationBar)(storyBoardPanel);
 	
 	animationBar.grabbers := [];
 	animationBar.refresh = [animationBar,animationBar.refresh]->fn(){
@@ -305,14 +306,14 @@ KeyFrameAnimation.createAnimationBar ::= fn(storyBoardPanel){
 						entries += {
 							GUI.TYPE : GUI.TYPE_BUTTON,
 							GUI.LABEL : "Remove this key frame",
-							GUI.ON_CLICK : [ animation,this.index ]->fn(){
+							GUI.ON_CLICK : [ animation,index ]->fn(){
 								this[0].removeKeyFrame(this[1]);
 							}
 						};							
 						entries += {
 							GUI.TYPE : GUI.TYPE_BUTTON,
 							GUI.LABEL : "Update position",
-							GUI.ON_CLICK : [ animation,this.index ]->fn(){
+							GUI.ON_CLICK : [ animation,index ]->fn(){
 								var animation = this[0];
 								var index = this[1];
 								var kf = animation.getKeyFrame(index);
@@ -325,7 +326,7 @@ KeyFrameAnimation.createAnimationBar ::= fn(storyBoardPanel){
 						entries += {
 							GUI.TYPE : GUI.TYPE_BUTTON,
 							GUI.LABEL : "Duplicate at current time",
-							GUI.ON_CLICK : [ animation,this.index,storyBoardPanel.playbackContext ]->fn(){
+							GUI.ON_CLICK : [ animation,index,storyBoardPanel.playbackContext ]->fn(){
 								var animation = this[0];
 								var index = this[1];
 								var kf = animation.getKeyFrame(index);
@@ -349,32 +350,8 @@ KeyFrameAnimation.createAnimationBar ::= fn(storyBoardPanel){
 			grabber.setPosition(animationBar.storyBoardPanel.getPositionForTime(kf.time), 17);
 			grabber.setTooltip("#"+index+": "+kf.time);
 		}
-//		
-		
-		
-//		this[0].durationGrabber.setPosition( new Geometry.Vec2(this[0].storyBoardPanel.getPositionForTime(this[0].animation.getDuration()),17 ));
 	};
-//	// duration
-//	animationBar.durationGrabber := gui.create({
-//		GUI.TYPE : GUI.TYPE_BUTTON,
-//		GUI.LABEL : "",
-//		GUI.POSITION : [0,10],
-//		GUI.WIDTH : 4,
-//		GUI.HEIGHT : 6,
-//		GUI.ON_DRAG : animationBar->fn(evt){
-//			this.animation.setDuration( this.animation.getDuration()+this.storyBoardPanel.getTimeForPosition(evt.deltaX*0.5) );
-//		},
-//		GUI.TOOLTIP : "Blending duration\nAdjust by dragging."
-//	});
-//	animationBar.durationGrabber.setButtonShape(GUI.BUTTON_SHAPE_TOP_RIGHT);
-//	animationBar += animationBar.durationGrabber;
-//	
-//	animationBar.refresh = [animationBar,animationBar.refresh]->fn(){
-//		// call original refresh method
-//		(this[0]->this[1]) ();
-//		this[0].durationGrabber.setPosition( new Geometry.Vec2(this[0].storyBoardPanel.getPositionForTime(this[0].animation.getDuration()),17 ));
-//	};
 	return animationBar;
-//	storyBoardPanel->storyBoardPanel.getTimeForPosition(evt.deltaX*0.5)
-	
 };
+
+return T;

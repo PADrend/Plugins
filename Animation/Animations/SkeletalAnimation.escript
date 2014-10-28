@@ -19,268 +19,269 @@
  *  code mostly inheriated from NodeAnimation from Claudius
  */
 
-
-loadOnce(__DIR__+"/KeyFrameAnimation.escript");
+static KeyFrameAnimation = module('./KeyFrameAnimation');
+static AnimationBase = module('./AnimationBase');
 
 // -----------------------------------------------------------------
 // SkeletalAnimation ---|> AnimationBase
-Animation.SkeletalAnimation := new Type(Animation.KeyFrameAnimation);
-var SkeletalAnimation = Animation.SkeletalAnimation;
+static T = new Type(KeyFrameAnimation);
+
+
 Traits.addTrait(SkeletalAnimation,Traits.PrintableNameTrait,$SkeletalAnimation);
 
-Animation.constructableAnimationTypes["SkeletalAnimation"] = SkeletalAnimation;
+module('../Utils').constructableAnimationTypes["SkeletalAnimation"] = T;
 
-SkeletalAnimation.nodeId := "";
-SkeletalAnimation.typeName ::= "SkeletalAnimation";
-SkeletalAnimation.skeletalBehavior := void;
-SkeletalAnimation.joints := [];
+T.nodeId := "";
+T.typeName ::= "SkeletalAnimation";
+T.skeletalBehavior := void;
+T.joints := [];
 
 // extension to regular keyframes
 // each pose stores one keyframe of all deforming joints inside the skeletaltree.
-Animation.KeyFrameAnimation.KeyFrame.poses := new Array();
+KeyFrameAnimation.KeyFrame.poses := new Array();
 
 //! (ctor)
-SkeletalAnimation._constructor ::= fn(node=void, animation, _startTime=0, _duration=1)@(super("SkeletalAnimation", _startTime, _duration))
+T._constructor ::= fn(node=void, animation, _startTime=0, _duration=1)@(super("SkeletalAnimation", _startTime, _duration))
 {
-    this.__status.node := void;
-    this.__status.originalMatrix := void;
-    
-    if(!node)
-        return;
-    
-    if(!animation)
-        return;
-    
-    if(!(node.skeleton ---|> MinSG.SkeletalNode))
-    {
-        this.skeletalBehavior := void;
-        this.joints = [];
-        
-        return;
-    }
-    
-    this.skeletalBehavior := animation;
-    this.__status.node = node;
-    
-    foreach(skeletalBehavior.getPoses() as var pose)
-    {
-        foreach(pose.getTimeline() as var time)
-        {
-            var found = false;
-            foreach(this.keyFrames as var key)
-            {
-                if(key.time == time)
-                {
-                    key.poses.pushBack(pose);
-                    found = true;
-                }
-            }
-            if(!found)
-            {
-                var keyframe = new Animation.KeyFrameAnimation.KeyFrame(time);
-                keyframe.poses.pushBack(pose);
-                keyFrames.pushBack(keyframe);
-            }
-        
-        }
-    }
+	this.__status.node := void;
+	this.__status.originalMatrix := void;
+	
+	if(!node)
+		return;
+	
+	if(!animation)
+		return;
+	
+	if(!(node.skeleton ---|> MinSG.SkeletalNode))
+	{
+		this.skeletalBehavior := void;
+		this.joints = [];
+		
+		return;
+	}
+	
+	this.skeletalBehavior := animation;
+	this.__status.node = node;
+	
+	foreach(skeletalBehavior.getPoses() as var pose)
+	{
+		foreach(pose.getTimeline() as var time)
+		{
+			var found = false;
+			foreach(this.keyFrames as var key)
+			{
+				if(key.time == time)
+				{
+					key.poses.pushBack(pose);
+					found = true;
+				}
+			}
+			if(!found)
+			{
+				var keyframe = new KeyFrameAnimation.KeyFrame(time);
+				keyframe.poses.pushBack(pose);
+				keyFrames.pushBack(keyframe);
+			}
+		
+		}
+	}
 };
 
 //! ---|> AnimationBase
-SkeletalAnimation.doEnter ::= fn(){
+T.doEnter ::= fn(){
 	// call base type's function.
-	(this->Animation.AnimationBase.doEnter)();
-    
-    if(!this.skeletalBehavior)
-        return;
-    
-    if(!(this.skeletalBehavior ---|> MinSG.SkeletalAnimationBehaviour))
-        return;
-    
-    foreach(this.skeletalBehavior.getPoses() as var pose)
-        pose.restart();
+	(this->AnimationBase.doEnter)();
+	
+	if(!this.skeletalBehavior)
+		return;
+	
+	if(!(this.skeletalBehavior ---|> MinSG.SkeletalAnimationBehaviour))
+		return;
+	
+	foreach(this.skeletalBehavior.getPoses() as var pose)
+		pose.restart();
 };
 
-SkeletalAnimation.doExecute ::= fn(Number localTime)
+T.doExecute ::= fn(Number localTime)
 {
-    if(!skeletalBehavior)
-        return;
-    
-    if(!(skeletalBehavior ---|> MinSG.SkeletalAnimationBehaviour))
-       return;
-    
-    this.skeletalBehavior.gotoTime(localTime);
+	if(!skeletalBehavior)
+		return;
+	
+	if(!(skeletalBehavior ---|> MinSG.SkeletalAnimationBehaviour))
+	   return;
+	
+	this.skeletalBehavior.gotoTime(localTime);
 };
 
 //! ---|> AnimationBase
-SkeletalAnimation.undo ::= fn(){
-    if(this.skeletalBehavior)
-       this.skeletalBehavior.gotoTime(0.0);
-    
-    this.skeletalBehavior.stopAnimation();
+T.undo ::= fn(){
+	if(this.skeletalBehavior)
+	   this.skeletalBehavior.gotoTime(0.0);
+	
+	this.skeletalBehavior.stopAnimation();
 	
 	// call base type's function.
-	(this->Animation.AnimationBase.undo)();
+	(this->AnimationBase.undo)();
 };
 
-SkeletalAnimation.getSkeletalBehavior ::= fn(){
-    return this.skeletalBehavior;
+T.getSkeletalBehavior ::= fn(){
+	return this.skeletalBehavior;
 };
 
-SkeletalAnimation.insertPose ::= fn(time){
-    if(!this.__status.node)
-        return;
-    
-    foreach(keyFrames as var key, var val)
-        if(val.time == time)
-        {
-            out("A Keyframe already exists at"+time+"s.\n");
-            return;
-        }
-    
+T.insertPose ::= fn(time){
+	if(!this.__status.node)
+		return;
+	
+	foreach(keyFrames as var key, var val)
+		if(val.time == time)
+		{
+			out("A Keyframe already exists at"+time+"s.\n");
+			return;
+		}
+	
 
-    var i;
-    this.keyFrames += void;
-    for(i=keyFrames.count()-2; i>0; --i)
-    {
-        if(keyFrames[i].time < time)
-            break;
-        
-        keyFrames[i+1] = keyFrames[i];
-    }
-    i++;
-    keyFrames[i] = new Animation.KeyFrameAnimation.KeyFrame(time);
-    keyFrames[i].poses = [];
-    foreach(this.skeletalBehavior.getPoses() as var pose)
-        keyFrames[i].poses += pose;
-    
-    foreach(keyFrames[i].poses as var pose)
-    {
-        pose.addValue(pose.getNode().getRelTransformationMatrix(), time, MinSG.SkeletalAbstractPose.LINEAR, i);
-        pose.restart();
-    }
-    
-    this._updated($KEY_FRAME_CHANGED,keyFrames[i]);
-    
+	var i;
+	this.keyFrames += void;
+	for(i=keyFrames.count()-2; i>0; --i)
+	{
+		if(keyFrames[i].time < time)
+			break;
+		
+		keyFrames[i+1] = keyFrames[i];
+	}
+	i++;
+	keyFrames[i] = new KeyFrameAnimation.KeyFrame(time);
+	keyFrames[i].poses = [];
+	foreach(this.skeletalBehavior.getPoses() as var pose)
+		keyFrames[i].poses += pose;
+	
+	foreach(keyFrames[i].poses as var pose)
+	{
+		pose.addValue(pose.getNode().getRelTransformationMatrix(), time, MinSG.SkeletalAbstractPose.LINEAR, i);
+		pose.restart();
+	}
+	
+	this._updated($KEY_FRAME_CHANGED,keyFrames[i]);
+	
 	//  if animation is currently active, apply changes immediately
 	if(this.isActive()){
 		this.execute(this.__status.lastTime);
 	}
 };
 
-SkeletalAnimation.setKeyFrame ::= fn(index, time, srt=void)
+T.setKeyFrame ::= fn(index, time, srt=void)
 {
-    var keyframe = getKeyFrame(index);
-    foreach(keyframe.poses as var pose)
-    {
-        var timeline = pose.getTimeline();
-        foreach(timeline as var index, var value)
-        {
-            if((value - keyframe.time).abs() < 0.001)
-            {
-                if(index > 0)
-                    if(timeline[index-1] >= time)
-                        return;
-                
-                if(index < timeline.size()-1)
-                    if(timeline[index+1] < time)
-                        return;
-                
-                timeline[index] = time;
-                if(!pose.setTimeline(timeline))
-                    out("Could not change Timeline!\n");
-                else
-                    pose.restart();
-                break;
-            }
-        }
-    }
-    keyframe.time = time;
-    
-    this._updated($KEY_FRAME_CHANGED,keyframe);
-    
-    //  if animation is currently active, apply changes immediately
-	if(this.isActive())
-		this.execute(this.__status.lastTime);
-};
-
-SkeletalAnimation.updateKeyFrame ::= fn(index)
-{
-    foreach(keyFrames[index].poses as var pose)
-    {
-        pose.updateValueAtIndex(pose.getNode().getRelTransformationMatrix(), index);
-        pose.restart();
-    }
-    
-    
-    this._updated($KEY_FRAME_REMOVED,void);
+	var keyframe = getKeyFrame(index);
+	foreach(keyframe.poses as var pose)
+	{
+		var timeline = pose.getTimeline();
+		foreach(timeline as var index, var value)
+		{
+			if((value - keyframe.time).abs() < 0.001)
+			{
+				if(index > 0)
+					if(timeline[index-1] >= time)
+						return;
+				
+				if(index < timeline.size()-1)
+					if(timeline[index+1] < time)
+						return;
+				
+				timeline[index] = time;
+				if(!pose.setTimeline(timeline))
+					out("Could not change Timeline!\n");
+				else
+					pose.restart();
+				break;
+			}
+		}
+	}
+	keyframe.time = time;
+	
+	this._updated($KEY_FRAME_CHANGED,keyframe);
 	
 	//  if animation is currently active, apply changes immediately
 	if(this.isActive())
 		this.execute(this.__status.lastTime);
 };
 
-SkeletalAnimation.removeKeyFrame ::= fn(index)
+T.updateKeyFrame ::= fn(index)
 {
-    foreach(this.keyFrames[index].poses as var pose)
-    {
-        pose.removeValue(index);
-        pose.restart();
-    }
-    
-    this.keyFrames.removeIndex(index);
-    
-    this._updated($KEY_FRAME_REMOVED,void);
+	foreach(keyFrames[index].poses as var pose)
+	{
+		pose.updateValueAtIndex(pose.getNode().getRelTransformationMatrix(), index);
+		pose.restart();
+	}
+	
+	
+	this._updated($KEY_FRAME_REMOVED,void);
 	
 	//  if animation is currently active, apply changes immediately
 	if(this.isActive())
 		this.execute(this.__status.lastTime);
 };
 
-SkeletalAnimation.getKeyFrame ::= fn(index)
+T.removeKeyFrame ::= fn(index)
 {
-    return keyFrames[index];
+	foreach(this.keyFrames[index].poses as var pose)
+	{
+		pose.removeValue(index);
+		pose.restart();
+	}
+	
+	this.keyFrames.removeIndex(index);
+	
+	this._updated($KEY_FRAME_REMOVED,void);
+	
+	//  if animation is currently active, apply changes immediately
+	if(this.isActive())
+		this.execute(this.__status.lastTime);
 };
 
-PADrend.Serialization.registerType( Animation.SkeletalAnimation.KeyFrame, "Animation.SkeletalAnimation.KeyFrame")
-	.addDescriber( fn(ctxt,Animation.KeyFrameAnimation.KeyFrame obj,Map d){
-                  d['time'] = obj.time;
-                  d['keyFrames'] = ctxt.createDescription(obj.poses);
-                  })
-    .setFactory( fn(ctxt,type,Map d){	return new type (d['time'], ctxt.createObject(d['poses']));	});
+T.getKeyFrame ::= fn(index)
+{
+	return keyFrames[index];
+};
+
+PADrend.Serialization.registerType( SkeletalAnimation.KeyFrame, "Animation.SkeletalAnimation.KeyFrame")
+	.addDescriber( fn(ctxt,KeyFrameAnimation.KeyFrame obj,Map d){
+				  d['time'] = obj.time;
+				  d['keyFrames'] = ctxt.createDescription(obj.poses);
+				  })
+	.setFactory( fn(ctxt,type,Map d){	return new type (d['time'], ctxt.createObject(d['poses']));	});
 
 
-PADrend.Serialization.registerType( Animation.SkeletalAnimation, "Animation.SkeletalAnimation")
+PADrend.Serialization.registerType( T, "Animation.SkeletalAnimation")
 	.initFrom( PADrend.Serialization.getTypeHandler(Animation.AnimationBase) ) //! --|> AnimationBase
-	.addDescriber( fn(ctxt,Animation.KeyFrameAnimation.KeyFrame obj,Map d){
+	.addDescriber( fn(ctxt,KeyFrameAnimation.KeyFrame obj,Map d){
 		d['nodeId'] = obj.getNodeId();
-        d['keyFrames'] = ctxt.createDescription(obj.keyFrames);
+		d['keyFrames'] = ctxt.createDescription(obj.keyFrames);
 	})
-	.addInitializer( fn(ctxt,Animation.SkeletalAnimation obj,Map d){
+	.addInitializer( fn(ctxt,T obj,Map d){
 		obj.setNodeId(d['nodeId']);
-        obj.KeyFrames = ctxt.createObject(d['keyFrames']);
+		obj.KeyFrames = ctxt.createObject(d['keyFrames']);
 	});
 
 // -----------------------------------------------------------------
 // GUI
 
 //! ---o
-SkeletalAnimation.getMenuEntries := fn(storyBoardPanel){
+T.getMenuEntries := fn(storyBoardPanel){
 	// call base type's function.
-	var m = (this->Animation.AnimationBase.getMenuEntries)(storyBoardPanel);
+	var m = (this->AnimationBase.getMenuEntries)(storyBoardPanel);
 	m+="----";
 	var idInput = gui.create({
-                                      GUI.TYPE : GUI.TYPE_TEXT,
-                                      GUI.LABEL : "NodeId",
-                                      GUI.WIDTH : 150,
-                                      GUI.DATA_VALUE : this.getNodeId(),
-                                      GUI.ON_DATA_CHANGED : this->fn(data){
-                                      this.setNodeId(data);
-                                      }
-                                      });	
+									  GUI.TYPE : GUI.TYPE_TEXT,
+									  GUI.LABEL : "NodeId",
+									  GUI.WIDTH : 150,
+									  GUI.DATA_VALUE : this.getNodeId(),
+									  GUI.ON_DATA_CHANGED : this->fn(data){
+									  this.setNodeId(data);
+									  }
+									  });	
 	m+=idInput;
-    
-    m+={
+	
+	m+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Add Pose",
 		GUI.TOOLTIP : "Add a new Pose for Skeletal Animation.",
@@ -289,16 +290,16 @@ SkeletalAnimation.getMenuEntries := fn(storyBoardPanel){
 			var animation = this[0];
 			var storyBoardPanel = this[1];
 			var insertionTime = storyBoardPanel.playbackContext ? storyBoardPanel.playbackContext.getCurrentTime()-animation.getStartTime() :
-            animation.__status.lastTime;
+			animation.__status.lastTime;
 			if(insertionTime<0){
 				Runtime.warn("New keyframes can only be added after the starting time");
 				return;
 			}
-            
+			
 			animation.insertPose(insertionTime);
 		}
 	};
 	return m;
 };
 
-return SkeletalAnimation;
+return T;

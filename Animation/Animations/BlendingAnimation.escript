@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -19,30 +19,32 @@
  ** Search for a BlendingState at the attached node and alter the alpha value.
  **/
 
-loadOnce(__DIR__+"/NodeAnimation.escript");
+static NodeAnimation = module('./NodeAnimation');
 
 // -----------------------------------------------------------------
 // BlendingAnimation ---|> NodeAnimation ---|> AnimationBase
-Animation.BlendingAnimation := new Type(Animation.NodeAnimation);
-var BlendingAnimation = Animation.BlendingAnimation;
-Traits.addTrait(BlendingAnimation,Traits.PrintableNameTrait,$BlendingAnimation);
+static T = new Type(NodeAnimation);
 
-BlendingAnimation.targetAlpha := 0.5;
-BlendingAnimation.typeName ::= "BlendingAnimation";
+module('../Utils').constructableAnimationTypes["BlendingAnimation"] = T;
 
-Animation.constructableAnimationTypes["BlendingAnimation"] = BlendingAnimation;
+
+Traits.addTrait(T,Traits.PrintableNameTrait,$BlendingAnimation);
+
+T.targetAlpha := 0.5;
+T.typeName ::= "BlendingAnimation";
+
 
 //! (ctor)
-BlendingAnimation._constructor ::= fn(_name="BlendingAnimation",_startTime=0,_duration=1)@(super(_name,_startTime,_duration)){
+T._constructor ::= fn(_name="BlendingAnimation",_startTime=0,_duration=1)@(super(_name,_startTime,_duration)){
 	this.__status.originalAlpha := void;
 	this.__status.blendingState := void;
 };
 
 //! ---|> AnimationBase
-BlendingAnimation.doEnter ::= fn(){
+T.doEnter @(override) ::= fn(){
 
 	// call base type's function.
-	(this->Animation.NodeAnimation.doEnter)();
+	(this->NodeAnimation.doEnter)();
 
 	var node = this.getNode();
 	if(!node)
@@ -71,13 +73,13 @@ BlendingAnimation.doEnter ::= fn(){
 };
 //
 ////! ---|> AnimationBase
-//BlendingAnimation.doLeave ::= fn(){
+//T.doLeave @(override) ::= fn(){
 //	// call base type's function.
-//	(this->Animation.NodeAnimation.doLeave)();
+//	(this->NodeAnimation.doLeave)();
 //};
 
 //! ---|> AnimationBase
-BlendingAnimation.doExecute ::= fn(Number localTime){
+T.doExecute @(override) ::= fn(Number localTime){
 	if(!this.__status.blendingState)
 		return;
 	if(duration==0)
@@ -90,9 +92,9 @@ BlendingAnimation.doExecute ::= fn(Number localTime){
 };
 
 //! ---|> AnimationBase
-BlendingAnimation.undo ::= fn(){
+T.undo @(override) ::= fn(){
 	// call base type's function.
-	(this->Animation.NodeAnimation.undo)();
+	(this->NodeAnimation.undo)();
 
 //	out(" - ",this.__status.originalAlpha," ... ",this.getTargetAlpha(),"\n");
 
@@ -104,11 +106,11 @@ BlendingAnimation.undo ::= fn(){
 	
 };
 
-BlendingAnimation.getTargetAlpha ::= fn(){
+T.getTargetAlpha ::= fn(){
 	return this.targetAlpha;
 };
 
-BlendingAnimation.setTargetAlpha ::= fn(newTargetAlpha){
+T.setTargetAlpha ::= fn(newTargetAlpha){
 	if(newTargetAlpha!=this.targetAlpha){
 			
 		this.targetAlpha = newTargetAlpha;
@@ -121,10 +123,10 @@ BlendingAnimation.setTargetAlpha ::= fn(newTargetAlpha){
 	}
 };
 
-PADrend.Serialization.registerType( Animation.BlendingAnimation, "Animation.BlendingAnimation")
-	.initFrom( PADrend.Serialization.getTypeHandler(Animation.NodeAnimation) ) //! --|> NodeAnimation
-	.addDescriber( fn(ctxt,Animation.BlendingAnimation obj,Map d){		d['targetAlpha'] = obj.getTargetAlpha();	})
-	.addInitializer( fn(ctxt,Animation.BlendingAnimation obj,Map d){	obj.setTargetAlpha(d['targetAlpha']);	});
+PADrend.Serialization.registerType( T, "Animation.BlendingAnimation")
+	.initFrom( PADrend.Serialization.getTypeHandler(NodeAnimation) ) //! --|> NodeAnimation
+	.addDescriber( fn(ctxt,T obj,Map d){		d['targetAlpha'] = obj.getTargetAlpha();	})
+	.addInitializer( fn(ctxt,T obj,Map d){	obj.setTargetAlpha(d['targetAlpha']);	});
 
 
 
@@ -132,9 +134,9 @@ PADrend.Serialization.registerType( Animation.BlendingAnimation, "Animation.Blen
 // GUI
 
 //! ---|> AnimationBase
-BlendingAnimation.getMenuEntries := fn(storyBoardPanel){
+T.getMenuEntries @(override) := fn(storyBoardPanel){
 	// call base type's function.
-	var m = (this->Animation.NodeAnimation.getMenuEntries)(storyBoardPanel);
+	var m = (this->NodeAnimation.getMenuEntries)(storyBoardPanel);
 	m+="----";
 	m+={
 		GUI.TYPE : GUI.TYPE_NUMBER,
@@ -158,9 +160,9 @@ BlendingAnimation.getMenuEntries := fn(storyBoardPanel){
 };
 
 //! ---|> AnimationBase
-BlendingAnimation.createAnimationBar ::= fn(storyBoardPanel){
+T.createAnimationBar @(override) ::= fn(storyBoardPanel){
 	// call base type's function.
-	var animationBar = (this->Animation.NodeAnimation.createAnimationBar)(storyBoardPanel);
+	var animationBar = (this->NodeAnimation.createAnimationBar)(storyBoardPanel);
 	
 	// duration
 	animationBar.durationGrabber := gui.create({
@@ -186,3 +188,4 @@ BlendingAnimation.createAnimationBar ::= fn(storyBoardPanel){
 //	storyBoardPanel->storyBoardPanel.getTimeForPosition(evt.deltaX*0.5)
 	
 };
+return T;

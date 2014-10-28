@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2012 Lukas Kopecki
  * Copyright (C) 2012 Ralf Petring <ralf@petring.net>
  * 
@@ -20,20 +20,21 @@
 
 GLOBALS.AnimationPlugin:=new Plugin({
 			Plugin.NAME	: 'Animation',
-			Plugin.VERSION : 1.0,
+			Plugin.VERSION : 1.1,
 			Plugin.DESCRIPTION : "Story based animations",
-			Plugin.AUTHORS : "Cl",
-			Plugin.OWNER : "Cl",
+			Plugin.AUTHORS : "Claudius",
+			Plugin.OWNER : "Claudius",
 			Plugin.REQUIRES : ["NodeEditor","PADrend","PADrend/Serialization"]
 });
 
 static Listener = Std.require('LibUtilExt/deprecated/Listener');
-loadOnce(__DIR__+"/PlaybackContext.escript");
-loadOnce(__DIR__+"/Animations/AnimationBase.escript");
-loadOnce(__DIR__+"/Animations/Story.escript");
-loadOnce(__DIR__+"/Animations/NodeAnimation.escript");
-loadOnce(__DIR__+"/Animations/BlendingAnimation.escript");
-loadOnce(__DIR__+"/Animations/KeyFrameAnimation.escript");
+
+static Utils = Std.require('Animation/Utils');
+static PlaybackContext = Std.require('Animation/PlaybackContext');
+static Story = Std.require('Animation/Animations/Story');
+static KeyFrameAnimation = Std.require('Animation/Animations/KeyFrameAnimation');
+static BlendingAnimation = Std.require('Animation/Animations/BlendingAnimation');
+
 
 // \note Disabled because it messes up the serialization of KeyFrameAnimations
 //if(MinSG.isSet($SkeletalAnimationBehaviour))
@@ -48,7 +49,7 @@ AnimationPlugin.playbackContext := void;
 AnimationPlugin.storyCounter := 0;
 
 //! ---|> Plugin
-AnimationPlugin.init:=fn(){
+AnimationPlugin.init @(override) :=fn(){
 
 	Listener.ANIMATION_PLUGIN_ACTIVE_STORY_CHANGED := $ANIMATION_PLUGIN_ACTIVE_STORY_CHANGED;
 
@@ -70,7 +71,7 @@ AnimationPlugin.init:=fn(){
 
 
 AnimationPlugin.createNewStory := fn(){
-	var story = new Animation.Story("Story "+ (++storyCounter) );
+	var story = new Story("Story "+ (++storyCounter) );
 	this.selectStory(story);
 	return story;
 };
@@ -82,9 +83,9 @@ AnimationPlugin.getActiveStory := fn(){
 
 AnimationPlugin.importStory := fn(filename){
 	out("\Importing story '",filename,"' ... ");
-	var result=Animation.loadAnimation(filename);
+	var result = Utils.loadAnimation(filename);
 	out(result,"\n");
-	if(result---|>Animation.Story){
+	if(result---|>Story){
 		result.filename := filename;
 		this.getActiveStory().addAnimation(result); 
 	}else{
@@ -95,9 +96,9 @@ AnimationPlugin.importStory := fn(filename){
 
 AnimationPlugin.loadStory := fn(filename){
 	out("\Loading story '",filename,"' ... ");
-	var result=Animation.loadAnimation(filename);
+	var result=Utils.loadAnimation(filename);
 	out(result,"\n");
-	if(result---|>Animation.Story){
+	if(result---|>Story){
 		result.filename := filename;
 		this.selectStory(result); 
 	}else{
@@ -108,9 +109,9 @@ AnimationPlugin.loadStory := fn(filename){
 
 AnimationPlugin.mergeStory := fn(filename){
 	out("\Merging story '",filename,"' ... ");
-	var result=Animation.loadAnimation(filename);
+	var result=Utils.loadAnimation(filename);
 	out(result,"\n");
-	if(result---|>Animation.Story){
+	if(result---|>Story){
 		// steal all animations at one, so that the old owner can't move them around while they are removed. 
 		var tmp = [];
 		result.animations.swap(tmp);
@@ -145,18 +146,18 @@ AnimationPlugin.rebuildStoryGUI := fn(){
 
 AnimationPlugin.saveCurrentStory := fn(filename){
 	out("\nSaving story as '",filename,"' ... ");
-	var result=Animation.saveAnimation(filename,this.activeStory);
+	var result=Utils.saveAnimation(filename,this.activeStory);
 	out(result,"\n");
 	this.activeStory.filename := filename;
 	return result;
 };
 
-AnimationPlugin.selectStory := fn(Animation.Story story){
+AnimationPlugin.selectStory := fn(Story story){
 	this.activeStory = story;
 	if(this.playbackContext){
 		this.playbackContext.stop();
 	}
-	this.playbackContext = new Animation.PlaybackContext(story);
+	this.playbackContext = new PlaybackContext(story);
 		
 	// high level story? -> register
 	if(!this.stories.contains(story) && !story.getStory()){
@@ -180,7 +181,7 @@ AnimationPlugin.selectStory := fn(Animation.Story story){
 
 
 //! @return [ filename of base story, name of substory, ... , name of given story]
-AnimationPlugin.getStoryPath := fn(Animation.Story story){
+AnimationPlugin.getStoryPath := fn(Story story){
 	var components = [];
 	while(story){
 		if(!story.getStory()){
@@ -225,7 +226,7 @@ AnimationPlugin.getStoryByPath := fn(Array path){
 				break;
 			}
 		}
-		if(!found || !(story---|>Animation.Story)){
+		if(!found || !(story---|>Story)){
 			Runtime.warn("Could not find story '"+debugPathString+"'");
 			return;
 		}
@@ -340,7 +341,7 @@ AnimationPlugin.createNavBar:=fn(width,height){
 	return panel;
 };
 
-AnimationPlugin.getNameForStory := fn(Animation.Story story){
+AnimationPlugin.getNameForStory := fn(Story story){
 	var s=story.getName();
 	if(story.isSet($filename))
 		s+=" ("+story.filename+")";
@@ -348,15 +349,15 @@ AnimationPlugin.getNameForStory := fn(Animation.Story story){
 };
 
 //!
-AnimationPlugin.openChildSelectorMenu:=fn(Geometry.Vec2 pos,[Array,Animation.Story] stories){
+AnimationPlugin.openChildSelectorMenu:=fn(Geometry.Vec2 pos,[Array,Story] stories){
 	var m=gui.createMenu();
 	m.entries:=[];
 	
-	if(stories---|>Animation.Story){
+	if(stories.isA(Story)){
 		var parentStory = stories;
 		stories = [];
 		foreach(parentStory.getAnimations() as var animation){
-			if(animation---|>Animation.Story)
+			if(animation.isA(Story))
 				stories += animation;
 		}
 	}
