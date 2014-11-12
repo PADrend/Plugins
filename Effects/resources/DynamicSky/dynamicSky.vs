@@ -1,3 +1,4 @@
+#version 120
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -27,15 +28,15 @@ const float scale = 0.005;
 
 void  main(void){
 
-    vec3 normal = - normalize(gl_Vertex.xyz);
-    vec2 texCoords = (normal*(10.0 / normal.y)).xz*scale;
+	vec3 normal = - normalize(gl_Vertex.xyz);
+	vec2 texCoords = (normal*(10.0 / normal.y)).xz*scale;
 
-    skyPos_ws = texCoords;
-    texCoord_1 = texCoords * 2.0 + cloudTime * vec2( 0.5, 1.0 );
-    texCoord_2 = texCoords * 2.5 + cloudTime * vec2( -0.9, 1.2 );
-    texCoord_3 = texCoords * 8.1 + cloudTime * vec2( 1.6, 1.7 );
+	skyPos_ws = texCoords;
+	texCoord_1 = texCoords * 2.0 + cloudTime * vec2( 0.5, 1.0 );
+	texCoord_2 = texCoords * 2.5 + cloudTime * vec2( -0.9, 1.2 );
+	texCoord_3 = texCoords * 8.1 + cloudTime * vec2( 1.6, 1.7 );
 
-    vpos = gl_Vertex.xyz;
+	vpos = gl_Vertex.xyz;
 
-    gl_Position = ftransform();
+	gl_Position = ftransform();
 }

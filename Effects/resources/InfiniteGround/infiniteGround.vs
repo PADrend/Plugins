@@ -1,3 +1,4 @@
+#version 120
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
