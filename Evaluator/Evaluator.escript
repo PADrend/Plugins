@@ -112,13 +112,13 @@ MinSG.Evaluator.setMeasurementResolutionExpression ::= fn(String resExp) {
 
 //!	MinSG.Evaluator ---o
 MinSG.Evaluator.createName ::= fn(){
-    return this.getEvaluatorTypeName()+" ("+this.directionPresetName()+", "+(this.getMode()==MinSG.Evaluator.DIRECTION_VALUES?"directional":"single")+")";
+	return this.getEvaluatorTypeName()+" ("+this.directionPresetName()+", "+(this.getMode()==MinSG.Evaluator.DIRECTION_VALUES?"directional":"single")+")";
 };
 
 //!	MinSG.Evaluator ---o
 MinSG.Evaluator.update ::= fn(...) {
-    this.name(this.createName());
-    executeExtensions('Evaluator_OnEvaluatorDescriptionChanged', this, this.name());
+	this.name(this.createName());
+	executeExtensions('Evaluator_OnEvaluatorDescriptionChanged', this, this.name());
 };
 
 static CONFIG_PREFIX = 'Evaluator_Config_';
@@ -217,7 +217,7 @@ Util.registerExtension('PADrend_Init', fn(){
 
 /*!	MinSG.Evaluator ---o	*/
 MinSG.Evaluator.createConfigPanel ::= fn(){
-    var panel = gui.create({
+	var panel = gui.create({
 		GUI.TYPE				:	GUI.TYPE_PANEL,
 		GUI.SIZE				:	GUI.SIZE_MAXIMIZE
 	});
@@ -235,7 +235,7 @@ MinSG.Evaluator.createConfigPanel ::= fn(){
 		panel += "?????";
 	}
 
-    return panel;
+	return panel;
 };
 
 
@@ -327,9 +327,9 @@ MinSG.Evaluator.singleMeasure ::= fn( MinSG.Node scene, MinSG.AbstractCameraNode
  *		diffRatioVec 	Array of ratios of difference between min and max to the maximum for each direction
  */
 MinSG.Evaluator.mergeValues::=fn(Collection samples){
-	var result=new ExtObject();
+	var result=new ExtObject;
 
-    // init attributes needed for quality calculations
+	// init attributes needed for quality calculations
 	var maxVec=[];
 	var minVec=[];
 	var diffRatioVec=[];
@@ -340,15 +340,15 @@ MinSG.Evaluator.mergeValues::=fn(Collection samples){
 	result.diffRatioVec:=diffRatioVec;
 	result.valueVec:=valueVec;
 
-    if(samples.count()==0){
-        maxVec+=0;
-        minVec+=0;
-        diffRatioVec+=0;
-        valueVec+=0;
-        return result;
-    }
+	if(samples.count()==0){
+		maxVec+=0;
+		minVec+=0;
+		diffRatioVec+=0;
+		valueVec+=0;
+		return result;
+	}
 //PADrend.serialize(EvaluatorManager.getSelectedEvaluator());
-    
+	
 	var first=true;
 	// sum up samples and extract min and max
 	foreach(samples as var sample){
@@ -377,10 +377,10 @@ MinSG.Evaluator.mergeValues::=fn(Collection samples){
 	}
 	// calculate diffs
 	foreach(maxVec as var direction,var maxValue){
-		diffRatioVec[direction] = maxValue!=0 ? (maxValue - minVec[direction]) / maxValue : void;
+		diffRatioVec[direction] = maxValue!=0 ? (maxValue - minVec[direction]) / maxValue : 0;
 	}
 
-    return result;
+	return result;
 };
 
 PADrend.Serialization.registerType( MinSG.Evaluator, "MinSG.Evaluator")

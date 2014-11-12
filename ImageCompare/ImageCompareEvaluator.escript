@@ -76,7 +76,8 @@ Evaluator.measure @(override) ::= fn(MinSG.FrameContext frameContext, MinSG.Node
 		Runtime.warn("Image comparison failed.");
 		return;
 	}
-	result = value;
+	if(!this.result || value<this.result) // for multiple directions, take lowerst quality sample.
+		result = value;
 
 	return this;
 };

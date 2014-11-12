@@ -95,6 +95,8 @@ static ex_AfterRendering = fn(...) {
 	var evaluator = EvaluatorManager.getSelectedEvaluator();
 	var angle = evaluator.getCameraAngle();
 	var rect = evaluator.measurementResolution;
+	if(rect.isA(Geometry.Vec2))
+		rect = new Geometry.Rect(0,0,rect.x(),rect.y());
 	
 	var measurementCamera = PADrend.getActiveCamera().clone();
 	measurementCamera.setRelTransformation(PADrend.getActiveCamera().getWorldTransformationMatrix());
