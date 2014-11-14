@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Jan Krems
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -17,6 +17,7 @@
 **
 ** GUI construction for the Waypoints-Plugin.
 **/
+static PathManagement = module('../PathManagement');
 
 static createPathMenu = fn() {
 	var pathListEntries = [];
