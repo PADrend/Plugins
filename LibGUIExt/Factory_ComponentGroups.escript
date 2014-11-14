@@ -17,7 +17,7 @@
 loadOnce(__DIR__+"/Factory_Components.escript");
 
 /*!	Create an Array of components from a given ...
-     ... A components description
+	 ... A components description
 		GUI.TYPE		GUI.TYPE_COMPONENTS  normal components
 						GUI.TYPE_MENU_ENTRIES components inside a menu
 		GUI.PROVIDER	Id, Array or callable provider creating entries
@@ -26,9 +26,9 @@ loadOnce(__DIR__+"/Factory_Components.escript");
 		GUI.CONTEXT		(optional) context object passed to the component providers
 			or
 		GUI.CONTEXT_ARRAY	(optional) context objects passed to the component providers
-     ... Array of descriptions,
-     ... registered String identifier \see ComponentRegistry
-     ... a callable provider. 
+	 ... Array of descriptions,
+	 ... registered String identifier \see ComponentRegistry
+	 ... a callable provider. 
 */
 GUI.GUI_Manager.createComponents ::= fn( mixed ){
 	return this._createComponents( mixed );
@@ -57,16 +57,18 @@ GUI.GUI_Manager._createComponents @(private) ::= fn( mixed,entryWidth=false,insi
 	}else{
 		var entries;
 		
-		if(mixed---|>Array){
+		if(mixed.isA(Array)){
 			entries = mixed;
-		}else if(mixed ---|>String){ // registered components provider
+		}else if(mixed.isA(String)){ // registered components provider
 			//! \see ComponentRegistry
 			entries = this.createRegisteredComponentEntries_filtered(mixed, filter,context...);
-			assert(entries---|>Array);
+			assert(entries.isA(Array));
+		}else if(mixed.isA(GUI.Component)){
+			entries = [mixed];
 		}else {
 			Traits.requireTrait(mixed,Traits.CallableTrait);
 			entries = mixed(context...);
-			assert(entries---|>Array);
+			assert(entries.isA(Array));
 		}
 		
 		var result = [];

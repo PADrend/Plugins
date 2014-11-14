@@ -1280,7 +1280,7 @@ GUI.GUI_Manager._componentFactories ::= {
 	// 	tab
 	GUI.TYPE_TAB : fn(input,result){
 		result.component = this.createTab(input.description.get(GUI.LABEL,"Tab"),
-								input.description[GUI.TAB_CONTENT]);
+								this.create(input.description[GUI.TAB_CONTENT]));
 	},
 	
 	// tabbed panel

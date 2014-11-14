@@ -551,14 +551,14 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.treeBuilding',[
 				"Build Tree",
 				[options] => fn(options){
 					if(!(NodeEditor.getSelectedNode()---|>MinSG.GroupNode)){
-						Runtime.warn("please select a group node to rebuild\n");
-						return true;
+						Runtime.warn("Build Tree: Select a group node to rebuild\n");
+					}else if(!NodeEditor.getSelectedNode().hasParent()){
+						Runtime.warn("Build Tree: don't apply this to the root node\n");
+					}else if(NodeEditor.getSelectedNode().isClosed()){
+						Runtime.warn("Build Tree: Can't rebuild closed node.\n");
+					}else{
+						options.func(NodeEditor.getSelectedNode(), options.map);
 					}
-					if(!NodeEditor.getSelectedNode().hasParent()){
-						Runtime.warn("don't apply this to the root node\n");
-						return true;
-					}
-					options.func(NodeEditor.getSelectedNode(), options.map);
 					return true;
 				}
 			);
