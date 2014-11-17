@@ -16,6 +16,7 @@ static ToolHelperTraits = module('./ToolHelperTraits');
 
 //---------------------------------------------------------------------------------
 static NodeAnchors = Std.require('LibMinSGExt/NodeAnchors');
+static Command = Std.require('LibUtilExt/Command');
 
 static _updatePivot = fn(MinSG.Node node, [Geometry.Vec3,false] pivot){
 	var newPivot = pivot ? pivot.toArray() : false;
@@ -25,7 +26,6 @@ static _updatePivot = fn(MinSG.Node node, [Geometry.Vec3,false] pivot){
 			node.__rotationPivot := pivot;
 			NodeEditor.selectNodes( NodeEditor.getSelectedNodes() );
 		};
-		static Command = Std.require('LibUtilExt/Command');
 		PADrend.executeCommand({
 			Command.DESCRIPTION : "Transform pivot",
 			Command.EXECUTE : 	[node,newPivot]=>fun,

@@ -213,7 +213,7 @@ Tool.onNodesSelected_static += fn(Array selectedNodes){
 			ctxt.editNode.rotateAroundWorldAxis_deg(deg,axis_ws);
 			var newLocation = ctxt.editNode.getRelTransformationSRT();
 			newLocation.setScale(1.0);
-			
+			static Command = Std.require('LibUtilExt/Command');
 			PADrend.executeCommand({
 				Command.DESCRIPTION : "Transform anchor",
 				Command.EXECUTE : 	[newLocation] => ctxt.anchor ,
