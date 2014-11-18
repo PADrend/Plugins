@@ -14,14 +14,14 @@
  **	[Plugin:Tests] Tests/AutomatedTests/ObjectSerialization.escript
  **/
 
-loadOnce(__DIR__+"/../AutomatedTest.escript");
+var AutomatedTest = Std.require('Tests/AutomatedTest');
 
 var tests = [];
 
 // ---
 
 // basic Object Serialization
-tests += new Tests.AutomatedTest( "LibUtilExt/ObjectSerialization" , fn(){
+tests += new AutomatedTest( "LibUtilExt/ObjectSerialization" , fn(){
 	loadOnce("LibUtilExt/CommonSerializers.escript");
 	
 	{
@@ -58,7 +58,7 @@ tests += new Tests.AutomatedTest( "LibUtilExt/ObjectSerialization" , fn(){
 	// hierarchical objects
 	{
 		var ok = true;
-		var c = new ExtObject( );
+		var c = new ExtObject;
 		var p = new ExtObject( {$child:c });
 		c.myParent := p;
 		
@@ -182,6 +182,149 @@ tests += new Tests.AutomatedTest( "LibUtilExt/ObjectSerialization" , fn(){
 		addResult("ObjectSerialization 5",ok);
 //		out(ctxt2.createObject(desc2));
 	}
+	/*{// ------------------------------------------------------------------------------ EXPERIMENTAL
+		static Context = ObjectSerialization.Context;
+		static TraitHandler;
+		{
+			var T = TraitHandler = new Type;
+			T._printableName @(override) ::= $TraitHandler;
+
+			T.trait @(private) := void;
+			T.traitName @(private) := "";
+
+			//! (ctor)
+			T._constructor ::= 	fn(Std.Traits.Trait _trait,[String,void] _name=void){
+				this.trait = _trait;
+				this.traitName = _name ? _name:_trait.getName();
+			};
+			//! ---o
+			T.describeTrait ::= fn(Context ctxt,obj,Map description){	Runtime.exception("This method is not implemented.");	};	//Std.ABSTRACT_METHOD();
+			//! ---o
+			T.initTrait ::= 		fn(Context ctxt,obj,Map description){	Runtime.exception("This method is not implemented.");	};//Std.ABSTRACT_METHOD();
+			T.getHandledTrait ::= 			fn(){	return this.trait;};
+			T.getHandledTraitName ::= 		fn(){	return this.traitName;};
+		}
+
+		// ------------
+		static GenericTraitHandler;
+		//! GenericTraitHandler ---|> TraitHandler
+		{
+			var T = GenericTraitHandler = new Type(TraitHandler);
+			T._printableName @(override) ::= $GenericTraitHandler;
+
+
+			T.addInitializer ::=			fn(fun){	doInitializeTrait += fun;	return this;	};
+			T.addDescriber ::=				fn(fun){	doDescribeTrait += fun;		return this;	};
+
+			//! ---|> TypeHandler
+			T.describeTrait @(override) ::= fn(Context ctxt,obj, Map description){
+				Std.Traits.assureTrait( obj, this.trait);
+				var arr = description['##TRAITS##'];
+				if(!arr){
+					arr = [];
+					description['##TRAITS##'] = arr;
+				}
+				arr += this.traitName;
+				this.doDescribeTrait(ctxt,obj,description);
+				return description;
+			};
+
+			//! ---|> TypeHandler
+			T.initTrait @(override) ::= 		fn(Context ctxt,obj,Map description){
+				Std.Traits.assureTrait( obj, this.trait);
+				this.doInitializeTrait(ctxt,obj,description);
+				return obj;
+			};
+
+			T.doInitializeTrait @(private,init) := Std.MultiProcedure;
+			T.doDescribeTrait @(private,init) := Std.MultiProcedure;
+
+
+			T.getDescribers  ::= 			fn(){	return this.doDescribeTrait;	};
+			T.getInitializers  ::= 			fn(){	return this.doInitializeTrait;	};
+		}
+	
+		{ // extend TypeRegistry
+			static T = ObjectSerialization.TypeRegistry;
+//			T.registeredTraits @(init,private) := Map; // registeredName -> Trait
+			
+			T.registerTrait ::= fn(Std.Traits.Trait trait, [void,String] traitName=void){
+				if(!this.isSet($registeredTraits))
+					this.registeredTraits := new Map; // TEMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				var handler = new GenericTraitHandler(trait,traitName);
+				this.registerTraitHandler(handler);
+				return handler;
+			};
+			//! (internal)
+			T.registerTraitHandler ::= fn(TraitHandler traitHandler){
+				this.registeredTraits[ traitHandler.getHandledTraitName() ] = traitHandler;
+				this.registeredTraits[ traitHandler.getHandledTrait().toString() ] = traitHandler;
+		//		outln("Registering: ",traitHandler.getHandledTypeName()," : ",traitHandler.getHandledType().toString()," : ",traitHandler);
+			};
+
+			T.getTraitHandler ::= fn([String,Std.Traits.Trait] nameOrTrait){
+				if(!this.isSet($registeredTraits))
+					this.registeredTraits := new Map; // TEMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				var handler = this.registeredTraits[nameOrTrait];
+				return (!handler && this.baseRegistry) ? this.baseRegistry.getTraitHandler(nameOrTrait) : handler;
+			};
+		}
+		{// extend Context
+			var T = ObjectSerialization.Context;
+			static original = T.createDescription;
+			
+			T.createDescription ::= fn(obj){
+				var d = (this->original)(obj);
+				var traits = Std.Traits.queryTraits(obj);
+//				print_r(traits);
+				foreach(traits as var trait){
+					var handler = this.typeRegistry.getTraitHandler( trait );
+					if(handler)
+						handler.describeTrait(this,obj,d);
+				}
+				return d;
+			};
+
+			static originalCreate = T.createObject;
+			T.createObject ::= fn(description){
+				var obj = (this->originalCreate)(description);
+				if(description.isA(Map)&& description['##TRAITS##'] ){
+					foreach( description['##TRAITS##'] as var traitId){
+						outln("Adding ",traitId," to ",obj);
+						this.typeRegistry.getTraitHandler(traitId).initTrait(this,obj,description);// handle not found!!!!!!!!!!!!!!!!!!!!
+					}
+				}
+				return obj;
+			};
+		}
+	//---------
+		var STest = new Type;
+		STest.foo := 0;
+		STest._constructor ::= fn( _foo){ this.foo = _foo;};
+
+		var t = new Std.Traits.GenericTrait( 'TestTrait' );
+		t.attributes.bar @(init) := Array;
+		
+		var reg = new ObjectSerialization.TypeRegistry(ObjectSerialization.defaultRegistry);
+		reg.registerType(STest,"STest")
+				.addDescriber(fn(ctxt,obj,Map d){	d['foo'] = obj.foo;	})
+				.setFactory(fn(ctxt,Type actualType,Map d){		return new actualType(d['foo']);	});
+
+		reg.registerTrait(t)
+				.addDescriber(fn(ctxt,obj,Map d){		d['testTrait_bar'] = obj.bar;	})
+				.addInitializer(fn(ctxt,obj,Map d){		obj.bar.append( ctxt.createObject(d['testTrait_bar']));	});
+
+		var obj1 = new STest("FOO");
+		Std.Traits.addTrait(obj1,t);
+		obj1.bar += "BAR";
+
+		var ctxt = new ObjectSerialization.Context(reg);
+		var s = ctxt.createDescription(obj1) ;
+		print_r( ctxt.createDescription(obj1) );
+		
+		var obj2 = ctxt.createObject(s);
+		print_r(obj2,obj2.foo,obj2.bar);
+	}*/
 });
 
 // ---------------------------------------------------------

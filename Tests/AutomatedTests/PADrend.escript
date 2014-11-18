@@ -15,14 +15,14 @@
  **	[Plugin:Tests] Tests/AutomatedTests/PADrend.escript
  **/
 
-loadOnce(__DIR__+"/../AutomatedTest.escript");
+var AutomatedTest = Std.require('Tests/AutomatedTest');
 
 var tests = [];
 
 // -----------------------------------------------------------------------------------------------
 
 // extended Object Serialization tests
-tests += new Tests.AutomatedTest( "PADrend ObjectSerialization" , fn(){
+tests += new AutomatedTest( "PADrend ObjectSerialization" , fn(){
 	static Command = Std.require('LibUtilExt/Command');
 	// function with bound params
 	var f1 = (fn(a,b,c){	return a*b-c; }).bindLastParams(10,1);

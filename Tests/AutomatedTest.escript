@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -11,20 +11,14 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:Tests] Test/AutomatedTest.escript
- **/
 
-declareNamespace( $Tests );
+var T = new Type;
 
-Tests.AutomatedTest := new Type();
-var AutomatedTest = Tests.AutomatedTest;
-
-AutomatedTest.description @(private) := void;
-AutomatedTest.fun @(private) := void;
-AutomatedTest.result @(private) := void;
-AutomatedTest.resultMessage @(private) := "?";
-AutomatedTest.partialResults @(private,init) := Array;
+T.description @(private) := void;
+T.fun @(private) := void;
+T.result @(private) := void;
+T.resultMessage @(private) := "?";
+T.partialResults @(private,init) := Array;
 
 /*! (ctor)
 	@param description A text describing the test
@@ -32,15 +26,15 @@ AutomatedTest.partialResults @(private,init) := Array;
 				The function may return true or false on success or failure, 
 				or addResult(...,...) may be called inside the function to set partial results,
 				or the result may throw an exception to signal a failure.	*/
-AutomatedTest._constructor ::= fn(String description,fun){
+T._constructor ::= fn(String description,fun){
 	this.description = description;
 	this.fun = fun;
 };
-AutomatedTest.addResult ::= fn(String partDescription,Bool partResult){
+T.addResult ::= fn(String partDescription,Bool partResult){
 	partialResults += [partDescription,partResult];
 	result &= partResult;
 };
-AutomatedTest.execute ::= fn(){
+T.execute ::= fn(){
 	result = true;
 	try{
 		var r2 = fun();
@@ -55,7 +49,9 @@ AutomatedTest.execute ::= fn(){
 	}
 	resultMessage = result ?"ok":"failed";
 };
-AutomatedTest.getDescription ::= 		fn(){	return description;	};
-AutomatedTest.getPartialResults ::= 	fn(){	return partialResults;	};
-AutomatedTest.getResult ::= 			fn(){	return result;	};
-AutomatedTest.getResultMessage ::=		fn(){	return resultMessage;	};
+T.getDescription ::= 		fn(){	return description;	};
+T.getPartialResults ::= 	fn(){	return partialResults;	};
+T.getResult ::= 			fn(){	return result;	};
+T.getResultMessage ::=		fn(){	return resultMessage;	};
+
+return T;

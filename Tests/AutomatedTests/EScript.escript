@@ -11,16 +11,11 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:Tests] Tests/AutomatedTests/EScript.escript
- **/
-
-loadOnce(__DIR__+"/../AutomatedTest.escript");
-
+var AutomatedTest = Std.require('Tests/AutomatedTest');
 
 var tests = [];
 
-tests += new Tests.AutomatedTest("EScript/Set",fn(){
+tests += new AutomatedTest("EScript/Set",fn(){
 	var s1 = new Set([4,5,1,3,4]);
 
 	var s2 = new Set([1,3,4,7]);

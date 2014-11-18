@@ -15,9 +15,8 @@
  **	[Plugin:Tests] Test/Tests_Automated.escript
  **/
 
-declareNamespace( $Tests );
 
-Tests.AutomatedTestsPlugin := new Plugin({
+var plugin = new Plugin({
 		Plugin.NAME : 'Tests/Tests_Automated',
 		Plugin.DESCRIPTION : 'Various automated tests.',
 		Plugin.VERSION : 0.1,
@@ -26,7 +25,6 @@ Tests.AutomatedTestsPlugin := new Plugin({
 		Plugin.REQUIRES : [ 'Tests' ],
 		Plugin.EXTENSION_POINTS : []
 });
-var plugin = Tests.AutomatedTestsPlugin;
 
 //!	---|> Plugin
 plugin.init:=fn(){

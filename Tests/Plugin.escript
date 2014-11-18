@@ -19,26 +19,18 @@
  ** The purpose of this plugin is to better detect if some high-level functionality has been broken.
  **/
 
-/***
- **  ---|> Plugin
- **/
-var plugin = new Plugin({
+static plugin = new Plugin({
 		Plugin.NAME : 'Tests',
 		Plugin.DESCRIPTION : 'Collection of various Testcases concerning PADrend.',
-		Plugin.VERSION : 0.1,
+		Plugin.VERSION : 1.0,
 		Plugin.AUTHORS : "Claudius",
 		Plugin.OWNER : "All",
 		Plugin.REQUIRES : [],
 		Plugin.EXTENSION_POINTS : []
 });
 
-// -------------------
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-plugin.init:=fn() {
+plugin.init @(override) :=fn() {
 	if(!queryPlugin('PADrend/GUI')){
 		registerExtension('PADrend_Init',this->initAutoTest,Extension.LOW_PRIORITY*10);
 	} else { 
@@ -63,23 +55,20 @@ plugin.init:=fn() {
 	if(GLOBALS.isSet($Sound))
 		testModules += __DIR__+"/Tests_Sound.escript";
 
-	if(MinSG.isSet($Triangulation)) {
+	if(MinSG.isSet($Triangulation)) 
 		testModules += __DIR__ + "/Tests_Triangulation.escript";
-	}
 
 	loadPlugins( testModules,false);
-
 	return true;
 };
 
 plugin.initAutoTest := fn(){
 	PADrend.message("(Tests-Plugin) PADrend started without gui -> starting auto test mode.");
 
-	var results = Tests.AutomatedTestsPlugin.execute();
+	var results = plugin.execute();
 	print_r(results);
-	if(!results['result']){
+	if(!results['result'])
 		GLOBALS._processResult = new Exception("(AutomatedTestsPlugin) " + results['resultString']);
-	}
 };
 
 return plugin;

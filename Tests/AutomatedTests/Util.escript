@@ -15,18 +15,18 @@
  **	[Plugin:Tests] Tests/AutomatedTests/Util.escript
  **/
 
-loadOnce(__DIR__+"/../AutomatedTest.escript");
+var AutomatedTest = Std.require('Tests/AutomatedTest');
 
 var tests = [];
 
-tests += new Tests.AutomatedTest("Example Test",fn(){
+tests += new AutomatedTest("Example Test",fn(){
 	addResult("Part 1",true);
 	addResult("Part 2",true);
 });
 
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "Util/DestructionMonitor" , fn(){
+tests += new AutomatedTest( "Util/DestructionMonitor" , fn(){
 
 
 //	addResult("Array.slice",
@@ -59,7 +59,7 @@ tests += new Tests.AutomatedTest( "Util/DestructionMonitor" , fn(){
 
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "Util/Command" , fn(){
+tests += new AutomatedTest( "Util/Command" , fn(){
 	static Command = Std.require('LibUtilExt/Command');
 	static CommandHistory = Std.require('LibUtilExt/CommandHistory');
 	var hist = new CommandHistory;
@@ -113,7 +113,7 @@ tests += new Tests.AutomatedTest( "Util/Command" , fn(){
 });
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "Util/DataWrapper" , fn(){
+tests += new AutomatedTest( "Util/DataWrapper" , fn(){
 
 	{
 		var sideLength = DataWrapper.createFromValue( 10 );
@@ -229,7 +229,7 @@ tests += new Tests.AutomatedTest( "Util/DataWrapper" , fn(){
 	
 });
 // -----------------------------------------------------------------------------------------------
-tests += new Tests.AutomatedTest( "Util/ExtensionPoint" , fn(){
+tests += new AutomatedTest( "Util/ExtensionPoint" , fn(){
 	var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
 	var extensionPoint = new ExtensionPoint;
 	extensionPoint.registerExtension( fn(arr){ arr+="foo"; }, Extension.LOW_PRIORITY);
@@ -255,7 +255,7 @@ tests += new Tests.AutomatedTest( "Util/ExtensionPoint" , fn(){
 });
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "Util/EScript extensions" , fn(){
+tests += new AutomatedTest( "Util/EScript extensions" , fn(){
 								
 	addResult("Array.slice",
 		[ 'a','b','c','d' ].slice(1,2) == ['b','c'] && // starting from #1, with length 2
@@ -346,7 +346,7 @@ tests += new Tests.AutomatedTest( "Util/EScript extensions" , fn(){
 
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "Util/Generated comparison functions" , fn(){
+tests += new AutomatedTest( "Util/Generated comparison functions" , fn(){
 	var A = new Type();
 	A.member := 0;
 	A._constructor ::= fn(Number num){ this.member=num; };
@@ -383,7 +383,7 @@ tests += new Tests.AutomatedTest( "Util/Generated comparison functions" , fn(){
 
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "Util/Listener" , fn(){
+tests += new AutomatedTest( "Util/Listener" , fn(){
 	static Listener = Std.require('LibUtilExt/deprecated/Listener');
 	var notifier = new Notifier;
 	
@@ -400,7 +400,7 @@ tests += new Tests.AutomatedTest( "Util/Listener" , fn(){
 });
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "Util/TypeBasedHandler" , fn(){
+tests += new AutomatedTest( "Util/TypeBasedHandler" , fn(){
 	var TypeBasedHandler = Std.require('LibUtilExt/TypeBasedHandler');
 	
 	var ObjectDescriber = new Type();
@@ -478,7 +478,7 @@ tests += new Tests.AutomatedTest( "Util/TypeBasedHandler" , fn(){
 
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "Util/XML" , fn(){
+tests += new AutomatedTest( "Util/XML" , fn(){
 	static XML_Utils = Std.require('LibUtilExt/XML_Utils');
 	
 	var tmpDir = new Util.TemporaryDirectory("TestsUtil");
@@ -518,7 +518,7 @@ tests += new Tests.AutomatedTest( "Util/XML" , fn(){
 
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest("Util/UpdatableHeap", fn() {
+tests += new AutomatedTest("Util/UpdatableHeap", fn() {
 	var heap = new Util.UpdatableHeap();
 	var numElements = 1000;
 	

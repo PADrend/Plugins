@@ -15,13 +15,13 @@
  **	[Plugin:Tests] Tests/AutomatedTests/MinSG.escript
  **/
 
-loadOnce(__DIR__+"/../AutomatedTest.escript");
+var AutomatedTest = Std.require('Tests/AutomatedTest');
 
 var tests = [];
 
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "[BUG20130903] MinSG BB bug.",fn(){
+tests += new AutomatedTest( "[BUG20130903] MinSG BB bug.",fn(){
 	var root = new MinSG.ListNode;
 	
 	
@@ -51,7 +51,7 @@ tests += new Tests.AutomatedTest( "[BUG20130903] MinSG BB bug.",fn(){
 // -----------------------------------------------------------------------------------------------
 
 // the camera's frustum should be automatically updated using a transformation listener. 
-tests += new Tests.AutomatedTest( "Automatic camera frustum update",fn(){
+tests += new AutomatedTest( "Automatic camera frustum update",fn(){
 	var camera = new MinSG.CameraNode;
 	var f1 = camera.getFrustum();
 	camera.moveLocal(0,1,0);
@@ -63,7 +63,7 @@ tests += new Tests.AutomatedTest( "Automatic camera frustum update",fn(){
 // -----------------------------------------------------------------------------------------------
 
 // the camera's frustum should be automatically updated using a transformation listener. 
-tests += new Tests.AutomatedTest( "MinSG: NodeAttributes",fn(){
+tests += new AutomatedTest( "MinSG: NodeAttributes",fn(){
 	var n = new MinSG.ListNode;
 	n.setNodeAttribute("a1",42);
 	n.a2 := 27;
@@ -97,7 +97,7 @@ tests += new Tests.AutomatedTest( "MinSG: NodeAttributes",fn(){
 
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "MinSG: tree observer",fn(){
+tests += new AutomatedTest( "MinSG: tree observer",fn(){
 	var added = [];
 	var removed = [];
 	var moved = [];
@@ -136,7 +136,7 @@ tests += new Tests.AutomatedTest( "MinSG: tree observer",fn(){
 
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "MinSG: create/load/save scenes",fn(){
+tests += new AutomatedTest( "MinSG: create/load/save scenes",fn(){
 
 	var tmpDir = new Util.TemporaryDirectory("TestsMinSG");
 	var filename = tmpDir.getPath()+"tmp_"+time().toIntStr();
@@ -306,7 +306,7 @@ tests += new Tests.AutomatedTest( "MinSG: create/load/save scenes",fn(){
 
 
 
-tests += new Tests.AutomatedTest( "MinSG: NodeQuery",fn(){
+tests += new AutomatedTest( "MinSG: NodeQuery",fn(){
 	Std._unregisterModule('LibMinSGExt/TreeQuery'); // force reload
 	
 	var TQuery = Std.require('LibMinSGExt/TreeQuery');
@@ -418,7 +418,7 @@ tests += new Tests.AutomatedTest( "MinSG: NodeQuery",fn(){
 
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "LibMinSGExt/NodeTagFunctions",fn(){
+tests += new AutomatedTest( "LibMinSGExt/NodeTagFunctions",fn(){
 	Std._unregisterModule('LibMinSGExt/NodeTagFunctions'); // force reload
 	
 
@@ -459,7 +459,7 @@ tests += new Tests.AutomatedTest( "LibMinSGExt/NodeTagFunctions",fn(){
 });
 // -----------------------------------------------------------------------------------------------
 
-tests += new Tests.AutomatedTest( "MinSG: Persistent node traits",fn(){
+tests += new AutomatedTest( "MinSG: Persistent node traits",fn(){
 	var root = new MinSG.ListNode;
 	declareNamespace($MinSG,$_Test);
 	
