@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Misc/SplineTrait",
+	"aliases" : ["ObjectTraits/SplineTrait"],
+	"description" : "Create spline's control points and calculate its curve's function.",
+	"displayName" : "Misc/SplineTrait"
+}

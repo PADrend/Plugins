@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Misc/SplineEditorTrait",
+	"aliases" : ["ObjectTraits/SplineEditorTrait"],
+	"description" : "Edit spline's control points visualize its curve.",
+	"displayName" : "Misc/SplineEditorTrait"
+}
