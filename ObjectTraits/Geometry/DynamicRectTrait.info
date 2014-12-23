@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Geometry/DynamicRectTrait",
+	"aliases" : [],
+	"description" : "Create a rect mesh (needs GeometryNode)",
+	"displayName" : "Geometry/Rect"
+}
