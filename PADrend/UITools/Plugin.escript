@@ -59,14 +59,10 @@ var plugin = new Plugin({
 
 // -------------------
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-plugin.init := fn(){
-	loadOnce(__DIR__+"/UIToolManager.escript");
-	
-	PADrend.uiToolsManager := new PADrend.UITools.UIToolManager;
+
+plugin.init @(override) := fn(){
+
+	PADrend.uiToolsManager := new (Std.require('PADrend/UITools/UIToolManager'));
 	
 	// for debug only
 	PADrend.uiToolsManager.onActiveToolChanged += fn(tool){

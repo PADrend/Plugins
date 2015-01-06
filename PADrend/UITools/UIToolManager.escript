@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2012-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2012-2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -13,24 +13,16 @@
 /****
  **	[Plugin:PADrend] PADrend/UITools/UIToolManager.escript
  **/
-    
-declareNamespace($PADrend,$UITools);
-
-/*! A UIToolManager manages a set of Tools (of arbitrary type), from which
-	only one can be active at a time.	*/
-PADrend.UITools.UIToolManager := new Type;
-var UIToolManager = PADrend.UITools.UIToolManager;
-
 
 
 /*! A ToolConfigurator wrapps a Tool-Object  and offers	activation and deactivation listeners for that tool.
 	A ToolConfigurator is not created directly but only by calling UIToolManager.registerTool(...) */
-UIToolManager.ToolConfigurator ::= new Type;
+static ToolConfigurator = new Type;
 {
-	var T = UIToolManager.ToolConfigurator; 
-	T._constructor @(private) ::= fn(_tool){	this.tool = _tool;	};
-	T.onActivate @(private,init):= MultiProcedure;
-	T.onDeactivate @(private,init):= MultiProcedure;
+	var T = ToolConfigurator; 
+	T._constructor ::= fn(_tool){	this.tool = _tool;	};
+	T.onActivate @(private,init):= Std.MultiProcedure;
+	T.onDeactivate @(private,init):= Std.MultiProcedure;
 	T.tool @(private) := void;
 	T.createConfigGUI := void;	//! ?????????????????????????
 
@@ -46,7 +38,9 @@ UIToolManager.ToolConfigurator ::= new Type;
 }
 
 
-
+/*! A UIToolManager manages a set of Tools (of arbitrary type), from which
+	only one can be active at a time.	*/
+var UIToolManager = new Type;
 
 UIToolManager.activeToolConfigurator @(private) := void;
 UIToolManager.registry @(private,init) := Map;
@@ -54,9 +48,8 @@ UIToolManager.activatingToolQueue @(private,init) := Array;
 
 UIToolManager.accessToolConfigurator := fn(tool){
 	var wrapper = registry[tool];
-	if(!wrapper){
+	if(!wrapper)
 		Runtime.exception("Unknown tool '"+tool+"'");
-	}
 	return wrapper;
 };
 
@@ -73,10 +66,9 @@ UIToolManager.onActiveToolChanged @(init) := MultiProcedure;
 
 UIToolManager.registerTool ::= fn(tool){
 	var wrapper = registry[tool];
-	if(wrapper){
+	if(wrapper)
 		Runtime.warn("Exisiting tool is redefined '"+tool+"'");
-	}
-	var configurator = (ToolConfigurator->fn(tool){return new this(tool);})(tool); // don't do this at home!
+	var configurator = new ToolConfigurator(tool);
 	registry[tool] = configurator;
 	return configurator;
 };
@@ -122,4 +114,5 @@ UIToolManager.setConfigPanelProvider ::= fn(tool,provider){
 	return this;
 };
 
-// ------------------------------------------------------------------------------
+
+return UIToolManager;
