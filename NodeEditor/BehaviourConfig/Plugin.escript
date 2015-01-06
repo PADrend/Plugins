@@ -42,8 +42,8 @@ var plugin = new Plugin({
 plugin.init @(override) := fn() {
 
 	{ // init members
-		loadOnce(__DIR__+"/BehaviourPanels.escript");
-		this.availableBehaviours := new Map();
+		Std.require('NodeEditor/BehaviourConfig/initBehaviourPanels');
+		this.availableBehaviours := new Map;
 		this.availableBehaviours['KeyFrameAnimationBehaviour'] = fn(MinSG.KeyFrameAnimationNode n){ return new MinSG.KeyFrameAnimationBehaviour(n); };
 
 		/* Particle System */

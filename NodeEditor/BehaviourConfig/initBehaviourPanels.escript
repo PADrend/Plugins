@@ -441,4 +441,5 @@ NodeEditor.registerConfigPanelProvider( MinSG.ParticlePointEmitter, fn(MinSG.Par
 	}
 });
 
+return true;
 // --------------------------------------------------------------------------
