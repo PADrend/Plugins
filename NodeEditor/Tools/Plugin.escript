@@ -21,8 +21,6 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn() {
 
-	/// load menues and tools
-	loadOnce(__DIR__+"/NodeTools.escript");
 	registerExtension('PADrend_Init',this->registerMenus);
 	return true;
 };

@@ -69,16 +69,6 @@ gui.registerComponentProvider('NodeEditor_MiscToolsMenu.helper',[
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL : "Print Node Info",
-		GUI.ON_CLICK : fn() {
-			foreach(NodeEditor.getSelectedNodes() as var node){
-				MinSG.printNodeInfo(node);
-			}
-		},
-		GUI.TOOLTIP : "Print node info depending on the node type."
-	},
-	{
-		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Remove node attributes",
 		GUI.ON_CLICK : fn() {
 			foreach(NodeEditor.getSelectedNodes() as var node){
