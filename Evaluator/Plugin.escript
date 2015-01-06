@@ -59,9 +59,8 @@ EvaluatorPlugin.init = fn() {
 
 	}
 	{
-		loadOnce(__DIR__ + "/Evaluator.escript");
-		loadOnce(__DIR__ + "/Evaluators.escript");
-		GLOBALS.EvaluatorManager := Std.require('Evaluator/EvaluatorManager');
+		Std.require('Evaluator/extendEvaluator');
+		Std.require('Evaluator/registerEvaluators');
 	}
 	{ /// Register ExtensionPointHandler:
 		registerExtension('PADrend_Init', this->fn(){
@@ -88,7 +87,7 @@ EvaluatorPlugin.init = fn() {
 /*!	[ext:PADrend_Init */
 EvaluatorPlugin.ex_Init := fn() {
 
-	EvaluatorManager.updateEvaluatorList( PADrend.configCache.getValue('Evaluator.selectedEvaluator') );
+	Std.require('Evaluator/EvaluatorManager').updateEvaluatorList( PADrend.configCache.getValue('Evaluator.selectedEvaluator') );
 	
 	// store selected evaluator in config
 	registerExtension('Evaluator_OnEvaluatorSelected', fn(e) {

@@ -190,7 +190,7 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 											Runtime.warn("Cannot evaluate visibility sphere. Current visibility sphere not available.");
 											return;
 										}
-										var evaluator = EvaluatorManager.getSelectedEvaluator();
+										var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
 										if(!evaluator) {
 											Runtime.exception("Invalid evaluator.");
 										}
@@ -432,7 +432,7 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 										
 										var outputDir = "data/SVS/";
 
-										var evaluator = EvaluatorManager.getSelectedEvaluator();
+										var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
 										if(!evaluator) {
 											Runtime.exception("Invalid evaluator.");
 										}

@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2008-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2008-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Ralf Petring <ralf@petring.net>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -13,7 +13,6 @@
  * http://mozilla.org/MPL/2.0/.
  */
 /*!
- *	[Plugin:Evaluator] Evaluator/Evaluator.escript
  *	EScript extensions for MinSG.Evaluator
  */
 
@@ -392,3 +391,5 @@ PADrend.Serialization.registerType( MinSG.Evaluator, "MinSG.Evaluator")
 		obj.init(); // recreate camera
 		ctxt.applyAttributesFromDescription(obj,d['attr']); // restore attributes (except the __camera)
 	});
+
+return true;

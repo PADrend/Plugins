@@ -340,7 +340,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 		fbo.attachColorTexture(renderingContext, color);
 		fbo.attachDepthTexture(renderingContext, depth);
 
-		var evaluator = EvaluatorManager.getSelectedEvaluator();
+		var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
 		if(!evaluator) {
 			Runtime.exception("Invalid evaluator.");
 		}

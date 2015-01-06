@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2008-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2008-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010-2011 Ralf Petring <ralf@petring.net>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -14,8 +14,10 @@
  */
 /*!
  *	[Plugin:Evaluator] Evaluator/Evaluators.escript
- *	EScript extensions for different Evaluator implementations
+ *	EScript extensions for different Evaluator implementations (GUI/Serialization/...)
  */
+
+module('./extendEvaluator');
 
 static CONFIG_PREFIX = 'Evaluator_Config_';
 
@@ -188,3 +190,5 @@ PADrend.Serialization.registerType( MinSG.VisibilityEvaluator, "MinSG.Visibility
 	.addInitializer( fn(ctxt,MinSG.VisibilityEvaluator obj,Map d){
 		obj.setCountPolygons( d['countPolygons'] );
 	});
+
+return true;

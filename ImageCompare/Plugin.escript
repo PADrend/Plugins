@@ -76,7 +76,7 @@ plugin.init := fn() {
 
 static ex_BeforeRendering = fn(...) {
 
-	var evaluator = EvaluatorManager.getSelectedEvaluator();
+	var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
 	if(!(evaluator ---|> ( Std.require( 'ImageCompare/ImageCompareEvaluator' ))) || !evaluator.isReady()) {
 		displayTexturesEnabled(false);
 		return;
@@ -92,7 +92,7 @@ static ex_AfterRendering = fn(...) {
 	
 	PADrend.selectScene(tempScene);
 	
-	var evaluator = EvaluatorManager.getSelectedEvaluator();
+	var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
 	var angle = evaluator.getCameraAngle();
 	var rect = evaluator.measurementResolution;
 	if(rect.isA(Geometry.Vec2))
