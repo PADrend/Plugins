@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2012,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -15,31 +15,27 @@
  **    JobScheduling/Job.escript
  **/
  
-loadOnce(__DIR__+"/JobScheduling.escript");
+var T = new Type;
 
-/*! Job */
-JobScheduling.Job := new Type();
-var Job = JobScheduling.Job;
-
-Job.workload := void;
-Job.jobId := "";
-Job.result := void;
-Job.finished := false;
-Job.iterator := void; // YieldIterator
-Job.startingTime := void; // void or Number
-Job.maximalDuration := false; // false or Number
+T.workload := void;
+T.jobId := "";
+T.result := void;
+T.finished := false;
+T.iterator := void; // YieldIterator
+T.startingTime := void; // void or Number
+T.maximalDuration := false; // false or Number
 
 //! (ctor) Job
-Job._constructor ::= fn(String _jobId, _workload, [Number,false] _maximalDuration = false){
+T._constructor ::= fn(String _jobId, _workload, [Number,false] _maximalDuration = false){
 	workload = _workload;
 	jobId = _jobId;
 	maximalDuration = _maximalDuration;
 };
 
-Job.execute ::= fn(){
+T.execute ::= fn(){
 	try{
 		var obj = iterator? iterator.next() : workload();
-		if( obj ---|> YieldIterator ){
+		if( obj.isA(YieldIterator) ){
 			iterator = obj;
 			if(iterator.end()){
 				result = iterator.value();
@@ -55,14 +51,14 @@ Job.execute ::= fn(){
 	finished = true;
 };
 
-Job.getId 				::= fn(){	return jobId;	};
-Job.getMaximalDuration	::= fn(){	return maximalDuration;	};
-Job.getResult			::= fn(){	return result;	};
-Job.getWorkload			::= fn(){	return workload;	};
-Job.getStartingTime		::= fn(){	return startingTime;	};
-Job.isFinished			::= fn(){	return finished;	};
-Job.setStartingTime		::= fn(t){	startingTime = t;	};
-Job.setMaximalDuration	::= fn([Number,false] t){	maximalDuration = t;	};
+T.getId 				::= fn(){	return jobId;	};
+T.getMaximalDuration	::= fn(){	return maximalDuration;	};
+T.getResult				::= fn(){	return result;	};
+T.getWorkload			::= fn(){	return workload;	};
+T.getStartingTime		::= fn(){	return startingTime;	};
+T.isFinished			::= fn(){	return finished;	};
+T.setStartingTime		::= fn(t){	startingTime = t;	};
+T.setMaximalDuration	::= fn([Number,false] t){	maximalDuration = t;	};
 
-
+return T;
 // ------------------------------------------------------------------

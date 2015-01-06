@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2012,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -11,41 +11,34 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/***
- **    JobScheduling/Scheduler.escript
- **/
- 
-loadOnce(__DIR__+"/JobScheduling.escript");
 
-// ------------------------------------------------------------------
  
 /*! Scheduler 
 	A Scheduler collects jobs and assigns them to free Workers.
 	A master program instance can have multiple Schedulers. Each Scheduler has a unique id (or name).
 	Each connected program instance (master and slaves) should create one WorkerSet for each Scheduler.
 */
-JobScheduling.Scheduler := new Type();
-var Scheduler = JobScheduling.Scheduler;
+var T = new Type;
 
-Scheduler.myId := "";
-Scheduler.jobCounter := 0;
+T.myId := "";
+T.jobCounter := 0;
 
-Scheduler.freeWorkerIds := void;	// Array: workerIds
-Scheduler.pendingJobs := void; 		// Array:  Job
-Scheduler.activeJobs := void; 		// Map:  JobId -> Job
-Scheduler.finishedJobs := void; 	// Map:  JobId -> Job
-Scheduler.reschedulingTimeFactor := 1.5; // factor how much a job's maximal duration is changed when the job is rescheduled after a timeout.
+T.freeWorkerIds := void;	// Array: workerIds
+T.pendingJobs := void; 		// Array:  Job
+T.activeJobs := void; 		// Map:  JobId -> Job
+T.finishedJobs := void; 	// Map:  JobId -> Job
+T.reschedulingTimeFactor := 1.5; // factor how much a job's maximal duration is changed when the job is rescheduled after a timeout.
 
 //! (ctor) Scheduler
-Scheduler._constructor ::= fn(String _schedulerId){
+T._constructor ::= fn(String _schedulerId){
 	myId = _schedulerId;
 	freeWorkerIds = [];
 	pendingJobs = [];
-	activeJobs = new Map();
+	activeJobs = new Map;
 	finishedJobs = new Map();
 	
 	// if a new worker appeares...
-	JobScheduling.onWorkerAvailable += this->fn(workerId){
+	module('./JobScheduling').onWorkerAvailable += this->fn(workerId){
 //		out("New Worker: [",workerId,"]\n");				
 		// and is assigned to this scheduler -> store its id
 		if(workerId.beginsWith(myId+"|")){
@@ -56,7 +49,7 @@ Scheduler._constructor ::= fn(String _schedulerId){
 	};
 	
 	// if a result gets available...
-	JobScheduling.onResultAvailable += this->fn(Map result){
+	module('./JobScheduling').onResultAvailable += this->fn(Map result){
 		// and this scheduler is waiting for it -> process the result
 		var jobId = result['jobId'];
 		var job = activeJobs[jobId];
@@ -91,30 +84,30 @@ Scheduler._constructor ::= fn(String _schedulerId){
 			return sum;
 		} ).bindLastParams( 20 ) );
 */
-Scheduler.addJob ::= fn( workload, [Number,false] maxDuration = false ){
+T.addJob ::= fn( workload, [Number,false] maxDuration = false ){
 	var jobId = myId+":"+ (++jobCounter);
-	pendingJobs += new JobScheduling.Job( jobId,workload,maxDuration);
+	pendingJobs += new (module('./Job'))( jobId,workload,maxDuration);
 	
 //	out("Scheduler.addJob: [",jobId,"]\n");
 	return jobId;
 };
 
 //! Clear all jobs and results
-Scheduler.clear ::= fn(){
+T.clear ::= fn(){
 	pendingJobs.clear();
 	activeJobs.clear();
 	finishedJobs.clear();
 };
 
 //! returns true iff the scheduler has any jobs (pending, active or finished but not fetched)
-Scheduler.empty ::= fn(){
+T.empty ::= fn(){
 	return pendingJobs.empty() && activeJobs.empty() && finishedJobs.empty();
 };
 
-static Command = Std.require('LibUtilExt/Command');
+static Command = module('LibUtilExt/Command');
 
 //! Should be called on every frame.
-Scheduler.execute ::= fn(){
+T.execute ::= fn(){
 	var now = clock();
 
 	while(!freeWorkerIds.empty() && !pendingJobs.empty()){
@@ -127,7 +120,7 @@ Scheduler.execute ::= fn(){
 		// announce new job (locally and on client instances)
 		PADrend.executeCommand(new Command({
 			Command.EXECUTE : (fn(jobId,workload,workerId){
-				JobScheduling.onJobAvailable( {
+				Std.require('JobScheduling/JobScheduling').onJobAvailable( {
 					'jobId' : jobId,
 					'workload' : workload,
 					'workerId' : workerId
@@ -159,7 +152,7 @@ Scheduler.execute ::= fn(){
 
 /*! Fetch (and remove) a result for a specific jobId.
 	\note isResultAvailable(jobId) should be called to check if the result is available. */
-Scheduler.fetchResult ::= fn(String jobId){
+T.fetchResult ::= fn(String jobId){
 	var result = finishedJobs[jobId].getResult();
 	finishedJobs.unset(jobId);
 	return result;
@@ -167,7 +160,7 @@ Scheduler.fetchResult ::= fn(String jobId){
 
 /*! Fetch (and remove) all available results.
 	@return A Map jobId -> result */
-Scheduler.fetchResults ::= fn(){
+T.fetchResults ::= fn(){
 	var results = new Map();
 	foreach(finishedJobs as var jobId,var job)
 		results[jobId] = job.getResult();
@@ -175,9 +168,9 @@ Scheduler.fetchResults ::= fn(){
 	return results;
 };
 
-Scheduler.getId ::= fn( ){ return myId; };
+T.getId ::= fn( ){ return myId; };
 	
-Scheduler.getInfo ::= fn(){
+T.getInfo ::= fn(){
 	return {
 		'numPendingJobs' : pendingJobs.count(),
 		'numActiveJobs' : activeJobs.count(),
@@ -186,9 +179,10 @@ Scheduler.getInfo ::= fn(){
 	};
 };
 
-Scheduler.isResultAvailable ::= fn(String jobId){
+T.isResultAvailable ::= fn(String jobId){
 	return finishedJobs[jobId];
 };
 
 
+return T;
 // ------------------------------------------------------------------

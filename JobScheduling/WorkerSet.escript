@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2012,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -11,33 +11,23 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/***
- **    JobScheduling/WorkerSet.escript
- **/
- 
-loadOnce(__DIR__+"/JobScheduling.escript");
-loadOnce(__DIR__+"/Job.escript");
-
-// ------------------------------------------------------------------
-
 /*! WorkerSet 
 	For each Scheduler on the master instance, there should be one WorkerSet-Object 
 	on each instance (master and slaves). The WorkerSet knows its Scheduler by its id.
 	Each worker can create and sustain several workers (internally only represented by ids).
 */
-JobScheduling.WorkerSet := new Type();
-var WorkerSet = JobScheduling.WorkerSet;
+var T = new Type;
 
-WorkerSet.schedulerId := ""; 
-WorkerSet.capacity := 0; 
-WorkerSet.activeJobs := void;  // Arry: Job
-WorkerSet.availableWorkers := void;  // Map: { id -> true }
+T.schedulerId := ""; 
+T.capacity := 0; 
+T.activeJobs := void;  // Arry: Job
+T.availableWorkers := void;  // Map: { id -> true }
 
 //! (static)
-WorkerSet.workerCounter ::= Rand.equilikely(0,10000)*10; 
+T.workerCounter ::= Rand.equilikely(0,10000)*10; 
 
 //! (ctor) WorkerSet
-WorkerSet._constructor ::= fn(String _schedulerId,Number _capacity){
+T._constructor ::= fn(String _schedulerId,Number _capacity){
 	schedulerId = _schedulerId;
 	capacity = _capacity;
 	activeJobs = [];
@@ -45,7 +35,7 @@ WorkerSet._constructor ::= fn(String _schedulerId,Number _capacity){
 	
 	
 	// a new job appeared...
-	JobScheduling.onJobAvailable += this->fn(data){
+	module('./JobScheduling').onJobAvailable += this->fn(data){
 		var workerId = data['workerId'];
 		// and it is assigned to this WorkerSet -> accept it
 		if(availableWorkers[workerId]){
@@ -53,7 +43,7 @@ WorkerSet._constructor ::= fn(String _schedulerId,Number _capacity){
 			availableWorkers.unset(workerId);
 			
 			// job is active
-			activeJobs+=new JobScheduling.Job(data['jobId'],data['workload']);
+			activeJobs+=new module('./Job')(data['jobId'],data['workload']);
 		}
 	};
 	static Command = Std.require('LibUtilExt/Command');
@@ -63,9 +53,7 @@ WorkerSet._constructor ::= fn(String _schedulerId,Number _capacity){
 		
 		// announce available worker (locally and on server instance)
 		PADrend.executeCommand(new Command({
-			Command.EXECUTE : (fn(workerId){
-				JobScheduling.onWorkerAvailable( workerId );
-			}).bindLastParams(workerId),
+			Command.EXECUTE : [workerId]=>fn(workerId){	Std.require('JobScheduling/JobScheduling').onWorkerAvailable( workerId ); },
 			Command.FLAGS : Command.FLAG_SEND_TO_MASTER | Command.FLAG_EXECUTE_LOCALLY
 		}));
 		
@@ -75,14 +63,14 @@ WorkerSet._constructor ::= fn(String _schedulerId,Number _capacity){
 };
 
 //! (internal)
-WorkerSet.createWorkerId ::= fn(){
+T.createWorkerId ::= fn(){
 	return schedulerId + "|" + (++workerCounter);
 };
 
 /*! Execute all active jobs.
 	If a job has finished, its result is announced.
 	If new worker are available, their ids are announced (normally, this also happens each time a job has finished). */
-WorkerSet.execute ::= fn(){
+T.execute ::= fn(){
 	if(activeJobs.empty())
 		return;
 	
@@ -103,17 +91,18 @@ WorkerSet.execute ::= fn(){
 	}
 	activeJobs.swap(newJobs);
 	
+	static Command = Std.require('LibUtilExt/Command');
 	// send results
 	foreach(finishedJobs as var job){
 	
 		// announce available result (locally and on server instance)
 		PADrend.executeCommand(new Command({
-			Command.EXECUTE : (fn(jobId,jobResult){
-				JobScheduling.onResultAvailable( { 
+			Command.EXECUTE : [job.getId(),job.getResult()] => fn(jobId,jobResult){
+					Std.require('JobScheduling/JobScheduling').onResultAvailable( { 
 						'jobId':jobId,
 						'result':jobResult 
 				});
-			}).bindLastParams(job.getId(),job.getResult()),
+			},
 			Command.FLAGS : Command.FLAG_EXECUTE_LOCALLY | Command.FLAG_SEND_TO_MASTER
 		}));
 	}
@@ -125,12 +114,10 @@ WorkerSet.execute ::= fn(){
 		
 		// announce available worker (locally and on server instance)
 		PADrend.executeCommand(new Command({
-			Command.EXECUTE : (fn(workerId){
-				JobScheduling.onWorkerAvailable( workerId );
-			}).bindLastParams(workerId),
+			Command.EXECUTE : [workerId] => fn(workerId){	Std.require('JobScheduling/JobScheduling').onWorkerAvailable( workerId );	},
 			Command.FLAGS : Command.FLAG_EXECUTE_LOCALLY | Command.FLAG_SEND_TO_MASTER
 		}));
 	}
 };
 
-// ------------------------------------------------------------------
+return T;
