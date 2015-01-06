@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -14,7 +14,7 @@
  **	[Plugin:NodeEditor/ObjectPlacer/Utils]
  **/
 
-declareNamespace($ObjectPlacer);
+static NS = new Namespace;
 
 //
 ///*! The object contains a factory for nodes.
@@ -24,9 +24,9 @@ declareNamespace($ObjectPlacer);
 //	
 //	\param factory  The contained factory.
 //*/
-//ObjectPlacer.NodeFactoryOwnerTrait := new Traits.GenericTrait("ObjectPlacer.NodeFactoryOwnerTrait");
+//NS.NodeFactoryOwnerTrait := new Traits.GenericTrait("ObjectPlacer.NodeFactoryOwnerTrait");
 //{
-//	var t = ObjectPlacer.NodeFactoryOwnerTrait;
+//	var t = NS.NodeFactoryOwnerTrait;
 //	t.attributes.getNodeFactory ::= fn(){	return this._nodeFactory;	};
 //
 //	t.onInit += fn(obj,factory){
@@ -38,9 +38,9 @@ declareNamespace($ObjectPlacer);
 /*!
 	\see Traits.CallableTrait
 */
-ObjectPlacer.ObjectFactoryTrait := new Traits.GenericTrait("ObjectPlacer.ObjectFactoryTrait");
+NS.ObjectFactoryTrait := new Traits.GenericTrait("ObjectPlacer.ObjectFactoryTrait");
 {
-	var t = ObjectPlacer.ObjectFactoryTrait;
+	var t = NS.ObjectFactoryTrait;
 	
 	t.attributes.getDescription ::= fn(){	return "Create a Node.";	};
 	t.attributes.createNode ::= fn(){	return doCreateNode();	};
@@ -55,9 +55,9 @@ ObjectPlacer.ObjectFactoryTrait := new Traits.GenericTrait("ObjectPlacer.ObjectF
 }
 
 /*! DOCU!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
-ObjectPlacer.AcceptsObjectCreatorsTrait := new Traits.GenericTrait("ObjectPlacer.AcceptsObjectCreatorsTrait");
+NS.AcceptsObjectCreatorsTrait := new Traits.GenericTrait("ObjectPlacer.AcceptsObjectCreatorsTrait");
 {
-	var t = ObjectPlacer.AcceptsObjectCreatorsTrait;
+	var t = NS.AcceptsObjectCreatorsTrait;
 
 
 	//! ---o
@@ -84,9 +84,9 @@ ObjectPlacer.AcceptsObjectCreatorsTrait := new Traits.GenericTrait("ObjectPlacer
 					fn(){	return new Geometry.Node(someMesh); });
 	\endcode
 */
-ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlacer.DraggableObjectCreatorTrait");
+NS.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlacer.DraggableObjectCreatorTrait");
 {
-	var t = ObjectPlacer.DraggableObjectCreatorTrait;
+	var t = NS.DraggableObjectCreatorTrait;
 	
 	static DraggableTrait = Std.require('LibGUIExt/Traits/DraggableTrait');
 	static DraggingMarkerTrait = Std.require('LibGUIExt/Traits/DraggingMarkerTrait');
@@ -106,7 +106,7 @@ ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlace
 		
 			var droppingComponent = gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] ));
 			var droppingPossible = !droppingComponent.getParentComponent() || 
-					Traits.queryTrait(droppingComponent,ObjectPlacer.AcceptsObjectCreatorsTrait); //! \see ObjectPlacer.AcceptsObjectCreatorsTrait
+					Traits.queryTrait(droppingComponent,NS.AcceptsObjectCreatorsTrait); //! \see ObjectPlacer.AcceptsObjectCreatorsTrait
 			
 			if(hasDraggingConnector){
 				getDraggingConnector().clearProperties();
@@ -124,7 +124,7 @@ ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlace
 		
 		component.onDrop += [objectInserter,objectCreator]=>fn(objectInserter,objectCreator, evt){
 			var droppingComponent = gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] ));
-			if(Traits.queryTrait(droppingComponent,ObjectPlacer.AcceptsObjectCreatorsTrait)){
+			if(Traits.queryTrait(droppingComponent,NS.AcceptsObjectCreatorsTrait)){
 				droppingComponent.addObjectCreator(objectCreator); //! \see ObjectPlacer.AcceptsObjectCreatorsTrait
 				return;
 			}
@@ -141,10 +141,10 @@ ObjectPlacer.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlace
 	};
 }
 
-//ObjectPlacer.onNodeInserted := new MultiProcedure; //! \todo move to prominent place?
+//NS.onNodeInserted := new MultiProcedure; //! \todo move to prominent place?
 
 //! Place the given node at the given position and add it to the current scene.
-ObjectPlacer.defaultNodeInserter := fn(screenPos,MinSG.Node node){
+NS.defaultNodeInserter := fn(screenPos,MinSG.Node node){
 	screenPos = new Geometry.Vec2(screenPos);
 	var Picking = Util.requirePlugin('PADrend/Picking');
 	
@@ -178,12 +178,14 @@ ObjectPlacer.defaultNodeInserter := fn(screenPos,MinSG.Node node){
 		node.setWorldOrigin(pos-nodeAnchor);
 		NodeEditor.selectNode(node);
 		
-		executeExtensions('ObjectPlacer_OnObjectInserted',node);
+		Util.executeExtensions('ObjectPlacer_OnObjectInserted',node);
 //		ObjectPlacer.onNodeInserted(n);
 	}else{
 		PADrend.message("Could not place object: invalid position.");
 	
 	}
 };
+
+return NS;
 
 //----------------------------------------------------------------------------

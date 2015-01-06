@@ -27,7 +27,7 @@
 
 
 */
-loadOnce(__DIR__+"/Utils.escript");
+static ObjectPlacerUtils = Std.require('SceneEditor/ObjectPlacer/Utils');
 
 //! ---|> Plugin
 var plugin = new Plugin({
@@ -287,7 +287,7 @@ plugin.createObjectEntry := fn(file){
 	});
 
 	//! \see DraggableObjectCreatorTrait
-	Traits.addTrait(entry, ObjectPlacer.DraggableObjectCreatorTrait, ObjectPlacer.defaultNodeInserter, new this.ObjectFactory(file));
+	Traits.addTrait(entry, ObjectPlacerUtils.DraggableObjectCreatorTrait, ObjectPlacerUtils.defaultNodeInserter, new this.ObjectFactory(file));
 
 	// change color when inserted.
 	if(!prototype){
@@ -311,8 +311,8 @@ plugin.ObjectFactory := new Type;
 {
 	var T = plugin.ObjectFactory;
 
-	//! \see ObjectPlacer.ObjectFactoryTrait
-	Traits.addTrait(T,ObjectPlacer.ObjectFactoryTrait);
+	//! \see ObjectPlacerUtils.ObjectFactoryTrait
+	Traits.addTrait(T,ObjectPlacerUtils.ObjectFactoryTrait);
 
 	T.file @(private) := void;
 	T._constructor ::= fn(_filename){
@@ -320,7 +320,7 @@ plugin.ObjectFactory := new Type;
 	};
 	T.plugin ::= plugin;
 
-	//! \see ObjectPlacer.ObjectFactoryTrait
+	//! \see ObjectPlacerUtils.ObjectFactoryTrait
 	T.doCreateNode @(override) ::= fn(){
 		if(!plugin.getPrototypeForFile(file)){
 			plugin.createPrototype(file);

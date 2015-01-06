@@ -67,8 +67,9 @@ plugin.createUITab := fn(){
 	});
 	panel += tv;
 
-	//! \see ObjectPlacer.AcceptsObjectCreatorsTrait
-	Traits.addTrait(tv,ObjectPlacer.AcceptsObjectCreatorsTrait);
+	var ObjectPlacerUtils = Std.require('SceneEditor/ObjectPlacer/Utils');
+	//! \see AcceptsObjectCreatorsTrait
+	Traits.addTrait(tv,ObjectPlacerUtils.AcceptsObjectCreatorsTrait);
 
 
 	var refreshTv = tv->fn(){
