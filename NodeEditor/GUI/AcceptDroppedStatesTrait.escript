@@ -11,7 +11,6 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static MultiProcedure = Std.require('Std/MultiProcedure');
  
  var t = new Traits.GenericTrait("NodeEditor/GUI/AcceptDroppedStatesTrait");
  
@@ -33,6 +32,6 @@ static MultiProcedure = Std.require('Std/MultiProcedure');
 
  t.attributes.availableStateDropActions := t.MOVE_STATES | t.COPY_STATES;
  t.attributes.defaultStateDropActions := t.COPY_STATES;
- t.attributes.onStatesDropped @(init) := MultiProcedure; // fn( source, [State*], MOVE_STATES||COPY_STATES, evt )
+ t.attributes.onStatesDropped @(init) := Std.MultiProcedure; // fn( source, [State*], MOVE_STATES||COPY_STATES, evt )
    
  return t;

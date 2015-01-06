@@ -1830,3 +1830,5 @@ if(MinSG.isSet($SurfelRenderer))
 		return entries;
 	});
 // --------------------------------------------------------------------------
+
+return true;

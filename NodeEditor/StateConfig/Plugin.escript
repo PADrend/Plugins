@@ -38,9 +38,7 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn() {
 
-	{ // init members
-		loadOnce(__DIR__+"/StatePanels.escript");
-	}
+	Std.require( 'NodeEditor/StateConfig/initStatePanels');
 
 	// register extensions
 	Util.registerExtension('NodeEditor_QueryAvailableStates',fn(a) {

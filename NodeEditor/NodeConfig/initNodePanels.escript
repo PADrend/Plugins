@@ -649,3 +649,5 @@ if(MinSG.isSet($PathNode)) {
 		return entries;
 	});
 }
+
+return true;

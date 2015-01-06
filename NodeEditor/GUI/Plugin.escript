@@ -27,11 +27,9 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn() {
-	loadOnce(__DIR__+"/GUI_Basics.escript");
-	loadOnce(__DIR__+"/GUI_Registries.escript");
-
+	Std.require( 'NodeEditor/GUI/initGUIBasics' );
+	Std.require( 'NodeEditor/GUI/initGUIRegistries' );
 	registerExtension('PADrend_Init',this->this.registerGUIProviders);
-
 	return true;
 };
 

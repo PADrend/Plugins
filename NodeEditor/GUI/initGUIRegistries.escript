@@ -158,4 +158,5 @@ NodeEditor.getIcon := new (Std.require('LibUtilExt/TypeBasedHandler'))(false);
 NodeEditor.getIcon += [Object,fn(obj){return false;}]; // false is returned per default.
 //	@}
 
-// --------------------------------------------------------------------------------------------------------------
+
+return true;

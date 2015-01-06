@@ -17,7 +17,7 @@
  **  - NodeEditor.Wrappers.MultipleObjectsWrapper
  **/
  
-loadOnce(__DIR__+"/GUI_Registries.escript");
+module('./initGUIRegistries');
 declareNamespace($NodeEditor);
 
 // ----------------------------------------------------------------
@@ -78,4 +78,5 @@ declareNamespace($NodeEditor,$Wrappers);
 }
 //	@}
 
-// --------------------------------------------------------------------------------------------------------------
+
+return true;

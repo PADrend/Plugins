@@ -26,10 +26,7 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn() {
 
-	{ // init members
-		loadOnce(__DIR__+"/NodePanels.escript");
-		this.configPanel := void;
-	}
+	Std.require( 'NodeEditor/NodeConfig/initNodePanels');
 
 	
 	{// init available nodes
