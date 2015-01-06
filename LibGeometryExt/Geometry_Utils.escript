@@ -10,10 +10,10 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[LibMinSGEct] Util/Geometry_Utils.escript
- **/
- 
+/*!
+	Various extension to the Geometry library.
+*/
+  
 Geometry.Box.getRelPosition ::= fn(x,y,z){
 	return this.getCorner(Geometry.CORNER_xyz)+new Geometry.Vec3(this.getExtentX()*x,this.getExtentY()*y,this.getExtentZ()*z);
 };
@@ -156,3 +156,5 @@ Geometry.Vec3.createOrthogonalVector ::= fn(){
 	}
 	return normal.cross(v1).normalize();
 };
+
+return Geometry;
