@@ -39,7 +39,7 @@ if(EScript.VERSION<607)
 	Std.require('LibRenderingExt/initRenderingUtils');	
 	Std.require('LibMinSGExt/initMinSGUtils');
 	Std.require('LibMinSGExt/initNodeExtensions');
-	loadOnce ("LibMinSGExt/MeshBuilderExtensions.escript");	
+	Std.require('LibMinSGExt/initMeshBuilderExtensions');
 
 }
 { // Declare some global variables

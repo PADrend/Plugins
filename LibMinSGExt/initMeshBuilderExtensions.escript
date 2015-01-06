@@ -36,4 +36,4 @@ Rendering.MeshBuilder.addBox ::= fn(Geometry.Box box){
 
 
 
-
+return true;
