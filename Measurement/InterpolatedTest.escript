@@ -327,6 +327,7 @@ MeasurementPlugin.InterpolatedTest.executeCurrentScene := fn(String scenename, M
  *
  */
 MeasurementPlugin.InterpolatedTest.executeAllScenes := fn(String fileprefix) {
+	var DataTable = (Std.require('LibUtilExt/DataTable'));
 	var scenes = PADrend.getSceneList();
 
 	var frame_durations = new DataTable("frame");
@@ -390,6 +391,8 @@ MeasurementPlugin.InterpolatedTest.executeAllScenes := fn(String fileprefix) {
  * \param fileprefix
  */
 MeasurementPlugin.InterpolatedTest.executeAllScenesWithBQEvaluator := fn(String fileprefix) {
+	var DataTable = (Std.require('LibUtilExt/DataTable'));
+	
 	var scenes = PADrend.getSceneList();
 
 	var objectsCAsVisible = new DataTable("frame");

@@ -37,8 +37,6 @@ GLOBALS.MeasurementPlugin := new Plugin({
  * ---|> Plugin
  */
 MeasurementPlugin.init:=fn() {
-	loadOnce("LibUtilExt/DataTable.escript");
-
 	load(__DIR__+"/SamplePath.escript");
 	load(__DIR__+"/InterpolatedTest.escript");
 
@@ -260,7 +258,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 				}
 				
 				// export data
-				var table = new DataTable( "frame" );
+				var table = new (Std.require('LibUtilExt/DataTable'))( "frame" );
 				for(var i=0;i<statistics.getNumCounters();i++){
 					if(statistics.getDescription(i)=="?") continue;
 					table.addDataRow(statistics.getDescription(i),statistics.getUnit(i),data[i],"#ff0000" );
@@ -295,7 +293,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 				m2[i] = i*i;
 				m3[i] = i*i*i;
 			}
-			var dataTable=new DataTable("x");
+			var dataTable=new (Std.require('LibUtilExt/DataTable'))("x");
 			dataTable.addDataRow( "linear","y",m1,"#888888" );
 			dataTable.addDataRow( "quadratic","y",m2,"#ff0000" );
 			dataTable.addDataRow( "cubic","y",m3,"#00ff00" );

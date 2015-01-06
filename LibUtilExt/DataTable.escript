@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2012,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Paul Justus
  * Copyright (C) 2010 Ralf Petring <ralf@petring.net>
  * 
@@ -61,21 +61,21 @@
 	
 
 */
-GLOBALS.DataTable := new Type;
+static T = new Type;
 
 /*! [ctor] */
-DataTable._constructor := fn( String unitX ){
+T._constructor := fn( String unitX ){
 	this.unitX := unitX;
 	this.dataRows := [];
 	this.templateFile := "resources/Diagrams/diagram-template.svg";
 };
 
-DataTable.addDataRow := fn( String description,String unitY, Collection data, String color = "#888888"){
-	this.dataRows += new DataTable.DataRow(description, unitY, data, color) ;
+T.addDataRow := fn( String description,String unitY, Collection data, String color = "#888888"){
+	this.dataRows += new T.DataRow(description, unitY, data, color) ;
 };
 
 /*! Export data to csv-file */
-DataTable.exportCSV := fn(String filename, String delimiter = "\t", sortnumerical = true){
+T.exportCSV := fn(String filename, String delimiter = "\t", sortnumerical = true){
 	var m = new Map;
 	var descriptions=[unitX];
 	foreach( dataRows as var dataRowIndex,var row){
@@ -115,7 +115,7 @@ DataTable.exportCSV := fn(String filename, String delimiter = "\t", sortnumerica
 };
 
 /*! Export data to dynamic svg-file */
-DataTable.exportSVG := fn(String filename, sortnumerical = true){
+T.exportSVG := fn(String filename, sortnumerical = true){
 	var s="\n";
 	foreach( dataRows as var row){
 	var key;
@@ -150,12 +150,14 @@ DataTable.exportSVG := fn(String filename, sortnumerical = true){
 	return success;
 };
 
-/*! Internally used by DataTable */
-DataTable.DataRow ::= new Type;
-DataTable.DataRow._constructor := fn( String description,String unitY, Collection data, String color = "#ff0000"){
+//! (internal)
+T.DataRow ::= new Type;
+T.DataRow._constructor := fn( String description,String unitY, Collection data, String color = "#ff0000"){
 	this.description := description;
 	this.unitY := unitY;
 	this.data := data.clone();
 	this.color := color;
 };
 
+
+return T;
