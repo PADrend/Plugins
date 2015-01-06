@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
 
- * Copyright (C) 2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2014-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -55,6 +55,21 @@ tests += new AutomatedTest( "Geometry.Box.getLineIntersections",fn(){
 	return true;
 });
 
+
+tests += new AutomatedTest( "Geometry.ProgressiveBlueNoiseCreator",fn(){
+	var ProgressiveBlueNoiseCreator = Std.require('LibGeometryExt/ProgressiveBlueNoiseCreator');
+
+	var ok = true;
+	// simple example: create points inside a 3d box
+	var box =  new Geometry.Box(0,0,0,1,1,1);
+	var points = ProgressiveBlueNoiseCreator.createPointsInBox( new Geometry.Box(0,0,0,1,1,1),100 );
+	ok &= points.count()==100;
+	foreach(points as var p)
+		ok &= box.contains( p );
+
+	//! \todo it qould be nice to also check the distribution's quality.	
+	return ok;
+});
 
 // -----------------------------------------------------------------------------------------------
 
