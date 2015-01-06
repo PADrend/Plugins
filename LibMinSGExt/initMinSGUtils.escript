@@ -703,4 +703,4 @@ GLOBALS.showWaitingScreen._waitingScreenShader := void;
 
 
 // -------------------------
-return MinSG;
+return true;

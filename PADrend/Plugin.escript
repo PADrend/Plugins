@@ -220,8 +220,7 @@ PADrend.message := fn(p...){
 /*! (static) Render the given sceneGraph with the given camera and flags.
 	\note If the clearColor is false, the rendering buffer is not cleared before rendering */
 PADrend.renderScene := fn( p... ){
-	@(once) static MinSGUtils =  Std.require('LibMinSGExt/MinSG_Utils');
-	MinSGUtils.renderScene(frameContext, p... ); //! \see MinSG_Utils
+	MinSG.renderScene(frameContext, p... );
 };
 
 PADrend.about := fn(){

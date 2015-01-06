@@ -171,4 +171,4 @@ MinSG.GroupState."-=" ::= fn( MinSG.State obj){
 	return this;
 };
 
-return MinSG;
+return true;

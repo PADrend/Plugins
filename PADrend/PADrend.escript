@@ -34,12 +34,11 @@ if(EScript.VERSION<607)
 {
 	outln("Loading Util scripts...");
 	
-	loadOnce ("LibUtilExt/Misc_Utils.escript");
-
-	Std.require('LibGeometryExt/Geometry_Utils');
-	Std.require('LibRenderingExt/Rendering_Utils');	
-	Std.require('LibMinSGExt/MinSG_Utils');
-	Std.require('LibMinSGExt/NodeExtensions');
+	Std.require('LibUtilExt/initMiscUtils');
+	Std.require('LibGeometryExt/initGeometryUtils');
+	Std.require('LibRenderingExt/initRenderingUtils');	
+	Std.require('LibMinSGExt/initMinSGUtils');
+	Std.require('LibMinSGExt/initNodeExtensions');
 	loadOnce ("LibMinSGExt/SemanticObject.escript");	
 	loadOnce ("LibMinSGExt/MeshBuilderExtensions.escript");	
 
@@ -55,5 +54,5 @@ if(EScript.VERSION<607)
 	GLOBALS.camera := void;
 }
 { // load and execute PADrend
-	Std.require('LibUtilExt/PluginRegistry').loadPlugins( ["PADrend"],true,[__DIR__+"/../"] );
+	Std.require('LibUtilExt/GlobalPluginRegistry').loadPlugins( ["PADrend"],true,[__DIR__+"/../"] );
 }

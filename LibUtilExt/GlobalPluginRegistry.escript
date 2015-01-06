@@ -14,7 +14,7 @@
 //! Global Plugin registry
  
 static ExtensionPoint = module('./ExtensionPoint');
-static ExtensionRegistry = module('./ExtensionRegistry');
+static ExtensionRegistry = module('./GlobalExtensionRegistry');
 static Plugin = module('./PluginType');
 
 static _pluginRegistry = new Map;
