@@ -39,7 +39,6 @@ if(EScript.VERSION<607)
 	Std.require('LibRenderingExt/initRenderingUtils');	
 	Std.require('LibMinSGExt/initMinSGUtils');
 	Std.require('LibMinSGExt/initNodeExtensions');
-	loadOnce ("LibMinSGExt/SemanticObject.escript");	
 	loadOnce ("LibMinSGExt/MeshBuilderExtensions.escript");	
 
 }

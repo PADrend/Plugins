@@ -83,11 +83,12 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.Node, fn(node){
 		GUI.ON_DATA_CHANGED : node -> node.setTempNode,
 		GUI.TOOLTIP : "If enabled, the node is not saved."
 	};
+	var SemanticObject = Std.require('LibMinSGExt/SemanticObject');
 	entries += {
 		GUI.TYPE : GUI.TYPE_BOOL,
 		GUI.LABEL : "is semantic obj",
-		GUI.DATA_VALUE : MinSG.SemanticObjects.isSemanticObject(node),
-		GUI.ON_DATA_CHANGED : [node] => MinSG.SemanticObjects.markAsSemanticObject,
+		GUI.DATA_VALUE : SemanticObject.isSemanticObject(node),
+		GUI.ON_DATA_CHANGED : [node] => SemanticObject.markAsSemanticObject,
 		GUI.TOOLTIP : "Mark to show if the node is a semantic object."
 	};
 	{// rendering Layers

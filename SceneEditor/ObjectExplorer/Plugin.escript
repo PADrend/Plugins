@@ -39,6 +39,8 @@ plugin.init @(override) := fn(){
 	return true;
 };
 
+static SemanticObject = Std.require('LibMinSGExt/SemanticObject');
+
 /*! Trait for GUI.TreeViewEntries.
 	When the entry is opened, for each contained semantic object a new subentry is created.
 	The sub entries are filled using the registered components 'ObjectEditor_ObjectEntry'.
@@ -67,7 +69,7 @@ SceneEditor.ObjectEditor.SemanticObjectEntryTrait := new Traits.GenericTrait('Sc
 			var node = entry.node;
 			var entries = [];
 			
-			foreach(MinSG.SemanticObjects.collectNextSemanticObjects(node) as var object){
+			foreach(SemanticObject.collectNextSemanticObjects(node) as var object){
 				var subEntry = gui.create({
 					GUI.TYPE : GUI.TYPE_TREE_GROUP,
 					GUI.OPTIONS : [{	
@@ -92,7 +94,7 @@ SceneEditor.ObjectEditor.SemanticObjectEntryTrait := new Traits.GenericTrait('Sc
 			
 		});
 		//! \todo if object has no sub objects, disable the default open marker (but still add the trait) 
-		if(MinSG.SemanticObjects.collectNextSemanticObjects(node).empty())
+		if(SemanticObject.collectNextSemanticObjects(node).empty())
 			entry.clearSubentries();
 	};
 	
@@ -310,12 +312,12 @@ plugin.initGUI := fn(){
 				return $REMOVE;
 			tv.unmarkAll();
 
-			if(nodes.count()!=1 || !MinSG.SemanticObjects.isSemanticObject(nodes[0]) )
+			if(nodes.count()!=1 || !SemanticObject.isSemanticObject(nodes[0]) )
 				return;
 			
 			// collect objects upwards
 			var objects = [];
-			for(var object = nodes[0]; object; object = MinSG.SemanticObjects.getContainingSemanticObject(object) )
+			for(var object = nodes[0]; object; object = SemanticObject.getContainingSemanticObject(object) )
 				objects += object;
 			
 			// recursively search object's entry

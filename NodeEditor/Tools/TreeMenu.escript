@@ -317,7 +317,7 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.cleanups',[
 			static counter = 0;
 			foreach(NodeEditor.getSelectedNodes() as var subtree){
 				subtree.traverse( fn(node){
-					if(MinSG.SemanticObjects.isSemanticObject(node) ){
+					if( Std.require('LibMinSGExt/SemanticObject').isSemanticObject(node) ){
 						if(!node.isClosed()){
 							++counter;
 							node.setClosed(true);

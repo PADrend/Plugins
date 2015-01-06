@@ -337,7 +337,7 @@ plugin.createPrototype := fn(file){
 		newPrototype = new MinSG.GeometryNode(Rendering.loadMesh(file));
 	}else{
 		newPrototype = PADrend.getSceneManager().loadScene(file,MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY);
-		MinSG.SemanticObjects.markAsSemanticObject(newPrototype);
+		Std.require('LibMinSGExt/SemanticObject').markAsSemanticObject(newPrototype);
 	}
 	if(!newPrototype){
 		PADrend.message("Could not load "+file);

@@ -39,11 +39,13 @@ var plugin = new Plugin({
 static nodeClipboard = [];
 static nodeClipboardMode = $COPY; // || $CUT
 static NodeEditor;
+static SemanticObject;
 
 plugin.init @(override) := fn() {
 
 	NodeEditor = Std.require('NodeEditor/NodeEditor');
-
+	SemanticObject = Std.require('LibMinSGExt/SemanticObject');
+	
 	/// Register ExtensionPointHandler:
 	registerExtension('PADrend_Init', fn(){	NodeEditor.selectNode(PADrend.getCurrentScene());	});
 	registerExtension('PADrend_UIEvent',fn(evt){
@@ -103,7 +105,7 @@ plugin.init @(override) := fn() {
 		static COLOR_BG_SEM_OBJ = new Util.Color4f(0,0.4,0,1);
 		static COLOR_TEXT_ORIGINAL = new Util.Color4f(1,1,1,1);
 		static COLOR_TEXT_INSTANCE = new Util.Color4f(0.9,0.9,0.9,1);
-
+	
 		static highlightNodes = fn(selectedNodes,...){
 			var skipAnnotations = selectedNodes.count()>20;
 			foreach(selectedNodes as var node){
@@ -114,7 +116,7 @@ plugin.init @(override) := fn() {
 				if(!skipAnnotations){
 					frameContext.showAnnotation(node,NodeEditor.getString(node),0,true,
 												node.isInstance() ? COLOR_TEXT_INSTANCE : COLOR_TEXT_ORIGINAL,
-												MinSG.SemanticObjects.isSemanticObject(node) ? COLOR_BG_SEM_OBJ : COLOR_BG_NODE  );
+												SemanticObject.isSemanticObject(node) ? COLOR_BG_SEM_OBJ : COLOR_BG_NODE  );
 				}
 
 				renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
@@ -372,12 +374,12 @@ plugin.init @(override) := fn() {
 plugin.setObjectIdentifier := 	fn(fun){		objectIdentifier = fun;	};
 static objectIdentifier = fn(node){
 
-	var semObj = MinSG.SemanticObjects.isSemanticObject(node) ? node :	MinSG.SemanticObjects.getContainingSemanticObject(node);
+	var semObj = SemanticObject.isSemanticObject(node) ? node :	SemanticObject.getContainingSemanticObject(node);
 	if( semObj ){
 
 		//! \todo This should be integrated into the selection method.
 		while(true){
-			var next = MinSG.SemanticObjects.getContainingSemanticObject(semObj);
+			var next = SemanticObject.getContainingSemanticObject(semObj);
 			if(!next || NodeEditor.isNodeSelected(next))
 				break;
 			semObj = next;
