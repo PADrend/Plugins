@@ -108,7 +108,7 @@ static camerasUsedForLastFrame = [];
 static renderingLayers = 1;
 
 plugin.init @(override) := fn(){
-	loadOnce(__DIR__+"/RenderingPass.escript");
+	PADrend.RenderingPass := Std.require( 'PADrend/EventLoop/RenderingPass' ); //alias
 
 	registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+1);
 	registerExtension('PADrend_Start',this->ex_Start);
@@ -209,7 +209,7 @@ plugin.planTask := fn(time,fun){
 plugin.singleFrame := fn() {
 
 	// create "default" rendering pass
-	var renderingPasses = [ new PADrend.RenderingPass("default",PADrend.getRootNode(),activeCamera, renderingFlags, this.doClearScreen ? this.bgColor : false,renderingLayers) ];
+	var renderingPasses = [ new (Std.require('PADrend/EventLoop/RenderingPass'))("default",PADrend.getRootNode(),activeCamera, renderingFlags, this.doClearScreen ? this.bgColor : false,renderingLayers) ];
 	executeExtensions('PADrend_BeforeRendering',renderingPasses);
 	
 	// -------------------

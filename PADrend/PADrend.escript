@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2008-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2007-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2007-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2011 David Maicher
  * Copyright (C) 2009 Jan Krems
  * Copyright (C) 2011 Ralf Petring <ralf@petring.net>
