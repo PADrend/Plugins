@@ -27,8 +27,8 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-//!	---|> Plugin
-plugin.init:=fn(){
+
+plugin.init @(override) :=fn(){
 	{ // Register ExtensionPointHandler:
 		registerExtension('PADrend_Init', this->fn(){
 			gui.registerComponentProvider('Tests_TestsMenu.soundTests',{

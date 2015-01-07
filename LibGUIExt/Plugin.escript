@@ -34,11 +34,7 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-plugin.init:=fn() {
+plugin.init @(override) :=fn() {
 	loadOnce(__DIR__+"/ComponentExtensions.escript");
 	loadOnce(__DIR__+"/ComponentRegistry.escript");
 	loadOnce(__DIR__+"/Factory_ComponentGroups.escript");

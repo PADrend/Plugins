@@ -19,7 +19,6 @@ Runtime.enableLogCounting();
 
 addSearchPath(__DIR__); // add "plugins/" to the search path for load and loadOnce.
 
-
 load("LibEStd/init.escript");
 Std.addModuleSearchPath(__DIR__); // add "plugins/" to the search path for Std.require
 
@@ -27,8 +26,7 @@ systemConfig.init(mainConfig);
 setConfigInfo('System.mainScript',"Main script file (default: PADrend/PADrend.escript)");
 load (systemConfig.getValue('System.mainScript',"PADrend/PADrend.escript"));
 
-
-if(_processResult---|>Exception)
+if( _processResult.isA(Exception) )
 	throw _processResult;
 else
 	exit(_processResult);

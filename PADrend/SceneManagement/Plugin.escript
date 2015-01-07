@@ -180,7 +180,7 @@ SceneManagement.initDefaultLightParameters := fn(){
 
 SceneManagement.createNewSceneRoot := fn(String t,debugOutput=true){
 	var newSceneRoot = eval(t+";");
-	if(! (newSceneRoot---|>MinSG.Node) )
+	if(! newSceneRoot.isA(MinSG.Node) )
 		return false;
 
 	newSceneRoot.name := "";

@@ -21,8 +21,7 @@ GLOBALS.TicTacToe := new Plugin({
 			Plugin.REQUIRES : ['PADrend/GUI','PADrend/Serialization','PADrend/CommandHandling']
 });
 
-//! ---|> Plugin
-TicTacToe.init:=fn(){
+TicTacToe.init @(override) :=fn(){
 
      { // Register ExtensionPointHandler:
      	registerExtension('PADrend_Init',this->fn(){

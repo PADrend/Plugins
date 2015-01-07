@@ -20,7 +20,7 @@ var plugin = new Plugin({
 
 static selectedNodesStorage = Std.require('NodeEditor/SelectedNodesStorage');
 
-plugin.init := fn() {
+plugin.init @(override) := fn() {
 	registerExtension('PADrend_Init', this->registerGUIComponents );
 	return true;
 };

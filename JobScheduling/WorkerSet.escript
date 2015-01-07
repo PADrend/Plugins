@@ -31,7 +31,7 @@ T._constructor ::= fn(String _schedulerId,Number _capacity){
 	schedulerId = _schedulerId;
 	capacity = _capacity;
 	activeJobs = [];
-	availableWorkers = new Map();
+	availableWorkers = new Map;
 	
 	
 	// a new job appeared...

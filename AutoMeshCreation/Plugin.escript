@@ -28,7 +28,7 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-plugin.init:=fn(){
+plugin.init @(override) := fn(){
     loadOnce(__DIR__+"/Extruder.escript");
 	loadOnce(__DIR__+"/Primitives.escript");
 	loadOnce(__DIR__+"/TreeGen.escript");

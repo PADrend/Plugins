@@ -15,7 +15,6 @@
  **	[PADrend] PADrend/GUI_Windows.escript
  **/
 
-//! ---|> Plugin
 var plugin = new Plugin({
 		Plugin.NAME : 'PADrend/GUI/MainWindow',
 		Plugin.DESCRIPTION : "PADrend's main window.",
@@ -27,7 +26,6 @@ var plugin = new Plugin({
 });
 
 
-//! ---|> Plugin
 plugin.init @(override) := fn(){
 
 	// toggle main window on [F1]

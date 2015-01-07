@@ -20,7 +20,7 @@ var plugin = new Plugin({
 			Plugin.REQUIRES : ['PADrend','PADrend/GUI','PADrend/EventLoop']
 });
 
-plugin.init := fn() {
+plugin.init @(override) := fn() {
 	var fps = DataWrapper.createFromConfig(systemConfig, 'Effects.LimitFPS.fps', 25);
 
 	var enabled = DataWrapper.createFromConfig(systemConfig, 'Effects.LimitFPS.enabled', false);

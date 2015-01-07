@@ -13,13 +13,9 @@
  */
 /****
  **	[Plugin:PADrend] PADrend/SplashScreen/Plugin.escript
- **
  **/
 
-/***
- **   ---|> Plugin
- **/
-PADrend.SplashScreen := new Plugin({
+var plugin = new Plugin({
 		Plugin.NAME : 'PADrend/SplashScreen',
 		Plugin.DESCRIPTION : "PADrend SplashScreen.",
 		Plugin.VERSION : 0.1,
@@ -29,15 +25,9 @@ PADrend.SplashScreen := new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-// -------------------
+static splashScreen = void;
 
-PADrend.SplashScreen.splashScreen := void;
-
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-PADrend.SplashScreen.init := fn(){
+plugin.init @(override) := fn(){
 	if(systemConfig.getValue('PADrend.SplashScreen.enabled', true)){
 		if(getOS() == 'WINDOWS') {
 			Runtime.warn("SplashScreen on windows is broken (until further notice). Save config to disable it.");
@@ -49,7 +39,7 @@ PADrend.SplashScreen.init := fn(){
 		if(getOS() == 'WINDOWS') {
 			logoPath = __DIR__+"/../resources/SplashScreen/Logo_alpha.png";
 		}
-		this.splashScreen = new Util.UI.SplashScreen("PADrend",systemConfig.getValue('PADrend.SplashScreen.image', logoPath) );
+		splashScreen = new Util.UI.SplashScreen("PADrend",systemConfig.getValue('PADrend.SplashScreen.image', logoPath) );
 
 		registerExtension('PADrend_Message',this->ext_Message);
 		registerExtension('PADrend_Init',this->ex_Init);
@@ -61,7 +51,7 @@ PADrend.SplashScreen.init := fn(){
 
 
 //! [ext:PADrend_Init]
-PADrend.SplashScreen.ex_Init := fn(...){
+plugin.ex_Init := fn(...){
 	PADrend.planTask( systemConfig.getValue('PADrend.SplashScreen.duration', 0.5); ,this->fn(){
 		// we are done!
 		splashScreen.showMessage("Finished.");
@@ -72,7 +62,7 @@ PADrend.SplashScreen.ex_Init := fn(...){
 };
 
 //! [ext:PADrend_Message]
-PADrend.SplashScreen.ext_Message := fn(s){
+plugin.ext_Message := fn(s){
 	if(!splashScreen){ // window already destroyed?
 		return Extension.REMOVE_EXTENSION;
 	}
@@ -80,5 +70,5 @@ PADrend.SplashScreen.ext_Message := fn(s){
 	return Extension.CONTINUE;
 };
 
-return PADrend.SplashScreen;
+return plugin;
 // ------------------------------------------------------------------------------

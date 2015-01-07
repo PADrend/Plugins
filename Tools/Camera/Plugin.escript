@@ -16,7 +16,6 @@
  *	2011-10-16	Benjamin Eikel	Creation.
  */
 
-//! CameraWindow ---|> Plugin
 GLOBALS.CameraWindowPlugin := new Plugin({
 			Plugin.NAME : "CameraWindowPlugin",
 			Plugin.VERSION : "1.0",
@@ -47,8 +46,7 @@ load(__DIR__ + "/ConfigPanel.escript");
 load(__DIR__ + "/OptionPanel.escript");
 load(__DIR__ + "/Window.escript");
 
-//! ---|> Plugin
-CameraWindowPlugin.init := fn() {
+CameraWindowPlugin.init @(override) := fn() {
 	{
 		registerExtension('PADrend_Init', this->ex_Init);
 		if(queryPlugin('NodeEditor')) {

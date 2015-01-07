@@ -16,9 +16,6 @@
  **/
 
 
-/***
- **   ---|> Plugin
- **/
 var plugin = new Plugin({
 		Plugin.NAME : 'PADrend/GUI/ToolsToolbar',
 		Plugin.DESCRIPTION : "A toolbar for interactive tools.",
@@ -35,11 +32,8 @@ plugin.toolbarEnabled := DataWrapper.createFromConfig(PADrend.configCache,'PADre
 plugin.toolbar := void;
 plugin.componentFilter := DataWrapper.createFromConfig(PADrend.configCache,'PADrend.GUI.toolsToolbarFiltered',[]);
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-plugin.init := fn(){
+
+plugin.init @(override) := fn(){
 	toolbarEnabled.onDataChanged += this->fn(value){
 		if(value){
 			createToolbar();

@@ -49,11 +49,7 @@ PADrend.CommandHandling := new Plugin({
 
 static _commandHistory;
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-PADrend.CommandHandling.init := fn(){
+PADrend.CommandHandling.init @(override) := fn(){
 
 	_commandHistory = new (Std.require('LibUtilExt/CommandHistory'));
 	Util.registerExtension('PADrend_KeyPressed',this->ex_KeyPressed);

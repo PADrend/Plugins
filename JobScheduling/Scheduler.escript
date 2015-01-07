@@ -35,7 +35,7 @@ T._constructor ::= fn(String _schedulerId){
 	freeWorkerIds = [];
 	pendingJobs = [];
 	activeJobs = new Map;
-	finishedJobs = new Map();
+	finishedJobs = new Map;
 	
 	// if a new worker appeares...
 	module('./JobScheduling').onWorkerAvailable += this->fn(workerId){
@@ -161,7 +161,7 @@ T.fetchResult ::= fn(String jobId){
 /*! Fetch (and remove) all available results.
 	@return A Map jobId -> result */
 T.fetchResults ::= fn(){
-	var results = new Map();
+	var results = new Map;
 	foreach(finishedJobs as var jobId,var job)
 		results[jobId] = job.getResult();
 	finishedJobs.clear();

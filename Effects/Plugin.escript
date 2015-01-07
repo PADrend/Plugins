@@ -17,7 +17,6 @@
  ** 2010-03-21
  **/
 
-//!	EffectsPlugin ---|> Plugin
 GLOBALS.EffectsPlugin := new Plugin({
 			Plugin.NAME : "Effects",
 			Plugin.VERSION : "1.0",
@@ -27,8 +26,7 @@ GLOBALS.EffectsPlugin := new Plugin({
 			Plugin.REQUIRES : ['LibRenderingExt']
 });
 
-/*! ---|> Plugin	*/
-EffectsPlugin.init:=fn() {
+EffectsPlugin.init @(override) :=fn() {
 	{ // Register ExtensionPointHandler:
 		registerExtension('PADrend_Init',this->registerMenus);
 	}

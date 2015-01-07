@@ -15,7 +15,6 @@
  **	[Plugin:Tests] Test/Tests_Automated.escript
  **/
 
-
 var plugin = new Plugin({
 		Plugin.NAME : 'Tests/Tests_Automated',
 		Plugin.DESCRIPTION : 'Various automated tests.',
@@ -26,8 +25,7 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-//!	---|> Plugin
-plugin.init:=fn(){
+plugin.init @(override) := fn(){
 	{ // Register ExtensionPointHandler:
 		if(queryPlugin('Tests')){
 			registerExtension('PADrend_Init', this->fn(){

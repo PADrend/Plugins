@@ -16,9 +16,7 @@
  **	[Plugin:PADrend] PADrend/Navigation/Plugin.escript
  **
  **/
-/***
- **   ---|> Plugin
- **/
+
 PADrend.Navigation := new Plugin({
 		Plugin.NAME : 'PADrend/Navigation',
 		Plugin.DESCRIPTION : "Keyboard and mouse navigation for PADrend.",
@@ -36,10 +34,6 @@ PADrend.Navigation.cameraMover := void;
 PADrend.Navigation.flyToHandler := void;
 PADrend.Navigation.joystickSupport := void;
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
 PADrend.Navigation.init @(override) := fn(){
 
 	registerExtension('PADrend_Init',this->ex_Init, Extension.HIGH_PRIORITY+1);
@@ -62,21 +56,21 @@ PADrend.Navigation.ex_Init := fn(){
 	
 	
 	// create cameraMover
-	    	
+			
 	this.cameraMover = new (Std.require('LibMinSGExt/CameraMover'))(PADrend.SystemUI.getWindow(), PADrend.SystemUI.getEventContext(), PADrend.getDolly(),GLOBALS.camera);
 	this.cameraMover.setInvertYAxis(systemConfig.getValue('PADrend.Input.invertMouse',false));
 	this.cameraMover.smoothMouse = systemConfig.getValue('PADrend.Input.smoothMouse',true);
 
 	this.cameraMover.joypad_rotationFactor := systemConfig.getValue('PADrend.Input.rotationFactor',3);
 	this.cameraMover.joypad_rotationExponent := systemConfig.getValue('PADrend.Input.rotationExponent',2);
-    
+	
 //    cameraMover.registerGamepad( PADrend.HID.getDevice("VirtualGamepad")  );
 
 	registerExtension('PADrend_UIEvent',[cameraMover] => fn(cameraMover,evt){	return cameraMover.getMouseView() ? cameraMover.handleEvent(evt,false) : false;	}, Extension.HIGH_PRIORITY);
 	registerExtension('PADrend_UIEvent',[cameraMover] => fn(cameraMover,evt){	return cameraMover.getMouseView() ? false : cameraMover.handleEvent(evt,false);	}, Extension.LOW_PRIORITY);
 
-    joystickSupport = DataWrapper.createFromConfig(systemConfig,'PADrend.Input.joystickSupport',false);
-    if(joystickSupport())
+	joystickSupport = DataWrapper.createFromConfig(systemConfig,'PADrend.Input.joystickSupport',false);
+	if(joystickSupport())
 		cameraMover.registerGamepad( PADrend.HID.getDevice("Gamepad_1")  );
 	
 	this.storedPositions = [ ];

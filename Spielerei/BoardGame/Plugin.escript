@@ -25,8 +25,7 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : [	]
 });
 
-//! ---|> Plugin
-plugin.init:=fn(){
+plugin.init @(override) :=fn(){
 	registerExtension('PADrend_Init',this->fn(){
 		gui.registerComponentProvider('Spielerei.boardGames',[{
 			GUI.TYPE : GUI.TYPE_MENU,

@@ -32,7 +32,7 @@ plugin.displayTexturesEnabled := displayTexturesEnabled;
 
 static tempScene; //! Temporary storage for the current PADrend scene.
 
-plugin.init := fn() {
+plugin.init @(override) := fn() {
 	if(!MinSG.isSet($AbstractImageComparator)) {
 		out(__FILE__,__LINE__," MinSG::ImageCompare not supported. Did you compile with MINSG_EXT_IMAGECOMPARE defined?\n");
 		return false;

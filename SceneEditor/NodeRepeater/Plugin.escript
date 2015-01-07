@@ -34,7 +34,7 @@ plugin.windowEnabled @(private) := DataWrapper.createFromValue(false);
 plugin.window @(private):= void;
 plugin.iterations := [];
 
-plugin.init := fn(){
+plugin.init @(override) := fn(){
     for(var i=0;i<3;++i){
         this.iterations += new ExtObject({
                 $count : DataWrapper.createFromValue(0),

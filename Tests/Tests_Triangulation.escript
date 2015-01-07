@@ -21,7 +21,7 @@ var plugin = new Plugin({
 	Plugin.EXTENSION_POINTS	:	[]
 });
 
-plugin.init := fn() {
+plugin.init @(override) := fn() {
 	registerExtension('PADrend_Init', this->fn(){
 		gui.registerComponentProvider('Tests_TestsMenu.triangulation',{
 			GUI.TYPE : GUI.TYPE_BUTTON,

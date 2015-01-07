@@ -36,7 +36,7 @@ plugin.refreshGroup  := new GUI.RefreshGroup();
 plugin.clicked  :=false;
 plugin.key  :=new Map();
 //plugin.groupNr :=DataWrapper.createFromValue( -1 );
-plugin.init := fn(){
+plugin.init @(override) := fn(){
     registerExtension('PADrend_Init',this->fn(){
         this.counter = 0;
 		gui.registerComponentProvider('SceneEditor_ToolsConfigTabs.Groups',this->createUITab);

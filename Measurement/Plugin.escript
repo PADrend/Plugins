@@ -22,7 +22,6 @@
  **  2011-09-02 - Benjamin Eikel - Rework of EScript code.
  **/
 
-//! MeasurementPlugin ---|> Plugin
 GLOBALS.MeasurementPlugin := new Plugin({
 		Plugin.NAME : 'Measurement',
 		Plugin.DESCRIPTION : "Measurements along camera paths.",
@@ -32,11 +31,7 @@ GLOBALS.MeasurementPlugin := new Plugin({
 		Plugin.REQUIRES : ['Evaluator', 'Waypoints']
 });
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-MeasurementPlugin.init:=fn() {
+MeasurementPlugin.init @(override) :=fn() {
 	load(__DIR__+"/SamplePath.escript");
 	load(__DIR__+"/InterpolatedTest.escript");
 

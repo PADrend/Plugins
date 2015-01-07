@@ -45,8 +45,6 @@
 	});
 */
 
-
-//!	---|> Plugin
 var plugin = new Plugin({
 		Plugin.NAME : 'PADrend/UITools',
 		Plugin.DESCRIPTION : "User interface tools.",
@@ -56,9 +54,6 @@ var plugin = new Plugin({
 		Plugin.REQUIRES : ['PADrend','PADrend/EventLoop'],
 		Plugin.EXTENSION_POINTS : []
 });
-
-// -------------------
-
 
 plugin.init @(override) := fn(){
 

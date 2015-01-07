@@ -19,9 +19,6 @@
  **
  **/
 
-/***
- **   PADrend ---|> Plugin
- **/
 GLOBALS.PADrend := new Plugin({
 		Plugin.NAME : 'PADrend',
 		Plugin.DESCRIPTION : 'Main application',
@@ -88,11 +85,7 @@ PADrend.getScenePath := fn(){	return this.scenePath();	};
 	is enabled, this time is synchronized between all instances. */
 PADrend.getSyncClock := Util.Timer.now;
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-PADrend.init := fn(){
+PADrend.init @(override) := fn(){
 	var start = clock();
 	
 	{	// basic initializations
@@ -129,7 +122,7 @@ PADrend.init := fn(){
 		PADrend.message("Loading PADrend modules...\n");
 	   
 		// Load all modules which are not explicitly disabled.
-		var configuredModules = systemConfig.getValue('PADrend.modules',new Map());
+		var configuredModules = systemConfig.getValue('PADrend.modules',new Map);
 		var modulesToLoad=[];
 		foreach( {
 					"CommandHandling" : true,

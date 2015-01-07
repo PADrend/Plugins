@@ -25,7 +25,7 @@ static NS = new Namespace;
 NS.animationClipboard := void; 
 
 // Registry for creatable Types of Animations:   Name(=short name) -> Type
-NS.constructableAnimationTypes := new Map();
+NS.constructableAnimationTypes := new Map;
 
 NS.loadAnimation := fn(filename){
 	var s = Util.loadFile(filename);

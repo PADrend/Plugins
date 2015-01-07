@@ -22,7 +22,7 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-plugin.init := fn() {
+plugin.init @(override) := fn() {
 	registerExtension('PADrend_Init', this -> fn() {
 		gui.registerComponentProvider('Tools_ToolsMenu.info_statistics', [{
 			GUI.TYPE		:	GUI.TYPE_MENU,

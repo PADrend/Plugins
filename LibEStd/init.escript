@@ -151,7 +151,7 @@ Std.JSONDataStore.getValue ::= Std.JSONDataStore.get;
 Std.JSONDataStore.setValue ::= Std.JSONDataStore.set;
 
 // system' main config manager
-GLOBALS.systemConfig := new Std.JSONDataStore();
+GLOBALS.systemConfig := new Std.JSONDataStore;
 
 // compatibility interface
 GLOBALS.getConfigValue := systemConfig->systemConfig.getValue;

@@ -19,10 +19,6 @@
  ** 2007-11-09
  **/
 
-
-/***
- **   ---|> Plugin
- **/
 var plugin = new Plugin({
 		Plugin.NAME : 'PADrend/GUI/MainToolbar',
 		Plugin.DESCRIPTION : "PADrend's main toolbar (enable with [F1]).",
@@ -38,8 +34,6 @@ var plugin = new Plugin({
 plugin.toolbarEnabled := void;
 plugin.toolbar := void;
 
-
-//! ---|> Plugin
 plugin.init @(override) := fn(){
 
 	this.registerStdToolbarEntries();
