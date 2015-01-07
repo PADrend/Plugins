@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2011 Ralf Petring <ralf@petring.net>
  * Copyright (C) 2011 Robert Gmyr
  * 
@@ -17,7 +17,7 @@
  **	[Plugin:Spielerei] Spielerei/Anaglyph.escript
  ** 2011-03 Gmyr
  **/
-GLOBALS.AnaglyphPlugin := new Plugin({
+static plugin = new Plugin({
 		Plugin.NAME : 'Spielerei_AnaglyphPlugin',
 		Plugin.DESCRIPTION :  "Rendering of anaglyph 3D images.",
 		Plugin.VERSION :  1.0,
@@ -27,52 +27,42 @@ GLOBALS.AnaglyphPlugin := new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-AnaglyphPlugin.init := fn() {
-	{
-		registerExtension('PADrend_Init',this->fn(){
-			gui.registerComponentProvider('Spielerei.anaglyph',[
-				"*Anaglyph 3D*",
-				{
-					GUI.TYPE : GUI.TYPE_BUTTON,
-					GUI.LABEL : "enable",
-					GUI.ON_CLICK : this->fn() {
-						enabled = true;
-					}
-				},
-				{
-					GUI.TYPE : GUI.TYPE_BUTTON,
-					GUI.LABEL : "disable",
-					GUI.ON_CLICK : this->fn() {
-						enabled = false;
-					}
-				},
-				'----'
-			]);
-		});
-        registerExtension('PADrend_BeforeRendering',this->this.ex_BeforeRendering);
-        registerExtension('PADrend_AfterRendering',this->this.ex_AfterRendering);
-    }
-	this.enabled := false;
-	this.leftEyeColor := new Util.Color4f(systemConfig.getValue('Spielerei.Anaglyph.leftEyeColor', [1.0, 0.0, 0.0]).clone().pushBack(1.0));
-	this.rightEyeColor := new Util.Color4f(systemConfig.getValue('Spielerei.Anaglyph.rightEyeColor', [0.0, 1.0, 1.0]).clone().pushBack(1.0));
+static leftEyeColor;
+static rightEyeColor;
 
-	this.rootNodeBackup := void;
+plugin.init @(override) := fn() {
+	static revoce = new Std.MultiProcedure;
+	static enabled = new Std.DataWrapper(false);
+	enabled.onDataChanged += fn(b){
+		revoce();
+		if(b){
+			revoce += Util.registerExtensionRevocably('PADrend_BeforeRendering',ex_BeforeRendering);
+			revoce += Util.registerExtensionRevocably('PADrend_AfterRendering',ex_AfterRendering);
+		}
+	};
+
+	registerExtension('PADrend_Init',fn(){
+		gui.registerComponentProvider('Spielerei.anaglyph',[
+			{
+				GUI.TYPE : GUI.TYPE_BOOL,
+				GUI.LABEL : "Anaglyph 3D",
+				GUI.DATA_WRAPPER : enabled,
+				GUI.TOOLTIP : "Currently broken!"
+			}
+		]);
+	});
+	leftEyeColor = new Util.Color4f(systemConfig.getValue('Spielerei.Anaglyph.leftEyeColor', [1.0, 0.0, 0.0]).clone().pushBack(1.0));
+	rightEyeColor = new Util.Color4f(systemConfig.getValue('Spielerei.Anaglyph.rightEyeColor', [0.0, 1.0, 1.0]).clone().pushBack(1.0));
 
 	return true;
 };
 
 
-AnaglyphPlugin.ex_BeforeRendering := fn(...) {
-	if(!enabled)
-		return;
-
+static ex_BeforeRendering = fn(...) {
 	PADrend.getRootNode().deactivate();
 };
 
-AnaglyphPlugin.ex_AfterRendering := fn(...) {
-	if(!enabled)
-		return;
-
+static ex_AfterRendering = fn(...) {
 	PADrend.getRootNode().activate();
 	renderingContext.clearScreen(new Util.Color4f(0.0, 0.0, 0.0, 1.0));
 
@@ -89,7 +79,7 @@ AnaglyphPlugin.ex_AfterRendering := fn(...) {
 	frameContext.setCamera(PADrend.getActiveCamera());
 };
 
-AnaglyphPlugin.renderEye := fn(fbo, colorTexture, depthTexture, eyeColor) {
+static renderEye = fn(fbo, colorTexture, depthTexture, eyeColor) {
 	frameContext.setCamera(PADrend.getActiveCamera());
 	renderingContext.pushAndSetFBO(fbo);
 	fbo.attachColorTexture(renderingContext,colorTexture);
@@ -101,8 +91,8 @@ AnaglyphPlugin.renderEye := fn(fbo, colorTexture, depthTexture, eyeColor) {
 	blendToCurrentImage(colorTexture);
 };
 
-AnaglyphPlugin.applyColorFilter := fn(filterColor) {
-	var blending = new Rendering.BlendingParameters();
+static applyColorFilter = fn(filterColor) {
+	var blending = new Rendering.BlendingParameters;
 	blending.enable();
 	blending.setBlendFunc(Rendering.BlendFunc.DST_COLOR, Rendering.BlendFunc.ZERO);
 	renderingContext.pushAndSetBlending(blending);
@@ -114,7 +104,7 @@ AnaglyphPlugin.applyColorFilter := fn(filterColor) {
 	renderingContext.popBlending();
 };
 
-AnaglyphPlugin.blendToCurrentImage := fn(colorTexture) {
+static blendToCurrentImage = fn(colorTexture) {
 	var blending = new Rendering.BlendingParameters();
 	blending.enable();
 	blending.setBlendFunc(Rendering.BlendFunc.ONE, Rendering.BlendFunc.ONE);
@@ -123,4 +113,4 @@ AnaglyphPlugin.blendToCurrentImage := fn(colorTexture) {
 	renderingContext.popBlending();
 };
 
-return AnaglyphPlugin;
+return plugin;

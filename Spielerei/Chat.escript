@@ -15,7 +15,7 @@
  * Simple Network Chat Client/Server System for network testing.
  * 2009-10-23
  */
-GLOBALS.ChatServer := new Type();
+static ChatServer = new Type;
 
 ChatServer.window := void;
 ChatServer.tcpServer := void;
@@ -126,7 +126,7 @@ ChatServer.broadcast := fn(text){
 };
 // -----------------------------------------------------------------
 
-GLOBALS.ChatClient := new Type();
+static ChatClient = new Type;
 
 ChatClient.window := void;
 ChatClient.connection := void;
@@ -220,4 +220,10 @@ ChatClient.sendText := fn(text){
     out("(ChatClient) Send: ",text,"\n");
     connection.sendString(text,'\n');
 };
+
+var NS = new Namespace;
+NS.Server := ChatServer;
+NS.Client := ChatClient;
+return NS;
+
 // -----------------------------------------------------------------

@@ -14,10 +14,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:Spielerei] Spielerei/Plugin.escript
- **/
-GLOBALS.SpielereiPlugin:=new Plugin({
+static plugin = new Plugin({
 		Plugin.NAME : 'Spielerei',
 		Plugin.DESCRIPTION : "Collection of experiments, games and stuff that fits nowhere else,\nbut might be interesting for someone.",
 		Plugin.VERSION : 1.0,
@@ -27,28 +24,16 @@ GLOBALS.SpielereiPlugin:=new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-SpielereiPlugin.init:=fn() {
-    {
-        load (__DIR__+"/Scenes.escript");
-        load (__DIR__+"/Chat.escript");
-    }
 
-    { // Register ExtensionPointHandler:
-        registerExtension('PADrend_Init',this->registerMenus);
-    }
+plugin.init @(override) :=fn() {
+	registerExtension('PADrend_Init',this->registerMenus);
 
     // ----
 	var modules = [];
 	modules+=__DIR__+"/"+"StatOverlay.escript";
-//	modules+=__DIR__+"/"+"TMSim/Plugin.escript";
 	modules+=__DIR__+"/"+"Anaglyph.escript";
 	modules+=__DIR__+"/"+"BoardGame/Plugin.escript";
 	modules+=__DIR__+"/"+"TicTacToe/Plugin.escript";
-    modules+=__DIR__+"/"+"HerbertOnChickenRun/Plugin.escript";
 
 	loadPlugins( modules,false );
 
@@ -61,7 +46,7 @@ SpielereiPlugin.init:=fn() {
 // ------------------------------------------------------------------------------
 
 
-SpielereiPlugin.registerMenus := fn(){
+plugin.registerMenus := fn(){
 	gui.registerComponentProvider('PADrend_MainToolbar.70_spielerei',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "Spielerei",
@@ -76,7 +61,7 @@ SpielereiPlugin.registerMenus := fn(){
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Chat Server",
 			GUI.ON_CLICK : fn() {
-				var s=new ChatServer();
+				var s = new (Std.require('Spielerei/Chat').Server);
 				s.init();
 			}
 		},
@@ -84,7 +69,7 @@ SpielereiPlugin.registerMenus := fn(){
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Chat Client",
 			GUI.ON_CLICK : fn() {
-				var c=new ChatClient();
+				var c=new (Std.require('Spielerei/Chat').Client);
 				c.init();
 			}
 		},
@@ -237,7 +222,7 @@ SpielereiPlugin.registerMenus := fn(){
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "New menu layout",
 			GUI.ON_CLICK : fn(){
-				SpielereiPlugin.newMenuDesign();
+				plugin.newMenuDesign();
 			}
 		},
 		{
@@ -251,7 +236,7 @@ SpielereiPlugin.registerMenus := fn(){
 	]);
 };
 
-SpielereiPlugin.newMenuDesign := fn(){
+plugin.newMenuDesign := fn(){
 	// setting style
 	gui.setDefaultColor(GUI.PROPERTY_MENU_TEXT_COLOR,new Util.Color4ub(255,255,255,255));
 	gui.setDefaultShape(GUI.PROPERTY_MENU_SHAPE,
@@ -260,5 +245,5 @@ SpielereiPlugin.newMenuDesign := fn(){
 							gui._createRectShape( new Util.Color4ub(230,230,230,240),new Util.Color4ub(128,128,128,128),true ));
 };
 
-return SpielereiPlugin;
+return plugin;
 // ------------------------------------------------------------------------------
