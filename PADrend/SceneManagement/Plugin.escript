@@ -98,15 +98,14 @@ SceneManagement.ex_Init := fn(...){
 		camera.applyVerticalAngle(systemConfig.getValue('PADrend.Camera.vAngle',90));
 		// when the application window is resized:
 		
-		static Listener = Std.require('LibUtilExt/deprecated/Listener');
-		Listener.add( Listener.TYPE_APP_WINDOW_SIZE_CHANGED, camera->fn(evt,newSize){
+		Util.requirePlugin('PADrend/SystemUI').onWindowResized += [camera] => fn(camera, width,height){
 			// update viewport only when it has not been fixed in the config
 			if(! systemConfig.getValue('PADrend.Camera.viewport',false))
-				this.setViewport( new Geometry.Rect( 0,0,newSize[0],newSize[1]));
+				camera.setViewport( new Geometry.Rect( 0,0,width,height));
 			// if no observer position is set, this is a normal angle based camera and the angle should be updated
-			if(!dolly.observerPosition)
-				this.applyVerticalAngle(systemConfig.getValue('PADrend.Camera.vAngle'));
-		});
+			if(!PADrend.getDolly().observerPosition)
+				camera.applyVerticalAngle(systemConfig.getValue('PADrend.Camera.vAngle'));
+		};
 
 		frameContext.setCamera( camera );
 		
@@ -125,17 +124,17 @@ SceneManagement.ex_Init := fn(...){
 
 		// --
 		// add camera ortho
-		var cameraOrtho = new MinSG.CameraNodeOrtho();
+		var cameraOrtho = new MinSG.CameraNodeOrtho;
 		cameraOrtho.name := "OrthoCamera";
 		cameraOrtho.setViewport( new Geometry.Rect(viewport[0],viewport[1],viewport[2],viewport[3]));
 		cameraOrtho.setNearFar(systemConfig.getValue('PADrend.Camera.near',0.1),systemConfig.getValue('PADrend.Camera.far',5000));
 		dolly.addChild(cameraOrtho);
 		// when the application window is resized:
-		Listener.add( Listener.TYPE_APP_WINDOW_SIZE_CHANGED, cameraOrtho->fn(evt,newSize){
+		Util.requirePlugin('PADrend/SystemUI').onWindowResized += [cameraOrtho] => fn(cameraOrtho, width,height){
 			// update viewport only when it has not been fixed in the config
 			if(! systemConfig.getValue('PADrend.Camera.viewport',false))
-				this.setViewport( new Geometry.Rect( 0,0,newSize[0],newSize[1]));
-		});
+				cameraOrtho.setViewport( new Geometry.Rect( 0,0,width,height));
+		};
 		
 		// --
 		// add sound-listener to camera

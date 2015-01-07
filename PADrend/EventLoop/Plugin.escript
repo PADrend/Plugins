@@ -173,15 +173,15 @@ plugin.ex_Init := fn(){
 };
 //! [ext:PADrend_Start]
 plugin.ex_Start := fn(){
-   while(active){
-        out("Starting EventLoop...\n");
-        try{
-        	while(active)
+	while(active){
+		out("Starting EventLoop...\n");
+		try{
+			while(active)
 				this.singleFrame();
-        }catch(e){
-            Runtime.log(Runtime.LOG_ERROR,e);
-            continue;
-        }
+		}catch(e){
+			Runtime.log(Runtime.LOG_ERROR,e);
+			continue;
+		}
 	}
 
 };
@@ -251,9 +251,7 @@ plugin.singleFrame := fn() {
 					plugin.stop();
 				}
 			} else if (evt.type == Util.UI.EVENT_RESIZE) {
-				renderingContext.setWindowClientArea(0, 0, evt.width, evt.height);
-				static Listener = Std.require('LibUtilExt/deprecated/Listener');
-				Listener.notify(Listener.TYPE_APP_WINDOW_SIZE_CHANGED, [evt.width, evt.height]);
+				Util.requirePlugin('PADrend/SystemUI').onWindowResized( evt.width, evt.height);
 			} else if (evt.type == Util.UI.EVENT_QUIT) {
 				plugin.stop();
 			}

@@ -16,15 +16,7 @@
  **	[Plugin:PADrend] PADrend/SystemUI/Plugin.escript
  **
  **/
- 
-static Listener = Std.require('LibUtilExt/deprecated/Listener');
 
-/*! Notified when the application window is resized; data is [width,height] */
-GLOBALS.Listener.TYPE_APP_WINDOW_SIZE_CHANGED := 'TYPE_APP_WINDOW_SIZE_CHANGED';
-
-/***
- **   ---|> Plugin
- **/
 PADrend.SystemUI := new Plugin({
 		Plugin.NAME : 'PADrend/SystemUI',
 		Plugin.DESCRIPTION : "Application window with openGL support and frame-/rendering-context.",
@@ -41,11 +33,7 @@ static window;
 static eventContext;
 static eventQueue;
 
-/**
- * Plugin initialization.
- * ---|> Plugin
- */
-PADrend.SystemUI.init := fn(){
+PADrend.SystemUI.init @(override) := fn(){
 
 	var windowSize = systemConfig.getValue('PADrend.window.size',[1024,1024]);
 
@@ -118,8 +106,13 @@ PADrend.SystemUI.init := fn(){
 		
 		GLOBALS.renderingContext = frameContext.getRenderingContext();
 		renderingContext.setWindowClientArea(0, 0, windowSize[0], windowSize[1]);
+		this.onWindowResized += fn(Number width,Number height){
+			renderingContext.setWindowClientArea(0, 0, width, height);
+		};
 
 		renderingContext.initGLState();
+		
+		
 		showWaitingScreen(false);
 
 		outln("ok.");
@@ -236,6 +229,12 @@ PADrend.SystemUI.getWindow := fn() {
 	return window;
 };
 
+
+/*! Notified when the application window is resized.
+	- Can be extended externally
+	- Must be triggered externally by the main event handler. */
+PADrend.SystemUI.onWindowResized := new Std.MultiProcedure; // fn(width,height){...}
+
 PADrend.SystemUI.swapBuffers := fn() {
 	window.swapBuffers();
 };
@@ -267,6 +266,7 @@ PADrend.SystemUI.checkForKey := fn(){
 
 PADrend.getEventContext := PADrend.SystemUI -> PADrend.SystemUI.getEventContext;
 PADrend.getEventQueue := PADrend.SystemUI -> PADrend.SystemUI.getEventQueue;
+
 
 // --------------------
 
