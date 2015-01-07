@@ -57,7 +57,7 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn(){
 
-	PADrend.uiToolsManager := new (Std.require('PADrend/UITools/UIToolManager'));
+	PADrend.uiToolsManager := new (module('./UIToolManager'));
 	
 	// for debug only
 	PADrend.uiToolsManager.onActiveToolChanged += fn(tool){

@@ -117,6 +117,17 @@ PADrend.init @(override) := fn(){
 		showWaitingScreen.fancy = systemConfig.getValue('PADrend.fancyWaitScreen',false);
 	}
 	
+	// setup plugin registry
+	static PluginRegistry = Std.require('LibUtilExt/GlobalPluginRegistry');
+	this.pluginFolders = Std.DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.plugins',[
+												IO.condensePath(__DIR__+"/../../extPlugins/"),
+												IO.condensePath(__DIR__+"/../")]);
+	// set plugin folders as module search paths
+	foreach( this.pluginFolders() as var folder){
+		PluginRegistry.modulePathPrefixes += folder;
+		Std.addModuleSearchPath(folder);
+	}
+
 	{	// PADrend modules
 
 		PADrend.message("Loading PADrend modules...\n");
@@ -143,7 +154,7 @@ PADrend.init @(override) := fn(){
 				modulesToLoad += "PADrend/"+moduleName;
 			}
 		}
-		loadPlugins(modulesToLoad,true,[this.getBaseFolder()+"/../"]);
+		PluginRegistry.loadPlugins(modulesToLoad,true,[this.getBaseFolder()+"/../"]);
 	}
 	
 	// init network
@@ -171,14 +182,8 @@ PADrend.init @(override) := fn(){
 			if(enabled)
 				enabledPluginNames += pluginName;
 		}
-		this.pluginFolders = Std.DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.plugins',[
-													IO.condensePath(__DIR__+"/../../extPlugins/"),
-													IO.condensePath(__DIR__+"/../")]);
-		// set plugin folders as module search paths
-		foreach( this.pluginFolders() as var folder)
-			Std.addModuleSearchPath(folder);
 		
-		loadPlugins(enabledPluginNames,true, this.pluginFolders() );
+		PluginRegistry.loadPlugins(enabledPluginNames,true, this.pluginFolders() );
 	}
 	
 

@@ -22,6 +22,8 @@ static onPluginListener = new Map;
 
 static N = new Namespace;
 
+//! Should be set to the List of EScript-module search paths. This allows for guessing the  plugin's theoretical module id (modules don't have module ids).
+N.modulePathPrefixes := [];
 
 /*! (public) Load plugins.
 	 - If a plugin name instead of a filename is given, "searchPath/PluginName/Plugin.escript" is assumed.
@@ -51,10 +53,26 @@ N.loadPlugins := fn( Array filenames, showNotification = true, Array searchPaths
 				Runtime.log(Runtime.LOG_ERROR,"Could not find plugin file: '"+pluginName+"'");
 				continue;
 			}
+			var guessedModuleName; // the guessed module name is used to inject a module(...) command into the plugin file, that allows using relatvie module names.
+			{
+				var filePath = IO.condensePath(filename);
+				foreach(N.modulePathPrefixes as var sp){
+					if(filePath.beginsWith(sp)){
+						guessedModuleName = filePath.substr(sp.length());
+						break;
+					}
+				}else{
+					guessedModuleName = filePath;
+				}
+				if(guessedModuleName.endsWith(".escript"))
+					guessedModuleName = guessedModuleName.substr(0,-".escript".length());
+//				outln("guessedModuleName: ",guessedModuleName);
+			}
+			
 			var plugin;
 			try{
-				plugin = load(filename);
-				if(! (plugin ---|> Plugin)){
+				plugin = load(filename,{$module : Std.require.createLoader(guessedModuleName)});
+				if(!plugin.isA(Plugin)){
 					Runtime.log(Runtime.LOG_ERROR,"loadPlugin('"+filename+"') :\t No Plugin-Object returned.");
 					continue;
 				}
