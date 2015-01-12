@@ -120,7 +120,8 @@ SVS.setUpRendering := fn(plugin) {
 	selectedSampleMaterialState.setSpecular(new Util.Color4f(1.0, 1.0, 1.0, 1.0));
 	selectedSampleMaterialState.setShininess(128.0);
 	
-	registerExtension('PADrend_AfterRendering', (fn(dummy, MinSG.Node sphereNode, Geometry.Sphere sphere, Array samples, MinSG.Node cross, MinSG.MaterialState normalMat, MinSG.MaterialState selectedMat) {
+	registerExtension('PADrend_AfterRendering', [sphereNode, worldSphere, plugin.samples, crossNode, sampleMaterialState, selectedSampleMaterialState]=>
+													fn(MinSG.Node sphereNode, Geometry.Sphere sphere, Array samples, MinSG.Node cross, MinSG.MaterialState normalMat, MinSG.MaterialState selectedMat,...) {
 												var center = sphere.getCenter();
 												var radius = sphere.getRadius();
 												foreach(samples as var sample) {
@@ -141,5 +142,5 @@ SVS.setUpRendering := fn(plugin) {
 												sphereNode.display(GLOBALS.frameContext);
 												
 												return Extension.CONTINUE;
-											}).bindLastParams(sphereNode, worldSphere, plugin.samples, crossNode, sampleMaterialState, selectedSampleMaterialState));
+											});
 };

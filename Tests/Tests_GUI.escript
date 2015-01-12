@@ -360,7 +360,7 @@ plugin.showWindow:=fn(){
 					}
 				],
 				GUI.ACTIONS : [
-					["Ok", fn(data){
+					["Ok", [data]=>fn(data){
 						gui.openDialog({
 							GUI.TYPE : GUI.TYPE_POPUP_DIALOG,
 							GUI.LABEL : "Summary",
@@ -368,7 +368,7 @@ plugin.showWindow:=fn(){
 							GUI.OPTIONS : [toJSON(data._getAttributes())],
 							GUI.ACTIONS : ["Done..."]
 						});
-					}.bindLastParams(data)],
+					}],
 					"Cancel"
 				]
 			});
@@ -532,10 +532,10 @@ plugin.showWindow:=fn(){
 		GUI.DATA_PROVIDER : fn(){
 			return Rand.equilikely(0,10);
 		},
-		GUI.ON_DATA_CHANGED : (fn(d,refreshGroup,dataObject){
+		GUI.ON_DATA_CHANGED : [refreshGroup,obj]=>fn(refreshGroup,dataObject, d){
 			dataObject.t1 = d;
 			refreshGroup.refresh();
-		}).bindLastParams(refreshGroup,obj),
+		},
 		GUI.DATA_REFRESH_GROUP : refreshGroup,
 		GUI.TOOLTIP : "Whenever a refresh is issued a new random number is set.\n If a value is entered manually, it is assigned to the above elements."
 	};
@@ -609,8 +609,8 @@ plugin.showWindow:=fn(){
 		p+="*DataWrapper*";
 		p++;
 		var sideLength = DataWrapper.createFromConfig( PADrend.configCache,'Test.GuiTests.sideLength',1 ).setOptions([1,2,4,9]);
-		var area = DataWrapper.createFromFunctions( (fn(sideLength){	return sideLength()*sideLength(); }).bindLastParams(sideLength),
-													(fn(data,sideLength){	sideLength.set(data.sqrt());} ).bindLastParams(sideLength));
+		var area = DataWrapper.createFromFunctions( [sideLength]=>fn(sideLength){	return sideLength()*sideLength(); },
+													[sideLength]=>fn(sideLength,data){	sideLength.set(data.sqrt());} );
 		// propagate changes of the sideLength to the area. sideLength and data are now directly connected, even without any gui element triggering a refreshGroup.
 		sideLength.onDataChanged += area->fn(data){refresh();};
 
@@ -649,8 +649,8 @@ plugin.showWindow:=fn(){
 		p+="*DataWrapper with GUI.RefreshGroup*";
 		p++;
 		var sideLength = DataWrapper.createFromValue( 9 );
-		var area = DataWrapper.createFromFunctions( (fn(sideLength){	return sideLength()*sideLength(); }).bindLastParams(sideLength),
-													(fn(data,sideLength){	sideLength.set(data.sqrt());} ).bindLastParams(sideLength));
+		var area = DataWrapper.createFromFunctions( [sideLength]=>fn(sideLength){	return sideLength()*sideLength(); },
+													[sideLength]=>fn(sideLength,data){	sideLength.set(data.sqrt());} );
 
 		// Use a refresh group to connect dependent data values using their gui components.
 		var refreshGroup = new GUI.RefreshGroup();
@@ -892,27 +892,27 @@ plugin.showWindow:=fn(){
 			GUI.WIDTH : 320,
 			GUI.HEIGHT : 100,
 			GUI.OPTIONS : options,
-			GUI.ON_DATA_CHANGED : (fn(data,numbers,refreshGroup){
+			GUI.ON_DATA_CHANGED : [numbers,refreshGroup]=>fn(numbers,refreshGroup,data){
 				numbers.swap(data);
 				refreshGroup.refresh();
-			}).bindLastParams(numbers,refreshGroup),
+			},
 			GUI.DATA_REFRESH_GROUP : refreshGroup,
-			GUI.DATA_PROVIDER : (fn(numbers){
+			GUI.DATA_PROVIDER : [numbers]=>fn(numbers){
 				return numbers.clone();
-			}).bindLastParams(numbers),
+			},
 		};
 		p++;
 		p+={
 			GUI.TYPE : GUI.TYPE_TEXT,
 			GUI.LABEL : "Numbers:",
 			GUI.DATA_REFRESH_GROUP : refreshGroup,
-			GUI.DATA_PROVIDER : (fn(numbers){
+			GUI.DATA_PROVIDER : [numbers]=>fn(numbers){
 				return numbers.implode(",");
-			}).bindLastParams(numbers),
-			GUI.ON_DATA_CHANGED : (fn(data,numbers,refreshGroup){
+			},
+			GUI.ON_DATA_CHANGED : [numbers,refreshGroup]=>fn(numbers,refreshGroup,data){
 				numbers.swap(data.split(","));
 				refreshGroup.refresh();
-			}).bindLastParams(numbers,refreshGroup)
+			}
 		};
 		p++;
 		p+={
@@ -920,13 +920,13 @@ plugin.showWindow:=fn(){
 			GUI.LABEL : "Numbers:",
 			GUI.RANGE : [0,65535],
 			GUI.DATA_REFRESH_GROUP : refreshGroup,
-			GUI.DATA_PROVIDER : (fn(numbers){
+			GUI.DATA_PROVIDER : [numbers]=>fn(numbers){
 				var v = 0;
 				foreach(numbers as var p)
 					v += 2.pow(p);
 				return v;
-			}).bindLastParams(numbers),
-			GUI.ON_DATA_CHANGED : (fn(data,numbers,refreshGroup){
+			},
+			GUI.ON_DATA_CHANGED : [numbers,refreshGroup]=>fn(numbers,refreshGroup,data){
 				var a = [];
 				for(var i=0;i<16;++i){
 					if( (2.pow(i)&data) > 0 )
@@ -934,7 +934,7 @@ plugin.showWindow:=fn(){
 				}
 				numbers.swap(a);
 				refreshGroup.refresh();
-			}).bindLastParams(numbers,refreshGroup)
+			}
 		};
 
 	}
@@ -1147,7 +1147,7 @@ plugin.showWindow:=fn(){
 	p+={
 	    GUI.TYPE : GUI.TYPE_BUTTON,
 	    GUI.LABEL : "...",
-	    GUI.ON_CLICK : (fn(v){
+	    GUI.ON_CLICK : [v]=>fn(v){
 			var container = gui.create({	GUI.TYPE : GUI.TYPE_CONTAINER	});
 			container += {
 				GUI.TYPE : GUI.TYPE_TEXT,
@@ -1156,7 +1156,7 @@ plugin.showWindow:=fn(){
 			container.destroyContents();
 			v(v()+"."); // trigger onDataChanged.
 			setText(v.onDataChanged.empty() ? "ok" : v.onDataChanged.count());
-	    }).bindLastParams(v),
+	    },
 	    GUI.TOOLTIP : "When pressing the button, a component is bound to a \n"
 			"DataWrapper and is then destroyed.\n"
 			"The button shows the number of onDataChanged-listeners (or 'ok')and should\n"

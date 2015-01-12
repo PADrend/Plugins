@@ -111,10 +111,10 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 	var backgroundShapeProperty = new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
 														gui._createRectShape(GUI.BLACK, GUI.NO_COLOR, true));
 
-	var resetBackground = (fn(Array bgValues, GUI.ShapeProperty property) {
+	var resetBackground = [backgroundShapeProperty] => fn(GUI.ShapeProperty property, Array bgValues) {
 		var backgroundColor = new Util.Color4ub(new Util.Color4f(bgValues));
 		property.setShape(gui._createRectShape(backgroundColor, GUI.NO_COLOR, true));
-	}).bindLastParams(backgroundShapeProperty);
+	};
 	windowBackgroundColor.onDataChanged += resetBackground;
 
 	var fontSize = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".fontSize", 1);
@@ -146,32 +146,32 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 								{
 									GUI.TYPE				:	GUI.TYPE_COLOR,
 									GUI.LABEL				:	"Foreground",
-									GUI.DATA_PROVIDER		:	(fn(dataWrapper) {
+									GUI.DATA_PROVIDER		:	[windowForegroundColor]=>fn(dataWrapper) {
 																	return new Util.Color4f(dataWrapper());
-																}).bindLastParams(windowForegroundColor),
-									GUI.ON_DATA_CHANGED		:	(fn(color, dataWrapper) {
+																},
+									GUI.ON_DATA_CHANGED		:	[windowForegroundColor]=>fn(dataWrapper, color) {
 																	dataWrapper(color.toArray());
-																}).bindLastParams(windowForegroundColor),
+																},
 								},
 								{
 									GUI.TYPE				:	GUI.TYPE_COLOR,
 									GUI.LABEL				:	"Background",
-									GUI.DATA_PROVIDER		:	(fn(dataWrapper) {
+									GUI.DATA_PROVIDER		:	[windowBackgroundColor]=>fn(dataWrapper) {
 																	return new Util.Color4f(dataWrapper());
-																}).bindLastParams(windowBackgroundColor),
-									GUI.ON_DATA_CHANGED		:	(fn(color, dataWrapper) {
+																},
+									GUI.ON_DATA_CHANGED		:	[windowBackgroundColor]=>fn(dataWrapper, color) {
 																	dataWrapper(color.toArray());
-																}).bindLastParams(windowBackgroundColor),
+																},
 								},
 								{
 									GUI.TYPE				:	GUI.TYPE_COLOR,
 									GUI.LABEL				:	"Highlight",
-									GUI.DATA_PROVIDER		:	(fn(dataWrapper) {
+									GUI.DATA_PROVIDER		:	[windowHighlightColor]=>fn(dataWrapper) {
 																	return new Util.Color4f(dataWrapper());
-																}).bindLastParams(windowHighlightColor),
-									GUI.ON_DATA_CHANGED		:	(fn(color, dataWrapper) {
+																},
+									GUI.ON_DATA_CHANGED		:	[windowHighlightColor]=>fn(dataWrapper,color) {
 																	dataWrapper(color.toArray());
-																}).bindLastParams(windowHighlightColor),
+																},
 								}
 							]
 		},
@@ -219,25 +219,25 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 				GUI.LABEL			:	"...",
 				GUI.COLOR			:	fgColor,
 				GUI.FONT			:	font,
-				GUI.ON_MOUSE_BUTTON	:	(fn(event, Util.Color4ub highlightColor, Util.Color4ub normalColor) {
+				GUI.ON_MOUSE_BUTTON	:	[highlightColor, fgColor]=>fn( Util.Color4ub highlightColor, Util.Color4ub normalColor,event) {
 											if(event.button != Util.UI.MOUSE_BUTTON_LEFT || !event.pressed) {
 												return false;
 											}
 											highlight = !highlight;
 											setColor(highlight ? highlightColor : normalColor);
 											return true;
-										}).bindLastParams(highlightColor, fgColor),
+										},
 				GUI.SIZE			:	[GUI.WIDTH_FILL_ABS,10,0],
 				GUI.TEXT_ALIGNMENT	:	GUI.TEXT_ALIGN_RIGHT
 			});
 			fpsLabel.highlight := false;
 			panel += fpsLabel;
-			registerExtension('PADrend_OnAvgFPSUpdated', (fn(fps, fpsLabel) {
+			registerExtension('PADrend_OnAvgFPSUpdated', [fpsLabel]=>fn(fpsLabel,fps) {
 				if(fpsLabel.isDestroyed()) {
 					return Extension.REMOVE_EXTENSION;
 				}
 				fpsLabel.setText("" + fps.round(0.1) + " fps");
-			}).bindLastParams(fpsLabel));
+			});
 			panel++;
 		}
 
@@ -261,21 +261,21 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 					GUI.LABEL			:	"...",
 					GUI.COLOR			:	fgColor,
 					GUI.FONT			:	font,
-					GUI.ON_MOUSE_BUTTON	:	(fn(event, Util.Color4ub highlightColor, Util.Color4ub normalColor) {
+					GUI.ON_MOUSE_BUTTON	:	[highlightColor, fgColor]=>fn(Util.Color4ub highlightColor, Util.Color4ub normalColor,event) {
 												if(event.button != Util.UI.MOUSE_BUTTON_LEFT || !event.pressed) {
 													return false;
 												}
 												highlight = !highlight;
 												setColor(highlight ? highlightColor : normalColor);
 												return true;
-											}).bindLastParams(highlightColor, fgColor),
+											},
 					GUI.SIZE			:	[GUI.WIDTH_FILL_ABS,10,0],
 					GUI.TEXT_ALIGNMENT	:	GUI.TEXT_ALIGN_RIGHT
 				});
 				label.highlight := false;
 				panel += label;
 
-				registerExtension('PADrend_AfterRendering', (fn(camera, label, Number counter) {
+				registerExtension('PADrend_AfterRendering', [label, counter]=>fn(label, Number counter,camera) {
 					if(label.isDestroyed()) {
 						return Extension.REMOVE_EXTENSION;
 					}
@@ -288,7 +288,7 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 						value = "" + value.round(0.001);
 					}
 					label.setText(value);
-				}).bindLastParams(label, counter));
+				});
 
 				panel++;
 			}

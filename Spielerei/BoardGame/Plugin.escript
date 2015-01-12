@@ -39,11 +39,11 @@ plugin.init @(override) :=fn(){
 				entries += {
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : file.substr( file.rFind("/")+1 ),
-					GUI.ON_CLICK : (fn(file){
+					GUI.ON_CLICK : [file]=>fn(file){
 						if(file.beginsWith("file://"))
 							file = file.substr(7);
 						load(file.substr(file)); // 
-					}).bindLastParams(file)
+					}
 				};
 			}
 			return entries;

@@ -139,11 +139,11 @@ T.setTimeScale ::= fn(newTimeScale){
 	
 	// send command to connected clients
 	PADrend.executeCommand( new Command({	
-			Command.EXECUTE : (fn(newTimeScale,clockStartingTime){ 
+			Command.EXECUTE : [newTimeScale,clockStartingTime]=>fn(newTimeScale,clockStartingTime){ 
 				var ctxt=AnimationPlugin.playbackContext;
 				ctxt.setTimeScale(newTimeScale);
 				ctxt.clockStartingTime=clockStartingTime;
-			}).bindLastParams(newTimeScale,clockStartingTime),
+			},
 			Command.FLAGS : Command.FLAG_SEND_TO_SLAVES }) 
 	);
 	

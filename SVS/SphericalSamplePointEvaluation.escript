@@ -41,7 +41,8 @@ SVS.setUpSphericalSamplePointEvaluation := fn(plugin) {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Evaluate",
 		GUI.TOOLTIP				:	"Use the evaluator from the 'Evaluator' plugin to generate a result for the selected sample.",
-		GUI.ON_CLICK			:	(fn(Geometry.Sphere sphere, Array samples, MinSG.Node node, GUI.Label label, data) {
+		GUI.ON_CLICK			:	[plugin.sphere, plugin.samples, plugin.node, resultLabel, data]=>
+											fn(Geometry.Sphere sphere, Array samples, MinSG.Node node, GUI.Label label, data) {
 										var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
 										if(!evaluator) {
 											Runtime.exception("Invalid evaluator.");
@@ -75,7 +76,7 @@ SVS.setUpSphericalSamplePointEvaluation := fn(plugin) {
 											resultsString += "[" + key + "]:" + result + "\n";
 										}
 										label.setText(resultsString);
-									}).bindLastParams(plugin.sphere, plugin.samples, plugin.node, resultLabel, data),
+									},
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	windowPanel++;
@@ -83,7 +84,7 @@ SVS.setUpSphericalSamplePointEvaluation := fn(plugin) {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Highlight",
 		GUI.TOOLTIP				:	"If the current result contains VisibilityVectors, highlight the nodes that are visibile.",
-		GUI.ON_CLICK			:	(fn(data) {
+		GUI.ON_CLICK			:	[data]=>fn(data) {
 										foreach(data.results as var result) {
 											if(MinSG.isSet($VisibilityVector) && result ---|> MinSG.VisibilityVector) {
 												var nodes = result.getNodes();
@@ -95,7 +96,7 @@ SVS.setUpSphericalSamplePointEvaluation := fn(plugin) {
 												data.highlightedNodes.append(nodes);
 											}
 										}
-									}).bindLastParams(data),
+									},
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	windowPanel++;
@@ -103,7 +104,7 @@ SVS.setUpSphericalSamplePointEvaluation := fn(plugin) {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Remove Highlight",
 		GUI.TOOLTIP				:	"If there are currently highlighted nodes, remove the highlighting.",
-		GUI.ON_CLICK			:	(fn(data) {
+		GUI.ON_CLICK			:	[data]=>fn(data) {
 										foreach(data.highlightedNodes as var node) {
 											var states = node.getStates();
 											foreach(states as var state) {
@@ -113,7 +114,7 @@ SVS.setUpSphericalSamplePointEvaluation := fn(plugin) {
 											}
 										}
 										data.highlightedNodes.clear();
-									}).bindLastParams(data),
+									},
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	windowPanel++;

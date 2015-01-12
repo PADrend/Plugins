@@ -159,16 +159,16 @@ var positionHandler = app->fn(roomSRT){
 
 
 //!	\see Tracking.TrackingAppTrait
-app.onEnableDevice += fn(device,positionHandler){
+app.onEnableDevice += [positionHandler] => fn(positionHandler,device){
 	device.onRoomTransformationChanged += positionHandler; /*! \see HID_Traits.Controller_Room6D_Trait */
 
 
 //    print_r(this);
 
-}.bindLastParams(positionHandler);
+};
 
 //!	\see Tracking.TrackingAppTrait
-app.onDisableDevice += fn(device,positionHandler){	device.onRoomTransformationChanged -= positionHandler; /*! \see HID_Traits.Controller_Room6D_Trait */	}.bindLastParams(positionHandler);
+app.onDisableDevice += [positionHandler]=>fn(positionHandler,device){	device.onRoomTransformationChanged -= positionHandler; /*! \see HID_Traits.Controller_Room6D_Trait */	};
 
 gui.registerComponentProvider('Tracking_applications.flystickCrossHairs',app->fn(){
 	return [

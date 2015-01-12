@@ -222,7 +222,7 @@ static showWindow = fn() {
 	});
 };
 
-plugin.init = fn() {
+plugin.init  @(override) := fn() {
 	registerExtension('PADrend_Init', this -> fn() {
 		gui.registerComponentProvider('Tools_ToolsMenu.orientationVisualization', {
 			GUI.TYPE 		:	GUI.TYPE_BUTTON,

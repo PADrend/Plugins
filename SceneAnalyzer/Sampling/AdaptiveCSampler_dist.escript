@@ -274,11 +274,11 @@ Sampler.step ::= fn(CSamplingContext ctxt){
 						continue;
 					}
 					JobScheduling.addJob(shedulerId , 
-						(fn(String regionId,MinSG.Evaluator evaluator,Geometry.Vec3 position){
+						[newRegion.toString(),ctxt.evaluator,position]=>fn(String regionId,MinSG.Evaluator evaluator,Geometry.Vec3 position){
 							out(".");
 							var results=evaluator.cubeMeasure(PADrend.getCurrentScene(),position);
 							return { 'regionId' : regionId , 'results' : results , 'position': position } ;
-						}).bindLastParams(newRegion.toString(),ctxt.evaluator,position),
+						},
 						2 // sec timeout
 					);
 					ctxt.sampleCount++;

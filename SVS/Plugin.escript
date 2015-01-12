@@ -12,7 +12,6 @@
  */
 declareNamespace($SVS);
 
-//!	plugin ---|> Plugin
 var plugin = new Plugin({
 			Plugin.NAME			:	"SVS",
 			Plugin.VERSION		:	"1.0",
@@ -23,8 +22,7 @@ var plugin = new Plugin({
 			Plugin.REQUIRES		:	['Evaluator', 'LibRenderingExt', 'NodeEditor', 'Tools', 'PADrend', 'PADrend/GUI', 'PADrend/Serialization']
 });
 
-//!	---|> Plugin
-plugin.init = fn() {
+plugin.init @(override) := fn() {
 	if(!MinSG.isSet($SVS)) {
 		Runtime.warn("Plug-in initialization failed: MinSG lacks the SVS extension.");
 		return false;

@@ -37,7 +37,7 @@ CameraWindowPlugin.createWindow := fn() {
 		GUI.LAYOUT				:	GUI.LAYOUT_FLOW
 	});
 
-	window.selectCamera := (fn([MinSG.AbstractCameraNode, void] newCamera, GUI.Container panel) {
+	window.selectCamera := [cameraPanel]=>fn(GUI.Container panel, [MinSG.AbstractCameraNode, void] newCamera) {
 		panel.clear();
 		if(!newCamera) {
 			return;
@@ -45,7 +45,7 @@ CameraWindowPlugin.createWindow := fn() {
 		panel += CameraWindowPlugin.createConfigPanel(newCamera);
 		panel++;
 		panel += CameraWindowPlugin.createOptionPanel(newCamera);
-	}).bindLastParams(cameraPanel);
+	};
 
 	var cameraDropDown = gui.create({
 		GUI.TYPE				:	GUI.TYPE_SELECT,
@@ -56,7 +56,7 @@ CameraWindowPlugin.createWindow := fn() {
 		GUI.SIZE				:	[GUI.WIDTH_ABS, -65, 0]
 	});
 	windowPanel += cameraDropDown;
-	registerExtension('CameraWindowPlugin_CamerasChanged', (fn(dropDown, window) {
+	registerExtension('CameraWindowPlugin_CamerasChanged', [cameraDropDown, window]=>fn(dropDown, window) {
 		// Make sure the listener will be removed when the window was closed.
 		if(!gui.isCurrentlyEnabled(dropDown)) {
 			return false;
@@ -78,7 +78,7 @@ CameraWindowPlugin.createWindow := fn() {
 			dropDown.setData(previouslySelected);
 			window.selectCamera(previouslySelected);
 		}
-	}).bindLastParams(cameraDropDown, window));
+	});
 	windowPanel += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.TOOLTIP				:	"Refresh the list of cameras",

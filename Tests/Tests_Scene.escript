@@ -69,7 +69,7 @@ plugin.execute:=fn(){
 		GUI.TYPE		:	GUI.TYPE_BUTTON,
 		GUI.LABEL		:	"Cube of cubes",
 		GUI.TOOLTIP		:	"Small, colored cubes that result in a large cube with side length two.",
-		GUI.ON_CLICK	:	(fn(plugin) {
+		GUI.ON_CLICK	:	[this]=>fn(plugin) {
 								var config = new ExtObject({
 									$count	:	2
 								});
@@ -84,18 +84,18 @@ plugin.execute:=fn(){
 									GUI.DATA_OBJECT		:	config,
 									GUI.DATA_ATTRIBUTE	:	$count
 								});
-								dialog.addAction("Generate Scene", (fn(config, plugin) {
+								dialog.addAction("Generate Scene", [config, plugin]=>fn(config, plugin) {
 									plugin.createCubeOfCubesScene(config.count);
-								}).bindLastParams(config, plugin));
+								});
 								dialog.addAction("Cancel");
 								dialog.init();
-							}).bindLastParams(this)
+							}
 	});
 	p.addOption({
 		GUI.TYPE		:	GUI.TYPE_BUTTON,
 		GUI.LABEL		:	"Grid of cubes",
 		GUI.TOOLTIP		:	"Grid of small cubes, whose size is determined by a normal distributed random variable.",
-		GUI.ON_CLICK	:	(fn(plugin) {
+		GUI.ON_CLICK	:	[this]=>fn(plugin) {
 								var config = new ExtObject({
 									$count			:	5,
 									$sizeMean		:	1.0,
@@ -130,18 +130,18 @@ plugin.execute:=fn(){
 									GUI.DATA_OBJECT		:	config,
 									GUI.DATA_ATTRIBUTE	:	$sizeVariance
 								});
-								dialog.addAction("Generate Scene", (fn(config, plugin) {
+								dialog.addAction("Generate Scene", [config, plugin]=>fn(config, plugin) {
 									plugin.createGridOfCubesScene(config.count, config.sizeMean, config.sizeVariance);
-								}).bindLastParams(config, plugin));
+								});
 								dialog.addAction("Cancel");
 								dialog.init();
-							}).bindLastParams(this)
+							}
 	});
 	p.addOption({
 		GUI.TYPE		:	GUI.TYPE_BUTTON,
 		GUI.LABEL		:	"Sphere of cubes",
 		GUI.TOOLTIP		:	"Sphere of small cubes, whose position is determined by a normal distributed random variable.",
-		GUI.ON_CLICK	:	(fn(plugin) {
+		GUI.ON_CLICK	:	[this]=>fn(plugin) {
 								var config = new ExtObject({
 									$count			:	1000,
 									$posVariance	:	50
@@ -166,18 +166,18 @@ plugin.execute:=fn(){
 									GUI.DATA_OBJECT		:	config,
 									GUI.DATA_ATTRIBUTE	:	$posVariance
 								});
-								dialog.addAction("Generate Scene", (fn(config, plugin) {
+								dialog.addAction("Generate Scene", [config, plugin]=>fn(config, plugin) {
 									plugin.createSphereOfCubesScene(config.count, config.posVariance);
-								}).bindLastParams(config, plugin));
+								});
 								dialog.addAction("Cancel");
 								dialog.init();
-							}).bindLastParams(this)
+							}
 	});
 	p.addOption({
 		GUI.TYPE		:	GUI.TYPE_BUTTON,
 		GUI.LABEL		:	"Sphere of cubes (death star)",
 		GUI.TOOLTIP		:	"Sphere of small cubes, whose position is determined by a normal distributed random variable.",
-		GUI.ON_CLICK	:	(fn(plugin) {
+		GUI.ON_CLICK	:	[this]=>fn(plugin) {
 								var config = new ExtObject({
 									$count			:	2000,
 									$posVariance	:	10
@@ -202,12 +202,12 @@ plugin.execute:=fn(){
 									GUI.DATA_OBJECT		:	config,
 									GUI.DATA_ATTRIBUTE	:	$posVariance
 								});
-								dialog.addAction("Generate Scene", (fn(config, plugin) {
+								dialog.addAction("Generate Scene", [config, plugin]=>fn(config, plugin) {
 									plugin.createSphereOfCubes2Scene(config.count, config.posVariance);
-								}).bindLastParams(config, plugin));
+								});
 								dialog.addAction("Cancel");
 								dialog.init();
-							}).bindLastParams(this)
+							}
 	});
 	p.addAction( "close" );
 	p.init();
@@ -249,13 +249,13 @@ plugin.createCubeScene := fn(num,cubeAnnotator=fn(cube,x,y,z){}){
 };
 
 plugin.createMaterialCubeScene := fn(num){
-	createCubeScene(num,(fn(cube,x,y,z,cScale){
+	createCubeScene(num,[1.0/num]=>fn(cScale, cube,x,y,z){
 		var mat = new MinSG.MaterialState();					
 		mat.setDiffuse( new Util.Color4f(x*cScale,y*cScale,z*cScale) );
 		mat.setAmbient( new Util.Color4f(z*cScale,x*cScale,y*cScale) );
 		mat.setSpecular( new Util.Color4f(y*cScale,z*cScale,x*cScale) );
 		cube.addState(mat);
-	}).bindLastParams( 1.0/num ) );
+	});
 	
 };
 
@@ -271,9 +271,9 @@ plugin.createFewMaterialsCubeScene := fn(num,numMaterials){
 		mat.setSpecular( new Util.Color4f(r.uniform(0,1),r.uniform(0,1),r.uniform(0,1)) );
 		materials+=mat;
 	}
-	createCubeScene(num,(fn(cube,x,y,z,materials,r){
+	createCubeScene(num,[materials ,r]=>fn(materials,r, cube,x,y,z){
 		cube.addState(materials[r.equilikely(0,materials.count()-1)]);
-	}).bindLastParams( materials ,r) );
+	});
 };
 
 plugin.createCubeOfCubesScene := fn(Number count) {

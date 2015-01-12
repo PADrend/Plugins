@@ -42,13 +42,13 @@ SVS.registerStates := fn() {
 			GUI.LABEL			:	"Sphere occlusion tests",
 			GUI.TOOLTIP			:	"Perform an occlusion test before displaying a sphere.",
 			GUI.DATA_PROVIDER	:	state -> state.isSphereOcclusionTestEnabled,
-			GUI.ON_DATA_CHANGED	:	(fn(state, data) {
+			GUI.ON_DATA_CHANGED	:	[state]=>fn(state, data) {
 										if(data) {
 											state.enableSphereOcclusionTest();
 										} else {
 											state.disableSphereOcclusionTest();
 										}
-									}).bindFirstParams(state),
+									},
 			GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
 		panel++;
@@ -57,13 +57,13 @@ SVS.registerStates := fn() {
 			GUI.LABEL			:	"Geometry occlusion tests",
 			GUI.TOOLTIP			:	"Perform an occlusion test before displaying geometry stored in the visibility information of a sphere.",
 			GUI.DATA_PROVIDER	:	state -> state.isGeometryOcclusionTestEnabled,
-			GUI.ON_DATA_CHANGED	:	(fn(state, data) {
+			GUI.ON_DATA_CHANGED	:	[state]=>fn(state, data) {
 										if(data) {
 											state.enableGeometryOcclusionTest();
 										} else {
 											state.disableGeometryOcclusionTest();
 										}
-									}).bindFirstParams(state),
+									},
 			GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
 		panel++;

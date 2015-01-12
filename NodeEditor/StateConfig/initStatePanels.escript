@@ -1007,6 +1007,24 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.OccRenderer, fn(MinSG.OccRen
 
 // ----
 
+/*! NaiveOccRenderer */
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.NaiveOccRenderer, fn(MinSG.NaiveOccRenderer state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*Naive Occlusion Culling Renderer*";
+	entries += GUI.NEXT_ROW;
+
+	entries += {
+		GUI.TYPE			:	GUI.TYPE_BOOL,
+		GUI.LABEL			:	"Show visible(debug)",
+		GUI.DATA_WRAPPER	:	Std.DataWrapper.createFromFunctions( state->state.getDebugShowVisible,state->state.setDebugShowVisible ),
+		GUI.SIZE			:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.18, 20]
+	};
+	entries += GUI.NEXT_ROW;
+	return entries;
+});
+
+// ----
+
 //! PolygonModeState
 gui.registerComponentProvider(CONFIG_PREFIX + MinSG.PolygonModeState, fn(MinSG.PolygonModeState state) {
 	var entries = getBaseTypeEntries(state);

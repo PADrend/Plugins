@@ -110,9 +110,9 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 		GUI.TYPE				:	GUI.TYPE_TEXT,
 		GUI.LABEL				:	"Current",
 		GUI.TOOLTIP				:	"Current visibility sphere",
-		GUI.DATA_PROVIDER		:	(fn(ExtObject config) {
+		GUI.DATA_PROVIDER		:	[config]=>fn(ExtObject config) {
 										return config.visibilitySphere.toString();
-									}).bindLastParams(config),
+									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0],
 		GUI.FLAGS				:	GUI.LOCKED
@@ -122,9 +122,9 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 		GUI.TYPE				:	GUI.TYPE_TEXT,
 		GUI.LABEL				:	"Reference",
 		GUI.TOOLTIP				:	"Reference visibility sphere",
-		GUI.DATA_PROVIDER		:	(fn(ExtObject config) {
+		GUI.DATA_PROVIDER		:	[config]=>fn(ExtObject config) {
 										return config.referenceVisibilitySphere.toString();
-									}).bindLastParams(config),
+									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0],
 		GUI.FLAGS				:	GUI.LOCKED
@@ -134,9 +134,9 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 		GUI.TYPE				:	GUI.TYPE_TEXT,
 		GUI.LABEL				:	"Difference",
 		GUI.TOOLTIP				:	"Difference visibility sphere",
-		GUI.DATA_PROVIDER		:	(fn(ExtObject config) {
+		GUI.DATA_PROVIDER		:	[config]=>fn(ExtObject config) {
 										return config.differenceVisibilitySphere.toString();
-									}).bindLastParams(config),
+									},
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0],
 		GUI.FLAGS				:	GUI.LOCKED
@@ -292,7 +292,7 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
 		GUI.LABEL				:	"Save",
 		GUI.TOOLTIP				:	"Save the current visibility sphere to a file.",
-		GUI.ON_CLICK			:	(fn(ExtObject config) {
+		GUI.ON_CLICK			:	[config]=>fn(ExtObject config) {
 										if(!config.visibilitySphere) {
 											Runtime.warn("Cannot save visibility sphere. Current visibility sphere not available.");
 											return;
@@ -303,7 +303,7 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 											}).bindLastParams(config)
 										);
 
-									}).bindLastParams(config),
+									},
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.5, 0]
 	};
 	windowPanel += {
@@ -407,27 +407,27 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 										GLOBALS.showWaitingScreen();
 										
 										var runs = [
-											["Tetrahedron", SVS.createSamplesFromMesh.bindLastParams(Rendering.createTetrahedron(), "Tetrahedron")],
-											["Octahedron", SVS.createSamplesFromMesh.bindLastParams(Rendering.createOctahedron(), "Octahedron")],
-											["Cube", SVS.createSamplesFromMesh.bindLastParams(Rendering.createCube(), "Cube")],
-											["Icosahedron", SVS.createSamplesFromMesh.bindLastParams(Rendering.createIcosahedron(), "Icosahedron")],
-											["Dodecahedron", SVS.createSamplesFromMesh.bindLastParams(Rendering.createDodecahedron(), "Dodecahedron")],
+											["Tetrahedron", [Rendering.createTetrahedron(), "Tetrahedron"]=>SVS.createSamplesFromMesh],
+											["Octahedron", [Rendering.createOctahedron(), "Octahedron"]=>SVS.createSamplesFromMesh],
+											["Cube", [Rendering.createCube(), "Cube"]=>SVS.createSamplesFromMesh],
+											["Icosahedron", [Rendering.createIcosahedron(), "Icosahedron"]=>SVS.createSamplesFromMesh],
+											["Dodecahedron", [Rendering.createDodecahedron(), "Dodecahedron"]=>SVS.createSamplesFromMesh],
 										
-											["TetrahedronSphere1", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createTetrahedron(), 1), "TetrahedronSphere1")],
-											["TetrahedronSphere2", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createTetrahedron(), 2), "TetrahedronSphere2")],
-											["TetrahedronSphere3", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createTetrahedron(), 3), "TetrahedronSphere3")],
-											["TetrahedronSphere4", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createTetrahedron(), 4), "TetrahedronSphere4")],
-											["TetrahedronSphere5", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createTetrahedron(), 5), "TetrahedronSphere5")],
-											["OctahedronSphere1", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createOctahedron(), 1), "OctahedronSphere1")],
-											["OctahedronSphere2", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createOctahedron(), 2), "OctahedronSphere2")],
-											["OctahedronSphere3", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createOctahedron(), 3), "OctahedronSphere3")],
-											["OctahedronSphere4", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createOctahedron(), 4), "OctahedronSphere4")],
-											["OctahedronSphere5", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createOctahedron(), 5), "OctahedronSphere5")],
-											["IcosahedronSphere1", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createIcosahedron(), 1), "IcosahedronSphere1")],
-											["IcosahedronSphere2", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createIcosahedron(), 2), "IcosahedronSphere2")],
-											["IcosahedronSphere3", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createIcosahedron(), 3), "IcosahedronSphere3")],
-											["IcosahedronSphere4", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createIcosahedron(), 4), "IcosahedronSphere4")],
-											["IcosahedronSphere5", SVS.createSamplesFromMesh.bindLastParams(Rendering.createEdgeSubdivisionSphere(Rendering.createIcosahedron(), 5), "IcosahedronSphere5")]
+											["TetrahedronSphere1", [Rendering.createEdgeSubdivisionSphere(Rendering.createTetrahedron(), 1), "TetrahedronSphere1"]=>SVS.createSamplesFromMesh],
+											["TetrahedronSphere2", [Rendering.createEdgeSubdivisionSphere(Rendering.createTetrahedron(), 2), "TetrahedronSphere2"]=>SVS.createSamplesFromMesh],
+											["TetrahedronSphere3", [Rendering.createEdgeSubdivisionSphere(Rendering.createTetrahedron(), 3), "TetrahedronSphere3"]=>SVS.createSamplesFromMesh],
+											["TetrahedronSphere4", [Rendering.createEdgeSubdivisionSphere(Rendering.createTetrahedron(), 4), "TetrahedronSphere4"]=>SVS.createSamplesFromMesh],
+											["TetrahedronSphere5", [Rendering.createEdgeSubdivisionSphere(Rendering.createTetrahedron(), 5), "TetrahedronSphere5"]=>SVS.createSamplesFromMesh],
+											["OctahedronSphere1", [Rendering.createEdgeSubdivisionSphere(Rendering.createOctahedron(), 1), "OctahedronSphere1"]=>SVS.createSamplesFromMesh],
+											["OctahedronSphere2", [Rendering.createEdgeSubdivisionSphere(Rendering.createOctahedron(), 2), "OctahedronSphere2"]=>SVS.createSamplesFromMesh],
+											["OctahedronSphere3", [Rendering.createEdgeSubdivisionSphere(Rendering.createOctahedron(), 3), "OctahedronSphere3"]=>SVS.createSamplesFromMesh],
+											["OctahedronSphere4", [Rendering.createEdgeSubdivisionSphere(Rendering.createOctahedron(), 4), "OctahedronSphere4"]=>SVS.createSamplesFromMesh],
+											["OctahedronSphere5", [Rendering.createEdgeSubdivisionSphere(Rendering.createOctahedron(), 5), "OctahedronSphere5"]=>SVS.createSamplesFromMesh],
+											["IcosahedronSphere1", [Rendering.createEdgeSubdivisionSphere(Rendering.createIcosahedron(), 1), "IcosahedronSphere1"]=>SVS.createSamplesFromMesh],
+											["IcosahedronSphere2", [Rendering.createEdgeSubdivisionSphere(Rendering.createIcosahedron(), 2), "IcosahedronSphere2"]=>SVS.createSamplesFromMesh],
+											["IcosahedronSphere3", [Rendering.createEdgeSubdivisionSphere(Rendering.createIcosahedron(), 3), "IcosahedronSphere3"]=>SVS.createSamplesFromMesh],
+											["IcosahedronSphere4", [Rendering.createEdgeSubdivisionSphere(Rendering.createIcosahedron(), 4), "IcosahedronSphere4"]=>SVS.createSamplesFromMesh],
+											["IcosahedronSphere5", [Rendering.createEdgeSubdivisionSphere(Rendering.createIcosahedron(), 5), "IcosahedronSphere5"]=>SVS.createSamplesFromMesh]
 										];
 										
 										var outputDir = "data/SVS/";

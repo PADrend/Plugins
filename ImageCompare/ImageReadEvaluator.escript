@@ -133,14 +133,14 @@ Evaluator.createConfigPanel @(override) ::= fn() {
 	imageComparatorDropDown.addOption("new MinSG.SSIMComparator()", "SSIM Comparator");
 	imageComparatorDropDown.addOption("new MinSG.AverageComparator()", "Average Comparator");
 	imageComparatorDropDown.addOption("new MinSG.PyramidComparator()", "Pyramid Comparator");
-	imageComparatorDropDown.onDataChanged = (fn(data, MinSG.Evaluator evaluator, panel) {
+	imageComparatorDropDown.onDataChanged = [this, panel]=>fn(MinSG.Evaluator evaluator, panel,data) {
 		var comparator = eval(panel.imageComparatorDD.getData() + ";");
 		if(comparator ---|> MinSG.AbstractImageComparator) {
 			panel.imageComparator = comparator;
 			evaluator.setImageComparator(comparator);
 		}
 		panel.imageComparatorOptions.rebuild(comparator);
-	}).bindLastParams(this, panel);
+	};
 	panel += imageComparatorDropDown;
 	panel++;
 	
@@ -212,7 +212,7 @@ Evaluator.createConfigPanel @(override) ::= fn() {
 					GUI.DATA_REFRESH_GROUP : refreshGroup
 				};
 			}
-			refreshGroup += (fn(comparator, options) {
+			refreshGroup += [comparator, options]=>fn(comparator, options) {
 				comparator.setFilterSize(options.filterSize);
 				comparator.setTextureDownloadSize(options.texDownSize);
 				comparator.setFilterType(options.filterType);
@@ -220,7 +220,7 @@ Evaluator.createConfigPanel @(override) ::= fn() {
 					comparator.setMinimalTestSize(options.minTestSize);
 					comparator.setInternalComparator(new options.internalComp(););
 				}
-			}).bindLastParams(comparator, options);
+			};
 		}
 	};
 	panel += imageComparatorOptions;

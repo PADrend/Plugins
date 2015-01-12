@@ -55,7 +55,7 @@ plugin.ex_Init := fn(...){
 			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Show histogram",
-				GUI.ON_CLICK : (fn(settings){
+				GUI.ON_CLICK : [settings]=>fn(settings){
 					showWaitingScreen();
 					var c = GASPManager.getSelectedGASP();
 					if(!c){
@@ -98,14 +98,14 @@ plugin.ex_Init := fn(...){
 					}
 
 	//settings
-				}).bindLastParams(settings),
+				},
 				GUI.WIDTH : 150
 			},
 			GUI.NEXT_ROW,
 			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Export weighted values",
-				GUI.ON_CLICK : (fn(settings){
+				GUI.ON_CLICK : [settings]=>fn(settings){
 					var c = GASPManager.getSelectedGASP();
 					if(!c){
 						Runtime.warn("No gasp selected.");
@@ -129,7 +129,7 @@ plugin.ex_Init := fn(...){
 					dataTable.exportCSV("1.csv",",");
 					PADrend.message("Data exported.");
 
-				}).bindLastParams(settings)
+				}
 			},
 			GUI.NEXT_ROW,
 			"*sampled delaunay 2d*",	GUI.NEXT_ROW,

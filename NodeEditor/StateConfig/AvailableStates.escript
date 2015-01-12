@@ -134,6 +134,7 @@ m["Texture"] = fn(){return new MinSG.TextureState;};
 m["[ext] BudgetAnnotationState"] = fn() { return new MinSG.BudgetAnnotationState; };
 m["[ext] CHC renderer"] = fn(){return new MinSG.OccRenderer;};
 m["[ext] CHC++ renderer"] = fn(){return new MinSG.CHCppRenderer;};
+m["[ext] NaiveOccRenderer"] = fn(){return new MinSG.NaiveOccRenderer;};
 
 if(MinSG.isSet($ColorCubeRenderer))
 	m["[ext] ColorCube renderer"] = fn() { return new MinSG.ColorCubeRenderer;};

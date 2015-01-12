@@ -117,8 +117,8 @@ tests += new AutomatedTest( "Util/DataWrapper" , fn(){
 
 	{
 		var sideLength = DataWrapper.createFromValue( 10 );
-		var area = DataWrapper.createFromFunctions( (fn(sideLength){	return sideLength()*sideLength(); }).bindLastParams(sideLength),
-														(fn(data,sideLength){	sideLength.set(data.sqrt());} ).bindLastParams(sideLength));
+		var area = DataWrapper.createFromFunctions( [sideLength]=>fn(sideLength){	return sideLength()*sideLength(); },
+													[sideLength]=>fn(sideLength,data){	sideLength.set(data.sqrt());} );
 		
 		// propagate changes of the sideLength to the area. sideLength and data are now directly connected.
 		sideLength.onDataChanged += area->fn(data){refresh();};

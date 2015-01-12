@@ -172,7 +172,7 @@ AnimationPlugin.selectStory := fn(Story story){
 		static Command = Std.require('LibUtilExt/Command');
 		// send command to connected clients
 		PADrend.executeCommand( new Command({	
-				Command.EXECUTE : (fn(path){ 	AnimationPlugin.selectStoryByPath(path);	}).bindLastParams( path ),
+				Command.EXECUTE : [path]=>fn(path){ 	AnimationPlugin.selectStoryByPath(path);	},
 				Command.FLAGS : Command.FLAG_SEND_TO_SLAVES }) 
 		);
 	}

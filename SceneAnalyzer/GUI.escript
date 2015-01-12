@@ -44,7 +44,7 @@ SceneAnalyzerGUI.createWindow:=fn(posX,posY) {
 		gui.registerComponentProvider('SceneAnalyzer_Tabs.20_evaluator',fn(){
 			return [{
 					GUI.TYPE : GUI.TYPE_TAB,
-					GUI.TAB_CONTENT : EvaluatorPlugin.createConfigPanel(),
+					GUI.TAB_CONTENT : Util.requirePlugin('Evaluator').createConfigPanel(),
 					GUI.LABEL : "Evaluator"
 			}];
 		});
@@ -142,7 +142,7 @@ static createOverviewPanel = fn(panel){
 	toolbar+={
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "combine",
-		GUI.ON_CLICK : (fn(data){
+		GUI.ON_CLICK : [data]=>fn(data){
 			if(data.gasps.empty())
 				return;
 						out("\n---------------\n");
@@ -154,7 +154,7 @@ static createOverviewPanel = fn(panel){
 						out("\n---------------\n");
 			GASPManager.combineGASPs(data.gasps,combineFunction);
 			
-		}).bindLastParams(data)
+		}
 	};
 	toolbar += {
 		GUI.TYPE : GUI.TYPE_TEXT,
@@ -253,9 +253,9 @@ static getPropertyMenu = fn(GASP gasp){
 					GUI.TYPE : GUI.TYPE_TEXT,
 					GUI.LABEL : key,
 					GUI.DATA_VALUE : value,
-					GUI.ON_DATA_CHANGED : fn(newValue,gasp,key){
+					GUI.ON_DATA_CHANGED : [gasp,key]=>fn(gasp,key,newValue){
 						gasp.applyDescription( {key:(newValue=="(REMOVE)"?void:newValue)} );
-					}.bindLastParams(gasp,key),
+					},
 					GUI.OPTIONS : [value,"(REMOVE)"],
 					GUI.TOOLTIP : "Attribute: "+key+"\nNote: Enter (REMOVE) to remove the entry."
 				};
@@ -264,13 +264,13 @@ static getPropertyMenu = fn(GASP gasp){
 		list += {
 			GUI.TYPE : GUI.TYPE_TEXT,
 			GUI.DATA_VALUE : "",
-			GUI.ON_DATA_CHANGED : fn(newKey,gasp,list,refreshFun){
+			GUI.ON_DATA_CHANGED : [gasp,list,thisFn]=>fn(gasp,list,refreshFun, newKey){
 				newKey = newKey.trim();
 				if(!newKey.empty()){
 					gasp.applyDescription( {newKey:""} );
 					refreshFun(list,gasp);
 				}
-			}.bindLastParams(gasp,list,thisFn),
+			},
 			GUI.TOOLTIP : "Enter new attribute's key."
 		};
 	} (list,gasp);
@@ -322,13 +322,13 @@ static createCreationPanel = fn(panel){
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Set",
 		GUI.WIDTH : 30,
-		GUI.ON_CLICK : (fn(config){
+		GUI.ON_CLICK : [config]=>fn(config){
 			var bb = PADrend.getCurrentScene().getWorldBB();
 			var center = bb.getCenter();
 			var scale = config.scale();
 			config.bb( ""+center.getX().round() + ", " + center.getY().round() + ", " + center.getZ().round() + ",    "
 					+ scale * bb.getExtentX().ceil() + ", " + scale * bb.getExtentY().ceil() + ", " + scale * bb.getExtentZ().ceil());
-		}).bindLastParams(config),
+		},
 		GUI.TOOLTIP : "Set the bounding box to the scaled scene's bounding box."
 	};
 
@@ -357,10 +357,10 @@ static createCreationPanel = fn(panel){
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Set",
 		GUI.WIDTH : 30,
-		GUI.ON_CLICK : (fn(config){
+		GUI.ON_CLICK : [config]=>fn(config){
 			var a = parseJSON("["+config.bb()+"]");
 			config.resolution("" + (a[3]*config.factor().floor()) + ","+ (a[4]*config.factor().floor()) + ","+ (a[5]*config.factor().floor()));
-		}).bindLastParams(config),
+		},
 		GUI.TOOLTIP : "Set the resolution according to the given bounding box."
 	};
 
@@ -376,12 +376,12 @@ static createCreationPanel = fn(panel){
 		GUI.HEIGHT : 25 ,
 		GUI.POSITION : [GUI.POS_X_ABS|GUI.REFERENCE_X_RIGHT|GUI.ALIGN_X_RIGHT|
 							GUI.POS_Y_ABS|GUI.REFERENCE_Y_BOTTOM|GUI.ALIGN_Y_BOTTOM, 5,5],	
-		GUI.ON_CLICK : (fn(config){
+		GUI.ON_CLICK : [config]=>fn(config){
 			var params = "("+config.bb()+"),"+config.resolution();
 			var c=GASPManager.createGASP(params);
 			GASPManager.registerGASP(c);
 			GASPManager.selectGASP(c);
-		}).bindLastParams(config)
+		}
 	};
 
 

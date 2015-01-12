@@ -96,7 +96,7 @@ TicTacToe.startGame := fn(){
 				GUI.SIZE : [GUI.WIDTH_REL|GUI.HEIGHT_REL , 0.33 ,0.33 ],
 				GUI.POSITION : [GUI.POS_X_REL|GUI.REFERENCE_X_LEFT|GUI.ALIGN_X_LEFT|GUI.POS_Y_REL|GUI.REFERENCE_Y_TOP|GUI.ALIGN_Y_TOP, i*0.33,j*0.33],
 				GUI.LABEL : "",
-				GUI.ON_CLICK : (fn(Number x, Number y){ var f = TicTacToe.getField(x,y); f->f.onClick();}).bindLastParams(i,j)
+				GUI.ON_CLICK : [i,j]=>fn(Number x, Number y){ var f = TicTacToe.getField(x,y); f->f.onClick();}
 			});
 			fields[i][j] = new Field(i,j,button);
 			panel += button;

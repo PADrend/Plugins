@@ -122,7 +122,7 @@ plugin.execute:=fn(){
 		
 	PADrend.message("Please wait...");
 
-	PADrend.planTask( 0.5, (fn(tests){
+	PADrend.planTask( 0.5, [tests]=>fn(tests){
 
 		var p=gui.createPopupWindow( 400,300,"Distributed Tests");
 		p.addOption("*Note: Needs at least one connected MultiView-Client.*");
@@ -134,7 +134,7 @@ plugin.execute:=fn(){
 		}
 		p.addAction( success ? "Everything ok :-)" : "Failed!" );
 		p.init();
-	}).bindLastParams(tests) );
+	});
 };
 
 

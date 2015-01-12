@@ -17,8 +17,7 @@
  *	2010-04-28	Benjamin Eikel	Creation.
  */
 
-/*!	EvaluatorPlugin ---|> Plugin */
-GLOBALS.EvaluatorPlugin := new Plugin({
+static plugin = new Plugin({
 		Plugin.NAME : 'Evaluator',
 		Plugin.DESCRIPTION : 'Selection and configuration of evaluators.',
 		Plugin.VERSION : 1.1,
@@ -50,9 +49,7 @@ GLOBALS.EvaluatorPlugin := new Plugin({
 			'Evaluator_OnEvaluatorDescriptionChanged'
 		]});
 
-/*!	Plugin initialization.
-	---|> Plugin	*/
-EvaluatorPlugin.init = fn() {
+plugin.init @(override) := fn() {
 	if(!MinSG.isSet($Evaluator)){
 		out("MinSG.Evaluator not found!\n");
 		return false;
@@ -69,7 +66,7 @@ EvaluatorPlugin.init = fn() {
 				GUI.LABEL : "Evaluator",
 				GUI.ON_CLICK : fn() {
 					if(!GLOBALS.gui.windows['Evaluator']) {
-						GLOBALS.gui.windows['Evaluator'] = EvaluatorPlugin.createWindow( 10, 40);
+						GLOBALS.gui.windows['Evaluator'] = plugin.createWindow( 10, 40);
 					}else{
 						GLOBALS.gui.windows['Evaluator'].toggleVisibility();
 					}
@@ -85,7 +82,7 @@ EvaluatorPlugin.init = fn() {
 };
 
 /*!	[ext:PADrend_Init */
-EvaluatorPlugin.ex_Init := fn() {
+plugin.ex_Init := fn() {
 
 	Std.require('Evaluator/EvaluatorManager').updateEvaluatorList( PADrend.configCache.getValue('Evaluator.selectedEvaluator') );
 	
@@ -98,7 +95,7 @@ EvaluatorPlugin.ex_Init := fn() {
 
 /*! [ext:Evaluator_QueryEvaluators]
 	Initialize standard evaluators.	*/
-EvaluatorPlugin.ex_QueryEvaluators := fn(Array evaluatorList) {
+plugin.ex_QueryEvaluators := fn(Array evaluatorList) {
 	evaluatorList += new MinSG.VisibilityEvaluator(MinSG.Evaluator.SINGLE_VALUE);
 	evaluatorList += new MinSG.AreaEvaluator(MinSG.Evaluator.SINGLE_VALUE);
 	evaluatorList += new MinSG.StatsEvaluator(MinSG.Evaluator.SINGLE_VALUE);
@@ -128,13 +125,13 @@ EvaluatorPlugin.ex_QueryEvaluators := fn(Array evaluatorList) {
 };
 
 /*!	[static] */
-EvaluatorPlugin.createWindow := fn( posX, posY) {
+plugin.createWindow := fn( posX, posY) {
 	var width=460;
 	var height=400;
 	var window=gui.createWindow(width, height, "Evaluator");
 	window.setPosition(posX, posY);
 
-	window += EvaluatorPlugin.createConfigPanel();
+	window += plugin.createConfigPanel();
 
 	window.setEnabled(true);
 	return window;
@@ -142,7 +139,7 @@ EvaluatorPlugin.createWindow := fn( posX, posY) {
 
 
 //! (static)
-EvaluatorPlugin.createConfigPanel := fn() {
+plugin.createConfigPanel := fn() {
 	static EvaluatorManager = Std.require('Evaluator/EvaluatorManager');
 	var panel = gui.create({
 		GUI.TYPE			:	GUI.TYPE_CONTAINER,
@@ -212,4 +209,4 @@ EvaluatorPlugin.createConfigPanel := fn() {
 };
 
 
-return EvaluatorPlugin;
+return plugin;

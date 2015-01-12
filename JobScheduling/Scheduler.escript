@@ -75,14 +75,14 @@ T._constructor ::= fn(String _schedulerId){
 	@note A workload function may use 'yield' to subdivide the calculation into several steps.
 	
 	@example
-		myScheduler.addJob( (fn(max){ 
+		myScheduler.addJob( [20]=>fn(max){ 
 			var sum=0;
 			for(var i=0;i<max;++i){
 				sum+=i;
 				yield;
 			}
 			return sum;
-		} ).bindLastParams( 20 ) );
+		}  );
 */
 T.addJob ::= fn( workload, [Number,false] maxDuration = false ){
 	var jobId = myId+":"+ (++jobCounter);
@@ -119,20 +119,20 @@ T.execute ::= fn(){
 		
 		// announce new job (locally and on client instances)
 		PADrend.executeCommand(new Command({
-			Command.EXECUTE : (fn(jobId,workload,workerId){
+			Command.EXECUTE : [job.getId(),job.getWorkload(),workerId ]=>fn(jobId,workload,workerId){
 				Std.require('JobScheduling/JobScheduling').onJobAvailable( {
 					'jobId' : jobId,
 					'workload' : workload,
 					'workerId' : workerId
 				});
-			}).bindLastParams( job.getId(),job.getWorkload(),workerId ),
+			},
 			Command.FLAGS : Command.FLAG_SEND_TO_SLAVES | Command.FLAG_EXECUTE_LOCALLY
 		}));
 	}
 
 	var reschduledJobs = [];
 	// sort out jobs with a timeout for rescheduling
-	activeJobs.filter( (fn(jobId,job,now,reschduledJobs){
+	activeJobs.filter( [now,reschduledJobs]=>fn(now,reschduledJobs, jobId,job){
 		var d  = job.getMaximalDuration();
 		
 		// the job has aduration limit and a timeout occured
@@ -141,7 +141,7 @@ T.execute ::= fn(){
 			return false;
 		}
 		return true;
-	}).bindLastParams(now,reschduledJobs) );
+	} );
 	
 	foreach(reschduledJobs as var job){
 		out("Job rescheduled after timeout: '", job.getId(),"' (after ",(now-job.getStartingTime()),"seconds)\n");

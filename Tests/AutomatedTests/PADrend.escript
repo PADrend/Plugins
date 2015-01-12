@@ -25,7 +25,7 @@ var tests = [];
 tests += new AutomatedTest( "PADrend ObjectSerialization" , fn(){
 	static Command = Std.require('LibUtilExt/Command');
 	// function with bound params
-	var f1 = (fn(a,b,c){	return a*b-c; }).bindLastParams(10,1);
+	var f1 = [10,1]=>fn(b,c,a){	return a*b-c; };
 	var s_f1 = PADrend.serialize( f1);
 	var f2 = PADrend.deserialize( s_f1);
 //		out(s_f1);

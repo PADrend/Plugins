@@ -118,7 +118,7 @@ plugin.showWindow := fn(){
         GUI.LABEL:"World Dim.",
         GUI.TOOLTIP: "To estimate the world dimension 'Dx, Dy, Dz' of the selected node(s)"+
         "\n-You can drag and drop the values in the entries field!",
-        GUI.ON_CLICK :this->fn(container){
+        GUI.ON_CLICK :[container]=>this->fn(container){
             container.destroyContents();
             var bb = MinSG.combineNodesWorldBBs(NodeEditor.getSelectedNodes());
             var bbData = [["Dx=:", bb.getExtentX()], ["Dy= ", bb.getExtentY()], ["Dz= ",bb.getExtentZ()] ];
@@ -133,19 +133,19 @@ plugin.showWindow := fn(){
                     GUI.DRAGGING_MARKER : true,
                     GUI.TOOLTIP: "you can drag and drop it in the entries field!",
                     });
-                    comp.onDrop :=fn(evt,data){
+                    comp.onDrop := [data]=>fn(data,evt){
                         for(var c = (gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] )));c;c=c.getParentComponent()){
                             if(Traits.queryTrait(c,NodeRepeater.AcceptsDataSettingTrait)){
                                 c.data(data[1]); //! \see AcceptsDataSettingTrait
                                 return;
                             }
                         }
-                    }.bindLastParams(data);
+                    };
                 container.nextColumn(4);
                 container+=comp;
                 container.nextColumn(6);
             }
-        }.bindLastParams(container),
+        },
     };
     panel+=container;
     panel++;
@@ -154,12 +154,12 @@ plugin.showWindow := fn(){
         GUI.TYPE : GUI.TYPE_BUTTON,
         GUI.WIDTH : 50,
         GUI.LABEL:"Create",
-        GUI.ON_CLICK :this->fn(container){
+        GUI.ON_CLICK : [container]=>this->fn(container){
         	static Command = Std.require('LibUtilExt/Command');
             var nodes = NodeEditor.getSelectedNodes();
             PADrend.executeCommand({
                 Command.DESCRIPTION : "Node Repeat",
-                Command.EXECUTE : this->fn(nodes,container){
+                Command.EXECUTE : [nodes,container]=>this->fn(nodes,container){
                     var scene = PADrend.getCurrentScene();
                     foreach(nodes as var node){
                         NodeEditor.selectNode(node);
@@ -174,18 +174,18 @@ plugin.showWindow := fn(){
                         iteration.count(0); iteration.x(0); iteration.y(0); iteration.z(0);
                     }
                     container.destroyContents();
-                }.bindLastParams(nodes,container),
+                },
 
-                Command.UNDO : this->fn(nodes){
+                Command.UNDO : [nodes]=>this->fn(nodes){
                     NodeEditor.unselectNodes(nodes);
                     var nodes_ = NodeEditor.getSelectedNodes();
                     foreach(nodes_ as var node){
                         MinSG.destroy(node);
                     }
-                }.bindLastParams(nodes)
+                }
 
             });
-        }.bindLastParams(container),
+        },
     };
     panel.nextColumn(30);
     panel+={

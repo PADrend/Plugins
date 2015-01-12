@@ -25,17 +25,17 @@ CameraWindowPlugin.createNearPlaneSlider := fn(MinSG.AbstractCameraNode camera, 
 		GUI.RANGE				:	[0.01, 10],
 		GUI.RANGE_STEP_SIZE		:	0.01,
 		GUI.DATA_VALUE			:	camera.getNearPlane(),
-		GUI.ON_DATA_CHANGED		:	(fn(data, MinSG.AbstractCameraNode camera) {
+		GUI.ON_DATA_CHANGED		:	[camera]=>fn(MinSG.AbstractCameraNode camera, data) {
 										if(camera == PADrend.getActiveCamera()) {
 											// If this is the active camera, broadcast the changes to all connected instances.
-											PADrend.executeCommand((fn(data) {
+											PADrend.executeCommand( [data]=>fn(data) {
 												var camera = PADrend.getActiveCamera();
 												camera.setNearFar(data, camera.getFarPlane());
-											}).bindLastParams(data));
+											});
 										} else {
 											camera.setNearFar(data, camera.getFarPlane());
 										}
-									}).bindLastParams(camera),
+									},
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	});
 };
@@ -48,17 +48,17 @@ CameraWindowPlugin.createFarPlaneSlider := fn(MinSG.AbstractCameraNode camera, B
 		GUI.RANGE				:	[1, 10000],
 		GUI.RANGE_STEP_SIZE		:	1,
 		GUI.DATA_VALUE			:	camera.getFarPlane(),
-		GUI.ON_DATA_CHANGED		:	(fn(data, MinSG.AbstractCameraNode camera) {
+		GUI.ON_DATA_CHANGED		:	[camera]=>fn(MinSG.AbstractCameraNode camera,data) {
 										if(camera == PADrend.getActiveCamera()) {
 											// If this is the active camera, broadcast the changes to all connected instances.
-											PADrend.executeCommand((fn(data) {
+											PADrend.executeCommand([data]=>fn(data) {
 												var camera = PADrend.getActiveCamera();
 												camera.setNearFar(camera.getNearPlane(), data);
-											}).bindLastParams(data));
+											});
 										} else {
 											camera.setNearFar(camera.getNearPlane(), data);
 										}
-									}).bindLastParams(camera),
+									},
 		GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	});
 };
@@ -122,10 +122,11 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 		var winWidth = GLOBALS.renderingContext.getWindowWidth();
 		var winHeight = GLOBALS.renderingContext.getWindowHeight();
 		var viewportRefreshGroup = new GUI.RefreshGroup();
-		registerExtension('CameraWindowPlugin_CameraConfigurationChanged', (fn(	MinSG.AbstractCameraNode changedCamera,
+		registerExtension('CameraWindowPlugin_CameraConfigurationChanged', [camera, viewportRefreshGroup, panel]=>fn( 
 																				MinSG.AbstractCameraNode selectedCamera,
 																				GUI.RefreshGroup refreshGroup,
-																				GUI.Component component) {
+																				GUI.Component component,
+																				MinSG.AbstractCameraNode changedCamera) {
 			// Make sure the listener will be removed when the window was closed.
 			if(!gui.isCurrentlyEnabled(component)) {
 				return false;
@@ -133,7 +134,7 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 			if(changedCamera == selectedCamera) {
 				refreshGroup.refresh();
 			}
-		}).bindLastParams(camera, viewportRefreshGroup, panel));
+		});
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_RANGE,
 			GUI.LABEL				:	"Viewport X",
@@ -223,12 +224,12 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 			GUI.DATA_PROVIDER		:	camera -> fn() {
 											return this.getAngles()[0];
 										},
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											var oldAngles = camera.getAngles();
 											oldAngles[0] = data;
 											camera.setAngles(oldAngles);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
@@ -242,12 +243,12 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 			GUI.DATA_PROVIDER		:	camera -> fn() {
 											return this.getAngles()[1];
 										},
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											var oldAngles = camera.getAngles();
 											oldAngles[1] = data;
 											camera.setAngles(oldAngles);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
@@ -261,12 +262,12 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 			GUI.DATA_PROVIDER		:	camera -> fn() {
 											return this.getAngles()[2];
 										},
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											var oldAngles = camera.getAngles();
 											oldAngles[2] = data;
 											camera.setAngles(oldAngles);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
@@ -280,12 +281,12 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 			GUI.DATA_PROVIDER		:	camera -> fn() {
 											return this.getAngles()[3];
 										},
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											var oldAngles = camera.getAngles();
 											oldAngles[3] = data;
 											camera.setAngles(oldAngles);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
@@ -300,10 +301,10 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 											var angles = this.getAngles();
 											return (-angles[0] + angles[1]);
 										},
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											camera.applyHorizontalAngle(data);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
@@ -318,10 +319,10 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 											var angles = this.getAngles();
 											return (-angles[2] + angles[3]);
 										},
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											camera.applyVerticalAngle(data);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
@@ -343,10 +344,10 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 			GUI.RANGE				:	[0.0005, 1],
 			GUI.RANGE_STEP_SIZE		:	0.0005,
 			GUI.DATA_VALUE			:	1,
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											camera.setFrustumFromScaledViewport(data);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
@@ -359,10 +360,10 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 			GUI.RANGE				:	[-winWidth / 2, 0],
 			GUI.RANGE_STEP_SIZE		:	1,
 			GUI.DATA_PROVIDER		:	camera -> camera.getLeftClippingPlane,
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											camera.setLeftClippingPlane(data);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
@@ -374,10 +375,10 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 			GUI.RANGE				:	[0, winWidth / 2],
 			GUI.RANGE_STEP_SIZE		:	1,
 			GUI.DATA_PROVIDER		:	camera -> camera.getRightClippingPlane,
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											camera.setRightClippingPlane(data);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
@@ -389,10 +390,10 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 			GUI.RANGE				:	[-winHeight / 2, 0],
 			GUI.RANGE_STEP_SIZE		:	1,
 			GUI.DATA_PROVIDER		:	camera -> camera.getBottomClippingPlane,
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											camera.setBottomClippingPlane(data);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
@@ -404,10 +405,10 @@ CameraWindowPlugin.createConfigPanel := fn(MinSG.AbstractCameraNode camera) {
 			GUI.RANGE				:	[0, winHeight / 2],
 			GUI.RANGE_STEP_SIZE		:	1,
 			GUI.DATA_PROVIDER		:	camera -> camera.getTopClippingPlane,
-			GUI.ON_DATA_CHANGED		:	(fn(data, camera, refreshGroup) {
+			GUI.ON_DATA_CHANGED		:	[camera,refreshGroup]=>fn(camera, refreshGroup, data) {
 											camera.setTopClippingPlane(data);
 											refreshGroup.refresh();
-										}).bindLastParams(camera, refreshGroup),
+										},
 			GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};

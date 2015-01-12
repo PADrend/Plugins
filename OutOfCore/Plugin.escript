@@ -26,7 +26,7 @@ var plugin = new Plugin({
 			Plugin.REQUIRES : []
 });
 
-plugin.init = fn() {
+plugin.init @(override) := fn() {
 	if(!MinSG.isSet($OutOfCore)) {
 		out("MinSG::OutOfCore not supported. Did you compile with MINSG_EXT_OUTOFCORE defined?\n");
 		return false;
@@ -132,9 +132,11 @@ plugin.createNewWindow := fn() {
 
 		panelContents += {GUI.TYPE : GUI.TYPE_NEXT_ROW};
 
-		registerExtension('PADrend_AfterRendering', (fn(camera, window, level,
+		registerExtension('PADrend_AfterRendering', [window, level, 
+							usedMemory, overallMemory, fillLevel,
+							objects, lastWorkDuration]=>fn(window, level,
 														usedMemory, overallMemory, fillLevel,
-														objects, lastWorkDuration) {
+														objects, lastWorkDuration, ...) {
 			if(window.isDestroyed()) {
 				return Extension.REMOVE_EXTENSION;
 			}
@@ -150,9 +152,7 @@ plugin.createNewWindow := fn() {
 			}
 			objects(levelStats.objects);
 			lastWorkDuration(levelStats.lastWorkDuration);
-		}).bindLastParams(	window, level, 
-							usedMemory, overallMemory, fillLevel,
-							objects, lastWorkDuration));
+		});
 	}
 
 	panelContents += {

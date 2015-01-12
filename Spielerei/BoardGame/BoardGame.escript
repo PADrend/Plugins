@@ -361,7 +361,7 @@ BoardGame.initParticleEmitter ::= fn(Game.GameObject obj, Number duration,red=2,
 	emitter.setSpawnNode(obj.getNode());
 	bMgr.registerBehaviour(emitter);
 
-	PADrend.planTask(duration,fn(manager,behavior){		manager.removeBehaviour(behavior);	}.bindLastParams(bMgr,emitter));
+	PADrend.planTask(duration,[bMgr,emitter]=>fn(manager,behavior){		manager.removeBehaviour(behavior);	});
 	
 	var animator = new MinSG.ParticleAnimator(particleNode);
 	bMgr.registerBehaviour(animator);
@@ -374,12 +374,12 @@ BoardGame.initParticleEmitter ::= fn(Game.GameObject obj, Number duration,red=2,
 	bMgr.registerBehaviour(fader);
 
 
-	PADrend.planTask(duration*3,fn(manager,behaviors,particleNode){	
+	PADrend.planTask(duration*3,[bMgr,[animator,affector,fader],particleNode]=>fn(manager,behaviors,particleNode){	
 		foreach(behaviors as var b)
 			manager.removeBehaviour(b);
 			MinSG.destroy(particleNode);
 		
-	}.bindLastParams(bMgr,[animator,affector,fader],particleNode));
+	});
 
 
 
