@@ -39,8 +39,40 @@ static formatFilename = fn(filename){
 	return filename.replaceAll(r);
 	
 };
+
+static Table = new Type;
+Table.data @(init) := Map;
+Table.maxX := 0;
+Table.maxY := 0;
+Table.defaultValue := 0;
+Table._key ::= fn(x,y){	return ""+x+":"+y;	};
+Table._increaseRange ::= fn(x,y){	
+	if(x>this.maxX) 
+		this.maxX = x; 
+	if(y>this.maxY) 
+		this.maxY = y;
+};
+
+Table.set ::= fn( addr..., value){
+	this.data[ this._key(addr...) ] = value;
+	this._increaseRange( addr... );
+};
+Table.get ::= fn( addr...){
+	var value = this.data[ this._key(addr...) ];
+	return void == value ? this.defaultValue : value;
+};
+Table.getString ::= fn(delimiter='\t'){
+	var lines = [];
+	for(var y=0; y<=this.maxY; ++y){
+		var line = [];
+		for(var x=0; x<=this.maxX; ++x)
+			line += this.get(x,y);
+		lines += line.implode(delimiter);
+	}
+	return lines.implode('\n');
+}; 
+
 static measure = fn(){
-	var Table = load("extPlugins/CsExperiments/TryOuts/Table.escript"); // TEMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	var GASPManager = Std.require('SceneAnalyzer/GlobalGASPManager');
 
 	var c = GASPManager.getSelectedGASP();
@@ -81,7 +113,6 @@ static measure = fn(){
 	PADrend.message("done.");
 };
 static measureDirectional = fn(){
-	var Table = load("extPlugins/CsExperiments/TryOuts/Table.escript"); // TEMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	var GASPManager = Std.require('SceneAnalyzer/GlobalGASPManager');
 
 	var c = GASPManager.getSelectedGASP();
