@@ -132,7 +132,8 @@ m["Texture"] = fn(){return new MinSG.TextureState;};
 
 
 m["[ext] BudgetAnnotationState"] = fn() { return new MinSG.BudgetAnnotationState; };
-m["[ext] CHC renderer"] = fn(){return new MinSG.OccRenderer;};
+m["[ext] CHC(old) renderer"] = fn(){return new MinSG.OccRenderer;};
+m["[ext] CHC renderer"] = fn(){return new MinSG.CHCRenderer;};
 m["[ext] CHC++ renderer"] = fn(){return new MinSG.CHCppRenderer;};
 m["[ext] NaiveOccRenderer"] = fn(){return new MinSG.NaiveOccRenderer;};
 

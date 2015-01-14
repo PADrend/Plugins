@@ -605,6 +605,24 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.CHCppRenderer, fn(MinSG.CHCp
 	return entries;
 });
 
+
+/*! CHCRenderer */
+gui.registerComponentProvider(CONFIG_PREFIX + MinSG.CHCRenderer, fn(MinSG.CHCRenderer state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*CHC: Coherent Hierarchical Culling*";
+	entries += GUI.NEXT_ROW;
+
+	entries += {
+		GUI.TYPE			:	GUI.TYPE_BOOL,
+		GUI.LABEL			:	"Show visible(debug)",
+		GUI.DATA_WRAPPER	:	Std.DataWrapper.createFromFunctions( state->state.getDebugShowVisible,state->state.setDebugShowVisible ),
+		GUI.SIZE			:	[GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.18, 20]
+	};
+	entries += GUI.NEXT_ROW;
+	return entries;
+});
+
+
 // -----
 
 //! ColorCubeRenderer
