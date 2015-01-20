@@ -68,9 +68,9 @@ MinSG.State.getStateAttributeWrapper ::= fn(String key, defaultValue=void){
 	If the funciton returns $EXIT_TRAVERSAL, the traversal is stopped. 
 	All other return values are ignored. */
 MinSG.Node.traverse ::= fn(fun){
-    var nodes=[this];
-    while(!nodes.empty()){
-        var node=nodes.popBack();
+	var nodes=[this];
+	while(!nodes.empty()){
+		var node=nodes.popBack();
 		var result = fun(node);
 		if(result == $BREAK_TRAVERSAL){
 			continue;
@@ -78,7 +78,7 @@ MinSG.Node.traverse ::= fn(fun){
 			break;
 		}// else CONTINUE_TRAVERSAL
 		nodes.append(MinSG.getChildNodes(node));
-    }
+	}
 	return this;
 };
 
@@ -124,7 +124,7 @@ MinSG.Node."-=" ::= fn( MinSG.State obj){
 };
 
 MinSG.GroupNode."+=" ::= fn( [MinSG.Node,MinSG.State] obj){
-	if(obj---|>MinSG.Node){
+	if(obj.isA(MinSG.Node)){
 		this.addChild(obj);
 	}else{
 		this.addState(obj);
@@ -133,7 +133,7 @@ MinSG.GroupNode."+=" ::= fn( [MinSG.Node,MinSG.State] obj){
 };
 
 MinSG.GroupNode."-=" ::= fn( [MinSG.Node,MinSG.State] obj){
-	if(obj---|>MinSG.Node){
+	if(obj.isA(MinSG.Node)){
 		this.removeChild(obj);
 	}else{
 		this.removeState(obj);
@@ -142,13 +142,13 @@ MinSG.GroupNode."-=" ::= fn( [MinSG.Node,MinSG.State] obj){
 };
 
 MinSG.Node.getPivotPosition ::= fn(){
-    if(MinSG.isSet($JointNode)) {
-        if(this ---|> MinSG.JointNode) {
-            return this.getWorldOrigin();
-        }
-    }
-     
-    return this.getWorldBB().getCenter();
+	if(MinSG.isSet($JointNode)) {
+		if(this.isA(MinSG.JointNode)) {
+			return this.getWorldOrigin();
+		}
+	}
+	 
+	return this.getWorldBB().getCenter();
 };
 
 MinSG.Node.getOriginalNode ::= fn(){
@@ -169,6 +169,14 @@ MinSG.GroupState."+=" ::= fn( MinSG.State obj){
 MinSG.GroupState."-=" ::= fn( MinSG.State obj){
 	this.removeState(obj);
 	return this;
+};
+
+// --------------
+MinSG.AbstractCameraNode.setNearPlane ::= fn(Number distance){
+	return this.setNearFar( distance, this.getFarPlane() );
+};
+MinSG.AbstractCameraNode.setFarPlane ::= fn(Number distance){
+	return this.setNearFar(  this.getNearPlane(),distance );
 };
 
 return true;
