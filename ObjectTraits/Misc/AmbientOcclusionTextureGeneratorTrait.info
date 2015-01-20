@@ -1,0 +1,5 @@
+{
+	"moduleId" : "ObjectTraits/Misc/AmbientOcclusionTextureGeneratorTrait",
+	"description" : "Bake ambient occlusion to a flat texture.",
+	"displayName" : "Misc/AmbientOcclusionTextureGenerator"
+}
