@@ -16,13 +16,14 @@ var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
 static TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
 
+
 static openMenu = fn(pointNr, data, event){
 	gui.openMenu(new Geometry.Vec2(event.x, event.y),[
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Toggle SRT/Pos",
 			GUI.ON_CLICK: [pointNr, data.spline_controlPoints] =>fn(pointNr, points){
-				
+
 				var point = points()[pointNr];
 				if(point.location.isA(Geometry.Vec3)){
 					var srt = new Geometry.SRT;
@@ -117,6 +118,16 @@ static openMenu = fn(pointNr, data, event){
 					arr[pointNr-1].location = new Geometry.Vec3(arr[pointNr].getPosition().x() - 5, arr[pointNr].getPosition().y(), arr[pointNr].getPosition().z());
 				points.forceRefresh();
 			}
+		},
+		// Test the function getTransformationAtLength(Number) see splineTrait!
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "dist.",
+			GUI.ON_CLICK: [data]=>fn(data){
+				doIt(20, data);
+
+			}
+
 		}
 	], 100);
 };
@@ -179,7 +190,7 @@ static rebuildSplineMesh = fn( data ){
 		MinSG.destroy(data.additionalLinesNode);
 		data.additionalLinesNode = void;
 	}
-		
+
 
 	var splinePoints = data.splineNode.spline_createSplinePoints(0.05);
 	if(!splinePoints.empty()){
@@ -203,7 +214,7 @@ static rebuildSplineMesh = fn( data ){
 	var mb2 = new Rendering.MeshBuilder;
 	mb2.normal(new Geometry.Vec3(0,0,1));
 	mb2.color(new Util.Color4f(0.2,0,0,0.1));
-	
+
 	// connections to controlPoints
 	var points = data.splineNode.spline_controlPoints();
 	for(var i=0; i<points.count(); i+=3){
@@ -224,11 +235,11 @@ static rebuildSplineMesh = fn( data ){
 				if(srt.isA(Geometry.SRT)){
 					var yVec = srt.getUpVector();
 					var zVec = srt.getDirVector();
-				
+
 					mb2.color(new Util.Color4f(0.5,0,0,0.1));
 					mb2.position(srt.getTranslation()).addVertex();
 					mb2.position(srt.getTranslation()+yVec.cross(zVec)*0.5).addVertex();
-					
+
 					mb2.color(new Util.Color4f(0,0.5,0,0.1));
 					mb2.position(srt.getTranslation()).addVertex();
 					mb2.position(srt.getTranslation()+yVec*0.5).addVertex();
@@ -240,7 +251,7 @@ static rebuildSplineMesh = fn( data ){
 			}
 		}
 	}
-		
+
 	if(!mb2.isEmpty()){
 		var m = mb2.buildMesh();
 		m.setDrawLines();
@@ -289,11 +300,11 @@ static updateEditNodes = fn( data ){
 		}
 	}
 	--data.localTransformationInProgress;
+	data.distancesMap = void;
 };
 
 trait.onInit += fn( MinSG.GroupNode splineNode){
 	Std.Traits.assureTrait(splineNode,module('./SplineTrait'));
-	
 	var data = new ExtObject;
 	data.localTransformationInProgress := 0;
 	data.editNodes := [];
@@ -301,7 +312,8 @@ trait.onInit += fn( MinSG.GroupNode splineNode){
 	data.additionalLinesNode := void;
 	data.spline_controlPoints := splineNode.spline_controlPoints; //! \see SplineTrait
 	data.splineNode := splineNode;
-	
+	data.distancesMap := void;
+
 	data.spline_controlPoints.onDataChanged += [data]=>fn(data, ...){
 		if(data.localTransformationInProgress==0){
 			if( data.editNodes.count()!=data.spline_controlPoints().count() )
@@ -315,6 +327,26 @@ trait.onInit += fn( MinSG.GroupNode splineNode){
 	rebuildEditNodes(data);
 	updateEditNodes(data);
 	rebuildSplineMesh(data);
+};
+
+// Test the function getTransformationAtLength(Number) see splineTrait!
+static doIt = fn(Number v, data){
+	var totallenghth = data.splineNode.getSplineLength(data);
+	var distance = totallenghth / 10;
+	for(var l = 0; l <=totallenghth; l+=distance){
+		var transformation = data.splineNode.getTransformationAtLength(l,data);
+		var geoNode = new MinSG.GeometryNode;
+		var mb = new Rendering.MeshBuilder;
+		mb.color(new Util.Color4f(1,0,1,0.4));
+		mb.addSphere( new Geometry.Sphere([0,0,0],0.1),10,10 );
+		geoNode.setMesh(mb.buildMesh());
+		if(transformation.isA(Geometry.Vec3))
+			geoNode.setRelOrigin(transformation);
+		else
+			geoNode.setRelTransformation(transformation);
+		data.splineNode += geoNode;
+	}
+
 };
 
 trait.allowRemoval();

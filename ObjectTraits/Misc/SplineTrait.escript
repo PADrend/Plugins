@@ -15,7 +15,7 @@
 
 var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
-
+static NumberKeyMap = Std.require('LibUtilExt/NumberKeyMap');
 
 static Point = new Type;
 Point.location := void; // SRT | Vec3
@@ -34,7 +34,7 @@ trait.onInit += fn( MinSG.GroupNode node){
 		p.location := location.clone();
 		return p;
 	};
-	
+
 	if(!serializedSplineControlpoints().empty()){
 		var initialPoints = [];
 		foreach(parseJSON(serializedSplineControlpoints()) as var pointArr){
@@ -54,21 +54,21 @@ trait.onInit += fn( MinSG.GroupNode node){
 		serializedSplineControlpoints(toJSON(serializedPoints,false));
 	};
 
-	
+
 	node.spline_createSplinePoints := fn(Number stepSize){
 		var points = this.spline_controlPoints();
 		if((points.size()-4) % 3 == 0){
-			var splineCurePoints = [];
+			var splineCurvePoints = [];
 			for(var index = 0; index < points.size()-1; index +=3){
 				var p0 = points[index].getPosition();
 				var p1 = points[index+1].getPosition();
 				var p2 = points[index+2].getPosition();
 				var p3 = points[index+3].getPosition();
 				for(var i = 0; i<=1.00001; i+=stepSize)
-					splineCurePoints += Geometry.interpolateCubicBezier(p0,p1,p2,p3, i);
+					splineCurvePoints += Geometry.interpolateCubicBezier(p0,p1,p2,p3, i);
 
 			}
-			return splineCurePoints;
+			return splineCurvePoints;
 		}
 		else{
 			Runtime.warn("No. of points is not 7 divisible!" );
@@ -76,10 +76,10 @@ trait.onInit += fn( MinSG.GroupNode node){
 		}
 
 	};
-	
+
 	node.spline_calculateTransformation := fn(Number t){
 		var points = this.spline_controlPoints();
-		
+
 		if(points.empty())
 			return new Geometry.Vec3;
 		var index = t.floor()*3;
@@ -89,8 +89,8 @@ trait.onInit += fn( MinSG.GroupNode node){
 			return points[0].location.clone();
 		if(index>=points.count()-3)
 			return points.back().location.clone();
-			
-		
+
+
 		var p0 = points[index];
 		var p1 = points[index+1];
 		var p2 = points[index+2];
@@ -103,12 +103,45 @@ trait.onInit += fn( MinSG.GroupNode node){
 			var interpolatedSRT = new Geometry.SRT;// (p0.location,p3.location,t%1.0);
 			interpolatedSRT.setTranslation(pos);
 			interpolatedSRT.setRotation( Geometry.Quaternion.slerp( new Geometry.Quaternion(p0.location.getRotation()), new Geometry.Quaternion(p3.location.getRotation()), t%1.0) );
-			
+
 			return interpolatedSRT;
 		}else{
 			return pos;
 		}
-		
+
+	};
+
+	node._updateDistanceMap := fn(data){
+		if(!data.distancesMap){
+			data.distancesMap = new NumberKeyMap; // length -> splineValue_t
+			var distance = 0;
+			var lastPoint;
+			var stepSize_t = 0.05;
+			foreach(data.splineNode.spline_createSplinePoints(stepSize_t) as var step, var position){
+				distance += lastPoint ? lastPoint.distance(position) : 0;
+				lastPoint = position;
+				data.distancesMap.insert(distance, step*stepSize_t);
+			}
+		}
+	};
+	node.getSplineLength := fn(data){
+		this._updateDistanceMap(data);
+		return data.distancesMap.getMaxKey();
+	};
+
+	node.getTransformationAtLength := fn(Number length, data){
+		this._updateDistanceMap(data);
+		[var lEntry,var rEntry] = data.distancesMap.getNeighbors(length);
+		var t;
+		if( !lEntry || lEntry[0]==rEntry[0] ){
+			t = rEntry[1];
+		}else if( !rEntry ){
+			t = lEntry[1];
+		}else{
+			t = lEntry[1] + (rEntry[1]-lEntry[1]) * (length-lEntry[0]) / (rEntry[0]-lEntry[0]);
+		}
+		return this.spline_calculateTransformation(t);
+
 	};
 
 };
