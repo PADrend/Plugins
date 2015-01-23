@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
+ * Copyright (C) 2011-2015 Benjamin Eikel <benjamin@eikel.org>
  * Copyright (C) 2011-2012 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2011-2012 Sascha Brandt
  * 
