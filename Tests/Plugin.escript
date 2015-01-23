@@ -65,7 +65,7 @@ plugin.init @(override) :=fn() {
 plugin.initAutoTest := fn(){
 	PADrend.message("(Tests-Plugin) PADrend started without gui -> starting auto test mode.");
 
-	var results = plugin.execute();
+	var results = Tests.AutomatedTestsPlugin.execute();
 	print_r(results);
 	if(!results['result'])
 		GLOBALS._processResult = new Exception("(AutomatedTestsPlugin) " + results['resultString']);

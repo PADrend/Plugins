@@ -30,15 +30,17 @@ var plugin = new Plugin({
 
 plugin.init @(override) :=fn(){
 	{ // Register ExtensionPointHandler:
-		registerExtension('PADrend_Init', this->fn(){
-			gui.registerComponentProvider('Tests_TestsMenu.soundTests',{
-				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : "Sound Tests",
-				GUI.ON_CLICK : this->execute
+		if (queryPlugin('PADrend/GUI')) {
+			registerExtension('PADrend_Init', this->fn(){
+				gui.registerComponentProvider('Tests_TestsMenu.soundTests',{
+					GUI.TYPE : GUI.TYPE_BUTTON,
+					GUI.LABEL : "Sound Tests",
+					GUI.ON_CLICK : this->execute
+				});
 			});
-		});
-    }
-    return true;
+		}
+	}
+	return true;
 };
 
 

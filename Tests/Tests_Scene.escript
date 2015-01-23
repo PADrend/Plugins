@@ -27,15 +27,17 @@ var plugin = new Plugin({
 
 plugin.init @(override) :=fn(){
 	{ // Register ExtensionPointHandler:
-		registerExtension('PADrend_Init', this->fn(){
-			gui.registerComponentProvider('Tests_TestsMenu.generatedScenes',{
-				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : "Generated test scenes",
-				GUI.ON_CLICK : this->fn() {
-					execute();
-				}
+		if (queryPlugin('PADrend/GUI')) {
+			registerExtension('PADrend_Init', this->fn(){
+				gui.registerComponentProvider('Tests_TestsMenu.generatedScenes',{
+					GUI.TYPE : GUI.TYPE_BUTTON,
+					GUI.LABEL : "Generated test scenes",
+					GUI.ON_CLICK : this->fn() {
+						execute();
+					}
+				});
 			});
-		});		
+		}
     }
     return true;
 };

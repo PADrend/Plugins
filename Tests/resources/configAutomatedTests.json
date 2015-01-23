@@ -4,6 +4,7 @@
 			"CommandHandling":true,
 			"EventLoop":false,
 			"GUI":false,
+			"HID":false,
 			"Navigation":false,
 			"NodeInteraction":false,
 			"SceneManagement":true,

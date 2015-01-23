@@ -15,7 +15,9 @@
  **	[Plugin:Tests] Test/Tests_Automated.escript
  **/
 
-var plugin = new Plugin({
+declareNamespace($Tests);
+
+Tests.AutomatedTestsPlugin := new Plugin({
 		Plugin.NAME : 'Tests/Tests_Automated',
 		Plugin.DESCRIPTION : 'Various automated tests.',
 		Plugin.VERSION : 0.1,
@@ -24,10 +26,11 @@ var plugin = new Plugin({
 		Plugin.REQUIRES : [ 'Tests' ],
 		Plugin.EXTENSION_POINTS : []
 });
+static plugin = Tests.AutomatedTestsPlugin;
 
 plugin.init @(override) := fn(){
 	{ // Register ExtensionPointHandler:
-		if(queryPlugin('Tests')){
+		if (queryPlugin('PADrend/GUI')) {
 			registerExtension('PADrend_Init', this->fn(){
 				gui.registerComponentProvider('Tests_TestsMenu.automatedTests',[{
 						GUI.TYPE : GUI.TYPE_BUTTON,

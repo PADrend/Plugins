@@ -27,13 +27,15 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn(){
 	{ // Register ExtensionPointHandler:
-		registerExtension('PADrend_Init', this->fn(){
-			gui.registerComponentProvider('Tests_TestsMenu.distributedTests',{
-				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : "Distributed tests",
-				GUI.ON_CLICK : this->execute
+		if (queryPlugin('PADrend/GUI')) {
+			registerExtension('PADrend_Init', this->fn(){
+				gui.registerComponentProvider('Tests_TestsMenu.distributedTests',{
+					GUI.TYPE : GUI.TYPE_BUTTON,
+					GUI.LABEL : "Distributed tests",
+					GUI.ON_CLICK : this->execute
+				});
 			});
-		});
+		}
     }
     return true;
 };
