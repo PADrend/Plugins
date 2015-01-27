@@ -32,7 +32,7 @@ static  TextureProcessor = Std.require('LibRenderingExt/TextureProcessor');
 	"void main(){\n"
 	"	ivec3 pos = ivec3(mod(gl_FragCoord.x,resolution), int(gl_FragCoord.y),int(gl_FragCoord.x)/resolution);\n"
 	"	float sum = 0.0;\n"
-	"	vec4 accum;\n"
+	"	vec4 accum = vec4(0.0);\n"
 	"	ivec3 cursor;\n"
 	"   for(cursor.x=-radius; cursor.x<=radius; ++cursor.x){\n"
 	"   for(cursor.y=-radius; cursor.y<=radius; ++cursor.y){\n"
@@ -148,7 +148,8 @@ T.createGeometryNode ::= fn(Number resolution=64, Number densityOffset = 0.0){
 		};
 		densityTexture.allocateLocalData();
 		var pixels =  Rendering.createColorPixelAccessor(renderingContext, densityTexture);
-
+		pixels.fill(0,0,resolution*resolution,resolution, new Util.Color4f(0, 0, 0, 0));
+		
 		foreach(this.points as var point){
 			var value = point[1];
 			pixels.writeColor( worldPosToTexturePos( point[0] )..., new Util.Color4f(value,value,value,1) );
