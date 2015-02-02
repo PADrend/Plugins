@@ -40,14 +40,14 @@ T.reduceKernel @(private) := void;
 T.scanKernel @(private) := void;
 T.scatterKernel @(private) := void;
 
-T.warpSizeMem @(private) := 32;
-T.warpSizeSchedule @(private) := 32;
+T.warpSizeMem @(private) := 1;
+T.warpSizeSchedule @(private) := 1;
 T.reduceWorkGroupSize @(private) := 128;
-T.scanWorkGroupSize @(private) := 64;
-T.scatterWorkGroupSize @(private) := 64;
-T.scatterWorkScale @(private) := 6;
+T.scanWorkGroupSize @(private) := 128;
+T.scatterWorkGroupSize @(private) := 128;
+T.scatterWorkScale @(private) := 1;
 T.scatterSlice @(private) := 32;
-T.scanBlocks @(private) := 760;
+T.scanBlocks @(private) := 128;
 T.radix @(private) := 1;
 T.radixBits @(private) := 4;
 
