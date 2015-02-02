@@ -14,6 +14,9 @@
  **	[Plugin:Tests] Tests/AutomatedTests/OpenCL.escript
  **/
 
+if(!Rendering.isSet($CL))
+	return [];
+
 GLOBALS.CL := Rendering.CL;
 static roundUp = fn(x, y) { return ((x + y - 1) / y).floor() * y; };
 
@@ -530,3 +533,5 @@ tests += new AutomatedTest("OpenCL: Sort (GPU)",fn(){
 		}
 	}
 });
+
+return tests;
