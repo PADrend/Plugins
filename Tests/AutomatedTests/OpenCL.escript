@@ -56,7 +56,7 @@ tests += new AutomatedTest("OpenCL: PrefixSum (GPU)",fn(){
 		var device = context.getDevices()[0];
 		var queue = new CL.CommandQueue(context, device, false, true);
 		
-		var elements = 10000;
+		var elements = 1024;
 		var buffer = new CL.Buffer(context, CL.READ_WRITE, elements, Util.TypeConstant.INT32);		
 		var bufferAcc = new CL.BufferAccessor(buffer, queue);
 		
@@ -97,7 +97,7 @@ tests += new AutomatedTest("OpenCL: PrefixSum (CPU)",fn(){
 		var device = context.getDevices()[0];
 		var queue = new CL.CommandQueue(context, device, false, true);
 		
-		var elements = 10000;
+		var elements = 1024;
 		var buffer = new CL.Buffer(context, CL.READ_WRITE, elements, Util.TypeConstant.INT32);		
 		var bufferAcc = new CL.BufferAccessor(buffer, queue);
 		
@@ -139,7 +139,7 @@ tests += new AutomatedTest("OpenCL: Reduce (GPU)",fn(){
 		var device = context.getDevices()[0];
 		var queue = new CL.CommandQueue(context, device, false, true);
 		
-		var elements = 10000;
+		var elements = 1024;
 		var buffer = new CL.Buffer(context, CL.READ_WRITE, elements, Util.TypeConstant.FLOAT);			
 		var output = new CL.Buffer(context, CL.READ_WRITE, 1, Util.TypeConstant.FLOAT);	
 		var bufferAcc = new CL.BufferAccessor(buffer, queue);
@@ -219,7 +219,7 @@ tests += new AutomatedTest("OpenCL: Reduce (CPU)",fn(){
 		var device = context.getDevices()[0];
 		var queue = new CL.CommandQueue(context, device, false, true);
 		
-		var elements = 10000;
+		var elements = 1024;
 		var buffer = new CL.Buffer(context, CL.READ_WRITE, elements, Util.TypeConstant.FLOAT);			
 		var output = new CL.Buffer(context, CL.READ_WRITE, 1, Util.TypeConstant.FLOAT);	
 		var bufferAcc = new CL.BufferAccessor(buffer, queue);
@@ -302,7 +302,7 @@ tests += new AutomatedTest("OpenCL: Sort (GPU)",fn(){
 		var queue = new CL.CommandQueue(context, device, false, true);
 		
 		{ // Reduce
-			var elements = 4096;
+			var elements = 1024;
 			var sorter = new RadixSort(context, device, queue);
 			var result = sorter.build();
 			if(result) {			
@@ -381,7 +381,7 @@ tests += new AutomatedTest("OpenCL: Sort (GPU)",fn(){
 		}
 		
 		{ // Scatter
-			var elements = 4096;
+			var elements = 1024;
 			var sorter = new RadixSort(context, device, queue);
 			sorter.setKeyType(Util.TypeConstant.UINT16);
 			var result = sorter.build();
@@ -455,7 +455,7 @@ tests += new AutomatedTest("OpenCL: Sort (GPU)",fn(){
 		}
 
 		{ // Sort
-			var elements = 4096;
+			var elements = 1024;
 			var buffer = new CL.Buffer(context, CL.READ_WRITE, elements, Util.TypeConstant.INT32);		
 			var bufferAcc = new CL.BufferAccessor(buffer, queue);
 			
@@ -487,7 +487,7 @@ tests += new AutomatedTest("OpenCL: Sort (GPU)",fn(){
 		}
 
 		{ // Sort		
-			var elements = 4096;			
+			var elements = 1024;			
 			var sorter = new RadixSort(context, device, queue);
 			sorter.setValueType("float4", 4*Util.getNumBytes(Util.TypeConstant.FLOAT));
 			var result = sorter.build();
