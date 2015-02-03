@@ -62,7 +62,7 @@ T.setReduceFn ::= fn(fun) {
 T.setType ::= fn(type, size=0) {
 	this.reduceType = typeMap[type];
 	if(this.reduceType) {
-		this.elementSize = Util.getNumBytes(this.reduceType);
+		this.elementSize = Util.getNumBytes(type);
 	} else if(size>0) {		
 		this.reduceType = type;
 		this.elementSize = size;

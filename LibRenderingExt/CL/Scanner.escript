@@ -73,7 +73,7 @@ T.getProfilingResults @(public) ::= fn(){
 T.setType ::= fn(type, size=0) {
 	this.scanType = typeMap[type];
 	if(this.scanType) {
-		this.elementSize = Util.getNumBytes(this.scanType);
+		this.elementSize = Util.getNumBytes(type);
 	} else if(size>0) {		
 		this.scanType = type;
 		this.elementSize = size;

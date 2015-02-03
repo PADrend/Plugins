@@ -94,7 +94,7 @@ T.getProfilingResults @(public) ::= fn(){
 T.setKeyType ::= fn(type, size=0) {
 	this.keyType = typeMap[type];
 	if(this.keyType) {
-		this.keySize = Util.getNumBytes(this.keyType);
+		this.keySize = Util.getNumBytes(type);
 	} else if(size>0) {		
 		this.keyType = type;
 		this.keySize = size;
@@ -106,7 +106,7 @@ T.setKeyType ::= fn(type, size=0) {
 T.setValueType ::= fn(type, size=0) {
 	this.valueType = typeMap[type];
 	if(this.valueType) {
-		this.valueSize = Util.getNumBytes(this.valueType);
+		this.valueSize = Util.getNumBytes(type);
 	} else if(type && size>0) {		
 		this.valueType = type;
 		this.valueSize = size;
@@ -115,11 +115,6 @@ T.setValueType ::= fn(type, size=0) {
 		this.valueSize = 0;
 	}
 };
-
-T.setIdentity ::= fn(id) {
-	this.reduceIdentity = id;
-};
-
 
 T._constructor ::= fn(CL.Context _context, CL.Device _device, CL.CommandQueue _queue) {
 	context = _context;
@@ -269,7 +264,7 @@ T.sort ::= fn(CL.Buffer keys, [CL.Buffer,void] values, elements, maxBits=0, prof
 		waitFor = [copyKeysEvent];
 		if(valueSize > 0) {
 			var copyValuesEvent = new CL.Event();
-			queue.copyBuffer(curKeys, nextKeys, 0, 0, elements * keySize, waitFor, copyValuesEvent);
+			queue.copyBuffer(curValues, nextValues, 0, 0, elements * valueSize, waitFor, copyValuesEvent);
 			waitFor = [copyValuesEvent];
 		}
 	}
