@@ -300,7 +300,6 @@ static updateEditNodes = fn( data ){
 		}
 	}
 	--data.localTransformationInProgress;
-	data.distancesMap = void;
 };
 
 trait.onInit += fn( MinSG.GroupNode splineNode){
@@ -312,7 +311,6 @@ trait.onInit += fn( MinSG.GroupNode splineNode){
 	data.additionalLinesNode := void;
 	data.spline_controlPoints := splineNode.spline_controlPoints; //! \see SplineTrait
 	data.splineNode := splineNode;
-	data.distancesMap := void;
 
 	data.spline_controlPoints.onDataChanged += [data]=>fn(data, ...){
 		if(data.localTransformationInProgress==0){

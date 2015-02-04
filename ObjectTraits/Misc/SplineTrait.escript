@@ -15,7 +15,6 @@
 
 var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
-static NumberKeyMap = Std.require('LibUtilExt/NumberKeyMap');
 
 static Point = new Type;
 Point.location := void; // SRT | Vec3
@@ -26,6 +25,7 @@ Point.getPosition ::= fn(){
 
 
 trait.onInit += fn( MinSG.GroupNode node){
+	var distancesMapWrapper = new Std.DataWrapper;
 	var serializedSplineControlpoints =  node.getNodeAttributeWrapper('spline_controlpoints', "[]" );
 	node.spline_controlPoints := new Std.DataWrapper; // [ Vec3* ]
 
@@ -46,14 +46,14 @@ trait.onInit += fn( MinSG.GroupNode node){
 		}
 		node.spline_controlPoints(initialPoints);
 	}
-	node.spline_controlPoints.onDataChanged += [serializedSplineControlpoints]=>fn(serializedSplineControlpoints,  Array points){
+	node.spline_controlPoints.onDataChanged += [distancesMapWrapper,serializedSplineControlpoints]=>fn(distancesMapWrapper,serializedSplineControlpoints,  Array points){
+		distancesMapWrapper( void );
 		var serializedPoints = [];
 		foreach(points as var point)
 			serializedPoints += point.location.toArray();
 //		outln(toJSON(serializedPoints,false));
 		serializedSplineControlpoints(toJSON(serializedPoints,false));
 	};
-
 
 	node.spline_createSplinePoints := fn(Number stepSize){
 		var points = this.spline_controlPoints();
@@ -111,27 +111,28 @@ trait.onInit += fn( MinSG.GroupNode node){
 
 	};
 
-	node._updateDistanceMap := fn(data){
-		if(!data.distancesMap){
-			data.distancesMap = new NumberKeyMap; // length -> splineValue_t
+	static updateDistanceMap = fn(distancesMapWrapper,splineNode){
+		if(!distancesMapWrapper()){
+			var distancesMap = new (Std.require('LibUtilExt/NumberKeyMap')); // length -> splineValue_t
 			var distance = 0;
 			var lastPoint;
 			var stepSize_t = 0.05;
-			foreach(data.splineNode.spline_createSplinePoints(stepSize_t) as var step, var position){
+			foreach(splineNode.spline_createSplinePoints(stepSize_t) as var step, var position){
 				distance += lastPoint ? lastPoint.distance(position) : 0;
 				lastPoint = position;
-				data.distancesMap.insert(distance, step*stepSize_t);
+				distancesMap.insert(distance, step*stepSize_t);
 			}
+			distancesMapWrapper(distancesMap);
 		}
 	};
-	node.getSplineLength := fn(data){
-		this._updateDistanceMap(data);
-		return data.distancesMap.getMaxKey();
+	node.getSplineLength := [distancesMapWrapper]=>fn(distancesMapWrapper){
+		updateDistanceMap(distancesMapWrapper,this);
+		return distancesMapWrapper().getMaxKey();
 	};
 
-	node.getTransformationAtLength := fn(Number length, data){
-		this._updateDistanceMap(data);
-		[var lEntry,var rEntry] = data.distancesMap.getNeighbors(length);
+	node.getTransformationAtLength := [distancesMapWrapper]=>fn(distancesMapWrapper, Number length){
+		updateDistanceMap(distancesMapWrapper,this);
+		[var lEntry,var rEntry] = distancesMapWrapper().getNeighbors(length);
 		var t;
 		if( !lEntry || lEntry[0]==rEntry[0] ){
 			t = rEntry[1];
