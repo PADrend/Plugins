@@ -823,6 +823,43 @@ plugin.registerStdToolbarEntries := fn() {
 		entries += "*" + scene + "*";
 		return entries;
 	});
+	
+	gui.registerComponentProvider('PADrend_SceneConfigMenu.05_sceneMetaData',fn(scene){
+		var NodeMetaInfo = Std.require('LibMinSGExt/NodeMetaInfo');
+		var entries = [];
+		entries += '----';
+		entries += {
+			GUI.TYPE : GUI.TYPE_TEXT,
+			GUI.LABEL : "Title",
+			GUI.DATA_WRAPPER : NodeMetaInfo.accessMetaInfo_Title(scene)
+		};
+		entries += {
+			GUI.TYPE : GUI.TYPE_TEXT,
+			GUI.LABEL : "Author",
+			GUI.DATA_WRAPPER : NodeMetaInfo.accessMetaInfo_Author(scene)
+		};
+		var d = getDate();
+		entries += {
+			GUI.TYPE : GUI.TYPE_TEXT,
+			GUI.LABEL : "Creation date",
+			GUI.DATA_WRAPPER : NodeMetaInfo.accessMetaInfo_CreationDate(scene),
+			GUI.OPTIONS :  ["" + d["year"] + "-"+ d["mon"] + "-" + d["mday"] ]
+		};
+		entries += {
+			GUI.TYPE : GUI.TYPE_TEXT,
+			GUI.LABEL : "License",
+			GUI.DATA_WRAPPER : NodeMetaInfo.accessMetaInfo_License(scene),
+			GUI.OPTIONS :  ["free","internal use","RESTRICTED" ]
+		};
+		entries += {
+			GUI.TYPE : GUI.TYPE_MULTILINE_TEXT,
+			GUI.LABEL : "Note",
+			GUI.DATA_WRAPPER : NodeMetaInfo.accessMetaInfo_Note(scene),
+			GUI.HEIGHT : 100
+		};
+		return entries;
+	});
+
 
 	gui.registerComponentProvider('PADrend_SceneConfigMenu.10_coordinateSystem',fn(scene){
 		var entries = [];

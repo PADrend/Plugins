@@ -85,7 +85,6 @@ plugin.init @(override) := fn(){
         __DIR__+"/Selection/Plugin.escript",
         __DIR__+"/TransformationTools/Plugin.escript",
         __DIR__+"/ObjectPlacer/Plugin.escript",
-        __DIR__+"/SceneMetaInfo/Plugin.escript",
 		__DIR__+"/VisualHelper/Plugin.escript",
 		__DIR__+"/NodeRepeater/Plugin.escript",
 		__DIR__+"/ObjectExplorer/Plugin.escript",
