@@ -184,7 +184,6 @@ SceneManagement.createNewSceneRoot := fn(String t,debugOutput=true){
 		return false;
 
 	newSceneRoot.name := "";
-	newSceneRoot.constructionString:=t;
 
 	this.registerScene(newSceneRoot);
 	this.selectScene(newSceneRoot);
@@ -218,7 +217,8 @@ SceneManagement.getDefaultSceneManager :=	fn( ){	return defaultSceneManager;	};
 SceneManagement.getSceneManager :=	fn( [MinSG.Node,void] scene=void){
 	if( !scene )
 		scene = activeScene;
-	return scene&&scene.isSet($__sceneManager) ? scene.__sceneManager : defaultSceneManager;
+	//! \see LibMinSGExt/Traits/SceneMarkerTrait
+	return scene&&scene.isSet($sceneData)&&scene.sceneData.isSet($sceneManager) ? scene.sceneData.sceneManager : defaultSceneManager;
 };
 
 	
@@ -255,7 +255,8 @@ SceneManagement.loadScene := fn(filename,
 		sceneManager = SceneManagement.createNewSceneManager();
 	var sceneRoot = sceneManager.loadScene(filename,importOptions);
 	if(sceneRoot){
-		sceneRoot.__sceneManager := sceneManager;
+		Std.Traits.assureTrait(sceneRoot,Std.require('LibMinSGExt/Traits/SceneMarkerTrait'));
+		sceneRoot.sceneData.sceneManager := sceneManager; //! \see LibMinSGExt/Traits/SceneMarkerTrait
 		this.registerScene(sceneRoot);
 	}
 	return sceneRoot;
@@ -275,18 +276,20 @@ SceneManagement.mergeScenes := fn(targetScene,Collection scenes) {
 };
 
 SceneManagement.registerScene := fn(MinSG.Node scene) {
-	if(!registeredScenes.contains(scene)) {
+	Std.Traits.assureTrait(scene,Std.require('LibMinSGExt/Traits/SceneMarkerTrait'));
+	
+	if(!registeredScenes.contains(scene)) 
 		registeredScenes.pushBack(scene);
-	}
-	if(!getCurrentScene()) {
-		selectScene(scene);
-	}
-	// store scene manager at scene (\todo create a new one for each scene or workspace!)
-	if(!scene.isSet($__sceneManager)||!scene.__sceneManager)
-		scene.__sceneManager := defaultSceneManager;
+	
+	// store sceneManager in sceneData
+	if(!scene.sceneData.isSet($sceneManager)||!scene.sceneData.sceneManager)
+		scene.sceneData.sceneManager := defaultSceneManager;
 		
-	if(!scene.getAttribute('constructionString')) scene.constructionString:="";
 	if(!scene.getAttribute('name')) scene.name:="";
+
+	if(!getCurrentScene())
+		selectScene(scene);
+
 	executeExtensions('PADrend_OnSceneRegistered',scene);
 	executeExtensions('PADrend_OnSceneListChanged',registeredScenes.clone());
 };

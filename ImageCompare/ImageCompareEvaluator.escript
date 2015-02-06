@@ -164,9 +164,6 @@ Evaluator.createConfigPanel @(override)  ::= fn() {
 			if(scene.isSet($filename)) {
 				label += scene.filename;
 			}
-			if(!scene.constructionString.empty()) {
-				label += "[ " + scene.constructionString + " ]";
-			}
 			scenes += [scene,label ];
 		}
 		return scenes;

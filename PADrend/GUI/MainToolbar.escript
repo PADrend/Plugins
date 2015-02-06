@@ -714,7 +714,6 @@ plugin.registerStdToolbarEntries := fn() {
 				}
 				var parts = [];
 				if(scene.isSet($name) && scene.name!="") parts += scene.name;
-				if(scene.isSet($constructionString) && scene.constructionString!="") parts += "[ "+scene.constructionString+" ]";
 				if(scene.isSet($filename) && scene.filename!="") parts += "[ "+scene.filename+" ]";
 				
 				parts += "ID-Namspace: " + PADrend.SceneManagement.getNamedMapOfAvaiableSceneManagers()[ PADrend.SceneManagement.getSceneManager(scene) ];

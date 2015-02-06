@@ -10,10 +10,6 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[Plugin:SceneEditor/NodeRepeator]
- **/
-
 declareNamespace($SceneEditor);
 
 //! ---|> Plugin
@@ -36,7 +32,7 @@ plugin.init @(override) := fn(){
 			entries += '----';
 			entries += {
 				GUI.TYPE : GUI.TYPE_TEXT,
-				GUI.LABEL : "Name",
+				GUI.LABEL : "Title",
 				GUI.DATA_WRAPPER : SceneEditor.accessSceneMetaInfo_Name(scene)
 			};
 			entries += {

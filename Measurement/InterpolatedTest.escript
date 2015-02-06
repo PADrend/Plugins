@@ -352,11 +352,7 @@ MeasurementPlugin.InterpolatedTest.executeAllScenes := fn(String fileprefix) {
 		var boxtests = new Map();
 
 		// get and adjust scenename
-		var scenename = scenes[i].constructionString;
-		if (scenename == "")
-			scenename = scenes[i].name;
-		if (scenename.beginsWith("new ")) //eliminate "new " if necessary
-			scenename = scenename.substr(4);
+		var scenename = scenes[i].name;
 		//scenename = scenename+" avg("+avgVBOSize+")";
 
 		// select color
@@ -416,11 +412,7 @@ MeasurementPlugin.InterpolatedTest.executeAllScenesWithBQEvaluator := fn(String 
 		var trianglesInO = new Map();
 
 		// adjust scenename
-		var scenename = scenes[i].constructionString;
-		if (scenename == "")
-			scenename = scenes[i].name;
-		if (scenename.beginsWith("new "))
-			scenename = scenename.substr(4);
+		var scenename = scenes[i].name;
 		//scenename = scenename+" avg("+avgVBOSize+")";
 
 		// select color

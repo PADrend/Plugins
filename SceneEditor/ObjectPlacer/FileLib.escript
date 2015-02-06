@@ -168,10 +168,10 @@ plugin.createObjectEntry := fn(file){
 	var prototype =  this.getPrototypeForFile(file);
 	var tooltip = "[" + file + "]";
 	if(prototype){
-		s = SceneEditor.accessSceneMetaInfo_Name(prototype)();
+		var s = SceneEditor.accessSceneMetaInfo_Name(prototype)();
 		if(s&&!s.empty())
-			tooltip += "\nName: " + s;
-		var s = SceneEditor.accessSceneMetaInfo_Author(prototype)();
+			tooltip += "\Title: " + s;
+		s = SceneEditor.accessSceneMetaInfo_Author(prototype)();
 		if(s&&!s.empty())
 			tooltip += "\nAuthor: " + s;
 		s = SceneEditor.accessSceneMetaInfo_CreationDate(prototype)();
