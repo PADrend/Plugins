@@ -18,6 +18,7 @@
  **/
  
 declareNamespace($NodeEditor);
+static NodeMetaInfo = Std.require('LibMinSGExt/NodeMetaInfo');
 
 // --------------------------------------------------------------------------------------------------------------
 
@@ -39,6 +40,10 @@ NodeEditor.getString += [MinSG.Node, fn(node){
 	var t="";
 	if(node.getAttribute("name"))
 		t+="Name: "+node.name+" | ";
+
+	var title = NodeMetaInfo.queryMetaInfo_Title(node,false);
+	if(title)
+		t+="Title: "+title+" | ";
 
 	var id=PADrend.getSceneManager().getNameOfRegisteredNode(node);
 	if(id)

@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -15,10 +15,11 @@
  **
  ** Graphical tools for managing semantic objects.
  **/
-declareNamespace($SceneEditor,$ObjectEditor);
 
-//! ---|> Plugin
-SceneEditor.ObjectEditor.plugin := new Plugin({
+static SemanticObject = Std.require('LibMinSGExt/SemanticObject');
+static SemanticObjectEntryTrait = module('./SemanticObjectEntryTrait');
+
+var plugin = new Plugin({
 	Plugin.NAME : 'SceneEditor/ObjectEditor',
 	Plugin.DESCRIPTION : 'Editor for semantic objects',
 	Plugin.AUTHORS : "Claudius",
@@ -28,78 +29,10 @@ SceneEditor.ObjectEditor.plugin := new Plugin({
 	Plugin.EXTENSION_POINTS : []
 });
 
-var plugin = SceneEditor.ObjectEditor.plugin;
-
 plugin.init @(override) := fn(){
-	registerExtension('PADrend_Init',this->initGUI);
-	
-	
-	// ----------------
-	
+	Util.registerExtension('PADrend_Init',this->initGUI);
 	return true;
 };
-
-static SemanticObject = Std.require('LibMinSGExt/SemanticObject');
-
-/*! Trait for GUI.TreeViewEntries.
-	When the entry is opened, for each contained semantic object a new subentry is created.
-	The sub entries are filled using the registered components 'ObjectEditor_ObjectEntry'.
-	This trait is also applied to all sub entries.
-	\param MinSG.Node 			the node associated with the entry
-
-	Adds the following attributes:
-	 - entryRegistry 		void if closed; { node -> sub entry } if opened
-	 - node					the referenced node
-	 
-	\see Based on the GUI.TreeViewEntry.DynamicSubentriesTrait
-*/
-SceneEditor.ObjectEditor.SemanticObjectEntryTrait := new Traits.GenericTrait('SceneEditor.ObjectEditor.SemanticObjectEntryTrait');
-{
-	var t = SceneEditor.ObjectEditor.SemanticObjectEntryTrait;
-	
-	t.attributes.entryRegistry := void; // void if closed; { node -> sub entry } if opened
-	t.attributes.node := void;
-	
-	t.onInit += fn(GUI.TreeViewEntry entry,MinSG.Node node){
-		entry.node = node;
-		entry.entryRegistry = new Map; // object->subEntry|void
-		
-		//! \see GUI.TreeViewEntry.DynamicSubentriesTrait
-		Traits.addTrait(entry,	GUI.TreeViewEntry.DynamicSubentriesTrait, [entry] => fn(entry){
-			var node = entry.node;
-			var entries = [];
-			
-			foreach(SemanticObject.collectNextSemanticObjects(node) as var object){
-				var subEntry = gui.create({
-					GUI.TYPE : GUI.TYPE_TREE_GROUP,
-					GUI.OPTIONS : [{	
-							GUI.TYPE : GUI.TYPE_CONTAINER,
-							GUI.CONTENTS : gui.createComponents({
-																	GUI.TYPE : GUI.TYPE_COMPONENTS,
-																	GUI.PROVIDER : 'ObjectEditor_ObjectEntry',
-																	GUI.CONTEXT  : object
-																}),
-							GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS,1,4 ]
-					}], 
-					GUI.FLAGS : GUI.COLLAPSED_ENTRY
-				});
-
-				//! \see SceneEditor.ObjectEditor.SemanticObjectEntryTrait
-				Traits.addTrait(subEntry, SceneEditor.ObjectEditor.SemanticObjectEntryTrait, object);
-				entries += subEntry;
-				entry.entryRegistry[object] = subEntry;
-			}
-
-			return entries;
-			
-		});
-		//! \todo if object has no sub objects, disable the default open marker (but still add the trait) 
-		if(SemanticObject.collectNextSemanticObjects(node).empty())
-			entry.clearSubentries();
-	};
-	
-}
-
 
 plugin.initGUI := fn(){
 
@@ -208,8 +141,8 @@ plugin.initGUI := fn(){
 						GUI.LABEL : "-",
 						GUI.WIDTH : 20,
 						GUI.ON_CLICK : [node,trait,refreshCallback] => fn(node,trait,refreshCallback){
-							if(Traits.queryTrait(node,trait))
-								Traits.removeTrait(node,trait);
+							if(Std.Traits.queryTrait(node,trait))
+								Std.Traits.removeTrait(node,trait);
 							refreshCallback();
 						}
 					};
@@ -243,7 +176,7 @@ plugin.initGUI := fn(){
 								GUI.LABEL : displayName,
 								GUI.WIDTH : 200,
 								GUI.ON_CLICK : [node,moduleId,refreshCallback] => fn(node,moduleId,refreshCallback){
-									Traits.addTrait(node,Std.require(moduleId) );
+									Std.Traits.addTrait(node,Std.require(moduleId) );
 									gui.closeAllMenus();
 									refreshCallback();
 								},
@@ -275,8 +208,8 @@ plugin.initGUI := fn(){
 					foreach(selectedComponents as var c){
 						c = c.getParentComponent();
 
-						//! \see SceneEditor.ObjectEditor.SemanticObjectEntryTrait
-						if(Traits.queryTrait(c,SceneEditor.ObjectEditor.SemanticObjectEntryTrait))
+						//! \see SemanticObjectEntryTrait
+						if(Std.Traits.queryTrait(c,SemanticObjectEntryTrait))
 							nodes += c.node;
 					}
 				}
@@ -291,23 +224,16 @@ plugin.initGUI := fn(){
 				return $REMOVE;
 			tv.destroyContents();
 			if(scene){
-				var rootEntry = gui.create({
-					GUI.TYPE : GUI.TYPE_TREE_GROUP,
-					GUI.OPTIONS : ["Scene","..."],
-					GUI.FLAGS : GUI.COLLAPSED_ENTRY
-				});
-				//! \see SceneEditor.ObjectEditor.SemanticObjectEntryTrait
-				Traits.addTrait(rootEntry,	SceneEditor.ObjectEditor.SemanticObjectEntryTrait, scene);
-				tv += rootEntry;
+				tv += SemanticObjectEntryTrait.createEntry(scene);
 			}
 		};
-		registerExtension('PADrend_OnSceneSelected',refreshTv);
+		Util.registerExtension('PADrend_OnSceneSelected',refreshTv);
 		
 		refreshTv(PADrend.getCurrentScene());
 
 		
 		// if an object is selected, select it in the object explorer
-		registerExtension('NodeEditor_OnNodesSelected',[tv]=>fn(tv,nodes){
+		Util.registerExtension('NodeEditor_OnNodesSelected',[tv]=>fn(tv,nodes){
 			if(tv.isDestroyed())
 				return $REMOVE;
 			tv.unmarkAll();
@@ -325,17 +251,13 @@ plugin.initGUI := fn(){
 			while(!objects.empty() && entry){
 				if(entry.isCollapsed())
 					entry.open();
-				
-//				if(!entry.entryRegistry){									//! \see SceneEditor.ObjectEditor.SemanticObjectEntryTrait
-//					Runtime.warn("(internal) Error in object explorer.");
-//					return;
-//				}
+
 				var nextObject = objects.popBack();
 				if(nextObject == entry.node) // special case: skip iff the nextObject is the scene and the entry is the root entry
 					continue;
 				
 				
-				var nextEntry = entry.entryRegistry[nextObject]; 			//! \see SceneEditor.ObjectEditor.SemanticObjectEntryTrait
+				var nextEntry = entry.entryRegistry[nextObject]; 			//! \see SemanticObjectEntryTrait
 				if(!nextEntry){
 					entry.refreshSubentries();								//! \see GUI.TreeViewEntry.DynamicSubentriesTrait
 					nextEntry = entry.entryRegistry[nextObject]; // try again

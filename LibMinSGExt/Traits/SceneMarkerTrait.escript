@@ -19,7 +19,7 @@
 	var scene;
 	var t = Std.require('LibMinSGExt/Traits/SceneMarkerTrait');
 	for(var n = node; n; n=n.getParent())
-		if( Std.queryTrait(n, t) )
+		if( Std.Traits.queryTrait(n, t) )
 			scene = n;
 	
 	outln("Node '",node,"' lies in scene '"+scene+"'");

@@ -62,6 +62,8 @@ static _defaultLight; // directional light 0; formerly known as PADrend.sun
 
 
 static SceneManager = Std.require( 'LibMinSGExt/SceneManagerExt' );
+static SceneMarkerTrait = Std.require('LibMinSGExt/Traits/SceneMarkerTrait');
+
 static initSceneManager = fn(sceneManager){
 	sceneManager.addSearchPath( Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/" );
 	sceneManager.registerNode( "L:Sun", _defaultLight );
@@ -69,17 +71,13 @@ static initSceneManager = fn(sceneManager){
 
 
 SceneManagement.init @(override) := fn(){
-	
 	defaultSceneManager = new SceneManager;
-
-	{
-		registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+2);
-		registerExtension('PADrend_OnSceneRegistered', Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree);
-	}
-	
+	Util.registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+2);
+	Util.registerExtension('PADrend_OnSceneRegistered', Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree);
 	return true;
 };
 
+//SceneManagement.init @(override) := fn(){
 
 //! [ext:PADrend_Init]
 SceneManagement.ex_Init := fn(...){
@@ -113,7 +111,7 @@ SceneManagement.ex_Init := fn(...){
 		// create dolly for camera
 		dolly = new MinSG.ListNode;
 		//! \see MinSG.DefaultDollyNodeTrait
-		Traits.addTrait( dolly,Std.require('LibMinSGExt/Traits/DefaultDollyNodeTrait'),camera );
+		Std.Traits.addTrait( dolly,Std.require('LibMinSGExt/Traits/DefaultDollyNodeTrait'),camera );
 
 
 		setConfigInfo('PADrend.Camera.observerPosition',"[x,y,z] or false. If false, the default 'angle'-based camera is used.");
@@ -151,15 +149,15 @@ SceneManagement.ex_Init := fn(...){
 		setConfigInfo('PADrend.sun',"Global directional light source.");
 		if(systemConfig.getValue('PADrend.sun.enabled',true)){
 			_defaultLight = new MinSG.LightNode;
-			this.initDefaultLightParameters();
+			SceneManagement.initDefaultLightParameters();
 			getRootNode() += _defaultLight;
-			this.lightingState := new MinSG.LightingState;
+			SceneManagement.lightingState := new MinSG.LightingState;
 			lightingState.setLight( _defaultLight );
-			getRootNode() += this.lightingState;
+			getRootNode() += SceneManagement.lightingState;
 		}
 
 		getRootNode().addChild(dolly);
-		this.createNewSceneRoot("new MinSG.ListNode",false);
+		SceneManagement.createNewSceneRoot("new MinSG.ListNode",false);
 	}
 	initSceneManager( defaultSceneManager );
 
@@ -179,15 +177,21 @@ SceneManagement.initDefaultLightParameters := fn(){
 // -------------------------------------------------------------
 
 SceneManagement.createNewSceneRoot := fn(String t,debugOutput=true){
-	var newSceneRoot = eval(t+";");
-	if(! newSceneRoot.isA(MinSG.Node) )
+	var scene = eval(t+";");
+	if(! scene.isA(MinSG.Node) )
 		return false;
 
-	newSceneRoot.name := "";
-
-	this.registerScene(newSceneRoot);
-	this.selectScene(newSceneRoot);
-	return newSceneRoot;
+	// init meta info
+	if(true){
+		var NodeMetaInfo = Std.require('LibMinSGExt/NodeMetaInfo');
+		var d = getDate();
+		NodeMetaInfo.accessMetaInfo_CreationDate(scene)("" + d["year"] + "-"+ d["mon"] + "-" + d["mday"] );
+		NodeMetaInfo.accessMetaInfo_Title(scene)("New_" + time().toHex() );
+		// ...	
+	}
+	this.registerScene(scene);
+	this.selectScene(scene);
+	return scene;
 };
 
 SceneManagement.deleteScene := fn(scene) {
@@ -217,10 +221,9 @@ SceneManagement.getDefaultSceneManager :=	fn( ){	return defaultSceneManager;	};
 SceneManagement.getSceneManager :=	fn( [MinSG.Node,void] scene=void){
 	if( !scene )
 		scene = activeScene;
-	//! \see LibMinSGExt/Traits/SceneMarkerTrait
+	//! \see SceneMarkerTrait
 	return scene&&scene.isSet($sceneData)&&scene.sceneData.isSet($sceneManager) ? scene.sceneData.sceneManager : defaultSceneManager;
 };
-
 	
 SceneManagement.getNamedMapOfAvaiableSceneManagers := fn(){
 	var m = new Map;
@@ -255,8 +258,8 @@ SceneManagement.loadScene := fn(filename,
 		sceneManager = SceneManagement.createNewSceneManager();
 	var sceneRoot = sceneManager.loadScene(filename,importOptions);
 	if(sceneRoot){
-		Std.Traits.assureTrait(sceneRoot,Std.require('LibMinSGExt/Traits/SceneMarkerTrait'));
-		sceneRoot.sceneData.sceneManager := sceneManager; //! \see LibMinSGExt/Traits/SceneMarkerTrait
+		Std.Traits.assureTrait(sceneRoot,SceneMarkerTrait);
+		sceneRoot.sceneData.sceneManager := sceneManager; //! \see SceneMarkerTrait
 		this.registerScene(sceneRoot);
 	}
 	return sceneRoot;
@@ -276,7 +279,7 @@ SceneManagement.mergeScenes := fn(targetScene,Collection scenes) {
 };
 
 SceneManagement.registerScene := fn(MinSG.Node scene) {
-	Std.Traits.assureTrait(scene,Std.require('LibMinSGExt/Traits/SceneMarkerTrait'));
+	Std.Traits.assureTrait(scene,SceneMarkerTrait);
 	
 	if(!registeredScenes.contains(scene)) 
 		registeredScenes.pushBack(scene);
@@ -284,8 +287,6 @@ SceneManagement.registerScene := fn(MinSG.Node scene) {
 	// store sceneManager in sceneData
 	if(!scene.sceneData.isSet($sceneManager)||!scene.sceneData.sceneManager)
 		scene.sceneData.sceneManager := defaultSceneManager;
-		
-	if(!scene.getAttribute('name')) scene.name:="";
 
 	if(!getCurrentScene())
 		selectScene(scene);

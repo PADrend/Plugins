@@ -112,11 +112,16 @@ plugin.registerStdToolbarEntries := fn() {
 	};
 	static openSaveSceneDialog = fn() {
 		var scene = PADrend.getCurrentScene();
+		
+		var filename = scene.isSet($filename) ? 
+								scene.filename : 
+								PADrend.getScenePath()+"/"+Std.require('LibMinSGExt/NodeMetaInfo').queryMetaInfo_Title(scene,"New")+".minsg";
+
 		gui.openDialog({
 			GUI.TYPE :		GUI.TYPE_FILE_DIALOG,
 			GUI.LABEL :		"Save scene",
 			GUI.ENDINGS :	[".minsg", ".dae", ".DAE"],
-			GUI.FILENAME : 	scene.isSet($filename) ? scene.filename : PADrend.getScenePath()+"/Neu.minsg",
+			GUI.FILENAME : 	filename,
 			GUI.ON_ACCEPT : [scene] => fn(scene, filename){
 						
 				var save = [scene,filename] => fn(scene,filename){
@@ -702,6 +707,7 @@ plugin.registerStdToolbarEntries := fn() {
 			return true;
 		};
 		sceneListView.update := fn(p...) {
+			var NodeMetaInfo = Std.require('LibMinSGExt/NodeMetaInfo');
 			var selected = getMarkedComponents();
 			var acticeScene=PADrend.getCurrentScene();
 			foreach(getContents() as var index,var entry){
@@ -713,12 +719,18 @@ plugin.registerStdToolbarEntries := fn() {
 					entry.selectLabel.setText("   #"+index+"    ");
 				}
 				var parts = [];
-				if(scene.isSet($name) && scene.name!="") parts += scene.name;
+				parts += NodeMetaInfo.queryMetaInfo_Title(scene,"");
 				if(scene.isSet($filename) && scene.filename!="") parts += "[ "+scene.filename+" ]";
-				
 				parts += "ID-Namspace: " + PADrend.SceneManagement.getNamedMapOfAvaiableSceneManagers()[ PADrend.SceneManagement.getSceneManager(scene) ];
 				
 				entry.nameLabel.setText( parts.implode(" : "));
+				entry.nameLabel.setTooltip( "" + 
+					"Title: "+NodeMetaInfo.queryMetaInfo_Title(scene,"?") + "\n"+
+					"Author: "+NodeMetaInfo.queryMetaInfo_Author(scene,"?") + "\n"+
+					"CreationDate: "+NodeMetaInfo.queryMetaInfo_CreationDate(scene,"?") + "\n"+
+					"License: "+NodeMetaInfo.queryMetaInfo_License(scene,"?") + "\n"+
+					"Note: "+NodeMetaInfo.queryMetaInfo_Note(scene,"") 
+				);
 			}
 		};
 
