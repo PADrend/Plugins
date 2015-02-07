@@ -12,8 +12,8 @@
  */
 
 //!	Collection of functions to store certain meta-information as node attributes.
-var getDataWrapper = fn(String key,MinSG.Node node){
-	if(!node.isSet($_metaInf))
+static getDataWrapper = fn(String key,MinSG.Node node){
+	if(!node.isSet($__metaInf))
 		node.__metaInf := new Map;
 	
 	var __metaInf = node.__metaInf;
@@ -33,6 +33,16 @@ var getDataWrapper = fn(String key,MinSG.Node node){
 	return __metaInf[key];
 
 };
+var query = fn(String key,MinSG.Node node, defaultValue=void){
+	if(node.isSet($__metaInf)){
+		var wrapper = node.__metaInf[key];
+		if(wrapper)
+			return ""==wrapper() ? defaultValue : wrapper();
+	}
+	var attr = node.getNodeAttribute(key);
+	return void==attr ? defaultValue : attr;
+};
+
 
 var NS = new Namespace;
 NS.accessMetaInfo_Author 			:= ["META_AUTHOR"] => getDataWrapper;
@@ -40,5 +50,10 @@ NS.accessMetaInfo_CreationDate 		:= ["META_CREATION_DATE"] => getDataWrapper;
 NS.accessMetaInfo_License 			:= ["META_LICENSE"] => getDataWrapper;
 NS.accessMetaInfo_Note 				:= ["META_NOTE"] => getDataWrapper;
 NS.accessMetaInfo_Title 			:= ["META_NAME"] => getDataWrapper;
+NS.queryMetaInfo_Author 			:= ["META_AUTHOR"] => query;
+NS.queryMetaInfo_CreationDate 		:= ["META_CREATION_DATE"] => query;
+NS.queryMetaInfo_License 			:= ["META_LICENSE"] => query;
+NS.queryMetaInfo_Note 				:= ["META_NOTE"] => query;
+NS.queryMetaInfo_Title 				:= ["META_NAME"] => query;
 
 return NS;
