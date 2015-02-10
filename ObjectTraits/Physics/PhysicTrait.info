@@ -1,6 +1,0 @@
-{
-	"moduleId" : "ObjectTraits/Physics/PhysicTrait",
-	"aliases" : ["ObjectTraits/PhysicTrait"],
-	"description" : "Node is influenced by physics.",
-	"displayName" : "Physics/PhysicTrait"
-}
