@@ -40,7 +40,9 @@ t.attributes.refresh := fn(){Runtime.exception("This method is not implemented."
 t.onInit += fn(GUI.Container container, contentDescription = void){
 	if(void!==contentDescription){
 		container.refresh := [contentDescription] => fn(contentDescription){
-			if(!this.isDestroyed()){
+			if(this.isDestroyed()){
+				return $REMOVE;
+			}else{
 				this.destroyContents();
 				foreach( gui.createComponents(contentDescription) as var c)
 					this += c;
