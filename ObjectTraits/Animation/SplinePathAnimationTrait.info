@@ -1,6 +1,6 @@
 {
-	"moduleId" : "ObjectTraits/Misc/SplinePathAnimationTrait",
+	"moduleId" : "ObjectTraits/Animation/SplinePathAnimationTrait",
 	"aliases" : ["ObjectTraits/SplinePathAnimationTrait"],
 	"description" : "Animate an object along a spline path.",
-	"displayName" : "Misc/SplinePathAnimationTrait"
+	"displayName" : "Animation/SplinePathAnimationTrait"
 }

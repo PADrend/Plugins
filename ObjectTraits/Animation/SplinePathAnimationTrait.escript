@@ -17,10 +17,11 @@ var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.Node node){
-	static roleName = "spline_splineNode";
+	static roleName = "splineNode";
 	node.spline_splineNode := new DataWrapper;
 	node.animationSpeed := node.getNodeAttributeWrapper('spline_animationSpeed', 1 );
-	node.repeatAnimation := node.getNodeAttributeWrapper('spline_repeatAnimation', false );;
+	node.repeatAnimation := node.getNodeAttributeWrapper('spline_repeatAnimation', false );
+	node.distanceOffset := node.getNodeAttributeWrapper('spline_distanceOffset', 0 );
 	//! \see ObjectTraits/NodeLinkTrait
 	Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));
 
@@ -50,7 +51,7 @@ trait.onInit += fn(MinSG.Node node){
 		};
 	}
 
-	Traits.assureTrait(node,module('../Animation/_AnimatedBaseTrait'));
+	Traits.assureTrait(node,module('./_AnimatedBaseTrait'));
 
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
@@ -58,12 +59,19 @@ trait.onInit += fn(MinSG.Node node){
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationPlay += fn(time,lastTime){
+//		var mb = new Rendering.MeshBuilder;
+//		mb.color(new Util.Color4f(0,1,0,0.4));
+//		mb.addSphere( new Geometry.Sphere([0,0,0],0.3),10,2 );
+//		var posMesh = mb.buildMesh();
 		if(this.spline_splineNode()){
 			var splineLength = this.spline_splineNode().getSplineLength();
 			var currentDistance = this.repeatAnimation() ?
 				(this.animationSpeed() * time) % splineLength :
 				(this.animationSpeed() * time).clamp(0,splineLength);
-			var transacormation = this.spline_splineNode().getTransformationAtLength(currentDistance);
+			var transacormation = this.spline_splineNode().getTransformationAtLength(currentDistance + this.distanceOffset());
+//			var n = new MinSG.GeometryNode(posMesh);
+//			n.setRelOrigin(transacormation);
+//			this.spline_splineNode()+=n;
 			if(transacormation.isA(Geometry.Vec3))
 				this.setWorldOrigin(this.spline_splineNode().localPosToWorldPos(transacormation));
 			else{
@@ -72,7 +80,6 @@ trait.onInit += fn(MinSG.Node node){
 			}
 
 		}else outln("No spline node selected!");
-
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
@@ -94,6 +101,14 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.WIDTH : 200,
 				GUI.DATA_WRAPPER : node.animationSpeed
 			},
+			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+			{
+				GUI.TYPE : GUI.TYPE_NUMBER,
+				GUI.LABEL : " dist. offset",
+				GUI.WIDTH : 150,
+				GUI.DATA_WRAPPER : node.distanceOffset
+			},
+			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.LABEL : "Rep. anim.",
