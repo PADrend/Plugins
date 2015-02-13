@@ -111,7 +111,7 @@ static openMenu = fn(pointNr, data, event){
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Straighten",
 			GUI.ON_CLICK: [pointNr, data.spline_controlPoints] =>fn(pointNr, points){
-				var arr = points();
+				var arr = points().clone();
 				if(arr[pointNr+1])
 					arr[pointNr+1].location = new Geometry.Vec3(arr[pointNr].getPosition().x() + 5, arr[pointNr].getPosition().y(), arr[pointNr].getPosition().z());
 				if(arr[pointNr-1])
@@ -192,17 +192,25 @@ static rebuildSplineMesh = fn( data ){
 	}
 
 
-	var splinePoints = data.splineNode.spline_createSplinePoints(0.05);
+	var splinePoints = data.splineNode.spline_createSplinePoints(0.0005);
 	if(!splinePoints.empty()){
 
 		var builder = new Rendering.MeshBuilder;
 		builder.normal(new Geometry.Vec3(0,0,1));
 		builder.color(new Util.Color4f(0.2,0,0,0.1));
+		//-------------------test---------------
+//		var mb = new Rendering.MeshBuilder;
+//		mb.color(new Util.Color4f(0,1,0,0.4));
+//		mb.addSphere( new Geometry.Sphere([0,0,0],0.3),5,5 );
+//		var posMesh = mb.buildMesh();
 
 		foreach(splinePoints as var i, var point){
 			if(i>0)
 				builder.position(point).addVertex();
 			builder.position(point).addVertex();
+//			var n = new MinSG.GeometryNode(posMesh);
+//			n.setRelOrigin(point);
+//			data.splineNode +=n;
 		}
 		var m = builder.buildMesh();
 		m.setDrawLines();

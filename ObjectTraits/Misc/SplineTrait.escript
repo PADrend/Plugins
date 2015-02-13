@@ -116,11 +116,12 @@ trait.onInit += fn( MinSG.GroupNode node){
 			var distancesMap = new (Std.require('LibUtilExt/NumberKeyMap')); // length -> splineValue_t
 			var distance = 0;
 			var lastPoint;
-			var stepSize_t = 0.05;
+			var stepSize_t = 0.0005;
 			foreach(splineNode.spline_createSplinePoints(stepSize_t) as var step, var position){
 				distance += lastPoint ? lastPoint.distance(position) : 0;
 				lastPoint = position;
 				distancesMap.insert(distance, step*stepSize_t);
+
 			}
 			distancesMapWrapper(distancesMap);
 		}
