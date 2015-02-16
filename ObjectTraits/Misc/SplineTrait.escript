@@ -2,8 +2,8 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2014 Claudius Jähn <claudius@uni-paderborn.de>
- * Copyright (C) 2014 Mouns Almarrani <murrani@mail.upb.de>
+ * Copyright (C) 2014-2015 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2014-2015 Mouns Almarrani <murrani@mail.upb.de>
  *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -12,6 +12,23 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
+ /*! A GroupNode becomes a container for a s spline curve (cubic bezier).
+	The splie's control points are saved with the node as node attribute.
+	Adds the following public members:
+	
+	- spline_controlPoints 						DataWrapper for ControlPoints*
+												Extend to update the spline.
+	- spline_createControlPoint(SRT|Vec3) -> ControlPoint 	Factory for control points; 
+												manually add to spline_controlPoints.
+	- spline_calcPositions(stepSize for t) -> { t -> Vec3 }
+ 
+	- spline_calcLocation(t) -> SRT|Vec3
+	- spline_calcLocationByLength(t) -> SRT|Vec3
+	- spline_calcLength() -> Number
+ 
+	\note Auxiliary Traits (like the SplineEditTrait) may add child nodes to the group node.
+		No persistant "normal" child node should be addded to the node.
+ */
 
 var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
@@ -55,29 +72,31 @@ trait.onInit += fn( MinSG.GroupNode node){
 		serializedSplineControlpoints(toJSON(serializedPoints,false));
 	};
 
-	node.spline_createSplinePoints := fn(Number stepSize){
+	node.spline_calcPositions := fn(Number stepSize){
+		var splineCurvePoints = new Map;
+
 		var points = this.spline_controlPoints();
-		if((points.size()-4) % 3 == 0){
-			var splineCurvePoints = [];
+		if((points.size()-4) % 3 != 0){
+			Runtime.warn("Ivalid number of points" );
+		}else{
+			var t = 0;
 			for(var index = 0; index < points.size()-1; index +=3){
 				var p0 = points[index].getPosition();
 				var p1 = points[index+1].getPosition();
 				var p2 = points[index+2].getPosition();
 				var p3 = points[index+3].getPosition();
-				for(var i = 0; i<=1.00001; i+=stepSize)
-					splineCurvePoints += Geometry.interpolateCubicBezier(p0,p1,p2,p3, i);
-
+				for(var i = 0; i< 0.99995; i+=stepSize)
+					splineCurvePoints[t+i] = Geometry.interpolateCubicBezier(p0,p1,p2,p3, i);
+				++t;
 			}
-			return splineCurvePoints;
+			if(!points.empty())
+				splineCurvePoints[t] = points.back().getPosition();
+//			print_r(splineCurvePoints);
 		}
-		else{
-			Runtime.warn("No. of points is not 7 divisible!" );
-			return [];
-		}
-
+		return splineCurvePoints;
 	};
 
-	node.spline_calculateTransformation := fn(Number t){
+	node.spline_calcLocation := fn(Number t){
 		var points = this.spline_controlPoints();
 
 		if(points.empty())
@@ -116,22 +135,20 @@ trait.onInit += fn( MinSG.GroupNode node){
 			var distancesMap = new (Std.require('LibUtilExt/NumberKeyMap')); // length -> splineValue_t
 			var distance = 0;
 			var lastPoint;
-			var stepSize_t = 0.0005;
-			foreach(splineNode.spline_createSplinePoints(stepSize_t) as var step, var position){
+			foreach(splineNode.spline_calcPositions(0.01) as var t, var position){
 				distance += lastPoint ? lastPoint.distance(position) : 0;
 				lastPoint = position;
-				distancesMap.insert(distance, step*stepSize_t);
-
+				distancesMap.insert(distance, t);
 			}
 			distancesMapWrapper(distancesMap);
 		}
 	};
-	node.getSplineLength := [distancesMapWrapper]=>fn(distancesMapWrapper){
+	node.spline_calcLength := [distancesMapWrapper]=>fn(distancesMapWrapper){
 		updateDistanceMap(distancesMapWrapper,this);
 		return distancesMapWrapper().getMaxKey();
 	};
 
-	node.getTransformationAtLength := [distancesMapWrapper]=>fn(distancesMapWrapper, Number length){
+	node.spline_calcLocationByLength := [distancesMapWrapper]=>fn(distancesMapWrapper, Number length){
 		updateDistanceMap(distancesMapWrapper,this);
 		[var lEntry,var rEntry] = distancesMapWrapper().getNeighbors(length);
 		var t;
@@ -142,7 +159,7 @@ trait.onInit += fn( MinSG.GroupNode node){
 		}else{
 			t = lEntry[1] + (rEntry[1]-lEntry[1]) * (length-lEntry[0]) / (rEntry[0]-lEntry[0]);
 		}
-		return this.spline_calculateTransformation(t);
+		return this.spline_calcLocation(t);
 
 	};
 

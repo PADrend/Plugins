@@ -2,8 +2,8 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2014 Claudius Jähn <claudius@uni-paderborn.de>
- * Copyright (C) 2014 Mouns Almarrani <murrani@mail.upb.de>
+ * Copyright (C) 2014-2015 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2014-2015 Mouns Almarrani <murrani@mail.upb.de>
  *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -109,17 +109,19 @@ static openMenu = fn(pointNr, data, event){
 		},
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
-			GUI.LABEL : "Straighten",
+			GUI.LABEL : "Corner",
 			GUI.ON_CLICK: [pointNr, data.spline_controlPoints] =>fn(pointNr, points){
-				var arr = points().clone();
-				if(arr[pointNr+1])
-					arr[pointNr+1].location = new Geometry.Vec3(arr[pointNr].getPosition().x() + 5, arr[pointNr].getPosition().y(), arr[pointNr].getPosition().z());
-				if(arr[pointNr-1])
-					arr[pointNr-1].location = new Geometry.Vec3(arr[pointNr].getPosition().x() - 5, arr[pointNr].getPosition().y(), arr[pointNr].getPosition().z());
+				var pos = points()[pointNr].getPosition();
+				var prev = points()[pointNr-3];
+				if(prev)
+					points()[pointNr-1].location = pos*0.75 + prev.getPosition()*0.25;
+				var next = points()[pointNr+3];
+				if(next)
+					points()[pointNr+1].location = pos*0.75 + next.getPosition()*0.25;
 				points.forceRefresh();
 			}
 		},
-		// Test the function getTransformationAtLength(Number) see splineTrait!
+		// Test the function spline_calcLocationByLength(Number) see splineTrait!
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "dist.",
@@ -129,6 +131,47 @@ static openMenu = fn(pointNr, data, event){
 			}
 
 		}
+	], 100);
+};
+static openMenu2 = fn(pointNr, data, event){
+	gui.openMenu(new Geometry.Vec2(event.x, event.y),[
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Set straight",
+			GUI.ON_CLICK: [pointNr, data.spline_controlPoints] =>fn(pointNr, points){
+				if(pointNr%3 == 1){
+					var pos = points()[pointNr-1].getPosition();
+					var other = points()[pointNr+2];
+					if(other)
+						points()[pointNr].location = pos*0.75 + other.getPosition()*0.25;
+				}else if(pointNr%3 == 2){
+					var pos = points()[pointNr+1].getPosition();
+					var other = points()[pointNr-2];
+					if(other)
+						points()[pointNr].location = pos*0.75 + other.getPosition()*0.25;
+				}
+				points.forceRefresh();
+			}
+		},
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Set smooth",
+			GUI.ON_CLICK: [pointNr, data.spline_controlPoints] =>fn(pointNr, points){
+				if(pointNr%3 == 1){
+					var pos = points()[pointNr-1].getPosition();
+					var other = points()[pointNr-2];
+					if(other)
+						points()[pointNr].location = pos*2.0 - other.getPosition();
+				}else if(pointNr%3 == 2){
+					var pos = points()[pointNr+1].getPosition();
+					var other = points()[pointNr+2];
+					if(other)
+						points()[pointNr].location = pos*2.0 - other.getPosition();
+				}
+				points.forceRefresh();
+			}
+		},
+		
 	], 100);
 };
 
@@ -142,40 +185,43 @@ static rebuildEditNodes = fn( data ){
 
 	foreach(data.spline_controlPoints() as var pointNr, var point){
 		var geoNode = new MinSG.GeometryNode;
+		geoNode.setTempNode(true);
 		geoNode.setRelOrigin(point.getPosition());
 //		geoNode.setRelScaling(0.3);
 
 		if(pointNr % 3== 0)
 			geoNode.onClick := [pointNr, data] => openMenu;
-
+		else
+			geoNode.onClick := [pointNr, data] => openMenu2;
 
 		Std.Traits.assureTrait(geoNode, TransformationObserverTrait );
 		geoNode.onNodeTransformed += [pointNr, data]=>fn(pointNr, data, ...){
-			++data.localTransformationInProgress;
-			var arr = data.spline_controlPoints();
+			if(data.detectNodeTransformations){
+				++data.editNodeTransformationInProgress;
+				var arr = data.spline_controlPoints();
 
-			if(pointNr % 3 == 0){
-				var deltaMovement =  this.getRelOrigin()-arr[pointNr].getPosition();
-				if(arr[pointNr+1]){
-					arr[pointNr+1].location += deltaMovement;
-					data.editNodes[pointNr+1].moveRel( deltaMovement );
+				if(pointNr % 3 == 0){
+					var deltaMovement =  this.getRelOrigin()-arr[pointNr].getPosition();
+					if(arr[pointNr+1]){
+						arr[pointNr+1].location += deltaMovement;
+						data.editNodes[pointNr+1].moveRel( deltaMovement );
+					}
+					if(arr[pointNr-1]){
+						arr[pointNr-1].location +=  deltaMovement;
+						data.editNodes[pointNr-1].moveRel( deltaMovement );
+					}
 				}
-				if(arr[pointNr-1]){
-					arr[pointNr-1].location +=  deltaMovement;
-					data.editNodes[pointNr-1].moveRel( deltaMovement );
-				}
+				if(arr[pointNr].location.isA(Geometry.Vec3))
+					arr[pointNr].location.setValue(this.getRelOrigin());
+				else // srt
+					arr[pointNr].location.setValue( this.getRelTransformationSRT() );
+
+				--data.editNodeTransformationInProgress;
+				if( data.editNodeTransformationInProgress == 0)
+					data.spline_controlPoints.forceRefresh();
 			}
-			if(arr[pointNr].location.isA(Geometry.Vec3))
-				arr[pointNr].location.setValue(this.getRelOrigin());
-			else // srt
-				arr[pointNr].location.setValue( this.getRelTransformationSRT() );
-
-			--data.localTransformationInProgress;
-			if( data.localTransformationInProgress == 0)
-				data.spline_controlPoints.forceRefresh();
 		};
 
-		geoNode.setTempNode(true);
 		data.editNodes += geoNode;
 		data.splineNode += geoNode;
 	};
@@ -192,7 +238,7 @@ static rebuildSplineMesh = fn( data ){
 	}
 
 
-	var splinePoints = data.splineNode.spline_createSplinePoints(0.0005);
+	var splinePoints = data.splineNode.spline_calcPositions(0.05);
 	if(!splinePoints.empty()){
 
 		var builder = new Rendering.MeshBuilder;
@@ -239,7 +285,7 @@ static rebuildSplineMesh = fn( data ){
 	for(var i=0; i<points.count()-3; i+=3){
 		if(points[i].location.isA(Geometry.SRT) && points[i+3].location.isA(Geometry.SRT) ){
 			for(var d=0;d<=1.001;d+=0.1){
-				var srt = data.splineNode.spline_calculateTransformation(i/3+d);
+				var srt = data.splineNode.spline_calcLocation(i/3+d);
 				if(srt.isA(Geometry.SRT)){
 					var yVec = srt.getUpVector();
 					var zVec = srt.getDirVector();
@@ -292,10 +338,18 @@ static updateEditNodes = fn( data ){
 			srtMesh = mb.buildMesh();
 		}
 	}
-
-	++data.localTransformationInProgress;
+	var requireRebuild = false;
+	data.detectNodeTransformations = false;
+	var bb = new Geometry.Box;
+	bb.invalidate();
 	foreach(data.spline_controlPoints() as var pointNr, var point){
 		var editNode = data.editNodes[pointNr];
+		if(!editNode.getParent()){ // if the user accidentally deleted a control node.
+			outln("Rebuild required!");
+			requireRebuild = true;
+			continue;
+		}
+		bb.include(point.getPosition());
 		if(pointNr % 3 != 0){
 			editNode.setMesh(controlMesh);
 			editNode.setRelOrigin(point.location);
@@ -307,13 +361,19 @@ static updateEditNodes = fn( data ){
 			editNode.setRelTransformation(point.location);
 		}
 	}
-	--data.localTransformationInProgress;
+	var scale = bb.getDiameter() / 30;
+	foreach(data.spline_controlPoints() as var pointNr, var point){
+		data.editNodes[pointNr].setScale(scale);
+	}
+	data.detectNodeTransformations = true;
+	return requireRebuild;
 };
 
 trait.onInit += fn( MinSG.GroupNode splineNode){
 	Std.Traits.assureTrait(splineNode,module('./SplineTrait'));
 	var data = new ExtObject;
-	data.localTransformationInProgress := 0;
+	data.editNodeTransformationInProgress := 0;
+	data.detectNodeTransformations := false;
 	data.editNodes := [];
 	data.curveNode := void;
 	data.additionalLinesNode := void;
@@ -321,12 +381,15 @@ trait.onInit += fn( MinSG.GroupNode splineNode){
 	data.splineNode := splineNode;
 
 	data.spline_controlPoints.onDataChanged += [data]=>fn(data, ...){
-		if(data.localTransformationInProgress==0){
+//		if(data.editNodeTransformationInProgress==0){
 			if( data.editNodes.count()!=data.spline_controlPoints().count() )
 				rebuildEditNodes(data);
-			updateEditNodes(data);
+			if(updateEditNodes(data)){
+				rebuildEditNodes(data);
+				updateEditNodes(data);
+			}
 			rebuildSplineMesh(data);
-		}
+//		}
 
 	};
 
@@ -335,12 +398,12 @@ trait.onInit += fn( MinSG.GroupNode splineNode){
 	rebuildSplineMesh(data);
 };
 
-// Test the function getTransformationAtLength(Number) see splineTrait!
+// Test the function spline_calcLocationByLength(Number) see splineTrait!
 static doIt = fn(Number v, data){
-	var totallenghth = data.splineNode.getSplineLength(data);
+	var totallenghth = data.splineNode.spline_calcLength(data);
 	var distance = totallenghth / 10;
 	for(var l = 0; l <=totallenghth; l+=distance){
-		var transformation = data.splineNode.getTransformationAtLength(l,data);
+		var transformation = data.splineNode.spline_calcLocationByLength(l,data);
 		var geoNode = new MinSG.GeometryNode;
 		var mb = new Rendering.MeshBuilder;
 		mb.color(new Util.Color4f(1,0,1,0.4));

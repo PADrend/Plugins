@@ -345,7 +345,7 @@ tests += new AutomatedTest( "MinSG: NodeQuery",fn(){
 
 		/*
 					root
-		         /         \
+				 /         \
 				l0(foo)     l1(bar)
 							|
 							l10
@@ -498,5 +498,36 @@ tests += new AutomatedTest( "MinSG: Persistent node traits",fn(){
 });
 
 // -----------------------------------------------------------------------------------------------
+tests += new AutomatedTest( "MinSG: SplineTrait",fn(){
+	var ok = true;
+	
+	var splineNode = new MinSG.ListNode;
+//  module('LibMinSGExt/SemanticObject').markAsSemanticObject(splineNode);
+	Traits.addTrait( splineNode, Std.require('ObjectTraits/Misc/SplineTrait'));
 
+	var points = [];
+
+	points += splineNode.spline_createControlPoint( new Geometry.Vec3(0,0,0) );
+	points += splineNode.spline_createControlPoint( new Geometry.Vec3(-18,10,0) );
+	points += splineNode.spline_createControlPoint( new Geometry.Vec3(9.15,-0.6,0) );
+	points += splineNode.spline_createControlPoint( new Geometry.Vec3(14.15, -0.6, 0) );
+	points += splineNode.spline_createControlPoint( new Geometry.Vec3(38.3, 1.9,0) );
+	points += splineNode.spline_createControlPoint( new Geometry.Vec3(16.25, -2.2,0) );
+	points += splineNode.spline_createControlPoint( new Geometry.Vec3(20,0,0) );
+
+	splineNode.spline_controlPoints(points);
+	var splineLength = splineNode.spline_calcLength();
+	
+	var stepSize = 0.05;
+	
+	var p;
+	for(var d=0; d<splineLength-stepSize; d+=stepSize){
+		var p2 = splineNode.spline_calcLocationByLength(d);
+		if(p)
+			ok &= (p.distance(p2)-stepSize).abs() / stepSize < 0.10;
+//			outln(d,"\t",p.distance(p2));
+		p = p2;
+	}
+	addResult("Approximate distances", ok);
+}); 
 return tests;

@@ -64,11 +64,11 @@ trait.onInit += fn(MinSG.Node node){
 //		mb.addSphere( new Geometry.Sphere([0,0,0],0.3),10,2 );
 //		var posMesh = mb.buildMesh();
 		if(this.spline_splineNode()){
-			var splineLength = this.spline_splineNode().getSplineLength();
+			var splineLength = this.spline_splineNode().spline_calcLength();
 			var currentDistance = this.repeatAnimation() ?
 				(this.animationSpeed() * time) % splineLength :
 				(this.animationSpeed() * time).clamp(0,splineLength);
-			var transacormation = this.spline_splineNode().getTransformationAtLength(currentDistance + this.distanceOffset());
+			var transacormation = this.spline_splineNode().spline_calcLocationByLength(currentDistance + this.distanceOffset());
 //			var n = new MinSG.GeometryNode(posMesh);
 //			n.setRelOrigin(transacormation);
 //			this.spline_splineNode()+=n;
