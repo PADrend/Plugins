@@ -227,6 +227,99 @@ HelperTraits.TriangleSelectionListenerTrait := new Traits.GenericTrait("HelperTr
 
 // -----------------------------------------------------------------------------------
 
+/*!	Adds a handler that is called whenever the MeshEditor's vertex selection changes.
+	The handler is also called when the listener is started with the initially selected vertex 
+	and -- if nodes are selected while the listener is finalized -- when the listener is finalized 
+	with an empty array.
+
+	Adds the following methods:
+	
+	- finalizeVertexSelectionListener		Disables the listening and if triangles are selected, calls the onTrianglesSelected 
+											handlers with an empty array. (may be safely called if already disabled).
+	- getSelectedVertices					returns the array of currently selected triangle.
+	- onVerticesSelected(triangles)			MultiProcedure called when the triangle selection changes. The selected triangles are given as parameter.
+	- onVerticesSelected_static(triangles)	Static MultiProcedure called when the triangle selection changes. The selected triangle are given as parameter.
+	- startVertexSelectionListener			Enables the listening and calls the onTrianglesSelected handlers
+											with the initially selected triangles (may be safely called if already enabled) 
+	- getVertexOrigin						returns the origin (Geometry.Vec3) of all selected triangles.
+
+	\see MeshEditor Plugin
+*/
+HelperTraits.VertexSelectionListenerTrait := new Traits.GenericTrait("HelperTraits.VertexSelectionListenerTrait");
+{
+	var t = HelperTraits.VertexSelectionListenerTrait;
+	
+	t.attributes._vertexSelectionChangedHandler @(private) := void; 
+	t.attributes._selectedVertices @(private,init) := Array;
+	t.attributes._vertexOrigin @(private,init) := Geometry.Vec3;
+
+	t.attributes.onVerticesSelected_static ::= void;
+	t.attributes.onVerticesSelected @(init) := Std.MultiProcedure;
+
+	t.attributes.startVertexSelectionListener ::= fn(){
+		if(!_vertexSelectionChangedHandler){
+			_vertexSelectionChangedHandler = this->fn(Array vertices){
+				_selectedVertices.swap(vertices.clone());
+				onVerticesSelected_static(_selectedVertices);
+				onVerticesSelected(_selectedVertices);
+			};
+			registerExtension('MeshEditor_OnVerticesSelected', _vertexSelectionChangedHandler);
+			_vertexSelectionChangedHandler( MeshEditor.getSelectedVertices() );
+		}
+		return this;
+	};
+	t.attributes.finalizeVertexSelectionListener ::= fn(){
+		if(_vertexSelectionChangedHandler){
+			removeExtension('MeshEditor_OnVerticesSelected', _vertexSelectionChangedHandler);
+			if(!_selectedVertices.empty())
+				_vertexSelectionChangedHandler( [] ); //clean up by calling handler with empty array.
+			_vertexSelectionChangedHandler = void;
+		}
+		return this;
+	};
+	
+	t.attributes.getSelectedVertices ::= fn(){
+		return _selectedVertices;
+	};
+	
+	t.attributes._calculateVertexOrigin ::= fn() {
+		if(!getSelectedMesh() || _selectedVertices.empty()) {
+			_vertexOrigin.setValue(0,0,0);
+			return;
+		}
+		var mesh = getSelectedMesh();
+		var posAcc = Rendering.PositionAttributeAccessor.create(mesh, Rendering.VertexAttributeIds.POSITION);	
+		// TODO: handle meshes without index buffer
+		var indices = mesh._getIndices();
+		_vertexOrigin.setValue(0,0,0);
+		foreach(_selectedVertices as var idx) {		
+			_vertexOrigin += posAcc.getPosition(indices[idx]);
+		}
+		_vertexOrigin /= _selectedVertices.size();
+	};
+	
+	t.attributes.getVertexOrigin ::= fn() {		
+		return _vertexOrigin;
+	};
+		
+	t.onInit += fn(obj){
+		obj.onVerticesSelected_static = new MultiProcedure;
+		Traits.assureTrait(obj, ToolHelperTraits.NodeSelectionListenerTrait);
+		Traits.assureTrait(obj, HelperTraits.TriangleSelectionListenerTrait);
+	
+		//! \see ToolHelperTraits.NodeSelectionListenerTrait
+		obj.onNodesSelected_static += fn(Array nodes){
+			_calculateVertexOrigin(); 
+		};
+		
+		obj.onVerticesSelected_static += fn(...){
+			_calculateVertexOrigin(); 
+		};
+	};
+}
+
+// -----------------------------------------------------------------------------------
+
 /*!	Adds methods for highlighting selected triangles.
 	Adds the following methods:
 
@@ -321,6 +414,93 @@ HelperTraits.TriangleHighlightTrait := new Traits.GenericTrait("HelperTraits.Tri
 	};
 }
 
+// -----------------------------------------------------------------------------------
+
+/*!	Adds methods for highlighting selected vertices.
+	Adds the following methods:
+
+	- enableVertexHighlight()	Enables the highlighting of vertices.
+	- disableVertexHighlight()	Disables the highlighting of vertices.
+	- isVertexHighlightActive()	Returns whether the highlighting is enabled.
+
+*/
+HelperTraits.VertexHighlightTrait := new Traits.GenericTrait("HelperTraits.VertexHighlightTrait");
+{
+	var t = HelperTraits.VertexHighlightTrait;
+		
+	t.attributes._revoceAfterRenderVertex @(private) := void; // void | MultiProcedure
+
+	t.attributes.enableVertexHighlight ::= fn(){
+		if(!this._revoceAfterRenderVertex){
+			this._revoceAfterRenderVertex = new Std.MultiProcedure;
+			this._revoceAfterRenderVertex += Util.registerExtensionRevocably('PADrend_AfterRenderingPass', this->this.highlightVertices); 
+		}
+		return this;
+	};
+
+	t.attributes.disableVertexHighlight ::= fn(){
+		if(this._revoceAfterRenderVertex){
+			this._revoceAfterRenderVertex();
+			this._revoceAfterRenderVertex = void;
+		}
+		return this;
+	};
+	t.attributes.isVertexHighlightActive ::= fn(){
+		return true & this._revoceAfterRenderVertex;
+	};
+	t.attributes.highlightVertices ::= fn(...) {
+		var nodes = getSelectedNodes();
+		if(nodes.empty())
+			return;
+		var node = nodes[0];
+		if(!(node ---|> MinSG.GeometryNode))
+			return;
+		var vertices = getSelectedVertices();			
+		var mesh = node.getMesh();		
+		var maxCount = mesh.getIndexCount();
+		
+		renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
+		renderingContext.multMatrix_modelToCamera(node.getWorldTransformationMatrix());
+		
+		renderingContext.pushAndSetLighting(false);
+		renderingContext.pushAndSetDepthBuffer(true,false,Rendering.Comparison.LEQUAL);
+		
+		// draw wireframe
+		renderingContext.pushAndSetPolygonMode(Rendering.PolygonModeParameters.LINE);
+		renderingContext.pushAndSetLine(1);
+		renderingContext.pushAndSetColorMaterial(new Util.Color4f(0,0,0,1));			
+		frameContext.displayMesh(mesh);			
+		renderingContext.popMaterial();
+		renderingContext.popLine();
+		renderingContext.popPolygonMode();
+		renderingContext.popDepthBuffer();
+		
+		renderingContext.pushAndSetDepthBuffer(false,false,Rendering.Comparison.ALWAYS);
+				
+		//renderingContext.pushAndSetPolygonMode(Rendering.PolygonModeParameters.POINT);
+		renderingContext.pushAndSetPointParameters(new Rendering.PointParameters(10));
+		renderingContext.pushAndSetColorMaterial(new Util.Color4f(1,0.5,0.5,1));
+		var mode = mesh.getDrawMode();
+		mesh.setDrawPoints();
+		foreach(vertices as var v) {
+			if(v < maxCount)
+				frameContext.displayMesh(mesh,v,1);
+		}
+		mesh.setDrawMode(mode);
+		renderingContext.popMaterial();
+		renderingContext.popPointParameters();
+		//renderingContext.popPolygonMode();
+		
+		renderingContext.popDepthBuffer();
+		renderingContext.popLighting();
+		
+		renderingContext.popMatrix_modelToCamera();
+	};
+	t.onInit += fn(obj){
+		Traits.requireTrait(obj, "ToolHelperTraits.NodeSelectionListenerTrait");
+		Traits.requireTrait(obj, "HelperTraits.VertexSelectionListenerTrait");
+	};
+}
 // -----------------------------------------------------------------------------------
 
 /*!	Adds methods to handle the transformation of triangles based on Commands.
@@ -421,6 +601,7 @@ HelperTraits.MeshTransformationHandlerTrait := new Traits.GenericTrait("HelperTr
 	t.onInit += fn(obj){
 		Traits.assureTrait(obj, HelperTraits.TriangleSelectionListenerTrait);
 		Traits.assureTrait(obj,ToolHelperTraits.NodeSelectionListenerTrait);
+		Traits.assureTrait(obj, HelperTraits.VertexSelectionListenerTrait);
 	
 		//! \see HelperTraits.TriangleSelectionListenerTrait
 		obj.onTrianglesSelected_static += fn(Array triangles){
@@ -437,6 +618,20 @@ HelperTraits.MeshTransformationHandlerTrait := new Traits.GenericTrait("HelperTr
 				vertices += indices[3*t+2];
 			}
 			setTransformedVertices(vertices.toArray()); 
+		};
+	
+		//! \see HelperTraits.TriangleSelectionListenerTrait
+		obj.onVerticesSelected_static += fn(Array vertices){
+			if(vertices.empty() || !_transformedMesh) {
+				setTransformedVertices([]); 
+				return;
+			}
+			var indices = _transformedMesh._getIndices();
+			var vIndices = new Set;
+			foreach(vertices as var v) {
+				vIndices += indices[v];
+			}
+			setTransformedVertices(vIndices.toArray()); 
 		};
 		
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait
@@ -469,6 +664,20 @@ HelperTraits.MeshTransformationHandlerTrait := new Traits.GenericTrait("HelperTr
 HelperTraits.GenericMeshEditTrait := new Traits.GenericTrait("HelperTraits.GenericMeshEditTrait");{
 	var t = HelperTraits.GenericMeshEditTrait;
 	
+	t.attributes.setVertexEditMode ::= fn(value){ 
+		if(value) {
+			disableHighlight();
+			finalizeTriangleSelectionListener();
+			startVertexSelectionListener();
+			enableVertexHighlight();
+		} else {
+			disableVertexHighlight();
+			finalizeVertexSelectionListener();
+			startTriangleSelectionListener();
+			enableHighlight();
+		}
+	};
+	
 	t.onInit += fn(obj){
 		//! \see HelperTraits.UIEventListenerTrait
 		Traits.addTrait(obj,HelperTraits.UIEventListenerTrait);
@@ -497,6 +706,12 @@ HelperTraits.GenericMeshEditTrait := new Traits.GenericTrait("HelperTraits.Gener
 		//! \see HelperTraits.TriangleHighlightTrait
 		Traits.addTrait(obj, HelperTraits.TriangleHighlightTrait);
 		
+		//! \see HelperTraits.VertexSelectionListenerTrait
+		Traits.addTrait(obj, HelperTraits.VertexSelectionListenerTrait);
+		
+		//! \see HelperTraits.VertexHighlightTrait
+		Traits.addTrait(obj, HelperTraits.VertexHighlightTrait);
+		
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait
 		obj.onNodesSelected_static += fn(Array nodes){
 			if(nodes.empty() || !(nodes[0] ---|> MinSG.GeometryNode)) {
@@ -508,6 +723,23 @@ HelperTraits.GenericMeshEditTrait := new Traits.GenericTrait("HelperTraits.Gener
 		//! \see HelperTraits.TriangleSelectionListenerTrait
 		obj.onTrianglesSelected_static += fn(Array triangles){
 			if(triangles.empty()){
+				//! \see ToolHelperTraits.FrameListenerTrait
+				disableFrameListener();
+
+				//! \see ToolHelperTraits.MetaNodeContainerTrait
+				disableMetaNode();
+			}else{
+				//! \see ToolHelperTraits.FrameListenerTrait
+				enableFrameListener();
+
+				//! \see ToolHelperTraits.MetaNodeContainerTrait
+				enableMetaNode();
+			}
+		};
+
+		//! \see HelperTraits.VertexSelectionListenerTrait
+		obj.onVerticesSelected_static += fn(Array vertices){
+			if(vertices.empty()){
 				//! \see ToolHelperTraits.FrameListenerTrait
 				disableFrameListener();
 
@@ -542,6 +774,9 @@ HelperTraits.GenericMeshEditTrait := new Traits.GenericTrait("HelperTraits.Gener
 		
 		//! \see ToolHelperTraits.UIToolTrait
 		obj.onToolDeactivation_static += fn(){
+			disableVertexHighlight();
+			finalizeVertexSelectionListener();
+			
 			//! \see HelperTraits.TriangleHighlightTrait
 			disableHighlight();
 			
@@ -559,49 +794,111 @@ HelperTraits.GenericMeshEditTrait := new Traits.GenericTrait("HelperTraits.Gener
 		};	
 		
 	};
+	
+	
+	/*! UIEvent function for selecting triangles of a mesh.
+	*/
+	t.attributes.selectTrianglesFunction ::= fn(evt) {
+		if(	evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_LEFT){
+			if(evt.pressed){
+				var nodes = getSelectedNodes();
+				if(nodes.empty())
+					return false;
+				var node = nodes[0];
+				if(!(node ---|> MinSG.GeometryNode))
+					return false;								
+				
+				if(this.getMetaNode() && Picking.pickNode( [evt.x,evt.y], this.getMetaNode() ))
+					return false;
+					
+				var mesh = node.getMesh();
+				var mat = node.getWorldToLocalMatrix();
+				var ray = Picking.getPickingRay([evt.x, evt.y]);
+				ray.setOrigin(mat.transformPosition(ray.getOrigin()));
+				ray.setDirection(mat.transformDirection(ray.getDirection()).normalize());
+									
+				var triangle = Rendering.getFirstTriangleIntersectingRay(mesh, ray);
+				
+				if(PADrend.getEventContext().isShiftPressed()){
+					if(triangle >= 0) 
+						if(MeshEditor.isTriangleSelected(triangle))
+							MeshEditor.removeTrianglesFromSelection([triangle]);
+						else
+							MeshEditor.addSelectedTriangles([triangle]);
+				} else {
+					if(triangle >= 0 && (!MeshEditor.isTriangleSelected(triangle) || MeshEditor.getSelectedTriangles().size() > 1 )) 
+						MeshEditor.selectTriangles([triangle]);
+					else
+						MeshEditor.clearTriangleSelection();
+				}
+				return true;
+			}
+		}
+		return false;
+	};
+	
+	
+	/*! UIEvent function for selecting vertices of a mesh.
+	*/
+	t.attributes.selectVerticesFunction ::= fn(evt) {
+		if(	evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_LEFT){
+			if(evt.pressed){
+				var nodes = getSelectedNodes();
+				if(nodes.empty())
+					return false;
+				var node = nodes[0];
+				if(!(node ---|> MinSG.GeometryNode))
+					return false;						
+				if(this.getMetaNode() && Picking.pickNode( [evt.x,evt.y], this.getMetaNode() ))
+					return false;
+					
+				var mesh = node.getMesh();
+				var mat = node.getWorldToLocalMatrix();
+				var ray = Picking.getPickingRay([evt.x, evt.y]);
+				ray.setOrigin(mat.transformPosition(ray.getOrigin()));
+				ray.setDirection(mat.transformDirection(ray.getDirection()).normalize());
+									
+				var triangle = Rendering.getFirstTriangleIntersectingRay(mesh, ray);
+				
+				var vertex = -1;
+				if(triangle >= 0) {
+					var acc = Rendering.PositionAttributeAccessor.create(mesh, Rendering.VertexAttributeIds.POSITION);
+					var indices = mesh._getIndices();
+					var v1 = triangle*3+0;
+					var v2 = triangle*3+1;
+					var v3 = triangle*3+2;
+					vertex = v1;
+					var dist = ray.distance(acc.getPosition(indices[v1]));
+					if(ray.distance(acc.getPosition(indices[v2])) < dist) {
+						dist = ray.distance(acc.getPosition(indices[v2]));
+						vertex = v2;
+					}
+					if(ray.distance(acc.getPosition(indices[v3])) < dist) {
+						//dist = ray.distance(acc.getPosition(v3));
+						vertex = v3;
+					}
+				}
+				
+				if(PADrend.getEventContext().isShiftPressed()){
+					if(vertex >= 0) 
+						if(MeshEditor.isVertexSelected(vertex))
+							MeshEditor.removeVerticesFromSelection([vertex]);
+						else
+							MeshEditor.addSelectedVertices([vertex]);
+				} else {
+					if(vertex >= 0 && (!MeshEditor.isVertexSelected(vertex) || MeshEditor.getSelectedVertices().size() > 1 )) 
+						MeshEditor.selectVertices([vertex]);
+					else
+						MeshEditor.clearVertexSelection();
+				}
+				return true;
+			}
+		}
+		return false;
+	};
 }
 
 // -----------------------------------------------------------------------------------
 
-/*! UIEvent function for selecting triangles of a mesh.
-*/
-HelperTraits.selectTrianglesFunction := fn(evt) {
-	if(	evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_LEFT){
-		if(evt.pressed){
-			var nodes = getSelectedNodes();
-			if(nodes.empty())
-				return false;
-			var node = nodes[0];
-			if(!(node ---|> MinSG.GeometryNode))
-				return false;								
-			
-			if(this.getMetaNode() && Picking.pickNode( [evt.x,evt.y], this.getMetaNode() ))
-				return false;
-				
-			var mesh = node.getMesh();
-			var mat = node.getWorldToLocalMatrix();
-			var ray = Picking.getPickingRay([evt.x, evt.y]);
-			ray.setOrigin(mat.transformPosition(ray.getOrigin()));
-			ray.setDirection(mat.transformDirection(ray.getDirection()).normalize());
-								
-			var triangle = Rendering.getFirstTriangleIntersectingRay(mesh, ray);
-			
-			if(PADrend.getEventContext().isShiftPressed()){
-				if(triangle >= 0) 
-					if(MeshEditor.isTriangleSelected(triangle))
-						MeshEditor.removeTrianglesFromSelection([triangle]);
-					else
-						MeshEditor.addSelectedTriangles([triangle]);
-			} else {
-				if(triangle >= 0 && (!MeshEditor.isTriangleSelected(triangle) || MeshEditor.getSelectedTriangles().size() > 1 )) 
-					MeshEditor.selectTriangles([triangle]);
-				else
-					MeshEditor.clearTriangleSelection();
-			}
-			return true;
-		}
-	}
-	return false;
-};
 
 return HelperTraits;

@@ -29,13 +29,22 @@ var plugin = new Plugin({
 			 * @param   Array of currently selected triangles (do not change!)
 			 * @result  void
 			 */
-			'MeshEditor_OnTrianglesSelected']
+			'MeshEditor_OnTrianglesSelected',
+			/* [ext:MeshEditor_OnVerticesSelected]
+			 * Called whenever the selected vertices change
+			 * @param   Array of currently selected vertex indices (do not change!)
+			 * @result  void
+			 */
+			'MeshEditor_OnVerticesSelected']
 });
 
 plugin.init:=fn() {
 	registerExtension('PADrend_Init',this->this.ex_Init);
 	return true;
 };
+
+//------------------------------------------------------------------------------------------------------
+// Triangle selection
 
 static selectedTriangles = [];
 static selectedTrianglesSet = new Std.Set;
@@ -45,7 +54,6 @@ plugin.selectTriangles := fn(Array triangles){
 	selectedTrianglesSet.clear();
 	addSelectedTriangles(triangles);
 };
-
 plugin.addSelectedTriangles := fn(Array triangles){
 	foreach(triangles as var t){
 		if(t && !selectedTrianglesSet.contains(t)){
@@ -55,7 +63,6 @@ plugin.addSelectedTriangles := fn(Array triangles){
 	}
 	Util.executeExtensions('MeshEditor_OnTrianglesSelected',selectedTriangles);
 };
-
 plugin.removeTrianglesFromSelection := fn(Array triangles){
 	foreach(triangles as var t){
 		if(t && selectedTrianglesSet.contains(t)){
@@ -65,16 +72,52 @@ plugin.removeTrianglesFromSelection := fn(Array triangles){
 	}
 	Util.executeExtensions('MeshEditor_OnTrianglesSelected',selectedTriangles);
 };
-
 plugin.clearTriangleSelection := fn(){
 	selectedTriangles.clear();
 	selectedTrianglesSet.clear();
 	Util.executeExtensions('MeshEditor_OnTrianglesSelected',selectedTriangles);
 };
-
 plugin.getSelectedTriangles := 	fn(){ return selectedTriangles.clone();	};
-
 plugin.isTriangleSelected := fn(t) { return t && selectedTrianglesSet.contains(t); };
+
+//------------------------------------------------------------------------------------------------------
+// Vertex selection
+
+static selectedVertices = [];
+static selectedVerticesSet = new Std.Set;
+
+plugin.selectVertices := fn(Array vertices){
+	selectedVertices.clear();
+	selectedVerticesSet.clear();
+	addSelectedVertices(vertices);
+};
+plugin.addSelectedVertices := fn(Array vertices){
+	foreach(vertices as var v){
+		if(v && !selectedVerticesSet.contains(v)){
+			selectedVerticesSet+=v;
+			selectedVertices+=v;			
+		}
+	}
+	Util.executeExtensions('MeshEditor_OnVerticesSelected',selectedVertices);
+};
+plugin.removeVerticesFromSelection := fn(Array vertices){
+	foreach(vertices as var v){
+		if(v && selectedVerticesSet.contains(v)){
+			selectedVerticesSet-=v;
+			selectedVertices.removeValue(v);			
+		}
+	}
+	Util.executeExtensions('MeshEditor_OnVerticesSelected',selectedVertices);
+};
+plugin.clearVertexSelection := fn(){
+	selectedVertices.clear();
+	selectedVerticesSet.clear();
+	Util.executeExtensions('MeshEditor_OnVerticesSelected',selectedVertices);
+};
+plugin.getSelectedVertices := 	fn(){ return selectedVertices.clone();	};
+plugin.isVertexSelected := fn(v) { return v && selectedVerticesSet.contains(v); };
+
+//------------------------------------------------------------------------------------------------------
 
 //!	[ext:PADrend_Init]
 plugin.ex_Init := fn(){	

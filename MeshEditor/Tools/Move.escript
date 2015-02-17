@@ -24,13 +24,21 @@ Traits.addTrait(Tool,HelperTraits.MeshTransformationHandlerTrait);
 
 
 Tool.normalTransform @(init) := fn(){	return DataWrapper.createFromValue(false);	};
+Tool.vertexMode @(init) := fn(){	return DataWrapper.createFromValue(false);	};
 
 Tool.editNode @(private) := void;
 
+Tool.onUIEvent = fn(evt) {
+	if(vertexMode()) {
+		return this.selectVerticesFunction(evt);
+	} else {
+		return this.selectTrianglesFunction(evt);
+	}
+};
+
 //! \see ToolHelperTraits.UIToolTrait
-Tool.onToolInitOnce_static += fn(){
+Tool.onToolInitOnce_static += fn(){		
 	//! \see HelperTraits.UIEventListenerTrait
-	this.onUIEvent = this->HelperTraits.selectTrianglesFunction;
 	var metaRootNode = new MinSG.ListNode;
 	this.setMetaNode(metaRootNode);
 
@@ -89,9 +97,17 @@ Tool.onFrame_static += fn(){
 		return;
 
 	var metaRootNode = this.getMetaNode();
-	_calculateOrigin(); 
 	var wm = nodes[0].getWorldTransformationMatrix();
-	var origin = getTriangleOrigin();
+	
+	var origin;
+	if(vertexMode()) {
+		origin = new Geometry.SRT();
+		_calculateVertexOrigin(); 
+		origin.setTranslation(getVertexOrigin());
+	} else {
+		_calculateOrigin(); 
+		origin = getTriangleOrigin();
+	}
 	if(!normalTransform()) {
 		origin.setRotation(new Geometry.Vec3(-1,0,0),new Geometry.Vec3(0,1,0));
 	}
@@ -103,6 +119,14 @@ Tool.onFrame_static += fn(){
 Tool.doCreateContextMenu ::= fn(){
 	return [
 	"*Triangle Translation Tool*",
+	{
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "Vertex Mode",
+		GUI.DATA_WRAPPER : vertexMode,
+		GUI.ON_DATA_CHANGED : this->fn(value) {
+			setVertexEditMode(value);
+		},
+	},
 	{
 		GUI.TYPE : GUI.TYPE_BOOL,
 		GUI.LABEL : "Normal translation",

@@ -21,6 +21,7 @@ var Tool = new Type;
 Traits.addTrait(Tool,HelperTraits.GenericMeshEditTrait);
 Traits.addTrait(Tool,HelperTraits.AfterRenderingListenerTrait);
 
+Tool.tolerance @(init) := fn(){	return DataWrapper.createFromValue(0.0001);	};
 Tool.cuttingLine @(private) := void;
 
 //! \see ToolHelperTraits.UIToolTrait
@@ -42,9 +43,9 @@ Tool.makeCut := fn() {
 	
 	PADrend.executeCommand({
 		Command.DESCRIPTION : "Transform vertices",
-		Command.EXECUTE : 	[p, mesh, triangles.clone()]=>fn(p, mesh, triangles) {
+		Command.EXECUTE : 	[p, mesh, triangles.clone(), tolerance()]=>fn(p, mesh, triangles, tolerance) {
 			var oldCount = mesh.getPrimitiveCount();
-			Rendering.cutMesh(mesh, p.getNormal()*p.getOffset(), p.getNormal(), triangles);
+			Rendering.cutMesh(mesh, p.getNormal()*p.getOffset(), p.getNormal(), triangles, tolerance);
 			var newTriangles = [];
 			for(var i=oldCount; i<mesh.getPrimitiveCount(); ++i) 
 				newTriangles += i;
@@ -62,7 +63,9 @@ Tool.onAfterRendering_static += fn(){
 	if(!this.cuttingLine) 
 		return;
 	Rendering.enable2DMode(GLOBALS.renderingContext);
-	Rendering.drawVector(GLOBALS.renderingContext, this.cuttingLine[0], this.cuttingLine[1], new Util.Color4f(0,0,0,1));	
+	renderingContext.pushAndSetDepthBuffer(false,false,Rendering.Comparison.ALWAYS);
+	Rendering.drawVector(GLOBALS.renderingContext, this.cuttingLine[0], this.cuttingLine[1], new Util.Color4f(0,0,0,1));
+	renderingContext.popDepthBuffer();	
 	Rendering.disable2DMode(GLOBALS.renderingContext);
 };
 
@@ -102,7 +105,20 @@ Tool.onUIEvent = fn(evt) {
 			return true;
 		}
 	}
-	return (this->HelperTraits.selectTrianglesFunction)(evt);
+	return this.selectTrianglesFunction(evt);
+};
+
+//! \see ToolHelperTraits.ContextMenuProviderTrait
+Tool.doCreateContextMenu ::= fn(){
+	return [
+	"*Knife Tool*",
+	{
+		GUI.TYPE : GUI.TYPE_NUMBER,
+		GUI.LABEL : "Tolerance",
+		GUI.DATA_WRAPPER : tolerance,
+		GUI.TOOLTIP : 	"Tolerance for vertices on the cutting plane."
+	},
+	'----'];
 };
 
 return Tool;

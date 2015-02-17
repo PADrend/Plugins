@@ -27,7 +27,7 @@ Tool.editNode @(private) := void;
 //! \see ToolHelperTraits.UIToolTrait
 Tool.onToolInitOnce_static += fn(){
 	//! \see HelperTraits.UIEventListenerTrait
-	this.onUIEvent = this->HelperTraits.selectTrianglesFunction;
+	this.onUIEvent = this.selectTrianglesFunction;
 	
 	var metaRootNode = new MinSG.ListNode;
 	this.setMetaNode(metaRootNode);
