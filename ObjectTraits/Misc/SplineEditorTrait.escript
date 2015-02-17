@@ -213,8 +213,8 @@ static rebuildEditNodes = fn( data ){
 				}
 				if(arr[pointNr].location.isA(Geometry.Vec3))
 					arr[pointNr].location.setValue(this.getRelOrigin());
-				else // srt
-					arr[pointNr].location.setValue( this.getRelTransformationSRT() );
+				else // srt (without scaling)
+					arr[pointNr].location.setValue( this.getRelTransformationSRT().setScale(1.0) );
 
 				--data.editNodeTransformationInProgress;
 				if( data.editNodeTransformationInProgress == 0)

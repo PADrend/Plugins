@@ -40,62 +40,6 @@ gui.registerComponentProvider('NodeEditor_NodeToolsMenu.alignment',fn(Array node
 
 */
 
-static NodeTransformationLogger = {
-
-
-static T = new Type;
-
-T.initialTransformations @(private,init) := Map;
-T.nodes @(private) := Array;
-
-T._constructor ::= fn(Array nodes_){
-	this.nodes = nodes_.clone();
-	this.init();
-};
-
-T.apply ::= fn([Map,void] relTransformations=void){
-	@(once) static Command = Std.require('LibUtilExt/Command');
-	
-	if(!relTransformations){
-		relTransformations = new Map;
-		foreach( this.nodes as var node)
-			relTransformations[node] = node.getRelTransformationSRT();
-	}
-	
-	var cmd = new Command({
-		Command.DESCRIPTION : "Transform nodes",
-		Command.EXECUTE : [relTransformations]=>fn(relTransformations){
-			foreach(relTransformations as var node, var t)
-				node.setRelTransformation(t);
-		},
-		Command.UNDO : [initialTransformations]=>fn(relTransformations){
-			foreach(relTransformations as var node, var t){
-//				outln(t.getTranslation());
-//				outln(node,"..",node.getRelOrigin());
-				node.setRelTransformation(t);
-//				outln(node,"..",node.getRelOrigin(),"\n");
-			}
-			outln("Undo...");
-		},
-		Command.FLAGS : Command.FLAG_EXECUTE_LOCALLY|Command.FLAG_SEND_TO_SLAVES,
-	});
-	PADrend.executeCommand(cmd);
-};
-
-T.init ::= fn(){
-	foreach(this.nodes as var node)
-		this.initialTransformations[node] = node.getRelTransformationSRT();	
-};
-//
-////! (static)
-//T.setWorldTransformations ::= fn(Map nodesToWorldTransformation){
-//	var nodes = [];
-//	foreach(nodesToWorldTransformation )
-//	var logger
-//	
-//};
-T;
-};
 
 static ALIGN_ORIGIN = 0;
 static ALIGN_BB_CENTER = 1;
@@ -114,6 +58,8 @@ static getOffset_OriginToSnap = fn(MinSG.Node node, Number mode){
 // ----------------------------------------------------------
 gui.registerComponentProvider('NodeEditor_AlignmentMenu.alignment',fn(){
 	@(once) static snapMode = Std.DataWrapper.createFromEntry(PADrend.configCache, "NodeEditor.alignmentMode", ALIGN_ORIGIN);
+	@(once) static NodeTransformationLogger = Std.require('PADrend/CommandHandling/NodeTransformationLogger');
+
 	return [
 		'*Alignment*',
 		{
