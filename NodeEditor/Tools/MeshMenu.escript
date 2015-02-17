@@ -185,6 +185,21 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Merge close vertices",
+		GUI.ON_CLICK : fn() {
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				foreach(MinSG.collectGeoNodes(subtree) as var geoNode){
+					var mesh = geoNode.getMesh();
+					Rendering.mergeCloseVertices(mesh);
+					out(".");
+				}
+			}
+			out("\n");
+		},
+		GUI.TOOLTIP : "Recalculate normals of all selected geometry nodes."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Embed meshes",
 		GUI.TOOLTIP : "Removes the filenames from meshes so that they are embedded into the minsg-file.",
 		GUI.ON_CLICK : fn() {
