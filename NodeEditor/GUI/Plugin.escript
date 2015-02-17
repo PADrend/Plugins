@@ -128,7 +128,7 @@ plugin.registerGUIProviders := fn(){
 						if(currentNode==PADrend.getRootNode()){
 							label="RootNode";
 						}else if(currentNode==PADrend.getCurrentScene()){
-							label="Scene: "+currentNode.name;
+							label="Scene";
 						}else{
 							label=NodeEditor.getString(currentNode);
 						}

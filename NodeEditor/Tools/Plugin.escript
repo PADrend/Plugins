@@ -68,6 +68,7 @@ plugin.registerMenus := fn(){
 	});
 
 	load(__DIR__+"/AddNodeMenu.escript");
+	load(__DIR__+"/AlignmentMenu.escript");
 	load(__DIR__+"/MaterialMenu.escript");
 	load(__DIR__+"/MeshMenu.escript");
 	load(__DIR__+"/MiscMenu.escript");
