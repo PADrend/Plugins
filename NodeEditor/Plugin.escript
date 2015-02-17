@@ -97,27 +97,22 @@ plugin.init @(override) := fn() {
 
 		NodeEditor.onSelectionChanged += fn(selectedNodes){
 			revoce();
-			if(!selectedNodes.empty())
+			if(!selectedNodes.empty()){
+				
 				revoce += Util.registerExtensionRevocably('PADrend_AfterRenderingPass', [selectedNodes] => highlightNodes );
+			}
 		};
 
 		static COLOR_BG_NODE = new Util.Color4f(0,0,0,1);
 		static COLOR_BG_SEM_OBJ = new Util.Color4f(0,0.4,0,1);
 		static COLOR_TEXT_ORIGINAL = new Util.Color4f(1,1,1,1);
 		static COLOR_TEXT_INSTANCE = new Util.Color4f(0.9,0.9,0.9,1);
+		static COLOR_FIRST_BARS = new Util.Color4f(1.0,1.0,1.0,1);
 	
 		static highlightNodes = fn(selectedNodes,...){
-			var skipAnnotations = selectedNodes.count()>20;
 			foreach(selectedNodes as var node){
 				if(!node || node==PADrend.getCurrentScene() || node==PADrend.getRootNode())
 					continue;
-
-
-				if(!skipAnnotations){
-					frameContext.showAnnotation(node,NodeEditor.getString(node),0,true,
-												node.isInstance() ? COLOR_TEXT_INSTANCE : COLOR_TEXT_ORIGINAL,
-												SemanticObject.isSemanticObject(node) ? COLOR_BG_SEM_OBJ : COLOR_BG_NODE  );
-				}
 
 				renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
 				renderingContext.multMatrix_modelToCamera(node.getWorldTransformationMatrix());
@@ -140,6 +135,20 @@ plugin.init @(override) := fn() {
 				renderingContext.popDepthBuffer();
 				renderingContext.popBlending();
 			}
+			for(var i=selectedNodes.count()>20 ? 0 : selectedNodes.count()-1; i>=0; --i){ // draw backward to draw first node on top
+				var node = selectedNodes[i];
+				if(node && node!=PADrend.getCurrentScene() && node!=PADrend.getRootNode()){
+					if( i==0 && selectedNodes.count()>1){ // show bars to mark first selected node
+						var t = NodeEditor.getString(selectedNodes.front());
+						frameContext.showAnnotation(selectedNodes.front(), t ,2,false, COLOR_FIRST_BARS, COLOR_FIRST_BARS);
+						frameContext.showAnnotation(selectedNodes.front(), t,-2,false, COLOR_FIRST_BARS, COLOR_FIRST_BARS);
+					}
+					frameContext.showAnnotation(node, NodeEditor.getString(node),0,true,
+												node.isInstance() ? COLOR_TEXT_INSTANCE : COLOR_TEXT_ORIGINAL,
+												SemanticObject.isSemanticObject(node) ?  COLOR_BG_SEM_OBJ : COLOR_BG_NODE);
+				}
+			}
+
 		};
 	}
 	// ----------------------------
