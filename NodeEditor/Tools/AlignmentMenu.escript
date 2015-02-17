@@ -128,11 +128,11 @@ gui.registerComponentProvider('NodeEditor_AlignmentMenu.alignment',fn(){
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Common position",
-			GUI.TOOLTIP : "Move all selected nodes to the position\nof the first selected node.",
+			GUI.TOOLTIP : "Move all selected nodes to the position\nof the last selected node.",
 			GUI.ON_CLICK:fn(){
-				var nodes = NodeEditor.getSelectedNodes().clone();
+				var nodes = NodeEditor.getSelectedNodes();
 				if(nodes.count()>1){
-					var node = nodes.popFront();
+					var node = nodes.popBack();
 					var logger = new NodeTransformationLogger(nodes);
 					var worldSnap = node.getWorldOrigin()+getOffset_OriginToSnap(node,snapMode());
 					foreach(nodes as var node){
@@ -148,7 +148,7 @@ gui.registerComponentProvider('NodeEditor_AlignmentMenu.alignment',fn(){
 			GUI.LABEL : "Place on line",
 			GUI.TOOLTIP : "Move all selected nodes on to the line between \nthe first and last selected nodes.",
 			GUI.ON_CLICK:fn(){
-				var nodes = NodeEditor.getSelectedNodes().clone();
+				var nodes = NodeEditor.getSelectedNodes();
 				if(nodes.count()>2){
 					var node1 = nodes.popFront();
 					var node2 = nodes.popBack();
@@ -170,7 +170,7 @@ gui.registerComponentProvider('NodeEditor_AlignmentMenu.alignment',fn(){
 			GUI.LABEL : "Distribute on line",
 			GUI.TOOLTIP : "Move all selected nodes on to the line between \nthe first and last selected nodes.",
 			GUI.ON_CLICK:fn(){
-				var nodes = NodeEditor.getSelectedNodes().clone();
+				var nodes = NodeEditor.getSelectedNodes();
 				if(nodes.count()>2){
 					var node1 = nodes.popFront();
 					var node2 = nodes.popBack();
@@ -195,11 +195,11 @@ gui.registerComponentProvider('NodeEditor_AlignmentMenu.alignment',fn(){
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Common world rotation",
-			GUI.TOOLTIP : "Apply the rotation of the \nfirst selected node to all selected nodes.",
+			GUI.TOOLTIP : "Apply the rotation of the \nlast selected node to all selected nodes.",
 			GUI.ON_CLICK:fn(){
-				var nodes = NodeEditor.getSelectedNodes().clone();
+				var nodes = NodeEditor.getSelectedNodes();
 				if(nodes.count()>1){
-					var node = nodes.popFront();
+					var node = nodes.popBack();
 					var srt = node.getWorldTransformationSRT();
 					var worldDir = srt.getDirVector();
 					var worldUp = srt.getUpVector();
@@ -220,11 +220,11 @@ gui.registerComponentProvider('NodeEditor_AlignmentMenu.alignment',fn(){
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Common world scaling",
-			GUI.TOOLTIP : "Apply the scaling of the \nfirst selected node to all selected nodes.",
+			GUI.TOOLTIP : "Apply the scaling of the \nlast selected node to all selected nodes.",
 			GUI.ON_CLICK:fn(){
 				var nodes = NodeEditor.getSelectedNodes().clone();
 				if(nodes.count()>1){
-					var node = nodes.popFront();
+					var node = nodes.popBack();
 					var srt = node.getWorldTransformationSRT();
 					var scaling = srt.getScale();
 					var logger = new NodeTransformationLogger(nodes);

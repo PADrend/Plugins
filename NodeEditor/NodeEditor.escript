@@ -120,7 +120,7 @@ NodeEditor.clearNodeSelection := fn(){
 	NodeEditor.onSelectionChanged(selectedNodes);
 };
 
-NodeEditor.getSelectedNode := 	fn(){   	return selectedNodes.front();	};
+NodeEditor.getSelectedNode := 	fn(){   	return selectedNodes.back();	};
 NodeEditor.getSelectedNodes := 	fn(){		return selectedNodes.clone();	};
 NodeEditor.isNodeSelected := 	fn(node){	return selectedNodesSet.contains(node);	};
 

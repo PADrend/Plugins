@@ -135,13 +135,14 @@ plugin.init @(override) := fn() {
 				renderingContext.popDepthBuffer();
 				renderingContext.popBlending();
 			}
-			for(var i=selectedNodes.count()>20 ? 0 : selectedNodes.count()-1; i>=0; --i){ // draw backward to draw first node on top
+			var last = selectedNodes.count()-1;
+			for(var i=selectedNodes.count()>20 ? last : 0; i<=last; ++i){ 
 				var node = selectedNodes[i];
 				if(node && node!=PADrend.getCurrentScene() && node!=PADrend.getRootNode()){
-					if( i==0 && selectedNodes.count()>1){ // show bars to mark first selected node
-						var t = NodeEditor.getString(selectedNodes.front());
-						frameContext.showAnnotation(selectedNodes.front(), t ,2,false, COLOR_FIRST_BARS, COLOR_FIRST_BARS);
-						frameContext.showAnnotation(selectedNodes.front(), t,-2,false, COLOR_FIRST_BARS, COLOR_FIRST_BARS);
+					if( i==last && selectedNodes.count()>1){ // show bars to mark first selected node
+						var t = NodeEditor.getString(node);
+						frameContext.showAnnotation(node, t ,2,false, COLOR_FIRST_BARS, COLOR_FIRST_BARS);
+						frameContext.showAnnotation(node, t,-2,false, COLOR_FIRST_BARS, COLOR_FIRST_BARS);
 					}
 					frameContext.showAnnotation(node, NodeEditor.getString(node),0,true,
 												node.isInstance() ? COLOR_TEXT_INSTANCE : COLOR_TEXT_ORIGINAL,
