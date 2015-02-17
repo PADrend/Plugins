@@ -1,0 +1,13 @@
+[
+{
+	"image" : "Icons24.png",
+	"icons" : {
+		"#TriangleMove" : [0,0,24,24],
+		"#TriangleRotate" : [24,0,24,24],
+		"#TriangleScale" : [48,0,24,24],
+		"#TriangleSelect" : [72,0,24,24],
+		"#TriangleExtrude" : [96,0,24,24],
+		"#TriangleKnife" : [120,0,24,24],
+		}
+}
+]

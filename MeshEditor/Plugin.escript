@@ -1,0 +1,207 @@
+ /*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2015 Sascha Brandt <myeti@mail.upb.de>
+ *
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+ /****
+ **	[Plugin:MeshEditor] Plugin:MeshEditor/Plugin.escript
+ **
+ ** Provides tools for editing the mesh of a selected geometry node.
+ **/
+var plugin = new Plugin({
+	Plugin.NAME				:	'MeshEditor',
+	Plugin.DESCRIPTION		:	"Provides tools for editing the mesh of a selected geometry node.",
+	Plugin.VERSION			:	0.1,
+	Plugin.AUTHORS			:	"Sascha Brandt",
+	Plugin.OWNER			:	"All",
+	Plugin.LICENSE 			:   "Mozilla Public License, v. 2.0",
+	Plugin.REQUIRES			:	['SceneEditor'],
+	Plugin.EXTENSION_POINTS	:	[
+			/* [ext:MeshEditor_OnTrianglesSelected]
+			 * Called whenever the selected triangles change
+			 * @param   Array of currently selected triangles (do not change!)
+			 * @result  void
+			 */
+			'MeshEditor_OnTrianglesSelected']
+});
+
+plugin.init:=fn() {
+	registerExtension('PADrend_Init',this->this.ex_Init);
+	return true;
+};
+
+static selectedTriangles = [];
+static selectedTrianglesSet = new Std.Set;
+
+plugin.selectTriangles := fn(Array triangles){
+	selectedTriangles.clear();
+	selectedTrianglesSet.clear();
+	addSelectedTriangles(triangles);
+};
+
+plugin.addSelectedTriangles := fn(Array triangles){
+	foreach(triangles as var t){
+		if(t && !selectedTrianglesSet.contains(t)){
+			selectedTrianglesSet+=t;
+			selectedTriangles+=t;			
+		}
+	}
+	Util.executeExtensions('MeshEditor_OnTrianglesSelected',selectedTriangles);
+};
+
+plugin.removeTrianglesFromSelection := fn(Array triangles){
+	foreach(triangles as var t){
+		if(t && selectedTrianglesSet.contains(t)){
+			selectedTrianglesSet-=t;
+			selectedTriangles.removeValue(t);			
+		}
+	}
+	Util.executeExtensions('MeshEditor_OnTrianglesSelected',selectedTriangles);
+};
+
+plugin.clearTriangleSelection := fn(){
+	selectedTriangles.clear();
+	selectedTrianglesSet.clear();
+	Util.executeExtensions('MeshEditor_OnTrianglesSelected',selectedTriangles);
+};
+
+plugin.getSelectedTriangles := 	fn(){ return selectedTriangles.clone();	};
+
+plugin.isTriangleSelected := fn(t) { return t && selectedTrianglesSet.contains(t); };
+
+//!	[ext:PADrend_Init]
+plugin.ex_Init := fn(){	
+	gui.loadIconFile( __DIR__+"/resources/Icons.json");
+	
+	registerMenus();
+		
+	{
+		var t = new (Std.require('MeshEditor/Tools/Move'));
+		PADrend.registerUITool('MeshEditorTools_Move')
+			.registerActivationListener(t->t.activateTool)
+			.registerDeactivationListener(t->t.deactivateTool);
+	}
+		
+	{
+		var t = new (Std.require('MeshEditor/Tools/Rotate'));
+		PADrend.registerUITool('MeshEditorTools_Rotate')
+			.registerActivationListener(t->t.activateTool)
+			.registerDeactivationListener(t->t.deactivateTool);
+	}
+		
+	{
+		var t = new (Std.require('MeshEditor/Tools/Scale'));
+		PADrend.registerUITool('MeshEditorTools_Scale')
+			.registerActivationListener(t->t.activateTool)
+			.registerDeactivationListener(t->t.deactivateTool);
+	}
+		
+	{
+		var t = new (Std.require('MeshEditor/Tools/Extrude'));
+		PADrend.registerUITool('MeshEditorTools_Extrude')
+			.registerActivationListener(t->t.activateTool)
+			.registerDeactivationListener(t->t.deactivateTool);
+	}
+		
+	{
+		var t = new (Std.require('MeshEditor/Tools/Knife'));
+		PADrend.registerUITool('MeshEditorTools_Knife')
+			.registerActivationListener(t->t.activateTool)
+			.registerDeactivationListener(t->t.deactivateTool);
+	}
+};
+
+plugin.registerMenus:=fn() {
+	gui.registerComponentProvider('PADrend_ToolsToolbar.MeshEditorTools',[{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.TOOLTIP	: "Triangle Move Tool: Allows the selection and movement of the triangles of a selected geometry node.",
+		GUI.ICON : '#TriangleMove',
+		GUI.WIDTH : 24,
+		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Move');	},
+		GUI.ON_INIT : fn(...){
+			var swithFun = fn(b){
+				if(isDestroyed())
+					return $REMOVE;
+				setSwitch(b);
+			};
+			PADrend.accessUIToolConfigurator('MeshEditorTools_Move')
+				.registerActivationListener([true]=>this->swithFun)
+				.registerDeactivationListener([false]=>this->swithFun);
+		},
+	},{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.TOOLTIP	: "Triangle Rotate Tool: Allows the selection and rotation of the triangles of a selected geometry node.",
+		GUI.ICON : '#TriangleRotate',
+		GUI.WIDTH : 24,
+		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Rotate');	},
+		GUI.ON_INIT : fn(...){
+			var swithFun = fn(b){
+				if(isDestroyed())
+					return $REMOVE;
+				setSwitch(b);
+			};
+			PADrend.accessUIToolConfigurator('MeshEditorTools_Rotate')
+				.registerActivationListener([true]=>this->swithFun)
+				.registerDeactivationListener([false]=>this->swithFun);
+		},
+	},{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.TOOLTIP	: "Triangle Scale Tool: Allows the selection and scaling of the triangles of a selected geometry node.",
+		GUI.ICON : '#TriangleScale',
+		GUI.WIDTH : 24,
+		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Scale');	},
+		GUI.ON_INIT : fn(...){
+			var swithFun = fn(b){
+				if(isDestroyed())
+					return $REMOVE;
+				setSwitch(b);
+			};
+			PADrend.accessUIToolConfigurator('MeshEditorTools_Scale')
+				.registerActivationListener([true]=>this->swithFun)
+				.registerDeactivationListener([false]=>this->swithFun);
+		},
+	},{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.TOOLTIP	: "Extrude Tool: Allows the selection and extrusion of the triangles of a selected geometry node.",
+		GUI.ICON : '#TriangleExtrude',
+		GUI.WIDTH : 24,
+		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Extrude');	},
+		GUI.ON_INIT : fn(...){
+			var swithFun = fn(b){
+				if(isDestroyed())
+					return $REMOVE;
+				setSwitch(b);
+			};
+			PADrend.accessUIToolConfigurator('MeshEditorTools_Extrude')
+				.registerActivationListener([true]=>this->swithFun)
+				.registerDeactivationListener([false]=>this->swithFun);
+		},
+	},{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.TOOLTIP	: "Knife Tool: Allows the selection and cutting of the triangles of a selected geometry node.",
+		GUI.ICON : '#TriangleKnife',
+		GUI.WIDTH : 24,
+		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Knife');	},
+		GUI.ON_INIT : fn(...){
+			var swithFun = fn(b){
+				if(isDestroyed())
+					return $REMOVE;
+				setSwitch(b);
+			};
+			PADrend.accessUIToolConfigurator('MeshEditorTools_Knife')
+				.registerActivationListener([true]=>this->swithFun)
+				.registerDeactivationListener([false]=>this->swithFun);
+		},
+	}]);
+};
+
+//----------------------------------------------------------------------------
+
+return plugin;
