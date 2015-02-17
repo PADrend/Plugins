@@ -66,7 +66,7 @@ GUI.GUI_Manager.createMenu ::= fn(mixed = void, width = 150, context...){
 	\note This function does not return the menu as it may automatically be  destroyed (one time menu). 
 	\note if the menu does not fit to the screen, its position is adjusted*/
 GUI.GUI_Manager.openMenu ::= fn(Geometry.Vec2 position, menuEntries,width=150,context...){
-	var menu = (menuEntries ---|> GUI.Menu) ? menuEntries : gui.createMenu(menuEntries,width,context...);
+	var menu = menuEntries.isA(GUI.Menu) ? menuEntries : gui.createMenu(menuEntries,width,context...);
 
 	menu.layout(); // assure the height is initialized
 	var height = menu.getHeight();
@@ -89,7 +89,7 @@ GUI.GUI_Manager.printMenuInfo ::= fn(){
 /*! Close prior submenus and open the given menu as submenu next to the given entry of the current menu.
 	\see gui.openMenu(...)	*/
 GUI.Menu.openSubmenu ::= fn(GUI.Component entry, menuEntries,width=150,context...){
-	var menu = (menuEntries ---|> GUI.Menu) ? menuEntries : gui.createMenu(menuEntries,width,context...);
+	var menu = menuEntries.isA(GUI.Menu) ? menuEntries : gui.createMenu(menuEntries,width,context...);
 
 	menu.layout(); // assure the height is initialized
 	var height = menu.getHeight();
@@ -112,7 +112,7 @@ GUI.Menu.openSubmenu ::= fn(GUI.Component entry, menuEntries,width=150,context..
 
 //! (internal) Registers a menu as submenu. If another submenu is opened, it is closed automatically.
 GUI.Menu._registerSubmenu ::= fn(GUI.Menu submenu){
-	if(this.isSet($_activeSubmenu) && this._activeSubmenu---|>GUI.Menu && submenu!=this._activeSubmenu){
+	if(this.isSet($_activeSubmenu) && this._activeSubmenu.isA(GUI.Menu) && submenu!=this._activeSubmenu){
 		this._activeSubmenu.close();
 		this._activeSubmenu = void;
 	}

@@ -267,16 +267,17 @@ GUI.GUI_Manager.createDelimiter ::= fn(){
 	\todo Change option on mouse wheel and up/down key
  */
  
+static DropdownTrait = new Std.Traits.GenericTrait("GUI_Dropdown");
+
 GUI.GUI_Manager.createDropdown ::= fn( width, height){
-	var dd=createContainer(width,height);
-	Traits.addTrait(dd,GUI.DropdownTrait);
+	var dd = this.createContainer(width,height);
+	Std.Traits.addTrait(dd, DropdownTrait);
 	dd.init(this,width,height);
 	return dd;
 };
 {
-	GUI.DropdownTrait := new Traits.GenericTrait("GUI_Dropdown");
 
-	var attr = GUI.DropdownTrait.attributes;
+	var attr = DropdownTrait.attributes;
 	attr.currentOption := void;
 	attr.entryContainer @(private) := void;
 	attr.options @(init) := Array;
@@ -299,11 +300,11 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 			menuComponent = value;
 		if(selectedComponent===void)
 			selectedComponent = menuComponent;
-		option.menuComponent:=gui.create(menuComponent,getWidth() );
-		option.selectedComponent:=gui.create(selectedComponent,getWidth()-getHeight());
-		option.tooltip:=tooltip;
-		option.value:=value;
-		this.options+=option;
+		option.menuComponent := gui.create(menuComponent,getWidth() );
+		option.selectedComponent := gui.create(selectedComponent,getWidth()-getHeight());
+		option.tooltip := tooltip;
+		option.value := value;
+		this.options += option;
 		if(!currentOption){
 			this.selectOption(option, false);
 		}
@@ -326,26 +327,30 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 		}
 		return options;
 	};
+	attr._activeMenu := void;
 	attr.init := fn(gui,width, height){
 		this.addProperty(new GUI.UseShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,GUI.PROPERTY_COMPONENT_LOWERED_BORDER_SHAPE));
 		this.setFlag(GUI.BACKGROUND);
 
 		var selectorWidth = 15;
-		entryContainer = gui.createContainer(width-selectorWidth,height); // ,GUI.LOWERED_BORDER
-		
+		entryContainer = gui.createButton(width-selectorWidth,height,""); // ,GUI.LOWERED_BORDER
+		entryContainer.setFlag(GUI.FLAT_BUTTON,true);
+			
 		entryContainer.setExtLayout(
 				GUI.POS_X_ABS|GUI.REFERENCE_X_LEFT|GUI.ALIGN_X_LEFT|
 				GUI.WIDTH_ABS|GUI.HEIGHT_REL,
 				new Geometry.Vec2(0,0),new Geometry.Vec2(-selectorWidth,1.0) );
-		
-		entryContainer.onMouseButton := this->fn(buttonEvent){
-			if(buttonEvent.pressed && buttonEvent.button == Util.UI.MOUSE_BUTTON_LEFT){
-				showMenu(); // \todo bug: if the dropdown is inside of a popdown-window, the menu may be behind the window.
-				return true;
-			}
-			return false;
-			
-		};
+		entryContainer.onClick := this->fn(){ showMenu(); };
+
+//		entryContainer = gui.createContainer(width-selectorWidth,height); // ,GUI.LOWERED_BORDER
+//		entryContainer.onMouseButton := this->fn(buttonEvent){
+//			if(buttonEvent.pressed && buttonEvent.button == Util.UI.MOUSE_BUTTON_LEFT){
+//				showMenu(); // \todo bug: if the dropdown is inside of a popdown-window, the menu may be behind the window.
+//				return true;
+//			}
+//			return false;
+//			
+//		};
 		this += entryContainer;
 		gui.enableMouseButtonListener(entryContainer);
 
@@ -361,7 +366,7 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 		this+=button;
 	};
 	//! ---o
-	attr.onDataChanged:=fn(data){};
+	attr.onDataChanged := fn(data){};
 	attr.selectOption := fn(option, fireDataChangedEvent = true){
 		if(currentOption == option)
 			return;
@@ -381,9 +386,9 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 		entryContainer.clear();
 		currentOption=void;
 		foreach(getOptions() as var option){
-			if(option.value==data){
+			if(option.value===data){
 				selectOption(option, false);
-				return;
+				break;
 			}
 		}
 	};
@@ -398,25 +403,41 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 		optionsProvider = p;
 	};
 	attr.showMenu @(private) := fn(){
-		var menu=gui.createMenu();
+		if( this._activeMenu&& !this._activeMenu.isDestroyed()){
+			this._activeMenu.close();
+			this._activeMenu = void;
+			return;
+		}
+		
+		var menu = gui.createMenu();
+		this._activeMenu = menu;
+		var selectedEntry;
 		foreach(getOptions() as var option){
-			var button=gui.createButton(getWidth(),getHeight(),"");
+			var button = gui.createButton(getWidth(),getHeight(),"");
 			button.setFlag(GUI.FLAT_BUTTON,true);
-               button.setTextStyle (GUI.TEXT_ALIGN_LEFT|GUI.TEXT_ALIGN_MIDDLE);
+			button.setTextStyle (GUI.TEXT_ALIGN_LEFT|GUI.TEXT_ALIGN_MIDDLE);
 			button.add(option.menuComponent);
-			button.option:=option;
-			button.dd:=this;
-			button.menu:=menu;
-			if(option.tooltip){
+			button.option := option;
+			button.dd := this;
+			button.menu := menu;
+			if(option.tooltip)
 				button.setTooltip(option.tooltip);
-			}
-			button.onClick=fn(){
-				dd.selectOption(option);
-				menu.close();
+			
+			button.onClick = fn(){
+				this.dd.selectOption(option);
+				this.menu.close();
+
+				this.dd.select(); // if the dd is inside a menu, make sure it is not closed here...
+				this.dd.activate();
 			};
 			menu.add(button);
+			if(option == this.currentOption)
+				selectedEntry = button;
 		};
 		menu.open(getAbsPosition()+new Geometry.Vec2(0,getHeight()));
+		if(selectedEntry)
+			selectedEntry.select();
+		menu.activate();
 	};
 }
 
