@@ -123,7 +123,8 @@ gui.registerComponentProvider('NodeEditor_AlignmentMenu.alignment',fn(){
 				[ALIGN_ORIGIN, "Origin", "Origin", "Align the nodes' local origins (0,0,0)"],
 				[ALIGN_BB_CENTER, "BB center", "BB center", "Align the centers of the bounding boxes"],
 				[ALIGN_BB_LOWER_CENTER, "BB lower center",  "BB lower center",  "Align the lower centers of the bounding boxes"],
-			]
+			],
+			GUI.TOOLTIP : "Reference point used for all alignment operations."
 		},
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
@@ -238,6 +239,62 @@ gui.registerComponentProvider('NodeEditor_AlignmentMenu.alignment',fn(){
 					logger.apply();
 					PADrend.message("Nodes scaled ("+nodes.count()+")");
 				}
+			}
+		},
+		{
+			GUI.TYPE : GUI.TYPE_MENU,
+			GUI.LABEL : "Place on plane",
+			GUI.TOOLTIP : "Move all selected nodes on a plane defined by the last selected node.",
+			GUI.MENU_PROVIDER:fn(){
+				static moveToPlane = fn(normal,world){
+					var nodes = NodeEditor.getSelectedNodes();
+					var referenceNode = nodes.popBack();
+					var worldPlane = new Geometry.Plane( referenceNode.getWorldOrigin()+getOffset_OriginToSnap(referenceNode,snapMode()), 
+															world?normal:referenceNode.localDirToWorldDir(normal).normalize() );
+					var logger = new NodeTransformationLogger(nodes);
+					foreach(nodes as var node){
+						var offset = getOffset_OriginToSnap(node,snapMode());
+						var pos = node.getWorldOrigin() + offset;
+						node.moveLocal( node.worldDirToLocalDir(worldPlane.getProjection(pos) - pos) );
+					}
+					logger.apply();
+					PADrend.message("Nodes moved ("+nodes.count()+")");
+					
+				};
+				return [
+					{
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Local x-plane",
+						GUI.ON_CLICK : [new Geometry.Vec3(1,0,0),false]=>moveToPlane
+					},
+					{
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Local y-plane",
+						GUI.ON_CLICK : [new Geometry.Vec3(0,1,0),false]=>moveToPlane
+					},
+					{
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Local z-plane",
+						GUI.ON_CLICK : [new Geometry.Vec3(0,0,1),false]=>moveToPlane
+					},
+					{
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "World x-plane",
+						GUI.ON_CLICK : [new Geometry.Vec3(1,0,0),true]=>moveToPlane
+					},
+					{
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "World y-plane",
+						GUI.ON_CLICK : [new Geometry.Vec3(0,1,0),true]=>moveToPlane
+					},
+					{
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "World z-plane",
+						GUI.ON_CLICK : [new Geometry.Vec3(0,0,1),true]=>moveToPlane
+					},
+				
+				
+				];
 			}
 		},
 	];
