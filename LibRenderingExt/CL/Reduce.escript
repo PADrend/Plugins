@@ -43,7 +43,7 @@ T.elementSize @(private) := Util.getNumBytes(Util.TypeConstant.INT32);
 T.reduceFn @(private) := "v1 + v2";
 T.reduceIdentity @(private) := "0";
 
-T.sumsBuffer @(private) := void;
+T.sumsBuffer := void;
 T.wgcBuffer @(private) := void;
 
 T.setWorkGroupSize ::= fn(value) { this.reduceWorkGroupSize = value; };
@@ -91,9 +91,10 @@ T.build ::= fn(options="") {;
 	program.addDefine("REDUCE_BLOCKS", reduceBlocks);
 	program.addDefine("REDUCE_T", reduceType);
 	//program.addDefine("REDUCE_FN(v1,v2)", reduceFn); // works apparently only for GPUs 
-	program.addDefine("REDUCE_IDENTITY", reduceIdentity);
+	//program.addDefine("REDUCE_IDENTITY", reduceIdentity);
 	
-	program.attachSource("#define REDUCE_FN(v1,v2) " + reduceFn);
+	program.attachSource("#define REDUCE_FN(v1,v2) " + reduceFn + "\n");
+	program.attachSource("#define REDUCE_IDENTITY " + reduceIdentity + "\n");
 	program.attachFile(__DIR__ + "/../resources/kernel/reduce.cl");
 	
 	built = program.build(device, options);

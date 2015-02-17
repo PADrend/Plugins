@@ -293,7 +293,6 @@ tests += new AutomatedTest("OpenCL: Reduce (CPU)",fn(){
 });
 
 tests += new AutomatedTest("OpenCL: Sort (GPU)",fn(){
-	Std._unregisterModule('LibRenderingExt/CL/RadixSort');
 	var RadixSort = Std.require('LibRenderingExt/CL/RadixSort');
 	
 	{ // GPU
