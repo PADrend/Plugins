@@ -30,6 +30,7 @@
 		No persistant "normal" child node should be addded to the node.
  */
 
+static NumberKeyMap = module('LibUtilExt/NumberKeyMap'); 
 var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
 
@@ -73,7 +74,7 @@ trait.onInit += fn( MinSG.GroupNode node){
 	};
 
 	node.spline_calcPositions := fn(Number stepSize){
-		var splineCurvePoints = new Map;
+		var splineCurvePoints = new NumberKeyMap;
 
 		var points = this.spline_controlPoints();
 		if((points.size()-4) % 3 != 0){
@@ -93,7 +94,7 @@ trait.onInit += fn( MinSG.GroupNode node){
 				splineCurvePoints[t] = points.back().getPosition();
 //			print_r(splineCurvePoints);
 		}
-		return splineCurvePoints;
+		return splineCurvePoints; // t -> position
 	};
 
 	node.spline_calcLocation := fn(Number t){
@@ -132,7 +133,7 @@ trait.onInit += fn( MinSG.GroupNode node){
 
 	static updateDistanceMap = fn(distancesMapWrapper,splineNode){
 		if(!distancesMapWrapper()){
-			var distancesMap = new (Std.require('LibUtilExt/NumberKeyMap')); // length -> splineValue_t
+			var distancesMap = new NumberKeyMap; // length -> splineValue_t
 			var distance = 0;
 			var lastPoint;
 			foreach(splineNode.spline_calcPositions(0.01) as var t, var position){

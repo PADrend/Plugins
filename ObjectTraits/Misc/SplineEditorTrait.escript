@@ -18,6 +18,8 @@ static TransformationObserverTrait = Std.require('LibMinSGExt/Traits/Transformat
 
 
 static openMenu = fn(pointNr, data, event){
+	static locationToPos = fn(l){	return l.isA(Geometry.Vec3) ? l : l.getTranslation(); };
+	
 	gui.openMenu(new Geometry.Vec2(event.x, event.y),[
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
@@ -38,58 +40,41 @@ static openMenu = fn(pointNr, data, event){
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Add after",
-			GUI.ON_CLICK: [data,pointNr, data.spline_controlPoints] =>fn(data,pointNr, points){
-				var arr = points().clone();
-				var arr2 = [];
-				if(arr[pointNr-1]){
-					var dir = ( arr[pointNr].getPosition() - arr[pointNr-1].getPosition()) / 4;
-					for(var i = 0; i<3 ; i++)
-						arr += data.splineNode.spline_createControlPoint((new Geometry.Vec3( arr[pointNr].getPosition().x(),  arr[pointNr].getPosition().y(),  arr[pointNr].getPosition().z())) + dir * (i+1));
-					points(arr);
-				}
-				else {
-					var dir = new Geometry.Vec3(5,0,0);
-					if(arr[pointNr+1])
-						dir = (arr[pointNr+1].getPosition() -  arr[pointNr].getPosition()) / 4;
-					arr2 += arr[pointNr];
-					for(var i = 0; i<3 ; i++)
-						arr2 += data.splineNode.spline_createControlPoint((new Geometry.Vec3( arr[pointNr].getPosition().x(),  arr[pointNr].getPosition().y(),  arr[pointNr].getPosition().z())) + dir * (i+1));
-
-					for(var i = pointNr+1; i<arr.size() ; i++)
-						arr2 += arr[i];
-					points(arr2);
+			GUI.ON_CLICK: [data.splineNode,pointNr, data.spline_controlPoints] =>fn(splineNode,pointNr, points){
+				if(pointNr<points().count()-1) {
+					points( points().slice(0,pointNr+2)
+								.append([	splineNode.spline_createControlPoint(locationToPos(splineNode.spline_calcLocation( pointNr/3+0.4 ))),
+											splineNode.spline_createControlPoint(splineNode.spline_calcLocation( pointNr/3+0.5 )),
+											splineNode.spline_createControlPoint(locationToPos(splineNode.spline_calcLocation( pointNr/3+0.6 ))) ])
+								.append(points().slice(pointNr+2)) );
+				}else{
+					var l0 = points()[pointNr].location.clone();
+					var p0 = locationToPos(l0);
+					var p1 = locationToPos(splineNode.spline_calcLocation( pointNr/3-1 ));
+					points( points().clone().append([	splineNode.spline_createControlPoint( p0 - (p1-p0)*0.3),
+														splineNode.spline_createControlPoint( p0 - (p1-p0)*0.7),
+														splineNode.spline_createControlPoint( l0.isA(Geometry.SRT) ? l0.translate( p0-p1 ) : l0 - (p1-p0) ) ]) );
 				}
 			}
 		},
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Add before",
-			GUI.ON_CLICK: [data,pointNr, data.spline_controlPoints] =>fn(data,pointNr, points){
-				var arr = points().clone();
-				var arr2 = [];
-				if(arr[pointNr-1]){
-					var dir = (arr[pointNr-1].getPosition() - arr[pointNr].getPosition()) / 4;
-					for(var i = 0; i<pointNr ; i++)
-						arr2 += arr[i];
-					for(var i = 0; i<3 ; i++)
-						arr2 += data.splineNode.spline_createControlPoint(
-												(new Geometry.Vec3(arr[pointNr].getPosition().x(), arr[pointNr].getPosition().y(), arr[pointNr].getPosition().z())) + dir * (i+1));
-					arr2 += arr[pointNr];
-					points(arr2);
+			GUI.ON_CLICK: [data.splineNode,pointNr, data.spline_controlPoints] =>fn(splineNode,pointNr, points){
+				if(pointNr>0) {
+					points( points().slice(0,pointNr-1)
+								.append([	splineNode.spline_createControlPoint(locationToPos(splineNode.spline_calcLocation( pointNr/3-0.6 ))),
+											splineNode.spline_createControlPoint(splineNode.spline_calcLocation( pointNr/3-0.5 )),
+											splineNode.spline_createControlPoint(locationToPos(splineNode.spline_calcLocation( pointNr/3-0.4 ))) ])
+								.append(points().slice(pointNr-1)) );
+				}else{
+					var l0 = points()[0].location.clone();
+					var p0 = locationToPos(l0);
+					var p1 = locationToPos(splineNode.spline_calcLocation( 1 ));
+					points( [	splineNode.spline_createControlPoint( l0.isA(Geometry.SRT) ? l0.translate( p0-p1 ) : l0 - (p1-p0) ),
+								splineNode.spline_createControlPoint( p0 - (p1-p0)*0.3),
+								splineNode.spline_createControlPoint( p0 - (p1-p0)*0.7) ].append(points()) );
 				}
-				else{
-					var dir = new Geometry.Vec3(-5,0,0);
-					if(arr[pointNr+1])
-						dir = (arr[pointNr].getPosition() - arr[pointNr+1].getPosition()) / 4;
-					for(var i = 0; i<3 ; i++)
-						arr2 += data.splineNode.spline_createControlPoint(
-												(new Geometry.Vec3(arr[pointNr].getPosition().x(), arr[pointNr].getPosition().y(), arr[pointNr].getPosition().z())) + dir * (i+1));
-					for(var i =0; i<arr.size() ; i++)
-						arr2 += arr[i];
-					points(arr2);
-
-				}
-
 			}
 		},
 		{
@@ -127,6 +112,17 @@ static openMenu = fn(pointNr, data, event){
 			GUI.LABEL : "dist.",
 			GUI.ON_CLICK: [data]=>fn(data){
 				doIt(20, data);
+
+			}
+
+		},
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Debug",
+			GUI.ON_CLICK: [data]=>fn(data){
+				foreach(data.spline_controlPoints() as var index, var point){
+					outln(index,"\t",point.location);
+				}
 
 			}
 
@@ -175,7 +171,7 @@ static openMenu2 = fn(pointNr, data, event){
 	], 100);
 };
 
-
+static blendingState = new MinSG.BlendingState;
 
 static rebuildEditNodes = fn( data ){
 	foreach(data.editNodes  as var n)
@@ -187,6 +183,8 @@ static rebuildEditNodes = fn( data ){
 		var geoNode = new MinSG.GeometryNode;
 		geoNode.setTempNode(true);
 		geoNode.setRelOrigin(point.getPosition());
+		geoNode += blendingState;
+		Std.Traits.addTrait(geoNode,module('../Basic/MetaObjectTrait'));
 //		geoNode.setRelScaling(0.3);
 
 		if(pointNr % 3== 0)
@@ -243,25 +241,19 @@ static rebuildSplineMesh = fn( data ){
 
 		var builder = new Rendering.MeshBuilder;
 		builder.normal(new Geometry.Vec3(0,0,1));
-		builder.color(new Util.Color4f(0.2,0,0,0.1));
-		//-------------------test---------------
-//		var mb = new Rendering.MeshBuilder;
-//		mb.color(new Util.Color4f(0,1,0,0.4));
-//		mb.addSphere( new Geometry.Sphere([0,0,0],0.3),5,5 );
-//		var posMesh = mb.buildMesh();
+		builder.color(new Util.Color4f(0.9,0,0,0.5));
 
-		foreach(splinePoints as var i, var point){
-			if(i>0)
-				builder.position(point).addVertex();
-			builder.position(point).addVertex();
-//			var n = new MinSG.GeometryNode(posMesh);
-//			n.setRelOrigin(point);
-//			data.splineNode +=n;
+		var lastPos = splinePoints[0];
+		foreach(splinePoints as var i, var pos){
+			builder.position(lastPos).addVertex();
+			builder.position(lastPos*0.3 + pos*0.7).addVertex();
+			lastPos = pos;
 		}
 		var m = builder.buildMesh();
 		m.setDrawLines();
 		data.curveNode = new MinSG.GeometryNode(m);
 		data.curveNode.setTempNode(true);
+		Std.Traits.addTrait(data.curveNode,module('../Basic/MetaObjectTrait'));
 		data.splineNode += data.curveNode;
 	}
 
@@ -269,9 +261,12 @@ static rebuildSplineMesh = fn( data ){
 	mb2.normal(new Geometry.Vec3(0,0,1));
 	mb2.color(new Util.Color4f(0.2,0,0,0.1));
 
+	var bb = new Geometry.Box;
+	bb.invalidate();
 	// connections to controlPoints
 	var points = data.splineNode.spline_controlPoints();
 	for(var i=0; i<points.count(); i+=3){
+		bb.include(points[i].getPosition());
 		if(i>0){
 			mb2.position(points[i-1].getPosition()).addVertex();
 			mb2.position(points[i].getPosition()).addVertex();
@@ -282,6 +277,7 @@ static rebuildSplineMesh = fn( data ){
 		}
 	}
 	// directions
+	var length = bb.getDiameter() / 50;
 	for(var i=0; i<points.count()-3; i+=3){
 		if(points[i].location.isA(Geometry.SRT) && points[i+3].location.isA(Geometry.SRT) ){
 			for(var d=0;d<=1.001;d+=0.1){
@@ -292,15 +288,15 @@ static rebuildSplineMesh = fn( data ){
 
 					mb2.color(new Util.Color4f(0.5,0,0,0.1));
 					mb2.position(srt.getTranslation()).addVertex();
-					mb2.position(srt.getTranslation()+yVec.cross(zVec)*0.5).addVertex();
+					mb2.position(srt.getTranslation()+yVec.cross(zVec)*length).addVertex();
 
 					mb2.color(new Util.Color4f(0,0.5,0,0.1));
 					mb2.position(srt.getTranslation()).addVertex();
-					mb2.position(srt.getTranslation()+yVec*0.5).addVertex();
+					mb2.position(srt.getTranslation()+yVec*length).addVertex();
 
 					mb2.color(new Util.Color4f(0,0,0.5,0.1));
 					mb2.position(srt.getTranslation()).addVertex();
-					mb2.position(srt.getTranslation()+zVec*0.5).addVertex();
+					mb2.position(srt.getTranslation()+zVec*length).addVertex();
 				}
 			}
 		}
@@ -311,6 +307,8 @@ static rebuildSplineMesh = fn( data ){
 		m.setDrawLines();
 		data.additionalLinesNode = new MinSG.GeometryNode(m);
 		data.additionalLinesNode.setTempNode(true);
+		Std.Traits.addTrait(data.additionalLinesNode,module('../Basic/MetaObjectTrait'));
+
 		data.splineNode += data.additionalLinesNode;
 	}
 };
@@ -322,7 +320,7 @@ static updateEditNodes = fn( data ){
 		{
 			var mb = new Rendering.MeshBuilder;
 			mb.color(new Util.Color4f(1,1,0,0.4));
-			mb.addSphere( new Geometry.Sphere([0,0,0],0.1),10,10 );
+			mb.addSphere( new Geometry.Sphere([0,0,0],0.2),10,10 );
 			controlMesh = mb.buildMesh();
 		}
 		{
@@ -334,7 +332,7 @@ static updateEditNodes = fn( data ){
 		{
 			var mb = new Rendering.MeshBuilder;
 			mb.color(new Util.Color4f(0,1,0,0.4));
-			mb.addBox(new Geometry.Box(new Geometry.Vec3(0,0,0),0.3,0.3,0.3));
+			mb.addBox(new Geometry.Box(new Geometry.Vec3(0,0,0),0.4,0.4,0.4));
 			srtMesh = mb.buildMesh();
 		}
 	}
@@ -361,7 +359,7 @@ static updateEditNodes = fn( data ){
 			editNode.setRelTransformation(point.location);
 		}
 	}
-	var scale = bb.getDiameter() / 30;
+	var scale = bb.getDiameter() / 50;
 	foreach(data.spline_controlPoints() as var pointNr, var point){
 		data.editNodes[pointNr].setScale(scale);
 	}
