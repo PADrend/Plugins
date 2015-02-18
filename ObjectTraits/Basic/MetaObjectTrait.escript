@@ -42,18 +42,34 @@ Renderer.doDisableState  @(override) ::= fn(node,params){// node,params){
 	// depth sort
 	params.setFlag( MinSG.USE_WORLD_MATRIX);
 
-	var blending=new Rendering.BlendingParameters;
+	var blending = new Rendering.BlendingParameters;
 	blending.enable();
-//	blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE);
-	blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE_MINUS_SRC_ALPHA);
-	renderingContext.pushAndSetBlending(blending);
-	
-	renderingContext.pushAndSetDepthBuffer(false, false, Rendering.Comparison.ALWAYS);
-	foreach(this.nodes as var node){
-		node.display(frameContext,params);
+
+
+
+	{	//  pass: no depth test
+//		blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE_MINUS_SRC_ALPHA);
+		blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE);
+		renderingContext.pushAndSetBlending(blending);
+		renderingContext.pushAndSetDepthBuffer(false, false, Rendering.Comparison.ALWAYS);
+		foreach(this.nodes as var node){
+			node.display(frameContext,params);
+		}
+		renderingContext.popDepthBuffer();
+		renderingContext.popBlending();
 	}
-	renderingContext.popDepthBuffer();
-	renderingContext.popBlending();
+
+	{	//  pass: normal depth test
+		blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE_MINUS_SRC_ALPHA);
+//		blending.setBlendFunc(Rendering.BlendFunc.SRC_ALPHA,Rendering.BlendFunc.ONE);
+		renderingContext.pushAndSetBlending(blending);
+		
+		foreach(this.nodes as var node){
+			node.display(frameContext,params);
+		}
+		renderingContext.popBlending();
+	}
+
 };
 
 Util.registerExtension('NodeEditor_QueryAvailableStates',fn(map){
@@ -76,6 +92,7 @@ MetaNodeState.doEnableState ::= fn(node,params){
 
 		if(frameContext.displayNode(node,params)) // pass on to other channel
 			return MinSG.STATE_SKIP_RENDERING;
+//			return MinSG.STATE_OK;
 		else{ // no (active) Renderer state
 			if(!node.hasParent())
 				return MinSG.STATE_OK;
@@ -84,7 +101,7 @@ MetaNodeState.doEnableState ::= fn(node,params){
 				sceneRoot = sceneRoot.getParent();
 			
 			foreach(sceneRoot.getStates() as var s){
-				if(s---|>Renderer) // renderer found (probably just disabled)
+				if(s.isA(Renderer)) // renderer found (probably just disabled)
 					break; 
 			}else{ // no renderer found -> add one
 				sceneRoot += new Renderer; 
