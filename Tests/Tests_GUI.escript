@@ -63,10 +63,10 @@ plugin.init @(override) :=fn(){
 			});
 		}
 	}
-    this.window:=void;
-    this.memoryWindow:=void;
-    this.panel:=void;
-    return true;
+	this.window:=void;
+	this.memoryWindow:=void;
+	this.panel:=void;
+	return true;
 };
 
 
@@ -1060,9 +1060,9 @@ plugin.showWindow:=fn(){
 
 
 	//!!!!!!!!!!!!!!!!!
-    p++;
-    p+='----';
-    p++;
+	p++;
+	p+='----';
+	p++;
 	p+={
 		GUI.TYPE : GUI.TYPE_MULTILINE_TEXT,
 		GUI.LABEL : "Multi line text entry",
@@ -1072,9 +1072,9 @@ plugin.showWindow:=fn(){
 	};
 
 
-    p++;
-    p+='----';
-    p++;
+	p++;
+	p+='----';
+	p++;
 	p+={
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 		GUI.LABEL : "Collapsible container",
@@ -1089,7 +1089,7 @@ plugin.showWindow:=fn(){
 		
 		]
 	};
-    p++;
+	p++;
 	p+={
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 		GUI.HEADER : ["Collapsible"," container ","II"],
@@ -1097,48 +1097,73 @@ plugin.showWindow:=fn(){
 		GUI.COLLAPSED : DataWrapper.createFromConfig( PADrend.configCache,'Test.GuiTests.collapsedContainer',false )
 	};
 	p++;
-    p+='----';
-    p++;
+	p+='----';
+	p++;
 
-    {	// LibGUIExt/Traits/RefreshableContainerTrait
+	{	// LibGUIExt/Traits/RefreshableContainerTrait
 		p+="LibGUIExt/Traits/RefreshableContainerTrait";
 		p++;
-    	var c = gui.create({
+		var c = gui.create({
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Refresh with random content",
 			GUI.ON_CLICK : fn(){	this.refresh();	},	//! \see LibGUIExt/Traits/RefreshableContainerTrait
 			GUI.WIDTH : 300,
-    	});
+		});
 		Traits.addTrait(c,Std.require('LibGUIExt/Traits/RefreshableContainerTrait'),fn(){
 			var s="";
 			for(var i=Rand.equilikely(2,10);i>0;--i )
 				s += " "+i;
 			return [s];
 		});
-    	p+=c;
-    	
-    	p++;
-    }
-        
+		p+=c;
+		
+		p++;
+	}
+	{	// DynamicContainer
+		
+		p+="DynamicContainer";
+		p++;
+		var text = new Std.DataWrapper;
+		var words = new Std.DataWrapper;
+		text.onDataChanged += [words]=>fn(words,t){	words(t.split(" "));};
+		text("foo bar");
+		gui.register('Test_dynamicContainer',["registeredText"]);
+		words('Test_dynamicContainer');
+		p += {
+			GUI.TYPE : GUI.TYPE_TEXT,
+			GUI.LABEL : "Type some words",
+			GUI.DATA_WRAPPER : text
+		};
+		p++;
+		p += {
+			GUI.TYPE : GUI.TYPE_CONTAINER,
+			GUI.CONTENTS : words,
+			GUI.LAYOUT : GUI.LAYOUT_BREAKABLE_TIGHT_FLOW,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS, 5,40],
+			GUI.TOOLTIP : "Initially: registeredText"
+		};
+		p++;
+	}
+		
 
 
 	p+="----";
-    p++;
-    p+="*Bug Testcases*";
+	p++;
+	p+="*Bug Testcases*";
 	p++;
 	p+="WIDTH_FILL_...";
 	p++;
 	p+={
-	    GUI.TYPE : GUI.TYPE_LABEL,
-	    GUI.SIZE : [GUI.WIDTH_FILL_REL,0.5,0],
-	    GUI.FLAGS : GUI.BORDER,
-	    GUI.LABEL : "50% ->"
+		GUI.TYPE : GUI.TYPE_LABEL,
+		GUI.SIZE : [GUI.WIDTH_FILL_REL,0.5,0],
+		GUI.FLAGS : GUI.BORDER,
+		GUI.LABEL : "50% ->"
 	};
-    p+={
-	    GUI.TYPE : GUI.TYPE_LABEL,
-	    GUI.SIZE : [GUI.WIDTH_FILL_ABS,30,0],
-	    GUI.FLAGS : GUI.BORDER,
-	    GUI.LABEL : "30px ->"
+	p+={
+		GUI.TYPE : GUI.TYPE_LABEL,
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS,30,0],
+		GUI.FLAGS : GUI.BORDER,
+		GUI.LABEL : "30px ->"
 	};
 	p++;
 	
@@ -1147,9 +1172,9 @@ plugin.showWindow:=fn(){
 	p++;
 	var v = DataWrapper.createFromValue("foo");
 	p+={
-	    GUI.TYPE : GUI.TYPE_BUTTON,
-	    GUI.LABEL : "...",
-	    GUI.ON_CLICK : [v]=>fn(v){
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "...",
+		GUI.ON_CLICK : [v]=>fn(v){
 			var container = gui.create({	GUI.TYPE : GUI.TYPE_CONTAINER	});
 			container += {
 				GUI.TYPE : GUI.TYPE_TEXT,
@@ -1158,8 +1183,8 @@ plugin.showWindow:=fn(){
 			container.destroyContents();
 			v(v()+"."); // trigger onDataChanged.
 			setText(v.onDataChanged.empty() ? "ok" : v.onDataChanged.count());
-	    },
-	    GUI.TOOLTIP : "When pressing the button, a component is bound to a \n"
+		},
+		GUI.TOOLTIP : "When pressing the button, a component is bound to a \n"
 			"DataWrapper and is then destroyed.\n"
 			"The button shows the number of onDataChanged-listeners (or 'ok')and should\n"
 			"always be 0, as the listeners should be removed automatically."

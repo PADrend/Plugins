@@ -66,8 +66,9 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 
 
 		GUI.COLOR : 	(optional) Util.Color4f text color
-		GUI.CONTENTS : 	(optional) [ components* ] An array of components to be added as children to
-						the component.
+		GUI.CONTENTS : 	(optional) [ components* ] || ComponentId || DataWrapper
+						An array of components or an componentId to be added as children to the component.
+						If a DataWrapper is given, the content is updated automatically when the data changes.
 						\note Use only for components where children can be added (Container, Panel, 
 							Button, Window, ...). For other components, the behavior is undefined!
 		GUI.CONTEXT_MENU_PROVIDER : (optional) a function returning an array of menu entries.
@@ -699,10 +700,25 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			var contents = description[GUI.CONTENTS];
 			if( contents ){
 				if(!skipAddingContents ){
+					// if contents is dynamic (e.g. DataWrapper)
+					if(contents.isSet($onDataChanged)){
+						contents.onDataChanged += [this,component,insideMenu] => fn(gui,component,insideMenu,contents){
+							if(component.isDestroyed()){
+								return $REMOVE;
+							}else{
+								component.destroyContents();
+								foreach( gui.createComponents({
+										GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
+										GUI.PROVIDER : contents }) as var c)
+									component += c;
+							}
+						};
+						contents = contents();
+					}
 					foreach( this.createComponents({
-									GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
-									GUI.PROVIDER : contents }) as var c)
-						component+=c;
+								GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
+								GUI.PROVIDER : contents }) as var c)
+					component+=c;
 				}
 				if(contents.isA(String))// for debugging
 					component._componentId := contents;
@@ -941,7 +957,7 @@ GUI.GUI_Manager._componentFactories ::= {
 		result.component = this._createComponentFromDescription(description2,input.width?input.width:100,input.insideMenu);
 		result.component.addProperty(new GUI.ColorProperty(GUI.PROPERTY_BUTTON_HOVERED_TEXT_COLOR, GUI.RED));
 	},
-
+	
 	// fileSelector
 	GUI.TYPE_FILE : fn(input,result){
 		// create text input
