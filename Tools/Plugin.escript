@@ -72,7 +72,7 @@ plugin.registerMenus:=fn(){
 		GUI.LABEL : "Tools",
 		GUI.MENU : 'Tools_ToolsMenu',
 		GUI.MENU_WIDTH : 150,
-		GUI.ICON : "#ToolsSmall",
+		GUI.ICON : "#Tools",
 		GUI.ICON_COLOR : GUI.BLACK,
   	});
   	

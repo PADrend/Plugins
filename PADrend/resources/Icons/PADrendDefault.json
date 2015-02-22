@@ -39,6 +39,19 @@
 		}
 },
 {
+	"image" : "PADrendIcons24.png",
+	"icons" : {
+		"#File" : [0,0,24,24],
+		"#Window" : [24,0,24,24],
+		"#Tools" : [48,0,24,24],
+		"#Settings" : [72,0,24,24],
+		"#Scenes" : [96,0,24,24],
+		"#Plugins" : [120,0,24,24],
+		"#Effects" : [144,0,24,24],
+		"#Spielerei" : [192,0,24,24],
+		}
+},
+{
 	"image" : "PADrendLogo_small.png",
 	"icons" : {
 		"#PADrendLogoSmall" : [0,0,16,14]

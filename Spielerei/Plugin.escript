@@ -50,7 +50,7 @@ plugin.registerMenus := fn(){
 	gui.registerComponentProvider('PADrend_MainToolbar.70_spielerei',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "Spielerei",
-		GUI.ICON : "#SpielereiSmall",
+		GUI.ICON : "#Spielerei",
 		GUI.ICON_COLOR : GUI.BLACK,
 		GUI.MENU : 'Spielerei'
 	});

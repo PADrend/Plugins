@@ -32,6 +32,7 @@ plugin.init @(override) := fn(){
     loadOnce(__DIR__+"/Extruder.escript");
 	loadOnce(__DIR__+"/Primitives.escript");
 	loadOnce(__DIR__+"/TreeGen.escript");
+	Std.require('AutoMeshCreation/TreeGen');
     return true;
 };
 

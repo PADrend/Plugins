@@ -47,7 +47,7 @@ EffectsPlugin.registerMenus:=fn(){
 	gui.registerComponentProvider('PADrend_MainToolbar.70_effects',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL:"Effects",
-		GUI.ICON : "#EffectsSmall",
+		GUI.ICON : "#Effects",
 		GUI.ICON_COLOR : GUI.BLACK,
 		GUI.MENU : 'Effects_MainMenu'
 	});
