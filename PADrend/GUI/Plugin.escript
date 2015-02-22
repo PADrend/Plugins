@@ -24,15 +24,21 @@ var plugin = new Plugin({
 });
 
 // -------------------
+static gui;
 
 plugin.init @(override) := fn(){
 	//  Init global GUI Manager
 	GUI.init(PADrend.SystemUI.getWindow(), PADrend.getEventContext());
+	gui = GLOBALS.gui;
 	
-	registerExtension('PADrend_Init',			this->initGUIResources,Extension.HIGH_PRIORITY+1);
-	registerExtension('PADrend_AfterRendering', fn(...){ renderGUI(); }, Extension.LOW_PRIORITY*2);
-
-	registerExtension('PADrend_Init', fn(){
+	Util.registerExtension('PADrend_Init',			fn(){
+		GUI.FileDialog.folderCacheProvider = PADrend.configCache;
+		module('./Style'); // init style
+	},Extension.HIGH_PRIORITY+1);
+	
+	Util.registerExtension('PADrend_AfterRendering', fn(...){ renderGUI(); }, Extension.LOW_PRIORITY*2);
+	
+	Util.registerExtension('PADrend_Init', fn(){
 		// register position converters: screen pos <-> gui pos
 		gui.screenPosToGUIPos @(override) := [gui.screenPosToGUIPos] => fn(originalFun, pos){
 			if(guiMode()==MODE_DUAL_COMPESSED){
@@ -53,6 +59,14 @@ plugin.init @(override) := fn(){
 		};
 	});
 
+	// init gui components
+	Util.registerExtension('PADrend_Init', fn(){
+//		module._registerModule('PADrend/gui',load('PADrend/gui.escript',{$__injectedGUIObject:GLOBALS.gui}));
+		// workaround for bug in _registerModule.
+		GLOBALS.__injectedGUIObject := GLOBALS.gui;
+		module('PADrend/gui');
+	});
+	
 	// main gui event handler: pass ui-events to gui
 	registerExtension('PADrend_UIEvent', fn(evt){
 		if(evt.isSet($x) && evt.isSet($y)){ //mouse event -> convert screen pos into gui pos
@@ -190,43 +204,6 @@ static renderGUI = fn(){
 	}
 };
 //Util.requirePlugin('PADrend/GUI').guiMode(2);
-
-
-//! [ext:PADrend_Init]
-plugin.initGUIResources := fn(){
-	
-	var resourceFolder = __DIR__+"/../resources";
-
-	gui.loadIconFile( resourceFolder+"/Icons/PADrendDefault.json");
-	
-	GUI.OPTIONS_MENU_MARKER @(override) := {
-		GUI.TYPE : GUI.TYPE_ICON,
-		GUI.ICON : '#DownSmall',
-		GUI.ICON_COLOR : new Util.Color4ub(0x30,0x30,0x30,0xff)
-	};
-
-	// init fonts
-	gui.registerFonts({
-//		GUI.FONT_ID_DEFAULT : 		resourceFolder+"/Fonts/DejaVu_Sans_Codensed_12.png",
-		GUI.FONT_ID_DEFAULT : 		resourceFolder+"/Fonts/DejaVu_Sans_Codensed_12.fnt",
-//		GUI.FONT_ID_DEFAULT : 		GUI.BitmapFont.createFont(resourceFolder+"/Fonts/BAUHS93.ttf",12, " !\"#$%&'()*+,-./0123456789:;<=>?@ ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"),
-//		GUI.FONT_ID_DEFAULT : 		GUI.BitmapFont.createFont(resourceFolder+"/Fonts/BAUHS93.ttf",20, " !\"#$%&'()*+,-./0123456789:;<=>?@ ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"),
-		GUI.FONT_ID_HEADING : 		resourceFolder+"/Fonts/DejaVu_Sans_14.fnt",
-		GUI.FONT_ID_LARGE : 		resourceFolder+"/Fonts/DejaVu_Sans_Codensed_18.fnt",
-		GUI.FONT_ID_TOOLTIP : 		resourceFolder+"/Fonts/DejaVu_Sans_10.fnt",
-		GUI.FONT_ID_WINDOW_TITLE : 	resourceFolder+"/Fonts/DejaVu_Sans_12.fnt",
-		GUI.FONT_ID_XLARGE : 		resourceFolder+"/Fonts/DejaVu_Sans_32_outline_aa.fnt",
-		GUI.FONT_ID_HUGE : 			resourceFolder+"/Fonts/DejaVu_Sans_64_outline_aa.fnt",
-	});
-    
-    
-    
-    gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_DEFAULT, Util.loadBitmap(resourceFolder+"/MouseCursors/3dSceneCursor.png"), 0, 0);
-    gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_TEXTFIELD, Util.loadBitmap(resourceFolder+"/MouseCursors/TextfieldCursor.png"), 8, 8);
-    gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_RESIZEDIAGONAL, Util.loadBitmap(resourceFolder+"/MouseCursors/resizeCursor.png"), 9, 9);
-	
-	GUI.FileDialog.folderCacheProvider = PADrend.configCache;
-};
 
  
 return plugin;

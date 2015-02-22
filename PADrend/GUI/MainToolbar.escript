@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2009-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2008-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2008-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 David Maicher
  * Copyright (C) 2011 Lukas Kopecki
  * Copyright (C) 2009-2012 Ralf Petring <ralf@petring.net>
@@ -31,71 +31,101 @@ var plugin = new Plugin({
 
 // -------------------
 
-plugin.toolbarEnabled := void;
-plugin.toolbar := void;
+static toolbarEnabled;
+static toolbar;
+static gui;
 
 plugin.init @(override) := fn(){
-
-	this.registerStdToolbarEntries();
 	toolbarEnabled = DataWrapper.createFromConfig(PADrend.configCache,'PADrend.GUI.mainToolbarEnabled',true);
-	toolbarEnabled.onDataChanged += this->fn(value){
-		if(value){
-			this.createToolbar();
-		}else if(toolbar){
-			var t = toolbar;
-			toolbar = void;
-			t.close();
-			PADrend.message("The main toolbar is enabled by pressing [F1].");
-		}
-	};
-
-	registerExtension( 'PADrend_KeyPressed',this->fn(evt){ // if the toolbar is closed and [F1] is pressed, re-create the toolbar.
-		if(evt.key == Util.UI.KEY_F1 && !toolbarEnabled()) {
-			toolbarEnabled(true);
-			return true;
-		}
-		return false;
-	});
-	registerExtension( 'PADrend_Init',this->fn(){
-		// show main toolbar
+	Util.registerExtension( 'PADrend_Init', fn(){
 		out(("Creating main toolbar").fillUp(40));
 		toolbarEnabled.forceRefresh();
 		outln("ok.");
+		},Extension.LOW_PRIORITY*2.0); // execute after all menus and tabs are registered
 	
-	},Extension.LOW_PRIORITY*2.0); // execute after all menus and tabs are registered
+	module.on('PADrend/gui', fn(_gui){
+		gui = _gui;
+		registerStdToolbarEntries();
 
+		toolbarEnabled.onDataChanged += fn(value){
+			if(value){
+				createToolbar();
+			}else if(toolbar){
+				var t = toolbar;
+				toolbar = void;
+				t.close();
+				PADrend.message("The main toolbar is enabled by pressing [F1].");
+			}
+		};
+
+		Util.registerExtension( 'PADrend_KeyPressed', fn(evt){ // if the toolbar is closed and [F1] is pressed, re-create the toolbar.
+			if(evt.key == Util.UI.KEY_F1 && !toolbarEnabled()) {
+				toolbarEnabled(true);
+				return true;
+			}
+			return false;
+		});
+	});
+		
 	return true;
 };
  
+static TOOLBAR_ID = 'PADrend_MainToolbar';
  
 //! Create the window containing the main toolbar
-plugin.createToolbar := fn(){
+static createToolbar = fn(){
+	var layouter = (new GUI.FlowLayouter).setMargin(0).setPadding(3).enableAutoBreak();
 
-	var entries = gui.createComponents('PADrend_MainToolbar');
-	var width = entries.count()*22+10;
-
-	this.toolbar = gui.create({
+	var entries = [];
+	var width = 10;
+	foreach(gui.createComponents({ 
+						GUI.TYPE : GUI.TYPE_COMPONENTS,
+						GUI.PROVIDER : TOOLBAR_ID,
+					}) as var e){
+		e.layout();
+		width+=e.getWidth()+5;
+		entries+=e;
+	}
+	var container = gui.create({
+		GUI.TYPE : GUI.TYPE_CONTAINER,
+		GUI.FLAGS : GUI.BACKGROUND,
+		GUI.LAYOUT : layouter,//GUI.LAYOUT_BREAKABLE_TIGHT_FLOW,
+		GUI.CONTENTS : entries,
+		GUI.SIZE : GUI.SIZE_MAXIMIZE,
+	});
+	container._componentId := TOOLBAR_ID;
+	
+	toolbar = gui.create({
 		GUI.TYPE : GUI.TYPE_WINDOW,
 		GUI.SIZE : [width,40],
 		GUI.LABEL : "InteractionTools",
 		GUI.FLAGS : GUI.HIDDEN_WINDOW | GUI.ONE_TIME_WINDOW,
-		GUI.ON_WINDOW_CLOSED : this->fn(){		toolbarEnabled(false);	},
-		GUI.POSITION : [0,-10],
-		GUI.CONTENTS : [gui.createToolbar(width+20,20,entries)]
+		GUI.ON_WINDOW_CLOSED : fn(){
+//			out("!!!!!");
+			toolbarEnabled(false);
+		},
+		
+		GUI.CONTENTS : [container]
 	});
+	container.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,GUI.NULL_SHAPE) );
+	container.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,gui._createRectShape(new Util.Color4ub(0,0,0,80),new Util.Color4ub(0,0,0,0),true)));
+	container.addProperty(new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,new Util.Color4ub(128,128,128,128)));
+	toolbar.setPosition(0,-10);
+
 	gui.windows['Toolbar'] = toolbar;
 };
 
+static ICON_COLOR = new Util.Color4ub(255,255,255,60);
 
-plugin.registerStdToolbarEntries := fn() {
+static registerStdToolbarEntries = fn() {
 
 	// ----------------------------------------------------------------------------------
-    // File...
-    gui.registerComponentProvider('PADrend_MainToolbar.00_file',{
+	// File...
+	gui.registerComponentProvider('PADrend_MainToolbar.00_file',{
 		GUI.TYPE		:	GUI.TYPE_MENU,
 		GUI.LABEL		:	"File",
-		GUI.ICON		:	"#FileSmall",
-		GUI.ICON_COLOR	:	GUI.BLACK,
+		GUI.ICON		:	"#File",
+		GUI.ICON_COLOR	:	ICON_COLOR,
 		GUI.MENU		:	'PADrend_FileMenu'
 	});
 	
@@ -389,7 +419,7 @@ plugin.registerStdToolbarEntries := fn() {
 				});
 			}
 		},
-    
+	
 		{
 			GUI.LABEL		:	"Load Meshes ...",
 			GUI.TOOLTIP		:	"Show a dialog to choose a directory, read all meshes from that directory, and add them to the current scene.\nSupported types: .mmf, .obj, .ply, .md2, .mvbo, .ngc",
@@ -595,15 +625,15 @@ plugin.registerStdToolbarEntries := fn() {
 	]);
 	
 	// ----------------------------------------------------------------------------------
-    // Scenes-Menu
-    gui.registerComponentProvider('PADrend_MainToolbar.10_scene',{
-        GUI.TYPE : GUI.TYPE_MENU,
-        GUI.LABEL : "Scenes",
-        GUI.MENU : 'PADrend_ScenesMenu',
-        GUI.MENU_WIDTH : 500,
-        GUI.ICON : "#ScenesSmall",
-        GUI.ICON_COLOR : GUI.BLACK
-    });
+	// Scenes-Menu
+	gui.registerComponentProvider('PADrend_MainToolbar.10_scene',{
+		GUI.TYPE : GUI.TYPE_MENU,
+		GUI.LABEL : "Scenes",
+		GUI.MENU : 'PADrend_ScenesMenu',
+		GUI.MENU_WIDTH : 500,
+		GUI.ICON : "#Scenes",
+		GUI.ICON_COLOR : ICON_COLOR
+	});
 
 	gui.registerComponentProvider('PADrend_ScenesMenu',fn(){
 		var sceneMenu = [];
@@ -716,7 +746,7 @@ plugin.registerStdToolbarEntries := fn() {
 				if(acticeScene==scene){
 					entry.selectLabel.setText("-[ #"+index+" ]- ");
 				}else{
-					entry.selectLabel.setText("   #"+index+"    ");
+					entry.selectLabel.setText("   #"+index+"	");
 				}
 				var parts = [];
 				parts += NodeMetaInfo.queryMetaInfo_Title(scene,"");
@@ -907,21 +937,21 @@ plugin.registerStdToolbarEntries := fn() {
 		GUI.TYPE		:	GUI.TYPE_MENU,
 		GUI.LABEL		:	"Plugins",
 		GUI.MENU		:	'PADrend_PluginsMenu',
-		GUI.ICON		:	"#PluginsSmall",
-		GUI.ICON_COLOR	:	GUI.BLACK,
+		GUI.ICON		:	"#Plugins",
+		GUI.ICON_COLOR : ICON_COLOR,
 	});
  // ----------------------------------------------------------------------------------
-    // Config-Menu
+	// Config-Menu
 
 	gui.registerComponentProvider('PADrend_MainToolbar.30_config',{
 		GUI.TYPE		:	GUI.TYPE_MENU,
 		GUI.LABEL		:	"Config",
-		GUI.ICON		:	"#SettingsSmall",
-		GUI.ICON_COLOR	:	GUI.BLACK,
+		GUI.ICON		:	"#Settings",
+		GUI.ICON_COLOR : ICON_COLOR,
 		GUI.MENU		:	'PADrend_ConfigMenu',
 		GUI.MENU_WIDTH	:	150
 	});
-    
+	
 	// ------------------------
 	// Config-Menu.10_renderingSettingsp
 
