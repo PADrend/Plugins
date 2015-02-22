@@ -89,19 +89,19 @@ GUI.GUI_Manager.hasRegisteredComponentProvider ::= fn(String id ){
 		
 	\example 
 		// menu with group and provider
-		gui.registerComponentProvider("MyPlugin_SomeMenuName.group1",fn(){
+		gui.register("MyPlugin_SomeMenuName.group1",fn(){
 					return [ "*Group 1*","some actions..." ]; });
 
 		// static menu with group
-		gui.registerComponentProvider("MyPlugin_SomeMenuName.group2", 
+		gui.register("MyPlugin_SomeMenuName.group2", 
 					[ "*Group 2*","some actions..." ] );
 
 		// menu without group
-		gui.registerComponentProvider("MyPlugin_SomeOthersMenuName",fn(){
+		gui.register("MyPlugin_SomeOthersMenuName",fn(){
 					return [ "action1","action2" ]; });
 
 		// context menu
-		gui.registerComponentProvider("MyPlugin_SomeContextMenu",fn(myObject){
+		gui.register("MyPlugin_SomeContextMenu",fn(myObject){
 					return [ "action for "+myObject.name ]; });
 
 		// open a registered menu
@@ -134,6 +134,7 @@ GUI.GUI_Manager.registerComponentProvider ::= fn(String componentId,providerOrEn
 		this._registeredComponentsListeners[componentId]();
 	return this;
 };
+GUI.GUI_Manager.register ::= GUI.GUI_Manager.registerComponentProvider; // alias
 
 /*! Remove a registered component provider or subgroup. */
 GUI.GUI_Manager.unregisterComponentProvider ::= fn(String componentId){

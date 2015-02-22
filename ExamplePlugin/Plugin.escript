@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2012-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2012-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -22,11 +22,10 @@
  ** - Opens a simple popup-window
  ** - Uses a DataWrapper for synchronization with the gui and persistent value storage
  **/
- 
-var plugin = new Plugin({
+ var plugin = new Plugin({
 		Plugin.NAME : 'ExamplePlugin',
 		Plugin.DESCRIPTION : 'Simple example plugin.',
-		Plugin.VERSION : 0.1,
+		Plugin.VERSION : 0.2,
 		Plugin.AUTHORS : "Claudius Jaehn",
 		Plugin.OWNER : "All",
 		Plugin.LICENSE : "Public Domain",
@@ -62,9 +61,9 @@ plugin.init @(override) :=fn() {
 		PADrend.message("You now have "+value+" gold.\n");
 	};
 
-	// Register ExtensionPointHandlers:
-	registerExtension('PADrend_Init',  initGUI); 
-	registerExtension('ExamplePlugin_OnRedButtonPressed', fn(){
+	module.on('PADrend/gui', initGUI); // call initGUI when PADrend/gui is ready.
+	
+	Util.registerExtension('ExamplePlugin_OnRedButtonPressed', fn(){
 		PADrend.message("You just pressed the red button! That costs you 10 gold!");
 		cash(cash()-10);
 	});
@@ -72,11 +71,12 @@ plugin.init @(override) :=fn() {
 	return true; // plugin successful initialized 
 };
 
-static initGUI = fn(){
+static initGUI = fn(_gui){
+	static gui = _gui;
 	outln("ExmaplePlugin: Init GUI...");
 	
 	// init menu entries
-	gui.registerComponentProvider('PADrend_PluginsMenu.examplePlugin',[
+	gui.register('PADrend_PluginsMenu.examplePlugin',[
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "ExamplePlugin",
@@ -95,14 +95,14 @@ static initGUI = fn(){
 		}
 	]);
 	
-	gui.registerComponentProvider('ExamplePlugin_WindowEntries.cash',[ 
+	gui.register('ExamplePlugin_WindowEntries.cash',[ 
 		{// for gui component documentation, see LibGUIExt/Factory_Components.escript
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "RED BUTTON",
 			GUI.COLOR : GUI.RED,
 			GUI.FONT : GUI.FONT_ID_LARGE,
 			GUI.TOOLTIP : "Dangerous button! Do not press!",
-			GUI.ON_CLICK : fn(){	executeExtensions('ExamplePlugin_OnRedButtonPressed');	}
+			GUI.ON_CLICK : fn(){	Util.executeExtensions('ExamplePlugin_OnRedButtonPressed');	}
 		},
 		{
 			GUI.TYPE : GUI.TYPE_NUMBER,

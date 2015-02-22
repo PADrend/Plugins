@@ -34,7 +34,7 @@ static gui;
 plugin.init @(override) := fn(){
 	module.on('PADrend/gui',fn(_gui){
 		gui = _gui;
-		gui.registerComponentProvider('PADrend_MiscConfigMenu.experimentalToolbar',[
+		gui.register('PADrend_MiscConfigMenu.experimentalToolbar',[
 			{
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.LABEL : "Show interaction tools",
@@ -42,7 +42,7 @@ plugin.init @(override) := fn(){
 				GUI.TOOLTIP : "Toolbar also opens with [F2]"
 			}
 		]);
-		gui.registerComponentProvider('PADrend_SceneToolMenu.tools',{
+		gui.register('PADrend_SceneToolMenu.tools',{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.MENU : 'PADrend_ToolsToolbar',
 			GUI.LABEL : "Interaction tools"

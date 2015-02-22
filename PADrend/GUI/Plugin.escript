@@ -68,7 +68,7 @@ plugin.init @(override) := fn(){
 	});
 	
 	// main gui event handler: pass ui-events to gui
-	registerExtension('PADrend_UIEvent', fn(evt){
+	Util.registerExtension('PADrend_UIEvent', fn(evt){
 		if(evt.isSet($x) && evt.isSet($y)){ //mouse event -> convert screen pos into gui pos
 			var pos = gui.screenPosToGUIPos( [evt.x,evt.y] );
 			evt = evt.clone();
@@ -81,7 +81,7 @@ plugin.init @(override) := fn(){
 	
 	// right click menu
 	if(systemConfig.getValue( 'PADrend.GUI.rightClickMenu',true)){
-		registerExtension( 'PADrend_UIEvent',this->fn(evt){
+		Util.registerExtension( 'PADrend_UIEvent',this->fn(evt){
 			if(evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_RIGHT && evt.pressed && !PADrend.getEventContext().isCtrlPressed()){
 				gui.openMenu(gui.screenPosToGUIPos( [evt.x,evt.y] ),'PADrend_SceneToolMenu');
 			}

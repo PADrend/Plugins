@@ -27,7 +27,7 @@ plugin.init @(override) := fn(){
 		static window;
 		static gui = _gui;
 		
-		gui.registerComponentProvider('PADrend_MainToolbar.25_openMainWindow',{
+		gui.register('PADrend_MainToolbar.25_openMainWindow',{
 			GUI.TYPE		:	GUI.TYPE_BUTTON,
 			GUI.LABEL		:	"->",
 			GUI.ICON		:	"#Window",
@@ -41,7 +41,7 @@ plugin.init @(override) := fn(){
 				},
 			GUI.TOOLTIP		:	"Show/Hide Main Window [F1]"
 		});
-		gui.registerComponentProvider('PADrend_MainWindowTabs.90_About',fn(){
+		gui.register('PADrend_MainWindowTabs.90_About',fn(){
 			var page = gui.createPanel();
 			foreach(PADrend.about() as var entry){
 				page+=entry;

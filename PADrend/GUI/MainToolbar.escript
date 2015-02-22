@@ -121,7 +121,7 @@ static registerStdToolbarEntries = fn() {
 
 	// ----------------------------------------------------------------------------------
 	// File...
-	gui.registerComponentProvider('PADrend_MainToolbar.00_file',{
+	gui.register('PADrend_MainToolbar.00_file',{
 		GUI.TYPE		:	GUI.TYPE_MENU,
 		GUI.LABEL		:	"File",
 		GUI.ICON		:	"#File",
@@ -185,7 +185,7 @@ static registerStdToolbarEntries = fn() {
 	};
 
 	// scenes subgroup
-	gui.registerComponentProvider('PADrend_FileMenu.10_scene',fn(){
+	gui.register('PADrend_FileMenu.10_scene',fn(){
 		var entries = [
 		{
 			GUI.LABEL		:	"Load Scene ...",
@@ -349,7 +349,7 @@ static registerStdToolbarEntries = fn() {
 	);
 
 	// meshes subgroup
-	gui.registerComponentProvider('PADrend_FileMenu.20_meshes',[
+	gui.register('PADrend_FileMenu.20_meshes',[
 		'----',
 		{
 			GUI.LABEL		:	"Load Mesh ...",
@@ -585,7 +585,7 @@ static registerStdToolbarEntries = fn() {
 	]);
 
 	// scripts subgroup
-	gui.registerComponentProvider('PADrend_FileMenu.30_scripts',[
+	gui.register('PADrend_FileMenu.30_scripts',[
 		'----',
 		{
 			GUI.LABEL		:	"Load Script ...",
@@ -608,7 +608,7 @@ static registerStdToolbarEntries = fn() {
 	]);
 		
 	// exit subgroup
-	gui.registerComponentProvider('PADrend_FileMenu.90_exit',[
+	gui.register('PADrend_FileMenu.90_exit',[
 		'----',
 		{
 			GUI.TYPE		:	GUI.TYPE_CRITICAL_BUTTON,
@@ -626,7 +626,7 @@ static registerStdToolbarEntries = fn() {
 	
 	// ----------------------------------------------------------------------------------
 	// Scenes-Menu
-	gui.registerComponentProvider('PADrend_MainToolbar.10_scene',{
+	gui.register('PADrend_MainToolbar.10_scene',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "Scenes",
 		GUI.MENU : 'PADrend_ScenesMenu',
@@ -635,7 +635,7 @@ static registerStdToolbarEntries = fn() {
 		GUI.ICON_COLOR : ICON_COLOR
 	});
 
-	gui.registerComponentProvider('PADrend_ScenesMenu',fn(){
+	gui.register('PADrend_ScenesMenu',fn(){
 		var sceneMenu = [];
 
 		sceneMenu += "*Create new scene root*";
@@ -860,13 +860,13 @@ static registerStdToolbarEntries = fn() {
 		return sceneMenu;
 	});
 	
-	gui.registerComponentProvider('PADrend_SceneConfigMenu.00_main',fn(scene){
+	gui.register('PADrend_SceneConfigMenu.00_main',fn(scene){
 		var entries = [];
 		entries += "*" + scene + "*";
 		return entries;
 	});
 	
-	gui.registerComponentProvider('PADrend_SceneConfigMenu.05_sceneMetaData',fn(scene){
+	gui.register('PADrend_SceneConfigMenu.05_sceneMetaData',fn(scene){
 		var NodeMetaInfo = Std.require('LibMinSGExt/NodeMetaInfo');
 		var entries = [];
 		entries += '----';
@@ -903,7 +903,7 @@ static registerStdToolbarEntries = fn() {
 	});
 
 
-	gui.registerComponentProvider('PADrend_SceneConfigMenu.10_coordinateSystem',fn(scene){
+	gui.register('PADrend_SceneConfigMenu.10_coordinateSystem',fn(scene){
 		var entries = [];
 		entries +='----';
 		entries += {
@@ -933,7 +933,7 @@ static registerStdToolbarEntries = fn() {
 
  // ----------------------------------------------------------------------------------
 
-	gui.registerComponentProvider('PADrend_MainToolbar.20_plugins',{
+	gui.register('PADrend_MainToolbar.20_plugins',{
 		GUI.TYPE		:	GUI.TYPE_MENU,
 		GUI.LABEL		:	"Plugins",
 		GUI.MENU		:	'PADrend_PluginsMenu',
@@ -943,7 +943,7 @@ static registerStdToolbarEntries = fn() {
  // ----------------------------------------------------------------------------------
 	// Config-Menu
 
-	gui.registerComponentProvider('PADrend_MainToolbar.30_config',{
+	gui.register('PADrend_MainToolbar.30_config',{
 		GUI.TYPE		:	GUI.TYPE_MENU,
 		GUI.LABEL		:	"Config",
 		GUI.ICON		:	"#Settings",
@@ -955,14 +955,14 @@ static registerStdToolbarEntries = fn() {
 	// ------------------------
 	// Config-Menu.10_renderingSettingsp
 
-	gui.registerComponentProvider('PADrend_ConfigMenu.10_renderingGroup',[{
+	gui.register('PADrend_ConfigMenu.10_renderingGroup',[{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "Rendering settings",
 		GUI.MENU : 'PADrend_RenderingSettings',
 		GUI.MENU_WIDTH : 150
 	}]);
 
-	gui.registerComponentProvider('PADrend_RenderingSettings',fn(){
+	gui.register('PADrend_RenderingSettings',fn(){
 		var m = [];
 		
 		m += "*Rendering flags*";
@@ -1057,14 +1057,14 @@ static registerStdToolbarEntries = fn() {
 	// ------------------------
 	// // Config-Menu.20_navigationGroup
 	
-	gui.registerComponentProvider('PADrend_ConfigMenu.20_navigationGroup',['----',{
+	gui.register('PADrend_ConfigMenu.20_navigationGroup',['----',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "Navigation",
 		GUI.MENU : 'PADrend_NavigationConfigMenu',
 		GUI.MENU_WIDTH : 150
 	}]);
 	
-	gui.registerComponentProvider('PADrend_NavigationConfigMenu.10_main',[
+	gui.register('PADrend_NavigationConfigMenu.10_main',[
 		"*Navigation settings*",
 		{
 			GUI.TYPE : 	GUI.TYPE_BOOL,
@@ -1106,7 +1106,7 @@ static registerStdToolbarEntries = fn() {
 			GUI.TOOLTIP : "NOTE: This value is not saved to the config!"
 		}
 	]);
-	gui.registerComponentProvider('PADrend_NavigationConfigMenu.20_joystick',fn(){	return [
+	gui.register('PADrend_NavigationConfigMenu.20_joystick',fn(){	return [
 		'----',
 		{
 			GUI.TYPE : GUI.TYPE_BOOL,
@@ -1136,12 +1136,12 @@ static registerStdToolbarEntries = fn() {
 			GUI.TOOLTIP : "Exponent used for calculatin the rotation."
 		}
 	];});
-	gui.registerComponentProvider('PADrend_NavigationConfigMenu.30_HIDDevices',[{
+	gui.register('PADrend_NavigationConfigMenu.30_HIDDevices',[{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.MENU : 'PADrend_HID_Menu',
 		GUI.LABEL : "HID Devices"
 	}]);
-	gui.registerComponentProvider('PADrend_HID_Menu.00_main',fn(){
+	gui.register('PADrend_HID_Menu.00_main',fn(){
 		var entries = [];
 		foreach( PADrend.HID.getDevices() as var deviceName, var device ){
 			entries += deviceName;
@@ -1152,7 +1152,7 @@ static registerStdToolbarEntries = fn() {
 	
 	// ------------------------
 	// gui settings
-	gui.registerComponentProvider('PADrend_ConfigMenu.25_gui',[
+	gui.register('PADrend_ConfigMenu.25_gui',[
 		'----',
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
@@ -1162,7 +1162,7 @@ static registerStdToolbarEntries = fn() {
 		}
 	]);
 	
-	gui.registerComponentProvider('PADrend_GUIConfigMenu.m_resetWindows',[
+	gui.register('PADrend_GUIConfigMenu.m_resetWindows',[
 		{
 			GUI.TYPE		:	GUI.TYPE_BUTTON,
 			GUI.LABEL		:	"Move all windows in sight",
@@ -1187,7 +1187,7 @@ static registerStdToolbarEntries = fn() {
 
 	// ------------------------
 	// Plugins
-	gui.registerComponentProvider('PADrend_ConfigMenu.26_plugins',[
+	gui.register('PADrend_ConfigMenu.26_plugins',[
 		'----',
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
@@ -1197,7 +1197,7 @@ static registerStdToolbarEntries = fn() {
 		}
 	]);
 	
-	gui.registerComponentProvider('PADrend_PluginSelectionMenu.main',fn(){
+	gui.register('PADrend_PluginSelectionMenu.main',fn(){
 		var entries = [];
 		entries += "*Plugins*";
 		
@@ -1307,7 +1307,7 @@ static registerStdToolbarEntries = fn() {
 	
 	// ------------------------
 	// misc settings
-	gui.registerComponentProvider('PADrend_ConfigMenu.30_misc',[
+	gui.register('PADrend_ConfigMenu.30_misc',[
 		'----',
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
@@ -1317,7 +1317,7 @@ static registerStdToolbarEntries = fn() {
 		}
 	]);
 	
-	gui.registerComponentProvider('PADrend_MiscConfigMenu.debugInfo',[
+	gui.register('PADrend_MiscConfigMenu.debugInfo',[
 		{
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Debug information output",
@@ -1336,7 +1336,7 @@ static registerStdToolbarEntries = fn() {
 
 	// ------------------------
 	// config file group
-	gui.registerComponentProvider('PADrend_ConfigMenu.90_config',[
+	gui.register('PADrend_ConfigMenu.90_config',[
 		'----',
 		{
 			GUI.LABEL		:	"Save configuration",

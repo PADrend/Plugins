@@ -14,11 +14,11 @@
 /*! Module used to register gui components:
 	\code
 		Std.require.on('PADrend/gui',fn(gui){
-			gui.registerComponentProvider('ComponentId.id2',["foo","bar"]);
+			gui.register('ComponentId.id2',["foo","bar"]);
 		});
 		// OR
 		module.on('PADrend/gui'fn(gui){
-			gui.registerComponentProvider('ComponentId.id2',["foo","bar"]);
+			gui.register('ComponentId.id2',["foo","bar"]);
 		});
 	\endcode
 	
