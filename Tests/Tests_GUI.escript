@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2015 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Ralf Petring <ralf@petring.net>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -14,8 +14,8 @@
  */
 /****
  **	[Plugin:Spielerei] Test/Tests_GUI.escript
- ** 2010-03 Experiments...
  **/
+static gui;
 
 var plugin = new Plugin({
 		Plugin.NAME : 'Tests/Tests_GUI',
@@ -28,41 +28,38 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) :=fn(){
-	{ // Register ExtensionPointHandler:
-		if (queryPlugin('PADrend/GUI')) {
-			registerExtension('PADrend_Init', this->fn(){
-				gui.registerComponentProvider('Tests_TestsMenu.gui',[
-					{
-						GUI.TYPE : GUI.TYPE_BUTTON,
-						GUI.LABEL : "GUI Tests",
-						GUI.ON_CLICK : this->showWindow
-					},
-					{
-						GUI.TYPE : GUI.TYPE_BUTTON,
-						GUI.LABEL : "GUI memory monitoring",
-						GUI.ON_CLICK : this->showMemoryWindow,
-						GUI.TOOLTIP : "All newly created Components are monitored for their destruction."
-					},
-					{
-						GUI.TYPE : GUI.TYPE_BUTTON,
-						GUI.LABEL : "Print GUI registry",
-						GUI.ON_CLICK : fn(){
-	//						print_r(gui._getComponentProviderRegistry());
-							// print only the groups and not the component themselves 
-							var m = new Map;
-							foreach(gui._getComponentProviderRegistry() as var groupName,var group){
-								m[groupName] = new Map;
-								foreach(group as var entryName,var entry)
-									m[groupName][entryName] =  entry.toDbgString();
-							}
-							print_r(m);
-						},
-						GUI.TOOLTIP : "Print the registered component provider groups to the console."
+	module.on('PADrend/gui', this->fn(_gui){
+		gui = _gui;
+		gui.registerComponentProvider('Tests_TestsMenu.gui',[
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "GUI Tests",
+				GUI.ON_CLICK : this->showWindow
+			},
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "GUI memory monitoring",
+				GUI.ON_CLICK : this->showMemoryWindow,
+				GUI.TOOLTIP : "All newly created Components are monitored for their destruction."
+			},
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "Print GUI registry",
+				GUI.ON_CLICK : fn(){
+//						print_r(gui._getComponentProviderRegistry());
+					// print only the groups and not the component themselves 
+					var m = new Map;
+					foreach(gui._getComponentProviderRegistry() as var groupName,var group){
+						m[groupName] = new Map;
+						foreach(group as var entryName,var entry)
+							m[groupName][entryName] =  entry.toDbgString();
 					}
-				]);
-			});
-		}
-	}
+					print_r(m);
+				},
+				GUI.TOOLTIP : "Print the registered component provider groups to the console."
+			}
+		]);
+	});
 	this.window:=void;
 	this.memoryWindow:=void;
 	this.panel:=void;
