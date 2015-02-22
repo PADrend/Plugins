@@ -73,7 +73,7 @@ plugin.registerMenus:=fn(){
 		GUI.MENU : 'Tools_ToolsMenu',
 		GUI.MENU_WIDTH : 150,
 		GUI.ICON : "#Tools",
-		GUI.ICON_COLOR : GUI.BLACK,
+		GUI.ICON_COLOR : module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR,
   	});
   	
 	gui.registerComponentProvider('Tools_ToolsMenu.info',[

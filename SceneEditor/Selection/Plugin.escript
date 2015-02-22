@@ -46,9 +46,8 @@ static SemObjTools = Std.require('LibMinSGExt/SemanticObject');
 plugin.init @(override) := fn(){
 	this.eventHandler = this->ex_UIEvent;
 	registerExtension('PADrend_OnSceneSelected',this->NodeEditor.selectNode);
-	registerExtension('PADrend_Init',this->fn(){
-		createUIToolEntries();
-	});
+	module.on('PADrend/gui',createUIToolEntries);
+	
 	PADrend.registerUITool('SceneEditor_Window')
 			.registerActivationListener(this->fn(){
 				registerExtension('PADrend_UIEvent',eventHandler);
@@ -75,8 +74,8 @@ plugin.init @(override) := fn(){
 /**
 *To create and register the UITool entries.
 */
-plugin.createUIToolEntries :=fn(){
-	gui.registerComponentProvider('PADrend_ToolsToolbar.sceneEditor_Selection',{
+plugin.createUIToolEntries :=fn(gui){
+	gui.register('PADrend_ToolsToolbar.sceneEditor_Selection',{
 		GUI.TYPE : GUI.TYPE_SELECT,
 		GUI.WIDTH : 39,
 		GUI.HEIGHT : 24,
@@ -90,7 +89,13 @@ plugin.createUIToolEntries :=fn(){
 		"\n  selection methods were described above."+
 		"\n- To unselect all selected nodes, click the mouse-right-button and click 'Unselect all'.",
 		GUI.OPTIONS : [
-			['SceneEditor_Window',{GUI.TYPE:GUI.TYPE_ICON,GUI.ICON : '#SelectWindowInclude',GUI.ICON_COLOR:GUI.WHITE},{
+			['SceneEditor_Window',
+				{
+					GUI.TYPE:GUI.TYPE_ICON,
+					GUI.ICON : '#SelectWindowInclude',
+					GUI.ICON_COLOR : module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR
+				},
+				{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.ICON : '#SelectWindowInclude',
 				GUI.WIDTH : 24,
@@ -115,7 +120,12 @@ plugin.createUIToolEntries :=fn(){
                 }
 
 			}],
-			['SceneEditor_Crossing',{GUI.TYPE:GUI.TYPE_ICON,GUI.ICON : '#SelectWindowCrossing',GUI.ICON_COLOR:GUI.WHITE},{
+			['SceneEditor_Crossing',
+				{
+					GUI.TYPE:GUI.TYPE_ICON,
+					GUI.ICON : '#SelectWindowCrossing',
+					GUI.ICON_COLOR : module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR
+				},{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Crossing",
 				GUI.ICON : '#SelectWindowCrossing',
@@ -149,7 +159,7 @@ plugin.createUIToolEntries :=fn(){
 
 	});
 
-	gui.registerComponentProvider('PADrend_SceneToolMenu.01_sceneEditor_Selection',fn(){
+	gui.register('PADrend_SceneToolMenu.01_sceneEditor_Selection',fn(){
 		return NodeEditor.getSelectedNodes().empty() ? [] : [{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Unselect all",

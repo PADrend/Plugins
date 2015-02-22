@@ -45,5 +45,10 @@ gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_RESIZEDIAGONAL, Util.loadBitmap
 
 var NS = new Namespace;
 
+NS.TOOLBAR_ICON_COLOR := new Util.Color4f(0.0,0,0,0.9);
+NS.TOOLBAR_BG_SHAPE := new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
+											gui._createRectShape(new Util.Color4f(0.3,0.3,0.3,0.5),new Util.Color4ub(0,0,0,0),true));
+	
+
 return NS;
 

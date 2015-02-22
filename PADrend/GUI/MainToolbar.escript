@@ -108,16 +108,17 @@ static createToolbar = fn(){
 		GUI.CONTENTS : [container]
 	});
 	container.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,GUI.NULL_SHAPE) );
-	container.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,gui._createRectShape(new Util.Color4ub(0,0,0,80),new Util.Color4ub(0,0,0,0),true)));
-	container.addProperty(new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,new Util.Color4ub(128,128,128,128)));
+	container.addProperty(module('PADrend/GUI/Style').TOOLBAR_BG_SHAPE);
+	container.addProperty(new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR));
 	toolbar.setPosition(0,-10);
 
 	gui.windows['Toolbar'] = toolbar;
 };
 
-static ICON_COLOR = new Util.Color4ub(255,255,255,60);
 
 static registerStdToolbarEntries = fn() {
+
+	static ICON_COLOR = module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR;
 
 	// ----------------------------------------------------------------------------------
 	// File...

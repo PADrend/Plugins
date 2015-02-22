@@ -51,7 +51,7 @@ plugin.registerMenus := fn(){
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "Spielerei",
 		GUI.ICON : "#Spielerei",
-		GUI.ICON_COLOR : GUI.BLACK,
+		GUI.ICON_COLOR : module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR,
 		GUI.MENU : 'Spielerei'
 	});
 								

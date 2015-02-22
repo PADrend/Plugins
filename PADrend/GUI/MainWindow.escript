@@ -31,7 +31,7 @@ plugin.init @(override) := fn(){
 			GUI.TYPE		:	GUI.TYPE_BUTTON,
 			GUI.LABEL		:	"->",
 			GUI.ICON		:	"#Window",
-			GUI.ICON_COLOR	:	GUI.BLACK,
+			GUI.ICON_COLOR	:	module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR,
 			GUI.ON_CLICK	:	fn() { 
 					if(!window){
 						window = createMainWindow(gui);

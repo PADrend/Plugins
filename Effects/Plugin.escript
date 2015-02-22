@@ -48,7 +48,7 @@ EffectsPlugin.registerMenus:=fn(){
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL:"Effects",
 		GUI.ICON : "#Effects",
-		GUI.ICON_COLOR : GUI.BLACK,
+		GUI.ICON_COLOR : module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR,
 		GUI.MENU : 'Effects_MainMenu'
 	});
 	

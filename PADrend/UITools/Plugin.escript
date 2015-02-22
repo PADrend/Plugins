@@ -30,6 +30,7 @@
 	gui.registerComponentProvider('PADrend_ToolsToolbar.myTool',{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.ICON : "#myToolIcon",
+		GUI.ICON_COLOR : module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR,
 		GUI.WIDTH : 15,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MyTool');	},
 		GUI.ON_INIT : fn(...){

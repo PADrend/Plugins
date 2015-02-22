@@ -141,8 +141,8 @@ static createToolbar = fn(){
 		GUI.CONTENTS : [container]
 	});
 	container.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,GUI.NULL_SHAPE) );
-	container.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,gui._createRectShape(new Util.Color4ub(200,200,200,160),new Util.Color4ub(200,200,200,0),true)));
-	container.addProperty(new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,new Util.Color4ub(0,0,0,200)));
+	container.addProperty(module('PADrend/GUI/Style').TOOLBAR_BG_SHAPE);
+	container.addProperty(new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR));
 	toolbar.setPosition(gui.windows['Toolbar'].getWidth(),-10);
 };
  
