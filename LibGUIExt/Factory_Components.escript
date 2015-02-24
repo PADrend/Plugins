@@ -26,9 +26,9 @@ Std.require('LibGUIExt/FactoryConstants');
 	- String: A label with that string (if it begins end ends with "*", the label is formatted as a headline)
 	- Map: A description of the component. \see _createComponentFromDescription(...)	*/
 GUI.GUI_Manager.create ::= fn(entry,entryWidth=false,insideMenu=false){
-	if(entry ---|> GUI.Component){
+	if(entry.isA(GUI.Component)){
 		return entry;
-	}else if(entry---|>Map){
+	}else if(entry.isA(Map)){
 		return _createComponentFromDescription(entry,entryWidth,insideMenu);
 	} else if(entry === GUI.H_DELIMITER){ // }else  if(entry---|>Identifier){ \todo
 		return this.createDelimiter();
@@ -302,30 +302,30 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 	Icon (or image)
 		GUI.TYPE :				TYPE_ICON
 		GUI.ICON : 				name, filename of an icon or an GUI.Icon/Image object.
-		GUI.ICON_COLOR :  		(optional) base color of the icon (default is WHITE)
+		GUI.ICON_COLOR :		(optional) base color of the icon (default is WHITE). If explicitly set to false, the color property is not set.
 	Label
 		GUI.TYPE :				TYPE_LABEL
 		GUI.LABEL : 			text
-		GUI.TEXT_ALIGNMENT : 	(optional) alignment of the text e.g. (GUI.TEXT_ALIGN_LEFT | GUI.TEXT_ALIGN_MIDDLE) or (GUI.TEXT_ALIGN_CENTER | GUI.TEXT_ALIGN_BOTTOM)
+		GUI.TEXT_ALIGNMENT :	(optional) alignment of the text e.g. (GUI.TEXT_ALIGN_LEFT | GUI.TEXT_ALIGN_MIDDLE) or (GUI.TEXT_ALIGN_CENTER | GUI.TEXT_ALIGN_BOTTOM)
 		GUI.DATA_WRAPPER : 		(optional) DataWrapper specifying dynamic text.
 
 	ListView (input)
 		GUI.TYPE :				GUI.TYPE_LIST
-		GUI.OPTIONS : 			[ option* ]
+		GUI.OPTIONS :			[ option* ]
 								One option may be:
 									- A component (or component description)
 									- An array [optionValue, optionComponentDescription]
-		GUI.LIST_ENTRY_HEIGHT : 	(optional) height of the entries.
-		GUI.FLAGS : 			(optional)
+		GUI.LIST_ENTRY_HEIGHT :	(optional) height of the entries.
+		GUI.FLAGS :				(optional)
 								This component supports the following additional flags:
 									GUI.AT_LEAST_ONE_MARKING, AT_MOST_ONE_MARKING
 
 	Menu
 		GUI.TYPE :				GUI.TYPE_MENU
-		GUI.MENU_WIDTH : 		(optional) width of the menu (default 100)
+		GUI.MENU_WIDTH :		(optional) width of the menu (default 100)
 		GUI.ICON:  				(optional) name, filename of an icon or an GUI.Icon/Image object.
-		GUI.ICON_COLOR:  		(optional) base color of the icon (default is WHITE)
-		GUI.MENU_CONTEXT : 		(optional) an arbitrary object (except void) given as parameter to all provider functions 
+		GUI.ICON_COLOR:			(optional) base color of the icon (default is WHITE)
+		GUI.MENU_CONTEXT :		(optional) an arbitrary object (except void) given as parameter to all provider functions 
 								called to create the menu entries. 
 								If this value is set, all providers HAVE to accept a parameter!
 
@@ -792,7 +792,7 @@ GUI.GUI_Manager._componentFactories ::= {
 
 			var icon = gui.getIcon(input.description[GUI.ICON]);
 
-			if(icon ---|> GUI.Component){
+			if(icon.isA(GUI.Component)){
 				button.setText('');
 				button += icon;
 //				button.setFlag(GUI.FLAT_BUTTON,true);
@@ -1049,7 +1049,8 @@ GUI.GUI_Manager._componentFactories ::= {
 
 	GUI.TYPE_ICON : fn(input,result){
 		result.component = this.getIcon(input.description[GUI.ICON]);
-		result.component.addProperty(new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,
+		if( false!==input.description[GUI.ICON_COLOR] )
+			result.component.addProperty(new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,
 						new Util.Color4ub( input.description.get(GUI.ICON_COLOR ,[255,255,255,255] ))));
 
 	},
