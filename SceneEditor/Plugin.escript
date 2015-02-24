@@ -50,7 +50,7 @@ plugin.init @(override) := fn(){
 		}
 	};
 
-	registerExtension('PADrend_Init',this->fn(){
+	module.on('PADrend/gui',this->fn(gui){
 		gui.registerComponentProvider('PADrend_ToolsToolbar.10_sceneEditor_showWindow',{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.ICON : '#SceneEditorWindow',
@@ -82,9 +82,9 @@ plugin.init @(override) := fn(){
 	},Extension.LOW_PRIORITY);
 
 	var modules = [
-        __DIR__+"/Selection/Plugin.escript",
-        __DIR__+"/TransformationTools/Plugin.escript",
-        __DIR__+"/ObjectPlacer/Plugin.escript",
+		__DIR__+"/Selection/Plugin.escript",
+		__DIR__+"/TransformationTools/Plugin.escript",
+		__DIR__+"/ObjectPlacer/Plugin.escript",
 		__DIR__+"/VisualHelper/Plugin.escript",
 		__DIR__+"/NodeRepeater/Plugin.escript",
 		__DIR__+"/ObjectExplorer/Plugin.escript",
