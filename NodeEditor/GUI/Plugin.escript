@@ -27,15 +27,16 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn() {
-	Std.require( 'NodeEditor/GUI/initGUIBasics' );
-	Std.require( 'NodeEditor/GUI/initGUIRegistries' );
-	registerExtension('PADrend_Init',this->this.registerGUIProviders);
+	module( './initGUIBasics' );
+	module( './initGUIRegistries' );
+	module.on('PADrend/gui',this->this.registerGUIProviders);
 	return true;
 };
 
 
-plugin.registerGUIProviders := fn(){
-
+plugin.registerGUIProviders := fn(_gui){
+	static gui = _gui;
+	
 	// node selection
 	gui.registerComponentProvider('PADrend_FileMenu.25_exportSelectedNode',fn(){
 		var entries = [];
@@ -92,6 +93,17 @@ plugin.registerGUIProviders := fn(){
 				var subMenu=[];
 
 				var node;
+				if(!NodeEditor.getSelectedNodes().empty()){
+					subMenu += {
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Unselect all",
+						GUI.ON_CLICK : fn(){
+							NodeEditor.selectNode(void);
+							gui.closeAllMenus();
+						}
+					};
+					subMenu += '----';
+				}
 				if(NodeEditor.getSelectedNodes().count()==1){
 					node = NodeEditor.getSelectedNode();
 					if(node.isInstance()){
