@@ -39,16 +39,19 @@ gui.registerFonts({
 
 
 
-gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_DEFAULT, Util.loadBitmap(resourceFolder+"/MouseCursors/3dSceneCursor.png"), 0, 0);
-gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_TEXTFIELD, Util.loadBitmap(resourceFolder+"/MouseCursors/TextfieldCursor.png"), 8, 8);
-gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_RESIZEDIAGONAL, Util.loadBitmap(resourceFolder+"/MouseCursors/resizeCursor.png"), 9, 9);
 
 var NS = new Namespace;
 
 NS.TOOLBAR_ICON_COLOR := new Util.Color4f(0.0,0,0,0.9);
 NS.TOOLBAR_BG_SHAPE := new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
 											gui._createRectShape(new Util.Color4f(0.3,0.3,0.3,0.5),new Util.Color4ub(0,0,0,0),true));
-	
+NS.resourceFolder := resourceFolder;
+											
+NS.CURSOR_DEFAULT := Util.loadBitmap(resourceFolder+"/MouseCursors/3dSceneCursor.png");
+
+gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_DEFAULT, NS.CURSOR_DEFAULT, 0, 0);
+gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_TEXTFIELD, Util.loadBitmap(resourceFolder+"/MouseCursors/TextfieldCursor.png"), 8, 8);
+gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_RESIZEDIAGONAL, Util.loadBitmap(resourceFolder+"/MouseCursors/resizeCursor.png"), 9, 9);
 
 return NS;
 

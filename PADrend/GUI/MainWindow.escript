@@ -57,7 +57,7 @@ plugin.init @(override) := fn(){
 		Util.registerExtension( 'PADrend_KeyPressed',fn(evt){
 			if (evt.key == Util.UI.KEY_F1) { // F1
 				if(!window){
-					window = createMainWindow();
+					window = createMainWindow(gui);
 				}else{
 					window.toggleVisibility();
 				}
