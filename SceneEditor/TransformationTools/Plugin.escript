@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -15,7 +15,6 @@
  **
  ** Graphical tools for transforming nodes
  **/
-
 var plugin = new Plugin({
 		Plugin.NAME : 'SceneEditor/TransformationTools3',
 		Plugin.DESCRIPTION : 'Transform nodes.',
@@ -28,13 +27,13 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn(){
 	registerExtension('PADrend_Init',this->this.ex_Init);
+	module.on('PADrend/gui',registerToolIcons);
+	
 	return true;
 };
 
 //!	[ext:PADrend_Init]
 plugin.ex_Init:=fn(){
-
-	registerMenus();
 
 	{
 		var t = new (Std.require('SceneEditor/TransformationTools/Tool_TranslationTool'));
@@ -59,7 +58,7 @@ plugin.ex_Init:=fn(){
 		PADrend.registerUITool('TransformationTools3_Snap')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
-	}	
+	}
 	{
 		var t = new (Std.require('SceneEditor/TransformationTools/Tool_SnapTool2'));
 		PADrend.registerUITool('TransformationTools3_Snap2')
@@ -73,10 +72,29 @@ plugin.ex_Init:=fn(){
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 
+
 };
 
-plugin.registerMenus:=fn() {
-	gui.registerComponentProvider('PADrend_ToolsToolbar.transform3',[{
+static registerToolIcons = fn(gui) {
+	static swithFun = fn(button,b){
+		if(button.isDestroyed())
+			return $REMOVE;
+		button.setSwitch(b);
+	};
+	static snapToolMode = new Std.DataWrapper(false);
+	var chooseSnapToolMode = {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.DATA_WRAPPER : snapToolMode,
+		GUI.LABEL : "Snap geometry (slow)"
+	};
+	gui.register('PADrend_UIToolConfig:TransformationTools3_Snap',[chooseSnapToolMode]);
+	gui.register('PADrend_UIToolConfig:TransformationTools3_Snap2',[chooseSnapToolMode]);
+	snapToolMode.onDataChanged += [gui]=>fn(gui,mode){
+		PADrend.setActiveUITool(mode?'TransformationTools3_Snap':'TransformationTools3_Snap2');
+		gui.closeAllMenus();
+	};
+	
+	gui.register('PADrend_ToolsToolbar.transform3',[{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.ICON : '#NodeTranslate',
 		GUI.WIDTH : 24,
@@ -91,6 +109,7 @@ plugin.registerMenus:=fn() {
 				.registerActivationListener([true]=>this->swithFun)
 				.registerDeactivationListener([false]=>this->swithFun);
 		},
+		GUI.TOOLTIP : "Translate selected nodes.\nSee context menu for options..."
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.ICON : '#NodeRotate',
@@ -106,10 +125,11 @@ plugin.registerMenus:=fn() {
 				.registerActivationListener([true]=>this->swithFun)
 				.registerDeactivationListener([false]=>this->swithFun);
 		},
+		GUI.TOOLTIP : "Rotate selected nodes.\nSee context menu for options..."
+
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.ICON : '#NodeScale',
-//		GUI.ICON_COLOR : GUI.BLACK,
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Scale');	},
 		GUI.ON_INIT : fn(...){
@@ -122,39 +142,22 @@ plugin.registerMenus:=fn() {
 				.registerActivationListener([true]=>this->swithFun)
 				.registerDeactivationListener([false]=>this->swithFun);
 		},
+		GUI.TOOLTIP : "Scale selected nodes.\nSee context menu for options..."
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.ICON : '#NodeSnap',
 		GUI.WIDTH : 24,
-//		GUI.ICON_COLOR : GUI.BLACK,
-		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Snap');	},
+		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool(snapToolMode() ? 'TransformationTools3_Snap': 'TransformationTools3_Snap2');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Snap')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
-		},
-	},
-	{
-		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.ICON : '#NodeSnap',
-		GUI.WIDTH : 24,
-		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Snap2');	},
-		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
+				.registerActivationListener([this,true]=>swithFun)
+				.registerDeactivationListener([this,false]=>swithFun);
 			PADrend.accessUIToolConfigurator('TransformationTools3_Snap2')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
+				.registerActivationListener([this,true]=>swithFun)
+				.registerDeactivationListener([this,false]=>swithFun);
 		},
+		GUI.TOOLTIP : "Snap selected nodes.\nSee context menu for options..."
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,

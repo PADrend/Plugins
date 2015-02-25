@@ -94,41 +94,35 @@ static registerGUI = fn(gui){
 		};
 	});
 
-	// while the tool is active, add config options to the sceneToolMenu.
-	static SCENE_TOOL_GUI_ID = 'PADrend_SceneToolMenu.01_sceneEditor_Selection';
-	PADrend.accessUIToolConfigurator(TOOL_ID)
-		.registerActivationListener( [gui]=>fn(gui){
-			gui.register(SCENE_TOOL_GUI_ID,[
-					"*Selection Tool*",
-					{
-						GUI.TYPE : GUI.TYPE_BOOL,
-						GUI.LABEL : "incl. sem. obj.",
-						GUI.DATA_WRAPPER : includeSemObj
-					},
-					{
-						GUI.TYPE : GUI.TYPE_CONTAINER,
-						GUI.LAYOUT : GUI.LAYOUT_FLOW,
-						GUI.CONTENTS : [
-							"Mode:",
-							{
-								GUI.TYPE : GUI.TYPE_BUTTON,
-								GUI.ICON : '#SelectWindowCrossing',
-								GUI.ON_CLICK : [true]=>mode_selectOnIntersection,
-								GUI.TOOLTIP : "Also select nodes on the border of the selection window."
-							},
-							{
-								GUI.TYPE : GUI.TYPE_BUTTON,
-								GUI.ICON : '#SelectWindowInclude',
-								GUI.ON_CLICK : [false]=>mode_selectOnIntersection,
-								GUI.TOOLTIP : "Only select nodes inside selection window."
-							},
-						],
-						GUI.HEIGHT : 24
-					}
-					
-			]);
-		})
-		.registerDeactivationListener( [gui]=>fn(gui){	gui.unregisterComponentProvider(SCENE_TOOL_GUI_ID); });
+	gui.register('PADrend_UIToolConfig:'+TOOL_ID,[
+		"*Selection Tool*",
+		{
+			GUI.TYPE : GUI.TYPE_BOOL,
+			GUI.LABEL : "incl. sem. obj.",
+			GUI.DATA_WRAPPER : includeSemObj
+		},
+		{
+			GUI.TYPE : GUI.TYPE_CONTAINER,
+			GUI.LAYOUT : GUI.LAYOUT_FLOW,
+			GUI.CONTENTS : [
+				"Mode:",
+				{
+					GUI.TYPE : GUI.TYPE_BUTTON,
+					GUI.ICON : '#SelectWindowCrossing',
+					GUI.ON_CLICK : [true]=>mode_selectOnIntersection,
+					GUI.TOOLTIP : "Also select nodes on the border of the selection window."
+				},
+				{
+					GUI.TYPE : GUI.TYPE_BUTTON,
+					GUI.ICON : '#SelectWindowInclude',
+					GUI.ON_CLICK : [false]=>mode_selectOnIntersection,
+					GUI.TOOLTIP : "Only select nodes inside selection window."
+				},
+			],
+			GUI.HEIGHT : 24
+		}
+	]);
+	
 };
 
 static revoceDrawCallback = new Std.MultiProcedure;
@@ -239,7 +233,6 @@ static handleEvent = fn(evt){
 *To collect all Geonodes, which they are in the selection frame.
 */
 static collectNodesInSelectionWindow =fn(MinSG.Node root,Geometry.Rect screenRect,Bool selectOnIntersection){
-	outln(screenRect, " ",selectionRect," ",selectionStartingPos);
 /**
 		   p4
 	|------*-------|
