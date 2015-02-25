@@ -27,7 +27,7 @@
 
 	// Add a button to a toolbar that changes its switching state according to 
 	// the tool:
-	gui.registerComponentProvider('PADrend_ToolsToolbar.myTool',{
+	gui.register('PADrend_ToolsToolbar.myTool',{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.ICON : "#myToolIcon",
 		GUI.ICON_COLOR : module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR,
@@ -44,6 +44,9 @@
 				.registerDeactivationListener([false]=>this->swithFun);
 		}
 	});
+	
+	// register configuration entries:
+	gui.register('PADrend_UIToolConfig:MyTool,["Config for MyTool"]);
 */
 
 var plugin = new Plugin({
@@ -68,13 +71,22 @@ plugin.init @(override) := fn(){
 			PADrend.message("UITool disabled.");
 	};
 	
-	registerExtension('PADrend_KeyPressed', fn(evt){
+	Util.registerExtension('PADrend_KeyPressed', fn(evt){
 		if(PADrend.uiToolsManager.getActiveTool() && evt.key == Util.UI.KEY_ESCAPE){
 			PADrend.deactivateUITool();
 			return true;
 		}
 		return false;
 	},Extension.HIGH_PRIORITY);
+	
+	// config options can eigther be registered globally at "PADrend_UIToolsConfig" for all ui tools OR
+	// at "PADrend_UIToolsConfig:ActiveToolId" for the active tool.
+	module.on('PADrend/gui',fn(gui){
+		gui.register('PADrend_SceneToolMenu.00_activeUITool',[gui]=>fn(gui){
+			return gui.createRegisteredComponentEntries('PADrend_UIToolsConfig').append(
+					gui.createRegisteredComponentEntries('PADrend_UIToolConfig:'+PADrend.uiToolsManager.getActiveTool() ));
+		});
+	});
 	
 	return true;
 };
