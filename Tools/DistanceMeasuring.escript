@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2009-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2009-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2009-2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010-2011 Ralf Petring <ralf@petring.net>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -22,7 +22,7 @@ declareNamespace($Tools);
 Tools.DistanceMeasuringPlugin := new Plugin({
 		Plugin.NAME : 'Tools_DistanceMeasuring',
 		Plugin.DESCRIPTION : "Measure distances.",
-		Plugin.VERSION : 1.0,
+		Plugin.VERSION : 1.1,
 		Plugin.AUTHORS : "Claudius",
 		Plugin.OWNER : "All",
 		Plugin.LICENSE : "Mozilla Public License, v. 2.0",
@@ -31,35 +31,33 @@ Tools.DistanceMeasuringPlugin := new Plugin({
 });
 var plugin = Tools.DistanceMeasuringPlugin;
 
-/*!	---|> Plugin */
 plugin.init @(override) := fn(){
-     { // Register ExtensionPointHandler:
-        registerExtension('PADrend_AfterRenderingPass',this->this.ex_AfterRenderingPass);
-        registerExtension('PADrend_Init',this->this.ex_Init);
-    }
+	module.on('PADrend/gui',this->this.initGUI);
+	
 	var m=0;
 	this.IDLE := m++;
 	this.PICK_FIRST := m++;
 	this.PICK_SECOND := m++;
 	this.PICK_JUMP := m++;
 
-    this.mode:=IDLE;
-    this.eventListenerRegistered:=false;
+	this.mode:=IDLE;
+	this.eventListenerRegistered:=false;
 
-    this.measurement:=false;
-    this.window:=false;
-    this.infoLabel:=false;
-    this.jumpDistance:=DataWrapper.createFromValue(1.0);
+	this.measurement:=false;
+	this.window:=false;
+	this.infoLabel:=false;
+	this.jumpDistance:=DataWrapper.createFromValue(1.0);
 	this.flyToHandler:=void;
-    this.rayCaster:=void;
-    
-    this.eventHandler := this->ex_UIEvent;
-    
+	this.rayCaster:=void;
+	
+	this.eventHandler := this->ex_UIEvent;
+	
 	return true;
 };
 
-//! [ext:PADrend_Init]
-plugin.ex_Init:=fn() {
+static TOOL_ID = 'DistanceMeasure';
+
+plugin.initGUI := fn(gui) {
 
 	this.window=gui.createWindow(320,250,"Measurement",GUI.HIDDEN_WINDOW);
 	this.window.setPosition(200,renderingContext.getWindowHeight()-250);
@@ -69,17 +67,17 @@ plugin.ex_Init:=fn() {
 
 	infoLabel.setFont(gui.getFont(GUI.FONT_ID_XLARGE));
 
-    infoLabel.setColor(new Util.Color4f(1.0,1.0,1.0,1.0));
+	infoLabel.setColor(new Util.Color4f(1.0,1.0,1.0,1.0));
 
 	this.window.add(infoLabel);
 	
-	gui.registerComponentProvider('Tools_ToolsMenu.measuring',[
+	gui.register('Tools_ToolsMenu.70_distanceMeasuring',[
 		"*Measure*",
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Measure",
 			GUI.ON_CLICK : fn(){
-				PADrend.uiToolsManager.setActiveTool('DistanceMeasure');
+				PADrend.uiToolsManager.setActiveTool(TOOL_ID);
 			},
 			GUI.TOOLTIP : "Click to start measuring distances.\n"
 				"Hint: After the first click, the distance from the camera to the picked \n"
@@ -111,14 +109,24 @@ plugin.ex_Init:=fn() {
 		'----'
 	]);
 	
-	gui.registerComponentProvider('PADrend_ToolsToolbar.measuring',{
+	gui.register('PADrend_UIToolConfig:'+TOOL_ID,[
+		"*Distance measuring*",
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Clear",
+			GUI.ON_CLICK : fn() {	PADrend.executeCommand( fn(){ Tools.DistanceMeasuringPlugin.clearMeasurement(); });	},
+			GUI.TOOLTIP : "Remove current measurement."
+		}
+	]);
+	
+	gui.register('PADrend_ToolsToolbar.70_distanceMeasuring',{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 //		GUI.LABEL : "M",
 		GUI.ICON : '#MeasurementTool', 
 		GUI.SIZE : [24,24],
 		GUI.TOOLTIP : "Distance measuring",
 		GUI.ON_CLICK : fn(){
-			PADrend.setActiveUITool('DistanceMeasure');
+			PADrend.setActiveUITool(TOOL_ID);
 		},
 		GUI.ON_INIT : fn(...){
 			var swithFun = fn(b){
@@ -126,7 +134,7 @@ plugin.ex_Init:=fn() {
 					return $REMOVE;
 				setSwitch(b);
 			};
-			PADrend.accessUIToolConfigurator('DistanceMeasure')
+			PADrend.accessUIToolConfigurator(TOOL_ID)
 				.registerActivationListener(this->([true] => swithFun))
 				.registerDeactivationListener(this->([false] => swithFun));
 		},
@@ -136,15 +144,8 @@ plugin.ex_Init:=fn() {
 				"[ESC] to stop measuring.\n"
 				"Hint: After the first click, the distance from the camera to the picked \n"
 				"point is measured until the mouse is moved.",
-		GUI.CONTEXT_MENU_PROVIDER : fn(){
-			return [{
-				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : "Clear",
-				GUI.ON_CLICK : this->fn(){	PADrend.executeCommand( fn(){ Tools.DistanceMeasuringPlugin.clearMeasurement(); });	}
-			}];
-		}
 	});
-	PADrend.registerUITool('DistanceMeasure')
+	PADrend.registerUITool(TOOL_ID)
 			.registerActivationListener(this->activateTool)
 			.registerDeactivationListener(this->deactivateTool);
 };
@@ -152,7 +153,7 @@ plugin.ex_Init:=fn() {
 
 plugin.activateTool := fn(){
 	PADrend.message("Click to measure.");
-	registerExtension('PADrend_UIEvent',eventHandler);
+	Util.registerExtension('PADrend_UIEvent',eventHandler);
 	setMode(PICK_FIRST);
 };
 
@@ -165,18 +166,22 @@ plugin.clearMeasurement:=fn(){
 
 plugin.deactivateTool := fn(){
 	PADrend.message("Measuring stopped.");
-	removeExtension('PADrend_UIEvent',eventHandler); 
+	Util.removeExtension('PADrend_UIEvent',eventHandler); 
 	setMode(IDLE);
 };
 
-//!	[ext:PADrend_AfterRenderingPass]
-plugin.ex_AfterRenderingPass:=fn(...){
-	if(measurement)
-		measurement.display();
-};
+
 
 plugin.setMode := fn(newMode){
+	@(once) static revoce = new Std.MultiProcedure;
 	this.mode = newMode;
+	revoce();
+	if(this.mode!=IDLE){
+		revoce += Util.registerExtensionRevocably('PADrend_AfterRenderingPass',this->fn(...){
+			if(measurement)
+				measurement.display();
+		});
+	}
 };
 
 plugin.queryScenePos := fn(screenPos){
@@ -193,10 +198,10 @@ plugin.queryScenePos := fn(screenPos){
 //!	[ext:UIEvent]
 plugin.ex_UIEvent:=fn(evt){
 
-	if( evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.pressed){
-		if( evt.button == Util.UI.MOUSE_BUTTON_LEFT && this.mode==PICK_FIRST ){
+	if( evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_LEFT && evt.pressed){
+		if( this.mode==PICK_FIRST ){
 			var pos=queryScenePos( [evt.x, evt.y] );
-			out(pos,"\n");
+			outln(pos);
 			if(!pos) return Extension.CONTINUE;
 			
 			PADrend.executeCommand( pos -> fn(){ Tools.DistanceMeasuringPlugin.selectFirstPoint(this); });
@@ -204,17 +209,17 @@ plugin.ex_UIEvent:=fn(evt){
 			// todo: broadcast
 			this.setMode(PICK_SECOND);
 
-		}else if(evt.button == Util.UI.MOUSE_BUTTON_LEFT && this.mode==PICK_SECOND ){
+		}else if(this.mode==PICK_SECOND ){
 			var pos=queryScenePos( [evt.x, evt.y] );
-			out(pos,"\n");
+			outln(pos);
 			if(!pos) return Extension.CONTINUE;
 			
 			PADrend.executeCommand( pos -> fn(){ Tools.DistanceMeasuringPlugin.selectSecondPoint(this); });
 
 			this.setMode(PICK_FIRST);
-		}else if(evt.button == Util.UI.MOUSE_BUTTON_LEFT && this.mode==PICK_JUMP){
+		}else if(this.mode==PICK_JUMP){
 			var pos=queryScenePos( [evt.x, evt.y] );
-			out(pos,"\n");
+			outln(pos);
 			if(!pos) return Extension.CONTINUE;
 			
 			var camPos = GLOBALS.camera.getWorldOrigin();
@@ -297,11 +302,39 @@ Measurement._constructor:=fn(p1=void,p2=void){
 	this.pos2:=p2;
 };
 
+static drawSteppedLine = fn(stepSize,p1,p2,color1,color2,width1,width2){
+	if(stepSize){
+		var dist = p2.distance(p1);
+		var dir = (p2-p1).normalize();
+		var b = true;
+		for(var d=0;d<=dist;d+=stepSize){
+			renderingContext.setLineWidth( b ? width1 : width2 );
+			Rendering.drawVector(GLOBALS.renderingContext, p1 + dir*d,p1 + dir*(d+stepSize).clamp(0,dist), b ?color1:color2);
+			b = !b;
+		}
+	}else{
+		renderingContext.setLineWidth( width1 );
+		Rendering.drawVector(GLOBALS.renderingContext, p1,p2, color1);
+	}
+};
 Measurement.display:=fn(){
 	if( !pos1)
 		return;
 	var p2=pos2 ? pos2 : pos1;
 	var p3=new Geometry.Vec3(p2.getX(),pos1.getY(),p2.getZ());
+	var dist = pos1.distance(p2);
+	var stepSize;
+	var boxSize = 0.1;
+	if(dist>0 && dist<1.0){
+		stepSize = 0.01;
+		boxSize = 0.01;
+	}else if(dist<10.0){
+		stepSize = 0.1;
+		boxSize = 0.1;
+	}else if(dist<100.0){
+		stepSize = 1;
+		boxSize = 0.2;
+	}
 	renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
 
 	renderingContext.pushAndSetDepthBuffer(false, false, Rendering.Comparison.LESS);
@@ -315,6 +348,8 @@ Measurement.display:=fn(){
 	renderingContext.pushAndSetBlending(blending);
 
 	renderingContext.setLineWidth(6.0);
+	drawSteppedLine(stepSize,pos1,p2,new Util.Color4f(1.0,0.0,0.0,0.07),new Util.Color4f(0.5,0.0,0.0,0.07),4,1);
+
 	Rendering.drawVector(GLOBALS.renderingContext, pos1,p2, new Util.Color4f(1.0,0.0,0.0,0.07));
 
 	renderingContext.setLineWidth(2.0);
@@ -323,17 +358,19 @@ Measurement.display:=fn(){
 	Rendering.drawVector(GLOBALS.renderingContext, p3,p2, new Util.Color4f(0.0,0.0,1.0,0.07));
 	// ---
 
-	var b1=new Geometry.Box(pos1,0.1,0.1,0.1);
-	var b2=new Geometry.Box(p2,0.1,0.1,0.1);
+	var b1=new Geometry.Box(pos1,boxSize,boxSize,boxSize);
+	var b2=new Geometry.Box(p2,boxSize,boxSize,boxSize);
 	renderingContext.pushAndSetColorMaterial(new Util.Color4f(1.0,0.0,0.0,0.1));
 	Rendering.drawBox(GLOBALS.renderingContext, b1);
 	Rendering.drawBox(GLOBALS.renderingContext, b2);
 	renderingContext.popMaterial();
 	renderingContext.popDepthBuffer();
-	renderingContext.pushAndSetDepthBuffer(true, false, Rendering.Comparison.LESS);
+//	renderingContext.pushAndSetDepthBuffer(true, false, Rendering.Comparison.LESS);
+	renderingContext.pushAndSetDepthBuffer(true, true, Rendering.Comparison.LESS);
 
-	b1=new Geometry.Box(pos1,0.05,0.05,0.05);
-	b2=new Geometry.Box(p2,0.05,0.05,0.05);
+	boxSize/=2;
+	b1=new Geometry.Box(pos1,boxSize,boxSize,boxSize);
+	b2=new Geometry.Box(p2,boxSize,boxSize,boxSize);
 	renderingContext.pushAndSetColorMaterial(new Util.Color4f(1.0,0.0,0.0,0.6));
 	Rendering.drawBox(GLOBALS.renderingContext, b1);
 	Rendering.drawBox(GLOBALS.renderingContext, b2);
@@ -343,8 +380,8 @@ Measurement.display:=fn(){
 	renderingContext.applyChanges();
 	// ---
 
-	renderingContext.setLineWidth(4.0);
-	Rendering.drawVector(GLOBALS.renderingContext, pos1,p2, new Util.Color4f(1.0,0.0,0.0,1.0));
+	drawSteppedLine(stepSize,pos1,p2,new Util.Color4f(1.0,0.0,0.0,1.0),new Util.Color4f(0.5,0.0,0.0,1.0),4,1);
+
 
 	renderingContext.setLineWidth(1.0);
 
