@@ -94,7 +94,7 @@ static registerToolIcons = fn(gui) {
 		gui.closeAllMenus();
 	};
 	
-	gui.register('PADrend_ToolsToolbar.transform3',[{
+	gui.register('PADrend_ToolsToolbar.40_transformationTools',[{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.ICON : '#NodeTranslate',
 		GUI.WIDTH : 24,

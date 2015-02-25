@@ -2,8 +2,8 @@
  * This file is part of the proprietary part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2014 Claudius Jähn <claudius@uni-paderborn.de>
- * Copyright (C) 20143 Mouns R. Husan Almarrani
+ * Copyright (C) 2014-2015 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2014 Mouns R. Husan Almarrani
  *
  * PADrend consists of an open source part and a proprietary part.
  * For the proprietary part of PADrend all rights are reserved.
@@ -11,7 +11,7 @@
 var plugin = new Plugin({
 	Plugin.NAME : 'SceneEditor/GroupStorage',
 	Plugin.DESCRIPTION : "Store of nodes groups",
-	Plugin.VERSION : 1.0,
+	Plugin.VERSION : 1.1,
 	Plugin.REQUIRES : [],
 	Plugin.AUTHORS : "Mouns",
 	Plugin.OWNER : "Claudius, Mouns",
@@ -21,15 +21,17 @@ var plugin = new Plugin({
 static selectedNodesStorage = Std.require('NodeEditor/SelectedNodesStorage');
 
 plugin.init @(override) := fn() {
-	registerExtension('PADrend_Init', this->registerGUIComponents );
+	module.on('PADrend/gui', registerGUIComponents );
 	return true;
 };
 
-static COLOR_PASSIVE = new Util.Color4f(0.5,0.5,0.5,1.0);
-static COLOR_ACTIVE = new Util.Color4f(0.2,0.2,1.0,1.0);
-
-plugin.registerGUIComponents := fn(){
-	gui.registerComponentProvider('PADrend_ToolsToolbar.30_selectionStorage', fn(){
+static registerGUIComponents = fn(gui){
+	static COLOR_PASSIVE = module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR;
+	static COLOR_ACTIVE = new Util.Color4f(0.0,0.0,0.6,1.0);
+	static ACTIVE_BG_SHAPE = new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
+											gui._createRectShape(new Util.Color4f(0.6,0.6,0.6,0.9),new Util.Color4ub(0.6,0.6,0.6,0.9),true));
+	
+	gui.register('PADrend_ToolsToolbar.10_storedSelections', [gui]=>fn(gui){
 		var panel = gui.create({
 			GUI.TYPE : GUI.TYPE_CONTAINER,
 			GUI.SIZE : [GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 25, 25],
@@ -97,8 +99,11 @@ plugin.registerGUIComponents := fn(){
 				if(button.isDestroyed())
 					return $REMOVE;
 				if(buttonId == index){
+					button.clearLocalProperties();
 					if( selection && !selection.empty()){
 						button.setColor( COLOR_ACTIVE );
+						button.addLocalProperty(ACTIVE_BG_SHAPE);
+						button.setFlag(GUI.BACKGROUND,true);
 						var t = "["+index+"] Select/goTo stored nodes ("+selection.count()+"):";
 						foreach(selection as var i,var n){
 							if(i>10){
@@ -110,6 +115,7 @@ plugin.registerGUIComponents := fn(){
 						button.setTooltip(t);
 					}
 					else{
+						button.setFlag(GUI.BACKGROUND,false);
 						button.setColor( COLOR_PASSIVE );
 						button.setTooltip( "[CTRL]+["+index+"] Update stored selection.");
 						

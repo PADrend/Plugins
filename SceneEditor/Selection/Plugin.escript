@@ -68,7 +68,7 @@ static registerGUI = fn(gui){
 	};
 	mode_selectOnIntersection.forceRefresh();
 	
-	gui.register('PADrend_ToolsToolbar.sceneEditor_Selection1',[gui]=>fn(gui){
+	gui.register('PADrend_ToolsToolbar.20_selectionTool',[gui]=>fn(gui){
 		return {
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "",

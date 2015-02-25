@@ -51,7 +51,7 @@ plugin.init @(override) := fn(){
 	};
 
 	module.on('PADrend/gui',this->fn(gui){
-		gui.registerComponentProvider('PADrend_ToolsToolbar.10_sceneEditor_showWindow',{
+		gui.register('PADrend_ToolsToolbar.90_showSceneEditorWindow',{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.ICON : '#SceneEditorWindow',
 			GUI.LABEL : "Scene Editor2",
@@ -60,7 +60,7 @@ plugin.init @(override) := fn(){
 			GUI.ON_CLICK : this->fn(){	windowEnabled(!windowEnabled());	},
 		});
 
-		gui.registerComponentProvider('PADrend_ConfigMenu.25_sceneEditor', [
+		gui.register('PADrend_ConfigMenu.25_sceneEditor', [
 			'----',
 			{
 				GUI.TYPE		:	GUI.TYPE_MENU,

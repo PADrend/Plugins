@@ -104,8 +104,8 @@ static createToolbar = fn(){
 		GUI.LAYOUT : layouter,//GUI.LAYOUT_BREAKABLE_TIGHT_FLOW,
 		GUI.CONTENTS : entries,
 		GUI.SIZE : GUI.SIZE_MAXIMIZE,
-		GUI.CONTEXT_MENU_PROVIDER : fn(componentFilter){
-			var entries = [];
+		GUI.CONTEXT_MENU_PROVIDER : fn(){
+			var entries = ["Hide entries:"];
 			foreach(gui.getRegisteredComponentProviders(TOOLBAR_ID) as var name,var p){
 				entries += {
 					GUI.TYPE : GUI.TYPE_BOOL,

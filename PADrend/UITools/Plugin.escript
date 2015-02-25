@@ -79,11 +79,11 @@ plugin.init @(override) := fn(){
 		return false;
 	},Extension.HIGH_PRIORITY);
 	
-	// config options can eigther be registered globally at "PADrend_UIToolsConfig" for all ui tools OR
-	// at "PADrend_UIToolsConfig:ActiveToolId" for the active tool.
+	// config options can eigther be registered globally at "PADrend_UIToolConfig" for all ui tools OR
+	// at "PADrend_UIToolConfig:ActiveToolId" for the active tool.
 	module.on('PADrend/gui',fn(gui){
 		gui.register('PADrend_SceneToolMenu.00_activeUITool',[gui]=>fn(gui){
-			return gui.createRegisteredComponentEntries('PADrend_UIToolsConfig').append(
+			return gui.createRegisteredComponentEntries('PADrend_UIToolConfig').append(
 					gui.createRegisteredComponentEntries('PADrend_UIToolConfig:'+PADrend.uiToolsManager.getActiveTool() ));
 		});
 	});

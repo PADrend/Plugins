@@ -186,10 +186,10 @@ ToolHelperTraits.ContextMenuProviderTrait := new Traits.GenericTrait("ToolHelper
 	t.attributes.doCreateContextMenu ::= fn(){	return [];	};
 	
 	t.attributes.enableContextMenu ::= fn(){
-		gui.registerComponentProvider('PADrend_UIToolsConfig.01_ToolConfig',this->doCreateContextMenu);
+		gui.registerComponentProvider('PADrend_UIToolConfig.01_ToolConfig',this->doCreateContextMenu);
 	};
 	t.attributes.disableContextMenu ::= fn(){
-		gui.unregisterComponentProvider('PADrend_UIToolsConfig.01_ToolConfig');
+		gui.unregisterComponentProvider('PADrend_UIToolConfig.01_ToolConfig');
 	};
 }
 
