@@ -83,6 +83,7 @@ plugin.init @(override) := fn(){
 	if(systemConfig.getValue( 'PADrend.GUI.rightClickMenu',true)){
 		Util.registerExtension( 'PADrend_UIEvent',this->fn(evt){
 			if(evt.type==Util.UI.EVENT_MOUSE_BUTTON && evt.button == Util.UI.MOUSE_BUTTON_RIGHT && evt.pressed && !PADrend.getEventContext().isCtrlPressed()){
+				gui.closeAllMenus();
 				gui.openMenu(gui.screenPosToGUIPos( [evt.x,evt.y] ),'PADrend_SceneToolMenu');
 			}
 			return false;
