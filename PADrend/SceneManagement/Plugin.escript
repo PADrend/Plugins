@@ -22,7 +22,7 @@ PADrend.SceneManagement := new Plugin({
 		Plugin.VERSION : 1.0,
 		Plugin.AUTHORS : "Claudius, Ralf & Benjamin",
 		Plugin.OWNER : "All",
-		Plugin.REQUIRES : ['PADrend'],
+		Plugin.REQUIRES : ['PADrend','LibRenderingExt'],
 		Plugin.EXTENSION_POINTS : [
 			/* [ext:PADrend_OnSceneSelected
 			 * Called when a scene is selected.
