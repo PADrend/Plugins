@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2008-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2008-2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2009 Jan Krems
  * Copyright (C) 2010 Ralf Petring <ralf@petring.net>
  * 
@@ -39,9 +39,10 @@ T.evtentContext @(private) := void;
 T.frameDuration @(private) := 0;
 T.invertYAxis @(private) := false;
 T.joypad_planeMovementModifier @(private) := 0;
+T.keyboardMoveLocalVec @(private,init) 	:= Geometry.Vec3;
 T.lastFrameTimestamp @(private,init) := clock;
 T.mouseView @(private) := false;
-T.moveLocalVec @(private,init) 	:= Geometry.Vec3;
+T.moveLocalVectors @(private,init) 	:= Array; // [Geometry.Vec3*]; // each device can add a separate movelLocalVec, so that they don't interfere with each other.
 T.moveAbsVec @(private,init) 	:= Geometry.Vec3;
 T.moveWalkVec @(private,init) 	:= Geometry.Vec3;
 T.pressedWithCtrl @(private,init) := Map;
@@ -62,44 +63,44 @@ T._actions @(private,init) := fn(){
 		Util.UI.EVENT_KEYBOARD : {
 			Util.UI.KEY_W : fn(evt) { // [w] forward
 					if(evt.pressed) {
-						this.walkMode ? moveWalkVec.z(this.moveWalkVec.z() - 1) : this.moveLocalVec.z(this.moveLocalVec.z() - 1);
+						this.walkMode ? moveWalkVec.z(this.moveWalkVec.z() - 1) : this.keyboardMoveLocalVec.z(this.keyboardMoveLocalVec.z() - 1);
 					} else {
-						this.walkMode ? moveWalkVec.z(this.moveWalkVec.z() + 1) : this.moveLocalVec.z(this.moveLocalVec.z() + 1);
+						this.walkMode ? moveWalkVec.z(this.moveWalkVec.z() + 1) : this.keyboardMoveLocalVec.z(this.keyboardMoveLocalVec.z() + 1);
 					}
 				},
 			Util.UI.KEY_S : fn(evt) { // [s] backward
 					if(evt.pressed) {
-						this.walkMode ? moveWalkVec.z(this.moveWalkVec.z() + 1) : this.moveLocalVec.z(this.moveLocalVec.z() + 1);
+						this.walkMode ? moveWalkVec.z(this.moveWalkVec.z() + 1) : this.keyboardMoveLocalVec.z(this.keyboardMoveLocalVec.z() + 1);
 					} else {
-						this.walkMode ? moveWalkVec.z(this.moveWalkVec.z() - 1) : this.moveLocalVec.z(this.moveLocalVec.z() - 1);
+						this.walkMode ? moveWalkVec.z(this.moveWalkVec.z() - 1) : this.keyboardMoveLocalVec.z(this.keyboardMoveLocalVec.z() - 1);
 					}
 				},
 			Util.UI.KEY_R : fn(evt) { // [r] up
 					if(evt.pressed) {
-						this.moveLocalVec.y(this.moveLocalVec.y() + 1);
+						this.keyboardMoveLocalVec.y(this.keyboardMoveLocalVec.y() + 1);
 					} else {
-						this.moveLocalVec.y(this.moveLocalVec.y() - 1);
+						this.keyboardMoveLocalVec.y(this.keyboardMoveLocalVec.y() - 1);
 					}
 				},
 			Util.UI.KEY_F : fn(evt) { // [f] down
 					if(evt.pressed) {
-						this.moveLocalVec.y(this.moveLocalVec.y() - 1);
+						this.keyboardMoveLocalVec.y(this.keyboardMoveLocalVec.y() - 1);
 					} else {
-						this.moveLocalVec.y(this.moveLocalVec.y() + 1);
+						this.keyboardMoveLocalVec.y(this.keyboardMoveLocalVec.y() + 1);
 					}
 				},
 			Util.UI.KEY_A : fn(evt) { // [a] left
 					if(evt.pressed) {
-						this.moveLocalVec.x(this.moveLocalVec.x() - 0.5);
+						this.keyboardMoveLocalVec.x(this.keyboardMoveLocalVec.x() - 0.5);
 					} else {
-						this.moveLocalVec.x(this.moveLocalVec.x() + 0.5);
+						this.keyboardMoveLocalVec.x(this.keyboardMoveLocalVec.x() + 0.5);
 					}
 				},
 			Util.UI.KEY_D : fn(evt) { // [d] right
 					if(evt.pressed) {
-						this.moveLocalVec.x(this.moveLocalVec.x() + 0.5);
+						this.keyboardMoveLocalVec.x(this.keyboardMoveLocalVec.x() + 0.5);
 					} else {
-						this.moveLocalVec.x(this.moveLocalVec.x() - 0.5);
+						this.keyboardMoveLocalVec.x(this.keyboardMoveLocalVec.x() - 0.5);
 					}
 				},
 			Util.UI.KEY_Q : fn(evt) { // [q] rotate left
@@ -193,6 +194,7 @@ T._constructor ::= fn(Util.UI.Window _window, Util.UI.EventContext _evtentContex
 	this.dolly = _dolly;
 	this.cameraNode = _camera ? _camera : _dolly;
 	this.speed = this.initialSpeed;
+	this.moveLocalVectors += this.keyboardMoveLocalVec;
 };
 
 T.execute ::= fn(){
@@ -208,8 +210,10 @@ T.execute ::= fn(){
 			v.normalize();
 		this.dolly.moveRel( v*this.speed*this.frameDuration );
 	}
-	if(!this.moveLocalVec.isZero())
-		this.dolly.moveLocal( this.moveLocalVec *this.speed*this.frameDuration);
+	foreach(this.moveLocalVectors as var localVec){
+		if(!localVec.isZero())
+			this.dolly.moveLocal( localVec *this.speed*this.frameDuration);
+	}
 	if(!this.moveAbsVec.isZero())
 		this.dolly.moveRel( this.moveAbsVec *this.speed*this.frameDuration);
 	
@@ -238,7 +242,7 @@ T.getPivot ::= fn(){
 	return this.dolly.isSet($getHeadNode) ? this.dolly.getHeadNode().getRelOrigin()+this.pivotOffset : this.pivotOffset;
 };
 
-T.getInvertYAxis ::= 				fn(){	return this.invertYAxis;	};
+T.getInvertYAxis ::= 			fn(){	return this.invertYAxis;	};
 T.getMouseView ::= 				fn(){	return this.mouseView;	};
 T.getSpeed ::= 					fn(){	return this.speed;	};
 T.getWalkMode ::= 				fn(){	return this.walkMode;	};
@@ -291,7 +295,7 @@ T.handleEvent ::= fn(evt,consumeKeysInMouseView=false){
 T.reset ::= fn(){
 	this.mouseRotationVec = new Geometry.Vec3;
 	this.pivotOffset = new Geometry.Vec3;
-	this.moveLocalVec = new Geometry.Vec3;
+	this.keyboardMoveLocalVec.setValue(0,0,0);
 	this.rotateDollyVec = new Geometry.Vec3;
 	this.moveWalkVec = new Geometry.Vec3;
 	this.speed = this.initialSpeed;
@@ -307,16 +311,20 @@ T.setDolly ::= 		fn(MinSG.Node newCamera)	{	this.dolly=newCamera;	};
 T.registerGamepad ::= fn(gamepad){
 	Traits.requireTrait(gamepad, Std.require('LibUtilExt/HID_Traits').ControllerAnalogAxisTrait); //! \see HID_Traits.ControllerAnalogAxisTrait
 	
+	
+	var localMovementVec = new Geometry.Vec3;
+	this.moveLocalVectors += localMovementVec;
+	
 	//! \see HID_Traits.ControllerAnalogAxisTrait
-	gamepad.onAnalogAxisChanged += this->fn(axis,value){
+	gamepad.onAnalogAxisChanged += [localMovementVec]=>this->fn(localMovementVec,axis,value){
 		if(axis==0){ // move left/right
-			this.moveLocalVec.x(value.sign()*(value*0.8).pow(2));
+			localMovementVec.x(value.sign()*(value*0.8).pow(2));
 		}else if(axis==1){ // move forward/backward
 			if(this.joypad_planeMovementModifier>0)
 				this.moveAbsVec.y(-(value.sign()*(value*0.6).pow(2)));
 			else
 				this.walkMode ? 	(this.moveWalkVec.z(value.sign()*(value).pow(2))):
-									(this.moveLocalVec.z(value.sign()*(value).pow(2)));
+									(localMovementVec.z(value.sign()*(value).pow(2)));
 		}else if(axis==2){ // rotate around y-axis
 			this.rotateDollyVec.y(-(value.sign()*(value * this.joypad_rotationFactor ).pow(this.joypad_rotationExponent)));
 		}else if(axis==3){ // rotate around x-axis
@@ -329,7 +337,7 @@ T.registerGamepad ::= fn(gamepad){
 
 	
 	//! \see HID.???Trait
-	gamepad.onButton += this->fn(button,pressed){
+	gamepad.onButton += [localMovementVec]=>this->fn(localMovementVec,button,pressed){
 		if(button == 9) {	// reset
 			if(pressed) {
 				this.reset();
@@ -339,7 +347,7 @@ T.registerGamepad ::= fn(gamepad){
 		}else if(button == 4) {	
 			if(pressed) {
 				if(this.joypad_planeMovementModifier == 0)
-					this.moveLocalVec.z(0);
+					localMovementVec.z(0);
 				this.joypad_planeMovementModifier++;
 			} else {
 				this.joypad_planeMovementModifier--;
