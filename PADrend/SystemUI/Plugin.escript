@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2011 Ralf Petring <ralf@petring.net>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -35,7 +35,7 @@ static eventQueue;
 
 PADrend.SystemUI.init @(override) := fn(){
 
-	var windowSize = systemConfig.getValue('PADrend.window.size',[1024,1024]);
+	var windowSize = systemConfig.getValue('PADrend.window.size',[800,600]);
 
 	{   // Create OpenGL Window
 
