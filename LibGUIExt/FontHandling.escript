@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -28,7 +28,7 @@ GUI.FONT_ID_WINDOW_TITLE := $FONT_ID_WINDOW_TITLE;
 
 //! (internal) Apply the entries of the font registry as global font where necessary.
 GUI.GUI_Manager._applyDefaultFonts ::= fn(){
-	var registry = getFontRegistry();
+	var registry = this.getFontRegistry();
 	if(registry[GUI.FONT_ID_DEFAULT])
 		this.setDefaultFont(GUI.PROPERTY_DEFAULT_FONT, registry[GUI.FONT_ID_DEFAULT] );
 	if(registry[GUI.FONT_ID_TOOLTIP])
@@ -42,16 +42,16 @@ GUI.GUI_Manager._applyDefaultFonts ::= fn(){
 	@see http://sourceforge.net/projects/bitmapfont/	*/
 GUI.GUI_Manager.createBitmapFont ::= fn(filename,
 									chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"){ // '
-    var image=gui.loadImage(filename);
-    if(!image) return false;
+	var image=gui.loadImage(filename);
+	if(!image) return false;
 
-    var fontHeight=image.getHeight()-2;
-    var font=new GUI.BitmapFont(image,fontHeight);
-    var reader = image.createPixelAccessor();
+	var fontHeight=image.getHeight()-2;
+	var font=new GUI.BitmapFont(image,fontHeight);
+	var reader = image.createPixelAccessor();
 
-    var imageW=image.getWidth();
-    var imageX=0;
-    for(var i=0;i<chars.length();i++){
+	var imageW=image.getWidth();
+	var imageX=0;
+	for(var i=0;i<chars.length();i++){
 		while(reader.readColor4f(imageX, 0).a() < 0.999) {
 			imageX++;
 
@@ -60,7 +60,7 @@ GUI.GUI_Manager.createBitmapFont ::= fn(filename,
 				return false;
 			}
 		}
-        var startX=imageX;
+		var startX=imageX;
 		while(reader.readColor4f(imageX, 0).a() >= 0.999) {
 			imageX++;
 			
@@ -69,15 +69,15 @@ GUI.GUI_Manager.createBitmapFont ::= fn(filename,
 				return false;
 			}
 		}
-        var endX = imageX;
-        font.addGlyph( ord(chars[i]),
+		var endX = imageX;
+		font.addGlyph( ord(chars[i]),
 					endX-startX, fontHeight, 		// dimensions
 					new Geometry.Vec2(startX,1),	// texture offset
 					new Geometry.Vec2(0,0), 		// screen offset
 					endX-startX);					// xAdvance
-    }
+	}
 //    out("Created font: ",filename,"\n");
-    return font;
+	return font;
 };
 
 /*! Load a font created with "Bitmap Font Generator v1.12a by Andreas J�nsson (www.AngelCode.com)"
@@ -91,6 +91,7 @@ GUI.GUI_Manager.createBitmapFontFromFNT ::= fn(filename){
 	var font;
 	var lineHeight = 10;
 	var fontInfo = XML_Utils.loadXML(filename);
+	var kernings = [];
 	foreach(fontInfo[XML_Utils.XML_CHILDREN] as var m){
 		var type = m[XML_Utils.XML_NAME];
 		if(type=='info'){
@@ -124,10 +125,22 @@ GUI.GUI_Manager.createBitmapFontFromFNT ::= fn(filename){
 					new Geometry.Vec2( attr['xoffset'],attr['yoffset'] ), // screen offset
 					attr['xadvance']);  //xAdvance					
 			}
-			
+		}else if(type=='kernings'){
+			foreach(m[XML_Utils.XML_CHILDREN] as var kerningInfo){
+				var attr = kerningInfo[XML_Utils.XML_ATTRIBUTES];
+				var amount = 0+attr['amount'];
+				if(amount<0) // HACK! reduce amount to prevent glyphs (in small fonts) from touching each other.
+					++amount;
+				if(amount!=0)
+					kernings += [0+attr['first'], 0+attr['second'], amount];
+			}
 		}
 //		out(" ##### ",type,"\n");
 	}
+	if(font && font.isSet($setKerning))
+		foreach(kernings as var entry)
+			font.setKerning(entry...);
+
 	return font;
 };
 
@@ -136,9 +149,9 @@ GUI.GUI_Manager.createBitmapFontFromFNT ::= fn(filename){
 	\example gui.getFont( GUI.FONT_ID_DEFAULT );
 	\example gui.getFont( "./resources/Fonts/DejaVu_Sans_10.fnt" );	*/
 GUI.GUI_Manager.getFont ::= fn([String,Identifier,GUI.AbstractFont] nameOrFilename){
-	if(nameOrFilename---|>GUI.AbstractFont) // already a font given? return it.
+	if(nameOrFilename.isA(GUI.AbstractFont)) // already a font given? return it.
 		return nameOrFilename;
-	var font = getFontRegistry()[nameOrFilename];
+	var font = this.getFontRegistry()[nameOrFilename];
 	if(font)
 		return font;
 	if(nameOrFilename.toString().endsWith(".png")){
@@ -149,13 +162,13 @@ GUI.GUI_Manager.getFont ::= fn([String,Identifier,GUI.AbstractFont] nameOrFilena
 		}
 	}else if(nameOrFilename.toString().endsWith(".fnt")){
 		try{
-			font = createBitmapFontFromFNT(nameOrFilename);
+			font = this.createBitmapFontFromFNT(nameOrFilename);
 		}catch(e){
 			Runtime.warn(e);
 		}
 	}
 	if(font){
-		registerFont(nameOrFilename,font);
+		this.registerFont(nameOrFilename,font);
 		return font;
 	}else{
 		Runtime.warn("Font not found '"+nameOrFilename+"'");
@@ -165,8 +178,8 @@ GUI.GUI_Manager.getFont ::= fn([String,Identifier,GUI.AbstractFont] nameOrFilena
 
 //! (internal)
 GUI.GUI_Manager.getFontRegistry ::= fn(){
-	if(!isSet($_fontRegistry))
-		this._fontRegistry := new Map();
+	if(!this.isSet($_fontRegistry))
+		this._fontRegistry := new Map;
 	return _fontRegistry;
 };
 
@@ -189,9 +202,9 @@ GUI.GUI_Manager.initDefaultFonts ::= fn(){
 	\note (inernal) If a default font is changed (e.g. PROPERTY_DEFAULT_FONT) it is automatically applied as property.
 	\attention Fonts should only be changed *BEFORE* they are used for the first time! Otherwise, the behavior is undefined.	*/
 GUI.GUI_Manager.registerFont ::= fn( [String,Identifier] name, idOrFileOrFont){
-	var f = getFont(idOrFileOrFont);
+	var f = this.getFont(idOrFileOrFont);
 	if(f){
-		getFontRegistry()[name] = getFont(f);
+		this.getFontRegistry()[name] = getFont(f);
 		_applyDefaultFonts();	
 	}
 };
