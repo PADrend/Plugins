@@ -92,6 +92,7 @@ GUI.GUI_Manager.createBitmapFontFromFNT ::= fn(filename){
 	var lineHeight = 10;
 	var fontInfo = XML_Utils.loadXML(filename);
 	var kernings = [];
+	var tabSpacing = 24;
 	foreach(fontInfo[XML_Utils.XML_CHILDREN] as var m){
 		var type = m[XML_Utils.XML_NAME];
 		if(type=='info'){
@@ -119,11 +120,13 @@ GUI.GUI_Manager.createBitmapFontFromFNT ::= fn(filename){
 					continue;
 				var attr = charInfo[XML_Utils.XML_ATTRIBUTES];
 				var unicode = 0+attr['id'];
+				if(unicode == 32)
+					tabSpacing = (0+attr['xadvance']) * 4;
 				font.addGlyph( unicode, 
 					attr['width'],attr['height'],
 					new Geometry.Vec2( attr['x'],attr['y']  ), // texture offset
 					new Geometry.Vec2( attr['xoffset'],attr['yoffset'] ), // screen offset
-					attr['xadvance']);  //xAdvance					
+					attr['xadvance']);  //xAdvance
 			}
 		}else if(type=='kernings'){
 			foreach(m[XML_Utils.XML_CHILDREN] as var kerningInfo){
@@ -141,6 +144,10 @@ GUI.GUI_Manager.createBitmapFontFromFNT ::= fn(filename){
 		foreach(kernings as var entry)
 			font.setKerning(entry...);
 
+	if(font && font.isSet($setTabWidth) ){
+		font.setTabWidth(tabSpacing);
+		//outln("***Setting tabSpacing ",tabSpacing);
+	}
 	return font;
 };
 
