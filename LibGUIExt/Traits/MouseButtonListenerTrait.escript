@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2012-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2012-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -20,10 +20,10 @@
 		myComponent.onMouseButton += fn(evt){	print_r(evt._getAttributes());	return CONTINUE;	};
 	\endcode
 */
-GUI.MouseButtonListenerTrait := new Traits.GenericTrait("GUI.MouseButtonListenerTrait");
+GUI.MouseButtonListenerTrait := new Std.Traits.GenericTrait("GUI.MouseButtonListenerTrait");
 
 var t = GUI.MouseButtonListenerTrait;
-t.attributes.onMouseButton @(init) := GUI.ChainedEventHandler;
+t.attributes.onMouseButton @(init) := module('../ChainedEventHandler');
 t.onInit += fn(GUI.Component c){
 	gui.enableMouseButtonListener(c);
 };
