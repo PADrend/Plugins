@@ -33,7 +33,7 @@ if(!IO.isFile(configFile)){
 	IO.saveTextFile(configFile,"");
 }
 
-systemConfig.init(mainConfig);
+systemConfig.init(configFile);
 setConfigInfo('System.mainScript',"Main script file (default: PADrend/PADrend.escript)");
 load(systemConfig.getValue('System.mainScript',"PADrend/PADrend.escript"));
 
