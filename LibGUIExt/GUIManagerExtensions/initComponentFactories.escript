@@ -15,9 +15,7 @@
 /****
  **	[LibGUIExt] Factory_Components.escript
  **/
-loadOnce(__DIR__+"/GUI_Utils.escript");
-Std.require('LibGUIExt/FactoryConstants');
-
+module('../FactoryConstants');
 
 /*! Creates a gui component.
 	The result is depending on the type of @p entry:

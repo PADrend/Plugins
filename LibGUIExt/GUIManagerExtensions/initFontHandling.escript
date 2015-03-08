@@ -11,20 +11,8 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[PADrend] LibGUIExt/FontHandling.escript
- **/
 
-
-GUI.FONT_ID_SYSTEM := $FONT_ID_SYSTEM;
-GUI.FONT_ID_DEFAULT := $FONT_ID_DEFAULT;
-GUI.FONT_ID_HEADING := $FONT_ID_HEADING;
-GUI.FONT_ID_LARGE := $FONT_ID_LARGE;
-GUI.FONT_ID_XLARGE := $FONT_ID_XLARGE;
-GUI.FONT_ID_HUGE := $FONT_ID_HUGE;
-GUI.FONT_ID_TOOLTIP := $FONT_ID_TOOLTIP;
-GUI.FONT_ID_WINDOW_TITLE := $FONT_ID_WINDOW_TITLE;
-
+module('../FactoryConstants');
 
 //! (internal) Apply the entries of the font registry as global font where necessary.
 GUI.GUI_Manager._applyDefaultFonts ::= fn(){
@@ -228,3 +216,4 @@ GUI.GUI_Manager.registerFonts ::= fn( Map fonts){
 	_applyDefaultFonts();
 };
 
+return true;

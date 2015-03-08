@@ -10,11 +10,11 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
+
+module('../FactoryConstants');
 /****
  **	[LibGUIExt] Factory_Dialogs.escript
  **/
-loadOnce(__DIR__+"/Factory_Components.escript");
-
 /*! 
 
 	File dialog					Dialog for selecting files.
@@ -160,4 +160,4 @@ GUI.GUI_Manager._dialogFactories ::= {
 };
 
 // --------------------------------------------------
-
+return true;

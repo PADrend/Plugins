@@ -83,39 +83,5 @@ GUI.GUI_Manager.printMenuInfo ::= fn(){
 	print_r(getComponentProviderRegistry());
 };
 
-// -------
-// Menu extension
 
-/*! Close prior submenus and open the given menu as submenu next to the given entry of the current menu.
-	\see gui.openMenu(...)	*/
-GUI.Menu.openSubmenu ::= fn(GUI.Component entry, menuEntries,width=150,context...){
-	var menu = menuEntries.isA(GUI.Menu) ? menuEntries : gui.createMenu(menuEntries,width,context...);
-
-	menu.layout(); // assure the height is initialized
-	var height = menu.getHeight();
-	
-	this._registerSubmenu(menu);
-
-	var position =  entry.getAbsPosition();
-	if(position.getX()+width+entry.getWidth() > gui.getScreenRect().getWidth()){
-		position.setX( position.getX()-width*0.5);
-	}else{
-		position.setX( position.getX()+entry.getWidth()*0.95);
-	}
-			
-	if(position.getY()+height > gui.getScreenRect().getHeight()){
-		position.setY([position.getY()-height,0].max());
-	}
-
-	menu.open(position);
-};
-
-//! (internal) Registers a menu as submenu. If another submenu is opened, it is closed automatically.
-GUI.Menu._registerSubmenu ::= fn(GUI.Menu submenu){
-	if(this.isSet($_activeSubmenu) && this._activeSubmenu.isA(GUI.Menu) && submenu!=this._activeSubmenu){
-		this._activeSubmenu.close();
-		this._activeSubmenu = void;
-	}
-	this._activeSubmenu @(private) := submenu;
-};
-//
+return true;

@@ -13,10 +13,6 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[PADrend] LibGUIExt/NewComponents.escript
- **/
-loadOnce(__DIR__+"/Factory_Components.escript");
 
 // ------------------------------------------------------------------------------
 // new components
@@ -809,3 +805,5 @@ GUI.GUI_Manager.createToolbar ::= fn(Number width,Number height,Array entries,[N
 };
 
 // ------------------------------------------------------------------------------------
+
+return true;

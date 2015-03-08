@@ -15,9 +15,6 @@
 /***
  **    FileDialog
  **/
-loadOnce(__DIR__+"/Factory_Components.escript");
-
-
 static T = new Type;
 
 T._title @(private) := void;

@@ -376,7 +376,7 @@ return fn(tabbedPanel){
 		GUI.LABEL : "Shots",
 		GUI.ON_CLICK : fn(){
 			// choose directory and size
-			var fileDialog=new GUI.FileDialog("Save screenshots",PADrend.getDataPath(),[""],fn(files){
+			var fileDialog=new (module('LibGUIExt/FileDialog'))("Save screenshots",PADrend.getDataPath(),[""],fn(files){
 				if(!PathManagement.getActivePath())
 					return;
 

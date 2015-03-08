@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 /****
- **	[LibGUIExt] Factory_Constants.escript
+ **	[LibGUIExt] FactoryConstants.escript
  **/
 
 GUI.ACTIONS := $ACTIONS;						//!	\see GUI_Manager.createDialog
@@ -117,4 +117,58 @@ GUI.TYPE_TREE_GROUP := 'treeSubGroup';
 GUI.TYPE_WINDOW := 'window';
 GUI.WIDTH := 'width';
 
+// -----------------------------------------------------------------------------
+GUI.FONT_ID_SYSTEM := $FONT_ID_SYSTEM;
+GUI.FONT_ID_DEFAULT := $FONT_ID_DEFAULT;
+GUI.FONT_ID_HEADING := $FONT_ID_HEADING;
+GUI.FONT_ID_LARGE := $FONT_ID_LARGE;
+GUI.FONT_ID_XLARGE := $FONT_ID_XLARGE;
+GUI.FONT_ID_HUGE := $FONT_ID_HUGE;
+GUI.FONT_ID_TOOLTIP := $FONT_ID_TOOLTIP;
+GUI.FONT_ID_WINDOW_TITLE := $FONT_ID_WINDOW_TITLE;
+
+// -----------------------------------------------------------------------------
+
+GUI.H_DELIMITER := $DELIMITER;
+GUI.NEXT_ROW := $NEXT_ROW;
+GUI.NEXT_COLUMN := $NEXT_COLUMN;
+
+// -----------------------------------------------------------------------------
+
+
+GUI.BLACK := new Util.Color4ub(0,0,0,255);
+GUI.WHITE := new Util.Color4ub(255,255,255,255);
+GUI.RED := new Util.Color4ub(255,0,0,255);
+GUI.DARK_GREEN := new Util.Color4ub(0,128,0,255);
+GUI.GREEN := new Util.Color4ub(0,255,0,255);
+GUI.BLUE := new Util.Color4ub(0,0,255,255);
+GUI.NO_COLOR := new Util.Color4ub(0, 0, 0, 0);
+
+// -----------------------------------------------------------------------------
+
+// default layouters
+GUI.LAYOUT_FLOW := (new GUI.FlowLayouter).setMargin(2).setPadding(2);
+GUI.LAYOUT_TIGHT_FLOW := (new GUI.FlowLayouter).setMargin(0).setPadding(0);
+GUI.LAYOUT_BREAKABLE_TIGHT_FLOW := (new GUI.FlowLayouter).setMargin(0).setPadding(0).enableAutoBreak();
+
+// default SIZEs
+GUI.SIZE_MAXIMIZE := [GUI.WIDTH_REL|GUI.HEIGHT_REL , 1.0,1.0 ];
+GUI.SIZE_MINIMIZE := [GUI.WIDTH_CHILDREN_ABS|GUI.HEIGHT_CHILDREN_ABS , 0,0 ];
+
+// default values for GUI.POSITION
+GUI.POSITION_CENTER_XY :=	[
+								GUI.POS_X_ABS | GUI.REFERENCE_X_CENTER | GUI.ALIGN_X_CENTER |
+								GUI.POS_Y_ABS | GUI.REFERENCE_Y_CENTER | GUI.ALIGN_Y_CENTER,
+								0, 0
+							];
+
+
+// Text (or description) used for buttons opening the options menu in dropdowns and comboboxes.
+// May be overridden and used for other menu buttons.
+GUI.OPTIONS_MENU_MARKER := ">";
+
+GUI.DIM_LINE_HEIGHT := 20;
+GUI.DIM_TIGHT_LINE_HEIGHT := 15;
+
+							
 return GUI;

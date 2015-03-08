@@ -19,7 +19,7 @@ var plugin = new Plugin({
 		Plugin.VERSION : 0.6,
 		Plugin.AUTHORS : "Claudius, Ralf & Benjamin",
 		Plugin.OWNER : "All",
-		Plugin.REQUIRES : ['PADrend','PADrend/SceneManagement','PADrend/EventLoop','PADrend/SystemUI','LibGUIExt'],
+		Plugin.REQUIRES : ['PADrend','PADrend/SceneManagement','PADrend/EventLoop','PADrend/SystemUI'],
 		Plugin.EXTENSION_POINTS : [	]
 });
 
@@ -28,11 +28,10 @@ static gui;
 
 plugin.init @(override) := fn(){
 	//  Init global GUI Manager
-	GUI.init(PADrend.SystemUI.getWindow(), PADrend.getEventContext());
-	gui = GLOBALS.gui;
+	gui = module('LibGUIExt/createGlobalGUIManager')( PADrend.SystemUI.getWindow(), PADrend.getEventContext() );
 	
 	Util.registerExtension('PADrend_Init',			fn(){
-		GUI.FileDialog.folderCacheProvider = PADrend.configCache;
+		module('LibGUIExt/FileDialog').folderCacheProvider = PADrend.configCache;
 		module('./Style'); // init style
 	},Extension.HIGH_PRIORITY+1);
 	

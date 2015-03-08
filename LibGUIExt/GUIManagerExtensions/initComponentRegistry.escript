@@ -13,7 +13,6 @@
 /****
  **	[PADrend] LibGUIExt/ComponentRegistry.escript
  **/
-
 // -----------
 // Component registry
 
@@ -156,3 +155,5 @@ GUI.GUI_Manager.unregisterComponentProvider ::= fn(String componentId){
 };
 
 // ------------------------------------
+
+return true;

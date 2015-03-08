@@ -11,9 +11,6 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-/****
- **	[PADrend] LibGUIExt/IconHandling.escript
- **/
 
 // ----------------
 // icons
@@ -116,3 +113,5 @@ GUI.GUI_Manager.loadIconFile ::= fn( String filename ){
 		return;
 	}
 };
+
+return true;

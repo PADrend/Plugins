@@ -14,7 +14,7 @@
  **	[LibGUIExt] Factory_ComponentGroup.escript
  **/
 
-loadOnce(__DIR__+"/Factory_Components.escript");
+module('../FactoryConstants');
 
 /*!	Create an Array of components from a given ...
 	 ... A components description
