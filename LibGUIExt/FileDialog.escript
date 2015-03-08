@@ -359,7 +359,7 @@ T.init ::= fn(){
 	window.activate();
 };
 
-
+static caseInsensitiveSort = fn(a,b){	return a.toLower()<b.toLower(); };
 
 //!	(public interface)
 T.refresh := fn(){
@@ -409,7 +409,7 @@ T.refresh := fn(){
 		Runtime.warn(e);
 		directories=[];
 	}
-	directories.sort();
+	directories.sort(caseInsensitiveSort);
 	foreach(directories as var entry) {
 		// Isolate directory name.
 		var lastSlash = entry.length() - 1;
@@ -430,7 +430,7 @@ T.refresh := fn(){
 	{
 		// support for db files
 		var dbFiles = Util.getFilesInDir(folder,['.dbfs']);
-		dbFiles.sort();
+		dbFiles.sort(caseInsensitiveSort);
 		foreach(dbFiles as var f){
 			var p=(f.contains('/') ? f.substr(f.rFind('/')+1) : f);
 			var label=gui.createLabel(300,15,
@@ -444,7 +444,7 @@ T.refresh := fn(){
 
 		// support for zip archives
 		var zipFiles = Util.getFilesInDir(folder, ['.zip']);
-		zipFiles.sort();
+		zipFiles.sort(caseInsensitiveSort);
 		foreach(zipFiles as var f) {
 			var p = (f.contains('/') ? f.substr(f.rFind('/') + 1) : f);
 			var label = gui.createLabel(300, 15, ">   [ " + p + " ]");
@@ -455,7 +455,7 @@ T.refresh := fn(){
 		}
 
 		var files = Util.getFilesInDir(folder,getTypes());
-		files.sort();
+		files.sort(caseInsensitiveSort);
 		foreach(files as var f){
 			var filename=(f.contains('/') ? f.substr(f.rFind('/')+1) : f);
 			var filter = this.searchFilter();
