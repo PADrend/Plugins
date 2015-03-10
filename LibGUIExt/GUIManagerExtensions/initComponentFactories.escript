@@ -1002,7 +1002,6 @@ GUI.GUI_Manager._componentFactories ::= {
 	},
 	// fileSelector
 	GUI.TYPE_FOLDER : fn(input,result){
-		loadOnce(__DIR__+"/Factory_Dialogs.escript");
 		// create text input
 		var textInputDescription = input.description.clone();
 		textInputDescription[GUI.TYPE] = GUI.TYPE_TEXT;
