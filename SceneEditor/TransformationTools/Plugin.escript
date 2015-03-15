@@ -76,11 +76,7 @@ plugin.ex_Init:=fn(){
 };
 
 static registerToolIcons = fn(gui) {
-	static swithFun = fn(button,b){
-		if(button.isDestroyed())
-			return $REMOVE;
-		button.setSwitch(b);
-	};
+
 	static snapToolMode = new Std.DataWrapper(false);
 	var chooseSnapToolMode = {
 		GUI.TYPE : GUI.TYPE_BOOL,
@@ -94,85 +90,82 @@ static registerToolIcons = fn(gui) {
 		gui.closeAllMenus();
 	};
 	
+	static Style = module('PADrend/GUI/Style');
+	static switchFun = fn(button,b){
+		if(button.isDestroyed())
+			return $REMOVE;
+		foreach(Style.TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
+			b ? button.addProperty(p) : button.removeProperty(p);
+	};
 	gui.register('PADrend_ToolsToolbar.40_transformationTools',[{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.ICON : '#NodeTranslate',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Move');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Move')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
 		},
 		GUI.TOOLTIP : "Translate selected nodes.\nSee context menu for options..."
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.ICON : '#NodeRotate',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Rotate');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Rotate')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
 		},
 		GUI.TOOLTIP : "Rotate selected nodes.\nSee context menu for options..."
 
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.ICON : '#NodeScale',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Scale');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Scale')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
 		},
 		GUI.TOOLTIP : "Scale selected nodes.\nSee context menu for options..."
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.ICON : '#NodeSnap',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool(snapToolMode() ? 'TransformationTools3_Snap': 'TransformationTools3_Snap2');	},
 		GUI.ON_INIT : fn(...){
 			PADrend.accessUIToolConfigurator('TransformationTools3_Snap')
-				.registerActivationListener([this,true]=>swithFun)
-				.registerDeactivationListener([this,false]=>swithFun);
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
 			PADrend.accessUIToolConfigurator('TransformationTools3_Snap2')
-				.registerActivationListener([this,true]=>swithFun)
-				.registerDeactivationListener([this,false]=>swithFun);
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
 		},
 		GUI.TOOLTIP : "Snap selected nodes.\nSee context menu for options..."
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.ICON : '#Anchor',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Anchor');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
 			PADrend.accessUIToolConfigurator('TransformationTools3_Anchor')
-				.registerActivationListener( [true]=>this->swithFun )
-				.registerDeactivationListener( [false]=>this->swithFun );
+				.registerActivationListener( [this,true]=>switchFun )
+				.registerDeactivationListener( [this,false]=>switchFun );
 		},
 		GUI.TOOLTIP : "AnchorTool: Edit a node's anchor points."
 	},

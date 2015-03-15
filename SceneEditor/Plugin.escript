@@ -53,6 +53,8 @@ plugin.init @(override) := fn(){
 	module.on('PADrend/gui',this->fn(gui){
 		gui.register('PADrend_ToolsToolbar.90_showSceneEditorWindow',{
 			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
+			GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
 			GUI.ICON : '#SceneEditorWindow',
 			GUI.LABEL : "Scene Editor2",
 			GUI.WIDTH : 24,

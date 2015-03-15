@@ -190,10 +190,15 @@ plugin.registerGUIProviders := fn(_gui){
 		toolbarEntries += {
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Tools",
+			GUI.MENU_WIDTH  : 150,
 			GUI.MENU : fn(){
-				return gui.createMenu('NodeEditor_NodeToolsMenu',150,NodeEditor.getSelectedNodes());
+				return gui.createComponents({
+						GUI.TYPE : GUI.TYPE_MENU_ENTRIES,
+						GUI.PROVIDER : 'NodeEditor_NodeToolsMenu',
+						GUI.WIDTH : 150,
+						GUI.CONTEXT : NodeEditor.getSelectedNodes()
+				});
 			}
-			
 		};
 
 		toolbarEntries += {

@@ -49,9 +49,10 @@ plugin.init @(override) :=fn() {
 plugin.registerMenus := fn(){
 	gui.registerComponentProvider('PADrend_MainToolbar.70_spielerei',{
 		GUI.TYPE : GUI.TYPE_MENU,
+		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.LABEL : "Spielerei",
 		GUI.ICON : "#Spielerei",
-		GUI.ICON_COLOR : module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR,
 		GUI.MENU : 'Spielerei'
 	});
 								

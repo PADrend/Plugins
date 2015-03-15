@@ -162,85 +162,80 @@ plugin.ex_Init := fn(){
 };
 
 plugin.registerMenus:=fn() {
-	gui.registerComponentProvider('PADrend_ToolsToolbar.MeshEditorTools',[{
+	static Style = module('PADrend/GUI/Style');
+	static switchFun = fn(button,b){
+		if(button.isDestroyed())
+			return $REMOVE;
+		foreach(Style.TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
+			b ? button.addProperty(p) : button.removeProperty(p);
+	};
+
+	gui.registerComponentProvider('PADrend_ToolsToolbar.80_MeshEditorTools',[{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.TOOLTIP	: "Triangle Move Tool: Allows the selection and movement of the triangles of a selected geometry node.",
 		GUI.ICON : '#TriangleMove',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Move');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
 			PADrend.accessUIToolConfigurator('MeshEditorTools_Move')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
 		},
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.TOOLTIP	: "Triangle Rotate Tool: Allows the selection and rotation of the triangles of a selected geometry node.",
 		GUI.ICON : '#TriangleRotate',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Rotate');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
 			PADrend.accessUIToolConfigurator('MeshEditorTools_Rotate')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
 		},
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.TOOLTIP	: "Triangle Scale Tool: Allows the selection and scaling of the triangles of a selected geometry node.",
 		GUI.ICON : '#TriangleScale',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Scale');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
 			PADrend.accessUIToolConfigurator('MeshEditorTools_Scale')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
 		},
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.TOOLTIP	: "Extrude Tool: Allows the selection and extrusion of the triangles of a selected geometry node.",
 		GUI.ICON : '#TriangleExtrude',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Extrude');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
 			PADrend.accessUIToolConfigurator('MeshEditorTools_Extrude')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
 		},
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.TOOLTIP	: "Knife Tool: Allows the selection and cutting of the triangles of a selected geometry node.",
 		GUI.ICON : '#TriangleKnife',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Knife');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
 			PADrend.accessUIToolConfigurator('MeshEditorTools_Knife')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
 		},
 	}]);
 };

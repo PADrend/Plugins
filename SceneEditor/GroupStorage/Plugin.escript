@@ -26,7 +26,8 @@ plugin.init @(override) := fn() {
 };
 
 static registerGUIComponents = fn(gui){
-	static COLOR_PASSIVE = module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR;
+	static Style = module('PADrend/GUI/Style');
+	static COLOR_PASSIVE = Style.TOOLBAR_ICON_COLOR;
 	static COLOR_ACTIVE = new Util.Color4f(0.0,0.0,0.6,1.0);
 	static ACTIVE_BG_SHAPE = new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
 											gui._createRectShape(new Util.Color4f(0.6,0.6,0.6,0.9),new Util.Color4ub(0.6,0.6,0.6,0.9),true));
@@ -42,10 +43,12 @@ static registerGUIComponents = fn(gui){
 
 			var button = gui.create({
 				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
+				GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 				GUI.LABEL : index,
 				GUI.SIZE: [8,8],
-				GUI.COLOR : COLOR_PASSIVE,
-				GUI.FLAGS : GUI.FLAT_BUTTON,
+//				GUI.COLOR : COLOR_PASSIVE,
+//				GUI.FLAGS : GUI.FLAT_BUTTON,
 				GUI.FONT : GUI.FONT_ID_SYSTEM,
 				GUI.ON_CLICK: [index] => fn(index){
 					var selection = selectedNodesStorage.getStoredSelection(index);
@@ -68,9 +71,10 @@ static registerGUIComponents = fn(gui){
 				},
 				GUI.CONTEXT_MENU_PROVIDER : [index] => fn(index){
 					return [
+						"*Selection #"+index+" ("+selectedNodesStorage.getStoredSelection(index).count()+ " Node/s)*",
 						{
 							GUI.TYPE : GUI.TYPE_BUTTON,
-							GUI.LABEL : "[CTRL]+["+index+"] Update stored selection",
+							GUI.LABEL : "Store selection #"+index,
 							GUI.ON_CLICK : [index] => fn(index){
 								var selectedNodes = NodeEditor.getSelectedNodes().clone();
 								if(selectedNodes.size() > 0){
@@ -79,16 +83,18 @@ static registerGUIComponents = fn(gui){
 								}
 								else
 									outln("No selected node(s)");
-								}
+							},
+							GUI.TOOLTIP : "[CTRL]+["+index+"]"
 						},
-						{
-							GUI.TYPE : GUI.TYPE_BUTTON,
-							GUI.LABEL : "Clear stored selection",
-							GUI.ON_CLICK : [index] => fn(index){
-								selectedNodesStorage.deleteStoredSlection(index);
-								outln("GUI cleared current selection at #",index);
-							}
-						}
+						(selectedNodesStorage.getStoredSelection(index).empty() ? [] : 
+							[{
+								GUI.TYPE : GUI.TYPE_BUTTON,
+								GUI.LABEL : "Clear",
+								GUI.ON_CLICK : [index] => fn(index){
+									selectedNodesStorage.deleteStoredSlection(index);
+									outln("GUI cleared current selection at #",index);
+								}
+							}])...
 
 					];
 				}
@@ -101,9 +107,13 @@ static registerGUIComponents = fn(gui){
 				if(buttonId == index){
 					button.clearLocalProperties();
 					if( selection && !selection.empty()){
-						button.setColor( COLOR_ACTIVE );
-						button.addLocalProperty(ACTIVE_BG_SHAPE);
-						button.setFlag(GUI.BACKGROUND,true);
+
+						foreach(module('PADrend/GUI/Style').TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
+							button.addProperty(p);
+
+//						button.setColor( COLOR_ACTIVE );
+//						button.addLocalProperty(ACTIVE_BG_SHAPE);
+//						button.setFlag(GUI.BACKGROUND,true);
 						var t = "["+index+"] Select/goTo stored nodes ("+selection.count()+"):";
 						foreach(selection as var i,var n){
 							if(i>10){
@@ -115,8 +125,11 @@ static registerGUIComponents = fn(gui){
 						button.setTooltip(t);
 					}
 					else{
-						button.setFlag(GUI.BACKGROUND,false);
-						button.setColor( COLOR_PASSIVE );
+						foreach(module('PADrend/GUI/Style').TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
+							button.removeProperty(p);
+
+//						button.setFlag(GUI.BACKGROUND,false);
+//						button.setColor( COLOR_PASSIVE );
 						button.setTooltip( "[CTRL]+["+index+"] Update stored selection.");
 						
 					}

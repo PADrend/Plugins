@@ -71,20 +71,22 @@ static registerGUI = fn(gui){
 	gui.register('PADrend_ToolsToolbar.20_selectionTool',[gui]=>fn(gui){
 		return {
 			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
+			GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
 			GUI.LABEL : "",
 			GUI.CONTENTS : activeIcon,
 			GUI.ICON : mode_selectOnIntersection() ? icons[0] : icons[1], // initially, a valid icon is required to properly init the color properties
-			GUI.ICON_COLOR : module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR,
 			GUI.ON_CLICK : fn(){	PADrend.setActiveUITool(TOOL_ID);	},
 			GUI.ON_INIT : fn(...){
-				var swithFun = [this]=>fn(button,b){
+				var switchFun = [this]=>fn(button,b){
 					if(button.isDestroyed())
 						return $REMOVE;
-					button.setSwitch(b);
+					foreach(module('PADrend/GUI/Style').TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
+						b ? button.addProperty(p) : button.removeProperty(p);
 				};
 				PADrend.accessUIToolConfigurator(TOOL_ID)
-						.registerActivationListener( [true]=>swithFun )
-						.registerDeactivationListener( [false]=>swithFun );
+						.registerActivationListener( [true]=>switchFun )
+						.registerDeactivationListener( [false]=>switchFun );
 			},
 			GUI.TOOLTIP :	"Drag mouse to select nodes in a rectangle.\n"
 							"[L-click] select a single node.\n"

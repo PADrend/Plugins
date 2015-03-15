@@ -109,7 +109,7 @@ static createToolbar = fn(){
 	});
 	container.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,GUI.NULL_SHAPE) );
 	container.addProperty(module('PADrend/GUI/Style').TOOLBAR_BG_SHAPE);
-	container.addProperty(new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR));
+
 	toolbar.setPosition(0,-10);
 
 	gui.windows['Toolbar'] = toolbar;
@@ -118,16 +118,17 @@ static createToolbar = fn(){
 
 static registerStdToolbarEntries = fn() {
 
-	static ICON_COLOR = module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR;
+	static Style = module('PADrend/GUI/Style');
 
 	// ----------------------------------------------------------------------------------
 	// File...
 	gui.register('PADrend_MainToolbar.00_file',{
-		GUI.TYPE		:	GUI.TYPE_MENU,
-		GUI.LABEL		:	"File",
-		GUI.ICON		:	"#File",
-		GUI.ICON_COLOR	:	ICON_COLOR,
-		GUI.MENU		:	'PADrend_FileMenu'
+		GUI.TYPE				:	GUI.TYPE_MENU,
+		GUI.LABEL				:	"File",
+		GUI.ICON				:	"#File",
+		GUI.MENU				:	'PADrend_FileMenu',
+		GUI.PROPERTIES			:	Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES	:	Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 	});
 	
 	static addToRecentSceneList = fn(filename){
@@ -633,7 +634,8 @@ static registerStdToolbarEntries = fn() {
 		GUI.MENU : 'PADrend_ScenesMenu',
 		GUI.MENU_WIDTH : 500,
 		GUI.ICON : "#Scenes",
-		GUI.ICON_COLOR : ICON_COLOR
+		GUI.PROPERTIES			:	Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES	:	Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
 	});
 
 	gui.register('PADrend_ScenesMenu',fn(){
@@ -935,22 +937,24 @@ static registerStdToolbarEntries = fn() {
  // ----------------------------------------------------------------------------------
 
 	gui.register('PADrend_MainToolbar.20_plugins',{
-		GUI.TYPE		:	GUI.TYPE_MENU,
-		GUI.LABEL		:	"Plugins",
-		GUI.MENU		:	'PADrend_PluginsMenu',
-		GUI.ICON		:	"#Plugins",
-		GUI.ICON_COLOR : ICON_COLOR,
+		GUI.TYPE				:	GUI.TYPE_MENU,
+		GUI.PROPERTIES			:	Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES	:	Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.LABEL				:	"Plugins",
+		GUI.MENU				:	'PADrend_PluginsMenu',
+		GUI.ICON				:	"#Plugins",
 	});
  // ----------------------------------------------------------------------------------
 	// Config-Menu
 
 	gui.register('PADrend_MainToolbar.30_config',{
-		GUI.TYPE		:	GUI.TYPE_MENU,
-		GUI.LABEL		:	"Config",
-		GUI.ICON		:	"#Settings",
-		GUI.ICON_COLOR : ICON_COLOR,
-		GUI.MENU		:	'PADrend_ConfigMenu',
-		GUI.MENU_WIDTH	:	150
+		GUI.TYPE				:	GUI.TYPE_MENU,
+		GUI.PROPERTIES			:	Style.TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES	:	Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.LABEL				:	"Config",
+		GUI.ICON				:	"#Settings",
+		GUI.MENU				:	'PADrend_ConfigMenu',
+		GUI.MENU_WIDTH			:	150
 	});
 	
 	// ------------------------

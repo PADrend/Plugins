@@ -121,6 +121,9 @@ plugin.initGUI := fn(gui) {
 	
 	gui.register('PADrend_ToolsToolbar.70_distanceMeasuring',{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
+
 //		GUI.LABEL : "M",
 		GUI.ICON : '#MeasurementTool', 
 		GUI.SIZE : [24,24],
@@ -129,14 +132,15 @@ plugin.initGUI := fn(gui) {
 			PADrend.setActiveUITool(TOOL_ID);
 		},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
+			var switchFun = [this]=>fn(button,b){
+				if(button.isDestroyed())
 					return $REMOVE;
-				setSwitch(b);
+				foreach(module('PADrend/GUI/Style').TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
+					b ? button.addProperty(p) : button.removeProperty(p);
 			};
 			PADrend.accessUIToolConfigurator(TOOL_ID)
-				.registerActivationListener(this->([true] => swithFun))
-				.registerDeactivationListener(this->([false] => swithFun));
+				.registerActivationListener([this,true] => switchFun)
+				.registerDeactivationListener([this,false] => switchFun);
 		},
 		GUI.TOOLTIP : "Distance measuring tool\n"
 				"[LeftClick] on the scene to start measuring distances.\n"

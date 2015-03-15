@@ -30,19 +30,21 @@
 	gui.register('PADrend_ToolsToolbar.myTool',{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.ICON : "#myToolIcon",
-		GUI.ICON_COLOR : module('PADrend/GUI/Style').TOOLBAR_ICON_COLOR,
+		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
+		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
 		GUI.WIDTH : 15,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MyTool');	},
 		GUI.ON_INIT : fn(...){
-			var swithFun = fn(b){
-				if(isDestroyed())
-					return $REMOVE;
-				setSwitch(b);
-			};
-			PADrend.accessUIToolConfigurator('MyTool')
-				.registerActivationListener([true]=>this->swithFun)
-				.registerDeactivationListener([false]=>this->swithFun);
-		}
+				var switchFun = [this]=>fn(button,b){
+					if(button.isDestroyed())
+						return $REMOVE;
+					foreach(module('PADrend/GUI/Style').TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
+						b ? button.addProperty(p) : button.removeProperty(p);
+				};
+				PADrend.accessUIToolConfigurator(TOOL_ID)
+						.registerActivationListener( [this,true]=>switchFun )
+						.registerDeactivationListener( [this,false]=>switchFun );
+			},
 	});
 	
 	// register configuration entries:
