@@ -77,10 +77,12 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 		GUI.CONTEXT_MENU_WIDTH : (optional) The width of the menu (see CONTEXT_MENU_PROVIDER)
 		GUI.FLAGS : 	(optional) additional flags set on the created component
 		GUI.FONT : 		(optional) GUI.Font or a name of a font (e.g. GUI.FONT_ID_DEFAULT,GUI.FONT_ID_HEADING)
-		GUI.HEIGHT :  	(optional) component's initial height (normally, use SIZE instead)
-
+		GUI.HEIGHT :	(optional) component's initial height (normally, use SIZE instead)
+		GUI.HOVER_PROPERTIES : (optional) [Property, 8bit-LayerBitMask, Bool Recursive] Array of hover-properties added to the component
+						e.g. [new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
+											gui._createRectShape(new Util.Color4f(0.9,0.3,0.3,0.5),new Util.Color4ub(0,0,0,0),true)),1,false]
 		GUI.LABEL : 	(optional) label text (not supported by all components)
-		GUI.ON_INIT : 		(optional) function which is called on the newly created component after creation with
+		GUI.ON_INIT :	(optional) function which is called on the newly created component after creation with
 									the description map as parameter.
 		GUI.ON_MOUSE_BUTTON:(optional) Function which is called when a mouse button is pressed or released.
 						Signature:   $CONTINUE|$BREAK|$CONTINUE_AND_REMOVE|$BREAK_AND_REMOVE|Void fn(ExtObject evt)
@@ -686,7 +688,11 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			foreach(description[GUI.PROPERTIES] as var property)
 				component.addProperty(property);
 		}
-		
+		// set optional hover properties
+		if( description[GUI.HOVER_PROPERTIES]){
+			foreach(description[GUI.HOVER_PROPERTIES] as var propertyEntry)
+				component.addComponentHoverProperty(propertyEntry...);
+		}
 
 		// call optional init function
 		if( description[GUI.ON_INIT] ){

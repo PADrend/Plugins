@@ -42,6 +42,7 @@ GUI.FLAGS := 'flags';	//
 GUI.FONT := 'font';
 GUI.HEADER := $HEADER;
 GUI.HEIGHT := 'height';
+GUI.HOVER_PROPERTIES := $HOVER_PROPERTIES;
 GUI.ICON := 'icon';
 GUI.ICON_COLOR := 'iconColor';
 GUI.LABEL := 'label';
