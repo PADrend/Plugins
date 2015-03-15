@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static MouseButtonListenerTrait = Std.require('LibGUIExt/Traits/MouseButtonListenerTrait');
+static MouseButtonListenerTrait = module('./MouseButtonListenerTrait');
 
 /*! Adds a configurable right-click menu to the component.
 	\param menu width 	(optional) the context menu's width.
@@ -27,7 +27,7 @@ static MouseButtonListenerTrait = Std.require('LibGUIExt/Traits/MouseButtonListe
 
 	\see MouseButtonListenerTrait
 	\code
-		Traits.addTrait(myComponent, Std.require('LibUtilExt/Traits/ContextMenuTrait'),300); // context menu with 300px width
+		Std.Traits.addTrait(myComponent, Std.require('LibUtilExt/Traits/ContextMenuTrait'),300); // context menu with 300px width
 
 		// add registered menu entries
 		myComponent.contextMenuProvider += "MyPlugin_SomeMenuName";
@@ -39,11 +39,11 @@ static MouseButtonListenerTrait = Std.require('LibGUIExt/Traits/MouseButtonListe
 		myComponent.contextMenuProvider += fn(){	return [ "someEntry","someOtherEntry"]; };
 	\endcode
 */
-var t = new Traits.GenericTrait("GUI.ContextMenuTrait"); 
+var t = new Std.Traits.GenericTrait("GUI.ContextMenuTrait"); 
 
 t.attributes.contextMenuProvider @(init) := Array;
 t.onInit += fn(GUI.Component c,Number menuWidth = 150){
-	Traits.assureTrait(c, MouseButtonListenerTrait);
+	Std.Traits.assureTrait(c, MouseButtonListenerTrait);
 	
 	//! \see MouseButtonListenerTrait
 	c.onMouseButton += [menuWidth] => fn(menuWidth, buttonEvent){

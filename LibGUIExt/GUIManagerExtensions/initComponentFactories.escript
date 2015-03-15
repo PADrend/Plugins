@@ -64,9 +64,9 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 
 
 		GUI.COLOR : 	(optional) Util.Color4f text color
-		GUI.CONTENTS : 	(optional) [ components* ] || ComponentId || DataWrapper
+		GUI.CONTENTS : 	(optional) [ components* ] || ComponentId || Std.DataWrapper
 						An array of components or an componentId to be added as children to the component.
-						If a DataWrapper is given, the content is updated automatically when the data changes.
+						If a Std.DataWrapper is given, the content is updated automatically when the data changes.
 						\note Use only for components where children can be added (Container, Panel, 
 							Button, Window, ...). For other components, the behavior is undefined!
 		GUI.CONTEXT_MENU_PROVIDER : (optional) a function returning an array of menu entries.
@@ -218,13 +218,13 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 
 
 	OR connect to a data wrapper
-		GUI.DATA_WRAPPER			An instance of DataWrapper (see DataWrapper.escript)
+		GUI.DATA_WRAPPER			An instance of Std.DataWrapper (see Std.DataWrapper.escript)
 		GUI.DATA_REFRESH_GROUP		(optional) if an RefreshGroup is given, the component's 'refresh'-function is registered.
 		GUI.ON_DATA_CHANGED 		(optional) same functionality as in the other case
 
 		example to connect a slider to a config value:
 
-			var myVariable = DataWrapper.createFromConfig( someConfigManager,'keyOfConfigValue', 1.0 ); // use this wrapper wherever you use the config value.
+			var myVariable = Std.DataWrapper.createFromEntry( someConfigManager,'keyOfConfigValue', 1.0 ); // use this wrapper wherever you use the config value.
 			//...
 			panel += {
 				GUI.TYPE  : GUI.TYPE_RANGE,
@@ -267,7 +267,7 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 		GUI.LABEL				The label in the container's header
 		or
 		GUI.HEADER				A components description for components in the header.
-		GUI.COLLAPSED			(optional) Bool or a DataWrapper 
+		GUI.COLLAPSED			(optional) Bool or a Std.DataWrapper 
 		GUI.CONTENTS			the contents
 
 	ColorSelector (input)
@@ -307,7 +307,7 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 		GUI.TYPE :				TYPE_LABEL
 		GUI.LABEL : 			text
 		GUI.TEXT_ALIGNMENT :	(optional) alignment of the text e.g. (GUI.TEXT_ALIGN_LEFT | GUI.TEXT_ALIGN_MIDDLE) or (GUI.TEXT_ALIGN_CENTER | GUI.TEXT_ALIGN_BOTTOM)
-		GUI.DATA_WRAPPER : 		(optional) DataWrapper specifying dynamic text.
+		GUI.DATA_WRAPPER : 		(optional) Std.DataWrapper specifying dynamic text.
 
 	ListView (input)
 		GUI.TYPE :				GUI.TYPE_LIST
@@ -484,24 +484,24 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 		// init the input component
 		if(inputComponent){
 
-			// create the proper DataWrapper
+			// create the proper Std.DataWrapper
 			var dataWrapper;
 			// Connect to attribute? obj.attr
 			var obj = description[ GUI.DATA_OBJECT ];
 			var id = description[ GUI.DATA_ATTRIBUTE ];
 			if(obj&&id){
-				dataWrapper = DataWrapper.createFromAttribute(obj,id);
+				dataWrapper = Std.DataWrapper.createFromAttribute(obj,id);
 			} // data provider - function?
 			else if(var dataProvider = description[GUI.DATA_PROVIDER]){
-				dataWrapper = DataWrapper.createFromFunctions( dataProvider );
+				dataWrapper = Std.DataWrapper.createFromFunctions( dataProvider );
 			} // data wrapper?
 			else if(var _dataWrapper = description[GUI.DATA_WRAPPER]){
 				dataWrapper = _dataWrapper;
 			} // single value?
 			else if(description.containsKey(GUI.DATA_VALUE)){
-				dataWrapper = DataWrapper.createFromValue(description[GUI.DATA_VALUE]);
+				dataWrapper = Std.DataWrapper.createFromValue(description[GUI.DATA_VALUE]);
 			}else{ // no data given?
-				dataWrapper = DataWrapper.createFromValue( inputComponent.getData() );
+				dataWrapper = Std.DataWrapper.createFromValue( inputComponent.getData() );
 			}
 			if(!inputComponent.setData){
 				print_r(description);
@@ -521,7 +521,7 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			// If the data is changed, update the inputComponent.
 			dataWrapper.onDataChanged += inputComponent->fn(data){
 				if(isDestroyed()){
-					return MultiProcedure.REMOVE;
+					return Std.MultiProcedure.REMOVE;
 				}
 				setData(data);
 			};
@@ -543,7 +543,7 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 				// If the data is changed, update the component's label.
 				dataWrapper.onDataChanged += component->fn(data){
 					if(this.isDestroyed())
-						return MultiProcedure.REMOVE;
+						return Std.MultiProcedure.REMOVE;
 					this.setText(data);
 				};
 				component.setText(dataWrapper());
@@ -564,7 +564,7 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			var sizeFlags = 0;
 
 			if(size){
-				if(size ---|> Geometry.Vec2){
+				if(size.isA(Geometry.Vec2)){
 					component.setWidth(size.x());
 					component.setHeight(size.y());
 				}else if(size.count()==2){
@@ -585,7 +585,7 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			var posFlags = 0;
 
 			if(pos){
-				if(pos ---|> Geometry.Vec2){
+				if(pos.isA(Geometry.Vec2)){
 					component.setPosition(pos);
 				}else if(pos.count()==2){
 					pos = new Geometry.Vec2(pos[0],pos[1]);
@@ -608,9 +608,9 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 		// context menu
 		if( description[GUI.CONTEXT_MENU_PROVIDER]){
 			//! \see ContextMenuTrait
-			@(once) static ContextMenuTrait = Std.require('LibGUIExt/Traits/ContextMenuTrait');
-			if(!Traits.queryTrait(component, ContextMenuTrait))
-				Traits.addTrait(component, ContextMenuTrait,description.get(GUI.CONTEXT_MENU_WIDTH,150));
+			@(once) static ContextMenuTrait = module('../Traits/ContextMenuTrait');
+			if(!Std.Traits.queryTrait(component, ContextMenuTrait))
+				Std.Traits.addTrait(component, ContextMenuTrait,description.get(GUI.CONTEXT_MENU_WIDTH,150));
 			component.contextMenuProvider += description[GUI.CONTEXT_MENU_PROVIDER];
 			
 			@(once) static triangle = this._createTriangleAtCornerShape(GUI.BLACK,6);
@@ -620,9 +620,9 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 		// mouse button listener
 		if( description[GUI.ON_MOUSE_BUTTON]){
 			//! \see MouseButtonListenerTrait
-			@(once) static MouseButtonListenerTrait = Std.require('LibGUIExt/Traits/MouseButtonListenerTrait');
-			if(!Traits.queryTrait(component, MouseButtonListenerTrait))
-				Traits.addTrait(component, MouseButtonListenerTrait);
+			@(once) static MouseButtonListenerTrait = module('../Traits/MouseButtonListenerTrait');
+			if(!Std.Traits.queryTrait(component, MouseButtonListenerTrait))
+				Std.Traits.addTrait(component, MouseButtonListenerTrait);
 			component.onMouseButton += description[GUI.ON_MOUSE_BUTTON];
 		}
 			
@@ -633,27 +633,27 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			static DraggingConnectorTrait;
 			static draggingHoverMarker;
 			@(once){
-				DraggableTrait = Std.require('LibGUIExt/Traits/DraggableTrait');
-				DraggingMarkerTrait = Std.require('LibGUIExt/Traits/DraggingMarkerTrait');
-				DraggingConnectorTrait = Std.require('LibGUIExt/Traits/DraggingConnectorTrait');
+				DraggableTrait = module('../Traits/DraggableTrait');
+				DraggingMarkerTrait = module('../Traits/DraggingMarkerTrait');
+				DraggingConnectorTrait = module('../Traits/DraggingConnectorTrait');
 				draggingHoverMarker = this._createShadowedRectShape(GUI.NO_COLOR,new Util.Color4ub(255,255,255,128),true);
 			}
 
 			//! \see GUI.DraggableTrait
-			if(!Traits.queryTrait(component,DraggableTrait)){
+			if(!Std.Traits.queryTrait(component,DraggableTrait)){
 				if(description[GUI.DRAGGING_BUTTONS])
-					Traits.addTrait(component,DraggableTrait, description[GUI.DRAGGING_BUTTONS] );
+					Std.Traits.addTrait(component,DraggableTrait, description[GUI.DRAGGING_BUTTONS] );
 				else
-					Traits.addTrait(component,DraggableTrait);
+					Std.Traits.addTrait(component,DraggableTrait);
 				component.addComponentHoverProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_ADDITIONAL_BACKGROUND_SHAPE,draggingHoverMarker),1,false);
 			}
 			if(description[GUI.DRAGGING_MARKER]){
 				if(description[GUI.DRAGGING_MARKER]===true)
-					Traits.addTrait(component, DraggingMarkerTrait); // use default
+					Std.Traits.addTrait(component, DraggingMarkerTrait); // use default
 				else
-					Traits.addTrait(component, DraggingMarkerTrait, description[GUI.DRAGGING_MARKER] );
+					Std.Traits.addTrait(component, DraggingMarkerTrait, description[GUI.DRAGGING_MARKER] );
 				if(description[GUI.DRAGGING_CONNECTOR]){
-					Traits.addTrait(component, DraggingConnectorTrait);
+					Std.Traits.addTrait(component, DraggingConnectorTrait);
 				}
 			}
 			if(description[GUI.ON_DRAG])
@@ -704,7 +704,7 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			var contents = description[GUI.CONTENTS];
 			if( contents ){
 				if(!skipAddingContents ){
-					// if contents is dynamic (e.g. DataWrapper)
+					// if contents is dynamic (e.g. Std.DataWrapper)
 					if(contents.isSet($onDataChanged)){
 						contents.onDataChanged += [this,component,insideMenu] => fn(gui,component,insideMenu,contents){
 							if(component.isDestroyed()){
@@ -864,8 +864,8 @@ GUI.GUI_Manager._componentFactories ::= {
 		container.addProperty(new GUI.UseShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,GUI.PROPERTY_TEXTFIELD_SHAPE)); //! \todo Temporary to create a nice border
 		
 		var collapsed = input.description.get(GUI.COLLAPSED,false);
-		if(! (collapsed---|>DataWrapper))
-			collapsed = DataWrapper.createFromValue(collapsed);
+		if(! (collapsed.isA(Std.DataWrapper)))
+			collapsed = Std.DataWrapper.createFromValue(collapsed);
 		
 
 		var header = this.create({
@@ -989,7 +989,7 @@ GUI.GUI_Manager._componentFactories ::= {
 			GUI.TOOLTIP : "open file explorer",
 			GUI.WIDTH : 20,
 			GUI.ON_CLICK : [tf, input.description.get(GUI.ENDINGS,[""]), input.description.get(GUI.DIR,".") ]=>fn(tf,endings,dir){
-					var f = new (Std.require('LibGUIExt/FileDialog'))("Select a file",dir, endings, [tf] => fn(tf, filename){
+					var f = new (module('../FileDialog'))("Select a file",dir, endings, [tf] => fn(tf, filename){
 						if(tf.isDestroyed()){
 							Runtime.warn("Trying to set data to a destroyed text field.");
 							return;
@@ -1086,7 +1086,7 @@ GUI.GUI_Manager._componentFactories ::= {
 		// add customized functions
 		//! ---|> Container
 		wrapper.add := fn(mixed){
-			if(mixed---|>Array){
+			if(mixed.isA(Array)){
 				addOption(mixed[0],mixed[1]);
 			}else{
 				list.add(mixed);
@@ -1119,7 +1119,7 @@ GUI.GUI_Manager._componentFactories ::= {
 			this.onDataChanged(data);
 		};
 		wrapper.setData := fn(data){
-			if(!(data---|>Array))
+			if(!(data.isA(Array)))
 				data = [data];
 			// map: value -> marking index
 			var m = new Map();
@@ -1174,7 +1174,7 @@ GUI.GUI_Manager._componentFactories ::= {
 
 			var icon = gui.getIcon(input.description[GUI.ICON]);
 
-			if(icon ---|> GUI.Component){
+			if(icon.isA(GUI.Component)){
 				button.setText('');
 				button += icon;
 //				button.setFlag(GUI.FLAT_BUTTON,true);
@@ -1206,14 +1206,14 @@ GUI.GUI_Manager._componentFactories ::= {
 			menuEntries = input.description[GUI.MENU];
 			if(!menuEntries)
 				menuEntries = ["..."];
-		}else if(menuEntries---|>Array)
+		}else if(menuEntries.isA(Array))
 			menuEntries = menuEntries.clone();
 		
 		button.addOnClickHandler(	[	this,
 										menuEntries,context,
 										input.description[GUI.MENU_WIDTH]?input.description[GUI.MENU_WIDTH]:100
 									] => fn( gui,menuEntries,context,menuWidth ){
-			if( this.getParentComponent()---|> GUI.Menu ){
+			if( this.getParentComponent().isA(GUI.Menu)){
 				getParentComponent().openSubmenu(this,menuEntries,menuWidth,context...);
 			}else{
 				var pos = getAbsPosition()+new Geometry.Vec2(isSubMenu ? getWidth()*0.95 : 0, isSubMenu ? 0 :getHeight());
@@ -1385,7 +1385,7 @@ GUI.GUI_Manager._componentFactories ::= {
 		var w = input.width?input.width:300;
 		result.component =this.createTreeView(w,input.height);
 		result.component.setData := fn(data){
-			if(data---|>Array){
+			if(data.isA(Array)){
 				foreach(data as var d)
 					markComponent(d);
 			}else if(data){
@@ -1430,7 +1430,7 @@ GUI.GUI_Manager._componentFactories ::= {
 		var optionsProvider = input.description[GUI.OPTIONS_PROVIDER];
 		if(optionsProvider){
 			//! \see GUI.TreeViewEntry.DynamicSubentriesTrait
-			Traits.addTrait( result.component, GUI.TreeViewEntry.DynamicSubentriesTrait,optionsProvider);
+			Std.Traits.addTrait( result.component, GUI.TreeViewEntry.DynamicSubentriesTrait,optionsProvider);
 		}
 
 	},

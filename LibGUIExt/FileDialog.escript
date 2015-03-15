@@ -139,7 +139,7 @@ T.init ::= fn(){
 	var windowWidth=400;
 	var optionPanelWidth=0;
 	
-	if(optionPanel---|> GUI.Component){
+	if(optionPanel.isA(GUI.Component)){
 		optionPanelWidth = optionPanel.getWidth();
 
 //        optionPanel.setPosition(width,0);
@@ -184,7 +184,7 @@ T.init ::= fn(){
 	
 	window += panel;
 
-	if(optionPanel---|> GUI.Component){
+	if(optionPanel.isA(GUI.Component)){
 		window+=optionPanel;
 	}
 
@@ -497,7 +497,7 @@ T.updateEndings @(private) ::= fn(Array newTypes){
 GUI.FileDialog := T;
 
 GUI._openFileDialog := fn(label,folder,ending,onConfirm){
-	var dialog = new T(label,folder,(ending---|>Array)?ending:[ending],onConfirm);
+	var dialog = new T(label,folder,(ending.isA(Array))?ending:[ending],onConfirm);
 	dialog.init();
 };
 

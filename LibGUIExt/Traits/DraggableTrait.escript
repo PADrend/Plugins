@@ -18,21 +18,21 @@ static MouseButtonListenerTrait = module('./MouseButtonListenerTrait');
 							Default is [Util.UI.MOUSE_BUTTON_LEFT, Util.UI.MOUSE_BUTTON_RIGHT]
 	Adds the following methods:
 	
-	*	void Component.onDrag(event)			(extendable MultiProcedure)
-	*	void Component.onDrop(event)			(extendable MultiProcedure)
-	*	void Component.onStartDragging(event)	(extendable MultiProcedure)
-	*	void Component.onStopDragging()			(extendable MultiProcedure)
+	*	void Component.onDrag(event)			(extendable Std.MultiProcedure)
+	*	void Component.onDrop(event)			(extendable Std.MultiProcedure)
+	*	void Component.onStartDragging(event)	(extendable Std.MultiProcedure)
+	*	void Component.onStopDragging()			(extendable Std.MultiProcedure)
 	*	void Component.stopDragging()
 				Can be called stop the dragging process. onStopDragging() is called, but onDrop(...) is skipped.
 	
 	\note Adds the MouseButtonListenerTrait if not already present.
 	\note the coordinates stored in the events are screenPositions (and not guiPositions)
 */
-var t = new Traits.GenericTrait("GUI.DraggableTrait");
-t.attributes.onDrag @(init) := MultiProcedure;				// fn(evt)
-t.attributes.onDrop @(init) := MultiProcedure;				// fn(evt)
-t.attributes.onStartDragging @(init) := MultiProcedure;		// fn(evt)
-t.attributes.onStopDragging @(init) := MultiProcedure;		// fn(){...}
+var t = new Std.Traits.GenericTrait("GUI.DraggableTrait");
+t.attributes.onDrag @(init) := Std.MultiProcedure;				// fn(evt)
+t.attributes.onDrop @(init) := Std.MultiProcedure;				// fn(evt)
+t.attributes.onStartDragging @(init) := Std.MultiProcedure;		// fn(evt)
+t.attributes.onStopDragging @(init) := Std.MultiProcedure;		// fn(){...}
 
 //! call to end the dragging.
 t.attributes.stopDragging ::= fn(){
@@ -47,7 +47,7 @@ t.attributes._dragging_possibleButtons @(private) := void;
 
 t.onInit += fn(GUI.Component c,Array mouseButtons = [Util.UI.MOUSE_BUTTON_LEFT, Util.UI.MOUSE_BUTTON_RIGHT] ){
 	//! \see MouseButtonListenerTrait
-	Traits.assureTrait(c, MouseButtonListenerTrait);
+	Std.Traits.assureTrait(c, MouseButtonListenerTrait);
 
 	(c->fn(mouseButtons){ _dragging_possibleButtons = mouseButtons;	})(mouseButtons.clone());
 	c.onMouseButton += fn(evt){

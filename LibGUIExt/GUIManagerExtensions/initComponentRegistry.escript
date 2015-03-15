@@ -22,7 +22,7 @@ GUI.GUI_Manager.addComponentProviderListener ::= fn(String componentId,handler){
 	if(!this.isSet($_registeredComponentsListeners))
 		this._registeredComponentsListeners @(private) := new Map;
 	if(!this._registeredComponentsListeners[componentId])
-		this._registeredComponentsListeners[componentId] = new MultiProcedure;
+		this._registeredComponentsListeners[componentId] = new Std.MultiProcedure;
 	this._registeredComponentsListeners[componentId] += handler;
 };
 
@@ -38,13 +38,13 @@ GUI.GUI_Manager.createRegisteredComponentEntries_filtered ::= fn(String componen
 	
 	var entries = [];
 	foreach(providers as var provider){
-		if(provider---|>Array){ // list of entries
+		if(provider.isA(Array)){ // list of entries
 			entries.append(provider);
-		}else if(provider---|>Map){ // single entry
+		}else if(provider.isA(Map)){ // single entry
 			entries+=provider;
 		}else{ // function creating entries
 			var a = provider(context...);
-			if(a---|>Array)
+			if(a.isA(Array))
 				entries.append(a);
 			else
 				entries += a;

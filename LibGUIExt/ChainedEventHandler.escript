@@ -11,9 +11,9 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-/*! GUI.ChainedEventHandler ---|> MultiProcedure
+/*! GUI.ChainedEventHandler ---|> Std.MultiProcedure
 
-	A GUI.ChainedEventHandler is similar to an ordinary MultiProcedure with
+	A GUI.ChainedEventHandler is similar to an ordinary Std.MultiProcedure with
 	different behavior depending on the result of the registered functions:
 		$BREAK (or true)		skip other functions; return true (event consumed)
 		$BREAK_AND_REMOVE		remove this function; skip other functions; return true (event consumed)
@@ -21,7 +21,7 @@
 		$CONTINUE_AND_REMOVE	remove this function;  continue with other functions; 
 								if this was the last one, return false (event consumed).
 		
-	\see MultiProcedure
+	\see Std.MultiProcedure
 */
 
 var T = new Type(Std.MultiProcedure);

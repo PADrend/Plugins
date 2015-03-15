@@ -11,26 +11,26 @@
  * http://mozilla.org/MPL/2.0/.
  */
  
-static ContextMenuTrait = Std.require('LibGUIExt/Traits/ContextMenuTrait');
+static ContextMenuTrait = module('./ContextMenuTrait');
 
 /*! Adds context menu entries for storing the component's rectangle (position and dimension) in a data wrapper.
 	Initially, the position and dimension is adjusted to the position in the data wrapper.
 	
-	\param DataWrapper	The DataWrapper should contain an Array with [x,y,width,height].
+	\param Std.DataWrapper	The Std.DataWrapper should contain an Array with [x,y,width,height].
 
 	Adds no public attributes. Adds the ContextMenuTrait if not already present.
 	
 	\code
-		Traits.addTrait(myWindow, Std.require('LibMinSGExt/Traits/StorableRectTrait'), DataWrapper.createFromConfig(someConfig,"someKey",[100,100,320,200]);
+		Std.Traits.addTrait(myWindow, Std.require('LibMinSGExt/Traits/StorableRectTrait'), Std.DataWrapper.createFromEntry(someConfig,"someKey",[100,100,320,200]);
 	\endcode
 
 */
-GUI.StorableRectTrait := new Traits.GenericTrait("GUI.StorableRectTrait"); 
+GUI.StorableRectTrait := new Std.Traits.GenericTrait("GUI.StorableRectTrait"); 
 
 var t = GUI.StorableRectTrait;
-t.onInit += fn(GUI.Component component,DataWrapper rectWrapper){
-	if(!Traits.queryTrait(component, ContextMenuTrait))
-		Traits.addTrait(component, ContextMenuTrait,200);
+t.onInit += fn(GUI.Component component,Std.DataWrapper rectWrapper){
+	if(!Std.Traits.queryTrait(component, ContextMenuTrait))
+		Std.Traits.addTrait(component, ContextMenuTrait,200);
 	
 	
 	//! \see GUI.ContextMenuTrait

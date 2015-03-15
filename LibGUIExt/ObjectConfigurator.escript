@@ -232,8 +232,8 @@ T.initConfigPanel ::= fn(GUI.Container configPanelContainer, [String,void] _pane
 		
 	};
 	//! \see RefreshableContainerTrait
-	@(once) static  RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
-	Traits.addTrait( configPanelContainer, RefreshableContainerTrait );
+	@(once) static  RefreshableContainerTrait = module('./Traits/RefreshableContainerTrait');
+	Std.Traits.addTrait( configPanelContainer, RefreshableContainerTrait );
 	configPanelContainer.refresh @(override) := fn(){
 		var scrollPosBackup;
 		if(this.getFirstChild().isSet($getScrollPos))

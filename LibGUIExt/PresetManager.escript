@@ -16,7 +16,7 @@
  **/
  
  /*!
-	A PresetManager manages different values for a group of settings (=an ExtObject or Map having several DataWrapper-members or entries) and creates a corresponding GUI.
+	A PresetManager manages different values for a group of settings (=an ExtObject or Map having several Std.DataWrapper-members or entries) and creates a corresponding GUI.
 	The presets are stored by a ConfigManager.
 	
 	Example for a GUI:
@@ -32,8 +32,8 @@
 	\code
 		// create a settings-object having two entries
 		var settings = new ExtObject({
-			$value1 : DataWrapper.createFromValue( "" ).setOptions([ "a","b"]),
-			$value2 : DataWrapper.createFromValue( 42 )
+			$value1 : Std.DataWrapper.createFromValue( "" ).setOptions([ "a","b"]),
+			$value2 : Std.DataWrapper.createFromValue( 42 )
 		});
 		var presetManager = new PresetManager( myConfigManager, 'MyPlugin', settings );
 		
@@ -61,10 +61,10 @@ T._constructor ::= fn(Std.JSONDataStore _config,String _keyBase,[ExtObject,Map] 
 	config = _config;
 	keyBase = _keyBase+'.';
 	
-	settings = _settings---|>Map ? _settings.clone() : _settings._getAttributes();
+	settings = _settings.isA(Map) ? _settings.clone() : _settings._getAttributes();
 
-	activePreset = DataWrapper.createFromConfig( config, keyBase + 'activePreset', "default" );
-	configChanged = DataWrapper.createFromValue( false );
+	activePreset = Std.DataWrapper.createFromEntry( config, keyBase + 'activePreset', "default" );
+	configChanged = Std.DataWrapper.createFromValue( false );
 	
 	// whenever a setting changes, set configChanged to true
 	foreach(settings as var dataWrapper)

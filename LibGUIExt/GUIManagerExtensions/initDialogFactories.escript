@@ -95,7 +95,7 @@ GUI.GUI_Manager._dialogFactories ::= {
 		}
 		
 		
-		var d = new (Std.require('LibGUIExt/FileDialog'))( input.title,
+		var d = new (module('../FileDialog'))( input.title,
 						dir,
 						input.description.get(GUI.ENDINGS,[""]),
 						input.description.get(GUI.ON_ACCEPT,fn(files){print_r(files);}));
@@ -138,7 +138,7 @@ GUI.GUI_Manager._dialogFactories ::= {
 		var size = input.description.get(GUI.SIZE,[300,50]);
 		var d = this.createPopupWindow(size[0],size[1],input.title);
 		foreach(input.description[GUI.ACTIONS] as var action){
-			d.addAction( (action---|>Array ? action : [action])...);
+			d.addAction( (action.isA(Array) ? action : [action])...);
 		}
 		var options = input.description[GUI.OPTIONS];
 		if(options){

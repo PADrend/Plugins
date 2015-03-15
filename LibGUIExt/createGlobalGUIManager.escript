@@ -37,7 +37,17 @@ GUI.GUI_Manager.guiPosToScreenPos ::= fn( guiPos ){
 	return new Geometry.Vec2(screenPos);
 };
 
-//GUI.GUI_Manager.onMouseMove @(init,const) :=  MultiProcedure; // \todo (Cl) not working correctly until now...
+
+// set a callback used to determine a folder used for caching data (e.g. rastered fonts)
+GUI.GUI_Manager.setCacheFolderProvider ::= fn( provider ){
+	this._cacheFolderProvider := provider;
+};
+
+GUI.GUI_Manager.getCacheFolder ::= fn(){
+	return (this.isSet($_cacheFolderProvider) && this._cacheFolderProvider) ? this._cacheFolderProvider() : ".";		
+};
+
+//GUI.GUI_Manager.onMouseMove @(init,const) :=  Std.MultiProcedure; // \todo (Cl) not working correctly until now...
 
 
 //! Creates global guiManager GLOBALS.gui.

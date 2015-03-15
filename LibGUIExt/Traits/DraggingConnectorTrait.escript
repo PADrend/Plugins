@@ -19,8 +19,8 @@
 
 	Example:
 		\code
-			Traits.addTrait(myComponent,GUI.DraggableTrait);
-			Traits.addTrait(myComponent,GUI.DraggingConnectorTrait);
+			Std.Traits.addTrait(myComponent,GUI.DraggableTrait);
+			Std.Traits.addTrait(myComponent,GUI.DraggingConnectorTrait);
 		\endcode
 
 	\note If you want to query the component under the cursor during dragging, you have to temporarily disable the connector.
@@ -47,7 +47,7 @@
 	\see Requires GUI.DraggingMarkerTrait
 	\see GUI.DraggableTrait
 */
-var t = new Traits.GenericTrait("GUI.DraggingConnectorTrait");
+var t = new Std.Traits.GenericTrait("GUI.DraggingConnectorTrait");
 static DraggingMarkerTrait = module('./DraggingMarkerTrait');
 
 t.attributes.getDraggingConnector ::= fn(){
@@ -55,7 +55,7 @@ t.attributes.getDraggingConnector ::= fn(){
 };
 t.onInit += fn(GUI.Component c){
 	//! \see GUI.DraggingMarkerTrait
-	Traits.requireTrait(c,DraggingMarkerTrait);
+	Std.Traits.requireTrait(c,DraggingMarkerTrait);
 
 	
 	//! \see GUI.DraggableTrait

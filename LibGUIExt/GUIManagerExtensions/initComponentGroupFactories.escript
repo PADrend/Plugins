@@ -35,7 +35,7 @@ GUI.GUI_Manager.createComponents ::= fn( mixed ){
 };
 
 GUI.GUI_Manager._createComponents @(private) ::= fn( mixed,entryWidth=false,insideMenu=false, filter=void, context... ){
-	if(mixed---|>Map){ // ignore the other parameters
+	if(mixed.isA(Map)){ // ignore the other parameters
 		var descr = mixed;
 		var type = descr.get(GUI.TYPE,GUI.TYPE_COMPONENTS);
 		var provider = descr.get(GUI.PROVIDER,"No Component provider given!");
@@ -66,7 +66,7 @@ GUI.GUI_Manager._createComponents @(private) ::= fn( mixed,entryWidth=false,insi
 		}else if(mixed.isA(GUI.Component)){
 			entries = [mixed];
 		}else {
-			Traits.requireTrait(mixed,Traits.CallableTrait);
+			Std.Traits.requireTrait(mixed,Traits.CallableTrait);
 			entries = mixed(context...);
 			assert(entries.isA(Array));
 		}

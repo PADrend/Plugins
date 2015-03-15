@@ -23,11 +23,11 @@
 	- refreshContainer( GUI.Component c ) 	Search a refreshable enclosing container of c (or c itself) and refresh it.
 					If no refreshable container is found, the function returns without notice. 
 */
-static t = new Traits.GenericTrait("GUI.RefreshableContainerTrait"); 
+static t = new Std.Traits.GenericTrait("GUI.RefreshableContainerTrait"); 
 
 t.refreshContainer := fn( GUI.Component c ){
 	for( ; c; c=c.getParentComponent() ){
-		if( Traits.queryTrait(c, t) ){
+		if( Std.Traits.queryTrait(c, t) ){
 			c.refresh();
 			break;
 		}

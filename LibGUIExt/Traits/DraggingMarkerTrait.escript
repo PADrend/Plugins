@@ -38,7 +38,7 @@
 */
 static DraggableTrait = module('./DraggableTrait');
 
-var t = new Traits.GenericTrait("GUI.DraggingMarkerTrait");
+var t = new Std.Traits.GenericTrait("GUI.DraggingMarkerTrait");
 
 //! Get the active marker component or void.
 t.attributes.getDraggingMarker ::= fn(){
@@ -46,7 +46,7 @@ t.attributes.getDraggingMarker ::= fn(){
 };
 
 t.onInit += fn(GUI.Component c, markerFactory = void){
-	Traits.requireTrait(c,DraggableTrait);
+	Std.Traits.requireTrait(c,DraggableTrait);
 	
 	if(markerFactory)
 		c._dragging_markerFactory := markerFactory;

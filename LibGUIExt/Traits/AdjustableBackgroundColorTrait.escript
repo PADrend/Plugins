@@ -12,15 +12,15 @@
  */
 
 /*! Binds the component's background color (and optionally border color) to a DataWarpper.
-	\param bgColor		A DataWrapper with an Array of four floats representing the background color.
-	\param lineColor	(optional)	A DataWrapper with an Array of four floats representing the line color.
+	\param bgColor		A Std.DataWrapper with an Array of four floats representing the background color.
+	\param lineColor	(optional)	A Std.DataWrapper with an Array of four floats representing the line color.
 	
 	Adds no public methods to the component.
 	
 	\note Internally uses a RectShape. For this to be visibile, the component's GUI.BORDER-flag
 		has to be enabled!
 */
-var t = new Traits.GenericTrait("GUI.AdjustableBackgroundColorTrait"); 
+var t = new Std.Traits.GenericTrait("GUI.AdjustableBackgroundColorTrait"); 
 
 t.attributes._backgroundProperty @(private) := void;
 t.attributes._bgColor @(private) := GUI.NO_COLOR;
@@ -29,7 +29,7 @@ t.attributes._refreshBGColor @(private) := fn(){
 	this._backgroundProperty.setShape(gui._createRectShape(_bgColor, _lineColor, true));
 };
 
-t.onInit += fn(GUI.Component component,DataWrapper bgColor,[DataWrapper,void] lineColor=void){
+t.onInit += fn(GUI.Component component,Std.DataWrapper bgColor,[Std.DataWrapper,void] lineColor=void){
 	component._backgroundProperty := new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,GUI.NULL_SHAPE);
 	component.addProperty(component._backgroundProperty);
 	

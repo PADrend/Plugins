@@ -27,7 +27,7 @@
  */
  
  {
-	GUI.ColorSelectorTrait := new Traits.GenericTrait("GUI_ColorSelector");
+	GUI.ColorSelectorTrait := new Std.Traits.GenericTrait("GUI_ColorSelector");
 
 	var t = GUI.ColorSelectorTrait;
 
@@ -40,7 +40,7 @@
 	t.attributes.setData := fn([Util.Color4f,Array] color){
 		dataType = color.getType(); // getData should return the same type.
 
-		if(color---|>Array)
+		if(color.isA(Array))
 			color = new Util.Color4f(color);
 
 		sliders[0].setData(color.r());
@@ -94,8 +94,8 @@
 
 
 GUI.GUI_Manager.createColorSelector ::= fn([Util.Color4f,Array] initialColor = new Util.Color4f(0,0,0,0)){
-	var c = gui.createContainer(300,100,GUI.RAISED_BORDER); 
-	Traits.addTrait(c,GUI.ColorSelectorTrait,this);
+	var c = this.createContainer(300,100,GUI.RAISED_BORDER); 
+	Std.Traits.addTrait(c,GUI.ColorSelectorTrait,this);
 	c.setData(initialColor);
 	return c;
 };
@@ -157,7 +157,7 @@ GUI.GUI_Manager.createCombobox ::= fn( width, height, [Collection,void] entries=
 
 		// find containing menu (required for proper closing of other submenus)
 		for(var c = this; c; c = c.getParentComponent()){
-			if(c ---|> GUI.Menu){
+			if(c.isA(GUI.Menu)){
 				c._registerSubmenu(menu);
 				break;
 			}
@@ -238,7 +238,7 @@ GUI.GUI_Manager.createCombobox ::= fn( width, height, [Collection,void] entries=
 
 //! Create a delimiter line.
 GUI.GUI_Manager.createDelimiter ::= fn(){
-	var delimiter=gui.createLabel(100,1,"",GUI.LOWERED_BORDER);
+	var delimiter=this.createLabel(100,1,"",GUI.LOWERED_BORDER);
 	delimiter.setExtLayout(
 			GUI.POS_X_ABS|GUI.REFERENCE_X_CENTER|GUI.ALIGN_X_CENTER|
 			GUI.WIDTH_ABS|GUI.HEIGHT_ABS,
@@ -441,70 +441,70 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 // ------------------------------------------------------------------------------
 
 /*! Creates an extended Slider with corresponding textfield and user defined scaling.
-    Example: // logarithmic slider with range 10^0 - 10^5
+	Example: // logarithmic slider with range 10^0 - 10^5
 
-    var s=gui.createExtSlider(  [150,15],[0,5],5,
-                            fn(v){ return (10).pow(v); },
-                            fn(v){ return (v).log(10); });
+	var s=gui.createExtSlider(  [150,15],[0,5],5,
+							fn(v){ return (10).pow(v); },
+							fn(v){ return (v).log(10); });
 */
 GUI.GUI_Manager.createExtSlider ::= fn(Array size,Array range,Number steps,f=false,f_inv=false){
-    var width=size[0];
-    var height=size[1];
-    var container = this.createContainer(width,height);
-    var slider = this.createSlider(width-50.0,height,range[0],range[1],steps); //,GUI.SHOW_VALUE
+	var width=size[0];
+	var height=size[1];
+	var container = this.createContainer(width,height);
+	var slider = this.createSlider(width-50.0,height,range[0],range[1],steps); //,GUI.SHOW_VALUE
 							
 	slider.setExtLayout(
 		GUI.POS_X_ABS|GUI.REFERENCE_X_LEFT|GUI.ALIGN_X_LEFT|
 		GUI.WIDTH_ABS|GUI.HEIGHT_REL,
 		new Geometry.Vec2(0,0),new Geometry.Vec2(-50,1.0) );
-    
-    container.add(slider);
-    slider.container:=container;
-    slider.onDataChanged = fn(data){
-        var v=container.getValue();
-        container.tf.setText(v);
-        return container.onDataChanged(v);
-    };
-    var tf = this.createTextfield( 50,height,"...",GUI.BORDER);
-    
+	
+	container.add(slider);
+	slider.container:=container;
+	slider.onDataChanged = fn(data){
+		var v=container.getValue();
+		container.tf.setText(v);
+		return container.onDataChanged(v);
+	};
+	var tf = this.createTextfield( 50,height,"...",GUI.BORDER);
+	
 	tf.setExtLayout(
 			GUI.POS_X_ABS|GUI.REFERENCE_X_RIGHT|GUI.ALIGN_X_RIGHT|
 			GUI.WIDTH_ABS|GUI.HEIGHT_REL,
 			new Geometry.Vec2(0,0),new Geometry.Vec2(50,1.0) );
-    
-    tf.container:=container;
-    tf.onDataChanged = fn(data){
-        var v=new Number(data);
-        container.setValue(v);
-        container.onDataChanged(v);
-    };
-    container.add(tf);
-    // ---o
-    container.onDataChanged:=fn(data){};
+	
+	tf.container:=container;
+	tf.onDataChanged = fn(data){
+		var v=new Number(data);
+		container.setValue(v);
+		container.onDataChanged(v);
+	};
+	container.add(tf);
+	// ---o
+	container.onDataChanged:=fn(data){};
 
-    container.setRange:=fn(left,right,steps){
-    	slider.setRange(left,right,steps);
-    };
+	container.setRange:=fn(left,right,steps){
+		slider.setRange(left,right,steps);
+	};
 
-    container.slider := slider;
-    container.tf := tf;
-    container.f := f ? container->f : fn(value){ return value; };
-    container.f_inv := f_inv ? container->f_inv : fn(value){ return value; };
-    container.setValue := fn(value){
-        slider.setValue(f_inv(value));
-        tf.setText(value);
-    };
-    container.getValue := fn(){
-        return f(slider.getValue());
-    };
-    container.getData := container.getValue; // alias
-    container.setData := container.setValue; // alias
-    container.addOption:=fn(optionValue){
+	container.slider := slider;
+	container.tf := tf;
+	container.f := f ? container->f : fn(value){ return value; };
+	container.f_inv := f_inv ? container->f_inv : fn(value){ return value; };
+	container.setValue := fn(value){
+		slider.setValue(f_inv(value));
+		tf.setText(value);
+	};
+	container.getValue := fn(){
+		return f(slider.getValue());
+	};
+	container.getData := container.getValue; // alias
+	container.setData := container.setValue; // alias
+	container.addOption:=fn(optionValue){
 		this.tf.addOption(optionValue);
-    };
-    container.addOptions := fn(Array optionValues){
+	};
+	container.addOptions := fn(Array optionValues){
 		this.tf.addOptions(optionValues);
-    };
+	};
 	container.setLocked := fn(b){
 		this.slider.setLocked(b);
 		this.tf.setLocked(b);
@@ -514,9 +514,9 @@ GUI.GUI_Manager.createExtSlider ::= fn(Array size,Array range,Number steps,f=fal
 	// ---
 //	container.connectToAttribute:=GUI.Slider.connectToAttribute;
 	// ---
-    slider.onDataChanged(slider.getValue());
+	slider.onDataChanged(slider.getValue());
 
-    return container;
+	return container;
 };
 
 
@@ -524,7 +524,7 @@ GUI.GUI_Manager.createExtSlider ::= fn(Array size,Array range,Number steps,f=fal
 
 //! Creates a label with a larger font.
 GUI.GUI_Manager.createHeader ::= fn(text){
-	var label=gui.createLabel(100,15,text);
+	var label=this.createLabel(100,15,text);
 	label.setExtLayout(
 //				GUI.POS_X_ABS|GUI.REFERENCE_X_CENTER|GUI.ALIGN_X_CENTER|
 		GUI.WIDTH_ABS|GUI.HEIGHT_ABS,
@@ -538,7 +538,7 @@ GUI.GUI_Manager.createHeader ::= fn(text){
 /*! Create an empty Component.
 	\note Supports negative size values referencing the parent's size. */
 GUI.GUI_Manager.createPlaceholder ::= fn(width,height=5){
-	var c=gui.createLabel("");
+	var c=this.createLabel("");
 	c.setExtLayout(
 			GUI.WIDTH_ABS|GUI.HEIGHT_ABS,
 			new Geometry.Vec2(0,0),new Geometry.Vec2(width,height) );
@@ -584,7 +584,7 @@ GUI.GUI_Manager.createPlaceholder ::= fn(width,height=5){
 GUI.GUI_Manager.createPopupWindow ::= fn( Number width=300,Number height=50,String title="",
 										Number flags=GUI.NO_CLOSE_BUTTON|GUI.NO_MINIMIZE_BUTTON|GUI.ALWAYS_ON_TOP|GUI.ONE_TIME_WINDOW){
 	// create window
-	var window=gui.createWindow(width,height,title,flags);
+	var window=this.createWindow(width,height,title,flags);
 
 	window._options := [];
 	window._originalAdd := window.add; // backup
@@ -753,55 +753,55 @@ GUI.GUI_Manager.createRadioButtonSet ::= fn(heading=false){
 
 /// GUI-Toolbar
 GUI.GUI_Manager.createToolbar ::= fn(Number width,Number height,Array entries,[Number,false] entryWidth=false){
-	var toolbar = gui.create({
+	var toolbar = this.create({
 		GUI.TYPE				:	GUI.TYPE_CONTAINER,
 		GUI.LAYOUT				:	GUI.LAYOUT_TIGHT_FLOW,
 		GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, width, height]
 	});
 
-    var xPos=0;
+	var xPos=0;
 
 	var count=entries.count();
 	var last=void;
-    foreach(entries as var entry){
-    	count--;
-        if( xPos>width-(entryWidth?entryWidth:50)){
-            toolbar.nextRow();
-            xPos=0;
-        }
+	foreach(entries as var entry){
+		count--;
+		if( xPos>width-(entryWidth?entryWidth:50)){
+			toolbar.nextRow();
+			xPos=0;
+		}
 
-        if(entry---|>String){
-            var s=entry.toString().replaceAll('\n','�\n�');
-            foreach(s.split('\n') as var part){
-                if(part.beginsWith('�')){
-                    toolbar.nextRow(4);
-                    xPos=0;
-                    if(last---|> GUI.Button){
+		if(entry.isA(String)){
+			var s=entry.toString().replaceAll('\n','�\n�');
+			foreach(s.split('\n') as var part){
+				if(part.beginsWith('�')){
+					toolbar.nextRow(4);
+					xPos=0;
+					if(last.isA(GUI.Button)){
 						last.setButtonShape(GUI.BUTTON_SHAPE_RIGHT);
-                    }
-                }
-                part=part.replaceAll('�',"");
-                if(part.length()>0){
-                    toolbar.add(gui.createLabel(part));
-                    xPos+=entryWidth;
-                }
-            }
-        }else{
-            var c=gui.create(entry,entryWidth);
-            toolbar.add(c);
-            if(c---|> GUI.Button){
-            	if(xPos==0)
+					}
+				}
+				part=part.replaceAll('�',"");
+				if(part.length()>0){
+					toolbar.add(gui.createLabel(part));
+					xPos+=entryWidth;
+				}
+			}
+		}else{
+			var c=gui.create(entry,entryWidth);
+			toolbar.add(c);
+			if(c.isA(GUI.Button)){
+				if(xPos==0)
 					c.setButtonShape(GUI.BUTTON_SHAPE_LEFT);
 				else if(count==0){
 					c.setButtonShape(GUI.BUTTON_SHAPE_RIGHT);
 				}else
 					c.setButtonShape(GUI.BUTTON_SHAPE_MIDDLE);
-            }
-            xPos+=c.getWidth();
-            last=c;
-        }
-    }
-    return toolbar;
+			}
+			xPos+=c.getWidth();
+			last=c;
+		}
+	}
+	return toolbar;
 };
 
 // ------------------------------------------------------------------------------------

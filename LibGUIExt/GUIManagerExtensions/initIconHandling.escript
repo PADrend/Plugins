@@ -26,23 +26,23 @@ GUI.GUI_Manager._getIconRegistry ::= fn( ){
 	\example gui.getIcon("#RefreshSmall"); 	*/
 GUI.GUI_Manager.getIcon ::= fn( [GUI.Component,String] nameOrIconOrFilename, [Util.Color4ub,false] color=false){
 	// Component given? ---> return it
-	if(nameOrIconOrFilename ---|> GUI.Component){
+	if(nameOrIconOrFilename.isA(GUI.Component)){
 		if(color)
 			nameOrIconOrFilename.addProperty(new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,color));
 		return nameOrIconOrFilename;
 	}
 	var icon = void;
 	var filename = void;
-	var registryEntry = _getIconRegistry()[nameOrIconOrFilename];
+	var registryEntry = this._getIconRegistry()[nameOrIconOrFilename];
 	
 	// found icon in the registry ---> return a clone
-	if(registryEntry ---|> GUI.Component ){
+	if(registryEntry.isA(GUI.Component) ){
 		icon = this.createIcon( registryEntry.getImageData(),registryEntry.getImageRect() );
 		if(color)
 			icon.addProperty(new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,color));
 		return icon;
 	} // found a filename?
-	else if(registryEntry ---|> String){
+	else if(registryEntry.isA(String)){
 		filename = registryEntry;
 	}else { // nothing found in registry ---> the given nameOrIconOrFilename should be a filename
 		filename = nameOrIconOrFilename;
@@ -69,12 +69,12 @@ GUI.GUI_Manager.getIcon ::= fn( [GUI.Component,String] nameOrIconOrFilename, [Ut
 	\note if a filename (and no icon) is given, the icon is created on first access 
 	\example gui.registerIcon("#RefreshSmall","resources/Icons/Refresh.png");	*/
 GUI.GUI_Manager.registerIcon ::= fn( String name, [GUI.Component,String] iconOrFilename ){
-	_getIconRegistry()[name] = iconOrFilename;
+	this._getIconRegistry()[name] = iconOrFilename;
 };
 
 GUI.GUI_Manager.registerIcons ::= fn( Map icons){
 	foreach(icons as var name, var i)
-		registerIcon(name,i);
+		this.registerIcon(name,i);
 };
 
 /*! An icon file is a json formatted collection of icon descriptions

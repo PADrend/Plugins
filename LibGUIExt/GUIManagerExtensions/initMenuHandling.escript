@@ -20,7 +20,7 @@ GUI.GUI_Manager._createMenu ::= GUI.GUI_Manager.createMenu;
 
 //! \note Use gui.openMenu(...) instead; the Menu-object itself should not be stored or handled directly.
 GUI.GUI_Manager.createMenu ::= fn(mixed = void, width = 150, context...){
-	var menu = gui._createMenu(GUI.ONE_TIME_MENU);
+	var menu = this._createMenu(GUI.ONE_TIME_MENU);
 	if(mixed){
 		if(mixed.isA(String))	// for debugging
 			menu._componentId := mixed;
@@ -66,7 +66,7 @@ GUI.GUI_Manager.createMenu ::= fn(mixed = void, width = 150, context...){
 	\note This function does not return the menu as it may automatically be  destroyed (one time menu). 
 	\note if the menu does not fit to the screen, its position is adjusted*/
 GUI.GUI_Manager.openMenu ::= fn(Geometry.Vec2 position, menuEntries,width=150,context...){
-	var menu = menuEntries.isA(GUI.Menu) ? menuEntries : gui.createMenu(menuEntries,width,context...);
+	var menu = menuEntries.isA(GUI.Menu) ? menuEntries : this.createMenu(menuEntries,width,context...);
 
 	menu.layout(); // assure the height is initialized
 	var height = menu.getHeight();

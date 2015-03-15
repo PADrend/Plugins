@@ -101,7 +101,7 @@ GUI.Component.connectToAttribute::=fn(obj , varId, [GUI.RefreshGroup,void] refre
 		var newData=dataWrapper.obj.getAttribute( dataWrapper.varId );
 		
 		if(oldData!=newData && 
-				!(oldData ---|> Number && newData ---|> Number && ""+oldData == ""+newData)){
+				!(oldData.isA(Number) && newData.isA(Number) && ""+oldData == ""+newData)){
 			component.setData(newData);
 			component.onDataChanged(component.getData());
 		}
@@ -148,7 +148,7 @@ GUI.Container._add::=GUI.Container.add;  // store original 'add' function
 		panel.add( [ "*Heading*", GUI.NEXT_ROW, GUI.H_DELIMITER, GUI.NEXT_ROW , "Some text..." ] );
 		 */
 GUI.Container.add::=fn(componentOrArrayOrDescription){
-	if(componentOrArrayOrDescription ---|> Array){
+	if(componentOrArrayOrDescription.isA(Array)){
 		foreach(componentOrArrayOrDescription as var c){
 			this._add(gui.create(c));
 		}
@@ -256,17 +256,17 @@ GUI.TreeViewEntry.clearSubentries ::= fn(){
 	\note Multiple uses are allowed on one entry.
 	\note The entry's onOpen-method should not be used otherwise.
 */
-GUI.TreeViewEntry.DynamicSubentriesTrait ::= new Traits.GenericTrait;
+GUI.TreeViewEntry.DynamicSubentriesTrait ::= new Std.Traits.GenericTrait;
 {
 	var t = GUI.TreeViewEntry.DynamicSubentriesTrait;
 	t.allowMultipleUses();
 	
 	t.onInit += fn(GUI.TreeViewEntry entry, provider){
-		Traits.requireTrait(provider, Traits.CallableTrait);
-		if(!Traits.queryTrait(entry,this)){
+		Std.Traits.requireTrait(provider, Std.Traits.CallableTrait);
+		if(!Std.Traits.queryTrait(entry,this)){
 			if(entry.isSet($onOpen))
 				Runtime.warn("GUI.TreeviewEntry.onOpen already set.");
-			entry.onOpen := new MultiProcedure;
+			entry.onOpen := new Std.MultiProcedure;
 			entry.onOpen += fn(){
 				// remove old sub entries
 				this.clearSubentries();
@@ -296,7 +296,7 @@ GUI.TreeViewEntry.DynamicSubentriesTrait ::= new Traits.GenericTrait;
 
 //! Add a \see GUI.TreeViewEntry.DynamicSubentriesTrait to the entry.
 GUI.TreeViewEntry.addSubentryProvider := fn(provider){
-	Traits.addTrait(this,GUI.TreeViewEntry.DynamicSubentriesTrait,provider);
+	Std.Traits.addTrait(this,GUI.TreeViewEntry.DynamicSubentriesTrait,provider);
 	return this;
 };
 
@@ -310,7 +310,7 @@ GUI.Window.toggleVisibility:=fn(){
 	this.setEnabled(v);
 	if(v){
 		var c=this;
-		while( (c=c.getFirstChild()) ---|> GUI.Container){
+		while( (c=c.getFirstChild()).isA(GUI.Container)){
 //			out("-",c,"\n");
 			c.activate();
 			c.select();
