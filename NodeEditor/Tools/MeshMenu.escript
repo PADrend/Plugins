@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2009-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2009-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2009-2012,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 David Maicher
  * Copyright (C) 2009-2010 Jan Krems
  * Copyright (C) 2010-2011 Jonas Knoll
@@ -18,7 +18,7 @@
  */
 
 
-gui.registerComponentProvider('NodeEditor_NodeToolsMenu.meshes',fn(Array nodes){
+gui.register('NodeEditor_NodeToolsMenu.meshes',fn(Array nodes){
 	return nodes.empty() ? [] : [
 		'----',
 		{
@@ -31,7 +31,7 @@ gui.registerComponentProvider('NodeEditor_NodeToolsMenu.meshes',fn(Array nodes){
 });
 
 // ------------------------------------------------------------------------------------------------
-gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
+gui.register('NodeEditor_MeshToolsMenu.meshModifications',[
 	"*Mesh modification*",
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -95,7 +95,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 						out(".");
 					}
 				}
-				out("]\n");
+				outln("]");
 
 				return true;
 
@@ -150,7 +150,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 					out(".");
 				}
 			}
-			out("\n");
+			outln();
 		},
 		GUI.TOOLTIP : "Reverse the order of vertices of each triangle in all selected geometry nodes."
 	},
@@ -165,7 +165,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 					out(".");
 				}
 			}
-			out("\n");
+			outln();
 		},
 		GUI.TOOLTIP : "Recalculate normals of all selected geometry nodes."
 	},
@@ -180,7 +180,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 					out(".");
 				}
 			}
-			out("\n");
+			outln();
 		}
 	},
 	{
@@ -194,7 +194,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 					out(".");
 				}
 			}
-			out("\n");
+			outln();
 		},
 		GUI.TOOLTIP : "Recalculate normals of all selected geometry nodes."
 	},
@@ -307,7 +307,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshModifications',[
 
 // -------------------------------------------------------------------------------
 
-gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
+gui.register('NodeEditor_MeshToolsMenu.textures',[
 	"*Textures etc.*",
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -349,7 +349,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 					}
 
 				}
-				out("]\n");
+				outln("]");
 				renderingContext.popMatrix_modelToCamera();
 
 				return true;
@@ -380,7 +380,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 					out(".");
 				}
 			}
-			out("\n");
+			outln();
 		},
 		GUI.TOOLTIP : "Flip the y-texture coordinate to repair some objects."
 	},
@@ -401,7 +401,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 				mesh._markAsChanged();
 				out(".");
 			}
-			out("\n");
+			outln();
 		},
 		GUI.TOOLTIP : "Flip the y-texture coordinate to repair some objects."
 	},{
@@ -421,7 +421,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 				mesh._markAsChanged();
 				out(".");
 			}
-			out("\n");
+			outln();
 		},
 		GUI.TOOLTIP : "Flip the y-texture coordinate to repair some objects."
 	},
@@ -429,29 +429,35 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.textures',[
 ]);
 // -------------------------------------
 
-gui.registerComponentProvider('NodeEditor_MeshToolsMenu.export',[
+gui.register('NodeEditor_MeshToolsMenu.export',[
 	"*Mesh export*",
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Save Mesh as .mmf",
 		GUI.ON_CLICK : fn(){
-			var node=NodeEditor.getSelectedNode();
-			if(! (node---|> MinSG.GeometryNode) ){
-				out("No GeometryNode selected!\n");
+			var node = NodeEditor.getSelectedNode();
+			if(! (node.isA(MinSG.GeometryNode)) ){
+				outln("No GeometryNode selected!");
 				return;
 			}
-			var mesh=node.getMesh();
+			var mesh = node.getMesh();
 			if(!mesh){
-				out("No Mesh available!\n");
+				outln("No Mesh available!");
 				return;
 			}
-			GUI._openFileDialog("Filename for mesh export", PADrend.getDataPath(), ".mmf",
-				mesh->fn(filename) {
-					out("Exporting ",filename,this,"\n");
+		
+			gui.openDialog({
+				GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+				GUI.LABEL : "Filename for mesh export",
+				GUI.ENDINGS : [".mmf"],
+				GUI.FILENAME : (mesh.getFileName().getFile().empty() || mesh.getFileName().getEnding()!='mmf') ? "new.mmf" : mesh.getFileName().getFile(),
+				GUI.DIR : mesh.getFileName().getDir().empty() ? PADrend.getDataPath() : mesh.getFileName().getDir(),
+				GUI.ON_ACCEPT : [mesh]=>fn(mesh,filename) {
+					outln("Exporting ",mesh,"->",filename);
 					showWaitingScreen();
-					Rendering.saveMesh(this,filename);
+					Rendering.saveMesh(mesh,filename);
 				}
-			);
+			});
 		},
 		GUI.TOOLTIP :  "Save the mesh of the selected GeometryNode as .mmf"
 	},
@@ -459,23 +465,29 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.export',[
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Save Mesh as .ply",
 		GUI.ON_CLICK : fn(){
-			var node=NodeEditor.getSelectedNode();
-			if(! (node---|> MinSG.GeometryNode) ){
-				out("No GeometryNode selected!\n");
+			var node = NodeEditor.getSelectedNode();
+			if(! (node.isA(MinSG.GeometryNode)) ){
+				outln("No GeometryNode selected!");
 				return;
 			}
-			var mesh=node.getMesh();
+			var mesh = node.getMesh();
 			if(!mesh){
-				out("No Mesh available!\n");
+				outln("No Mesh available!");
 				return;
 			}
-			GUI._openFileDialog("Filename for mesh export", PADrend.getDataPath(), ".ply",
-				mesh->fn(filename) {
+		
+			gui.openDialog({
+				GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+				GUI.LABEL : "Filename for mesh export",
+				GUI.ENDINGS : [".ply"],
+				GUI.FILENAME : (mesh.getFileName().getFile().empty() || mesh.getFileName().getEnding()!='ply') ? "new.ply" : mesh.getFileName().getFile(),
+				GUI.DIR : mesh.getFileName().getDir().empty() ? PADrend.getDataPath() : mesh.getFileName().getDir(),
+				GUI.ON_ACCEPT : [mesh]=>fn(mesh,filename) {
+					outln("Exporting ",mesh,"->",filename);
 					showWaitingScreen();
-					out("Exporting ",filename,this,"\n");
-					Rendering.saveMesh(this,filename);
+					Rendering.saveMesh(mesh,filename);
 				}
-			);
+			});
 		},
 		GUI.TOOLTIP :  "Save the mesh of the selected GeometryNode as .ply"
 	},
@@ -484,7 +496,7 @@ gui.registerComponentProvider('NodeEditor_MeshToolsMenu.export',[
 // -----------------------------------------------------------------------------------
 
 if( Rendering.isSet($simplifyMesh)){
-	gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshSimplifications',[
+	gui.register('NodeEditor_MeshToolsMenu.meshSimplifications',[
 		"*Mesh simplification*",
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
@@ -492,8 +504,8 @@ if( Rendering.isSet($simplifyMesh)){
 			GUI.ON_CLICK : fn() {
 				var node=NodeEditor.getSelectedNode();
 
-				if(! (node ---|> MinSG.GeometryNode) ){
-					out("No geometry node!!!\n");
+				if(! (node.isA(MinSG.GeometryNode)) ){
+					outln("No geometry node!!!");
 					return;
 				}
 
@@ -632,8 +644,8 @@ if( Rendering.isSet($simplifyMesh)){
 			GUI.ON_CLICK : fn() {
 				var node=NodeEditor.getSelectedNode();
 
-				if(! (node ---|> MinSG.GeometryNode) ){
-					out("No geometry node!!!\n");
+				if(! (node.isA(MinSG.GeometryNode)) ){
+					outln("No geometry node!!!");
 					return;
 				}
 
@@ -810,7 +822,7 @@ if( Rendering.isSet($simplifyMesh)){
 								PADrend.getRootNode().display(frameContext,PADrend.getRenderingFlags());
 								var tex=Rendering.createTextureFromScreen();
 								var b=Rendering.saveTexture(renderingContext,tex,"screens/MeshSimplificationTest_tri."+i+"_thold."+thresholdMin.getText()+"_flip."+flipMin.getText()+"_pos."+weights[0]+"_norm."+weights[1]+"_col."+weights[2]+"_tex."+weights[3]+"_bound."+weights[4]+"_opt."+useOptPos.getData()+".png");
-								out("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
+								outln("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
 								node.setMesh(origMesh);
 							}
 						}
@@ -833,7 +845,7 @@ if( Rendering.isSet($simplifyMesh)){
 								PADrend.getRootNode().display(frameContext,PADrend.getRenderingFlags());
 								var tex=Rendering.createTextureFromScreen();
 								var b=Rendering.saveTexture(renderingContext,tex,"screens/MeshSimplificationTest_tri."+triangleMin.getText()+"_thold."+i+"_flip."+flipMin.getText()+"_pos."+weights[0]+"_norm."+weights[1]+"_col."+weights[2]+"_tex."+weights[3]+"_bound."+weights[4]+"_opt."+useOptPos.getData()+".png");
-								out("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
+								outln("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"));
 								node.setMesh(origMesh);
 							}
 						}
@@ -856,7 +868,7 @@ if( Rendering.isSet($simplifyMesh)){
 								PADrend.getRootNode().display(frameContext,PADrend.getRenderingFlags());
 								var tex=Rendering.createTextureFromScreen();
 								var b=Rendering.saveTexture(renderingContext,tex,"screens/MeshSimplificationTest_tri."+triangleMin.getText()+"_thold."+thresholdMin.getText()+"_flip."+i+"_pos."+weights[0]+"_norm."+weights[1]+"_col."+weights[2]+"_tex."+weights[3]+"_bound."+weights[4]+"_opt."+useOptPos.getData()+".png");
-								out("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
+								outln("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"));
 								node.setMesh(origMesh);
 							}
 						}
@@ -879,7 +891,7 @@ if( Rendering.isSet($simplifyMesh)){
 								PADrend.getRootNode().display(frameContext,PADrend.getRenderingFlags());
 								var tex=Rendering.createTextureFromScreen();
 								var b=Rendering.saveTexture(renderingContext,tex,"screens/MeshSimplificationTest_tri."+triangleMin.getText()+"_thold."+thresholdMin.getText()+"_flip."+flipMin.getText()+"_pos."+weights[0]+"_norm."+weights[1]+"_col."+weights[2]+"_tex."+weights[3]+"_bound."+weights[4]+"_opt."+useOptPos.getData()+".png");
-								out("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
+								outln("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"));
 								node.setMesh(origMesh);
 							}
 						}
@@ -902,7 +914,7 @@ if( Rendering.isSet($simplifyMesh)){
 								PADrend.getRootNode().display(frameContext,PADrend.getRenderingFlags());
 								var tex=Rendering.createTextureFromScreen();
 								var b=Rendering.saveTexture(renderingContext,tex,"screens/MeshSimplificationTest_tri."+triangleMin.getText()+"_thold."+thresholdMin.getText()+"_flip."+flipMin.getText()+"_pos."+weights[0]+"_norm."+weights[1]+"_col."+weights[2]+"_tex."+weights[3]+"_bound."+weights[4]+"_opt."+useOptPos.getData()+".png");
-								out("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
+								outln("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"));
 								node.setMesh(origMesh);
 							}
 						}
@@ -925,7 +937,7 @@ if( Rendering.isSet($simplifyMesh)){
 								PADrend.getRootNode().display(frameContext,PADrend.getRenderingFlags());
 								var tex=Rendering.createTextureFromScreen();
 								var b=Rendering.saveTexture(renderingContext,tex,"screens/MeshSimplificationTest_tri."+triangleMin.getText()+"_thold."+thresholdMin.getText()+"_flip."+flipMin.getText()+"_pos."+weights[0]+"_norm."+weights[1]+"_col."+weights[2]+"_tex."+weights[3]+"_bound."+weights[4]+"_opt."+useOptPos.getData()+".png");
-								out("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
+								outln("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"));
 								node.setMesh(origMesh);
 							}
 						}
@@ -948,7 +960,7 @@ if( Rendering.isSet($simplifyMesh)){
 								PADrend.getRootNode().display(frameContext,PADrend.getRenderingFlags());
 								var tex=Rendering.createTextureFromScreen();
 								var b=Rendering.saveTexture(renderingContext,tex,"screens/MeshSimplificationTest_tri."+triangleMin.getText()+"_thold."+thresholdMin.getText()+"_flip."+flipMin.getText()+"_pos."+weights[0]+"_norm."+weights[1]+"_col."+weights[2]+"_tex."+weights[3]+"_bound."+weights[4]+"_opt."+useOptPos.getData()+".png");
-								out("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
+								outln("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"));
 								node.setMesh(origMesh);
 							}
 						}
@@ -971,7 +983,7 @@ if( Rendering.isSet($simplifyMesh)){
 								PADrend.getRootNode().display(frameContext,PADrend.getRenderingFlags());
 								var tex=Rendering.createTextureFromScreen();
 								var b=Rendering.saveTexture(renderingContext,tex,"screens/MeshSimplificationTest_tri."+triangleMin.getText()+"_thold."+thresholdMin.getText()+"_flip."+flipMin.getText()+"_pos."+weights[0]+"_norm."+weights[1]+"_col."+weights[2]+"_tex."+weights[3]+"_bound."+weights[4]+"_opt."+useOptPos.getData()+".png");
-								out("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
+								outln("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"));
 								node.setMesh(origMesh);
 							}
 						}
@@ -993,7 +1005,7 @@ if( Rendering.isSet($simplifyMesh)){
 							PADrend.getRootNode().display(frameContext,PADrend.getRenderingFlags());
 							var tex=Rendering.createTextureFromScreen();
 							var b=Rendering.saveTexture(renderingContext,tex,"screens/MeshSimplificationTest_tri."+triangleMin.getText()+"_thold."+thresholdMin.getText()+"_flip."+flipMin.getText()+"_pos."+weights[0]+"_norm."+weights[1]+"_col."+weights[2]+"_tex."+weights[3]+"_bound."+weights[4]+"_opt."+useOptPos.getData()+".png");
-							out("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
+							outln("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"));
 							node.setMesh(origMesh);
 						}
 
@@ -1005,7 +1017,7 @@ if( Rendering.isSet($simplifyMesh)){
 							PADrend.getRootNode().display(frameContext,PADrend.getRenderingFlags());
 							var tex=Rendering.createTextureFromScreen();
 							var b=Rendering.saveTexture(renderingContext,tex,"screens/MeshSimplificationTest_tri."+triangleMin.getText()+"_thold."+thresholdMin.getText()+"_flip."+flipMin.getText()+"_pos."+weights[0]+"_norm."+weights[1]+"_col."+weights[2]+"_tex."+weights[3]+"_bound."+weights[4]+"_opt."+!(useOptPos.getData())+".png");
-							out("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"),"\n");
+							outln("Screenshot: ",tex,"\t",(b?"ok.":"\afailed!"));
 							node.setMesh(origMesh);
 						}
 					}
@@ -1024,7 +1036,7 @@ if( Rendering.isSet($simplifyMesh)){
 	]);
 }
 // --------------------------------------------------------------------------------------------------
-gui.registerComponentProvider('NodeEditor_MeshToolsMenu.meshFixes',[
+gui.register('NodeEditor_MeshToolsMenu.meshFixes',[
 	"*Mesh fixes*",
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,

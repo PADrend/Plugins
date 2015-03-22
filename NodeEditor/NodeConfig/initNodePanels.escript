@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 David Maicher
  * Copyright (C) 2010 Jan Krems
  * Copyright (C) 2010 Paul Justus
@@ -30,7 +30,7 @@ static getBaseTypeEntries = fn( obj, baseType=void ){
 };
 
 /*!	Node */
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.Node, fn(node){
+gui.register(CONFIG_PREFIX + MinSG.Node, fn(node){
 	var entries = [];
 	entries += {
 		GUI.TYPE : GUI.TYPE_LABEL,
@@ -149,7 +149,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.Node, fn(node){
 // ----
 
 /*!	GroupNode	*/
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GroupNode, fn(node){
+gui.register(CONFIG_PREFIX + MinSG.GroupNode, fn(node){
 	var entries = getBaseTypeEntries(node,MinSG.GroupNode.getBaseType());
 	entries += "*GroupNode Info:*";
 
@@ -186,12 +186,12 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GroupNode, fn(node){
 	button.calcValues := fn(){
 		foreach(MinSG.collectNodes(node) as var n){
 			this.values.nodes++;
-			if(n ---|> MinSG.GeometryNode){
+			if(n.isA(MinSG.GeometryNode)){
 				this.values.geonodes++;
 				this.values.triangles += n.getTriangleCount();
 				this.values.vertices += n.getVertexCount();
 			}
-			if(n ---|> MinSG.GroupNode)
+			if(n.isA(MinSG.GroupNode))
 				this.values.groupnodes++;
 			if(n.hasStates())
 				this.values.states += n.getStates().count();
@@ -214,9 +214,9 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GroupNode, fn(node){
 	};
 
 	button.node := node;
-	button.values := new ExtObject();
+	button.values := new ExtObject;
 	button.resetValues();
-	button.labels := new ExtObject();
+	button.labels := new ExtObject;
 	button.createLabels();
 
 	entries += (button);
@@ -275,7 +275,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GroupNode, fn(node){
 // ----
 
 /*!	GeometryNode	*/
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GeometryNode, fn(node){
+gui.register(CONFIG_PREFIX + MinSG.GeometryNode, fn(node){
 	var entries = getBaseTypeEntries(node,MinSG.GeometryNode.getBaseType());
 
 	entries += "*GeometryNode Info:*";
@@ -407,7 +407,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GeometryNode, fn(node){
 				if(path){
 					showWaitingScreen();
 					var geoNode = MinSG.loadModel(path);
-					if(geoNode ---|> MinSG.GeometryNode) {
+					if(geoNode.isA(MinSG.GeometryNode)) {
 						var mesh = geoNode.getMesh();
 						mesh.setFileName(filename);
 						this.node.setMesh(mesh);
@@ -421,6 +421,30 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GeometryNode, fn(node){
 		},
 		GUI.TOOLTIP		:	"Reload the GeometryNode's mesh from the given file."
 	};
+	entries += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Save mesh...",
+		GUI.ON_CLICK : [data] => fn(data){
+			var mesh = data.node.getMesh();
+			if(!mesh){
+				Runtime.warn("No Mesh available!");
+				return;
+			}
+			gui.openDialog({
+				GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+				GUI.LABEL : "Filename for mesh export",
+				GUI.ENDINGS : [".mmf",".ply"],
+				GUI.FILENAME : (mesh.getFileName().getFile().empty() || mesh.getFileName().getEnding()!='mmf') ? "new.mmf" : mesh.getFileName().getFile(),
+				GUI.DIR : mesh.getFileName().getDir().empty() ? PADrend.getDataPath() : mesh.getFileName().getDir(),
+				GUI.ON_ACCEPT : [mesh]=>fn(mesh,filename) {
+					outln("Exporting ",mesh,"->",filename);
+					showWaitingScreen();
+					Rendering.saveMesh(mesh,filename);
+				}
+			});
+		},
+		GUI.TOOLTIP		:	"Save the mesh as .mmf or .ply file."
+	};
 	
 	entries += GUI.NEXT_ROW;
 	return entries;
@@ -429,7 +453,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.GeometryNode, fn(node){
 // ----
 
 /*!	Light	*/
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.LightNode, fn(node){
+gui.register(CONFIG_PREFIX + MinSG.LightNode, fn(node){
 	var entries = getBaseTypeEntries(node,MinSG.LightNode.getBaseType());
 
 	var dummy = new ExtObject;
@@ -552,7 +576,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.LightNode, fn(node){
 if(MinSG.isSet($ParticleSystemNode)){
 
 /*!	ParticleSystemNode	*/
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ParticleSystemNode, fn(node){
+gui.register(CONFIG_PREFIX + MinSG.ParticleSystemNode, fn(node){
 	var entries = getBaseTypeEntries(node,MinSG.ParticleSystemNode.getBaseType());
 
 	entries += "*ParticleSystemNode Info:*";
@@ -591,7 +615,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ParticleSystemNode, fn(node)
 /*!	MultiAlgoGroupNode	*/
 if(MinSG.isSet($MAR))
 	
-	gui.registerComponentProvider(CONFIG_PREFIX + MinSG.MAR.MultiAlgoGroupNode, fn(node){
+	gui.register(CONFIG_PREFIX + MinSG.MAR.MultiAlgoGroupNode, fn(node){
 		var entries = getBaseTypeEntries(node,MinSG.MultiAlgoGroupNode.getBaseType());
 
 		entries += "*MultiAlgoGroupNode Info:*";
@@ -618,7 +642,7 @@ if(MinSG.isSet($MAR))
 
 //!	PathNode
 if(MinSG.isSet($PathNode)) {
-	gui.registerComponentProvider(CONFIG_PREFIX + MinSG.PathNode, fn(node){
+	gui.register(CONFIG_PREFIX + MinSG.PathNode, fn(node){
 		var entries = getBaseTypeEntries(node,MinSG.PathNode.getBaseType());
 
 		entries += "*PathNode*";
