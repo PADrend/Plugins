@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2013 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Paul Justus
  * Copyright (C) 2010-2013 Ralf Petring <ralf@petring.net>
  * Copyright (C) 2010-2011 Robert Gmyr
@@ -29,7 +29,7 @@ static getBaseTypeEntries = fn( obj, baseType=void ){
 };
  
 //!	State
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.State, fn(MinSG.State state) {
+gui.register(CONFIG_PREFIX + MinSG.State, fn(MinSG.State state) {
 	var entries = [];
 	entries += {
 		GUI.TYPE				:	GUI.TYPE_LABEL,
@@ -117,7 +117,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.State, fn(MinSG.State state)
 // ----
 
 //! AlphaTestState
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.AlphaTestState, fn(MinSG.AlphaTestState state) {
+gui.register(CONFIG_PREFIX + MinSG.AlphaTestState, fn(MinSG.AlphaTestState state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*AlphaTestState:*";
 	entries += GUI.NEXT_ROW;
@@ -165,7 +165,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.AlphaTestState, fn(MinSG.Alp
 /*!	AlgoSelector */
 if(MinSG.isSet($MAR))
 {
-	gui.registerComponentProvider(CONFIG_PREFIX + MinSG.MAR.AlgoSelector, fn(MinSG.MAR.AlgoSelector state) {
+	gui.register(CONFIG_PREFIX + MinSG.MAR.AlgoSelector, fn(MinSG.MAR.AlgoSelector state) {
 		var entries = getBaseTypeEntries(state);
 		entries += {
 			GUI.TYPE : GUI.TYPE_SELECT,
@@ -216,7 +216,7 @@ if(MinSG.isSet($MAR))
 		return entries;
 	});
 
-	gui.registerComponentProvider(CONFIG_PREFIX + MinSG.MAR.SurfelRenderer, fn(MinSG.MAR.SurfelRenderer state) {
+	gui.register(CONFIG_PREFIX + MinSG.MAR.SurfelRenderer, fn(MinSG.MAR.SurfelRenderer state) {
 	var entries = getBaseTypeEntries(state);
 		var dw = DataWrapper.createFromFunctions(state->state.getSurfelCountFactor, state->state.setSurfelCountFactor);
 		entries += {
@@ -260,7 +260,7 @@ if(MinSG.isSet($MAR))
 // -----
 
 //! BlendingState
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.BlendingState, fn(MinSG.BlendingState state) {
+gui.register(CONFIG_PREFIX + MinSG.BlendingState, fn(MinSG.BlendingState state) {
 	var entries = getBaseTypeEntries(state);
 	var equations = [
 		[Rendering.BlendEquation.FUNC_ADD, "FUNC_ADD"],
@@ -459,7 +459,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.BlendingState, fn(MinSG.Blen
 // ----
 
 //! BudgetAnnotationState
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.BudgetAnnotationState, fn(MinSG.BudgetAnnotationState state) {
+gui.register(CONFIG_PREFIX + MinSG.BudgetAnnotationState, fn(MinSG.BudgetAnnotationState state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*BudgetAnnotationState*";
 	entries += GUI.NEXT_ROW;
@@ -504,7 +504,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.BudgetAnnotationState, fn(Mi
 // -----
 
 /*! CHCppRenderer */
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.CHCppRenderer, fn(MinSG.CHCppRenderer state) {
+gui.register(CONFIG_PREFIX + MinSG.CHCppRenderer, fn(MinSG.CHCppRenderer state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*CHC++ Renderer*";
 	entries += GUI.NEXT_ROW;
@@ -607,7 +607,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.CHCppRenderer, fn(MinSG.CHCp
 
 
 /*! CHCRenderer */
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.CHCRenderer, fn(MinSG.CHCRenderer state) {
+gui.register(CONFIG_PREFIX + MinSG.CHCRenderer, fn(MinSG.CHCRenderer state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*CHC: Coherent Hierarchical Culling*";
 	entries += GUI.NEXT_ROW;
@@ -627,7 +627,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.CHCRenderer, fn(MinSG.CHCRen
 
 //! ColorCubeRenderer
 if(MinSG.isSet($ColorCubeRenderer))
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ColorCubeRenderer, fn(MinSG.ColorCubeRenderer state) {
+gui.register(CONFIG_PREFIX + MinSG.ColorCubeRenderer, fn(MinSG.ColorCubeRenderer state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*Color Cube Renderer:*";
 	entries += GUI.NEXT_ROW;
@@ -643,7 +643,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ColorCubeRenderer, fn(MinSG.
 // ----
 
 //! CullFaceState
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.CullFaceState, fn(MinSG.CullFaceState state) {
+gui.register(CONFIG_PREFIX + MinSG.CullFaceState, fn(MinSG.CullFaceState state) {
 	var entries = getBaseTypeEntries(state);
 	entries += {
 		GUI.TYPE			:	GUI.TYPE_BOOL,
@@ -668,7 +668,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.CullFaceState, fn(MinSG.Cull
 // ----
 
 //! LODRenderer
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.LODRenderer, fn(MinSG.LODRenderer state) {
+gui.register(CONFIG_PREFIX + MinSG.LODRenderer, fn(MinSG.LODRenderer state) {
 	var entries = getBaseTypeEntries(state);
 	entries += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
@@ -704,7 +704,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.LODRenderer, fn(MinSG.LODRen
 
 // ----
 
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.MaterialState, fn(MinSG.MaterialState state) {
+gui.register(CONFIG_PREFIX + MinSG.MaterialState, fn(MinSG.MaterialState state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*Material State:*";
 	entries += GUI.NEXT_ROW;
@@ -789,7 +789,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.MaterialState, fn(MinSG.Mate
 // ----
 
 /*! HOMRenderer */
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.HOMRenderer, fn(MinSG.HOMRenderer state) {
+gui.register(CONFIG_PREFIX + MinSG.HOMRenderer, fn(MinSG.HOMRenderer state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*HOM (Hierarchical Occlusion Maps) Renderer:*";
 	entries += GUI.NEXT_ROW;
@@ -884,7 +884,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.HOMRenderer, fn(MinSG.HOMRen
 // ----
 
 /*! LightingState */
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.LightingState, fn(MinSG.LightingState state) {
+gui.register(CONFIG_PREFIX + MinSG.LightingState, fn(MinSG.LightingState state) {
 	var entries = getBaseTypeEntries(state);
 	entries+= "*Lighting State:*";
 	entries += GUI.NEXT_ROW;
@@ -942,7 +942,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.LightingState, fn(MinSG.Ligh
 // ----
 
 /*! NodeRendererState */
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.NodeRendererState, fn(MinSG.NodeRendererState state) {
+gui.register(CONFIG_PREFIX + MinSG.NodeRendererState, fn(MinSG.NodeRendererState state) {
 	var entries = getBaseTypeEntries(state,MinSG.NodeRendererState.getBaseType());
 	entries += {
 		GUI.LABEL			:	"SourceChannel",
@@ -958,21 +958,21 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.NodeRendererState, fn(MinSG.
 	return entries;
 });
 
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ScriptedNodeRendererState, fn(MinSG.ScriptedNodeRendererState state) {
+gui.register(CONFIG_PREFIX + MinSG.ScriptedNodeRendererState, fn(MinSG.ScriptedNodeRendererState state) {
 	return getBaseTypeEntries(state,MinSG.NodeRendererState.getBaseType());
 });
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ScriptedState, fn(MinSG.ScriptedState state) {
+gui.register(CONFIG_PREFIX + MinSG.ScriptedState, fn(MinSG.ScriptedState state) {
 	return getBaseTypeEntries(state,MinSG.ScriptedState.getBaseType());
 });
 
-//gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ScriptedState, fn(MinSG.NodeRendererState state) {
+//gui.register(CONFIG_PREFIX + MinSG.ScriptedState, fn(MinSG.NodeRendererState state) {
 //	return getBaseTypeEntries(state);
 //});
 
 // -----
 
 /*! OccRenderer */
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.OccRenderer, fn(MinSG.OccRenderer state) {
+gui.register(CONFIG_PREFIX + MinSG.OccRenderer, fn(MinSG.OccRenderer state) {
 	var entries = getBaseTypeEntries(state);
 	print_r(entries);
 	entries+= "*CHC Renderer*";
@@ -1026,7 +1026,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.OccRenderer, fn(MinSG.OccRen
 // ----
 
 /*! NaiveOccRenderer */
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.NaiveOccRenderer, fn(MinSG.NaiveOccRenderer state) {
+gui.register(CONFIG_PREFIX + MinSG.NaiveOccRenderer, fn(MinSG.NaiveOccRenderer state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*Naive Occlusion Culling Renderer*";
 	entries += GUI.NEXT_ROW;
@@ -1044,7 +1044,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.NaiveOccRenderer, fn(MinSG.N
 // ----
 
 //! PolygonModeState
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.PolygonModeState, fn(MinSG.PolygonModeState state) {
+gui.register(CONFIG_PREFIX + MinSG.PolygonModeState, fn(MinSG.PolygonModeState state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*PolygonModeState:*";
 	entries += GUI.NEXT_ROW;
@@ -1068,7 +1068,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.PolygonModeState, fn(MinSG.P
 // ----
 
 /*! ProjSizeFilterState */
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ProjSizeFilterState, fn(MinSG.ProjSizeFilterState state) {
+gui.register(CONFIG_PREFIX + MinSG.ProjSizeFilterState, fn(MinSG.ProjSizeFilterState state) {
 	var entries = getBaseTypeEntries(state);
 	entries+=	"Changes the rendering channel of nodes when their projected size is smaller \n"+
 			"than the given value ( if they are far enough away).\n"+
@@ -1248,7 +1248,7 @@ NodeEditor.addConfigTreeEntryProvider(ShaderObjectWrapper,fn( obj,entry ){
 });
 
 
-gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
+gui.register('NodeEditor_UniformEditor',fn(uniformContainer){
 	var entries = [];
 
 	var tv = gui.create({
@@ -1431,7 +1431,7 @@ gui.registerComponentProvider('NodeEditor_UniformEditor',fn(uniformContainer){
 
 
 /*! ShaderState	*/
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ShaderState, fn(MinSG.ShaderState state) {
+gui.register(CONFIG_PREFIX + MinSG.ShaderState, fn(MinSG.ShaderState state) {
 	var entries = getBaseTypeEntries(state,MinSG.ShaderState.getBaseType());
 	// -----------------------------------------------------------
 	entries += {
@@ -1475,7 +1475,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ShaderState, fn(MinSG.Shader
 // -------------
 
 /*! ShaderUniformState	*/
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ShaderUniformState, fn(MinSG.ShaderUniformState state) {
+gui.register(CONFIG_PREFIX + MinSG.ShaderUniformState, fn(MinSG.ShaderUniformState state) {
 	var entries = getBaseTypeEntries(state);
 	entries+={
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
@@ -1495,7 +1495,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ShaderUniformState, fn(MinSG
 // ----
 
 /*! ShadowState	*/
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ShadowState, fn(MinSG.ShadowState state) {
+gui.register(CONFIG_PREFIX + MinSG.ShadowState, fn(MinSG.ShadowState state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*ShadowState:*";
 	entries += GUI.NEXT_ROW;
@@ -1546,7 +1546,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.ShadowState, fn(MinSG.Shadow
 // ----
 
 /*! Texture	*/
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TextureState, fn(MinSG.TextureState state) {
+gui.register(CONFIG_PREFIX + MinSG.TextureState, fn(MinSG.TextureState state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*Texture State:*";
 	entries += GUI.NEXT_ROW;
@@ -1695,6 +1695,27 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TextureState, fn(MinSG.Textu
 			RefreshableContainerTrait.refreshContainer( this );
 		}
 	};
+	entries += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Save texture as png...",
+		GUI.WIDTH : 200,
+		GUI.TOOLTIP : "Note: Not all formats are supported for exporting!",
+		GUI.ON_CLICK : [state,textureFile] => fn(state,textureFile){
+			var filename = new Util.FileName(textureFile());
+			gui.openDialog({
+				GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+				GUI.LABEL : "Filename for texture export",
+				GUI.ENDINGS : [".png"],
+				GUI.FILENAME : (filename.empty() || filename.getEnding()!='png') ? "new.png" : filename.getFile(),
+				GUI.DIR : filename.empty() ? PADrend.getDataPath() : filename.getDir(),
+				GUI.ON_ACCEPT : [state]=>fn(state,filename) {
+					Rendering.saveTexture(renderingContext,state.getTexture(), filename);
+					PADrend.message("Texture saved to : \""+ filename);
+				}
+			});
+		}
+	};
+	
 	entries += GUI.NEXT_ROW;
 	return entries;
 });
@@ -1702,7 +1723,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TextureState, fn(MinSG.Textu
 // ----
 
 /*! TransparencyRenderer	*/
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TransparencyRenderer, fn(MinSG.TransparencyRenderer state) {
+gui.register(CONFIG_PREFIX + MinSG.TransparencyRenderer, fn(MinSG.TransparencyRenderer state) {
 	var entries = getBaseTypeEntries(state);
 	entries+= "*Tansparency Renderer:*";
 	entries += GUI.NEXT_ROW;
@@ -1720,7 +1741,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TransparencyRenderer, fn(Min
 
 //! TreeVisualization
 if(MinSG.isSet($TreeVisualization))
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TreeVisualization, fn(MinSG.TreeVisualization state) {
+gui.register(CONFIG_PREFIX + MinSG.TreeVisualization, fn(MinSG.TreeVisualization state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*Tree Visualization*";
 
@@ -1772,7 +1793,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TreeVisualization, fn(MinSG.
 
 /*! TwinPartitionsRenderer	*/
 if(MinSG.isSet($TwinPartitionsRenderer))
-gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TwinPartitionsRenderer, fn(MinSG.TwinPartitionsRenderer state) {
+gui.register(CONFIG_PREFIX + MinSG.TwinPartitionsRenderer, fn(MinSG.TwinPartitionsRenderer state) {
 	var entries = getBaseTypeEntries(state);
 	entries += "*Twin Partitions Renderer:*";
 	entries += GUI.NEXT_ROW;
@@ -1821,7 +1842,7 @@ gui.registerComponentProvider(CONFIG_PREFIX + MinSG.TwinPartitionsRenderer, fn(M
 
 //! BlueSurfels
 if(MinSG.isSet($SurfelRenderer))
-	gui.registerComponentProvider('NodeEditor_ObjConfig_'+MinSG.SurfelRenderer, fn(renderer){
+	gui.register('NodeEditor_ObjConfig_'+MinSG.SurfelRenderer, fn(renderer){
 		var entries = gui.createComponents( {	GUI.TYPE:GUI.TYPE_COMPONENTS, GUI.PROVIDER:'NodeEditor_ObjConfig_'+MinSG.SurfelRenderer.getBaseType().toString(), GUI.CONTEXT:renderer });
 
 		entries += {
