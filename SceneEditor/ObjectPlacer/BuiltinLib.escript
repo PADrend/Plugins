@@ -28,7 +28,7 @@ var plugin = new Plugin({
 plugin.init @(override) := fn(){
 	registerExtension('PADrend_Init',fn(){
 		//! \see SceneEditor/ObjectPlacer
-		gui.registerComponentProvider('SceneEditor_ObjectProviderEntries.builtIn',this->fn(){
+		gui.register('SceneEditor_ObjectProviderEntries.builtIn',this->fn(){
 			var entries = ["BuiltIn"];
 			foreach( {
 						"Cube" : 				fn(){	

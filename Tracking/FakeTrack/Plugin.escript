@@ -50,7 +50,7 @@ plugin.init @(override) := fn(){
 				GUI.DATA_WRAPPER : b
 			};
 		}
-		gui.registerComponentProvider('Tracking_drivers.fake',[{
+		gui.register('Tracking_drivers.fake',[{
 			GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 			GUI.COLLAPSED : true,
 			GUI.HEADER : ["Device: Fake tracking device(debug)"],
@@ -131,7 +131,7 @@ plugin.init @(override) := fn(){
 
 	registerExtension('PADrend_Init', fn(){
 
-		gui.registerComponentProvider('Tracking_drivers.mouse',[{
+		gui.register('Tracking_drivers.mouse',[{
 			GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 			GUI.COLLAPSED : true,
 			GUI.HEADER : ["Device: Mouse tracking device (debug)"],

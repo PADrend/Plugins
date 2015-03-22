@@ -30,7 +30,7 @@ static gaspPath = systemConfig.getValue('SceneAnalyzer.path',".");
 SceneAnalyzerGUI.createWindow:=fn(posX,posY) {
 
 	@(once){
-		gui.registerComponentProvider('SceneAnalyzer_Tabs.10_gasps',fn(){
+		gui.register('SceneAnalyzer_Tabs.10_gasps',fn(){
 			var page = gui.create({	GUI.TYPE : GUI.TYPE_PANEL	});
 			createOverviewPanel(page);
 			page.nextRow(20);
@@ -41,14 +41,14 @@ SceneAnalyzerGUI.createWindow:=fn(posX,posY) {
 					GUI.LABEL : "GASPs"
 			}];
 		});
-		gui.registerComponentProvider('SceneAnalyzer_Tabs.20_evaluator',fn(){
+		gui.register('SceneAnalyzer_Tabs.20_evaluator',fn(){
 			return [{
 					GUI.TYPE : GUI.TYPE_TAB,
 					GUI.TAB_CONTENT : Util.requirePlugin('Evaluator').createConfigPanel(),
 					GUI.LABEL : "Evaluator"
 			}];
 		});
-		gui.registerComponentProvider('SceneAnalyzer_Tabs.30_sampling',fn(){
+		gui.register('SceneAnalyzer_Tabs.30_sampling',fn(){
 			var page = gui.create({	GUI.TYPE : GUI.TYPE_PANEL	});
 			createSamplingPanel(page);
 			return [{
@@ -57,7 +57,7 @@ SceneAnalyzerGUI.createWindow:=fn(posX,posY) {
 					GUI.LABEL : "Sampling"
 			}];
 		});		
-		gui.registerComponentProvider('SceneAnalyzer_Tabs.40_display',fn(){
+		gui.register('SceneAnalyzer_Tabs.40_display',fn(){
 			var page = gui.create({	GUI.TYPE : GUI.TYPE_PANEL	});
 			createDisplayPanel(page);
 			return [{

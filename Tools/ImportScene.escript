@@ -460,7 +460,7 @@ plugin.createWindow := fn(){
 plugin.init @(override) := fn(){
 	{ // Register ExtensionPointHandler:
 		registerExtension('PADrend_Init',this->fn(){
-			gui.registerComponentProvider('Tools_ToolsMenu.importExport_import',{
+			gui.register('Tools_ToolsMenu.importExport_import',{
 				GUI.LABEL:"Import Scene",
 				GUI.ON_CLICK:this->fn() {
 					if(!popup || !gui.isCurrentlyEnabled(popup))

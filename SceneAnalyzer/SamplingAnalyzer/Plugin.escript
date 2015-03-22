@@ -37,7 +37,7 @@ plugin.init @(override) := fn(){
 
 plugin.ex_Init := fn(){
 
-	gui.registerComponentProvider('SceneAnalyzer_Tabs.90_SamplingAnalyzer',fn(){
+	gui.register('SceneAnalyzer_Tabs.90_SamplingAnalyzer',fn(){
 		var page=gui.createPanel(100,100,GUI.AUTO_LAYOUT);
 		var parameters = new ExtObject( { $dhNumDistBuckets:2000,
 										$dhNumAngleBuckets:360, 

@@ -29,7 +29,7 @@ var plugin = new Plugin({
 plugin.init @(override) :=fn(){
 
 	registerExtension('PADrend_Init',this->fn(){
-		gui.registerComponentProvider('PADrend_MainWindowTabs.20_Tracking', this->createMainWindowTab);
+		gui.register('PADrend_MainWindowTabs.20_Tracking', this->createMainWindowTab);
 	});
 	var modules = [
         __DIR__+"/FakeTrack/Plugin.escript",

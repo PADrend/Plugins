@@ -213,7 +213,7 @@ Tool.doCreateContextMenu ::= fn(){
 					GUI.ON_CLICK : this->fn(){
 						//! \see ToolHelperTraits.NodeTransformationHandlerTrait
 						var node = this.getTransformedNodes()[0];
-						if(!(node---|>MinSG.ListNode))
+						if(!node.isA(MinSG.GroupNode))
 							return;
 						var pivot = _findPivot(node);
 						if(pivot.length()==0){

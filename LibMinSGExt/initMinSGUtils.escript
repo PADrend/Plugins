@@ -102,7 +102,7 @@ MinSG.cleanupTree := fn(MinSG.Node root, [MinSG.SceneManagement.SceneManager,voi
 		var children=MinSG.getChildNodes(node);
 
 		if(children.count() == 0){ // is leaf node
-			if(node ---|> MinSG.GroupNode){ // remove empty leaf node
+			if(node.isA(MinSG.GroupNode)){ // remove empty leaf node
 				MinSG.destroy(node);
 			}
 		}else if (children.count() == 1){ // only single child
@@ -188,12 +188,12 @@ MinSG.collectTreeStatistics := fn(MinSG.Node root) {
 	};
 	foreach(MinSG.collectNodes(root) as var node) {
 		++statistics["Nodes"];
-		if(node ---|> MinSG.GeometryNode) {
+		if(node.isA(MinSG.GeometryNode)) {
 			++statistics["GeometryNodes"];
 			statistics["Triangles"] += node.getTriangleCount();
 			statistics["Vertices"] += node.getVertexCount();
 		}
-		if(node ---|> MinSG.GroupNode) {
+		if(node.isA(MinSG.GroupNode)) {
 			++statistics["GroupNodes"];
 		}
 		if(node.hasStates()) {
@@ -305,11 +305,11 @@ MinSG.materialToVertexColor:=fn(MinSG.Node node, oldState = void) {
 		}
 	}
 
-	if(node ---|> MinSG.GroupNode) {
+	if(node.isA(MinSG.GroupNode)) {
 		foreach(MinSG.getChildNodes(node) as var child) {
 			thisFn(child, state);
 		}
-	} else if(state && node ---|> MinSG.GeometryNode) {
+	} else if(state && node.isA(MinSG.GeometryNode)) {
 		Rendering.setMaterial(node.getMesh(), state.getAmbient(), state.getDiffuse(), state.getSpecular(), state.getShininess());
 	}
 };
@@ -478,7 +478,7 @@ MinSG.updatePrototype := fn(MinSG.Node node, MinSG.Node newPrototype){
 		foreach(MinSG.getChildNodes(newInstance) as var c)
 			node += c;
 
-		if(node---|>MinSG.GeometryNode)		
+		if(node.isA(MinSG.GeometryNode))
 			node.setMesh(newInstance.getMesh());
 
 		node._setPrototype(newPrototype);

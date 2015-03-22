@@ -76,9 +76,9 @@ trait.onInit += fn(MinSG.Node node){
 			[var time, var location] = entry;
 			
 			var parts2 = [time];
-			if(location---|>Geometry.Vec3)
+			if(location.isA(Geometry.Vec3))
 				parts2.append(location.toArray());
-			else if(location---|>Geometry.SRT){
+			else if(location.isA(Geometry.SRT)){
 				parts2.append(location.getTranslation().toArray());
 				parts2.append(location.getDirVector().toArray());
 				parts2.append(location.getUpVector().toArray());
@@ -117,7 +117,7 @@ trait.onInit += fn(MinSG.Node node){
 			prevTime = nextTime;
 		}
 		if(prevLocation==nextLocation){
-			if(prevLocation---|>Geometry.SRT){
+			if(prevLocation.isA(Geometry.SRT)){
 				this.setRelTransformation(prevLocation);
 			}else{
 				this.setRelPosition( prevLocation );
@@ -126,7 +126,7 @@ trait.onInit += fn(MinSG.Node node){
 //			outln( relTime," ",prevTime," ",nextTime);
 			
 			var d = (prevTime==nextTime ? 0.0 : simpleSmootTime((relTime-prevTime) / (nextTime-prevTime),this.keyFrame_smoothFactor()) );
-			if(prevLocation---|>Geometry.SRT){
+			if(prevLocation.isA(Geometry.SRT)){
 				this.setRelTransformation( new Geometry.SRT(prevLocation,nextLocation,d));
 			}else{
 				this.setRelPosition( prevLocation*d + nextLocation*(1-d) );

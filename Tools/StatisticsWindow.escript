@@ -24,12 +24,12 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn() {
 	registerExtension('PADrend_Init', this -> fn() {
-		gui.registerComponentProvider('Tools_ToolsMenu.info_statistics', [{
+		gui.register('Tools_ToolsMenu.info_statistics', [{
 			GUI.TYPE		:	GUI.TYPE_MENU,
 			GUI.LABEL		:	"Statistics Windows",
 			GUI.MENU		:	'StatisticsWindow'
 		}]);
-		gui.registerComponentProvider('StatisticsWindow.Windows', this -> this.buildWindowsMenu);
+		gui.register('StatisticsWindow.Windows', this -> this.buildWindowsMenu);
 		var windowMap = PADrend.configCache.getValue("StatisticsWindow", new Map);
 		foreach(windowMap as var key, var value) {
 			if(value["openAutomatically"]) {

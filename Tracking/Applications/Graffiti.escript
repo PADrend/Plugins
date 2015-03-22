@@ -159,7 +159,7 @@ static buttonHandler = fn(button,pressed){
 	}
 };
 static positionHandler = fn(roomSRTOrVoid){
-	if(roomSRTOrVoid---|>Geometry.SRT){
+	if(roomSRTOrVoid.isA(Geometry.SRT)){
 		@(once) static TrackingTools = module('../TrackingTools');
 
 		var worldSRT = TrackingTools.roomSRTToWorldSRT(roomSRTOrVoid);
@@ -188,7 +188,7 @@ myDeviceHandler.onDeviceDisabled += fn(device){
 };
 myDeviceHandler.refresh();
 
-gui.registerComponentProvider('Tracking_applications.graffiti',fn(){
+gui.register('Tracking_applications.graffiti',fn(){
 	return [{
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 		GUI.COLLAPSED : true,

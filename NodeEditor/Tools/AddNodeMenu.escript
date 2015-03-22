@@ -12,7 +12,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-gui.registerComponentProvider('NodeEditor_NodeToolsMenu.addNode',fn(Array nodes){
+gui.register('NodeEditor_NodeToolsMenu.addNode',fn(Array nodes){
 	if( nodes.size()!=1 || !(nodes.front()---|>MinSG.GroupNode))
 		return [];
 

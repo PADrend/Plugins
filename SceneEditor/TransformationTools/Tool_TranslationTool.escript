@@ -42,7 +42,7 @@ Tool.snapNode ::= fn(MinSG.Node node, anchors,MinSG.Node rootNode,Number searchD
 	var worldLocations = [];
 	foreach(anchors as var anchor){
 		var p = anchor();
-		if(p---|>Geometry.Vec3){
+		if(p.isA(Geometry.Vec3)){
 			var worldPos = node.localPosToWorldPos(p);
 			worldLocations += worldPos;
 			searchBox.include(worldPos);
@@ -60,7 +60,7 @@ Tool.snapNode ::= fn(MinSG.Node node, anchors,MinSG.Node rootNode,Number searchD
 			continue;
 		foreach(n.findAnchors() as var name,var anchor){
 			var location = anchor();
-			if(! (location---|>Geometry.Vec3))
+			if(! (location.isA(Geometry.Vec3)))
 				continue;
 			var worldPos = n.localPosToWorldPos(location);
 			foreach(worldLocations as var worldPos2){
@@ -80,7 +80,7 @@ Tool.snapNode ::= fn(MinSG.Node node, anchors,MinSG.Node rootNode,Number searchD
 //		var area2 = searchArea * 10;
 //		foreach(anchors as var name,var anchor){
 //			var location = anchor();
-//			if( !(location---|>Geometry.Vec3) )
+//			if( !(location.isA(Geometry.Vec3)) )
 //				continue;
 //			var worldLocation = node.localPosToWorldPos(location);
 //			

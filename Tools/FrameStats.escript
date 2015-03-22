@@ -34,7 +34,7 @@ plugin.init @(override) := fn() {
 	{ // Register ExtensionPointHandler:
 		registerExtension('PADrend_AfterRendering',this->this.ex_afterRendering);
 		registerExtension('PADrend_Init',this->fn(){
-			gui.registerComponentProvider('PADrend_MainWindowTabs.30_FrameStats',this->createMainWindowTab);
+			gui.register('PADrend_MainWindowTabs.30_FrameStats',this->createMainWindowTab);
 		});
 	}
 	this.imageWidth:=480;

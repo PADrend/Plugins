@@ -128,14 +128,14 @@ static initMenus = fn(){
 		optionWindow.setEnabled(true);
 	};
 
-	gui.registerComponentProvider('Effects_MainMenu.postprocessing',{
+	gui.register('Effects_MainMenu.postprocessing',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "PP effects",
 		GUI.MENU_WIDTH : 170,
 		GUI.MENU : 'Effects_PPMenu'
 	});
 					
-	gui.registerComponentProvider('Effects_PPMenu',this->fn(){
+	gui.register('Effects_PPMenu',this->fn(){
 								
 		var effects = scanEffectFiles();
 		var m=[];

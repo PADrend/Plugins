@@ -50,9 +50,9 @@ trait.onInit += fn(MinSG.Node node){
 		var m2 = new Map;
 		foreach(m as var name,var location){
 			var parts = [];
-			if(location---|>Geometry.Vec3)
+			if(location.isA(Geometry.Vec3))
 				parts.append(location.toArray());
-			else if(location---|>Geometry.SRT){
+			else if(location.isA(Geometry.SRT)){
 				parts.append(location.getTranslation().toArray());
 				parts.append(location.getDirVector().toArray());
 				parts.append(location.getUpVector().toArray());

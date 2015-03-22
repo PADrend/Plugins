@@ -45,7 +45,7 @@ plugin.initGUI := fn(){
 	
 	// ----------------------------
 	// content of an object entry
-	gui.registerComponentProvider('ObjectEditor_ObjectEntry.00main',fn(MinSG.Node node){
+	gui.register('ObjectEditor_ObjectEntry.00main',fn(MinSG.Node node){
 		if(node.hasParent()&& node.getParent().isInstance() )
 			return [NodeEditor.getString(node)];
 
@@ -84,7 +84,7 @@ plugin.initGUI := fn(){
 		return collapsibleObjectContainer;
 	});
 	
-	gui.registerComponentProvider('ObjectEditor_ObjectConfig.0_id',fn(MinSG.Node node,refreshCallback){
+	gui.register('ObjectEditor_ObjectConfig.0_id',fn(MinSG.Node node,refreshCallback){
 		var id =  PADrend.getSceneManager().getNameOfRegisteredNode(node);
 		return [
 			{
@@ -115,7 +115,7 @@ plugin.initGUI := fn(){
 //												gui._createRectShape(new Util.Color4ub(0,128,0,255),new Util.Color4ub(0,128,0,255),true));
 
 
-	gui.registerComponentProvider('ObjectEditor_ObjectConfig.5_traits',fn(MinSG.Node node,refreshCallback){
+	gui.register('ObjectEditor_ObjectConfig.5_traits',fn(MinSG.Node node,refreshCallback){
 		var entries = [];
 		foreach( Std.require('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node) as var traitId){
 			var info = traitRegistry.getTraitInfos()[traitId];
@@ -154,7 +154,7 @@ plugin.initGUI := fn(){
 		return entries;
 	});
 	
-	gui.registerComponentProvider('ObjectEditor_ObjectConfig.9_addTraits',fn(MinSG.Node node,refreshCallback){
+	gui.register('ObjectEditor_ObjectConfig.9_addTraits',fn(MinSG.Node node,refreshCallback){
 		return [
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			'----',
@@ -193,7 +193,7 @@ plugin.initGUI := fn(){
 	// ------------------
 	
 	// content of the tab in the SceneEditor window
-	gui.registerComponentProvider('SceneEditor_ToolsConfigTabs.SemanticObjects',fn(){
+	gui.register('SceneEditor_ToolsConfigTabs.SemanticObjects',fn(){
 		var panel = gui.create({
 			GUI.TYPE : GUI.TYPE_PANEL
 		});

@@ -36,7 +36,7 @@ MeasurementPlugin.init @(override) :=fn() {
 	load(__DIR__+"/InterpolatedTest.escript");
 
 	registerExtension('PADrend_Init',this->fn(){
-		gui.registerComponentProvider('PADrend_MainWindowTabs.50_Measurement', this->createTab);
+		gui.register('PADrend_MainWindowTabs.50_Measurement', this->createTab);
 	});
 
 	return true;

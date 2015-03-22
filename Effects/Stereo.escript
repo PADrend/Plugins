@@ -196,14 +196,14 @@ plugin.init @(override) := fn(){
         
         // ------------------------
 		// gui
-		gui.registerComponentProvider('Effects_MainMenu.stereo',[
+		gui.register('Effects_MainMenu.stereo',[
 			{
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Stereoscopic",
 				GUI.MENU : 'Effects_Stereo'
 			}
 		]);
-		gui.registerComponentProvider('Effects_Stereo.main',[
+		gui.register('Effects_Stereo.main',[
 			{
 				GUI.TYPE : GUI.TYPE_SELECT,
 				GUI.DATA_WRAPPER : stereoMode,

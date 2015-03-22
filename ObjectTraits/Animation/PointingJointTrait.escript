@@ -64,8 +64,8 @@ trait.onInit += fn(MinSG.Node node){
 		if(!mAnchor)
 			return;
 		mAnchor = mAnchor();
-		var worldUp = mAnchor---|>Geometry.SRT ? mNode.localPosToWorldPos(mAnchor.getUpVector()) : node.getWorldTransformationSRT().getUpVector();
-		var worldSource = mNode.localPosToWorldPos( mAnchor---|>Geometry.SRT ? mAnchor.getTranslation() : mAnchor );
+		var worldUp = mAnchor.isA(Geometry.SRT) ? mNode.localPosToWorldPos(mAnchor.getUpVector()) : node.getWorldTransformationSRT().getUpVector();
+		var worldSource = mNode.localPosToWorldPos( mAnchor.isA(Geometry.SRT) ? mAnchor.getTranslation() : mAnchor );
 		
 		var targetNode = node.__targetNode();
 		var worldTarget;
@@ -74,7 +74,7 @@ trait.onInit += fn(MinSG.Node node){
 			var tAnchor = targetNode.findAnchor( node.__targetAnchorId() );
 			if(tAnchor){
 				tAnchor = tAnchor();
-				worldTarget = targetNode.localPosToWorldPos( tAnchor---|>Geometry.SRT ? tAnchor.getTranslation() : tAnchor );
+				worldTarget = targetNode.localPosToWorldPos( tAnchor.isA(Geometry.SRT) ? tAnchor.getTranslation() : tAnchor );
 			}
 			
 		}

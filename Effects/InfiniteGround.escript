@@ -303,7 +303,7 @@ static ext_PADrend_AfterRendering = fn(...){
 };
 
 static registerGUI = fn(){
-	gui.registerComponentProvider('Effects_MainMenu.20_infiniteGround',[
+	gui.register('Effects_MainMenu.20_infiniteGround',[
 		"*Infinite Ground*",
 		{
 			GUI.TYPE : GUI.TYPE_BOOL,
@@ -319,7 +319,7 @@ static registerGUI = fn(){
 	]);
 
 
-	gui.registerComponentProvider('Effects_InfiniteGroundOptions.00Main',[
+	gui.register('Effects_InfiniteGroundOptions.00Main',[
 		{
 			GUI.LABEL : "Type",
 			GUI.TYPE : GUI.TYPE_RANGE,

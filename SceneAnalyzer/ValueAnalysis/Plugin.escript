@@ -34,7 +34,7 @@ plugin.init @(override) := fn(){
 
 //! [ext:PADrend_Init]
 plugin.ex_Init := fn(...){
-	gui.registerComponentProvider('SceneAnalyzer_Tabs.90_V-Analyzer',fn(){
+	gui.register('SceneAnalyzer_Tabs.90_V-Analyzer',fn(){
 		var page=gui.createPanel(100,100,GUI.AUTO_LAYOUT);
 
 		var settings = new ExtObject({

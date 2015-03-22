@@ -83,7 +83,7 @@ PADrend.CommandHandling.ex_KeyPressed := fn(evt){
 */
 PADrend.CommandHandling.executeCommand := fn(cmd){ //[Command,Map,UserFunction,Delegate,...]
 	if(cmd---|>Command){
-	}else if(cmd---|>Map){
+	}else if(cmd.isA(Map)){
 		cmd =new Command(cmd);
 	}else {  
 		cmd = new Command({ 

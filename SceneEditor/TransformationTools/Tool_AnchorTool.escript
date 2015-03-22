@@ -100,7 +100,7 @@ Tool.onNodesSelected_static += fn(Array selectedNodes){
 		editNode += markerNode;
 		Traits.addTrait( markerNode, EditNodeTraits.AnnotatableTrait);		//! \see EditNodeTraits.AnnotatableTrait
 		markerNode.setAnnotation("["+anchorName+"]");					//! \see EditNodeTraits.AnnotatableTrait
-		markerNode += (location---|>Geometry.Vec3) ? this.mat_Vec3 : this.mat_SRT;
+		markerNode += (location.isA(Geometry.Vec3)) ? this.mat_Vec3 : this.mat_SRT;
 
 		var ctxt = new ExtObject;
 		ctxt.node := node;
@@ -116,7 +116,7 @@ Tool.onNodesSelected_static += fn(Array selectedNodes){
 			}
 			if(!location){
 				editNode.deactivate();
-			}else if(location---|>Geometry.Vec3){
+			}else if(location.isA(Geometry.Vec3)){
 				editNode.activate();
 				editNode.setRelPosition(location);
 			}else{
@@ -168,9 +168,9 @@ Tool.onNodesSelected_static += fn(Array selectedNodes){
 			var oldLocation = ctxt.anchor();
 			var newLocation;
 			
-			if(oldLocation---|>Geometry.Vec3){
+			if(oldLocation.isA(Geometry.Vec3)){
 				newLocation =  newRelPos ;
-			}else if(oldLocation---|>Geometry.SRT){
+			}else if(oldLocation.isA(Geometry.SRT)){
 				newLocation = oldLocation.clone();
 				newLocation.setTranslation(newRelPos);
 			}
@@ -183,7 +183,7 @@ Tool.onNodesSelected_static += fn(Array selectedNodes){
 			MinSG.destroy(ctxt.axisMarkerNode);
 		};
 
-		 if(! (location---|>Geometry.SRT)) // no rotation necessary-> continue
+		 if(! (location.isA(Geometry.SRT))) // no rotation necessary-> continue
 			continue;
 		
 		translatorNode.scale(0.5);

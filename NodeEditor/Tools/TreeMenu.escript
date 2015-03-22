@@ -16,7 +16,7 @@
  */
 
 
-gui.registerComponentProvider('NodeEditor_NodeToolsMenu.treeTools',fn(Array nodes){
+gui.register('NodeEditor_NodeToolsMenu.treeTools',fn(Array nodes){
 	return nodes.empty() ? [] : [
 		'----',
 		{
@@ -30,7 +30,7 @@ gui.registerComponentProvider('NodeEditor_NodeToolsMenu.treeTools',fn(Array node
 });
 
 // ----------------------------------------------------------
-gui.registerComponentProvider('NodeEditor_TreeToolsMenu.transformations',[
+gui.register('NodeEditor_TreeToolsMenu.transformations',[
 	'*Transformations*',
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -91,7 +91,7 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.transformations',[
 
 
 // ----------------------------------------------------------
-gui.registerComponentProvider('NodeEditor_TreeToolsMenu.treeOperations',[
+gui.register('NodeEditor_TreeToolsMenu.treeOperations',[
 	'----',
 	"*Tree operations*",
 
@@ -299,7 +299,7 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.treeOperations',[
 		GUI.TOOLTIP: "Remove the selected state from the scene."
 	},
 ]);
-gui.registerComponentProvider('NodeEditor_TreeToolsMenu.cleanups',[
+gui.register('NodeEditor_TreeToolsMenu.cleanups',[
 	"*Cleanups*",
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -413,7 +413,7 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.cleanups',[
 ]);
 
 
-gui.registerComponentProvider('NodeEditor_TreeToolsMenu.prototypes',[
+gui.register('NodeEditor_TreeToolsMenu.prototypes',[
 	'----',
 	"*Prototypes/Instances*",
 	{
@@ -469,7 +469,7 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.prototypes',[
 // ----------------------------------------------------------------------------------
 // tree building operations
 
-gui.registerComponentProvider('NodeEditor_TreeToolsMenu.treeBuilding',[
+gui.register('NodeEditor_TreeToolsMenu.treeBuilding',[
 	'----',
 	"*Tree building op.*",
 	{
@@ -748,7 +748,7 @@ if(MinSG.isSet($mergeGeometry)) {
 		w.init();
 	};
 
-	gui.registerComponentProvider('NodeEditor_TreeToolsMenu.triangleTrees',[
+	gui.register('NodeEditor_TreeToolsMenu.triangleTrees',[
 		'----',
 		"*Triangle Trees*",
 		{

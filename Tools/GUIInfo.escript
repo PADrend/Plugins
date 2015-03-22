@@ -30,7 +30,7 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn(){
 	Util.registerExtension('PADrend_Init', fn(){
-		gui.registerComponentProvider('Tools_DebugWindowTabs.x_guiInfo',	createTab);
+		gui.register('Tools_DebugWindowTabs.x_guiInfo',	createTab);
 	});
 	static revoce = new Std.MultiProcedure;
 	enabled.onDataChanged += fn(b){

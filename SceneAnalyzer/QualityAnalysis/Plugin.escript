@@ -185,7 +185,7 @@ static measureDirectional = fn(){
 
 plugin.init @(override) := fn(){
     Util.registerExtension('PADrend_Init',fn(){
-		gui.registerComponentProvider('SceneAnalyzer_Tabs.90_QualityAnalyzer',fn(){
+		gui.register('SceneAnalyzer_Tabs.90_QualityAnalyzer',fn(){
 			return {
 				GUI.TYPE : GUI.TYPE_TAB,
 				GUI.LABEL : "Q-Anaylsis",

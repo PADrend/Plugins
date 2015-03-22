@@ -34,10 +34,10 @@ var plugin = Tools.ExportScenePlugin;
 plugin.init @(override) := fn(){
     { // Register ExtensionPointHandler:
 		registerExtension('PADrend_Init',this->fn(){
-			gui.registerComponentProvider('Tools_ToolsMenu.importExport',[ // group header
+			gui.register('Tools_ToolsMenu.importExport',[ // group header
 				"*Import / Export*"
 			]);
-			gui.registerComponentProvider('Tools_ToolsMenu.importExport_export',{
+			gui.register('Tools_ToolsMenu.importExport_export',{
 				GUI.LABEL:"Export Scene",
 				GUI.ON_CLICK:this->createWindow,
 				GUI.TOOLTIP:"exports the whole content of a scene\n(including meshes & textures) to minsg format"
@@ -145,7 +145,7 @@ plugin.exportScene := fn(){
 plugin.collectMeshesAndTextures := fn(MinSG.Node scene, Set meshes, Set textures){
     var nodes = MinSG.collectNodes(scene);
     foreach(nodes as var node){
-        if(node ---|> MinSG.GeometryNode && node.getMesh()){
+        if(node.isA(MinSG.GeometryNode) && node.getMesh()){
             var mesh = node.getMesh();
             mesh.setFileName(new Util.FileName());
             meshes += mesh;
@@ -158,7 +158,7 @@ plugin.collectMeshesAndTextures := fn(MinSG.Node scene, Set meshes, Set textures
 			}
 		}
 		{ /// LOD Meshes
-			if(node ---|> MinSG.GeometryNode){
+			if(node.isA(MinSG.GeometryNode)){
 				var gaList = void;
 				if(node.isInstance()){
 					gaList = node.getPrototype().getNodeAttribute('lodMeshes');

@@ -12,7 +12,7 @@
  */
 
 
-gui.registerComponentProvider('NodeEditor_NodeToolsMenu.alignment',fn(Array nodes){
+gui.register('NodeEditor_NodeToolsMenu.alignment',fn(Array nodes){
 	return nodes.empty() ? [] : [
 		'----',
 		{
@@ -56,7 +56,7 @@ static getOffset_OriginToSnap = fn(MinSG.Node node, Number mode){
 };
 
 // ----------------------------------------------------------
-gui.registerComponentProvider('NodeEditor_AlignmentMenu.alignment',fn(){
+gui.register('NodeEditor_AlignmentMenu.alignment',fn(){
 	@(once) static snapMode = Std.DataWrapper.createFromEntry(PADrend.configCache, "NodeEditor.alignmentMode", ALIGN_ORIGIN);
 	@(once) static NodeTransformationLogger = Std.require('PADrend/CommandHandling/NodeTransformationLogger');
 

@@ -43,7 +43,7 @@ plugin.init @(override) := fn(){
 	restrictHeight.onDataChanged += update;
 
 	registerExtension('PADrend_Init',fn(){
-		gui.registerComponentProvider('Tools_ToolsMenu.movementContraints',[
+		gui.register('Tools_ToolsMenu.movementContraints',[
 			{
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Movement constraints",
@@ -51,7 +51,7 @@ plugin.init @(override) := fn(){
 			}
 		]);
 
-		gui.registerComponentProvider('Tools_MovementContraintsMenu.main',[
+		gui.register('Tools_MovementContraintsMenu.main',[
 			{
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.LABEL : "Enabled",

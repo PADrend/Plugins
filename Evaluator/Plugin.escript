@@ -61,7 +61,7 @@ plugin.init @(override) := fn() {
 	}
 	{ /// Register ExtensionPointHandler:
 		registerExtension('PADrend_Init', this->fn(){
-			gui.registerComponentProvider('PADrend_PluginsMenu.evaluator',{
+			gui.register('PADrend_PluginsMenu.evaluator',{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Evaluator",
 				GUI.ON_CLICK : fn() {

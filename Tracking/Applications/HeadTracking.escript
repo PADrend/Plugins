@@ -30,7 +30,7 @@ myDeviceHandler.onDeviceEnabled += fn(device){	device.onRoomTransformationChange
 myDeviceHandler.onDeviceDisabled += fn(device){	device.onRoomTransformationChanged -= positionHandler; /*! \see HID_Traits.Controller_Room6D_Trait */	};
 myDeviceHandler.refresh();
 
-gui.registerComponentProvider('Tracking_applications.observerPositionTracking',fn(){
+gui.register('Tracking_applications.observerPositionTracking',fn(){
 	return [{
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 		GUI.COLLAPSED : true,

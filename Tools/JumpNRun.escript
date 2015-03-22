@@ -60,7 +60,7 @@ plugin.init @(override) := fn(){
 
 //! [ext:PADrend_Init]
 plugin.ex_Init:=fn(){
-	gui.registerComponentProvider('Tools_ToolsMenu.jumpNRun',[
+	gui.register('Tools_ToolsMenu.jumpNRun',[
 		"*JumpNRun*",
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,

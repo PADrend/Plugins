@@ -29,7 +29,7 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn(){
 	registerExtension('PADrend_Init', this->fn(){
-		gui.registerComponentProvider('Tools_DebugWindowTabs.eObjInfo',	fn(){
+		gui.register('Tools_DebugWindowTabs.eObjInfo',	fn(){
 			return {
 				GUI.TYPE : GUI.TYPE_TAB,
 				GUI.TAB_CONTENT :  createObjInfoGUI("GLOBALS"),

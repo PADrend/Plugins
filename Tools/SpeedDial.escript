@@ -78,7 +78,7 @@ plugin.init @(override) := fn() {
 	});
 	
 	registerExtension('PADrend_Init',this->fn(){
-		gui.registerComponentProvider('PADrend_SceneToolMenu.presets',{
+		gui.register('PADrend_SceneToolMenu.presets',{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Presets",
 			GUI.FLAGS : GUI.BACKGROUND,
@@ -108,7 +108,7 @@ plugin.init @(override) := fn() {
 				return pMenu;
 			}
 		});
-		gui.registerComponentProvider('Tools_SpeedDial_MainConfigMenu.tagSelection', 
+		gui.register('Tools_SpeedDial_MainConfigMenu.tagSelection', 
 										[mainWindowTags] =>this->getTagFilterMenuEntries );
 	});
 	registerExtension('Tools_SpeedDial_QueryFolders',[presetPaths] => fn(presetPaths, Array paths){

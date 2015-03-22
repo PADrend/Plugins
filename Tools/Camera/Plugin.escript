@@ -64,7 +64,7 @@ CameraWindowPlugin.init @(override) := fn() {
 //! [ext:PADrend_Init]
 CameraWindowPlugin.ex_Init := fn() {
 	
-	gui.registerComponentProvider('Tools_ToolsMenu.cameraSettings',[
+	gui.register('Tools_ToolsMenu.cameraSettings',[
 		{
 			GUI.LABEL			:	"Cameras ...",
 			GUI.TOOLTIP			:	"Open a window to manage camera settings.",
@@ -72,7 +72,7 @@ CameraWindowPlugin.ex_Init := fn() {
 		}
 	]);
 
-	gui.registerComponentProvider('PADrend_ConfigMenu.35_cameraSettings',[
+	gui.register('PADrend_ConfigMenu.35_cameraSettings',[
 		'----',
 		{
 			GUI.TYPE : GUI.TYPE_MENU,

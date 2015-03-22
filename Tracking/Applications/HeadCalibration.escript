@@ -59,7 +59,7 @@ static handler = fn(){
 	}
 };
 
-gui.registerComponentProvider('Tracking_applications.observerPositionCalibration',fn(){
+gui.register('Tracking_applications.observerPositionCalibration',fn(){
 	return [{
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 		GUI.COLLAPSED : true,

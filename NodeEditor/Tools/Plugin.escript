@@ -26,7 +26,7 @@ plugin.init @(override) := fn() {
 };
 
 plugin.registerMenus := fn(){
-	gui.registerComponentProvider('PADrend_SceneToolMenu.10_nodeTools',fn(){
+	gui.register('PADrend_SceneToolMenu.10_nodeTools',fn(){
 		var nodes = NodeEditor.getSelectedNodes();
 		if(nodes.empty())
 			return [];
@@ -40,7 +40,7 @@ plugin.registerMenus := fn(){
 		];
 	});
 
-	gui.registerComponentProvider('NodeEditor_NodeToolsMenu.00_nodeId',fn(Array nodes){
+	gui.register('NodeEditor_NodeToolsMenu.00_nodeId',fn(Array nodes){
 		var menu = [];
 		if(nodes.count()==1){
 			var node = nodes.front();

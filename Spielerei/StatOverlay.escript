@@ -27,7 +27,7 @@ GLOBALS.StatOverlayPlugin:= new Plugin({
 StatOverlayPlugin.init @(override) := fn(){
      { // Register ExtensionPointHandler:
 		registerExtension('PADrend_Init',this->fn(){
-			gui.registerComponentProvider('Spielerei.statOverlay',[
+			gui.register('Spielerei.statOverlay',[
 				"*StatOverlay mode*",
 				{
 					GUI.TYPE : GUI.TYPE_BUTTON,

@@ -13,7 +13,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-gui.registerComponentProvider('NodeEditor_NodeToolsMenu.material',fn(Array nodes){
+gui.register('NodeEditor_NodeToolsMenu.material',fn(Array nodes){
 	return nodes.empty() ? [] : [
 		'----',
 		{
@@ -26,7 +26,7 @@ gui.registerComponentProvider('NodeEditor_NodeToolsMenu.material',fn(Array nodes
 });
 
 // ----------------------------------------------------------
-gui.registerComponentProvider('NodeEditor_MaterialMenu',[
+gui.register('NodeEditor_MaterialMenu',[
 	"*Materials*",
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON, 

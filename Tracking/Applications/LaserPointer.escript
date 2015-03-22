@@ -195,7 +195,7 @@ rpc.registerFunction('Tracking.LaserApp.setMode',fn(mode){
 });
 
 static positionHandler = fn(roomSRTOrVoid){
-	if(roomSRTOrVoid---|>Geometry.SRT){
+	if(roomSRTOrVoid.isA(Geometry.SRT)){
 		@(once) static TrackingTools = module('../TrackingTools');
 
 		var worldSRT = TrackingTools.roomSRTToWorldSRT(roomSRTOrVoid);
@@ -223,7 +223,7 @@ myDeviceHandler.onDeviceDisabled += fn(device){
 };
 myDeviceHandler.refresh();
 
-gui.registerComponentProvider('Tracking_applications.flystickLaserPointer',fn(){
+gui.register('Tracking_applications.flystickLaserPointer',fn(){
 	return [{
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 		GUI.COLLAPSED : true,

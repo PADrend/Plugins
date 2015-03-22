@@ -170,7 +170,7 @@ plugin.registerMenus:=fn() {
 			b ? button.addProperty(p) : button.removeProperty(p);
 	};
 
-	gui.registerComponentProvider('PADrend_ToolsToolbar.80_MeshEditorTools',[{
+	gui.register('PADrend_ToolsToolbar.80_MeshEditorTools',[{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
 		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,

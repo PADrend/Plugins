@@ -15,7 +15,7 @@
  */
 
 	
-gui.registerComponentProvider('NodeEditor_NodeToolsMenu.~misc',fn(Array nodes){
+gui.register('NodeEditor_NodeToolsMenu.~misc',fn(Array nodes){
 	return nodes.empty() ? [] : [
 		'----',
 		{
@@ -27,7 +27,7 @@ gui.registerComponentProvider('NodeEditor_NodeToolsMenu.~misc',fn(Array nodes){
 	];
 });
 
-gui.registerComponentProvider('NodeEditor_MiscToolsMenu.helper',[
+gui.register('NodeEditor_MiscToolsMenu.helper',[
 	'----',
 	"*Helper*",
 	{
@@ -94,11 +94,11 @@ gui.registerComponentProvider('NodeEditor_MiscToolsMenu.helper',[
 	}
 ]);
 
-gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experiments',[
+gui.register('NodeEditor_MiscToolsMenu.experiments',[
 	'----',
 	"*Experiments/Tests*"
 ]);
-gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experiments_experimentalBehaviors',[
+gui.register('NodeEditor_MiscToolsMenu.experiments_experimentalBehaviors',[
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "New Behaviors [2013-07]",
@@ -111,7 +111,7 @@ gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experiments_experimental
 ]);
 
 if(MinSG.isSet($ParticleSystemNode)){
-	gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experimentsParticles',[
+	gui.register('NodeEditor_MiscToolsMenu.experimentsParticles',[
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Particles: Burn!",
@@ -201,7 +201,7 @@ if(MinSG.isSet($ParticleSystemNode)){
 }
 
 if(MinSG.isSet($SoundEmittingBehaviour)){
-	gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experimentsSound',[
+	gui.register('NodeEditor_MiscToolsMenu.experimentsSound',[
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Sound: Make some noise!",
@@ -225,7 +225,7 @@ if(MinSG.isSet($SoundEmittingBehaviour)){
 	]);
 }
 
-gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experimentsOnClick',[
+gui.register('NodeEditor_MiscToolsMenu.experimentsOnClick',[
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "OnClick: Make interactive",
@@ -250,7 +250,7 @@ gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experimentsOnClick',[
 	}
 ]);
 
-gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experimentsScriptedTests',[
+gui.register('NodeEditor_MiscToolsMenu.experimentsScriptedTests',[
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "ScriptedState test",
@@ -459,7 +459,7 @@ gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experimentsScriptedTests
 	}
 ]);
 
-gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experimentsSpecularTexture', [
+gui.register('NodeEditor_MiscToolsMenu.experimentsSpecularTexture', [
 	{
 		GUI.TYPE		:	GUI.TYPE_BUTTON,
 		GUI.LABEL		:	"Test Specular Texture",
@@ -538,7 +538,7 @@ gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experimentsSpecularTextu
 ]);
 
 // ???????????????????????????????????????????????????????????????????????????????????????????????????????
-gui.registerComponentProvider('NodeEditor_MiscToolsMenu.experimentsColorCubes',[
+gui.register('NodeEditor_MiscToolsMenu.experimentsColorCubes',[
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "test color cube build",

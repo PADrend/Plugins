@@ -48,7 +48,7 @@ plugin.init @(override) := fn() {
 	enabled.forceRefresh();
 
 	registerExtension('PADrend_Init', [enabled, fps] => fn(enabled, fps) {
-		gui.registerComponentProvider('Effects_MiscEffectsMenu.limitFps', [
+		gui.register('Effects_MiscEffectsMenu.limitFps', [
 			{
 				GUI.TYPE			:	GUI.TYPE_BOOL,
 				GUI.LABEL			:	"Limit fps",

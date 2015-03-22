@@ -53,7 +53,7 @@ plugin.init @(override) := fn(){
 //!	[ext:PADrend_Init]
 plugin.ex_Init := fn(){
 	//! \see SceneEditor
-	gui.registerComponentProvider('SceneEditor_ToolsConfigTabs.Prototypes',this->createUITab);
+	gui.register('SceneEditor_ToolsConfigTabs.Prototypes',this->createUITab);
 };
 
 

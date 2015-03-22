@@ -25,7 +25,7 @@ TicTacToe.init @(override) :=fn(){
 
      { // Register ExtensionPointHandler:
      	registerExtension('PADrend_Init',this->fn(){
-			gui.registerComponentProvider('Spielerei.ticTacToe',{
+			gui.register('Spielerei.ticTacToe',{
 				GUI.LABEL:"Tic Tac Toe",
 				GUI.ON_CLICK:fn() {
 					if(!TicTacToe.window)

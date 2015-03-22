@@ -34,7 +34,7 @@ plugin.init @(override) := fn() {
 	{ /// Register ExtensionPointHandler:
 		registerExtension('PADrend_Init', this -> this.ex_Init);
 		registerExtension('PADrend_Init', this -> fn() {
-			gui.registerComponentProvider('PADrend_PluginsMenu.outOfCore', {
+			gui.register('PADrend_PluginsMenu.outOfCore', {
 				GUI.LABEL		:	"OutOfCore",
 				GUI.ON_CLICK	:	this -> this.createNewWindow
 			});

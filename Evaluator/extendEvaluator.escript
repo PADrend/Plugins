@@ -124,7 +124,7 @@ static CONFIG_PREFIX = 'Evaluator_Config_';
 
 Util.registerExtension('PADrend_Init', fn(){
 
-	gui.registerComponentProvider( CONFIG_PREFIX + MinSG.Evaluator.toString(), fn(evaluator){
+	gui.register( CONFIG_PREFIX + MinSG.Evaluator.toString(), fn(evaluator){
 		var resultDataWrapper = new Std.DataWrapper("");
 		return [
 			{

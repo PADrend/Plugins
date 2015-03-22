@@ -25,7 +25,7 @@ static CONFIG_PREFIX = 'Evaluator_Config_';
 // OverdrawFactorEvaluator
 
 Util.registerExtension('PADrend_Init', fn(){
-	gui.registerComponentProvider( CONFIG_PREFIX + MinSG.OverdrawFactorEvaluator.toString(), fn(evaluator){
+	gui.register( CONFIG_PREFIX + MinSG.OverdrawFactorEvaluator.toString(), fn(evaluator){
 		var entries = gui.createComponents( {
 				GUI.TYPE : GUI.TYPE_COMPONENTS,
 				GUI.PROVIDER : 	CONFIG_PREFIX + MinSG.OverdrawFactorEvaluator.getBaseType().toString(), 
@@ -70,7 +70,7 @@ Util.registerExtension('PADrend_Init', fn(){
 // StatsEvaluator
 
 Util.registerExtension('PADrend_Init', fn(){
-	gui.registerComponentProvider( CONFIG_PREFIX + MinSG.StatsEvaluator.toString(), fn(evaluator){
+	gui.register( CONFIG_PREFIX + MinSG.StatsEvaluator.toString(), fn(evaluator){
 		var entries = gui.createComponents( {
 				GUI.TYPE : GUI.TYPE_COMPONENTS,
 				GUI.PROVIDER : 	CONFIG_PREFIX + MinSG.StatsEvaluator.getBaseType().toString(), 
@@ -153,7 +153,7 @@ PADrend.Serialization.registerType( MinSG.StatsEvaluator, "MinSG.StatsEvaluator"
 // VisibilityEvaluator
 
 Util.registerExtension('PADrend_Init', fn(){
-	gui.registerComponentProvider( CONFIG_PREFIX + MinSG.VisibilityEvaluator.toString(), fn(evaluator){
+	gui.register( CONFIG_PREFIX + MinSG.VisibilityEvaluator.toString(), fn(evaluator){
 		var entries = gui.createComponents( {
 				GUI.TYPE : GUI.TYPE_COMPONENTS,
 				GUI.PROVIDER : 	CONFIG_PREFIX + MinSG.VisibilityEvaluator.getBaseType().toString(), 

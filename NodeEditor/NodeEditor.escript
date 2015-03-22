@@ -59,9 +59,9 @@ NodeEditor.getString += [MinSG.Node, fn(node){
 	if(node.isTempNode())
 		t+="(temp) ";
 
-	if(node ---|> MinSG.GeometryNode) {
+	if(node.isA(MinSG.GeometryNode)) {
 		t+=" (" + node.getTriangleCount() + " triangles)";
-	}else if(node ---|> MinSG.GroupNode) {
+	}else if(node.isA(MinSG.GroupNode)) {
 		t+=" ("+node.countChildren()+" children)";
 	}
 	if(node.hasStates())

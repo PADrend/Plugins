@@ -23,13 +23,13 @@ var formatMebibytes = fn(Number bytes) {
 // Instances are ignored.
 rootNode.traverse([svsSize, memNodes, meshes] => fn(DataWrapper svsSize, DataWrapper memNodes, Map meshes, MinSG.Node node) {
 	memNodes(memNodes() + node.getMemoryUsage());
-	if(node ---|> MinSG.GeometryNode) {
+	if(node.isA(MinSG.GeometryNode)) {
 		var mesh = node.getMesh();
 		if(mesh) {
 			meshes[mesh] = true;
 		}
 	}
-	if(node ---|> MinSG.GroupNode && MinSG.SVS.hasVisibilitySphere(node)) {
+	if(node.isA(MinSG.GroupNode) && MinSG.SVS.hasVisibilitySphere(node)) {
 		svsSize(svsSize() + MinSG.SVS.getSphereMemoryUsage(node));
 	}
 });

@@ -453,7 +453,7 @@ plugin.init @(override) := fn() {
 
 plugin.registerMenus := fn() {	
 	
-	gui.registerComponentProvider('PADrend_SceneToolMenu.states',fn(){
+	gui.register('PADrend_SceneToolMenu.states',fn(){
 		var nodes = NodeEditor.getSelectedNodes();
 		if(nodes.count()!=1)
 			return [];
@@ -467,7 +467,7 @@ plugin.registerMenus := fn() {
 		];
 	});
 
-	gui.registerComponentProvider('NodeEditor_StatesMenu',fn(MinSG.Node node){
+	gui.register('NodeEditor_StatesMenu',fn(MinSG.Node node){
 							
 		var entries = [];
 		foreach(node.getStates() as var state){

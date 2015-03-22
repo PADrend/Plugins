@@ -42,7 +42,7 @@ plugin.init @(override) := fn() {
 	};
 
 	registerExtension('PADrend_Init',fn(){
-		gui.registerComponentProvider('Spielerei.anaglyph',[
+		gui.register('Spielerei.anaglyph',[
 			{
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.LABEL : "Anaglyph 3D",

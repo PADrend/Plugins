@@ -38,7 +38,7 @@ plugin.registerGUIProviders := fn(_gui){
 	static gui = _gui;
 	
 	// node selection
-	gui.registerComponentProvider('PADrend_FileMenu.25_exportSelectedNode',fn(){
+	gui.register('PADrend_FileMenu.25_exportSelectedNode',fn(){
 		var entries = [];
 		entries += {
 			GUI.TYPE : GUI.TYPE_BUTTON,
@@ -83,7 +83,7 @@ plugin.registerGUIProviders := fn(_gui){
 	});
 
 	// node selection
-	gui.registerComponentProvider('PADrend_SceneToolMenu.05_selectNode',[
+	gui.register('PADrend_SceneToolMenu.05_selectNode',[
 		'----',
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
@@ -157,7 +157,7 @@ plugin.registerGUIProviders := fn(_gui){
 				}
 				subMenu.append(a);
 
-				if(node ---|> MinSG.GroupNode){
+				if(node.isA(MinSG.GroupNode)){
 					subMenu+="----";
 					subMenu+={
 						GUI.TYPE : GUI.TYPE_BUTTON,
@@ -180,7 +180,7 @@ plugin.registerGUIProviders := fn(_gui){
 		| 															|
 		|-----------------------------------------------------------|
 	*/
-	gui.registerComponentProvider('PADrend_MainWindowTabs.10_NodeEditor', this->fn() {
+	gui.register('PADrend_MainWindowTabs.10_NodeEditor', this->fn() {
 		var page = gui.create({
 			GUI.TYPE : GUI.TYPE_CONTAINER,
 			GUI.LAYOUT : GUI.LAYOUT_FLOW,

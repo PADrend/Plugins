@@ -79,7 +79,7 @@ Tool.onUIEvent = fn(evt) {
 			} else {
 				if(this.cuttingLine[0].distanceSquared(this.cuttingLine[1]) < 0.0001) {				
 					var nodes = getSelectedNodes();
-					if(nodes.empty() || !(nodes[0] ---|> MinSG.GeometryNode))
+					if(nodes.empty() || !(nodes[0].isA(MinSG.GeometryNode)))
 						return false;
 						
 					var mesh = nodes[0].getMesh();

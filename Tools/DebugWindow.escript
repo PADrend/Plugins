@@ -24,7 +24,7 @@ var plugin = new Plugin({
 plugin.init @(override) := fn(){
 
 	registerExtension('PADrend_Init', fn(){
-		gui.registerComponentProvider('PADrend_PluginsMenu.dbgWindow',[{
+		gui.register('PADrend_PluginsMenu.dbgWindow',[{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Debug Tools",
 			GUI.ON_CLICK : toggleWindow

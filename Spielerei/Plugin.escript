@@ -47,7 +47,7 @@ plugin.init @(override) :=fn() {
 
 
 plugin.registerMenus := fn(){
-	gui.registerComponentProvider('PADrend_MainToolbar.70_spielerei',{
+	gui.register('PADrend_MainToolbar.70_spielerei',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
 		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
@@ -56,7 +56,7 @@ plugin.registerMenus := fn(){
 		GUI.MENU : 'Spielerei'
 	});
 								
-	gui.registerComponentProvider('Spielerei.networkTest',[
+	gui.register('Spielerei.networkTest',[
 		"*Network Test*",
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
@@ -79,7 +79,7 @@ plugin.registerMenus := fn(){
 
 	// ----------------------
 	
-	gui.registerComponentProvider('Spielerei.~00_misc',[
+	gui.register('Spielerei.~00_misc',[
 		"*misc*",
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,

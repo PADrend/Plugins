@@ -44,9 +44,9 @@ static updateAnchorAttributes = fn(node,...){
 		var location = anchorWrapper();
 		if(!location){
 			continue;
-		}else if(location---|>Geometry.Vec3){
+		}else if(location.isA(Geometry.Vec3)){
 			m[anchorName] = location.toArray();
-		}else if(location---|>Geometry.SRT){
+		}else if(location.isA(Geometry.SRT)){
 			var a = location.getTranslation().toArray();
 			a.append( location.getDirVector().toArray() );
 			a.append( location.getUpVector().toArray() );
@@ -73,7 +73,7 @@ static initAnchors = fn(node){
 		return false;
 
 	var m = parseJSON(attr); // { name : [numbers*] }
-	if(!m---|>Map){
+	if(!m.isA(Map)){
 		Runtime.warn("MinSG.Node._initAnchors: invalid anchor data: '"+attr+"'");
 		return false;
 	}

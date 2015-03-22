@@ -55,7 +55,7 @@ AnimationPlugin.init @(override) :=fn(){
 
 	{ // Register ExtensionPointHandler:
 		registerExtension('PADrend_Init',this->fn(){
-			gui.registerComponentProvider('PADrend_PluginsMenu.animation',{
+			gui.register('PADrend_PluginsMenu.animation',{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Animation editor",
 				GUI.ON_CLICK : fn() { AnimationPlugin.showWindow(0, 50, 600, 300); }

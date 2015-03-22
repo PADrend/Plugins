@@ -37,28 +37,28 @@ plugin.init @(override) := fn() {
 			loadOnce(__DIR__ + "/PreprocessingWindow.escript");
 			loadOnce(__DIR__ + "/ProjectionEvaluation.escript");
 			loadOnce(__DIR__ + "/VisibleSetEvaluation.escript");
-			gui.registerComponentProvider('PADrend_PluginsMenu.sphericalSampling', {
+			gui.register('PADrend_PluginsMenu.sphericalSampling', {
 				GUI.TYPE		:	GUI.TYPE_MENU,
 				GUI.LABEL		:	"SVS",
 				GUI.MENU		:	'SVS',
 				GUI.MENU_WIDTH	:	150
 			});
-			gui.registerComponentProvider('SVS.PreprocessingWindow', {
+			gui.register('SVS.PreprocessingWindow', {
 				GUI.TYPE 		:	GUI.TYPE_BUTTON,
 				GUI.LABEL		:	"Preprocessing Window",
 				GUI.ON_CLICK	:	SVS.setUpPreprocessingWindow
 			});
-			gui.registerComponentProvider('SVS.ProjectionEvaluation', {
+			gui.register('SVS.ProjectionEvaluation', {
 				GUI.TYPE 		:	GUI.TYPE_BUTTON,
 				GUI.LABEL		:	"Projection Evaluation",
 				GUI.ON_CLICK	:	SVS.setUpProjectionEvaluationWindow
 			});
-			gui.registerComponentProvider('SVS.SingleVisibilitySphere', {
+			gui.register('SVS.SingleVisibilitySphere', {
 				GUI.TYPE 		:	GUI.TYPE_BUTTON,
 				GUI.LABEL		:	"Single Visibility Sphere",
 				GUI.ON_CLICK	:	this -> this.setUp
 			});
-			gui.registerComponentProvider('SVS.VisibleSetEvaluation', {
+			gui.register('SVS.VisibleSetEvaluation', {
 				GUI.TYPE 		:	GUI.TYPE_BUTTON,
 				GUI.LABEL		:	"Visible Set Evaluation",
 				GUI.ON_CLICK	:	SVS.setUpVisibleSetEvaluationWindow

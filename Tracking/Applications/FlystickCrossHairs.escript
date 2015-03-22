@@ -170,7 +170,7 @@ app.onEnableDevice += [positionHandler] => fn(positionHandler,device){
 //!	\see Tracking.TrackingAppTrait
 app.onDisableDevice += [positionHandler]=>fn(positionHandler,device){	device.onRoomTransformationChanged -= positionHandler; /*! \see HID_Traits.Controller_Room6D_Trait */	};
 
-gui.registerComponentProvider('Tracking_applications.flystickCrossHairs',app->fn(){
+gui.register('Tracking_applications.flystickCrossHairs',app->fn(){
 	return [
 		"FlystickCrossHairs",
 		{

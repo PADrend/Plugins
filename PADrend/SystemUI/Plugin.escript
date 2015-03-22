@@ -140,7 +140,7 @@ PADrend.SystemUI.init @(override) := fn(){
 		replaceDefaultFont();
 
 		registerExtension('PADrend_Init', [fontFile, fontSize] => fn(DataWrapper fontFile, DataWrapper fontSize, ...) {
-			gui.registerComponentProvider('PADrend_MiscConfigMenu.renderingFont', [
+			gui.register('PADrend_MiscConfigMenu.renderingFont', [
 				"----",
 				{
 					GUI.TYPE			:	GUI.TYPE_BUTTON,
@@ -170,14 +170,14 @@ PADrend.SystemUI.init @(override) := fn(){
 	}
 	// window config menu
 	registerExtension('PADrend_Init', fn(){
-		gui.registerComponentProvider('PADrend_ConfigMenu.30_WindowConfig',['----',{
+		gui.register('PADrend_ConfigMenu.30_WindowConfig',['----',{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "System Window",
 			GUI.MENU : 'PADrend_SystemUI_WindowConfigMenu',
 			GUI.MENU_WIDTH : 150
 		}]);
 		
-		gui.registerComponentProvider('PADrend_SystemUI_WindowConfigMenu.10_main',fn(){
+		gui.register('PADrend_SystemUI_WindowConfigMenu.10_main',fn(){
 			var borderless = Std.DataWrapper.createFromEntry( systemConfig, 'PADrend.window.noFrame' );
 			var size = Std.DataWrapper.createFromFunctions(
 				fn(){ 		return toJSON(systemConfig.getValue('PADrend.window.size'),false); },

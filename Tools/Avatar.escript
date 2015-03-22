@@ -40,7 +40,7 @@ plugin.init @(override) := fn(){
 	Util.requirePlugin('Tools_JumpNRun', 1.0);
 	 { // Register ExtensionPointHandler:
 		registerExtension('PADrend_Init',this->fn(){
-			gui.registerComponentProvider('Tools_ToolsMenu.avatar',[
+			gui.register('Tools_ToolsMenu.avatar',[
 				"*Avatar*",
 				{
 					GUI.TYPE : GUI.TYPE_BUTTON,

@@ -45,7 +45,7 @@ plugin.init @(override) := fn() {
 		
 		
 	Util.registerExtension('PADrend_Init',fn(){
-		gui.registerComponentProvider('Tools_ToolsMenu.screenshot',{
+		gui.register('Tools_ToolsMenu.screenshot',{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Screenshot ...",
 				GUI.ON_CLICK : openConfigWindow

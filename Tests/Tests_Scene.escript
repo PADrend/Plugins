@@ -29,7 +29,7 @@ plugin.init @(override) :=fn(){
 	{ // Register ExtensionPointHandler:
 		if (queryPlugin('PADrend/GUI')) {
 			registerExtension('PADrend_Init', this->fn(){
-				gui.registerComponentProvider('Tests_TestsMenu.generatedScenes',{
+				gui.register('Tests_TestsMenu.generatedScenes',{
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : "Generated test scenes",
 					GUI.ON_CLICK : this->fn() {

@@ -30,7 +30,7 @@ var plugin = new Plugin({
 plugin.init @(override) :=fn(){
 	module.on('PADrend/gui', this->fn(_gui){
 		gui = _gui;
-		gui.registerComponentProvider('Tests_TestsMenu.gui',[
+		gui.register('Tests_TestsMenu.gui',[
 			{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "GUI Tests",
@@ -385,9 +385,9 @@ plugin.showWindow:=fn(){
 	p+="----";
 	p++;
 
-	gui.registerComponentProvider('Tests_ContentTest.00_header',["*Container*","This content is provided by a component provider!"]);
-	gui.registerComponentProvider('Tests_ContentTest.10_somethingElse',["Some external extension to the content..."]);
-	gui.registerComponentProvider('Tests_ContentTest.90_footer',['----']);
+	gui.register('Tests_ContentTest.00_header',["*Container*","This content is provided by a component provider!"]);
+	gui.register('Tests_ContentTest.10_somethingElse',["Some external extension to the content..."]);
+	gui.register('Tests_ContentTest.90_footer',['----']);
 	
 	// registered components
 	p += {

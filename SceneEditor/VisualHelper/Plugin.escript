@@ -35,13 +35,13 @@ plugin.init @(override) := fn() {
 
 //! Create and register menu entries.
 plugin.createMenuEntries := fn() {
-	gui.registerComponentProvider('SceneEditor_ConfigMenu.drawCoordSystem', {
+	gui.register('SceneEditor_ConfigMenu.drawCoordSystem', {
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.LABEL			:	"Draw coordinate system",
 		GUI.TOOLTIP			:	"If checked, draw a world coordinate system.",
 		GUI.DATA_WRAPPER	:	this.coordSystemEnabled
 	});
-	gui.registerComponentProvider('SceneEditor_ConfigMenu.drawGrid', {
+	gui.register('SceneEditor_ConfigMenu.drawGrid', {
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.LABEL			:	"Draw grid",
 		GUI.TOOLTIP			:	"If checked, draw a grid in the x-z plane.",

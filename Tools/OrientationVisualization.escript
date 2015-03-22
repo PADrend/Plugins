@@ -224,7 +224,7 @@ static showWindow = fn() {
 
 plugin.init  @(override) := fn() {
 	registerExtension('PADrend_Init', this -> fn() {
-		gui.registerComponentProvider('Tools_ToolsMenu.orientationVisualization', {
+		gui.register('Tools_ToolsMenu.orientationVisualization', {
 			GUI.TYPE 		:	GUI.TYPE_BUTTON,
 			GUI.LABEL		:	"Orientation Visualization",
 			GUI.ON_CLICK	:	showWindow

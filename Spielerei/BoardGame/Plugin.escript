@@ -27,13 +27,13 @@ var plugin = new Plugin({
 
 plugin.init @(override) :=fn(){
 	registerExtension('PADrend_Init',this->fn(){
-		gui.registerComponentProvider('Spielerei.boardGames',[{
+		gui.register('Spielerei.boardGames',[{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Board games",
 			GUI.MENU : 'Spielerei_BoardGameMenu' 
 		}]);
 		
-		gui.registerComponentProvider('Spielerei_BoardGameMenu.imageViewer',fn(){
+		gui.register('Spielerei_BoardGameMenu.imageViewer',fn(){
 			var entries =[];
 			foreach(Util.getFilesInDir(__DIR__+"/Games",['.escript']) as var file){
 				entries += {

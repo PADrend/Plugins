@@ -210,7 +210,7 @@ HelperTraits.TriangleSelectionListenerTrait := new Traits.GenericTrait("HelperTr
 	
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait
 		obj.onNodesSelected_static += fn(Array nodes){
-			if(nodes.empty() || !(nodes[0] ---|> MinSG.GeometryNode)) {
+			if(nodes.empty() || !(nodes[0].isA(MinSG.GeometryNode))) {
 				_selectedMesh = void;
 				_calculateOrigin(); 
 				return;
@@ -361,7 +361,7 @@ HelperTraits.TriangleHighlightTrait := new Traits.GenericTrait("HelperTraits.Tri
 		if(nodes.empty())
 			return;
 		var node = nodes[0];
-		if(!(node ---|> MinSG.GeometryNode))
+		if(!(node.isA(MinSG.GeometryNode)))
 			return;
 		var triangles = getSelectedTriangles();			
 		var mesh = node.getMesh();		
@@ -453,7 +453,7 @@ HelperTraits.VertexHighlightTrait := new Traits.GenericTrait("HelperTraits.Verte
 		if(nodes.empty())
 			return;
 		var node = nodes[0];
-		if(!(node ---|> MinSG.GeometryNode))
+		if(!(node.isA(MinSG.GeometryNode)))
 			return;
 		var vertices = getSelectedVertices();			
 		var mesh = node.getMesh();		
@@ -546,7 +546,7 @@ HelperTraits.MeshTransformationHandlerTrait := new Traits.GenericTrait("HelperTr
 		if(!_transformedVertices.empty()){
 			_vertexOrigins.clear();
 			var nodes = getSelectedNodes();
-			if(nodes.empty() || !(nodes[0] ---|> MinSG.GeometryNode))
+			if(nodes.empty() || !(nodes[0].isA(MinSG.GeometryNode)))
 				return;
 			var mesh = nodes[0].getMesh();
 			var acc = Rendering.PositionAttributeAccessor.create(mesh, Rendering.VertexAttributeIds.POSITION);
@@ -636,7 +636,7 @@ HelperTraits.MeshTransformationHandlerTrait := new Traits.GenericTrait("HelperTr
 		
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait
 		obj.onNodesSelected_static += fn(Array nodes){
-			if(nodes.empty() || !(nodes[0] ---|> MinSG.GeometryNode)) {
+			if(nodes.empty() || !(nodes[0].isA(MinSG.GeometryNode))) {
 				_transformedMesh = void;
 				setTransformedVertices([]);
 				return;
@@ -714,7 +714,7 @@ HelperTraits.GenericMeshEditTrait := new Traits.GenericTrait("HelperTraits.Gener
 		
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait
 		obj.onNodesSelected_static += fn(Array nodes){
-			if(nodes.empty() || !(nodes[0] ---|> MinSG.GeometryNode)) {
+			if(nodes.empty() || !(nodes[0].isA(MinSG.GeometryNode))) {
 				// TODO: remember last state
 				//MeshEditor.clearTriangleSelection();
 			}
@@ -805,7 +805,7 @@ HelperTraits.GenericMeshEditTrait := new Traits.GenericTrait("HelperTraits.Gener
 				if(nodes.empty())
 					return false;
 				var node = nodes[0];
-				if(!(node ---|> MinSG.GeometryNode))
+				if(!(node.isA(MinSG.GeometryNode)))
 					return false;								
 				
 				if(this.getMetaNode() && Picking.pickNode( [evt.x,evt.y], this.getMetaNode() ))
@@ -847,7 +847,7 @@ HelperTraits.GenericMeshEditTrait := new Traits.GenericTrait("HelperTraits.Gener
 				if(nodes.empty())
 					return false;
 				var node = nodes[0];
-				if(!(node ---|> MinSG.GeometryNode))
+				if(!(node.isA(MinSG.GeometryNode)))
 					return false;						
 				if(this.getMetaNode() && Picking.pickNode( [evt.x,evt.y], this.getMetaNode() ))
 					return false;

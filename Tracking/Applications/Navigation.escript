@@ -227,7 +227,7 @@ myDeviceHandler.onDeviceDisabled += fn(device){
 };
 myDeviceHandler.refresh();
 
-gui.registerComponentProvider('Tracking_applications.flystickNavigation',fn(){
+gui.register('Tracking_applications.flystickNavigation',fn(){
 	return [{
 		GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 		GUI.COLLAPSED : true,

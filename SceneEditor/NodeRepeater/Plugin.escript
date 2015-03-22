@@ -58,7 +58,7 @@ plugin.init @(override) := fn(){
 	};
 
 	registerExtension('PADrend_Init',this->fn(){
-		gui.registerComponentProvider('NodeEditor_TreeToolsMenu._10_nodeRepeater_showWindow',{
+		gui.register('NodeEditor_TreeToolsMenu._10_nodeRepeater_showWindow',{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Node Repeater",
 			GUI.TOOLTIP : "Show node repeater editor's.\nIt enables you to repeate the selected node(s)"+

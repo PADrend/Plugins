@@ -25,7 +25,7 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn(){
 	registerExtension('PADrend_Init', this->fn(){
-		gui.registerComponentProvider('Tools_DebugWindowTabs.scriptWidnow',	createTab);
+		gui.register('Tools_DebugWindowTabs.scriptWidnow',	createTab);
 	});
 	return true;
 };

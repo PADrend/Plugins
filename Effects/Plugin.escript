@@ -44,7 +44,7 @@ EffectsPlugin.init @(override) :=fn() {
 
 //!	[ext:PADrend_Init]
 EffectsPlugin.registerMenus:=fn(){
-	gui.registerComponentProvider('PADrend_MainToolbar.70_effects',{
+	gui.register('PADrend_MainToolbar.70_effects',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
 		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
@@ -53,14 +53,14 @@ EffectsPlugin.registerMenus:=fn(){
 		GUI.MENU : 'Effects_MainMenu'
 	});
 	
-	gui.registerComponentProvider('Effects_MainMenu.misc',{
+	gui.register('Effects_MainMenu.misc',{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Misc",
 			GUI.MENU : 'Effects_MiscEffectsMenu'
 	});
 
 	// ----------------------------	
-	gui.registerComponentProvider('Effects_MainMenu.environment',[
+	gui.register('Effects_MainMenu.environment',[
 		'----',
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
@@ -69,7 +69,7 @@ EffectsPlugin.registerMenus:=fn(){
 		}
 	]);
 
-	gui.registerComponentProvider('Effects_EnvironmentMenu',[
+	gui.register('Effects_EnvironmentMenu',[
 		"*Environment*",
 		{
 			GUI.LABEL		:	"Lake",

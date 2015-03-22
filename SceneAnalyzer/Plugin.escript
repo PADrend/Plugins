@@ -37,7 +37,7 @@ plugin.init @(override) := fn(){
 			
 		statId = PADrend.frameStatistics.addCounter("SceneProp","ActiveSceneProperty");
 		
-		gui.registerComponentProvider('PADrend_PluginsMenu.gasp',{
+		gui.register('PADrend_PluginsMenu.gasp',{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL :  "SceneAnalyzer",
 			GUI.ON_CLICK : fn(){

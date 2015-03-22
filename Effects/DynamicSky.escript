@@ -333,7 +333,7 @@ static updateSkyValues = fn(...){
 
 
 static initGUI = fn(){
-	gui.registerComponentProvider('Effects_MainMenu.10_dynamicSky', fn(){
+	gui.register('Effects_MainMenu.10_dynamicSky', fn(){
 
 		var menu=[];
 	  
@@ -368,7 +368,7 @@ static initGUI = fn(){
 	});
 		
 		
-	gui.registerComponentProvider('Effects_DynamicSkyOptions',fn(){
+	gui.register('Effects_DynamicSkyOptions',fn(){
 		return [
 			"*Sky options*",
 				
