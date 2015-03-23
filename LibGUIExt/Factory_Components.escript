@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2012 Ralf Petring <ralf@petring.net>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -16,7 +16,7 @@
  **	[LibGUIExt] Factory_Components.escript
  **/
 loadOnce(__DIR__+"/GUI_Utils.escript");
-loadOnce(__DIR__+"/FactoryConstants.escript");
+Std.require('LibGUIExt/FactoryConstants');
 
 
 /*! Creates a gui component.
@@ -26,35 +26,35 @@ loadOnce(__DIR__+"/FactoryConstants.escript");
 	- String: A label with that string (if it begins end ends with "*", the label is formatted as a headline)
 	- Map: A description of the component. \see _createComponentFromDescription(...)	*/
 GUI.GUI_Manager.create ::= fn(entry,entryWidth=false,insideMenu=false){
-    if(entry ---|> GUI.Component){
-        return entry;
-    }else if(entry---|>Map){
-    	return _createComponentFromDescription(entry,entryWidth,insideMenu);
-    } else if(entry === GUI.H_DELIMITER){ // }else  if(entry---|>Identifier){ \todo
-    	return this.createDelimiter();
-    }else if(entry === GUI.NEXT_COLUMN){
-    	return this._createPanelNextColumn(0);
-    }else if(entry === GUI.NEXT_ROW){
-    	return this._createPanelNextRow(0);
-    } else if(entry=='----'){
+	if(entry ---|> GUI.Component){
+		return entry;
+	}else if(entry---|>Map){
+		return _createComponentFromDescription(entry,entryWidth,insideMenu);
+	} else if(entry === GUI.H_DELIMITER){ // }else  if(entry---|>Identifier){ \todo
+		return this.createDelimiter();
+	}else if(entry === GUI.NEXT_COLUMN){
+		return this._createPanelNextColumn(0);
+	}else if(entry === GUI.NEXT_ROW){
+		return this._createPanelNextRow(0);
+	} else if(entry=='----'){
 //       return this.createLabel(entryWidth,1,"",GUI.RAISED_BORDER);
-       return this.createDelimiter();
-    } else {
-        var text=entry.toString();
-        if(text.beginsWith('*') && text.endsWith('*')){
-        	text=entry.substr(1,-1);
-        	if(insideMenu){
+	   return this.createDelimiter();
+	} else {
+		var text=entry.toString();
+		if(text.beginsWith('*') && text.endsWith('*')){
+			text=entry.substr(1,-1);
+			if(insideMenu){
 				var label=entryWidth ? this.createLabel(entryWidth,15,text,GUI.BACKGROUND) : this.createLabel(text) ;
 				label.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,GUI.BUTTON_SHAPE_TOP));
 				label.setTextStyle (GUI.TEXT_ALIGN_CENTER|GUI.TEXT_ALIGN_MIDDLE);
 				return label;
-        	}else{
+			}else{
 				return this.createHeader(text);
-        	}
-        }
-        else
-            return this.createLabel(entry);
-    }
+			}
+		}
+		else
+			return this.createLabel(entry);
+	}
 };
 GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 
