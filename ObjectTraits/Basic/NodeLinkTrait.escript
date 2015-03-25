@@ -26,10 +26,10 @@
 */
 static TreeQuery = module('LibMinSGExt/TreeQuery');
 static queryRelNodes = fn(MinSG.Node source,String query){
-	return TreeQuery.execute(query,PADrend.getSceneManager(),[source]).toArray();
+	return TreeQuery.execute(query,PADrend.getResponsibleSceneManager(source),[source]).toArray();
 };
 static createRelativeNodeQuery = fn(MinSG.Node source,MinSG.Node target){
-	return TreeQuery.createRelativeNodeQuery(PADrend.getSceneManager(),source,target);
+	return TreeQuery.createRelativeNodeQuery(PADrend.getResponsibleSceneManager(source),source,target);
 };
 
 // ------------------------------

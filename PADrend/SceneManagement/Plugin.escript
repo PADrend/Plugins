@@ -218,18 +218,31 @@ SceneManagement.getSceneList :=		fn(){	return registeredScenes;	};
 
 SceneManagement.getDefaultSceneManager :=	fn( ){	return defaultSceneManager;	};
 
-SceneManagement.getSceneManager :=	fn( [MinSG.Node,void] scene=void){
-	if( !scene )
-		scene = activeScene;
+//! get the active scene manager
+SceneManagement.getSceneManager :=	fn(){
 	//! \see SceneMarkerTrait
-	return scene&&scene.isSet($sceneData)&&scene.sceneData.isSet($sceneManager) ? scene.sceneData.sceneManager : defaultSceneManager;
+	return activeScene&&activeScene.isSet($sceneData)&&activeScene.sceneData.isSet($sceneManager) ? activeScene.sceneData.sceneManager : defaultSceneManager;
 };
+//! get the scene manager responsible for the given node
+SceneManagement.getResponsibleSceneManager := fn( MinSG.Node node){
+	var sm;
+	for(;node;node=node.getParent()){
+		if( Std.Traits.queryTrait(node,SceneMarkerTrait) && node.sceneData.isSet($sceneManager) && node.sceneData.sceneManager ){
+			if(sm)
+				Runtime.warn("SceneManagement.getResponsibleSceneManager: node has no unique resposnible scene manager!");
+			sm = node.sceneData.sceneManager; //! \see SceneMarkerTrait
+		}
+	}
+	return sm ? sm : defaultSceneManager;
+	
+};
+
 	
 SceneManagement.getNamedMapOfAvaiableSceneManagers := fn(){
 	var m = new Map;
 	var i = 0;
 	foreach(registeredScenes as var scene){
-		var sceneManager = SceneManagement.getSceneManager(scene);
+		var sceneManager = SceneManagement.getResponsibleSceneManager(scene);
 		if(!m[sceneManager]){
 			if(sceneManager == SceneManagement.getDefaultSceneManager())
 				m[sceneManager] = "default";
@@ -455,6 +468,7 @@ PADrend.getDefaultLight := SceneManagement->SceneManagement.getDefaultLight;
 PADrend.getRootNode := SceneManagement->SceneManagement.getRootNode;
 PADrend.getSceneList := SceneManagement->SceneManagement.getSceneList;
 PADrend.getSceneManager := SceneManagement->SceneManagement.getSceneManager;
+PADrend.getResponsibleSceneManager := SceneManagement->SceneManagement.getResponsibleSceneManager;
 PADrend.isCurrentCoordinateSystem_YUp := SceneManagement->SceneManagement.isCurrentCoordinateSystem_YUp;
 PADrend.isCurrentCoordinateSystem_ZUp := SceneManagement->SceneManagement.isCurrentCoordinateSystem_ZUp;
 PADrend.isSceneCoordinateSystem_YUp := SceneManagement->SceneManagement.isSceneCoordinateSystem_YUp;

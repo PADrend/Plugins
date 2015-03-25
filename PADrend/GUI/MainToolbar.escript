@@ -721,7 +721,7 @@ plugin.registerStdToolbarEntries := fn() {
 				var parts = [];
 				parts += NodeMetaInfo.queryMetaInfo_Title(scene,"");
 				if(scene.isSet($filename) && scene.filename!="") parts += "[ "+scene.filename+" ]";
-				parts += "ID-Namspace: " + PADrend.SceneManagement.getNamedMapOfAvaiableSceneManagers()[ PADrend.SceneManagement.getSceneManager(scene) ];
+				parts += "ID-Namspace: " + PADrend.SceneManagement.getNamedMapOfAvaiableSceneManagers()[ PADrend.SceneManagement.getResponsibleSceneManager(scene) ];
 				
 				entry.nameLabel.setText( parts.implode(" : "));
 				entry.nameLabel.setTooltip( "" + 
