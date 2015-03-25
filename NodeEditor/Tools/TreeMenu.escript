@@ -123,10 +123,14 @@ gui.registerComponentProvider('NodeEditor_TreeToolsMenu.treeOperations',[
 		GUI.LABEL:"Group nodes in common subtree",
 		GUI.ON_CLICK:fn(){
 			if(!NodeEditor.getSelectedNodes().empty()){
-				var subtreeRoot = NodeEditor.getSelectedNodes()[0];
-				foreach(NodeEditor.getSelectedNodes() as var node){
-					subtreeRoot = MinSG.getRootOfCommonSubtree(subtreeRoot,node);
-					assert(subtreeRoot);
+				var subtreeRoot = NodeEditor.getSelectedNodes().front();
+				if(NodeEditor.getSelectedNodes().count()>1){
+					foreach(NodeEditor.getSelectedNodes() as var node){
+						subtreeRoot = MinSG.getRootOfCommonSubtree(subtreeRoot,node);
+						assert(subtreeRoot);
+					}
+				}else {
+					subtreeRoot = subtreeRoot.getParent();
 				}
 				var newGroup = new MinSG.ListNode;
 				subtreeRoot += newGroup;
