@@ -50,7 +50,9 @@ loadOnce(__DIR__+"/Factory_Components.escript");
 									that button. If the function returns true; the window is kept open.
 									Otherwise, it is closed. Optionally, the third entry in the array
 									can be a tooltip.
-		GUI.OPTIONS : 			(optional) Array of components. Each component is placed in a separate row.
+		GUI.OPTIONS : 			(optional) Array of components. Each component is placed in a separate row and its size is adjusted to fit one row.
+			or
+		GUI.CONTENTS : 			(optional) Array of components. Each component is placed in a separate row -- its size is NOT adjusted.
 		GUI.SIZE : 				(optional) [width,height]
 */
 GUI.GUI_Manager.createDialog ::= fn(Map description){
@@ -143,7 +145,14 @@ GUI.GUI_Manager._dialogFactories ::= {
 			if(options.isA(String))// for debugging
 				d._componentId := options;
 			foreach(this.createComponents(options) as var option)
-				d+=option;
+				d.addOption(option,true);
+		}
+		var contents = input.description[GUI.CONTENTS];
+		if(contents){
+			if(contents.isA(String))// for debugging
+				d._componentId := contents;
+			foreach(this.createComponents(contents) as var option)
+				d.addOption(option,false);
 		}
 		result.dialog = d;
 	},

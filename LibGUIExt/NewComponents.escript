@@ -593,12 +593,13 @@ GUI.GUI_Manager.createPopupWindow ::= fn( Number width=300,Number height=50,Stri
 	window._options := [];
 	window._originalAdd := window.add; // backup
 
-	window.addOption:=fn(component){
+	window.addOption:=fn(component,Bool adjustSize=true){
 		var c = gui.create(component);
-		c.setExtLayout(
-			GUI.POS_X_ABS|GUI.REFERENCE_X_LEFT|GUI.ALIGN_X_LEFT|
-			GUI.WIDTH_ABS,
-			new Geometry.Vec2(0,0),new Geometry.Vec2(-20,0) );
+		if(adjustSize)
+			c.setExtLayout(
+				GUI.POS_X_ABS|GUI.REFERENCE_X_LEFT|GUI.ALIGN_X_LEFT|
+				GUI.WIDTH_ABS,
+				new Geometry.Vec2(0,0),new Geometry.Vec2(-20,0) );
 		_options+=c;
 	};
 	
