@@ -65,7 +65,7 @@ plugin.init @(override) := fn(){
 		};
 		registeredLibraries.forceRefresh();
 	});
-	module.on('PADrend/gui',fn(gui){
+	Util.registerExtension('PADrend_Init',fn(){
 		gui.registerComponentProvider('SceneEditor_ObjectProviderEntries.lib_00UsedFiles', fn(){
 			return {
 				GUI.TYPE : GUI.TYPE_TREE_GROUP,
