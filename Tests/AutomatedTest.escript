@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -19,6 +19,8 @@ T.fun @(private) := void;
 T.result @(private) := void;
 T.resultMessage @(private) := "?";
 T.partialResults @(private,init) := Array;
+T.scriptFile @(private) := void;
+T.duration @(private) := void;
 
 /*! (ctor)
 	@param description A text describing the test
@@ -31,27 +33,33 @@ T._constructor ::= fn(String description,fun){
 	this.fun = fun;
 };
 T.addResult ::= fn(String partDescription,Bool partResult){
-	partialResults += [partDescription,partResult];
-	result &= partResult;
+	this.partialResults += [partDescription,partResult];
+	this.result &= partResult;
 };
 T.execute ::= fn(){
-	result = true;
+	var start = clock();
+	this.result = true;
 	try{
-		var r2 = fun();
+		var r2 = this.fun();
 		if(void !== r2){
-			result &= r2;
+			this.result &= r2;
 		}
 	}catch(e){
 		out(e);
-		resultMessage = "exception";
-		result=false;
+		this.resultMessage = "exception";
+		this.duration = clock()-start;
+		this.result = false;
 		return;
 	}
-	resultMessage = result ?"ok":"failed";
+	this.resultMessage = this.result ?"ok":"failed";
+	this.duration = clock()-start;
 };
-T.getDescription ::= 		fn(){	return description;	};
-T.getPartialResults ::= 	fn(){	return partialResults;	};
-T.getResult ::= 			fn(){	return result;	};
-T.getResultMessage ::=		fn(){	return resultMessage;	};
+T.getDescription ::= 		fn(){	return this.description;	};
+T.getDuration ::=			fn(){	return this.duration;	};
+T.getPartialResults ::= 	fn(){	return this.partialResults;	};
+T.getResult ::= 			fn(){	return this.result;	};
+T.getResultMessage ::=		fn(){	return this.resultMessage;	};
+T.getScriptFile ::=			fn(){	return this.scriptFile;	};
+T.setScriptFile ::=			fn(String f){	this.scriptFile = f;	};
 
 return T;
