@@ -66,5 +66,13 @@ gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_DEFAULT, NS.CURSOR_DEFAULT, 0, 
 gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_TEXTFIELD, Util.loadBitmap(resourceFolder+"/MouseCursors/TextfieldCursor.png"), 8, 8);
 gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_RESIZEDIAGONAL, Util.loadBitmap(resourceFolder+"/MouseCursors/resizeCursor.png"), 9, 9);
 
+
+// menu
+gui.setDefaultColor(GUI.PROPERTY_MENU_TEXT_COLOR,new Util.Color4ub(255,255,255,255));
+gui.setDefaultShape(GUI.PROPERTY_MENU_SHAPE,
+						gui._createShadowedRectShape( new Util.Color4ub(20,20,20,200),new Util.Color4ub(150,150,150,200),true) );
+gui.setDefaultShape(GUI.PROPERTY_TEXTFIELD_SHAPE,
+						gui._createRectShape( new Util.Color4ub(230,230,230,240),new Util.Color4ub(128,128,128,128),true ));
+
 return NS;
 

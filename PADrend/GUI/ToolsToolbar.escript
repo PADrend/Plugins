@@ -45,7 +45,8 @@ plugin.init @(override) := fn(){
 		gui.register('PADrend_SceneToolMenu.tools',{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.MENU : 'PADrend_ToolsToolbar',
-			GUI.LABEL : "Interaction tools"
+			GUI.LABEL : "Interaction tools",
+			GUI.MENU_WIDTH : 50
 		});
 		toolbarEnabled.onDataChanged += fn(value){
 			if(value){
