@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2011 David Maicher
  * Copyright (C) 2013 Mouns R. Husan Almarrani
  * 
@@ -64,7 +64,7 @@ static applySRT = fn(MinSG.Node node,Geometry.SRT newSRT, oldSRT = void){
 static stopMoving = fn(){
 	if(!currentNode)
 		return;
-	out("Stop moving...\n");
+	outln("Stop moving...");
 
 	applySRT(currentNode,currentNode.getRelTransformationSRT(),backupSRT);
 	backupSRT=void;
@@ -78,7 +78,7 @@ static startMoving = fn(MinSG.Node node){
 	stopMoving();
 	currentNode = node;
 
-	out("Start moving...\n");
+	outln("Start moving...");
 
 	backupCamera = PADrend.getCameraMover().getDolly();
 	backupSRT = node.getRelTransformationSRT();
@@ -91,7 +91,7 @@ plugin.init @(override) := fn(){
 	static NodeEditor = Std.require('NodeEditor/NodeEditor');
 
 
-	registerExtension('NodeEditor_OnNodesSelected',fn(...) {		stopMoving();	});
+	Util.registerExtension('NodeEditor_OnNodesSelected',fn(...) {		stopMoving();	});
 	
 	// ---------------------------------------------------------------------------------
 
@@ -128,20 +128,14 @@ plugin.init @(override) := fn(){
 	}];
 
 	NodeEditor.registerConfigPanelProvider(NodeTransformationsWrapper,fn( transformationWrapper,panel ){
+
 		var node = transformationWrapper.getNode();
 
 		// this refreshGroup is updated every frame
-		var displayRefreshGroup = new GUI.RefreshGroup();
+		var displayRefreshGroup = new GUI.RefreshGroup;
 		// this refreshGroup is only updated if the panel is not selected.
 		// (automatic updates on external changes but still allowing editing with the text inputs)
-		var manipulationRefreshGroup = new GUI.RefreshGroup();
-
-		panel += "Transformations for node ["+NodeEditor.getString(node)+"]";
-		panel++;
-		panel += '----';
-		panel++;
-		panel += "*Information*";
-		panel++;
+		var manipulationRefreshGroup = new GUI.RefreshGroup;
 
 		registerExtension('PADrend_AfterRendering', [displayRefreshGroup,manipulationRefreshGroup,panel] => fn(displayRefreshGroup,manipulationRefreshGroup,panel, d){
 			if(!gui.isCurrentlyEnabled(panel))
@@ -150,168 +144,194 @@ plugin.init @(override) := fn(){
 				manipulationRefreshGroup.refresh();
 			displayRefreshGroup.refresh();
 		});
-//
-		panel++;
-		panel += "SRT";
-		panel++;
-		panel += {
-			GUI.TYPE : GUI.TYPE_TEXT,
-			GUI.SIZE : [GUI.WIDTH_ABS, -30,0],
-			GUI.DATA_PROVIDER : [node] => fn(node){
-				return node.hasRelTransformationSRT() ? node.getRelTransformationSRT().toString() : "The node has no SRT.";
-			},
-			GUI.DATA_REFRESH_GROUP : displayRefreshGroup,
-			GUI.FLAGS : GUI.LOCKED,
-			GUI.TOOLTIP : "The node's SRT (displayed only)"
-		};
-		panel++;
-		panel += "Matrix";
-		panel++;
-		panel += {
-			GUI.TYPE : GUI.TYPE_TEXT,
-			GUI.SIZE : [GUI.WIDTH_ABS, -30,0],
-			GUI.DATA_PROVIDER : [node] => fn(node){
-				return node.hasTransformation() ? node.getRelTransformationMatrix().toString() : "The node has no matrix.";
-			},
-			GUI.DATA_REFRESH_GROUP : displayRefreshGroup,
-			GUI.FLAGS : GUI.LOCKED,
-			GUI.TOOLTIP : "The node's local transformation matrix (displayed only)"
-		};
-		panel++;
-		panel += "Local bounding box";
-		panel++;
-		panel += {
-			GUI.TYPE : GUI.TYPE_TEXT,
-			GUI.SIZE : [GUI.WIDTH_ABS, -30,0],
-			GUI.DATA_PROVIDER : [node] => fn(node){
-				return node.getBB().toString();
-			},
-			GUI.DATA_REFRESH_GROUP : displayRefreshGroup,
-			GUI.FLAGS : GUI.LOCKED,
-			GUI.TOOLTIP : "The node's axis-aligned bounding box in local coordinates. (displayed only)"
-		};
-		panel++;
-		panel += "Absolute bounding box";
-		panel++;
-		panel += {
-			GUI.TYPE : GUI.TYPE_TEXT,
-			GUI.SIZE : [GUI.WIDTH_ABS, -30,0],
-			GUI.DATA_PROVIDER : [node] => fn(node){
-				return node.getWorldBB().toString();
-			},
-			GUI.DATA_REFRESH_GROUP : displayRefreshGroup,
-			GUI.FLAGS : GUI.LOCKED,
-			GUI.TOOLTIP : "The node's axis-aligned bounding box in global coordinates. (displayed only)"
-		};
-		panel++;
-		// ------------------------------------------------------------------------------
 
-		panel += '----';
-		panel++;
-		panel += "*Manipulation*";
-//		panel += {
-//			GUI.TYPE : GUI.TYPE_BUTTON,
-//			GUI.ICON : "#RefreshSmall",
-//			GUI.ICON_COLOR : GUI.BLACK,
-//			GUI.ON_CLICK : manipulationRefreshGroup->manipulationRefreshGroup.refresh,
-//			GUI.TOOLTIP : "Refresh the input components below.",
-//			GUI.FLAGS : GUI.FLAT_BUTTON
-//		};
-		panel++;
+		var entries = [
+			"Transformations for node ["+NodeEditor.getString(node)+"]",
+			GUI.NEXT_ROW,
+			'----',
+			GUI.NEXT_ROW,
+			"*Information*",
+			GUI.NEXT_ROW,
 
-		panel += {
-			GUI.TYPE		:	GUI.TYPE_BUTTON,
-			GUI.LABEL		:	"Move Node",
-			GUI.TOOLTIP		:	"Move selected node with the cameraMover.",
-			GUI.ON_CLICK	:	[node] => fn(node) {
-				if(currentNode) {
-					stopMoving();
-					setSwitch(false);
-				} else {
-					startMoving(node);
-					setSwitch(true);
+			"SRT",
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.SIZE : [GUI.WIDTH_ABS, -30,0],
+				GUI.DATA_PROVIDER : [node] => fn(node){
+					return node.hasRelTransformationSRT() ? node.getRelTransformationSRT().toString() : "The node has no SRT.";
+				},
+				GUI.DATA_REFRESH_GROUP : displayRefreshGroup,
+				GUI.FLAGS : GUI.LOCKED,
+				GUI.TOOLTIP : "The node's SRT (displayed only)"
+			},
+			GUI.NEXT_ROW,
+			"Matrix",
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.SIZE : [GUI.WIDTH_ABS, -30,0],
+				GUI.DATA_PROVIDER : [node] => fn(node){
+					return node.hasTransformation() ? node.getRelTransformationMatrix().toString() : "The node has no matrix.";
+				},
+				GUI.DATA_REFRESH_GROUP : displayRefreshGroup,
+				GUI.FLAGS : GUI.LOCKED,
+				GUI.TOOLTIP : "The node's local transformation matrix (displayed only)"
+			},
+			GUI.NEXT_ROW,
+			"Local bounding box",
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.SIZE : [GUI.WIDTH_ABS, -30,0],
+				GUI.DATA_PROVIDER : [node] => fn(node){
+					return node.getBB().toString();
+				},
+				GUI.DATA_REFRESH_GROUP : displayRefreshGroup,
+				GUI.FLAGS : GUI.LOCKED,
+				GUI.TOOLTIP : "The node's axis-aligned bounding box in local coordinates. (displayed only)"
+			},
+			GUI.NEXT_ROW,
+			"Absolute bounding box",
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.SIZE : [GUI.WIDTH_ABS, -30,0],
+				GUI.DATA_PROVIDER : [node] => fn(node){
+					return node.getWorldBB().toString();
+				},
+				GUI.DATA_REFRESH_GROUP : displayRefreshGroup,
+				GUI.FLAGS : GUI.LOCKED,
+				GUI.TOOLTIP : "The node's axis-aligned bounding box in global coordinates. (displayed only)"
+			},
+			GUI.NEXT_ROW,
+			// ------------------------------------------------------------------------------
+
+			'----',
+			GUI.NEXT_ROW,
+			"*Manipulation*",
+			GUI.NEXT_ROW,
+
+			{
+				GUI.TYPE		:	GUI.TYPE_BUTTON,
+				GUI.LABEL		:	"Reset",
+				GUI.TOOLTIP		:	"Remove all relative transformations.",
+				GUI.ON_CLICK	:	[node] => fn(node) {
+					applySRT(node,new Geometry.SRT);
 				}
-			}
-		};
-		panel += {
-			GUI.TYPE		:	GUI.TYPE_BUTTON,
-			GUI.LABEL		:	"Undo",
-			GUI.ON_CLICK	:	fn() {
-				stopMoving();
-				PADrend.undoCommand();
-			}
-		};
-		panel += {
-			GUI.TYPE		:	GUI.TYPE_BUTTON,
-			GUI.LABEL		:	"Redo",
-			GUI.ON_CLICK	:	fn() {
-				stopMoving();
-				PADrend.redoCommand();
-			}
-		};
-		panel++;
-
-
-		panel += {
-			GUI.TYPE			:	GUI.TYPE_TEXT,
-			GUI.LABEL			:	"Scale",
-			GUI.OPTIONS			:	[1.0, 0.1, 0.01, 0.001],
-			GUI.SIZE 			: 	[GUI.WIDTH_ABS, -30,0],
-			GUI.DATA_REFRESH_GROUP : manipulationRefreshGroup,
-			GUI.DATA_PROVIDER : [node] => fn(node){
-				return node.hasRelTransformationSRT() ? node.getRelTransformationSRT().getScale() : (node.getRelTransformationMatrix().transformDirection(1,0,0)).length();
 			},
-			GUI.ON_DATA_CHANGED :	[node] => fn(node,data) {
-				applySRT(node,node.getRelTransformationSRT().setScale(0 + data));
-			}
-		};
-		panel++;
-
-		panel += {
-			GUI.TYPE			:	GUI.TYPE_TEXT,
-			GUI.LABEL			:	"Translation",
-			GUI.OPTIONS			:	["0, 0, 0"],
-			GUI.SIZE 			: 	[GUI.WIDTH_ABS, -30,0],
-			GUI.DATA_REFRESH_GROUP : manipulationRefreshGroup,
-			GUI.DATA_PROVIDER : [node] => fn(node){
-				var p = node.getRelTransformationMatrix().transformPosition(0,0,0);
-				return ""+p.getX()+","+p.getY()+","+p.getZ();
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "--> Leaves",
+				GUI.ON_CLICK : [node]=>MinSG.moveTransformationsIntoLeaves,
+				GUI.TOOLTIP: "Move all transformations to the leaf nodes.\n NOT UNDOABLE!"
 			},
-			GUI.ON_DATA_CHANGED : [node] => fn(node,data) {
-				applySRT(node , node.getRelTransformationSRT().setTranslation(new Geometry.Vec3(parseJSON("["+data+"]"))));
-			}
-		};
-		panel++;
-
-		panel += {
-			GUI.TYPE 			: 	GUI.TYPE_TEXT,
-			GUI.LABEL			:	"Rotation",
-			GUI.TOOLTIP			:	"Array of two arrays: [[dirX, dirY, dirZ], [upX, upY, upZ]]",
-			GUI.OPTIONS			: [
-				"[[ 0,  0,  1], [ 0,  1,  0]]",
-				"[[ 1,  0,  0], [ 0,  1,  0]]",
-				"[[ 0,  0, -1], [ 0,  1,  0]]",
-				"[[-1,  0,  0], [ 0,  1,  0]]",
-				"[[ 0,  1,  0], [ 0,  0, -1]]",
-				"[[ 0, -1,  0], [ 0,  0,  1]]"
-			],
-			GUI.SIZE 			: [GUI.WIDTH_ABS, -30,0],
-			GUI.DATA_REFRESH_GROUP : manipulationRefreshGroup,
-			GUI.DATA_PROVIDER : [node] => fn(node){
-				var dir = node.hasRelTransformationSRT() ? node.getRelTransformationSRT().getDirVector() : node.getRelTransformationMatrix().transformDirection(0,0,1);
-				var up = node.hasRelTransformationSRT() ? node.getRelTransformationSRT().getUpVector() : node.getRelTransformationMatrix().transformDirection(0,1,0);
-				return toJSON([[dir.getX(), dir.getY(), dir.getZ()], [up.getX(), up.getY(), up.getZ()]], false);
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL: "--> Closed Nodes",
+				GUI.ON_CLICK : [node]=>MinSG.moveTransformationsIntoClosedNodes,
+				GUI.TOOLTIP: "Move all transformations to the closed nodes\n NOT UNDOABLE!"
 			},
-			GUI.ON_DATA_CHANGED	: [node] => fn(node,data) {
-				var d = parseJSON(data);
-				var currentSRT = node.getRelTransformationSRT();
-				var srt = new Geometry.SRT(currentSRT.getTranslation(),
-										   new Geometry.Vec3(d[0][0], d[0][1], d[0][2]),
-										   new Geometry.Vec3(d[1][0], d[1][1], d[1][2]),
-										   currentSRT.getScale());
-				applySRT(node , srt);
-			}
-		};
+			
+			GUI.NEXT_ROW,
+
+			{
+				GUI.TYPE		:	GUI.TYPE_BUTTON,
+				GUI.LABEL		:	"Move Node",
+				GUI.TOOLTIP		:	"Move selected node with the cameraMover.",
+				GUI.ON_CLICK	:	[node] => fn(node) {
+					if(currentNode) {
+						stopMoving();
+						setSwitch(false);
+					} else {
+						startMoving(node);
+						setSwitch(true);
+					}
+				}
+			},
+			{
+				GUI.TYPE		:	GUI.TYPE_BUTTON,
+				GUI.LABEL		:	"Undo",
+				GUI.ON_CLICK	:	fn() {
+					stopMoving();
+					PADrend.undoCommand();
+				}
+			},
+			{
+				GUI.TYPE		:	GUI.TYPE_BUTTON,
+				GUI.LABEL		:	"Redo",
+				GUI.ON_CLICK	:	fn() {
+					stopMoving();
+					PADrend.redoCommand();
+				}
+			},
+			
+			GUI.NEXT_ROW,
+
+
+			{
+				GUI.TYPE			:	GUI.TYPE_TEXT,
+				GUI.LABEL			:	"Scale",
+				GUI.OPTIONS			:	[1.0, 0.1, 0.01, 0.001],
+				GUI.SIZE 			: 	[GUI.WIDTH_ABS, -30,0],
+				GUI.DATA_REFRESH_GROUP : manipulationRefreshGroup,
+				GUI.DATA_PROVIDER : [node] => fn(node){
+					return node.hasRelTransformationSRT() ? node.getRelTransformationSRT().getScale() : (node.getRelTransformationMatrix().transformDirection(1,0,0)).length();
+				},
+				GUI.ON_DATA_CHANGED :	[node] => fn(node,data) {
+					applySRT(node,node.getRelTransformationSRT().setScale(0 + data));
+				}
+			},
+			GUI.NEXT_ROW,
+
+			{
+				GUI.TYPE			:	GUI.TYPE_TEXT,
+				GUI.LABEL			:	"Translation",
+				GUI.OPTIONS			:	["0, 0, 0"],
+				GUI.SIZE 			: 	[GUI.WIDTH_ABS, -30,0],
+				GUI.DATA_REFRESH_GROUP : manipulationRefreshGroup,
+				GUI.DATA_PROVIDER : [node] => fn(node){
+					var p = node.getRelTransformationMatrix().transformPosition(0,0,0);
+					return ""+p.getX()+","+p.getY()+","+p.getZ();
+				},
+				GUI.ON_DATA_CHANGED : [node] => fn(node,data) {
+					applySRT(node , node.getRelTransformationSRT().setTranslation(new Geometry.Vec3(parseJSON("["+data+"]"))));
+				}
+			},
+			GUI.NEXT_ROW,
+
+			{
+				GUI.TYPE 			: 	GUI.TYPE_TEXT,
+				GUI.LABEL			:	"Rotation",
+				GUI.TOOLTIP			:	"Array of two arrays: [[dirX, dirY, dirZ], [upX, upY, upZ]]",
+				GUI.OPTIONS			: [
+					"[[ 0,  0,  1], [ 0,  1,  0]]",
+					"[[ 1,  0,  0], [ 0,  1,  0]]",
+					"[[ 0,  0, -1], [ 0,  1,  0]]",
+					"[[-1,  0,  0], [ 0,  1,  0]]",
+					"[[ 0,  1,  0], [ 0,  0, -1]]",
+					"[[ 0, -1,  0], [ 0,  0,  1]]"
+				],
+				GUI.SIZE 			: [GUI.WIDTH_ABS, -30,0],
+				GUI.DATA_REFRESH_GROUP : manipulationRefreshGroup,
+				GUI.DATA_PROVIDER : [node] => fn(node){
+					var dir = node.hasRelTransformationSRT() ? node.getRelTransformationSRT().getDirVector() : node.getRelTransformationMatrix().transformDirection(0,0,1);
+					var up = node.hasRelTransformationSRT() ? node.getRelTransformationSRT().getUpVector() : node.getRelTransformationMatrix().transformDirection(0,1,0);
+					return toJSON([[dir.getX(), dir.getY(), dir.getZ()], [up.getX(), up.getY(), up.getZ()]], false);
+				},
+				GUI.ON_DATA_CHANGED	: [node] => fn(node,data) {
+					var d = parseJSON(data);
+					var currentSRT = node.getRelTransformationSRT();
+					var srt = new Geometry.SRT(currentSRT.getTranslation(),
+											   new Geometry.Vec3(d[0][0], d[0][1], d[0][2]),
+											   new Geometry.Vec3(d[1][0], d[1][1], d[1][2]),
+											   currentSRT.getScale());
+					applySRT(node , srt);
+				}
+			},
+		];
+		foreach( entries as var entry)
+			panel += entry;
 	});
 
 	// ---------------------------------------------------------------------------------
