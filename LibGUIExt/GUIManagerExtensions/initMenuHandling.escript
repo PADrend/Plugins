@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2012-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2012-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -16,11 +16,26 @@
 
 // ------------------------------------
 // Menu
-GUI.GUI_Manager._createMenu ::= GUI.GUI_Manager.createMenu;
+GUI.GUI_Manager._createMenu @(private) ::= GUI.GUI_Manager.createMenu;
+
+static MENU_PRESET_ID = 'menu';
 
 //! \note Use gui.openMenu(...) instead; the Menu-object itself should not be stored or handled directly.
-GUI.GUI_Manager.createMenu ::= fn(mixed = void, width = 150, context...){
+GUI.GUI_Manager.createMenu ::= fn(mixed = void, width = false, context...){
 	var menu = this._createMenu(GUI.ONE_TIME_MENU);
+	var menuPreset = this.getPreset( MENU_PRESET_ID );
+	if(menuPreset){
+		var properties = menuPreset[GUI.PROPERTIES];
+		if(properties)
+			foreach(properties as var p)
+				menu.addProperty(p);
+		if(!width)
+			width = properties[GUI.MENU_WIDTH];
+		
+	}
+	if(!width)
+		width = 150;
+		
 	if(mixed){
 		if(mixed.isA(String))	// for debugging
 			menu._componentId := mixed;
@@ -29,7 +44,8 @@ GUI.GUI_Manager.createMenu ::= fn(mixed = void, width = 150, context...){
 								GUI.TYPE : 				GUI.TYPE_MENU_ENTRIES,
 								GUI.PROVIDER :			mixed,
 								GUI.WIDTH : 			width,
-								GUI.CONTEXT_ARRAY : 	context
+								GUI.CONTEXT_ARRAY : 	context,
+								GUI.PRESET :			MENU_PRESET_ID
 		});
 		var height = 0;
 		foreach(components as var c){

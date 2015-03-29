@@ -34,16 +34,7 @@ plugin.init @(override) := fn(){
 		module('LibGUIExt/FileDialog').folderCacheProvider = PADrend.configCache;
 		module('./Style'); // init style
 	},Extension.HIGH_PRIORITY+1);
-	
-	gui.setCacheFolderProvider( fn(){
-		var folder = PADrend.getUserPath()+"/.cache";
-		if(!Util.isDir(folder)){
-			outln("Creating cache folder '"+folder+"'...");
-			Util.createDir(folder);
-		}
-		return folder;
-	});
-	
+
 	Util.registerExtension('PADrend_AfterRendering', fn(...){ renderGUI(); }, Extension.LOW_PRIORITY*2);
 	
 	Util.registerExtension('PADrend_Init', fn(){

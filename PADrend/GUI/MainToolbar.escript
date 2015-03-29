@@ -632,7 +632,6 @@ static registerStdToolbarEntries = fn() {
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "Scenes",
 		GUI.MENU : 'PADrend_ScenesMenu',
-		GUI.MENU_WIDTH : 500,
 		GUI.ICON : "#Scenes",
 		GUI.PROPERTIES			:	Style.TOOLBAR_BUTTON_PROPERTIES,
 		GUI.HOVER_PROPERTIES	:	Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
@@ -644,7 +643,7 @@ static registerStdToolbarEntries = fn() {
 		sceneMenu += "*Create new scene root*";
 		var container = gui.create({
 			GUI.TYPE				:	GUI.TYPE_CONTAINER,
-			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 10, 40],
+			GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 500, 40],
 			GUI.LAYOUT				:	GUI.LAYOUT_FLOW
 		});
 

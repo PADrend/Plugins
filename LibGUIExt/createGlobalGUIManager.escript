@@ -37,14 +37,25 @@ GUI.GUI_Manager.guiPosToScreenPos ::= fn( guiPos ){
 	return new Geometry.Vec2(screenPos);
 };
 
-
-// set a callback used to determine a folder used for caching data (e.g. rastered fonts)
-GUI.GUI_Manager.setCacheFolderProvider ::= fn( provider ){
-	this._cacheFolderProvider := provider;
+GUI.GUI_Manager.registerPreset ::= fn(String id, presetProvider){
+	if(!this.isSet($_presets))
+		this._presets @(private) := new Map;
+	this._presets[id] = presetProvider;
 };
 
-GUI.GUI_Manager.getCacheFolder ::= fn(){
-	return (this.isSet($_cacheFolderProvider) && this._cacheFolderProvider) ? this._cacheFolderProvider() : ".";		
+GUI.GUI_Manager.getPreset ::= fn(String id){
+	var preset;
+	if(this.isSet($_presets)){
+		if(id.beginsWith('/'))
+			id = id.substr(1);
+		preset = this._presets[id];
+		if(preset.isA(Map)){
+			return preset.clone();
+		}else if(preset){
+			return preset().clone();
+		}
+	}
+	return preset;
 };
 
 //GUI.GUI_Manager.onMouseMove @(init,const) :=  Std.MultiProcedure; // \todo (Cl) not working correctly until now...

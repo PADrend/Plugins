@@ -1141,7 +1141,65 @@ plugin.showWindow:=fn(){
 		};
 		p++;
 	}
+	{	// presets
+		p+='----';
+		p += GUI.NEXT_ROW;
+		p += "*Presets*";
+		p += GUI.NEXT_ROW;
 		
+		var preset = {
+			GUI.TOOLTIP : "Tooltip added by preset",
+			GUI.PROPERTIES : [new GUI.ColorProperty(GUI.PROPERTY_TEXT_COLOR, new Util.Color4ub(0,100,0,255))]
+		};
+		gui.registerPreset('test/greenLabel1',preset);
+		gui.registerPreset('test',{
+			GUI.FLAGS : GUI.BORDER,
+			GUI.WIDTH :100
+		});
+		p += {
+			GUI.TYPE : GUI.LABEL,
+			GUI.PRESET : 'test/greenLabel1',
+			GUI.LABEL : "Using named preset for green text."
+		};
+		p += GUI.NEXT_ROW;
+		p += {
+			GUI.TYPE : GUI.LABEL,
+			GUI.PRESET : preset,
+			GUI.LABEL : "Using preset map for green text."
+		};
+		p += GUI.NEXT_ROW;
+		p += {
+			GUI.TYPE : GUI.LABEL,
+			GUI.PRESET : [preset]=>fn(preset){return preset;},
+			GUI.LABEL : "Using preset-callback for green text."
+		};
+		p += GUI.NEXT_ROW;
+		p += {
+			GUI.TYPE : GUI.TYPE_CONTAINER,
+			GUI.PRESET : 'test',
+			GUI.CONTENTS : [{
+				GUI.TYPE : GUI.LABEL,
+				GUI.PRESET : './greenLabel1',
+				GUI.LABEL : "Using relatively named preset for green text."
+			}],
+		};
+		p += GUI.NEXT_ROW;
+		p += {
+			GUI.TYPE : GUI.TYPE_CONTAINER,
+			GUI.PRESET : 'test',
+			GUI.CONTENTS : [{
+					GUI.TYPE : GUI.TYPE_CONTAINER,
+					GUI.WIDTH : GUI.SIZE_MAXIMIZE,
+					GUI.CONTENTS : [{
+						GUI.TYPE : GUI.LABEL,
+						GUI.PRESET : './greenLabel1',
+						GUI.LABEL : "Using relatively named preset in nested container for green text."
+					}],
+			}]
+		};
+		p += GUI.NEXT_ROW;
+		
+	}
 
 
 	p+="----";

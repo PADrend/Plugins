@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2008-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2008-2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Jan Krems
  * Copyright (C) 2009-2010 Ralf Petring <ralf@petring.net>
  * 
@@ -517,20 +517,6 @@ GUI.GUI_Manager.createExtSlider ::= fn(Array size,Array range,Number steps,f=fal
 	slider.onDataChanged(slider.getValue());
 
 	return container;
-};
-
-
-// ------------------------------------------------------------------------------
-
-//! Creates a label with a larger font.
-GUI.GUI_Manager.createHeader ::= fn(text){
-	var label=this.createLabel(100,15,text);
-	label.setExtLayout(
-//				GUI.POS_X_ABS|GUI.REFERENCE_X_CENTER|GUI.ALIGN_X_CENTER|
-		GUI.WIDTH_ABS|GUI.HEIGHT_ABS,
-		new Geometry.Vec2(0,0),new Geometry.Vec2(-20,15) );
-	label.setFont( getFont(GUI.FONT_ID_HEADING) );
-	return label;
 };
 
 // -------------------------------------------------------------------------------

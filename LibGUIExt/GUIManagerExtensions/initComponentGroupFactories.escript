@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -21,6 +21,7 @@ module('../FactoryConstants');
 		GUI.TYPE		GUI.TYPE_COMPONENTS  normal components
 						GUI.TYPE_MENU_ENTRIES components inside a menu
 		GUI.PROVIDER	Id, Array or callable provider creating entries
+		GUI.PRESET		(optional) preset-id used as reference for realtive preset ids
 		GUI.WIDTH		(optional) component's width
 		GUI.FILTER		(optional) filter function fn(Map componentProviders) called before creating the components.
 		GUI.CONTEXT		(optional) context object passed to the component providers
@@ -34,7 +35,7 @@ GUI.GUI_Manager.createComponents ::= fn( mixed ){
 	return this._createComponents( mixed );
 };
 
-GUI.GUI_Manager._createComponents @(private) ::= fn( mixed,entryWidth=false,insideMenu=false, filter=void, context... ){
+GUI.GUI_Manager._createComponents @(private) ::= fn( mixed,entryWidth=false,insideMenu=false, filter=void,presetIdPrefix=false, context... ){
 	if(mixed.isA(Map)){ // ignore the other parameters
 		var descr = mixed;
 		var type = descr.get(GUI.TYPE,GUI.TYPE_COMPONENTS);
@@ -48,9 +49,13 @@ GUI.GUI_Manager._createComponents @(private) ::= fn( mixed,entryWidth=false,insi
 			contextArray = descr.get(GUI.CONTEXT_ARRAY);
 		
 		if(type == GUI.TYPE_MENU_ENTRIES){
-			return (void==contextArray) ? this._createComponents(provider,width,true, descr[GUI.FILTER]) : this._createComponents(provider,width,true, descr[GUI.FILTER],contextArray...);
+			return (void==contextArray) ? 
+						this._createComponents(provider,width,true, descr[GUI.FILTER],descr[GUI.PRESET]) : 
+						this._createComponents(provider,width,true, descr[GUI.FILTER],descr[GUI.PRESET],contextArray...);
 		}else if(type == GUI.TYPE_COMPONENTS){
-			return (void==contextArray) ? this._createComponents(provider,width,false,descr[GUI.FILTER]) : this._createComponents(provider,width,false,descr[GUI.FILTER],contextArray...);
+			return (void==contextArray) ? 
+						this._createComponents(provider,width,false,descr[GUI.FILTER],descr[GUI.PRESET]) : 
+						this._createComponents(provider,width,false,descr[GUI.FILTER],descr[GUI.PRESET],contextArray...);
 		}
 		Runtime.warn("GUI.GUI_Manager.createComponents: Unknown Components-Type '"+type+"'");
 		return [];
@@ -66,14 +71,14 @@ GUI.GUI_Manager._createComponents @(private) ::= fn( mixed,entryWidth=false,insi
 		}else if(mixed.isA(GUI.Component)){
 			entries = [mixed];
 		}else {
-			Std.Traits.requireTrait(mixed,Traits.CallableTrait);
+			Std.Traits.requireTrait(mixed,Std.Traits.CallableTrait);
 			entries = mixed(context...);
 			assert(entries.isA(Array));
 		}
 		
 		var result = [];
 		foreach(entries as var c)
-			result += this.createComponent(c,entryWidth,insideMenu);
+			result += this.createComponent(c,entryWidth,insideMenu,presetIdPrefix);
 		return result;
 	}
 };

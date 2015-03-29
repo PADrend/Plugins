@@ -10,9 +10,6 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
- 
-
-
 var resourceFolder = __DIR__+"/../resources";
 
 gui.loadIconFile( resourceFolder+"/Icons/PADrendDefault.json");
@@ -67,12 +64,39 @@ gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_TEXTFIELD, Util.loadBitmap(reso
 gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_RESIZEDIAGONAL, Util.loadBitmap(resourceFolder+"/MouseCursors/resizeCursor.png"), 9, 9);
 
 
-// menu
-gui.setDefaultColor(GUI.PROPERTY_MENU_TEXT_COLOR,new Util.Color4ub(255,255,255,255));
-gui.setDefaultShape(GUI.PROPERTY_MENU_SHAPE,
-						gui._createShadowedRectShape( new Util.Color4ub(20,20,20,200),new Util.Color4ub(150,150,150,200),true) );
-gui.setDefaultShape(GUI.PROPERTY_TEXTFIELD_SHAPE,
-						gui._createRectShape( new Util.Color4ub(230,230,230,240),new Util.Color4ub(128,128,128,128),true ));
 
+
+gui.registerPreset('header',{
+	GUI.SIZE : [GUI.WIDTH_ABS|GUI.HEIGHT_ABS,-20,15],
+	GUI.FONT : GUI.FONT_ID_HEADING
+});
+
+
+// menu
+//gui.setDefaultColor(GUI.PROPERTY_MENU_TEXT_COLOR,new Util.Color4ub(255,0,0,255));
+//gui.setDefaultShape(GUI.PROPERTY_MENU_SHAPE,
+//						gui._createShadowedRectShape( new Util.Color4ub(20,20,20,200),new Util.Color4ub(150,150,150,200),true) );
+//gui.setDefaultShape(GUI.PROPERTY_TEXTFIELD_SHAPE,
+//						gui._createRectShape( new Util.Color4ub(230,230,230,240),new Util.Color4ub(128,128,128,128),true ));
+
+gui.registerPreset('menu',{
+	GUI.PROPERTIES : [
+			new GUI.ColorProperty(GUI.PROPERTY_TEXT_COLOR, GUI.WHITE),
+			new GUI.ColorProperty(GUI.PROPERTY_BUTTON_HOVERED_TEXT_COLOR, color_accent1 ),
+			new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_HOVERED_SHAPE, gui._createRectShape( color_accent2,color_accent2,true ) ),
+			new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE, gui.getNullShape() ),
+			new GUI.ShapeProperty(GUI.PROPERTY_MENU_SHAPE, gui._createShadowedRectShape( new Util.Color4ub(20,20,20,200),GUI.NO_COLOR,true) ),
+			new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, GUI.WHITE ),
+	],
+	GUI.MENU_WIDTH : 150,
+});
+
+gui.registerPreset('menu/header',{
+	GUI.FLAGS : GUI.BACKGROUND,
+	GUI.TEXT_ALIGNMENT : GUI.TEXT_ALIGN_CENTER | GUI.TEXT_ALIGN_MIDDLE,
+	GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,3,15],
+	GUI.PROPERTIES  : [ new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
+											gui._createRectShape( color_accent1,color_accent1,true)) ]
+});
 return NS;
 

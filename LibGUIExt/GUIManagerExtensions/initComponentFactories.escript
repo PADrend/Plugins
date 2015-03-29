@@ -23,11 +23,11 @@ module('../FactoryConstants');
 	- "----": A horizontal delimiter
 	- String: A label with that string (if it begins end ends with "*", the label is formatted as a headline)
 	- Map: A description of the component. \see _createComponentFromDescription(...)	*/
-GUI.GUI_Manager.create ::= fn(entry,entryWidth=false,insideMenu=false){
+GUI.GUI_Manager.create ::= fn(entry,entryWidth=false,insideMenu=false,presetIdPrefix=false){
 	if(entry.isA(GUI.Component)){
 		return entry;
 	}else if(entry.isA(Map)){
-		return _createComponentFromDescription(entry,entryWidth,insideMenu);
+		return _createComponentFromDescription(entry,entryWidth,insideMenu,presetIdPrefix);
 	} else if(entry === GUI.H_DELIMITER){ // }else  if(entry---|>Identifier){ \todo
 		return this.createDelimiter();
 	}else if(entry === GUI.NEXT_COLUMN){
@@ -40,15 +40,21 @@ GUI.GUI_Manager.create ::= fn(entry,entryWidth=false,insideMenu=false){
 	} else {
 		var text=entry.toString();
 		if(text.beginsWith('*') && text.endsWith('*')){
-			text=entry.substr(1,-1);
-			if(insideMenu){
-				var label=entryWidth ? this.createLabel(entryWidth,15,text,GUI.BACKGROUND) : this.createLabel(text) ;
-				label.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,GUI.BUTTON_SHAPE_TOP));
-				label.setTextStyle (GUI.TEXT_ALIGN_CENTER|GUI.TEXT_ALIGN_MIDDLE);
-				return label;
-			}else{
-				return this.createHeader(text);
-			}
+			return this.create({
+				GUI.TYPE : GUI.TYPE_LABEL,
+				GUI.LABEL : entry.substr(1,-1),
+				GUI.PRESET : presetIdPrefix ? presetIdPrefix+"/header" : "header"
+			});
+			
+//			text=entry.substr(1,-1);
+//			if(insideMenu){
+//				var label=entryWidth ? this.createLabel(entryWidth,15,text,GUI.BACKGROUND) : this.createLabel(text) ;
+//				label.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,GUI.BUTTON_SHAPE_TOP));
+//				label.setTextStyle (GUI.TEXT_ALIGN_CENTER|GUI.TEXT_ALIGN_MIDDLE);
+//				return label;
+//			}else{
+//				return this.createHeader(text);
+//			}
 		}
 		else
 			return this.createLabel(entry);
@@ -98,7 +104,6 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 						}
 						\note adds the MouseButtonListenerTrait trait.
 						\note see GUI.ChainedEventHandler
-						
 		GUI.POSITION :	(optional) component's position
 						Geometry.Vec2(x,y)		Fixed position relative to parent
 						or
@@ -109,6 +114,8 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 							GUI.POS_Y_ABS|GUI.REFERENCE_Y_BOTTOM|GUI.ALIGN_Y_BOTTOM, 0,0]
 							align at bottom center
 						\note should not be used inside a Panel (use a Container instead)
+		GUI.PRESET : (optional) a preset expression. e.g. "./heading", "menu", "animEditor/fancyButton"
+						or a description map used as preset
 		GUI.PROPERTIES : (optional) Array of properties added to the component
 
 		GUI.SIZE : 		(optional) component's size
@@ -410,12 +417,33 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 		GUI.ON_WINDOW_CLOSED	(optional) Handler called after the window has been closed.
 */
 
-GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map description,width = false,insideMenu=false){
+GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map description,width = false,insideMenu=false, presetIdPrefix=false){
 
 	var component = void; 			//< main component
 	var inputComponent = void; 		//< the input (sub-)component
 	var skipAddingContents = void;	//< if true, the componentFactory itself handles the CONTENTS part of the description
 	// -------------------
+	// (optionally) select preset
+
+	if( description[GUI.PRESET] ){
+		var preset = description[GUI.PRESET];
+		if(preset.isA(Map)){
+			preset = preset.clone();
+		}else if(preset.isA(String)){
+			if(presetIdPrefix.isA(String))
+				preset = IO.condensePath( presetIdPrefix+"/"+preset );
+			preset = gui.getPreset(preset);
+		}else{
+			preset = preset();
+		}
+		
+		if(!preset.isA(Map)){
+			Runtime.warn("Invalid gui-preset: "+description[GUI.PRESET];);
+		}else{
+			description = preset.merge(description);
+		}
+	}
+	
 	// preparations (? temporary ?)
 
 	// add dataWrapper's options
@@ -428,12 +456,12 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			description[GUI.TYPE] != GUI.TYPE_TREE_GROUP ){ // unfortunate special case: options for a closed tree group should only be be created on demand.
 		description[GUI.OPTIONS] = description[GUI.OPTIONS_PROVIDER]();
 	}
-
+	
 	// -------------------
 	// I. create component
 	{
 		// prepare factory input
-		var input = new ExtObject();
+		var input = new ExtObject;
 		input.description := description;
 		input.insideMenu := insideMenu;
 
@@ -704,23 +732,35 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			var contents = description[GUI.CONTENTS];
 			if( contents ){
 				if(!skipAddingContents ){
+					var childrenPresetIdPrefix = description[GUI.PRESET];
+					if(childrenPresetIdPrefix.isA(String) && presetIdPrefix.isA(String) && childrenPresetIdPrefix.beginsWith('.')){
+						childrenPresetIdPrefix = IO.condensePath( presetIdPrefix+"/"+childrenPresetIdPrefix );
+					} else if(childrenPresetIdPrefix.isA(String)){
+					} else if(presetIdPrefix.isA(String)){
+						childrenPresetIdPrefix = presetIdPrefix;
+					}
+				
 					// if contents is dynamic (e.g. Std.DataWrapper)
 					if(contents.isSet($onDataChanged)){
-						contents.onDataChanged += [this,component,insideMenu] => fn(gui,component,insideMenu,contents){
+						contents.onDataChanged += [this,component,insideMenu,childrenPresetIdPrefix] => fn(gui,component,insideMenu,childrenPresetIdPrefix,contents){
 							if(component.isDestroyed()){
 								return $REMOVE;
 							}else{
 								component.destroyContents();
 								foreach( gui.createComponents({
 										GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
+										GUI.PRESET : childrenPresetIdPrefix,
 										GUI.PROVIDER : contents }) as var c)
 									component += c;
 							}
 						};
 						contents = contents();
 					}
+				
+						
 					foreach( this.createComponents({
 								GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
+								GUI.PRESET : childrenPresetIdPrefix,
 								GUI.PROVIDER : contents }) as var c)
 					component+=c;
 				}
@@ -785,7 +825,7 @@ GUI.GUI_Manager._componentFactories ::= {
 
 		// set other layout if button is inside menu
 		if(input.insideMenu){
-			button.setFlag(GUI.FLAT_BUTTON,true);
+//			button.setFlag(GUI.FLAT_BUTTON,true);
 			button.setTextStyle (GUI.TEXT_ALIGN_LEFT|GUI.TEXT_ALIGN_MIDDLE);
 		}
 		if(input.description[GUI.TEXT_ALIGNMENT]){
@@ -1160,8 +1200,6 @@ GUI.GUI_Manager._componentFactories ::= {
 		button.isSubMenu := input.insideMenu;
 
 		if(input.insideMenu){
-	//			button.setColor(new Util.Color4f(1,1,1,1));
-			button.setFlag(GUI.FLAT_BUTTON,true);
 			button.setTextStyle (GUI.TEXT_ALIGN_MIDDLE);
 			button += {
 				GUI.TYPE : GUI.TYPE_LABEL,
