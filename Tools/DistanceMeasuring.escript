@@ -86,7 +86,7 @@ plugin.initGUI := fn(gui) {
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Clear",
-			GUI.ON_CLICK : this->fn() {
+			GUI.ON_CLICK : fn() {
 				PADrend.executeCommand( fn(){ Tools.DistanceMeasuringPlugin.clearMeasurement(); });
 			},
 			GUI.TOOLTIP : "Remove current measurement."
@@ -132,7 +132,7 @@ plugin.initGUI := fn(gui) {
 			PADrend.setActiveUITool(TOOL_ID);
 		},
 		GUI.ON_INIT : fn(...){
-			var switchFun = [this]=>fn(button,b){
+			var switchFun = fn(button,b){
 				if(button.isDestroyed())
 					return $REMOVE;
 				foreach(module('PADrend/GUI/Style').TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
@@ -144,7 +144,6 @@ plugin.initGUI := fn(gui) {
 		},
 		GUI.TOOLTIP : "Distance measuring tool\n"
 				"[LeftClick] on the scene to start measuring distances.\n"
-				"[RightClick] one the button for options.\n"
 				"[ESC] to stop measuring.\n"
 				"Hint: After the first click, the distance from the camera to the picked \n"
 				"point is measured until the mouse is moved.",
