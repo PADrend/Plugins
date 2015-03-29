@@ -43,8 +43,7 @@ static registerGUIComponents = fn(gui){
 
 			var button = gui.create({
 				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-				GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+				GUI.PRESET : './toolIcon',
 				GUI.LABEL : index,
 				GUI.SIZE: [8,8],
 //				GUI.COLOR : COLOR_PASSIVE,

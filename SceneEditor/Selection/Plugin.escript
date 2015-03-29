@@ -71,9 +71,9 @@ static registerGUI = fn(gui){
 	gui.register('PADrend_ToolsToolbar.20_selectionTool',[gui]=>fn(gui){
 		return {
 			GUI.TYPE : GUI.TYPE_BUTTON,
-			GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
-			GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
+			GUI.PRESET : './toolIcon',
 			GUI.LABEL : "",
+			GUI.WIDTH : 24,
 			GUI.CONTENTS : activeIcon,
 			GUI.ICON : mode_selectOnIntersection() ? icons[0] : icons[1], // initially, a valid icon is required to properly init the color properties
 			GUI.ON_CLICK : fn(){	PADrend.setActiveUITool(TOOL_ID);	},

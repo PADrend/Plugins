@@ -127,8 +127,7 @@ static registerStdToolbarEntries = fn() {
 		GUI.LABEL				:	"File",
 		GUI.ICON				:	"#File",
 		GUI.MENU				:	'PADrend_FileMenu',
-		GUI.PROPERTIES			:	Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES	:	Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET				:	'./toolIcon',
 	});
 	
 	static addToRecentSceneList = fn(filename){
@@ -633,8 +632,7 @@ static registerStdToolbarEntries = fn() {
 		GUI.LABEL : "Scenes",
 		GUI.MENU : 'PADrend_ScenesMenu',
 		GUI.ICON : "#Scenes",
-		GUI.PROPERTIES			:	Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES	:	Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 	});
 
 	gui.register('PADrend_ScenesMenu',fn(){
@@ -937,8 +935,7 @@ static registerStdToolbarEntries = fn() {
 
 	gui.register('PADrend_MainToolbar.20_plugins',{
 		GUI.TYPE				:	GUI.TYPE_MENU,
-		GUI.PROPERTIES			:	Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES	:	Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET				:	'./toolIcon',
 		GUI.LABEL				:	"Plugins",
 		GUI.MENU				:	'PADrend_PluginsMenu',
 		GUI.ICON				:	"#Plugins",
@@ -948,8 +945,7 @@ static registerStdToolbarEntries = fn() {
 
 	gui.register('PADrend_MainToolbar.30_config',{
 		GUI.TYPE				:	GUI.TYPE_MENU,
-		GUI.PROPERTIES			:	Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES	:	Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET				:	'./toolIcon',
 		GUI.LABEL				:	"Config",
 		GUI.ICON				:	"#Settings",
 		GUI.MENU				:	'PADrend_ConfigMenu',

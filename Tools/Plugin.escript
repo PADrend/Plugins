@@ -69,8 +69,7 @@ plugin.init @(override) := fn() {
 plugin.registerMenus:=fn(){
   	gui.register('PADrend_MainToolbar.60_tools',{
 		GUI.TYPE : GUI.TYPE_MENU,
-		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.LABEL : "Tools",
 		GUI.MENU : 'Tools_ToolsMenu',
 		GUI.MENU_WIDTH : 150,

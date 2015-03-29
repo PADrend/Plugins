@@ -45,9 +45,7 @@ var NS = new Namespace;
 NS.TOOLBAR_ICON_COLOR := new Util.Color4f(0.0,0,0,0.9);
 NS.TOOLBAR_BG_SHAPE := new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
 											gui._createRectShape(new Util.Color4f(0.3,0.3,0.3,0.5),new Util.Color4ub(0,0,0,0),true));
-NS.TOOLBAR_BUTTON_PROPERTIES := [new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, NS.TOOLBAR_ICON_COLOR)];
-NS.TOOLBAR_BUTTON_HOVER_PROPERTIES := [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
-											gui._createRectShape(color_accent1,new Util.Color4ub(0,0,0,0),true)),1,false] ];
+
 
 NS.TOOLBAR_ACTIVE_BUTTON_PROPERTIES := [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, GUI.BLACK),
 											new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
@@ -79,6 +77,8 @@ gui.registerPreset('header',{
 //gui.setDefaultShape(GUI.PROPERTY_TEXTFIELD_SHAPE,
 //						gui._createRectShape( new Util.Color4ub(230,230,230,240),new Util.Color4ub(128,128,128,128),true ));
 
+
+
 gui.registerPreset('menu',{
 	GUI.PROPERTIES : [
 			new GUI.ColorProperty(GUI.PROPERTY_TEXT_COLOR, GUI.WHITE),
@@ -97,6 +97,24 @@ gui.registerPreset('menu/header',{
 	GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,3,15],
 	GUI.PROPERTIES  : [ new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
 											gui._createRectShape( color_accent1,color_accent1,true)) ]
+});
+
+gui.registerPreset('toolIcon',{
+		GUI.PROPERTIES : [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, NS.TOOLBAR_ICON_COLOR)	],
+		GUI.HOVER_PROPERTIES : [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
+											gui._createRectShape(color_accent1,GUI.NO_COLOR,true)),1,false] ]
+});
+
+//gui.registerPreset('mainToolbar',{
+//		GUI.PROPERTIES : [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, NS.TOOLBAR_ICON_COLOR)	],
+//		GUI.HOVER_PROPERTIES : [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
+//											gui._createRectShape(color_accent1,GUI.NO_COLOR,true)),1,false] ]
+//});
+
+gui.registerPreset('menu/toolIcon',{
+		GUI.PROPERTIES : [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,GUI.WHITE)	],
+		GUI.HOVER_PROPERTIES : [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
+											gui._createRectShape(color_accent2,GUI.NO_COLOR,true)),1,false] ]
 });
 return NS;
 

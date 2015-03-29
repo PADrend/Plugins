@@ -121,10 +121,7 @@ plugin.initGUI := fn(gui) {
 	
 	gui.register('PADrend_ToolsToolbar.70_distanceMeasuring',{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
-
-//		GUI.LABEL : "M",
+		GUI.PRESET : './toolIcon',
 		GUI.ICON : '#MeasurementTool', 
 		GUI.SIZE : [24,24],
 		GUI.TOOLTIP : "Distance measuring",

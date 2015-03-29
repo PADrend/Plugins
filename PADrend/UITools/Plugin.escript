@@ -30,8 +30,7 @@
 	gui.register('PADrend_ToolsToolbar.myTool',{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.ICON : "#myToolIcon",
-		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.WIDTH : 15,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MyTool');	},
 		GUI.ON_INIT : fn(...){

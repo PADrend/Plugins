@@ -46,9 +46,8 @@ EffectsPlugin.init @(override) :=fn() {
 EffectsPlugin.registerMenus:=fn(){
 	gui.register('PADrend_MainToolbar.70_effects',{
 		GUI.TYPE : GUI.TYPE_MENU,
-		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
-		GUI.LABEL:"Effects",
+		GUI.PRESET : './toolIcon',
+		GUI.LABEL: "Effects",
 		GUI.ICON : "#Effects",
 		GUI.MENU : 'Effects_MainMenu'
 	});

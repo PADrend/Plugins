@@ -172,10 +172,7 @@ plugin.registerMenus:=fn() {
 
 	gui.register('PADrend_ToolsToolbar.80_MeshEditorTools',[{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
-		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.TOOLTIP	: "Triangle Move Tool: Allows the selection and movement of the triangles of a selected geometry node.",
 		GUI.ICON : '#TriangleMove',
 		GUI.WIDTH : 24,
@@ -187,8 +184,7 @@ plugin.registerMenus:=fn() {
 		},
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.TOOLTIP	: "Triangle Rotate Tool: Allows the selection and rotation of the triangles of a selected geometry node.",
 		GUI.ICON : '#TriangleRotate',
 		GUI.WIDTH : 24,
@@ -200,8 +196,7 @@ plugin.registerMenus:=fn() {
 		},
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.TOOLTIP	: "Triangle Scale Tool: Allows the selection and scaling of the triangles of a selected geometry node.",
 		GUI.ICON : '#TriangleScale',
 		GUI.WIDTH : 24,
@@ -213,8 +208,7 @@ plugin.registerMenus:=fn() {
 		},
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.TOOLTIP	: "Extrude Tool: Allows the selection and extrusion of the triangles of a selected geometry node.",
 		GUI.ICON : '#TriangleExtrude',
 		GUI.WIDTH : 24,
@@ -226,8 +220,7 @@ plugin.registerMenus:=fn() {
 		},
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.TOOLTIP	: "Knife Tool: Allows the selection and cutting of the triangles of a selected geometry node.",
 		GUI.ICON : '#TriangleKnife',
 		GUI.WIDTH : 24,

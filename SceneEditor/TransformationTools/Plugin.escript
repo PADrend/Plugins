@@ -99,8 +99,7 @@ static registerToolIcons = fn(gui) {
 	};
 	gui.register('PADrend_ToolsToolbar.40_transformationTools',[{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.ICON : '#NodeTranslate',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Move');	},
@@ -112,8 +111,7 @@ static registerToolIcons = fn(gui) {
 		GUI.TOOLTIP : "Translate selected nodes.\nSee context menu for options..."
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.ICON : '#NodeRotate',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Rotate');	},
@@ -126,8 +124,7 @@ static registerToolIcons = fn(gui) {
 
 	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.ICON : '#NodeScale',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Scale');	},
@@ -140,8 +137,7 @@ static registerToolIcons = fn(gui) {
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.ICON : '#NodeSnap',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool(snapToolMode() ? 'TransformationTools3_Snap': 'TransformationTools3_Snap2');	},
@@ -157,8 +153,7 @@ static registerToolIcons = fn(gui) {
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.PROPERTIES : Style.TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : Style.TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.ICON : '#Anchor',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Anchor');	},

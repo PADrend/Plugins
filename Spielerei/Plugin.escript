@@ -49,8 +49,7 @@ plugin.init @(override) :=fn() {
 plugin.registerMenus := fn(){
 	gui.register('PADrend_MainToolbar.70_spielerei',{
 		GUI.TYPE : GUI.TYPE_MENU,
-		GUI.PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_PROPERTIES,
-		GUI.HOVER_PROPERTIES : module('PADrend/GUI/Style').TOOLBAR_BUTTON_HOVER_PROPERTIES,
+		GUI.PRESET : './toolIcon',
 		GUI.LABEL : "Spielerei",
 		GUI.ICON : "#Spielerei",
 		GUI.MENU : 'Spielerei'

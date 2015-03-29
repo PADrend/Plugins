@@ -48,6 +48,8 @@ GUI.GUI_Manager.getPreset ::= fn(String id){
 	if(this.isSet($_presets)){
 		if(id.beginsWith('/'))
 			id = id.substr(1);
+		else if(id.beginsWith('./'))
+			id = id.substr(2);
 		preset = this._presets[id];
 		if(preset.isA(Map)){
 			return preset.clone();
