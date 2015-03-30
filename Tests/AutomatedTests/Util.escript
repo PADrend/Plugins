@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2013,2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -561,6 +561,61 @@ tests += new AutomatedTest("Util/UpdatableHeap", fn() {
 	return true;
 });
 
+
+// ---------------------------------------------------------
+tests += new AutomatedTest( "Util/BinaryData in strings" , fn(){
+	var ok = true;
+	
+	var s = "ABCDEFG"; // 0x41 0x42 0x43 0x44 0x45 0x46 0x47
+	
+	
+	ok &= Util.readBinaryNumberFromString( Util.TypeConstant.UINT8,s,1)== 0x42;
+	
+	ok &= Util.readBinaryNumberFromString_LittleEndian( Util.TypeConstant.UINT16, s, 2 ) === 0x4443;
+	ok &= Util.readBinaryNumberFromString_BigEndian( Util.TypeConstant.UINT16, s, 2 ) === 0x4344;
+	
+	ok &= Util.readBinaryNumberFromString_LittleEndian( Util.TypeConstant.UINT32, s, 3 ) === 0x47464544;
+	ok &= Util.readBinaryNumberFromString_BigEndian( Util.TypeConstant.UINT32, s, 3 ) === 0x44454647;
+	
+	ok &= Util.readBinaryNumberFromString_LittleEndian( Util.TypeConstant.INT16, s, 2 ) === 0x4443;
+	ok &= Util.readBinaryNumberFromString_BigEndian( Util.TypeConstant.INT16, s, 2 ) === 0x4344;
+	
+	ok &= Util.readBinaryNumberFromString_LittleEndian( Util.TypeConstant.INT32, s, 3 ) === 0x47464544;
+	ok &= Util.readBinaryNumberFromString_BigEndian( Util.TypeConstant.INT32, s, 3 ) === 0x44454647;
+	
+	{
+		var boundaryCheck = false;
+		try{
+			Util.readBinaryNumberFromString_BigEndian( Util.TypeConstant.INT32, s, 4 );
+		}catch(){boundaryCheck = true;}
+		ok &= boundaryCheck;
+	}
+	
+	var s2 = "        ";
+	ok &= Util.writeBinaryNumberToString( Util.TypeConstant.UINT8, s2, 2, 0x42 )=== "  B     ";
+
+	ok &= Util.writeBinaryNumberToString_LittleEndian( Util.TypeConstant.UINT8, s2, 2, 0x42 )=== "  B     ";
+	ok &= Util.writeBinaryNumberToString_LittleEndian( Util.TypeConstant.UINT16, s2, 3, 0x4142 )=== "   BA   ";
+	ok &= Util.writeBinaryNumberToString_LittleEndian( Util.TypeConstant.UINT32, s2, 3, 0x41424344 )=== "   DCBA ";
+	ok &= Util.writeBinaryNumberToString_BigEndian( Util.TypeConstant.UINT32, s2, 3, 0x41424344 )=== "   ABCD ";
+	ok &= Util.writeBinaryNumberToString_BigEndian( Util.TypeConstant.UINT16, s2, 3, 0x4142 )=== "   AB   ";
+	
+	//!\note  UINT64 is not tested!
+	{
+		var boundaryCheck = false;
+		try{
+			Util.writeBinaryNumberToString_BigEndian( Util.TypeConstant.INT32, "  ", 1 );
+		}catch(){boundaryCheck = true;}
+		ok &= boundaryCheck;
+	}
+	ok &= Util.readBinaryNumberFromString_BigEndian(Util.TypeConstant.FLOAT, Util.writeBinaryNumberToString_BigEndian( Util.TypeConstant.FLOAT, s2, 3, 42.5 ),3 ) ~= 42.5;
+	ok &= Util.readBinaryNumberFromString_LittleEndian(Util.TypeConstant.FLOAT, Util.writeBinaryNumberToString_LittleEndian( Util.TypeConstant.FLOAT, s2, 3, 42.5 ),3 ) ~= 42.5;
+	ok &= Util.readBinaryNumberFromString_BigEndian(Util.TypeConstant.DOUBLE, Util.writeBinaryNumberToString_BigEndian( Util.TypeConstant.DOUBLE, s2, 0, -42.5 ),0 ) ~= -42.5;
+	ok &= Util.readBinaryNumberFromString_LittleEndian(Util.TypeConstant.DOUBLE, Util.writeBinaryNumberToString_LittleEndian( Util.TypeConstant.DOUBLE, s2, 0, -42.5 ),0 ) ~= -42.5;
+		
+
+	return ok;
+});
 
 // ---------------------------------------------------------
 return tests;
