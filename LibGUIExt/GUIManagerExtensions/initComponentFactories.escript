@@ -751,12 +751,21 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 						contents = contents();
 					}
 				
-						
-					foreach( this.createComponents({
-								GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
-								GUI.PRESET : childrenPresetIdPrefix,
-								GUI.PROVIDER : contents }) as var c)
-					component+=c;
+					if(contents.isA(Map)){
+						if(!contents[GUI.PRESET]&&childrenPresetIdPrefix){
+							contents = contents.clone();
+							contents[GUI.PRESET] = childrenPresetIdPrefix;
+						}
+						foreach( this.createComponents(contents) as var c)
+							component+=c;
+					}else{
+						foreach( this.createComponents({
+									GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
+									GUI.PRESET : childrenPresetIdPrefix,
+									GUI.PROVIDER : contents }) as var c)
+							component+=c;
+					}
+				
 				}
 				if(contents.isA(String))// for debugging
 					component._componentId := contents;
