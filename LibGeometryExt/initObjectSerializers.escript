@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 /*! Collection of serializers for various types from Geometry.	*/
-var defaultRegistry = Std.require('Std/ObjectSerialization').defaultRegistry;
+var defaultRegistry = Std.module('Std/ObjectSerialization').defaultRegistry;
 
 defaultRegistry.registerType(Geometry.Box,"Geometry.Box")
 	.addDescriber(fn(ctxt,Geometry.Box obj,Map d){

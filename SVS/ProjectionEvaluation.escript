@@ -76,7 +76,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 			nodes.append(MinSG.getChildNodes(node));
 		}
 	};
-	registerExtension('NodeEditor_OnNodesSelected', [panel, selectedNode]=>fn(guiElement, dataWrapper, nodes) {
+	Util.registerExtension('NodeEditor_OnNodesSelected', [panel, selectedNode]=>fn(guiElement, dataWrapper, nodes) {
 		if(guiElement.isDestroyed()) {
 			return Extension.REMOVE_EXTENSION;
 		}
@@ -340,7 +340,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 		fbo.attachColorTexture(renderingContext, color);
 		fbo.attachDepthTexture(renderingContext, depth);
 
-		var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
+		var evaluator = Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator();
 		if(!evaluator) {
 			Runtime.exception("Invalid evaluator.");
 		}

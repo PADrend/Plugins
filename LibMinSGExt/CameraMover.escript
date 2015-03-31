@@ -309,7 +309,7 @@ T.setDolly ::= 		fn(MinSG.Node newCamera)	{	this.dolly=newCamera;	};
 
 //! This method is part of the ongoing HID-redesign \see #677
 T.registerGamepad ::= fn(gamepad){
-	Traits.requireTrait(gamepad, Std.require('LibUtilExt/HID_Traits').ControllerAnalogAxisTrait); //! \see HID_Traits.ControllerAnalogAxisTrait
+	Std.Traits.requireTrait(gamepad, Std.module('LibUtilExt/HID_Traits').ControllerAnalogAxisTrait); //! \see HID_Traits.ControllerAnalogAxisTrait
 	
 	
 	var localMovementVec = new Geometry.Vec3;

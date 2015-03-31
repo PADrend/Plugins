@@ -16,7 +16,7 @@
  **
  **/
 
-static Command = Std.require('LibUtilExt/Command');
+static Command = Std.module('LibUtilExt/Command');
 
 /***
  **   ---|> Plugin
@@ -51,7 +51,7 @@ static _commandHistory;
 
 PADrend.CommandHandling.init @(override) := fn(){
 
-	_commandHistory = new (Std.require('LibUtilExt/CommandHistory'));
+	_commandHistory = new (Std.module('LibUtilExt/CommandHistory'));
 	Util.registerExtension('PADrend_KeyPressed',this->ex_KeyPressed);
 	Util.registerExtension('PADrend_Init',this->ex_Init);
 	

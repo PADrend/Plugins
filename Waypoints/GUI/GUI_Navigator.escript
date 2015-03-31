@@ -17,7 +17,7 @@
 **
 ** GUI construction for the navigator part of the Waypoints-Plugin.
 **/
-static PathManagement = Std.require('Waypoints/PathManagement');
+static PathManagement = Std.module('Waypoints/PathManagement');
 
 
 static createWaypointScreenshotCell = fn(MinSG.Waypoint waypoint) {
@@ -171,7 +171,7 @@ return fn(tabbedPanel){
 		GUI.DATA_WRAPPER : descriptionText
 	};
 	
-	registerExtension('Waypoints_SelectedWaypointChanged',
+	Util.registerExtension('Waypoints_SelectedWaypointChanged',
 		[descriptionText] => fn(descriptionText, timestamp){
 			// get nearest waypoint
 			var path = PathManagement.getActivePath();
@@ -212,7 +212,7 @@ return fn(tabbedPanel){
 	waypointsPanel.enableAutoBreak();
 	panel += waypointsPanel;
 
-	registerExtension('Waypoints_PathChanged', [waypointsPanel] => fn(container,path) {
+	Util.registerExtension('Waypoints_PathChanged', [waypointsPanel] => fn(container,path) {
 		container.clear();
 		if(!path) 
 			return;

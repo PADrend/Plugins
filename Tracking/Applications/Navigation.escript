@@ -14,9 +14,9 @@
  */
 
 
-static deviceRequirements = [	Std.require('LibUtilExt/HID_Traits').Controller_Room6D_Trait, 
-								Std.require('LibUtilExt/HID_Traits').ControllerAnalogAxisTrait, 
-								Std.require('LibUtilExt/HID_Traits').ControllerButtonTrait];
+static deviceRequirements = [	Std.module('LibUtilExt/HID_Traits').Controller_Room6D_Trait, 
+								Std.module('LibUtilExt/HID_Traits').ControllerAnalogAxisTrait, 
+								Std.module('LibUtilExt/HID_Traits').ControllerButtonTrait];
 static enabled = Std.DataWrapper.createFromEntry( systemConfig,'Tracking.Nav.intitiallyEnabled',false );
 static deviceNames = Std.DataWrapper.createFromEntry(systemConfig,'Tracking.Nav.deviceNames', ["Flystick"]);
 
@@ -215,7 +215,7 @@ myDeviceHandler.onDeviceEnabled += fn(device){
 	device.onAnalogAxisChanged += axesHandler;							//! \see HID_Traits.ControllerAnalogAxisTrait
 	device.onButton += buttonHandler;									//! \see HID_Traits.ControllerButtonTrait
 	device.onRoomTransformationChanged += positionHandler; 				//! \see HID_Traits.Controller_Room6D_Trait
-	registerExtension('PADrend_AfterFrame', frameListener);
+	Util.registerExtension('PADrend_AfterFrame', frameListener);
 };
 
 myDeviceHandler.onDeviceDisabled += fn(device){	

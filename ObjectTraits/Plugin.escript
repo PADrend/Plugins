@@ -22,7 +22,7 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn(){
-	Std.require('ObjectTraits/ObjectTraitRegistry').scanTraitsInFolder( __DIR__ );
+	Std.module('ObjectTraits/ObjectTraitRegistry').scanTraitsInFolder( __DIR__ );
 	return true;
 };
 

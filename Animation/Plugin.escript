@@ -27,13 +27,13 @@ GLOBALS.AnimationPlugin:=new Plugin({
 			Plugin.REQUIRES : ["NodeEditor","PADrend","PADrend/Serialization"]
 });
 
-static Listener = Std.require('LibUtilExt/deprecated/Listener');
+static Listener = Std.module('LibUtilExt/deprecated/Listener');
 
-static Utils = Std.require('Animation/Utils');
-static PlaybackContext = Std.require('Animation/PlaybackContext');
-static Story = Std.require('Animation/Animations/Story');
-static KeyFrameAnimation = Std.require('Animation/Animations/KeyFrameAnimation');
-static BlendingAnimation = Std.require('Animation/Animations/BlendingAnimation');
+static Utils = Std.module('Animation/Utils');
+static PlaybackContext = Std.module('Animation/PlaybackContext');
+static Story = Std.module('Animation/Animations/Story');
+static KeyFrameAnimation = Std.module('Animation/Animations/KeyFrameAnimation');
+static BlendingAnimation = Std.module('Animation/Animations/BlendingAnimation');
 
 
 // \note Disabled because it messes up the serialization of KeyFrameAnimations
@@ -54,7 +54,7 @@ AnimationPlugin.init @(override) :=fn(){
 	Listener.ANIMATION_PLUGIN_ACTIVE_STORY_CHANGED := $ANIMATION_PLUGIN_ACTIVE_STORY_CHANGED;
 
 	{ // Register ExtensionPointHandler:
-		registerExtension('PADrend_Init',this->fn(){
+		Util.registerExtension('PADrend_Init',this->fn(){
 			gui.register('PADrend_PluginsMenu.animation',{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Animation editor",
@@ -169,7 +169,7 @@ AnimationPlugin.selectStory := fn(Story story){
 	
 	var path  = this.getStoryPath(story);
 	if(path.front()!="???"){
-		static Command = Std.require('LibUtilExt/Command');
+		static Command = Std.module('LibUtilExt/Command');
 		// send command to connected clients
 		PADrend.executeCommand( new Command({	
 				Command.EXECUTE : [path]=>fn(path){ 	AnimationPlugin.selectStoryByPath(path);	},

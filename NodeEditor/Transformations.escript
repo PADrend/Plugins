@@ -35,7 +35,7 @@ static backupCamera;
 static backupSRT;
 static currentNode;
 
-static Command = Std.require('LibUtilExt/Command');
+static Command = Std.module('LibUtilExt/Command');
 
 static applySRT = fn(MinSG.Node node,Geometry.SRT newSRT, oldSRT = void){
 	if(!oldSRT){
@@ -88,7 +88,7 @@ static startMoving = fn(MinSG.Node node){
 
 
 plugin.init @(override) := fn(){
-	static NodeEditor = Std.require('NodeEditor/NodeEditor');
+	static NodeEditor = Std.module('NodeEditor/NodeEditor');
 
 
 	Util.registerExtension('NodeEditor_OnNodesSelected',fn(...) {		stopMoving();	});
@@ -137,7 +137,7 @@ plugin.init @(override) := fn(){
 		// (automatic updates on external changes but still allowing editing with the text inputs)
 		var manipulationRefreshGroup = new GUI.RefreshGroup;
 
-		registerExtension('PADrend_AfterRendering', [displayRefreshGroup,manipulationRefreshGroup,panel] => fn(displayRefreshGroup,manipulationRefreshGroup,panel, d){
+		Util.registerExtension('PADrend_AfterRendering', [displayRefreshGroup,manipulationRefreshGroup,panel] => fn(displayRefreshGroup,manipulationRefreshGroup,panel, d){
 			if(!gui.isCurrentlyEnabled(panel))
 				return Extension.REMOVE_EXTENSION;
 			if(!panel.isSelected())

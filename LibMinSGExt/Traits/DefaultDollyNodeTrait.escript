@@ -33,7 +33,7 @@ t.attributes.getHeadNode				:= fn(){	return this.head;	};
 t.onInit += fn(MinSG.ListNode dollyRoot, MinSG.Node camera){
 	
 	//! \see LibMinSGExt/Traits/CameraFrameAdjustmentTrait
-	Traits.addTrait(dollyRoot, Std.require( 'LibMinSGExt/Traits/CameraFrameAdjustmentTrait' ));
+	Std.Traits.addTrait(dollyRoot, Std.module( 'LibMinSGExt/Traits/CameraFrameAdjustmentTrait' ));
 	
 	var headNode = new MinSG.ListNode;
 	headNode += camera;

@@ -14,7 +14,7 @@
 	object structure using a combination of an optional TreeView with type based entries 
 	and type based config panels. */
 	
-static TypeBasedHandler = Std.require('LibUtilExt/TypeBasedHandler');
+static TypeBasedHandler = Std.module('LibUtilExt/TypeBasedHandler');
 
 var T = new Type;
 T._fillTreeEntry @(init) := fn(){	return new TypeBasedHandler(true);	};

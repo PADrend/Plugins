@@ -39,7 +39,7 @@ var plugin = new Plugin({
 });
 
 plugin.init:=fn() {
-	registerExtension('PADrend_Init',this->this.ex_Init);
+	Util.registerExtension('PADrend_Init',this->this.ex_Init);
 	return true;
 };
 
@@ -126,35 +126,35 @@ plugin.ex_Init := fn(){
 	registerMenus();
 		
 	{
-		var t = new (Std.require('MeshEditor/Tools/Move'));
+		var t = new (Std.module('MeshEditor/Tools/Move'));
 		PADrend.registerUITool('MeshEditorTools_Move')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 		
 	{
-		var t = new (Std.require('MeshEditor/Tools/Rotate'));
+		var t = new (Std.module('MeshEditor/Tools/Rotate'));
 		PADrend.registerUITool('MeshEditorTools_Rotate')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 		
 	{
-		var t = new (Std.require('MeshEditor/Tools/Scale'));
+		var t = new (Std.module('MeshEditor/Tools/Scale'));
 		PADrend.registerUITool('MeshEditorTools_Scale')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 		
 	{
-		var t = new (Std.require('MeshEditor/Tools/Extrude'));
+		var t = new (Std.module('MeshEditor/Tools/Extrude'));
 		PADrend.registerUITool('MeshEditorTools_Extrude')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 		
 	{
-		var t = new (Std.require('MeshEditor/Tools/Knife'));
+		var t = new (Std.module('MeshEditor/Tools/Knife'));
 		PADrend.registerUITool('MeshEditorTools_Knife')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);

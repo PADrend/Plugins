@@ -51,7 +51,7 @@ plugin._message := fn(	text ){
 			GUI.TYPE : GUI.TYPE_WINDOW,
 			GUI.FLAGS : GUI.HIDDEN_WINDOW
 		});
-		Traits.addTrait(_window, Std.require('LibGUIExt/Traits/StorableRectTrait'),
+		Std.Traits.addTrait(_window, Std.module('LibGUIExt/Traits/StorableRectTrait'),
 					DataWrapper.createFromConfig(PADrend.configCache, "Effects.OSD.winRect", [	(r.getWidth() - width)*_position[0],(r.getHeight() - height)*_position[1],width,height]));
 		var c = gui.create({
 			GUI.TYPE : GUI.TYPE_CONTAINER,
@@ -82,7 +82,7 @@ plugin._message := fn(	text ){
 	_window.unselect(); // hides the buttons
 	
 	if(!_timeout){
-		registerExtension('PADrend_AfterFrame',this->fn(){
+		Util.registerExtension('PADrend_AfterFrame',this->fn(){
 			if(clock()>_timeout){
 				_window.setEnabled(false);
 				_timeout = false;

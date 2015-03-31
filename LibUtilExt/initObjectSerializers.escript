@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 /*! Collection of serializers for various types from Util.	*/
-var defaultRegistry = Std.require('Std/ObjectSerialization').defaultRegistry;
+var defaultRegistry = Std.module('Std/ObjectSerialization').defaultRegistry;
 
 defaultRegistry.registerType(Util.Color4f,"Util.Color4f")
 	.addDescriber(fn(ctxt,Util.Color4f obj,Map d){ d['rgba'] = obj.toArray().implode(" ");	})

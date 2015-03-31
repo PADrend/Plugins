@@ -24,7 +24,7 @@ GLOBALS.ConcurrentCSampler := new Type(CSampler);
 
 ConcurrentCSampler._activeSamplingContext := void;
 
-static GASP = Std.require('SceneAnalyzer/GASP');
+static GASP = Std.module('SceneAnalyzer/GASP');
 //! ---|> CSampler
 ConcurrentCSampler.execute @(override) ::= fn(MinSG.Node sceneNode,
 						MinSG.Evaluator evaluator,
@@ -49,7 +49,7 @@ ConcurrentCSampler.execute @(override) ::= fn(MinSG.Node sceneNode,
 		return;
 
 	// register extensionPoint
-	registerExtension('PADrend_AfterFrame',this->ex_AfterFrame);
+	Util.registerExtension('PADrend_AfterFrame',this->ex_AfterFrame);
 	out("Sampling started!");
 };
 

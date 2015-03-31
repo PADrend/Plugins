@@ -63,7 +63,7 @@ MeasurementPlugin.createTab @(private) := fn(gui) {
 		panel += "*Tests along current path using evaluator*";
 		panel += GUI.NEXT_ROW;
 
-		var currentEvaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
+		var currentEvaluator = Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator();
 		var evaluatorName = DataWrapper.createFromValue(currentEvaluator ? currentEvaluator.name() : "");
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_TEXT,
@@ -73,7 +73,7 @@ MeasurementPlugin.createTab @(private) := fn(gui) {
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0],
 			GUI.FLAGS				:	GUI.LOCKED
 		};
-		registerExtension('Evaluator_OnEvaluatorDescriptionChanged',
+		Util.registerExtension('Evaluator_OnEvaluatorDescriptionChanged',
 			[evaluatorName] => fn(dataWrapper, evaluator, description) {
 				if(evaluator) 
 					dataWrapper(description);
@@ -253,7 +253,7 @@ MeasurementPlugin.createTab @(private) := fn(gui) {
 				}
 				
 				// export data
-				var table = new (Std.require('LibUtilExt/DataTable'))( "frame" );
+				var table = new (Std.module('LibUtilExt/DataTable'))( "frame" );
 				for(var i=0;i<statistics.getNumCounters();i++){
 					if(statistics.getDescription(i)=="?") continue;
 					table.addDataRow(statistics.getDescription(i),statistics.getUnit(i),data[i],"#ff0000" );
@@ -288,7 +288,7 @@ MeasurementPlugin.createTab @(private) := fn(gui) {
 				m2[i] = i*i;
 				m3[i] = i*i*i;
 			}
-			var dataTable=new (Std.require('LibUtilExt/DataTable'))("x");
+			var dataTable=new (Std.module('LibUtilExt/DataTable'))("x");
 			dataTable.addDataRow( "linear","y",m1,"#888888" );
 			dataTable.addDataRow( "quadratic","y",m2,"#ff0000" );
 			dataTable.addDataRow( "cubic","y",m3,"#00ff00" );

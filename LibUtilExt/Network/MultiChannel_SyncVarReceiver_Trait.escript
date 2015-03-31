@@ -21,9 +21,9 @@ var t = new Std.Traits.GenericTrait('MultiChannel_SyncVarReceiver_Trait');
 t.allowMultipleUses();
 
 t.onInit += fn(connection,Number channelId, targetMap,deserialize=parseJSON){
-	Traits.requireTrait(connection, Std.require('LibUtilExt/Network/MultiChannelReceiverTrait'));//!	\see	LibUtilExt/Network/MultiChannelReceiverTrait
-	Traits.requireTrait(connection, Std.require('LibUtilExt/Network/MultiChannelSenderTrait'));	//!	\see	LibUtilExt/Network/MultiChannelSenderTrait
-	Traits.requireTrait(deserialize,Traits.CallableTrait);										//!	\see	Traits.CallableTrait
+	Std.Traits.requireTrait(connection, Std.module('LibUtilExt/Network/MultiChannelReceiverTrait'));//!	\see	LibUtilExt/Network/MultiChannelReceiverTrait
+	Std.Traits.requireTrait(connection, Std.module('LibUtilExt/Network/MultiChannelSenderTrait'));	//!	\see	LibUtilExt/Network/MultiChannelSenderTrait
+	Std.Traits.requireTrait(deserialize,Traits.CallableTrait);										//!	\see	Std.Traits.CallableTrait
 	
 	//!	\see MultiChannelReceiverTrait
 	connection.setChannelHandler(channelId,[channelId,targetMap,deserialize] => fn(channelId,targetMap,deserialize, data){

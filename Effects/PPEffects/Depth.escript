@@ -10,7 +10,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type( Std.require('Effects/SimplePPEffect2') );
+var Effect = new Type( Std.module('Effects/SimplePPEffect2') );
 
 Effect.begin @(override) ::= fn() {
 	renderingContext.pushAndSetFBO(fbo);

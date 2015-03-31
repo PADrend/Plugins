@@ -18,7 +18,7 @@ var plugin = new Plugin({
 	Plugin.EXTENSION_POINTS : []
 });
 
-static selectedNodesStorage = Std.require('NodeEditor/SelectedNodesStorage');
+static selectedNodesStorage = Std.module('NodeEditor/SelectedNodesStorage');
 
 plugin.init @(override) := fn() {
 	module.on('PADrend/gui', registerGUIComponents );

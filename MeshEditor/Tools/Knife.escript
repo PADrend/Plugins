@@ -13,7 +13,7 @@
 static HelperTraits = module('../HelperTraits');
 
 static MeshEditor = Util.requirePlugin('MeshEditor');
-static Command = Std.require('LibUtilExt/Command');
+static Command = Std.module('LibUtilExt/Command');
 static Picking = Util.requirePlugin('PADrend/Picking');
 
 

@@ -32,7 +32,7 @@ sampler.settings := new ExtObject({
 	$sampleExpression2 : DataWrapper.createFromValue( "" ).setOptions([ "getRegionCorners(newRegion)","[]"]),
 });
 
-sampler.presetManager := new (Std.require('LibGUIExt/PresetManager'))( PADrend.configCache,'SceneAnalyzer.cSampler',sampler.settings );
+sampler.presetManager := new (Std.module('LibGUIExt/PresetManager'))( PADrend.configCache,'SceneAnalyzer.cSampler',sampler.settings );
 
 
 

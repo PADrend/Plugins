@@ -89,7 +89,7 @@ PADrend.init @(override) := fn(){
 	var start = clock();
 	
 	{	// basic initializations
-		registerExtension('PADrend_Message',fn(s){	out("[[--   ",s,"   --]]\n"); });
+		Util.registerExtension('PADrend_Message',fn(s){	out("[[--   ",s,"   --]]\n"); });
 	
 		this.syncVars = new DataWrapperContainer;
 		
@@ -118,7 +118,7 @@ PADrend.init @(override) := fn(){
 	}
 	
 	// setup plugin registry
-	static PluginRegistry = Std.require('LibUtilExt/GlobalPluginRegistry');
+	static PluginRegistry = Std.module('LibUtilExt/GlobalPluginRegistry');
 	this.pluginFolders = Std.DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.plugins',[
 												IO.condensePath(__DIR__+"/../../extPlugins/"),
 												IO.condensePath(__DIR__+"/../")]);

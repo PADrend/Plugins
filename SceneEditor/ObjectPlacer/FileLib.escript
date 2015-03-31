@@ -27,7 +27,7 @@
 
 
 */
-static ObjectPlacerUtils = Std.require('SceneEditor/ObjectPlacer/Utils');
+static ObjectPlacerUtils = Std.module('SceneEditor/ObjectPlacer/Utils');
 
 var plugin = new Plugin({
 		Plugin.NAME : 'SceneEditor/ObjectPlacer',
@@ -341,7 +341,7 @@ static createPrototype = fn(file){
 		newPrototype = new MinSG.GeometryNode(Rendering.loadMesh(file));
 	}else{
 		newPrototype = PADrend.getSceneManager().loadScene(file,MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY);
-		Std.require('LibMinSGExt/SemanticObject').markAsSemanticObject(newPrototype);
+		Std.module('LibMinSGExt/SemanticObject').markAsSemanticObject(newPrototype);
 	}
 	if(!newPrototype){
 		PADrend.message("Could not load "+file);

@@ -20,9 +20,9 @@ t.attributes.sendValue ::= fn(Number channel,String strData){
 	this.sendString(""+channel+":"+strData);
 	return this;
 };
-static ExtUDPSocket = Std.require('LibUtilExt/Network/ExtUDPSocket');
+static ExtUDPSocket = Std.module('LibUtilExt/Network/ExtUDPSocket');
 t.onInit += fn(ExtUDPSocket socket){
-	Traits.addTrait(socket, Std.require('LibUtilExt/Network/MultiChannelSenderTrait'));			//!	\see	LibUtilExt/Network/MultiChannelSenderTrait
+	Std.Traits.addTrait(socket, Std.module('LibUtilExt/Network/MultiChannelSenderTrait'));			//!	\see	LibUtilExt/Network/MultiChannelSenderTrait
 };
 Util.Network.UDPMultiChannelSenderTrait := t;
 return t;

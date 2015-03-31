@@ -60,7 +60,7 @@ plugin.init @(override) := fn() {
 	this.sceneToolTags := DataWrapper.createFromConfig(PADrend.configCache,'Tools.SpeedDial.sceneToolTags',[TAG_FOR_THE_UNTAGGED]);
 
 	// Register ExtensionPointHandler:
-	registerExtension('PADrend_KeyPressed',this->fn(evt) {
+	Util.registerExtension('PADrend_KeyPressed',this->fn(evt) {
 		if(evt.key == Util.UI.KEY_F3){
 			if(!window || !window.isVisible()){
 				showWindow();
@@ -84,7 +84,7 @@ plugin.init @(override) := fn() {
 			GUI.FLAGS : GUI.BACKGROUND,
 			GUI.MENU_WIDTH : 200,
 			GUI.MENU : this->fn(){
-				@(once) static AdjustableBackgroundColorTrait = Std.require('LibGUIExt/Traits/AdjustableBackgroundColorTrait');
+				@(once) static AdjustableBackgroundColorTrait = Std.module('LibGUIExt/Traits/AdjustableBackgroundColorTrait');
 				var pMenu=[{
 					GUI.TYPE : GUI.TYPE_MENU,
 					GUI.LABEL : "Tags",
@@ -102,7 +102,7 @@ plugin.init @(override) := fn() {
 						GUI.TOOLTIP : preset.getFullDescription()
 					},200,true);
 					if(preset.bgColor)
-						Traits.addTrait(c, AdjustableBackgroundColorTrait,preset.bgColor);
+						Std.Traits.addTrait(c, AdjustableBackgroundColorTrait,preset.bgColor);
 					pMenu+=c;
 				}
 				return pMenu;
@@ -111,7 +111,7 @@ plugin.init @(override) := fn() {
 		gui.register('Tools_SpeedDial_MainConfigMenu.tagSelection', 
 										[mainWindowTags] =>this->getTagFilterMenuEntries );
 	});
-	registerExtension('Tools_SpeedDial_QueryFolders',[presetPaths] => fn(presetPaths, Array paths){
+	Util.registerExtension('Tools_SpeedDial_QueryFolders',[presetPaths] => fn(presetPaths, Array paths){
 		paths.append(presetPaths());
 	});
 	Util.requirePlugin('PADrend/RemoteControl').registerFunctions({
@@ -404,7 +404,7 @@ plugin.createPresetContextMenu := fn(preset){
 };
 
 plugin.showWindow:=fn(){
-	@(once) static AdjustableBackgroundColorTrait = Std.require('LibGUIExt/Traits/AdjustableBackgroundColorTrait');
+	@(once) static AdjustableBackgroundColorTrait = Std.module('LibGUIExt/Traits/AdjustableBackgroundColorTrait');
 
 	// create/resize window
 	var width=[renderingContext.getWindowWidth(),1024].min();
@@ -458,7 +458,7 @@ plugin.showWindow:=fn(){
 		});
 		if(preset.bgColor){
 			//! \see AdjustableBackgroundColorTrait
-			Traits.addTrait( b, AdjustableBackgroundColorTrait, preset.bgColor);
+			Std.Traits.addTrait( b, AdjustableBackgroundColorTrait, preset.bgColor);
 		}
 		
 		panel += b;

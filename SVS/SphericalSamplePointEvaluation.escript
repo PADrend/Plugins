@@ -43,7 +43,7 @@ SVS.setUpSphericalSamplePointEvaluation := fn(plugin) {
 		GUI.TOOLTIP				:	"Use the evaluator from the 'Evaluator' plugin to generate a result for the selected sample.",
 		GUI.ON_CLICK			:	[plugin.sphere, plugin.samples, plugin.node, resultLabel, data]=>
 											fn(Geometry.Sphere sphere, Array samples, MinSG.Node node, GUI.Label label, data) {
-										var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
+										var evaluator = Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator();
 										if(!evaluator) {
 											Runtime.exception("Invalid evaluator.");
 										}

@@ -36,7 +36,7 @@ T._constructor ::= fn(Array nodes_){
 };
 
 T.apply ::= fn([Map,void] relTransformations=void){
-	@(once) static Command = Std.require('LibUtilExt/Command');
+	@(once) static Command = Std.module('LibUtilExt/Command');
 	
 	if(!relTransformations){
 		relTransformations = new Map;

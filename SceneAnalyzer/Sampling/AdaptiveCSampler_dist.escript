@@ -133,7 +133,7 @@ Sampler.createConfigPanel ::= fn(){
 /*! ---|> CSampler
 	@return true if finished. */
 Sampler.step ::= fn(CSamplingContext ctxt){
-	static JobScheduling = Std.require('JobScheduling/JobScheduling');
+	static JobScheduling = Std.module('JobScheduling/JobScheduling');
 
 //	out("Adaptive sample sample...\n");
 

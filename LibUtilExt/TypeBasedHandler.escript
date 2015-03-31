@@ -17,7 +17,7 @@
 /*!
  \example // simple non recursive example
  
-	static TypeBasedHandler = Std.require('LibUtilExt/TypeBasedHandler');
+	static TypeBasedHandler = Std.module('LibUtilExt/TypeBasedHandler');
 	var describer = new TypeBasedHandler(false); // one (non recursive) type handler for all instances
 	describer.addHandler(Object,fn(obj){		return "(generic object '"+obj.getTypeName()+"')";	});
 	describer.addHandler(Number,fn(Number s){	return "(Number "+s+")"; });

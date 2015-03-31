@@ -27,8 +27,8 @@ PADrend.Serialization := new Plugin({
 PADrend.Serialization.typeRegistry @(private) := void;
 
 PADrend.Serialization.init @(override) := fn(){
-	Std.require('LibUtilExt/initObjectSerializers');
-	Std.require('LibGeometryExt/initObjectSerializers');
+	Std.module('LibUtilExt/initObjectSerializers');
+	Std.module('LibGeometryExt/initObjectSerializers');
 
 	this.typeRegistry = new  ObjectSerialization.TypeRegistry;
 	

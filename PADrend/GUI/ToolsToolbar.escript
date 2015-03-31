@@ -59,9 +59,9 @@ plugin.init @(override) := fn(){
 		};
 	}); 
 	
-	registerExtension( 'PADrend_Init',fn(){	toolbarEnabled.forceRefresh();	},Extension.LOW_PRIORITY*3.0); // execute after all menus and tabs are registered
+	Util.registerExtension( 'PADrend_Init',fn(){	toolbarEnabled.forceRefresh();	},Extension.LOW_PRIORITY*3.0); // execute after all menus and tabs are registered
 
-	registerExtension( 'PADrend_KeyPressed',fn(evt){
+	Util.registerExtension( 'PADrend_KeyPressed',fn(evt){
 		if(evt.key == Util.UI.KEY_F2 && !toolbarEnabled()) {
 			toolbarEnabled(true);
 			return true;

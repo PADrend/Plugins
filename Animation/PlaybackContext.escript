@@ -76,7 +76,7 @@ T.isPlaying ::= fn(){
 	return this.playing;
 };
 
-static Command = Std.require('LibUtilExt/Command');
+static Command = Std.module('LibUtilExt/Command');
 T.jumpRel ::= fn(tDiff){
 	if(tDiff < -this.currentTime)
 		tDiff = -this.currentTime;
@@ -107,7 +107,7 @@ T.play ::= fn(){
 	
 	this.playing = true;
 	if(!this.extensionRegistered){
-		registerExtension('PADrend_AfterFrame',this->fn(...){
+		Util.registerExtension('PADrend_AfterFrame',this->fn(...){
 			if(!this.playing){
 				this.extensionRegistered=false;
 				return Extension.REMOVE_EXTENSION;

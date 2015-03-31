@@ -46,7 +46,7 @@ plugin.init @(override) := fn() {
 	PADrend.syncVars.addDataWrapper('GUITools.Logo.name',activeLogoName);
 	PADrend.syncVars.addDataWrapper('GUITools.Logo.wbg',whiteBackground);
 
-	registerExtension('PADrend_Init',	fn(){enabled.forceRefresh();} );
+	Util.registerExtension('PADrend_Init',	fn(){enabled.forceRefresh();} );
 	return true;
 };
 
@@ -97,7 +97,7 @@ static refresh = fn(...){
 			},
 			GUI.CONTEXT_MENU_WIDTH : 200,
 			GUI.TOOLTIP : autoTooltip() ? {
-					var Version = Std.require('PADrend/Version');
+					var Version = Std.module('PADrend/Version');
 					Version.VERSION_FULL_STRING + "\nBuild: "+ Version.BUILD;
 				} : "",
 			GUI.FLAGS : GUI.BACKGROUND

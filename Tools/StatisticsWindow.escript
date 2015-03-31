@@ -23,7 +23,7 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn() {
-	registerExtension('PADrend_Init', this -> fn() {
+	Util.registerExtension('PADrend_Init', this -> fn() {
 		gui.register('Tools_ToolsMenu.info_statistics', [{
 			GUI.TYPE		:	GUI.TYPE_MENU,
 			GUI.LABEL		:	"Statistics Windows",
@@ -90,10 +90,10 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 		}
 	);
 	//! \see GUI.ContextMenuTrait
-	Traits.addTrait(window, Std.require('LibGUIExt/Traits/ContextMenuTrait'),200);
+	Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/ContextMenuTrait'),200);
 
 	//! \see GUI.StorableRectTrait
-	Traits.addTrait(window, Std.require('LibGUIExt/Traits/StorableRectTrait'),
+	Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'),
 			DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".rect", windowRectDefault));
 
 
@@ -232,7 +232,7 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 			});
 			fpsLabel.highlight := false;
 			panel += fpsLabel;
-			registerExtension('PADrend_OnAvgFPSUpdated', [fpsLabel]=>fn(fpsLabel,fps) {
+			Util.registerExtension('PADrend_OnAvgFPSUpdated', [fpsLabel]=>fn(fpsLabel,fps) {
 				if(fpsLabel.isDestroyed()) {
 					return Extension.REMOVE_EXTENSION;
 				}
@@ -275,7 +275,7 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 				label.highlight := false;
 				panel += label;
 
-				registerExtension('PADrend_AfterRendering', [label, counter]=>fn(label, Number counter,camera) {
+				Util.registerExtension('PADrend_AfterRendering', [label, counter]=>fn(label, Number counter,camera) {
 					if(label.isDestroyed()) {
 						return Extension.REMOVE_EXTENSION;
 					}

@@ -15,7 +15,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-var Version = Std.require('PADrend/Version');
+var Version = Std.module('PADrend/Version');
  // header 
 outln("-"*79);
 outln(Version.VERSION_FULL_STRING);
@@ -34,12 +34,12 @@ if(EScript.VERSION<607)
 {
 	outln("Loading Util scripts...");
 	
-	Std.require('LibUtilExt/initMiscUtils');
-	Std.require('LibGeometryExt/initGeometryUtils');
-	Std.require('LibRenderingExt/initRenderingUtils');	
-	Std.require('LibMinSGExt/initMinSGUtils');
-	Std.require('LibMinSGExt/initNodeExtensions');
-	Std.require('LibMinSGExt/initMeshBuilderExtensions');
+	Std.module('LibUtilExt/initMiscUtils');
+	Std.module('LibGeometryExt/initGeometryUtils');
+	Std.module('LibRenderingExt/initRenderingUtils');	
+	Std.module('LibMinSGExt/initMinSGUtils');
+	Std.module('LibMinSGExt/initNodeExtensions');
+	Std.module('LibMinSGExt/initMeshBuilderExtensions');
 
 }
 { // Declare some global variables
@@ -53,5 +53,5 @@ if(EScript.VERSION<607)
 	GLOBALS.camera := void;
 }
 { // load and execute PADrend
-	Std.require('LibUtilExt/GlobalPluginRegistry').loadPlugins( ["PADrend"],true,[__DIR__+"/../"] );
+	Std.module('LibUtilExt/GlobalPluginRegistry').loadPlugins( ["PADrend"],true,[__DIR__+"/../"] );
 }

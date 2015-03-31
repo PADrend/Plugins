@@ -21,7 +21,7 @@ static ContextMenuTrait = module('./ContextMenuTrait');
 	Adds no public attributes. Adds the ContextMenuTrait if not already present.
 	
 	\code
-		Std.Traits.addTrait(myWindow, Std.require('LibMinSGExt/Traits/StorableRectTrait'), Std.DataWrapper.createFromEntry(someConfig,"someKey",[100,100,320,200]);
+		Std.Traits.addTrait(myWindow, Std.module('LibMinSGExt/Traits/StorableRectTrait'), Std.DataWrapper.createFromEntry(someConfig,"someKey",[100,100,320,200]);
 	\endcode
 
 */

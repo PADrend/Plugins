@@ -15,7 +15,7 @@
  ** Tracking of the position of the observer to optimize immersion for stereoscoping view.
  **/
  
-static deviceRequirements = [Std.require('LibUtilExt/HID_Traits').Controller_Room6D_Trait];
+static deviceRequirements = [Std.module('LibUtilExt/HID_Traits').Controller_Room6D_Trait];
 static enabled = Std.DataWrapper.createFromEntry( systemConfig,'Tracking.ObserverPositionTracking.intitiallyEnabled',true );
 static deviceNames = Std.DataWrapper.createFromEntry(systemConfig,'Tracking.ObserverPositionTracking.deviceNames', ["Brille"]);
 

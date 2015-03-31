@@ -15,8 +15,8 @@ static EditNodeTraits = module('./EditNodeTraits');
 static ToolHelperTraits = module('./ToolHelperTraits');
 
 //---------------------------------------------------------------------------------
-static NodeAnchors = Std.require('LibMinSGExt/NodeAnchors');
-static Command = Std.require('LibUtilExt/Command');
+static NodeAnchors = Std.module('LibMinSGExt/NodeAnchors');
+static Command = Std.module('LibUtilExt/Command');
 
 static _updatePivot = fn(MinSG.Node node, [Geometry.Vec3,false] pivot){
 	var newPivot = pivot ? pivot.toArray() : false;
@@ -80,13 +80,13 @@ Tool.onToolInitOnce_static += fn(){
 	metaRoot += editNode;
 
 	//! \see EditNodeTraits.AdjustableProjSizeTrait
-	Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait);
+	Std.Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait);
 
 	//! \see ToolHelperTraits.FrameListenerTrait
 	this.onFrame += editNode->editNode.adjustProjSize; //! \see EditNodeTraits.AdjustableProjSizeTrait
 
 	//! \see EditNodeTraits.AnnotatableTrait
-	Traits.addTrait( editNode, EditNodeTraits.AnnotatableTrait);
+	Std.Traits.addTrait( editNode, EditNodeTraits.AnnotatableTrait);
 
 	// ----------
 

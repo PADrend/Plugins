@@ -22,16 +22,16 @@
  * If there is no path between source and target, an empty array is returned.
  */
 return fn(Array vertices, source, target) {
-	var VertexTrait = Std.require('GraphTools/Vertex');
-	Traits.requireTrait(source, VertexTrait);
-	Traits.requireTrait(target, VertexTrait);
+	var VertexTrait = Std.module('GraphTools/Vertex');
+	Std.Traits.requireTrait(source, VertexTrait);
+	Std.Traits.requireTrait(target, VertexTrait);
 
 	var previous = new Map;
 	var infinity = 1.0e+20;
 	var queue = new Util.UpdatableHeap;
 	var queueElements = new Map;
 	foreach(vertices as var vertex) {
-		Traits.requireTrait(vertex, VertexTrait);
+		Std.Traits.requireTrait(vertex, VertexTrait);
 
 		// The distance is stored as the cost in the heap.
 		queueElements[vertex] = queue.insert(vertex === source ? 0 : infinity,

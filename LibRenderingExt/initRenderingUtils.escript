@@ -121,7 +121,7 @@ static smoothCubeMap = fn(Rendering.Texture sourceMap,Rendering.Texture targetMa
 	renderingContext.pushAndSetTexture(0,sourceMap);
 	for(var layer=0;layer<6;++layer){
 		shader.setUniform(renderingContext, new Rendering.Uniform('layer',Rendering.Uniform.INT, [layer]));
-		(new (Std.require('LibRenderingExt/TextureProcessor')))
+		(new (Std.module('LibRenderingExt/TextureProcessor')))
 			.setOutputTexture(targetMap,0,layer)
 			.setShader(shader)
 			.execute();

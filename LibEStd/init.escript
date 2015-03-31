@@ -68,21 +68,21 @@ if(EScript.VERSION>=701){
 	Std.addModuleSearchPath(__DIR__ + "/../../../EScript");
 	Std.addModuleSearchPath("EScript.exp");
 
-	Std.require('Std/TypeExtensions');
+	Std.module('Std/TypeExtensions');
 
-	GLOBALS.ObjectSerialization := Std.require('Std/ObjectSerialization');
-	GLOBALS.MultiProcedure := Std.require('Std/MultiProcedure');
-	GLOBALS.DataWrapperContainer := Std.require('Std/DataWrapperContainer');
-	GLOBALS.Set := Std.require('Std/Set');
-	GLOBALS.info := Std.require('Std/info');
-	GLOBALS.PriorityQueue := Std.require('Std/PriorityQueue');
-	GLOBALS.Traits := Std.require('Std/Traits/basics');
-	Traits.CallableTrait := Std.require('Std/Traits/CallableTrait');
-	Traits.DefaultComparisonOperatorsTrait := Std.require('Std/Traits/DefaultComparisonOperatorsTrait');
-	Traits.PrintableNameTrait := Std.require('Std/Traits/PrintableNameTrait');
+	GLOBALS.ObjectSerialization := Std.module('Std/ObjectSerialization');
+	GLOBALS.MultiProcedure := Std.module('Std/MultiProcedure');
+	GLOBALS.DataWrapperContainer := Std.module('Std/DataWrapperContainer');
+	GLOBALS.Set := Std.module('Std/Set');
+	GLOBALS.info := Std.module('Std/info');
+	GLOBALS.PriorityQueue := Std.module('Std/PriorityQueue');
+	GLOBALS.Traits := Std.module('Std/Traits/basics');
+	Std.Traits.CallableTrait := Std.module('Std/Traits/CallableTrait');
+	Std.Traits.DefaultComparisonOperatorsTrait := Std.module('Std/Traits/DefaultComparisonOperatorsTrait');
+	Std.Traits.PrintableNameTrait := Std.module('Std/Traits/PrintableNameTrait');
 
-	GLOBALS.DataWrapper := Std.require('Std/DataWrapper');
-	Std.JSONDataStore := Std.require('Std/JSONDataStore');
+	GLOBALS.DataWrapper := Std.module('Std/DataWrapper');
+	Std.JSONDataStore := Std.module('Std/JSONDataStore');
 
 	Std.addRevocably := fn( array, callback ){
 		array += callback;

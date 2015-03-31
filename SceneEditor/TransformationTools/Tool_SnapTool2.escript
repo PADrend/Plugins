@@ -72,7 +72,7 @@ Tool.onDraggingStart := fn(evt){
 };
 static getRayCaster = fn(){
 	static caster;
-	@(once)	caster = new (Std.require('LibMinSGExt/RendRayCaster'));
+	@(once)	caster = new (Std.module('LibMinSGExt/RendRayCaster'));
 	return caster;
 };
 Tool.onDragging := fn(evt){
@@ -151,7 +151,7 @@ Tool.onToolInitOnce_static += fn(){
 	};
 
 	//! \see EditNodeTraits.AdjustableProjSizeTrait
-	Traits.addTrait( n, EditNodeTraits.AdjustableProjSizeTrait,50,80);
+	Std.Traits.addTrait( n, EditNodeTraits.AdjustableProjSizeTrait,50,80);
 
 	//! \see ToolHelperTraits.FrameListenerTrait
 	this.onFrame += [n] => fn(arrowNode){
@@ -160,11 +160,11 @@ Tool.onToolInitOnce_static += fn(){
 	};
 
 	//! \see EditNodeTraits.ColorTrait
-	Traits.addTrait(n,EditNodeTraits.ColorTrait);
+	Std.Traits.addTrait(n,EditNodeTraits.ColorTrait);
 	n.setColor(new Util.Color4f(2,0,0,0.5));
 
 	//! \see EditNodeTraits.DraggableTrait
-	Traits.addTrait(n,EditNodeTraits.DraggableTrait);
+	Std.Traits.addTrait(n,EditNodeTraits.DraggableTrait);
 
 	//! \see EditNodeTraits.DraggableTrait
 	n.onDraggingStart += fn(evt){

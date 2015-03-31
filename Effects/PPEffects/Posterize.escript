@@ -11,7 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type( Std.require('Effects/SimplePPEffect') );
+var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
 Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_130.vs", getShaderFolder()+"Posterize.fs", Rendering.Shader.USE_UNIFORMS))){
 	

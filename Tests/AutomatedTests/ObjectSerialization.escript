@@ -14,7 +14,7 @@
  **	[Plugin:Tests] Tests/AutomatedTests/ObjectSerialization.escript
  **/
 
-var AutomatedTest = Std.require('Tests/AutomatedTest');
+var AutomatedTest = Std.module('Tests/AutomatedTest');
 
 var tests = [];
 
@@ -22,8 +22,8 @@ var tests = [];
 
 // basic Object Serialization
 tests += new AutomatedTest( "LibUtilExt/ObjectSerialization" , fn(){
-	Std.require('LibUtilExt/initObjectSerializers');
-	Std.require('LibGeometryExt/initObjectSerializers');
+	Std.module('LibUtilExt/initObjectSerializers');
+	Std.module('LibGeometryExt/initObjectSerializers');
 	
 	{
 		var ok = true;

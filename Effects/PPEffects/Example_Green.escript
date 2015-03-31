@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-var Effect = new Type( Std.require('Effects/PPEffect') );
+var Effect = new Type( Std.module('Effects/PPEffect') );
 
 Effect._constructor ::= fn(){
 

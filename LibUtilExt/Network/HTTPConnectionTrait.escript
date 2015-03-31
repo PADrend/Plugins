@@ -13,8 +13,8 @@
 
 /*! Simple usage example: 
 	\code
-		static HTTP = Std.require( 'LibUtilExt/Network/HTTP' );
-		static HTTPConnectionTrait = Std.require( 'LibUtilExt/Network/HTTPConnectionTrait' );
+		static HTTP = Std.module( 'LibUtilExt/Network/HTTP' );
+		static HTTPConnectionTrait = Std.module( 'LibUtilExt/Network/HTTPConnectionTrait' );
 
 		static isAllowed =  fn( String authLine, String method, String query){
 			var parts = authLine.split(" ");
@@ -39,18 +39,18 @@
 			return [new HTTP.Message( HTTP.STATUS_NOT_FOUND,void,"File not found!" ),false];
 		};
 
-		var services = new (Std.require('LibUtilExt/Network/ServiceBundle'));
+		var services = new (Std.module('LibUtilExt/Network/ServiceBundle'));
 
 		var tcpServer;
 		try{
 
-			tcpServer = new (Std.require('LibUtilExt/Network/ExtTCPServer'))( 8081 );
+			tcpServer = new (Std.module('LibUtilExt/Network/ExtTCPServer'))( 8081 );
 			services += tcpServer;
 
-			static ExtTCPConnection = Std.require('LibUtilExt/Network/ExtTCPConnection');
+			static ExtTCPConnection = Std.module('LibUtilExt/Network/ExtTCPConnection');
 			tcpServer.onConnect += [services] => fn(services, ExtTCPConnection newConnection){
 				//! \see HTTPConnectionTrait
-				Traits.addTrait(newConnection, );
+				Std.Traits.addTrait(newConnection, );
 				
 				newConnection.isAllowed @(override) := isAllowed; //! \see HTTPConnectionTrait
 				newConnection.handleGETRequest @(override) := handleGETRequest; //! \see HTTPConnectionTrait
@@ -67,7 +67,7 @@
 
 
 
-static HTTP = Std.require( 'LibUtilExt/Network/HTTP' );
+static HTTP = Std.module( 'LibUtilExt/Network/HTTP' );
 
 var t = new Traits.GenericTrait;
 
@@ -176,7 +176,7 @@ t.attributes.execute := fn(){
 		this.close();
 };
 
-static ExtTCPConnection = Std.require('LibUtilExt/Network/ExtTCPConnection');
+static ExtTCPConnection = Std.module('LibUtilExt/Network/ExtTCPConnection');
 t.onInit += fn(ExtTCPConnection connection){};
 
 

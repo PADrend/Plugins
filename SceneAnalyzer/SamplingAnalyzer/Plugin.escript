@@ -28,7 +28,7 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : [	]
 });
 
-static GASPManager = Std.require('SceneAnalyzer/GlobalGASPManager');
+static GASPManager = Std.module('SceneAnalyzer/GlobalGASPManager');
 
 plugin.init @(override) := fn(){
 	Util.registerExtension('PADrend_Init',this->this.ex_Init);
@@ -67,7 +67,7 @@ plugin.ex_Init := fn(){
 						positions+=point.pos;
 					var histogram = MinSG.SamplingAnalysis.createDistanceHistogram(positions,this.dhNumDistBuckets);
 
-					var dataTable = new (Std.require('LibUtilExt/DataTable'))("dist");
+					var dataTable = new (Std.module('LibUtilExt/DataTable'))("dist");
 					var data = new Map();
 					var scale = histogram.maxValue/histogram.buckets.count();
 					foreach( histogram.buckets as var idx,var amount){
@@ -103,7 +103,7 @@ plugin.ex_Init := fn(){
 						positions+=point.pos;
 					var histogram = MinSG.SamplingAnalysis.createAngleHistogram(positions,this.dhNumAngleBuckets);
 	//				print_r(result._getAttributes());
-					var dataTable = new (Std.require('LibUtilExt/DataTable'))("dist");
+					var dataTable = new (Std.module('LibUtilExt/DataTable'))("dist");
 					var data = new Map;
 					var scale = histogram.maxValue/histogram.buckets.count();
 					foreach( histogram.buckets as var idx,var amount){
@@ -139,7 +139,7 @@ plugin.ex_Init := fn(){
 						positions+=point.pos;
 					var histogram = MinSG.SamplingAnalysis.createClosestPointDistanceHistogram(positions,this.dhNumClosestPointBuckets);
 	//				print_r(result._getAttributes());
-					var dataTable = new (Std.require('LibUtilExt/DataTable'))("dist");
+					var dataTable = new (Std.module('LibUtilExt/DataTable'))("dist");
 					var data = new Map;
 					var scale = histogram.maxValue/histogram.buckets.count();
 					foreach( histogram.buckets as var idx,var amount){
@@ -164,7 +164,7 @@ plugin.ex_Init := fn(){
 						Runtime.warn("No gasp selected.");
 						return;
 					}
-					var dataTable = new (Std.require('LibUtilExt/DataTable'))("dist");
+					var dataTable = new (Std.module('LibUtilExt/DataTable'))("dist");
 					var data = new Map;
 					foreach(c.sampleContainer.collectPoints() as var pointNr,var point){
 						var pos = point.pos;

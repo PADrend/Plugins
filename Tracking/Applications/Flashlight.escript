@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static deviceRequirements = [Std.require('LibUtilExt/HID_Traits').Controller_Room6D_Trait];
+static deviceRequirements = [Std.module('LibUtilExt/HID_Traits').Controller_Room6D_Trait];
 static enabled = Std.DataWrapper.createFromEntry( systemConfig,'Tracking.Light.intitiallyEnabled',false );
 static deviceNames = Std.DataWrapper.createFromEntry(systemConfig,'Tracking.Light.deviceNames', ["Flystick"]);
 

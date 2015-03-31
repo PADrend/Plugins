@@ -41,7 +41,7 @@ plugin.init @(override) := fn(){
 	module.on('PADrend/gui',this->fn(gui){
 		gui.register('SceneEditor_ToolsConfigTabs.Prototypes',[gui]=>this->createUITab);
 	});
-	registerExtension('ObjectPlacer_OnObjectInserted',	Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree );
+	Util.registerExtension('ObjectPlacer_OnObjectInserted',	Std.module('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree );
 
 	var modules = [
         __DIR__+"/BuiltinLib.escript",
@@ -63,9 +63,9 @@ plugin.createUITab := fn(gui){
 	});
 	panel += tv;
 
-	var ObjectPlacerUtils = Std.require('SceneEditor/ObjectPlacer/Utils');
+	var ObjectPlacerUtils = Std.module('SceneEditor/ObjectPlacer/Utils');
 	//! \see AcceptsObjectCreatorsTrait
-	Traits.addTrait(tv,ObjectPlacerUtils.AcceptsObjectCreatorsTrait);
+	Std.Traits.addTrait(tv,ObjectPlacerUtils.AcceptsObjectCreatorsTrait);
 
 
 	var refreshTv = tv->fn(){

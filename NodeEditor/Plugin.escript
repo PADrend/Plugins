@@ -43,12 +43,12 @@ static SemanticObject;
 
 plugin.init @(override) := fn() {
 
-	NodeEditor = Std.require('NodeEditor/NodeEditor');
-	SemanticObject = Std.require('LibMinSGExt/SemanticObject');
+	NodeEditor = Std.module('NodeEditor/NodeEditor');
+	SemanticObject = Std.module('LibMinSGExt/SemanticObject');
 	
 	/// Register ExtensionPointHandler:
-	registerExtension('PADrend_Init', fn(){	NodeEditor.selectNode(PADrend.getCurrentScene());	});
-	registerExtension('PADrend_UIEvent',fn(evt){
+	Util.registerExtension('PADrend_Init', fn(){	NodeEditor.selectNode(PADrend.getCurrentScene());	});
+	Util.registerExtension('PADrend_UIEvent',fn(evt){
 		if(	evt.type==Util.UI.EVENT_MOUSE_BUTTON &&
 				(evt.button == Util.UI.MOUSE_BUTTON_LEFT || evt.button == Util.UI.MOUSE_BUTTON_RIGHT) &&
 				evt.pressed &&
@@ -75,7 +75,7 @@ plugin.init @(override) := fn() {
 		return false;
 	});
 
-	registerExtension('PADrend_OnSceneSelected', NodeEditor.selectNode); // automatically select the scene
+	Util.registerExtension('PADrend_OnSceneSelected', NodeEditor.selectNode); // automatically select the scene
 
 	var modules = [
 				__DIR__+"/GUI/Plugin.escript",
@@ -155,7 +155,7 @@ plugin.init @(override) := fn() {
 	// ----------------------------
 	// keyboard input
 	static keyMap = new Map;
-	registerExtension('PADrend_KeyPressed', fn(evt) {
+	Util.registerExtension('PADrend_KeyPressed', fn(evt) {
 		var handler = keyMap[evt.key];
 		return handler ? handler() : false;
 	});
@@ -221,7 +221,7 @@ plugin.init @(override) := fn() {
 					var c = node.clone();
 					node.getParent() += c;
 					newNodes += c;
-					Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(c);
+					Std.module('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(c);
 				}
 			}
 			PADrend.message(""+newNodes.count()+" nodes duplicated." );
@@ -241,7 +241,7 @@ plugin.init @(override) := fn() {
 					var c = MinSG.Node.createInstance(node);
 					node.getParent() += c;
 					newNodes += c;
-					Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(c);
+					Std.module('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(c);
 				}
 			}
 			PADrend.message(""+newNodes.count()+" nodes instanciated." );
@@ -299,7 +299,7 @@ plugin.init @(override) := fn() {
 					var n2=node.clone();
 					MinSG.changeParentKeepTransformation(n2,parentNode);
 					clones+=n2;
-					Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(n2);
+					Std.module('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(n2);
 
 					out(".");
 				}
@@ -316,7 +316,7 @@ plugin.init @(override) := fn() {
 
 	// [1...9] restore selection
 	// [ctrl] + [1...9] store selection
-	static selectedNodesStorage = Std.require('NodeEditor/SelectedNodesStorage');
+	static selectedNodesStorage = Std.module('NodeEditor/SelectedNodesStorage');
 	foreach( [ Util.UI.KEY_1, Util.UI.KEY_2, Util.UI.KEY_3, Util.UI.KEY_4, Util.UI.KEY_5,
 				Util.UI.KEY_6, Util.UI.KEY_7, Util.UI.KEY_8, Util.UI.KEY_9] as var index,var sym){
 		keyMap[sym] = [index] => this->fn(index){
@@ -369,7 +369,7 @@ plugin.init @(override) := fn() {
 					return Extension.CONTINUE;
 				}
 			});
-			registerExtension('PADrend_AfterFrame',follower->follower.execute);
+			Util.registerExtension('PADrend_AfterFrame',follower->follower.execute);
 			camera.setRelPosition(new Geometry.Vec3(0,0,NodeEditor.getSelectedNode().getWorldBB().getDiameter()));
 			out(-NodeEditor.getSelectedNode().getWorldBB().getDiameter()*1.5);
 		}

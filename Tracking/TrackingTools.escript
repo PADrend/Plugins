@@ -17,7 +17,7 @@ static rayCache = []; //segmentString, clock()+0.1, intersection
 
 //!	Returns the intersection point of the scene with the given worldRay/segment
 NS.querySceneIntersection := fn(Geometry.Segment3 worldSegment, _useCache=true){
-	@(once) static rayCaster = new (Std.require('LibMinSGExt/RendRayCaster'));
+	@(once) static rayCaster = new (Std.module('LibMinSGExt/RendRayCaster'));
 	var segStr = ""+worldSegment;
 	var now = clock();
 

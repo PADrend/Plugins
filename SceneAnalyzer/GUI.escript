@@ -22,8 +22,8 @@ static SceneAnalyzerGUI = new Namespace;
 //    "v.avg()",
 //    "(v[0]-v[1]).abs()"];
 
-static GASP = Std.require('SceneAnalyzer/GASP');
-static GASPManager = Std.require('SceneAnalyzer/GlobalGASPManager');
+static GASP = Std.module('SceneAnalyzer/GASP');
+static GASPManager = Std.module('SceneAnalyzer/GlobalGASPManager');
 
 static gaspPath = systemConfig.getValue('SceneAnalyzer.path',".");
 
@@ -74,7 +74,7 @@ SceneAnalyzerGUI.createWindow:=fn(posX,posY) {
 		GUI.LABEL : "Scene Analyzer"
 	});
 
-	Std.Traits.addTrait(window, Std.require('LibGUIExt/Traits/StorableRectTrait'),
+	Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'),
 						Std.DataWrapper.createFromConfig(PADrend.configCache, "SceneAnalyzer.winRect", [200,100,420,410]));
 
 	var tabPanel = gui.create({

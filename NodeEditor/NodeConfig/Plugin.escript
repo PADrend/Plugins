@@ -26,7 +26,7 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn() {
 
-	Std.require( 'NodeEditor/NodeConfig/initNodePanels');
+	Std.module( 'NodeEditor/NodeConfig/initNodePanels');
 
 	
 	{// init available nodes
@@ -51,8 +51,8 @@ plugin.init @(override) := fn() {
 	NodeEditor.addConfigTreeEntryProvider(MinSG.Node,fn( node,entry ){
 		
 		//! \see AcceptDroppedStatesTrait
-		@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');								
-		Traits.addTrait( entry._label, AcceptDroppedStatesTrait);
+		@(once) static AcceptDroppedStatesTrait = Std.module('NodeEditor/GUI/AcceptDroppedStatesTrait');								
+		Std.Traits.addTrait( entry._label, AcceptDroppedStatesTrait);
 		entry._label.onStatesDropped += [node] => fn(node, source, Array states, actionType, evt){
 			AcceptDroppedStatesTrait.transferDroppedStates( source, node, states, actionType); //! \see AcceptDroppedStatesTrait
 			for(var c=this; c; c=c.getParentComponent()){

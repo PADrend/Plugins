@@ -18,7 +18,7 @@
 **
 ** GUI construction for the editor part of the Waypoints-Plugin.
 **/
-static PathManagement = Std.require('Waypoints/PathManagement');
+static PathManagement = Std.module('Waypoints/PathManagement');
 
 static createWaypointCell = fn(MinSG.Waypoint waypoint, listView) {
 	var cell = gui.create({
@@ -193,7 +193,7 @@ return fn(tabbedPanel){
 		GUI.LIST_ENTRY_HEIGHT	:	35
 	});
 
-	registerExtension('Waypoints_PathChanged', [tw] => fn(listView, [MinSG.PathNode, void] path) {
+	Util.registerExtension('Waypoints_PathChanged', [tw] => fn(listView, [MinSG.PathNode, void] path) {
 		listView.clear();
 		if(!path)
 			return;

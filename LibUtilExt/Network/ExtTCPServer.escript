@@ -15,8 +15,8 @@
 	- calls onConnect(new connection) when a new connection is available.
 	\see LibUtilExt/Network/NetworkServiceTrait	*/
 var T = new Type;
-Traits.addTrait(T,Traits.PrintableNameTrait,$ExtTCPServer); 								//!	\see 	Traits.PrintableNameTrait
-Traits.addTrait(T,Std.require('LibUtilExt/Network/NetworkServiceTrait'));					//! \see	LibUtilExt/Network/NetworkServiceTrait
+Traits.addTrait(T,Traits.PrintableNameTrait,$ExtTCPServer); 								//!	\see 	Std.Traits.PrintableNameTrait
+Traits.addTrait(T,Std.module('LibUtilExt/Network/NetworkServiceTrait'));					//! \see	LibUtilExt/Network/NetworkServiceTrait
 
 T.server @(private) := void;
 T.onConnect @(init,public) := MultiProcedure;
@@ -32,7 +32,7 @@ T.close 	@(override) ::= fn(){	this.server.close();	return this;	};
 //!\see LibUtilExt/Network/NetworkServiceTrait
 T.isOpen	@(override) ::= fn(){	return this.server.isOpen();	};
 
-static ExtTCPConnection = Std.require('LibUtilExt/Network/ExtTCPConnection');
+static ExtTCPConnection = Std.module('LibUtilExt/Network/ExtTCPConnection');
 //!\see LibUtilExt/Network/NetworkServiceTrait
 T.execute	@(override) ::= fn(){
 	if(this.isOpen()){

@@ -20,7 +20,7 @@ if(!Rendering.isSet($CL))
 GLOBALS.CL := Rendering.CL;
 static roundUp = fn(x, y) { return ((x + y - 1) / y).floor() * y; };
 
-var AutomatedTest = Std.require('Tests/AutomatedTest');
+var AutomatedTest = Std.module('Tests/AutomatedTest');
 
 var tests = [];
 
@@ -49,7 +49,7 @@ tests += new AutomatedTest("OpenCL: availability",fn(){
 
 
 tests += new AutomatedTest("OpenCL: PrefixSum (GPU)",fn(){
-	static Scanner = Std.require('LibRenderingExt/CL/Scanner');
+	static Scanner = Std.module('LibRenderingExt/CL/Scanner');
 	
 	{ // GPU
 		var context = new CL.Context(CL.TYPE_GPU, false);
@@ -91,7 +91,7 @@ tests += new AutomatedTest("OpenCL: PrefixSum (GPU)",fn(){
 });
 
 tests += new AutomatedTest("OpenCL: PrefixSum (CPU)",fn(){
-	static Scanner = Std.require('LibRenderingExt/CL/Scanner');	
+	static Scanner = Std.module('LibRenderingExt/CL/Scanner');	
 	{ // CPU
 		var context = new CL.Context(CL.TYPE_CPU, false);
 		var device = context.getDevices()[0];
@@ -133,7 +133,7 @@ tests += new AutomatedTest("OpenCL: PrefixSum (CPU)",fn(){
 
 
 tests += new AutomatedTest("OpenCL: Reduce (GPU)",fn(){
-	static Reduce = Std.require('LibRenderingExt/CL/Reduce');	
+	static Reduce = Std.module('LibRenderingExt/CL/Reduce');	
 	{ // GPU
 		var context = new CL.Context(CL.TYPE_GPU);
 		var device = context.getDevices()[0];
@@ -213,7 +213,7 @@ tests += new AutomatedTest("OpenCL: Reduce (GPU)",fn(){
 });
 
 tests += new AutomatedTest("OpenCL: Reduce (CPU)",fn(){
-	static Reduce = Std.require('LibRenderingExt/CL/Reduce');
+	static Reduce = Std.module('LibRenderingExt/CL/Reduce');
 	{ // CPU
 		var context = new CL.Context(CL.TYPE_CPU);
 		var device = context.getDevices()[0];
@@ -293,7 +293,7 @@ tests += new AutomatedTest("OpenCL: Reduce (CPU)",fn(){
 });
 
 tests += new AutomatedTest("OpenCL: Sort (GPU)",fn(){
-	var RadixSort = Std.require('LibRenderingExt/CL/RadixSort');
+	var RadixSort = Std.module('LibRenderingExt/CL/RadixSort');
 	
 	{ // GPU
 		var context = new CL.Context(CL.TYPE_GPU, false);

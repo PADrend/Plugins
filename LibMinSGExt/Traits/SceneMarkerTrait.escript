@@ -17,7 +17,7 @@
 	
 	\code
 	var scene;
-	var t = Std.require('LibMinSGExt/Traits/SceneMarkerTrait');
+	var t = Std.module('LibMinSGExt/Traits/SceneMarkerTrait');
 	for(var n = node; n; n=n.getParent())
 		if( Std.Traits.queryTrait(n, t) )
 			scene = n;

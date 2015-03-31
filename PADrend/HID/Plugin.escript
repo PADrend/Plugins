@@ -45,14 +45,14 @@ declareNamespace($PADrend,$HID);
 //	// init virtual gamepad
 //	var virtualGamepad = new ExtObject;
 //
-//	Traits.addTrait( virtualGamepad, HID.DeviceBaseTrait, "VirtualGamepad");
-//	Traits.addTrait( virtualGamepad, HID.ControllerButtonTrait, 2);
-////	Traits.addTrait( virtualGamepad, HID.ControllerHatTrait, 1);
-//	Traits.addTrait( virtualGamepad, HID.ControllerAnalogAxisTrait, 4);
-//	Traits.addTrait( virtualGamepad, HID.GamepadDeviceTrait);
+//	Std.Traits.addTrait( virtualGamepad, HID.DeviceBaseTrait, "VirtualGamepad");
+//	Std.Traits.addTrait( virtualGamepad, HID.ControllerButtonTrait, 2);
+////	Std.Traits.addTrait( virtualGamepad, HID.ControllerHatTrait, 1);
+//	Std.Traits.addTrait( virtualGamepad, HID.ControllerAnalogAxisTrait, 4);
+//	Std.Traits.addTrait( virtualGamepad, HID.GamepadDeviceTrait);
 //	
 //	
-//	registerExtension('PADrend_UIEvent',virtualGamepad->fn(evt){
+//	Util.registerExtension('PADrend_UIEvent',virtualGamepad->fn(evt){
 //		if(evt.type==Util.UI.EVENT_KEYBOARD){
 //			if(evt.key == Util.UI.KEY_B){
 //				return this.sendButtonEvent(0,evt.pressed);
@@ -103,16 +103,16 @@ PADrend.HID.initDefaultGamepad := fn(DataWrapper sensitivityValue){
 	// init the real gamepad here....
 	var gamepad = new ExtObject;
 
-	var HID_Traits = Std.require('LibUtilExt/HID_Traits');
-	Traits.addTrait( gamepad, HID_Traits.DeviceBaseTrait, "Gamepad_1");
-	Traits.addTrait( gamepad, HID_Traits.ControllerButtonTrait, 10);
-	Traits.addTrait( gamepad, HID_Traits.ControllerHatTrait, 1);
-	Traits.addTrait( gamepad, HID_Traits.ControllerAnalogAxisTrait, 4);
-	Traits.addTrait( gamepad, HID_Traits.GamepadDeviceTrait);
+	var HID_Traits = Std.module('LibUtilExt/HID_Traits');
+	Std.Traits.addTrait( gamepad, HID_Traits.DeviceBaseTrait, "Gamepad_1");
+	Std.Traits.addTrait( gamepad, HID_Traits.ControllerButtonTrait, 10);
+	Std.Traits.addTrait( gamepad, HID_Traits.ControllerHatTrait, 1);
+	Std.Traits.addTrait( gamepad, HID_Traits.ControllerAnalogAxisTrait, 4);
+	Std.Traits.addTrait( gamepad, HID_Traits.GamepadDeviceTrait);
 	
 	gamepad.sensitivityValue @(private) := sensitivityValue;
 	
-	registerExtension('PADrend_UIEvent',gamepad->fn(evt){
+	Util.registerExtension('PADrend_UIEvent',gamepad->fn(evt){
 		var handled = false;
 		if(evt.type==Util.UI.EVENT_JOY_AXIS){
 			if(evt.joystick == 0){
@@ -140,7 +140,7 @@ PADrend.HID.initDefaultGamepad := fn(DataWrapper sensitivityValue){
 PADrend.HID.devices @(private) := new Map;
 
 PADrend.HID.registerDevice := fn(deviceObject){
-	Traits.requireTrait(deviceObject,Std.require('LibUtilExt/HID_Traits').DeviceBaseTrait);
+	Std.Traits.requireTrait(deviceObject,Std.module('LibUtilExt/HID_Traits').DeviceBaseTrait);
 	PADrend.HID.devices[deviceObject.getDeviceId()] = deviceObject;
 };
 

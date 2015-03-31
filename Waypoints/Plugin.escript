@@ -60,12 +60,12 @@ GLOBALS.WaypointsPlugin := new Plugin({
 });
 
 
-static PathManagement = Std.require('Waypoints/PathManagement');
+static PathManagement = Std.module('Waypoints/PathManagement');
 
 WaypointsPlugin.init @(override) := fn() {
 	Util.requirePlugin('NodeEditor');
 
-	registerExtension('PADrend_Init', fn(){
+	Util.registerExtension('PADrend_Init', fn(){
 		// load inital path if set in config
 		var f = systemConfig.getValue('Waypoint.initialPath',false);
 		if(f)
@@ -75,7 +75,7 @@ WaypointsPlugin.init @(override) := fn() {
 	});
 	module.on('PADrend/gui',fn(gui){
 		gui.register('PADrend_MainWindowTabs.20_Waypoints',fn(){
-			return Std.require('Waypoints/GUI/GUI')();
+			return Std.module('Waypoints/GUI/GUI')();
 		});
 
 	});

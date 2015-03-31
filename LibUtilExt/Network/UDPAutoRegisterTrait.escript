@@ -20,7 +20,7 @@ var t = new Std.Traits.GenericTrait('UDPAutoRegisterTrait');
 
 t.attributes.timeToRegister @(private) := 0;
 
-static ExtUDPSocket = Std.require('LibUtilExt/Network/ExtUDPSocket');
+static ExtUDPSocket = Std.module('LibUtilExt/Network/ExtUDPSocket');
 t.onInit += fn(ExtUDPSocket socket, targetHost, Number targetPort, Number duration=1){
 	socket.addTarget(targetHost,targetPort);
 	(socket->fn(duration){

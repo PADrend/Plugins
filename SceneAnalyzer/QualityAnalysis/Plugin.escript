@@ -73,10 +73,10 @@ Table.getString ::= fn(delimiter='\t'){
 }; 
 
 static measure = fn(){
-	var GASPManager = Std.require('SceneAnalyzer/GlobalGASPManager');
+	var GASPManager = Std.module('SceneAnalyzer/GlobalGASPManager');
 
 	var c = GASPManager.getSelectedGASP();
-	var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
+	var evaluator = Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator();
 	var bb = c.getRootNode().getBoundingBox();
 
 	var t = new Table;
@@ -113,10 +113,10 @@ static measure = fn(){
 	PADrend.message("done.");
 };
 static measureDirectional = fn(){
-	var GASPManager = Std.require('SceneAnalyzer/GlobalGASPManager');
+	var GASPManager = Std.module('SceneAnalyzer/GlobalGASPManager');
 
 	var c = GASPManager.getSelectedGASP();
-	var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
+	var evaluator = Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator();
 	var bb = c.getRootNode().getBoundingBox();
 
 	var t = new Table;

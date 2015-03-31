@@ -42,7 +42,7 @@ var plugin = new Plugin({
 plugin.init @(override) := fn() {
 
 	{ // init members
-		Std.require('NodeEditor/BehaviourConfig/initBehaviourPanels');
+		Std.module('NodeEditor/BehaviourConfig/initBehaviourPanels');
 		this.availableBehaviours := new Map;
 		this.availableBehaviours['KeyFrameAnimationBehaviour'] = fn(MinSG.KeyFrameAnimationNode n){ return new MinSG.KeyFrameAnimationBehaviour(n); };
 
@@ -63,7 +63,7 @@ plugin.init @(override) := fn() {
 	}
 
 	{ // register at extension points
-		registerExtension('NodeEditor_QueryAvailableBehaviours',this->fn(Map registry){ registry.merge(this.availableBehaviours); });
+		Util.registerExtension('NodeEditor_QueryAvailableBehaviours',this->fn(Map registry){ registry.merge(this.availableBehaviours); });
 	}
 
 	

@@ -155,7 +155,7 @@ plugin.showWindow := fn(){
         GUI.WIDTH : 50,
         GUI.LABEL:"Create",
         GUI.ON_CLICK : [container]=>this->fn(container){
-        	static Command = Std.require('LibUtilExt/Command');
+        	static Command = Std.module('LibUtilExt/Command');
             var nodes = NodeEditor.getSelectedNodes();
             PADrend.executeCommand({
                 Command.DESCRIPTION : "Node Repeat",
@@ -201,7 +201,7 @@ plugin.showWindow := fn(){
         }
     };
 	window += panel;
-	Traits.addTrait(window, Std.require('LibGUIExt/Traits/StorableRectTrait'), 
+	Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'), 
 							DataWrapper.createFromConfig(PADrend.configCache, "Node_Repeator.winRect", [200,100,240,100]));
 };
 

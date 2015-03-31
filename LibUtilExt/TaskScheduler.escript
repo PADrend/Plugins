@@ -15,7 +15,7 @@ var T = new Type;
 
 T._printableName @(override) ::= $TaskScheduler;
 T._tasks @(private,init) := fn(){
-	return new (Std.require('Std/PriorityQueue'))( fn(a,b){return a[0] < b[0]; } );
+	return new (Std.module('Std/PriorityQueue'))( fn(a,b){return a[0] < b[0]; } );
 };
 
 //! (ctor)

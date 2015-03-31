@@ -75,7 +75,7 @@ HID_Traits.ControllerButtonTrait := new Traits.GenericTrait("HID_Traits.Controll
 	var t = HID_Traits.ControllerButtonTrait;
 	
 	t.attributes.onButton @(init) := 	fn(){	
-		var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
+		var ExtensionPoint = Std.module('LibUtilExt/ExtensionPoint');
 		return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);
 	};
 
@@ -95,7 +95,7 @@ HID_Traits.ControllerButtonTrait := new Traits.GenericTrait("HID_Traits.Controll
 		return this.onButton(buttonId,pressed);
 	};
 	t.onInit += fn(obj,numberOfButtons){
-		Traits.requireTrait(obj,HID_Traits.DeviceBaseTrait);		//! \see HID_Traits.DeviceBaseTrait
+		Std.Traits.requireTrait(obj,HID_Traits.DeviceBaseTrait);		//! \see HID_Traits.DeviceBaseTrait
 		obj._buttonStatus @(init,private) := (new Array).resize(numberOfButtons,false);
 		
 		//! \see HID_Traits.DeviceBaseTrait
@@ -127,7 +127,7 @@ HID_Traits.ControllerAnalogAxisTrait := new Traits.GenericTrait("HID_Traits.Cont
 	var t = HID_Traits.ControllerAnalogAxisTrait;
 	
 	t.attributes.onAnalogAxisChanged @(init) := 	fn(){	
-		var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
+		var ExtensionPoint = Std.module('LibUtilExt/ExtensionPoint');
 		return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);
 	};
 
@@ -147,7 +147,7 @@ HID_Traits.ControllerAnalogAxisTrait := new Traits.GenericTrait("HID_Traits.Cont
 		return this.onAnalogAxisChanged(axisId,value);
 	};
 	t.onInit += fn(obj,numberOfAxes){
-		Traits.requireTrait(obj,HID_Traits.DeviceBaseTrait);		//! \see HID_Traits.DeviceBaseTrait
+		Std.Traits.requireTrait(obj,HID_Traits.DeviceBaseTrait);		//! \see HID_Traits.DeviceBaseTrait
 		obj._axesStatus @(init,private) := (new Array).resize(numberOfAxes,0.0);
 		
 		//! \see HID_Traits.DeviceBaseTrait
@@ -180,7 +180,7 @@ HID_Traits.ControllerHatTrait := new Traits.GenericTrait("HID_Traits.ControllerH
 	var t = HID_Traits.ControllerHatTrait;
 	
 	t.attributes.onHatChanged @(init) := fn(){	
-		var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
+		var ExtensionPoint = Std.module('LibUtilExt/ExtensionPoint');
 		return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);
 	};
 
@@ -200,7 +200,7 @@ HID_Traits.ControllerHatTrait := new Traits.GenericTrait("HID_Traits.ControllerH
 		return this.onHatChanged(hatId,value);
 	};
 	t.onInit += fn(obj,numberOfHats){
-		Traits.requireTrait(obj,HID_Traits.DeviceBaseTrait);		//! \see HID_Traits.DeviceBaseTrait
+		Std.Traits.requireTrait(obj,HID_Traits.DeviceBaseTrait);		//! \see HID_Traits.DeviceBaseTrait
 		obj._hatsStatus @(init,private) := (new Array).resize(numberOfHats,0.0);
 		
 		//! \see HID_Traits.DeviceBaseTrait
@@ -232,7 +232,7 @@ HID_Traits.Controller_Room6D_Trait := new Traits.GenericTrait("HID_Traits.Contro
 	
 	t.attributes._controllerRoomSRT @(private) := void;
 	t.attributes.onRoomTransformationChanged @(init) := fn(){	
-		var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
+		var ExtensionPoint = Std.module('LibUtilExt/ExtensionPoint');
 		return new ExtensionPoint(ExtensionPoint.CHAINED|ExtensionPoint.THROW_EXCEPTION);
 	};
 
@@ -244,7 +244,7 @@ HID_Traits.Controller_Room6D_Trait := new Traits.GenericTrait("HID_Traits.Contro
 		return this.onRoomTransformationChanged(_controllerRoomSRT);
 	};
 	t.onInit += fn(obj){
-		Traits.requireTrait(obj,HID_Traits.DeviceBaseTrait);		//! \see HID_Traits.DeviceBaseTrait
+		Std.Traits.requireTrait(obj,HID_Traits.DeviceBaseTrait);		//! \see HID_Traits.DeviceBaseTrait
 				
 		//! \see HID_Traits.DeviceBaseTrait
 		obj.onResetDevice_static += fn(){
@@ -264,8 +264,8 @@ HID_Traits.GamepadDeviceTrait := new Traits.GenericTrait("HID_Traits.GamepadDevi
 	var t = HID_Traits.GamepadDeviceTrait;
 
 	t.onInit += fn(obj){
-		Traits.requireTrait(obj,HID_Traits.ControllerButtonTrait);
-		Traits.requireTrait(obj,HID_Traits.ControllerAnalogAxisTrait);
+		Std.Traits.requireTrait(obj,HID_Traits.ControllerButtonTrait);
+		Std.Traits.requireTrait(obj,HID_Traits.ControllerAnalogAxisTrait);
 	};
 }
 

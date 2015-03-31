@@ -15,7 +15,7 @@
  **	[Plugin:GASP] GASP/SamplingTester/plugin.escript
  **/
 
-static GASPManager = Std.require('SceneAnalyzer/GlobalGASPManager');
+static GASPManager = Std.module('SceneAnalyzer/GlobalGASPManager');
 
 var plugin = new Plugin({
 		Plugin.NAME : 'SceneAnalyzer/ValueAnalysis',
@@ -124,7 +124,7 @@ plugin.ex_Init := fn(...){
 	//					if(!max || value>max)
 	//						max = value;
 					}
-					var dataTable = new (Std.require('LibUtilExt/DataTable'))("value");
+					var dataTable = new (Std.module('LibUtilExt/DataTable'))("value");
 					dataTable.addDataRow( "weight","y",distribution);
 					dataTable.exportCSV("1.csv",",");
 					PADrend.message("Data exported.");

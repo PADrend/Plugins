@@ -105,7 +105,7 @@ plugin.showMemoryWindow := fn(){
 	});
 	panel += l;
 
-	registerExtension('PADrend_AfterFrame',l->fn(){
+	Util.registerExtension('PADrend_AfterFrame',l->fn(){
 		this.setText( gui._destructionMonitor ? gui._destructionMonitor.getPendingMarkersCount() :"[disabled]" );
 	});
 
@@ -1106,7 +1106,7 @@ plugin.showWindow:=fn(){
 			GUI.ON_CLICK : fn(){	this.refresh();	},	//! \see LibGUIExt/Traits/RefreshableContainerTrait
 			GUI.WIDTH : 300,
 		});
-		Traits.addTrait(c,Std.require('LibGUIExt/Traits/RefreshableContainerTrait'),fn(){
+		Std.Traits.addTrait(c,Std.module('LibGUIExt/Traits/RefreshableContainerTrait'),fn(){
 			var s="";
 			for(var i=Rand.equilikely(2,10);i>0;--i )
 				s += " "+i;

@@ -143,7 +143,7 @@ ToolHelperTraits.NodeSelectionListenerTrait := new Traits.GenericTrait("ToolHelp
 				onNodesSelected_static(_selectedNodes);
 				onNodesSelected(_selectedNodes);
 			};
-			registerExtension('NodeEditor_OnNodesSelected', _nodeSelectionChangedHandler);
+			Util.registerExtension('NodeEditor_OnNodesSelected', _nodeSelectionChangedHandler);
 			_nodeSelectionChangedHandler( NodeEditor.getSelectedNodes() );
 		}
 		return this;
@@ -226,7 +226,7 @@ ToolHelperTraits.NodeTransformationHandlerTrait := new Traits.GenericTrait("Tool
 			}
 			if(differenceFound){
 				var fun = fn(){foreach(this as var a)a[1].convertsSafelyToSRT() ? a[0].setRelTransformation(a[1].toSRT()) : a[0].setRelTransformation(a[1]);	};
-				static Command = Std.require('LibUtilExt/Command');
+				static Command = Std.module('LibUtilExt/Command');
 				PADrend.executeCommand({
 					Command.DESCRIPTION : "Transform nodes",
 					Command.EXECUTE : 	aExecute->fun,
@@ -323,22 +323,22 @@ ToolHelperTraits.GenericNodeTransformToolTrait := new Traits.GenericTrait("ToolH
 	
 	t.onInit += fn(obj){
 		//! \see ToolHelperTraits.UIToolTrait
-		Traits.addTrait(obj,ToolHelperTraits.UIToolTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.UIToolTrait);
 
 		//! \see ToolHelperTraits.FrameListenerTrait
-		Traits.addTrait(obj,ToolHelperTraits.FrameListenerTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.FrameListenerTrait);
 
 		//! \see ToolHelperTraits.ContextMenuProviderTrait
-		Traits.addTrait(obj,ToolHelperTraits.ContextMenuProviderTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.ContextMenuProviderTrait);
 
 		//! \see ToolHelperTraits.MetaNodeContainerTrait
-		Traits.addTrait(obj,ToolHelperTraits.MetaNodeContainerTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.MetaNodeContainerTrait);
 
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait
-		Traits.addTrait(obj,ToolHelperTraits.NodeSelectionListenerTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.NodeSelectionListenerTrait);
 
 		//! \see ToolHelperTraits.NodeTransformationHandlerTrait
-		Traits.addTrait(obj,ToolHelperTraits.NodeTransformationHandlerTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.NodeTransformationHandlerTrait);
 
 
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait

@@ -34,11 +34,11 @@ DirectedEdgeTrait.attributes.getEdgeWeight ::= fn() {
 	return this.edgeWeight;
 };
 DirectedEdgeTrait.attributes.setEdgeTail ::= fn(tail) {
-	Traits.requireTrait(tail, Std.require('GraphTools/Vertex'));
+	Std.Traits.requireTrait(tail, Std.module('GraphTools/Vertex'));
 	this.edgeTail = tail;
 };
 DirectedEdgeTrait.attributes.setEdgeHead ::= fn(head) {
-	Traits.requireTrait(head, Std.require('GraphTools/Vertex'));
+	Std.Traits.requireTrait(head, Std.module('GraphTools/Vertex'));
 	this.edgeHead = head;
 };
 DirectedEdgeTrait.attributes.setEdgeWeight ::= fn(Number weight) {

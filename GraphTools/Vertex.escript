@@ -18,15 +18,15 @@ VertexTrait.attributes.vertexIncomingEdges @(private, init) := Array;
 VertexTrait.attributes.vertexOutgoingEdges @(private, init) := Array;
 
 VertexTrait.attributes.addIncomingEdge ::= fn(edge) {
-	Traits.requireTrait(edge, Std.require('GraphTools/DirectedEdge'));
+	Std.Traits.requireTrait(edge, Std.module('GraphTools/DirectedEdge'));
 	this.vertexIncomingEdges += edge;
 };
 VertexTrait.attributes.addOutgoingEdge ::= fn(edge) {
-	Traits.requireTrait(edge, Std.require('GraphTools/DirectedEdge'));
+	Std.Traits.requireTrait(edge, Std.module('GraphTools/DirectedEdge'));
 	this.vertexOutgoingEdges += edge;
 };
 VertexTrait.attributes.getDirectPredecessors ::= fn() {
-	var Set = Std.require('Std/Set');
+	var Set = Std.module('Std/Set');
 	var predecessors = new Set;
 	foreach(this.vertexIncomingEdges as var edge) {
 		predecessors += edge.getEdgeTail();
@@ -34,7 +34,7 @@ VertexTrait.attributes.getDirectPredecessors ::= fn() {
 	return predecessors;
 };
 VertexTrait.attributes.getDirectSuccessors ::= fn() {
-	var Set = Std.require('Std/Set');
+	var Set = Std.module('Std/Set');
 	var successors = new Set;
 	foreach(this.vertexOutgoingEdges as var edge) {
 		successors += edge.getEdgeHead();

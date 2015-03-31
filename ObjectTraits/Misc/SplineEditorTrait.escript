@@ -14,7 +14,7 @@
 
 var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
-static TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
+static TransformationObserverTrait = Std.module('LibMinSGExt/Traits/TransformationObserverTrait');
 
 
 static openMenu = fn(pointNr, data, event){

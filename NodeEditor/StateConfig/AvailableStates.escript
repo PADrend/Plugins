@@ -140,7 +140,7 @@ m["[ext] NaiveOccRenderer"] = fn(){return new MinSG.NaiveOccRenderer;};
 if(MinSG.isSet($ColorCubeRenderer))
 	m["[ext] ColorCube renderer"] = fn() { return new MinSG.ColorCubeRenderer;};
 m["[ext] HOM renderer"] = fn() { return new MinSG.HOMRenderer(512); };
-m["[ext] LineWidthState"] = fn() { return new (Std.require('LibMinSGExt/LineWidthState')); };
+m["[ext] LineWidthState"] = fn() { return new (Std.module('LibMinSGExt/LineWidthState')); };
 m["[ext] LOD-Renderer"] = fn(){return new MinSG.LODRenderer;};
 if(MinSG.isSet($MAR))
 	m["[ext] MAR Surfel Renderer"] = fn(){return new MinSG.MAR.SurfelRenderer;};

@@ -18,7 +18,7 @@
 
 static T = new ExtObject;
 
-static Listener = Std.require('LibUtilExt/deprecated/Listener');
+static Listener = Std.module('LibUtilExt/deprecated/Listener');
 static GASP = module('./GASP');
 static CSampler = module('./Sampling/CSampler');
 
@@ -379,7 +379,7 @@ T.selectCSampler:=fn(c){
 //! (static)
 T.executeSampling:=fn(){
 	getCSampler().execute(PADrend.getCurrentScene(),
-						Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator(),
+						Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator(),
 						this.getSelectedGASP());
 };
 

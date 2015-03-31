@@ -26,7 +26,7 @@
 */
 MinSG.setScriptedStateImporter( fn(parentNode,Map description){
 	try{
-		var handler = Std.require('LibMinSGExt/ScriptedStateImportersRegistry')[ description['sStateType'] ];
+		var handler = Std.module('LibMinSGExt/ScriptedStateImportersRegistry')[ description['sStateType'] ];
 		if(handler){
 			var state = handler(description);
 			if(state){
@@ -52,7 +52,7 @@ MinSG.setScriptedStateExporter( fn(state,description){
 	try{
 		var typeName = state._printableName;
 		description['sStateType'] = ""+typeName;
-		var handler = Std.require('LibMinSGExt/ScriptedStateExportersRegistry')[ typeName ];
+		var handler = Std.module('LibMinSGExt/ScriptedStateExportersRegistry')[ typeName ];
 		if(handler)
 			handler(state,description);
 
@@ -510,7 +510,7 @@ MinSG.ShaderState.setUniform ::= fn(params...){
 };
 
 
-static ExtSceneManager = Std.require('LibMinSGExt/SceneManagerExt');
+static ExtSceneManager = Std.module('LibMinSGExt/SceneManagerExt');
 MinSG.ShaderState.recreateShader ::= fn(ExtSceneManager sm){
 	var shaderState = this;
 	var vs = [];

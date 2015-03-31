@@ -15,7 +15,7 @@
  **	[Plugin:Tests] Tests/AutomatedTests/MinSG.escript
  **/
 
-var AutomatedTest = Std.require('Tests/AutomatedTest');
+var AutomatedTest = Std.module('Tests/AutomatedTest');
 
 var tests = [];
 
@@ -103,13 +103,13 @@ tests += new AutomatedTest( "MinSG: tree observer",fn(){
 	var moved = [];
 
 	var root = new MinSG.ListNode;
-	var NodeAddedObserverTrait = Std.require('LibMinSGExt/Traits/NodeAddedObserverTrait');
-	var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
-	var NodeRemovedObserverTrait = Std.require('LibMinSGExt/Traits/NodeRemovedObserverTrait');
+	var NodeAddedObserverTrait = Std.module('LibMinSGExt/Traits/NodeAddedObserverTrait');
+	var TransformationObserverTrait = Std.module('LibMinSGExt/Traits/TransformationObserverTrait');
+	var NodeRemovedObserverTrait = Std.module('LibMinSGExt/Traits/NodeRemovedObserverTrait');
 	
-	Traits.addTrait(root, NodeAddedObserverTrait, added->added.pushBack ); //! \see MinSG.NodeAddedObserverTrait
-	Traits.addTrait(root, TransformationObserverTrait, moved->moved.pushBack ); //! \see MinSG.TransformationObserverTrait
-	Traits.addTrait(root, NodeRemovedObserverTrait, [removed]=>fn(removed,parent,node){removed+=[parent,node,node.isDestroyed()];} ); //! \see MinSG.NodeRemovedObserverTrait
+	Std.Traits.addTrait(root, NodeAddedObserverTrait, added->added.pushBack ); //! \see MinSG.NodeAddedObserverTrait
+	Std.Traits.addTrait(root, TransformationObserverTrait, moved->moved.pushBack ); //! \see MinSG.TransformationObserverTrait
+	Std.Traits.addTrait(root, NodeRemovedObserverTrait, [removed]=>fn(removed,parent,node){removed+=[parent,node,node.isDestroyed()];} ); //! \see MinSG.NodeRemovedObserverTrait
 
 	var c1 = new MinSG.ListNode;
 	root += c1;
@@ -146,7 +146,7 @@ tests += new AutomatedTest( "MinSG: create/load/save scenes",fn(){
 	var sceneString = "";
 	// create and save a scene
 	{
-		var sceneManager = new (Std.require('LibMinSGExt/SceneManagerExt'));
+		var sceneManager = new (Std.module('LibMinSGExt/SceneManagerExt'));
 		var root = new MinSG.ListNode;
 		root.setNodeAttribute("WurzelTag",true);
 		sceneManager.registerNode("WurzelId",root);
@@ -241,7 +241,7 @@ tests += new AutomatedTest( "MinSG: create/load/save scenes",fn(){
 
 	// re-load scene, check properties and save again
 	{
-		var sceneManager = new (Std.require('LibMinSGExt/SceneManagerExt'));
+		var sceneManager = new (Std.module('LibMinSGExt/SceneManagerExt'));
 		var root = sceneManager.loadScene(filename + ".minsg");
 		var a = MinSG.collectNodesWithAttribute(root,"WurzelTag");
 		addResult( "tag test", a.count()==1 && sceneManager.getRegisteredNode("WurzelId") == a[0]);
@@ -309,8 +309,8 @@ tests += new AutomatedTest( "MinSG: create/load/save scenes",fn(){
 tests += new AutomatedTest( "MinSG: NodeQuery",fn(){
 	Std._unregisterModule('LibMinSGExt/TreeQuery'); // force reload
 	
-	var TQuery = Std.require('LibMinSGExt/TreeQuery');
-	var sm = new (Std.require('LibMinSGExt/SceneManagerExt'));
+	var TQuery = Std.module('LibMinSGExt/TreeQuery');
+	var sm = new (Std.module('LibMinSGExt/SceneManagerExt'));
 	
 	{
 		var ok = true;
@@ -341,7 +341,7 @@ tests += new AutomatedTest( "MinSG: NodeQuery",fn(){
 		
 		var ok = true;
 		
-		var sceneManager = new (Std.require('LibMinSGExt/SceneManagerExt'));
+		var sceneManager = new (Std.module('LibMinSGExt/SceneManagerExt'));
 
 		/*
 					root
@@ -371,7 +371,7 @@ tests += new AutomatedTest( "MinSG: NodeQuery",fn(){
 		l10.setNodeAttribute('name',"dum");
 		l1.setNodeAttribute('name',"di");
 		
-		var tagFunctions = Std.require('LibMinSGExt/NodeTagFunctions');
+		var tagFunctions = Std.module('LibMinSGExt/NodeTagFunctions');
 		tagFunctions.addTag(g100,"tag1");
 		tagFunctions.addTag(l0,"tag1");
 		
@@ -392,7 +392,7 @@ tests += new AutomatedTest( "MinSG: NodeQuery",fn(){
 		
 		// ----------------------
 		// semantic objects
-		var SemObjTools = Std.require('LibMinSGExt/SemanticObject');
+		var SemObjTools = Std.module('LibMinSGExt/SemanticObject');
 		SemObjTools.markAsSemanticObject(root);
 		SemObjTools.markAsSemanticObject(l1);
 		ok &= TQuery.execute("./MinSG:containingSemObj", sm, [l10] ) == new Set([l1]);
@@ -422,9 +422,9 @@ tests += new AutomatedTest( "LibMinSGExt/NodeTagFunctions",fn(){
 	Std._unregisterModule('LibMinSGExt/NodeTagFunctions'); // force reload
 	
 
-	var tagFunctions = Std.require('LibMinSGExt/NodeTagFunctions');
+	var tagFunctions = Std.module('LibMinSGExt/NodeTagFunctions');
 	// instance
-	var sm = new (Std.require('LibMinSGExt/SceneManagerExt'));
+	var sm = new (Std.module('LibMinSGExt/SceneManagerExt'));
 	var root = new MinSG.ListNode;
 	tagFunctions.addTag(root,"root");
 	
@@ -464,7 +464,7 @@ tests += new AutomatedTest( "MinSG: Persistent node traits",fn(){
 	declareNamespace($MinSG,$_Test);
 	
 	var traitName = 'MinSG/_Test/PersistentNodeTestTrait';
-	var t = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))(traitName);
+	var t = new (Std.module('LibMinSGExt/Traits/PersistentNodeTrait'))(traitName);
 	Std._unregisterModule(traitName);
 	Std._registerModule(traitName,t);
 	
@@ -479,13 +479,13 @@ tests += new AutomatedTest( "MinSG: Persistent node traits",fn(){
 		++this.initCounter;
 	};
 	var n1 = new MinSG.ListNode;
-	Traits.addTrait(n1,t); // manually add to n1 (normal trait behavior)
+	Std.Traits.addTrait(n1,t); // manually add to n1 (normal trait behavior)
 
 	root += n1;
 	var n2 = MinSG.Node.createInstance(n1); // trait is not yet initialized
 	root += n2;
 
-	var PersistentNodeTrait = Std.require('LibMinSGExt/Traits/PersistentNodeTrait');
+	var PersistentNodeTrait = Std.module('LibMinSGExt/Traits/PersistentNodeTrait');
 	PersistentNodeTrait.initTraitsInSubtree(root); // trait of n1 is not touched; n2 is initialized.
 
 	return	t.initCounter == 2 && 
@@ -503,7 +503,7 @@ tests += new AutomatedTest( "MinSG: SplineTrait",fn(){
 	
 	var splineNode = new MinSG.ListNode;
 //  module('LibMinSGExt/SemanticObject').markAsSemanticObject(splineNode);
-	Traits.addTrait( splineNode, Std.require('ObjectTraits/Misc/SplineTrait'));
+	Std.Traits.addTrait( splineNode, Std.module('ObjectTraits/Misc/SplineTrait'));
 
 	var points = [];
 

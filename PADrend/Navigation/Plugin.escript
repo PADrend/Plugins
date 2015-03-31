@@ -36,10 +36,10 @@ PADrend.Navigation.joystickSupport := void;
 
 PADrend.Navigation.init @(override) := fn(){
 
-	registerExtension('PADrend_Init',this->ex_Init, Extension.HIGH_PRIORITY+1);
+	Util.registerExtension('PADrend_Init',this->ex_Init, Extension.HIGH_PRIORITY+1);
 
-	registerExtension('PADrend_KeyPressed',onKeyPressed, Extension.HIGH_PRIORITY);
-	registerExtension('PADrend_AfterFrame',this->ex_FrameEnding);
+	Util.registerExtension('PADrend_KeyPressed',onKeyPressed, Extension.HIGH_PRIORITY);
+	Util.registerExtension('PADrend_AfterFrame',this->ex_FrameEnding);
 	
 	return true;
 };
@@ -57,7 +57,7 @@ PADrend.Navigation.ex_Init := fn(){
 	
 	// create cameraMover
 			
-	this.cameraMover = new (Std.require('LibMinSGExt/CameraMover'))(PADrend.SystemUI.getWindow(), PADrend.SystemUI.getEventContext(), PADrend.getDolly(),GLOBALS.camera);
+	this.cameraMover = new (Std.module('LibMinSGExt/CameraMover'))(PADrend.SystemUI.getWindow(), PADrend.SystemUI.getEventContext(), PADrend.getDolly(),GLOBALS.camera);
 	this.cameraMover.setInvertYAxis(systemConfig.getValue('PADrend.Input.invertMouse',false));
 	this.cameraMover.smoothMouse = systemConfig.getValue('PADrend.Input.smoothMouse',true);
 
@@ -66,8 +66,8 @@ PADrend.Navigation.ex_Init := fn(){
 	
 //    cameraMover.registerGamepad( PADrend.HID.getDevice("VirtualGamepad")  );
 
-	registerExtension('PADrend_UIEvent',[cameraMover] => fn(cameraMover,evt){	return cameraMover.getMouseView() ? cameraMover.handleEvent(evt,false) : false;	}, Extension.HIGH_PRIORITY);
-	registerExtension('PADrend_UIEvent',[cameraMover] => fn(cameraMover,evt){	return cameraMover.getMouseView() ? false : cameraMover.handleEvent(evt,false);	}, Extension.LOW_PRIORITY);
+	Util.registerExtension('PADrend_UIEvent',[cameraMover] => fn(cameraMover,evt){	return cameraMover.getMouseView() ? cameraMover.handleEvent(evt,false) : false;	}, Extension.HIGH_PRIORITY);
+	Util.registerExtension('PADrend_UIEvent',[cameraMover] => fn(cameraMover,evt){	return cameraMover.getMouseView() ? false : cameraMover.handleEvent(evt,false);	}, Extension.LOW_PRIORITY);
 
 	joystickSupport = DataWrapper.createFromConfig(systemConfig,'PADrend.Input.joystickSupport',false);
 	if(joystickSupport())
@@ -225,7 +225,7 @@ PADrend.Navigation.flyTo := fn(Geometry.SRT targetSRT, Number duration=0.5){
 				return Extension.REMOVE_EXTENSION;	
 			}
 		});
-		registerExtension('PADrend_AfterFrame',flyToHandler->flyToHandler.execute);
+		Util.registerExtension('PADrend_AfterFrame',flyToHandler->flyToHandler.execute);
 	}
 	flyToHandler.sourceSRT = PADrend.getDolly().getRelTransformationSRT().clone();
 	flyToHandler.targetSRT = PADrend.getDolly().getParent().getWorldTransformationMatrix().inverse().toSRT() * targetSRT;

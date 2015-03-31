@@ -15,7 +15,7 @@
 	\see LibUtilExt/Network/NetworkServiceTrait	*/
 var T = new Type;
 Traits.addTrait(T,Traits.PrintableNameTrait,$ExtUDPSocket); 								//!	\see Traits.PrintableNameTrait
-Traits.addTrait(T,Std.require('LibUtilExt/Network/NetworkServiceTrait'));					//!\see LibUtilExt/Network/NetworkServiceTrait
+Traits.addTrait(T,Std.module('LibUtilExt/Network/NetworkServiceTrait'));					//!\see LibUtilExt/Network/NetworkServiceTrait
 
 T.socket @(private) := void;
 T.onDataReceived @(init) := MultiProcedure;

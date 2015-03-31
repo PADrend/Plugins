@@ -30,7 +30,7 @@ static plugin = new Plugin({
 });
 
 plugin.init @(override) := fn() {
-	GLOBALS.JobScheduling := Std.require('JobScheduling/JobScheduling');
+	GLOBALS.JobScheduling := Std.module('JobScheduling/JobScheduling');
 	return true;
 };
 

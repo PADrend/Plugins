@@ -120,7 +120,7 @@ T.execute ::= fn(){
 		// announce new job (locally and on client instances)
 		PADrend.executeCommand(new Command({
 			Command.EXECUTE : [job.getId(),job.getWorkload(),workerId ]=>fn(jobId,workload,workerId){
-				Std.require('JobScheduling/JobScheduling').onJobAvailable( {
+				Std.module('JobScheduling/JobScheduling').onJobAvailable( {
 					'jobId' : jobId,
 					'workload' : workload,
 					'workerId' : workerId

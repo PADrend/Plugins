@@ -21,7 +21,7 @@ t.attributes.targets @(init,private) := Map; // ip:port -> [ip,target,timeout]
 t.attributes.duration @(private) := void;
 t.attributes.timeToCheck @(private) := 0;
 
-static ExtUDPSocket = Std.require('LibUtilExt/Network/ExtUDPSocket');
+static ExtUDPSocket = Std.module('LibUtilExt/Network/ExtUDPSocket');
 t.onInit += fn(ExtUDPSocket socket, Number duration=10){
 	(socket->fn(duration){
 		this.onExecute += this->fn(){

@@ -10,7 +10,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-static  TextureProcessor = Std.require('LibRenderingExt/TextureProcessor');
+static  TextureProcessor = Std.module('LibRenderingExt/TextureProcessor');
 
  var vs = "	void main( void ){  gl_TexCoord[0] = gl_MultiTexCoord0;  gl_Position = ftransform(); } ";
  

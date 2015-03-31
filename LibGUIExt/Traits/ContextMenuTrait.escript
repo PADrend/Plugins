@@ -27,7 +27,7 @@ static MouseButtonListenerTrait = module('./MouseButtonListenerTrait');
 
 	\see MouseButtonListenerTrait
 	\code
-		Std.Traits.addTrait(myComponent, Std.require('LibUtilExt/Traits/ContextMenuTrait'),300); // context menu with 300px width
+		Std.Traits.addTrait(myComponent, Std.module('LibUtilExt/Traits/ContextMenuTrait'),300); // context menu with 300px width
 
 		// add registered menu entries
 		myComponent.contextMenuProvider += "MyPlugin_SomeMenuName";

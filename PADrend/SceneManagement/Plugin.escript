@@ -61,8 +61,8 @@ static dolly = void;
 static _defaultLight; // directional light 0; formerly known as PADrend.sun
 
 
-static SceneManager = Std.require( 'LibMinSGExt/SceneManagerExt' );
-static SceneMarkerTrait = Std.require('LibMinSGExt/Traits/SceneMarkerTrait');
+static SceneManager = Std.module( 'LibMinSGExt/SceneManagerExt' );
+static SceneMarkerTrait = Std.module('LibMinSGExt/Traits/SceneMarkerTrait');
 
 static initSceneManager = fn(sceneManager){
 	sceneManager.addSearchPath( Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/" );
@@ -73,7 +73,7 @@ static initSceneManager = fn(sceneManager){
 SceneManagement.init @(override) := fn(){
 	defaultSceneManager = new SceneManager;
 	Util.registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+2);
-	Util.registerExtension('PADrend_OnSceneRegistered', Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree);
+	Util.registerExtension('PADrend_OnSceneRegistered', Std.module('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree);
 	return true;
 };
 
@@ -111,7 +111,7 @@ SceneManagement.ex_Init := fn(...){
 		// create dolly for camera
 		dolly = new MinSG.ListNode;
 		//! \see MinSG.DefaultDollyNodeTrait
-		Std.Traits.addTrait( dolly,Std.require('LibMinSGExt/Traits/DefaultDollyNodeTrait'),camera );
+		Std.Traits.addTrait( dolly,Std.module('LibMinSGExt/Traits/DefaultDollyNodeTrait'),camera );
 
 
 		setConfigInfo('PADrend.Camera.observerPosition',"[x,y,z] or false. If false, the default 'angle'-based camera is used.");
@@ -183,7 +183,7 @@ SceneManagement.createNewSceneRoot := fn(String t,debugOutput=true){
 
 	// init meta info
 	if(true){
-		var NodeMetaInfo = Std.require('LibMinSGExt/NodeMetaInfo');
+		var NodeMetaInfo = Std.module('LibMinSGExt/NodeMetaInfo');
 		var d = getDate();
 		NodeMetaInfo.accessMetaInfo_CreationDate(scene)("" + d["year"] + "-"+ d["mon"] + "-" + d["mday"] );
 		NodeMetaInfo.accessMetaInfo_Title(scene)("New_" + time().toHex() );

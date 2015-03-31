@@ -50,7 +50,7 @@ NS.ObjectFactoryTrait := new Traits.GenericTrait("ObjectPlacer.ObjectFactoryTrai
 
 	t.onInit += fn(obj){
 		//! \see Traits.CallableTrait
-		Traits.addTrait(obj,Traits.CallableTrait,fn(caller){	return doCreateNode();	});
+		Std.Traits.addTrait(obj,Traits.CallableTrait,fn(caller){	return doCreateNode();	});
 	};
 }
 
@@ -79,7 +79,7 @@ NS.AcceptsObjectCreatorsTrait := new Traits.GenericTrait("ObjectPlacer.AcceptsOb
 
 	\see GUI.DraggableTrait
 	\code
-		Traits.addTrait(myComponent,GUI.DraggableObjectCreatorTrait, 
+		Std.Traits.addTrait(myComponent,GUI.DraggableObjectCreatorTrait, 
 					ObjectPlacer.defaultNodeInserter, 
 					fn(){	return new Geometry.Node(someMesh); });
 	\endcode
@@ -88,12 +88,12 @@ NS.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlacer.Draggabl
 {
 	var t = NS.DraggableObjectCreatorTrait;
 	
-	static DraggableTrait = Std.require('LibGUIExt/Traits/DraggableTrait');
-	static DraggingMarkerTrait = Std.require('LibGUIExt/Traits/DraggingMarkerTrait');
-	static DraggingConnectorTrait = Std.require('LibGUIExt/Traits/DraggingConnectorTrait');
+	static DraggableTrait = Std.module('LibGUIExt/Traits/DraggableTrait');
+	static DraggingMarkerTrait = Std.module('LibGUIExt/Traits/DraggingMarkerTrait');
+	static DraggingConnectorTrait = Std.module('LibGUIExt/Traits/DraggingConnectorTrait');
 
 	t.onInit += fn(GUI.Component component,objectInserter,objectCreator){
-		Traits.assureTrait(component, DraggableTrait);
+		Std.Traits.assureTrait(component, DraggableTrait);
 		
 		component.onDrag += fn(evt){
 			var hasDraggingMarker = Traits.queryTrait(this, DraggingMarkerTrait);
@@ -106,7 +106,7 @@ NS.DraggableObjectCreatorTrait := new Traits.GenericTrait("ObjectPlacer.Draggabl
 		
 			var droppingComponent = gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] ));
 			var droppingPossible = !droppingComponent.getParentComponent() || 
-					Traits.queryTrait(droppingComponent,NS.AcceptsObjectCreatorsTrait); //! \see ObjectPlacer.AcceptsObjectCreatorsTrait
+					Std.Traits.queryTrait(droppingComponent,NS.AcceptsObjectCreatorsTrait); //! \see ObjectPlacer.AcceptsObjectCreatorsTrait
 			
 			if(hasDraggingConnector){
 				getDraggingConnector().clearProperties();

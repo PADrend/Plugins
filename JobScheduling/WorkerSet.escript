@@ -46,14 +46,14 @@ T._constructor ::= fn(String _schedulerId,Number _capacity){
 			activeJobs+=new module('./Job')(data['jobId'],data['workload']);
 		}
 	};
-	static Command = Std.require('LibUtilExt/Command');
+	static Command = Std.module('LibUtilExt/Command');
 	for(var i=0;i<capacity;++i){
 		var workerId = createWorkerId();
 		availableWorkers[workerId] = true;
 		
 		// announce available worker (locally and on server instance)
 		PADrend.executeCommand(new Command({
-			Command.EXECUTE : [workerId]=>fn(workerId){	Std.require('JobScheduling/JobScheduling').onWorkerAvailable( workerId ); },
+			Command.EXECUTE : [workerId]=>fn(workerId){	Std.module('JobScheduling/JobScheduling').onWorkerAvailable( workerId ); },
 			Command.FLAGS : Command.FLAG_SEND_TO_MASTER | Command.FLAG_EXECUTE_LOCALLY
 		}));
 		
@@ -91,14 +91,14 @@ T.execute ::= fn(){
 	}
 	activeJobs.swap(newJobs);
 	
-	static Command = Std.require('LibUtilExt/Command');
+	static Command = Std.module('LibUtilExt/Command');
 	// send results
 	foreach(finishedJobs as var job){
 	
 		// announce available result (locally and on server instance)
 		PADrend.executeCommand(new Command({
 			Command.EXECUTE : [job.getId(),job.getResult()] => fn(jobId,jobResult){
-					Std.require('JobScheduling/JobScheduling').onResultAvailable( { 
+					Std.module('JobScheduling/JobScheduling').onResultAvailable( { 
 						'jobId':jobId,
 						'result':jobResult 
 				});
@@ -114,7 +114,7 @@ T.execute ::= fn(){
 		
 		// announce available worker (locally and on server instance)
 		PADrend.executeCommand(new Command({
-			Command.EXECUTE : [workerId] => fn(workerId){	Std.require('JobScheduling/JobScheduling').onWorkerAvailable( workerId );	},
+			Command.EXECUTE : [workerId] => fn(workerId){	Std.module('JobScheduling/JobScheduling').onWorkerAvailable( workerId );	},
 			Command.FLAGS : Command.FLAG_EXECUTE_LOCALLY | Command.FLAG_SEND_TO_MASTER
 		}));
 	}

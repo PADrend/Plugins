@@ -18,7 +18,7 @@
  **/
  
 declareNamespace($NodeEditor);
-static NodeMetaInfo = Std.require('LibMinSGExt/NodeMetaInfo');
+static NodeMetaInfo = Std.module('LibMinSGExt/NodeMetaInfo');
 
 // --------------------------------------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ NodeEditor.nodeFactories := new Map;  //!<  human readable string -> factory fun
 //! @name String conversions
 // @{
 //! Get a descriptive string for the given Node or State
-NodeEditor.getString := new (Std.require('LibUtilExt/TypeBasedHandler'))(false);
+NodeEditor.getString := new (Std.module('LibUtilExt/TypeBasedHandler'))(false);
 
 NodeEditor.getString += [Object,fn(obj){return obj.toString();}];
 NodeEditor.getString += [MinSG.Node, fn(node){

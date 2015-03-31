@@ -14,8 +14,8 @@
 /*! A wrapper for a TCPConnection object (expendable with traits.)
 	\see LibUtilExt/Network/NetworkServiceTrait	*/
 var T = new Type;
-Traits.addTrait(T,Traits.PrintableNameTrait,$ExtTCPConnection); 								//! \see		Traits.PrintableNameTrait
-Traits.addTrait(T, Std.require('LibUtilExt/Network/NetworkServiceTrait'));						//! \see		LibUtilExt/Network/NetworkServiceTrait
+Traits.addTrait(T,Traits.PrintableNameTrait,$ExtTCPConnection); 								//! \see		Std.Traits.PrintableNameTrait
+Traits.addTrait(T, Std.module('LibUtilExt/Network/NetworkServiceTrait'));						//! \see		LibUtilExt/Network/NetworkServiceTrait
 
 T.connection @(private) := void;
 

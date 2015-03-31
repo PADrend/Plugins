@@ -74,7 +74,7 @@ plugin.init @(override) := fn(){
 		var resourceFolder = __DIR__+"/resources";
 		gui.loadIconFile( resourceFolder+"/ToolbarIcons.json");
 	});
-	registerExtension( 'PADrend_KeyPressed',this->fn(evt){
+	Util.registerExtension( 'PADrend_KeyPressed',this->fn(evt){
 		if(evt.key == Util.UI.KEY_F2) {
 			windowEnabled(!windowEnabled());
 			return true;
@@ -109,7 +109,7 @@ plugin.showWindow := fn(){
 		}
 	});
 
-	Traits.addTrait(window, Std.require('LibGUIExt/Traits/StorableRectTrait'),
+	Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'),
 						DataWrapper.createFromConfig(PADrend.configCache, "SceneEditor.winRect", [100,100,300,350]));
 
 	var tabPanel =gui.create({

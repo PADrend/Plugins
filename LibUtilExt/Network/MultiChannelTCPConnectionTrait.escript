@@ -27,7 +27,7 @@ t.attributes.channelHandler @(init,private) := Map;
 
 //! \see LibUtilExt/Network/MultiChannelReceiverTrait
 t.attributes.setChannelHandler ::= fn(Number channel,listener){
-	Traits.requireTrait(listener,Traits.CallableTrait);										//!	\see	Traits.CallableTrait
+	Std.Traits.requireTrait(listener,Traits.CallableTrait);										//!	\see	Std.Traits.CallableTrait
 	channelHandler[channel] = listener;
 };
 
@@ -49,10 +49,10 @@ t.attributes.execute ::= fn(){
 //		this.sendString(toJSON(data,false));
 //		return this;
 };
-static ExtTCPConnection = Std.require('LibUtilExt/Network/ExtTCPConnection');
+static ExtTCPConnection = Std.module('LibUtilExt/Network/ExtTCPConnection');
 t.onInit += fn(ExtTCPConnection connection){
-	Traits.addTrait(connection, Std.require('LibUtilExt/Network/MultiChannelReceiverTrait'));	//!	\see 	LibUtilExt/Network/MultiChannelReceiverTrait
-	Traits.addTrait(connection, Std.require('LibUtilExt/Network/MultiChannelSenderTrait'));		//!	\see 	LibUtilExt/Network/MultiChannelSenderTrait
+	Std.Traits.addTrait(connection, Std.module('LibUtilExt/Network/MultiChannelReceiverTrait'));	//!	\see 	LibUtilExt/Network/MultiChannelReceiverTrait
+	Std.Traits.addTrait(connection, Std.module('LibUtilExt/Network/MultiChannelSenderTrait'));		//!	\see 	LibUtilExt/Network/MultiChannelSenderTrait
 	
 	// replace normal tcpConnection by DataConnection.
 	//! \see LibUtilExt/Network/ExtTCPConnection

@@ -71,13 +71,13 @@ static announceSchedulers = fn(){
 	}
 	activeWorkerSets.swap(newWorkers);
 	
-	static Command = Std.require('LibUtilExt/Command');
+	static Command = Std.module('LibUtilExt/Command');
 	// update slave-instances
 	PADrend.executeCommand(new Command({
 		Command.EXECUTE : [remoteWorkerSetInfo] => fn(workerSetInfo){
 			if( !GLOBALS.isSet($JobScheduling) )
 				return;
-			Std.require('JobScheduling/JobScheduling').updateWorkerSets(workerSetInfo);
+			Std.module('JobScheduling/JobScheduling').updateWorkerSets(workerSetInfo);
 			
 		},
 		Command.FLAGS : Command.FLAG_SEND_TO_SLAVES // only send to slaves (slave instances also call this  method, but should not handle their own calls)
@@ -108,7 +108,7 @@ NS.initScheduler := fn(String schedulerId,numLocalWorker=1,numRemoteWorker=1){
 	
 	out("Add new scheduler ",schedulerId,"\n");
 	activeSchedulers[schedulerId] = new ExtObject({
-			$scheduler : new (Std.require('JobScheduling/Scheduler'))(schedulerId),
+			$scheduler : new (Std.module('JobScheduling/Scheduler'))(schedulerId),
 			$numLocalWorker : numLocalWorker,
 			$numRemoteWorker : numRemoteWorker
 	});

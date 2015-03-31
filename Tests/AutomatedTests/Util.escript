@@ -15,7 +15,7 @@
  **	[Plugin:Tests] Tests/AutomatedTests/Util.escript
  **/
 
-var AutomatedTest = Std.require('Tests/AutomatedTest');
+var AutomatedTest = Std.module('Tests/AutomatedTest');
 
 var tests = [];
 
@@ -60,8 +60,8 @@ tests += new AutomatedTest( "Util/DestructionMonitor" , fn(){
 // -----------------------------------------------------------------------------------------------
 
 tests += new AutomatedTest( "Util/Command" , fn(){
-	static Command = Std.require('LibUtilExt/Command');
-	static CommandHistory = Std.require('LibUtilExt/CommandHistory');
+	static Command = Std.module('LibUtilExt/Command');
+	static CommandHistory = Std.module('LibUtilExt/CommandHistory');
 	var hist = new CommandHistory;
 	
 	var obj = new ExtObject( {$m1:1} );
@@ -230,7 +230,7 @@ tests += new AutomatedTest( "Util/DataWrapper" , fn(){
 });
 // -----------------------------------------------------------------------------------------------
 tests += new AutomatedTest( "Util/ExtensionPoint" , fn(){
-	var ExtensionPoint = Std.require('LibUtilExt/ExtensionPoint');
+	var ExtensionPoint = Std.module('LibUtilExt/ExtensionPoint');
 	var extensionPoint = new ExtensionPoint;
 	extensionPoint.registerExtension( fn(arr){ arr+="foo"; }, Extension.LOW_PRIORITY);
 	var bar = fn(arr){ arr+="bar"; };
@@ -350,7 +350,7 @@ tests += new AutomatedTest( "Util/Generated comparison functions" , fn(){
 	var A = new Type();
 	A.member := 0;
 	A._constructor ::= fn(Number num){ this.member=num; };
-	Traits.addTrait(A,Traits.DefaultComparisonOperatorsTrait,fn(b){return this.member<b.member;});
+	Std.Traits.addTrait(A,Traits.DefaultComparisonOperatorsTrait,fn(b){return this.member<b.member;});
 	
 	var result = true;
 	
@@ -384,7 +384,7 @@ tests += new AutomatedTest( "Util/Generated comparison functions" , fn(){
 // -----------------------------------------------------------------------------------------------
 
 tests += new AutomatedTest( "Util/Listener" , fn(){
-	static Listener = Std.require('LibUtilExt/deprecated/Listener');
+	static Listener = Std.module('LibUtilExt/deprecated/Listener');
 	var notifier = new Notifier;
 	
 	var obj =  new ExtObject;
@@ -401,7 +401,7 @@ tests += new AutomatedTest( "Util/Listener" , fn(){
 // -----------------------------------------------------------------------------------------------
 
 tests += new AutomatedTest( "Util/TypeBasedHandler" , fn(){
-	var TypeBasedHandler = Std.require('LibUtilExt/TypeBasedHandler');
+	var TypeBasedHandler = Std.module('LibUtilExt/TypeBasedHandler');
 	
 	var ObjectDescriber = new Type();
 	
@@ -479,7 +479,7 @@ tests += new AutomatedTest( "Util/TypeBasedHandler" , fn(){
 // -----------------------------------------------------------------------------------------------
 
 tests += new AutomatedTest( "Util/XML" , fn(){
-	static XML_Utils = Std.require('LibUtilExt/XML_Utils');
+	static XML_Utils = Std.module('LibUtilExt/XML_Utils');
 	
 	var tmpDir = new Util.TemporaryDirectory("TestsUtil");
 	var filename1 = tmpDir.getPath()+"test1.xml";

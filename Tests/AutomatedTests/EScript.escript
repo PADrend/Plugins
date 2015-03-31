@@ -11,7 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var AutomatedTest = Std.require('Tests/AutomatedTest');
+var AutomatedTest = Std.module('Tests/AutomatedTest');
 
 var tests = [];
 

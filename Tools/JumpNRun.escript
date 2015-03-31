@@ -130,7 +130,7 @@ plugin.ex_AfterFrame:=fn(...){
 	var observer=PADrend.getCameraMover().getDolly();
 
     if(!rayCaster)
-		rayCaster=new (Std.require('LibMinSGExt/RendRayCaster'));
+		rayCaster=new (Std.module('LibMinSGExt/RendRayCaster'));
 
 	var t_0=clock();
 	if(!t_1)

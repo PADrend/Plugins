@@ -28,7 +28,7 @@ var T = MinSG.RendRayCaster;
 T.castCam @(private) := void;
 T.resolution @(private) := void;
 T.fbo @(private) := void;
-T.renderingLayers @(public,init) := Std.require('Std/DataWrapper');
+T.renderingLayers @(public,init) := Std.module('Std/DataWrapper');
 
 T._constructor ::= fn(Number _resolution=10){
 	this.renderingLayers( 1 );

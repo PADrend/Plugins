@@ -13,7 +13,7 @@
 static HelperTraits = module('../HelperTraits');
 
 static MeshEditor = Util.requirePlugin('MeshEditor');
-static Command = Std.require('LibUtilExt/Command');
+static Command = Std.module('LibUtilExt/Command');
 
 static EditNodeFactories = module('SceneEditor/TransformationTools/EditNodeFactories');
 static EditNodeTraits = module('SceneEditor/TransformationTools/EditNodeTraits');
@@ -39,10 +39,10 @@ Tool.onToolInitOnce_static += fn(){
 	metaRootNode += editNode;
 
 	//! \see EditNodeTraits.AnnotatableTrait
-	Traits.addTrait( editNode, EditNodeTraits.AnnotatableTrait);
+	Std.Traits.addTrait( editNode, EditNodeTraits.AnnotatableTrait);
 
 	//! \see EditNodeTraits.AdjustableProjSizeTrait
-	Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait);
+	Std.Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait);
 
 	editNode.onTranslationStart += this->fn(){
 		this.applyVertexTransformations();				//! \see HelperTraits.MeshTransformationHandlerTrait

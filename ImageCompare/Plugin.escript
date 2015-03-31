@@ -66,9 +66,9 @@ plugin.init @(override) := fn() {
 	}
 
 	Util.registerExtension('Evaluator_QueryEvaluators', fn(Array evaluatorList) {
-		evaluatorList += new (Std.require( 'ImageCompare/ImageCompareEvaluator' ));
-		evaluatorList += new (Std.require( 'ImageCompare/ImageReadEvaluator' ));
-		evaluatorList += new (Std.require( 'ImageCompare/ImageWriteEvaluator' ));
+		evaluatorList += new (Std.module( 'ImageCompare/ImageCompareEvaluator' ));
+		evaluatorList += new (Std.module( 'ImageCompare/ImageReadEvaluator' ));
+		evaluatorList += new (Std.module( 'ImageCompare/ImageWriteEvaluator' ));
 	});
 	return true;
 };
@@ -76,8 +76,8 @@ plugin.init @(override) := fn() {
 
 static ex_BeforeRendering = fn(...) {
 
-	var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
-	if(!(evaluator ---|> ( Std.require( 'ImageCompare/ImageCompareEvaluator' ))) || !evaluator.isReady()) {
+	var evaluator = Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator();
+	if(!(evaluator ---|> ( Std.module( 'ImageCompare/ImageCompareEvaluator' ))) || !evaluator.isReady()) {
 		displayTexturesEnabled(false);
 		return;
 	}
@@ -92,7 +92,7 @@ static ex_AfterRendering = fn(...) {
 	
 	PADrend.selectScene(tempScene);
 	
-	var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
+	var evaluator = Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator();
 	var angle = evaluator.getCameraAngle();
 	var rect = evaluator.measurementResolution;
 	if(rect.isA(Geometry.Vec2))

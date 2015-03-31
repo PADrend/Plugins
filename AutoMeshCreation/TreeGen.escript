@@ -61,7 +61,7 @@ BranchData._constructor ::= fn( [BranchData,void] parent,Number index=0){
 		
 
 TreeGen.executeBranchExtruder ::= fn(Rendering.MeshBuilder mb,BranchData d){
-	@(once) static Extruder = Std.require('AutoMeshCreation/Extruder');
+	@(once) static Extruder = Std.module('AutoMeshCreation/Extruder');
 	
 	var ext = new Extruder;
 	ext.uScale = d.uScale;

@@ -15,7 +15,7 @@
  **/
 
 
-var Effect = new Type( Std.require('Effects/PPEffect') );
+var Effect = new Type( Std.module('Effects/PPEffect') );
 
 Effect._constructor:=fn(){
 
@@ -51,7 +51,7 @@ Effect._constructor:=fn(){
 		'useNoise' : DataWrapper.createFromValue( shader.getUniform('useNoise').getData()[0] ),
 	};
 
-	this.presetManager := new (Std.require('LibGUIExt/PresetManager'))( PADrend.configCache, 'Effects.SSAO', settings );
+	this.presetManager := new (Std.module('LibGUIExt/PresetManager'))( PADrend.configCache, 'Effects.SSAO', settings );
 
 	renderingContext.popShader();
 };

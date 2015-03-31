@@ -11,7 +11,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-var Effect = new Type( Std.require('Effects/PPEffect') );
+var Effect = new Type( Std.module('Effects/PPEffect') );
 
 Effect._constructor ::= fn() {
 	this.fbo := new Rendering.FBO();

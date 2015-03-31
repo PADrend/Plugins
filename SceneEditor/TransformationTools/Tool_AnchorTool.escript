@@ -17,7 +17,7 @@ static ToolHelperTraits = module('./ToolHelperTraits');
 
 //---------------------------------------------------------------------------------
 
-static NodeAnchors = Std.require('LibMinSGExt/NodeAnchors');
+static NodeAnchors = Std.module('LibMinSGExt/NodeAnchors');
 
 var Tool = new Type;
 
@@ -98,7 +98,7 @@ Tool.onNodesSelected_static += fn(Array selectedNodes){
 		var markerNode = new MinSG.GeometryNode(EditNodeFactories.getCubeMesh());
 		markerNode.scale(0.2);
 		editNode += markerNode;
-		Traits.addTrait( markerNode, EditNodeTraits.AnnotatableTrait);		//! \see EditNodeTraits.AnnotatableTrait
+		Std.Traits.addTrait( markerNode, EditNodeTraits.AnnotatableTrait);		//! \see EditNodeTraits.AnnotatableTrait
 		markerNode.setAnnotation("["+anchorName+"]");					//! \see EditNodeTraits.AnnotatableTrait
 		markerNode += (location.isA(Geometry.Vec3)) ? this.mat_Vec3 : this.mat_SRT;
 
@@ -130,13 +130,13 @@ Tool.onNodesSelected_static += fn(Array selectedNodes){
 		// anchor is defined in prototype -> just show, but do not edit.
 		if(!NodeAnchors.getAnchor(node,anchorName)){ 
 			// only the marker is visible -> smaller projected size required
-			Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait,10,30);	//! \see EditNodeTraits.AdjustableProjSizeTrait
+			Std.Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait,10,30);	//! \see EditNodeTraits.AdjustableProjSizeTrait
 			//! \see ToolHelperTraits.FrameListenerTrait
 			this.onFrame += editNode->editNode.adjustProjSize; 						//! \see EditNodeTraits.AdjustableProjSizeTrait
 			continue;
 		}
 
-		Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait);				//! \see EditNodeTraits.AdjustableProjSizeTrait
+		Std.Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait);				//! \see EditNodeTraits.AdjustableProjSizeTrait
 		//! \see ToolHelperTraits.FrameListenerTrait
 		this.onFrame += editNode->editNode.adjustProjSize; 							//! \see EditNodeTraits.AdjustableProjSizeTrait
 
@@ -174,7 +174,7 @@ Tool.onNodesSelected_static += fn(Array selectedNodes){
 				newLocation = oldLocation.clone();
 				newLocation.setTranslation(newRelPos);
 			}
-			static Command = Std.require('LibUtilExt/Command');
+			static Command = Std.module('LibUtilExt/Command');
 			PADrend.executeCommand({
 				Command.DESCRIPTION : "Transform anchor",
 				Command.EXECUTE : 	[newLocation] => ctxt.anchor ,
@@ -213,7 +213,7 @@ Tool.onNodesSelected_static += fn(Array selectedNodes){
 			ctxt.editNode.rotateAroundWorldAxis_deg(deg,axis_ws);
 			var newLocation = ctxt.editNode.getRelTransformationSRT();
 			newLocation.setScale(1.0);
-			static Command = Std.require('LibUtilExt/Command');
+			static Command = Std.module('LibUtilExt/Command');
 			PADrend.executeCommand({
 				Command.DESCRIPTION : "Transform anchor",
 				Command.EXECUTE : 	[newLocation] => ctxt.anchor ,

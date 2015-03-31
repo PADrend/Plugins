@@ -26,7 +26,7 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn(){
-	registerExtension('PADrend_Init',this->this.ex_Init);
+	Util.registerExtension('PADrend_Init',this->this.ex_Init);
 	module.on('PADrend/gui',registerToolIcons);
 	
 	return true;
@@ -36,37 +36,37 @@ plugin.init @(override) := fn(){
 plugin.ex_Init:=fn(){
 
 	{
-		var t = new (Std.require('SceneEditor/TransformationTools/Tool_TranslationTool'));
+		var t = new (Std.module('SceneEditor/TransformationTools/Tool_TranslationTool'));
 		PADrend.registerUITool('TransformationTools3_Move')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 	{
-		var t = new (Std.require('SceneEditor/TransformationTools/Tool_RotationTool'));
+		var t = new (Std.module('SceneEditor/TransformationTools/Tool_RotationTool'));
 		PADrend.registerUITool('TransformationTools3_Rotate')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 
 	}{
-		var t = new (Std.require('SceneEditor/TransformationTools/Tool_ScaleTool'));
+		var t = new (Std.module('SceneEditor/TransformationTools/Tool_ScaleTool'));
 		PADrend.registerUITool('TransformationTools3_Scale')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 	{
-		var t = new (Std.require('SceneEditor/TransformationTools/Tool_SnapTool'));
+		var t = new (Std.module('SceneEditor/TransformationTools/Tool_SnapTool'));
 		PADrend.registerUITool('TransformationTools3_Snap')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 	{
-		var t = new (Std.require('SceneEditor/TransformationTools/Tool_SnapTool2'));
+		var t = new (Std.module('SceneEditor/TransformationTools/Tool_SnapTool2'));
 		PADrend.registerUITool('TransformationTools3_Snap2')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
 	{
-		var t = new (Std.require('SceneEditor/TransformationTools/Tool_AnchorTool'));
+		var t = new (Std.module('SceneEditor/TransformationTools/Tool_AnchorTool'));
 		PADrend.registerUITool('TransformationTools3_Anchor')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);

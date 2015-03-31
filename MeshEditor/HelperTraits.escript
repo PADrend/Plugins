@@ -143,7 +143,7 @@ HelperTraits.TriangleSelectionListenerTrait := new Traits.GenericTrait("HelperTr
 				onTrianglesSelected_static(_selectedTriangles);
 				onTrianglesSelected(_selectedTriangles);
 			};
-			registerExtension('MeshEditor_OnTrianglesSelected', _triangleSelectionChangedHandler);
+			Util.registerExtension('MeshEditor_OnTrianglesSelected', _triangleSelectionChangedHandler);
 			_triangleSelectionChangedHandler( MeshEditor.getSelectedTriangles() );
 		}
 		return this;
@@ -206,7 +206,7 @@ HelperTraits.TriangleSelectionListenerTrait := new Traits.GenericTrait("HelperTr
 		
 	t.onInit += fn(obj){
 		obj.onTrianglesSelected_static = new MultiProcedure;
-		Traits.assureTrait(obj, ToolHelperTraits.NodeSelectionListenerTrait);
+		Std.Traits.assureTrait(obj, ToolHelperTraits.NodeSelectionListenerTrait);
 	
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait
 		obj.onNodesSelected_static += fn(Array nodes){
@@ -263,7 +263,7 @@ HelperTraits.VertexSelectionListenerTrait := new Traits.GenericTrait("HelperTrai
 				onVerticesSelected_static(_selectedVertices);
 				onVerticesSelected(_selectedVertices);
 			};
-			registerExtension('MeshEditor_OnVerticesSelected', _vertexSelectionChangedHandler);
+			Util.registerExtension('MeshEditor_OnVerticesSelected', _vertexSelectionChangedHandler);
 			_vertexSelectionChangedHandler( MeshEditor.getSelectedVertices() );
 		}
 		return this;
@@ -304,8 +304,8 @@ HelperTraits.VertexSelectionListenerTrait := new Traits.GenericTrait("HelperTrai
 		
 	t.onInit += fn(obj){
 		obj.onVerticesSelected_static = new MultiProcedure;
-		Traits.assureTrait(obj, ToolHelperTraits.NodeSelectionListenerTrait);
-		Traits.assureTrait(obj, HelperTraits.TriangleSelectionListenerTrait);
+		Std.Traits.assureTrait(obj, ToolHelperTraits.NodeSelectionListenerTrait);
+		Std.Traits.assureTrait(obj, HelperTraits.TriangleSelectionListenerTrait);
 	
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait
 		obj.onNodesSelected_static += fn(Array nodes){
@@ -409,8 +409,8 @@ HelperTraits.TriangleHighlightTrait := new Traits.GenericTrait("HelperTraits.Tri
 		renderingContext.popMatrix_modelToCamera();
 	};
 	t.onInit += fn(obj){
-		Traits.requireTrait(obj, "ToolHelperTraits.NodeSelectionListenerTrait");
-		Traits.requireTrait(obj, "HelperTraits.TriangleSelectionListenerTrait");
+		Std.Traits.requireTrait(obj, "ToolHelperTraits.NodeSelectionListenerTrait");
+		Std.Traits.requireTrait(obj, "HelperTraits.TriangleSelectionListenerTrait");
 	};
 }
 
@@ -497,8 +497,8 @@ HelperTraits.VertexHighlightTrait := new Traits.GenericTrait("HelperTraits.Verte
 		renderingContext.popMatrix_modelToCamera();
 	};
 	t.onInit += fn(obj){
-		Traits.requireTrait(obj, "ToolHelperTraits.NodeSelectionListenerTrait");
-		Traits.requireTrait(obj, "HelperTraits.VertexSelectionListenerTrait");
+		Std.Traits.requireTrait(obj, "ToolHelperTraits.NodeSelectionListenerTrait");
+		Std.Traits.requireTrait(obj, "HelperTraits.VertexSelectionListenerTrait");
 	};
 }
 // -----------------------------------------------------------------------------------
@@ -528,7 +528,7 @@ HelperTraits.MeshTransformationHandlerTrait := new Traits.GenericTrait("HelperTr
 		if(!_transformedVertices.empty() && _transformMatrix && _transformedMesh) {
 				
 			_resetVertices(_transformedMesh, _transformedVertices, _vertexOrigins);
-			static Command = Std.require('LibUtilExt/Command');
+			static Command = Std.module('LibUtilExt/Command');
 			PADrend.executeCommand({
 				Command.DESCRIPTION : "Transform vertices",
 				Command.EXECUTE : 	[_transformedMesh, _transformedVertices.clone(), _transformMatrix]=>this->_transformVertices,
@@ -599,9 +599,9 @@ HelperTraits.MeshTransformationHandlerTrait := new Traits.GenericTrait("HelperTr
 	t.attributes.getTransformedMesh ::= 	fn(){ return _transformedMesh; };
 	
 	t.onInit += fn(obj){
-		Traits.assureTrait(obj, HelperTraits.TriangleSelectionListenerTrait);
-		Traits.assureTrait(obj,ToolHelperTraits.NodeSelectionListenerTrait);
-		Traits.assureTrait(obj, HelperTraits.VertexSelectionListenerTrait);
+		Std.Traits.assureTrait(obj, HelperTraits.TriangleSelectionListenerTrait);
+		Std.Traits.assureTrait(obj,ToolHelperTraits.NodeSelectionListenerTrait);
+		Std.Traits.assureTrait(obj, HelperTraits.VertexSelectionListenerTrait);
 	
 		//! \see HelperTraits.TriangleSelectionListenerTrait
 		obj.onTrianglesSelected_static += fn(Array triangles){
@@ -680,37 +680,37 @@ HelperTraits.GenericMeshEditTrait := new Traits.GenericTrait("HelperTraits.Gener
 	
 	t.onInit += fn(obj){
 		//! \see HelperTraits.UIEventListenerTrait
-		Traits.addTrait(obj,HelperTraits.UIEventListenerTrait);
+		Std.Traits.addTrait(obj,HelperTraits.UIEventListenerTrait);
 	
 		//! \see ToolHelperTraits.UIToolTrait
-		Traits.addTrait(obj,ToolHelperTraits.UIToolTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.UIToolTrait);
 
 		//! \see ToolHelperTraits.FrameListenerTrait
-		Traits.addTrait(obj,ToolHelperTraits.FrameListenerTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.FrameListenerTrait);
 
 		//! \see ToolHelperTraits.ContextMenuProviderTrait
-		Traits.addTrait(obj,ToolHelperTraits.ContextMenuProviderTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.ContextMenuProviderTrait);
 
 		//! \see ToolHelperTraits.MetaNodeContainerTrait
-		Traits.addTrait(obj,ToolHelperTraits.MetaNodeContainerTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.MetaNodeContainerTrait);
 
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait
-		Traits.addTrait(obj,ToolHelperTraits.NodeSelectionListenerTrait);
+		Std.Traits.addTrait(obj,ToolHelperTraits.NodeSelectionListenerTrait);
 
 		//! \see ToolHelperTraits.NodeTransformationHandlerTrait
 		//Traits.addTrait(obj,ToolHelperTraits.NodeTransformationHandlerTrait);
 				
 		//! \see HelperTraits.TriangleSelectionListenerTrait
-		Traits.addTrait(obj, HelperTraits.TriangleSelectionListenerTrait);
+		Std.Traits.addTrait(obj, HelperTraits.TriangleSelectionListenerTrait);
 		
 		//! \see HelperTraits.TriangleHighlightTrait
-		Traits.addTrait(obj, HelperTraits.TriangleHighlightTrait);
+		Std.Traits.addTrait(obj, HelperTraits.TriangleHighlightTrait);
 		
 		//! \see HelperTraits.VertexSelectionListenerTrait
-		Traits.addTrait(obj, HelperTraits.VertexSelectionListenerTrait);
+		Std.Traits.addTrait(obj, HelperTraits.VertexSelectionListenerTrait);
 		
 		//! \see HelperTraits.VertexHighlightTrait
-		Traits.addTrait(obj, HelperTraits.VertexHighlightTrait);
+		Std.Traits.addTrait(obj, HelperTraits.VertexHighlightTrait);
 		
 		//! \see ToolHelperTraits.NodeSelectionListenerTrait
 		obj.onNodesSelected_static += fn(Array nodes){

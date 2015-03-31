@@ -77,7 +77,7 @@ plugin.init @(override) := fn(){
 		sampler += "AdaptiveCSampler_dist";
 
 	foreach(sampler as var s)
-		GASPManager.registerCSampler( Std.require( 'SceneAnalyzer/Sampling/' +s ) );
+		GASPManager.registerCSampler( Std.module( 'SceneAnalyzer/Sampling/' +s ) );
 
 	var modules = [];
 	if(Util.queryPlugin('PADrend') && MinSG.isSet($SamplingAnalysis)) 

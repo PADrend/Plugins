@@ -61,7 +61,7 @@ plugin.registerMenus := fn(gui){
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Chat Server",
 			GUI.ON_CLICK : fn() {
-				var s = new (Std.require('Spielerei/Chat').Server);
+				var s = new (Std.module('Spielerei/Chat').Server);
 				s.init();
 			}
 		},
@@ -69,7 +69,7 @@ plugin.registerMenus := fn(gui){
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Chat Client",
 			GUI.ON_CLICK : fn() {
-				var c=new (Std.require('Spielerei/Chat').Client);
+				var c=new (Std.module('Spielerei/Chat').Client);
 				c.init();
 			}
 		},

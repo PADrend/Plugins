@@ -13,7 +13,7 @@
 	maximizing the minimal distance between two adjacent points.
 	
 	\code
-	var ProgressiveBlueNoiseCreator = Std.require('LibGeometryExt/ProgressiveBlueNoiseCreator');
+	var ProgressiveBlueNoiseCreator = Std.module('LibGeometryExt/ProgressiveBlueNoiseCreator');
 
 	// simple example: create points inside a 3d box
 	print_r( ProgressiveBlueNoiseCreator.createPointsInBox( new Geometry.Box(0,0,0,1,1,1),100 );

@@ -29,9 +29,9 @@ plugin.init @(override) := fn(){
 	static active = Std.DataWrapper.createFromEntry(PADrend.configCache,'Tracking.fakeTrackEnabled', false);
 	static controllerNode;
 
-	static HID_Traits = Std.require('LibUtilExt/HID_Traits');
+	static HID_Traits = Std.module('LibUtilExt/HID_Traits');
 
-	registerExtension('PADrend_Init', fn(){
+	Util.registerExtension('PADrend_Init', fn(){
 		var buttons = [];
 		for(var buttonNr=0; buttonNr<5; ++buttonNr){
 			var b = new Std.DataWrapper(false);
@@ -97,7 +97,7 @@ plugin.init @(override) := fn(){
 			Std.Traits.addTrait( controllerNode, HID_Traits.ControllerAnalogAxisTrait, 2);
 
 			//! \see TransformationObserverTrait
-			var TransformationObserverTrait = Std.require('LibMinSGExt/Traits/TransformationObserverTrait');
+			var TransformationObserverTrait = Std.module('LibMinSGExt/Traits/TransformationObserverTrait');
 			Std.Traits.addTrait( controllerNode, TransformationObserverTrait);
 			controllerNode.onNodeTransformed += fn(node){
 				this.sendTransformationEvent(node.getRelTransformationSRT()); //! \see HID_Traits.Controller_Room6D_Trait
@@ -108,7 +108,7 @@ plugin.init @(override) := fn(){
 		}
 	};
 
-	registerExtension('PADrend_Init', fn(){	active.forceRefresh();	},Util.EXTENSION_PRIORITY_HIGH);
+	Util.registerExtension('PADrend_Init', fn(){	active.forceRefresh();	},Util.EXTENSION_PRIORITY_HIGH);
 
 
 	// -------------------------------------------------------------------------------------------------------------

@@ -108,20 +108,20 @@ static camerasUsedForLastFrame = [];
 static renderingLayers = 1;
 
 plugin.init @(override) := fn(){
-	PADrend.RenderingPass := Std.require( 'PADrend/EventLoop/RenderingPass' ); //alias
+	PADrend.RenderingPass := Std.module( 'PADrend/EventLoop/RenderingPass' ); //alias
 
-	registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+1);
-	registerExtension('PADrend_Start',this->ex_Start);
+	Util.registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+1);
+	Util.registerExtension('PADrend_Start',this->ex_Start);
 
 
 	//  Task scheduler
 	// The task sheduler is called with a timeslot of 0.1 sec after every frame
-	this.taskScheduler := new (Std.require('LibUtilExt/TaskScheduler'));
-	registerExtension('PADrend_AfterRendering',	this->fn(...){	taskScheduler.execute(0.1); } );
+	this.taskScheduler := new (Std.module('LibUtilExt/TaskScheduler'));
+	Util.registerExtension('PADrend_AfterRendering',	this->fn(...){	taskScheduler.execute(0.1); } );
 	
 	// Behaviour manager
 	if(MinSG.isSet($BehaviourManager)){
-		registerExtension('PADrend_AfterRendering',	this->fn(...){
+		Util.registerExtension('PADrend_AfterRendering',	this->fn(...){
 			try{
 				PADrend.getSceneManager().getBehaviourManager().executeBehaviours( PADrend.getSyncClock() );
 			}catch(e){
@@ -135,7 +135,7 @@ plugin.init @(override) := fn(){
 		fpsCounter.start := Util.Timer.now();
 		fpsCounter.fCounter := 0;
 	
-		registerExtension('PADrend_AfterRendering', fpsCounter->fn(...){
+		Util.registerExtension('PADrend_AfterRendering', fpsCounter->fn(...){
 			++fCounter;
 			var now = Util.Timer.now();
 
@@ -150,7 +150,7 @@ plugin.init @(override) := fn(){
 
 	// experimental!!!!	
 	// set global time uniform
-	registerExtension('PADrend_AfterRendering', fn(...){
+	Util.registerExtension('PADrend_AfterRendering', fn(...){
 			renderingContext.setGlobalUniform("sg_time",Rendering.Uniform.FLOAT,[PADrend.getSyncClock()]);
 	});
 		
@@ -209,7 +209,7 @@ plugin.planTask := fn(time,fun){
 plugin.singleFrame := fn() {
 
 	// create "default" rendering pass
-	var renderingPasses = [ new (Std.require('PADrend/EventLoop/RenderingPass'))("default",PADrend.getRootNode(),activeCamera, renderingFlags, this.doClearScreen ? this.bgColor : false,renderingLayers) ];
+	var renderingPasses = [ new (Std.module('PADrend/EventLoop/RenderingPass'))("default",PADrend.getRootNode(),activeCamera, renderingFlags, this.doClearScreen ? this.bgColor : false,renderingLayers) ];
 	executeExtensions('PADrend_BeforeRendering',renderingPasses);
 	
 	// -------------------

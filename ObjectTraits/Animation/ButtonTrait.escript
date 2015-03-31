@@ -31,7 +31,7 @@ static createRelativeNodeQuery = fn(MinSG.Node source,MinSG.Node target){
 
 trait.onInit += fn(MinSG.Node node){
 
-	Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));
+	Std.Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));
 	
 	node.buttonFn1 := node.getNodeAttributeWrapper('buttonFn1', "animationPlay" );
 	node.buttonFn2 := node.getNodeAttributeWrapper('buttonFn2', "animationPause" );
@@ -58,7 +58,7 @@ trait.onInit += fn(MinSG.Node node){
 			
 			@(once) static CommandHandling = Util.requirePlugin('PADrend/CommandHandling');
 			CommandHandling.executeRemoteCommand( [pathToButton,time,value]=>fn(pathToButton,time,value){
-				var button = Std.require('LibMinSGExt/TreeQuery').execute(pathToButton,PADrend.getSceneManager(),[PADrend.getCurrentScene()]).toArray().front();
+				var button = Std.module('LibMinSGExt/TreeQuery').execute(pathToButton,PADrend.getSceneManager(),[PADrend.getCurrentScene()]).toArray().front();
 				button._buttonFixedNextSwitchTime = time;
 				button.buttonState(value);
 			} );

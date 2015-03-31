@@ -404,7 +404,7 @@ var TreeQueryParser = T;
 // ---------------------------------------------------------------
 // MinSG-specific part
 
-static SemObjTools = Std.require('LibMinSGExt/SemanticObject');
+static SemObjTools = Std.module('LibMinSGExt/SemanticObject');
 
 // ----------------------------------------------------------------------------
 //// Query functions:
@@ -622,7 +622,7 @@ static functionRegistry = {
 	},
 	// MinSG:tag( 'tagName', [, nodes])   Collect all nodes with the given tag
 	'MinSG:collectByTag' : fn(ctxt, tagName, input=void){
-		@(once) static tagFunctions = Std.require('LibMinSGExt/NodeTagFunctions');
+		@(once) static tagFunctions = Std.module('LibMinSGExt/NodeTagFunctions');
 		var output = new Set;
 		foreach( getInput(ctxt,input) as var subtreeRoot){
 			output.merge(tagFunctions.collectNodesByTag(subtreeRoot,tagName(ctxt)));
@@ -747,7 +747,7 @@ static createRelativeNodeQuery = fn(SceneManager sm, MinSG.Node source, MinSG.No
 		queryToTarget = "/MinSG:collectRefId('" + sm.getNameOfRegisteredNode(target.getPrototype()) + "')";
 	}else{
 		// try to identify tag to connect to target
-		@(once) static tagFunctions = Std.require('LibMinSGExt/NodeTagFunctions');
+		@(once) static tagFunctions = Std.module('LibMinSGExt/NodeTagFunctions');
 		foreach(tagFunctions.getTags(target) as var tag){
 			var nodes = tagFunctions.collectNodesByTag(source,tag);
 			if(nodes.size()==1 && nodes.front()==target){

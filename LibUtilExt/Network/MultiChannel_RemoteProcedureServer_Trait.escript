@@ -20,8 +20,8 @@ var t = new Std.Traits.GenericTrait('MultiChannel_RemoteProcedureServer_Trait');
 t.allowMultipleUses();
 
 t.onInit += fn(connection,Number channelId, fun, deserialize=parseJSON){
-	Traits.requireTrait(connection, Std.require('LibUtilExt/Network/MultiChannelReceiverTrait'));	//!	\see	LibUtilExt/Network/MultiChannelReceiverTrait
-	Traits.requireTrait(fun,Traits.CallableTrait);													//!	\see	Traits.CallableTrait
+	Std.Traits.requireTrait(connection, Std.module('LibUtilExt/Network/MultiChannelReceiverTrait'));	//!	\see	LibUtilExt/Network/MultiChannelReceiverTrait
+	Std.Traits.requireTrait(fun,Traits.CallableTrait);													//!	\see	Std.Traits.CallableTrait
 	
 	//!	\see LibUtilExt/Network/MultiChannelReceiverTrait
 	connection.setChannelHandler(channelId, [fun,deserialize] => fn(fun,deserialize, data){

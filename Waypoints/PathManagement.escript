@@ -275,9 +275,9 @@ PathManagement.flyToPrevWaypoint := fn(duration){
 // --------------------------------------
 // edit
 
-static Command = Std.require('LibUtilExt/Command');
+static Command = Std.module('LibUtilExt/Command');
 PathManagement.getCommandHistory:=fn(){
-	@(once) static cmdHistory = new (Std.require('LibUtilExt/CommandHistory'));
+	@(once) static cmdHistory = new (Std.module('LibUtilExt/CommandHistory'));
 	return cmdHistory;
 };
 

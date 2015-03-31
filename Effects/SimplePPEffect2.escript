@@ -17,7 +17,7 @@
 /*! Helper type for simple post-processing effects.
 	\deprecated Do not use for new effects! Directly inherit from PPEffect instead.
 */
-var SimplePPEffect2 = new Type( Std.require('Effects/PPEffect') );
+var SimplePPEffect2 = new Type( Std.module('Effects/PPEffect') );
 SimplePPEffect2._constructor ::= fn() {
 	this.fbo := new Rendering.FBO;
 	

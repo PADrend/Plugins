@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-var AutomatedTest = Std.require('Tests/AutomatedTest');
+var AutomatedTest = Std.module('Tests/AutomatedTest');
 
 var tests = [];
 
@@ -19,11 +19,11 @@ var tests = [];
 
 tests += new AutomatedTest( "ObjectTraits",fn(){
 	
-	var sceneManager = new (Std.require('LibMinSGExt/SceneManagerExt'));
+	var sceneManager = new (Std.module('LibMinSGExt/SceneManagerExt'));
 	
 	// create scene-root with separate sceneManager.
 	var sceneRoot = new MinSG.ListNode;
-	Std.Traits.assureTrait(sceneRoot,Std.require('LibMinSGExt/Traits/SceneMarkerTrait') );
+	Std.Traits.assureTrait(sceneRoot,Std.module('LibMinSGExt/Traits/SceneMarkerTrait') );
 	sceneRoot.sceneData.sceneManager := sceneManager; //! \see SceneMarkerTrait
 	
 	{	// LinearNodeRepeaterTrait
@@ -43,7 +43,7 @@ tests += new AutomatedTest( "ObjectTraits",fn(){
 		// add persistent trait to node
 		var traitCounter = new Std.DataWrapper(0);
 		var traitName = "Tests/MyTestTrait";
-		var myDummyPersistentNodeTrait = new (Std.require('LibMinSGExt/Traits/PersistentNodeTrait'))(traitName);
+		var myDummyPersistentNodeTrait = new (Std.module('LibMinSGExt/Traits/PersistentNodeTrait'))(traitName);
 		Std._unregisterModule(traitName);
 		Std._registerModule(traitName,myDummyPersistentNodeTrait);
 		myDummyPersistentNodeTrait.attributes.myTraitAttribute := "foo";
@@ -59,7 +59,7 @@ tests += new AutomatedTest( "ObjectTraits",fn(){
 		var repeaterContainerNode = new MinSG.ListNode;
 		sceneRoot += repeaterContainerNode;
 		// add repeater trait to container
-		Std.Traits.addTrait(repeaterContainerNode, Std.require('ObjectTraits/Misc/LinearNodeRepeaterTrait') );
+		Std.Traits.addTrait(repeaterContainerNode, Std.module('ObjectTraits/Misc/LinearNodeRepeaterTrait') );
 		
 		var linkOk = new Std.DataWrapper(false);
 		//!\ see NodeLinkTrait

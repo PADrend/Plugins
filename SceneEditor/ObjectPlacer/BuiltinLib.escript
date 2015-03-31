@@ -53,9 +53,9 @@ plugin.init @(override) := fn(){
 					GUI.DRAGGING_MARKER : fn(c){	_draggingMarker_relPos.setValue(-5,-5); return "X";},
 					GUI.DRAGGING_CONNECTOR : true,
 				});
-				var ObjectPlacerUtils = Std.require('SceneEditor/ObjectPlacer/Utils');
+				var ObjectPlacerUtils = Std.module('SceneEditor/ObjectPlacer/Utils');
 				//! \see DraggableObjectCreatorTrait
-				Traits.addTrait(entry,ObjectPlacerUtils.DraggableObjectCreatorTrait,ObjectPlacerUtils.defaultNodeInserter,factory);
+				Std.Traits.addTrait(entry,ObjectPlacerUtils.DraggableObjectCreatorTrait,ObjectPlacerUtils.defaultNodeInserter,factory);
 
 				entries += entry;
 			}

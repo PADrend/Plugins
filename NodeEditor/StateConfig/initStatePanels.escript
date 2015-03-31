@@ -1691,7 +1691,7 @@ gui.register(CONFIG_PREFIX + MinSG.TextureState, fn(MinSG.TextureState state) {
 				outln(" done (", texture, ").");
 			}
 			//! \see RefreshableContainerTrait
-			@(once) static RefreshableContainerTrait = Std.require('LibGUIExt/Traits/RefreshableContainerTrait');
+			@(once) static RefreshableContainerTrait = Std.module('LibGUIExt/Traits/RefreshableContainerTrait');
 			RefreshableContainerTrait.refreshContainer( this );
 		}
 	};

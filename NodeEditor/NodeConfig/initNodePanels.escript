@@ -83,7 +83,7 @@ gui.register(CONFIG_PREFIX + MinSG.Node, fn(node){
 		GUI.ON_DATA_CHANGED : node -> node.setTempNode,
 		GUI.TOOLTIP : "If enabled, the node is not saved."
 	};
-	var SemanticObject = Std.require('LibMinSGExt/SemanticObject');
+	var SemanticObject = Std.module('LibMinSGExt/SemanticObject');
 	entries += {
 		GUI.TYPE : GUI.TYPE_BOOL,
 		GUI.LABEL : "is semantic obj",
@@ -116,7 +116,7 @@ gui.register(CONFIG_PREFIX + MinSG.Node, fn(node){
 			};
 		}
 	}
-	@(once) static PersistentNodeTrait = Std.require('LibMinSGExt/Traits/PersistentNodeTrait');
+	@(once) static PersistentNodeTrait = Std.module('LibMinSGExt/Traits/PersistentNodeTrait');
 	
 	if(node.isInstance()){
 		var inheritedTraits = PersistentNodeTrait.getLocalPersistentNodeTraitNames(node.getPrototype());

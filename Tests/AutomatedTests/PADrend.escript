@@ -15,7 +15,7 @@
  **	[Plugin:Tests] Tests/AutomatedTests/PADrend.escript
  **/
 
-var AutomatedTest = Std.require('Tests/AutomatedTest');
+var AutomatedTest = Std.module('Tests/AutomatedTest');
 
 var tests = [];
 
@@ -23,7 +23,7 @@ var tests = [];
 
 // extended Object Serialization tests
 tests += new AutomatedTest( "PADrend ObjectSerialization" , fn(){
-	static Command = Std.require('LibUtilExt/Command');
+	static Command = Std.module('LibUtilExt/Command');
 	// function with bound params
 	var f1 = [10,1]=>fn(b,c,a){	return a*b-c; };
 	var s_f1 = PADrend.serialize( f1);

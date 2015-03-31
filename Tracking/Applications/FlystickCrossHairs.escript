@@ -90,7 +90,7 @@ var app = new ExtObject;
 Std.Traits.addTrait(app, TrackingAppTrait,
 				DataWrapper.createFromConfig(systemConfig,'Tracking.FlystickCrossHairs.intitiallyEnabled',false ),
 				DataWrapper.createFromConfig(systemConfig,'Tracking.FlystickCrossHairs.deviceName', "Flystick"),
-				[Std.require('LibUtilExt/HID_Traits').Controller_Room6D_Trait]
+				[Std.module('LibUtilExt/HID_Traits').Controller_Room6D_Trait]
 );
 
 

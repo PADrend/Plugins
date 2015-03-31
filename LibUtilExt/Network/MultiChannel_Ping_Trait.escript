@@ -31,8 +31,8 @@ t.attributes.getPongReceivedClock ::= fn(){	return lastPongReceiveClock;};
 t.attributes.getPingReceivedClock ::= fn(){	return lastPingReceiveClock;};
 
 t.onInit += fn(connection){
-	Traits.requireTrait(connection, Std.require('LibUtilExt/Network/MultiChannelReceiverTrait'));	//!	\see	LibUtilExt/Network/MultiChannelReceiverTrait
-	Traits.requireTrait(connection, Std.require('LibUtilExt/Network/MultiChannelSenderTrait'));		//!	\see	LibUtilExt/Network/MultiChannelSenderTrait
+	Std.Traits.requireTrait(connection, Std.module('LibUtilExt/Network/MultiChannelReceiverTrait'));	//!	\see	LibUtilExt/Network/MultiChannelReceiverTrait
+	Std.Traits.requireTrait(connection, Std.module('LibUtilExt/Network/MultiChannelSenderTrait'));		//!	\see	LibUtilExt/Network/MultiChannelSenderTrait
 
 	//! \see MultiChannelReceiverTrait
 	connection.setChannelHandler(Util.Network.CHANNEL_ID_PING,fn(data){

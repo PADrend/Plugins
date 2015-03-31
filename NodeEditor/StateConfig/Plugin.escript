@@ -38,7 +38,7 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn() {
 
-	Std.require( 'NodeEditor/StateConfig/initStatePanels');
+	Std.module( 'NodeEditor/StateConfig/initStatePanels');
 
 	// register extensions
 	Util.registerExtension('NodeEditor_QueryAvailableStates',fn(a) {
@@ -101,7 +101,7 @@ plugin.init @(override) := fn() {
 			
 			static getDroppingComponent = fn( Geometry.Vec2 guiPos ){
 				//! \see AcceptDroppedStatesTrait
-				@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');
+				@(once) static AcceptDroppedStatesTrait = Std.module('NodeEditor/GUI/AcceptDroppedStatesTrait');
 				for( var c = gui.getComponentAtPos(guiPos); c; c=c.getParentComponent()){
 					if(Traits.queryTrait(c,AcceptDroppedStatesTrait) )
 						return c;
@@ -156,7 +156,7 @@ plugin.init @(override) := fn() {
 				}else  if(!gui.getComponentAtPos(gui.screenPosToGUIPos( [evt.x,evt.y] )).getParentComponent()) { // screen ?
 					var node = Util.requirePlugin('PADrend/Picking').pickNode( [evt.x,evt.y] );
 					if(node){
-						@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');					//! \see AcceptDroppedStatesTrait
+						@(once) static AcceptDroppedStatesTrait = Std.module('NodeEditor/GUI/AcceptDroppedStatesTrait');					//! \see AcceptDroppedStatesTrait
 						AcceptDroppedStatesTrait.transferDroppedStates( stateSource, node, [state] );
 					}
 				}
@@ -266,8 +266,8 @@ plugin.init @(override) := fn() {
 	// GroupState
 	NodeEditor.addConfigTreeEntryProvider(MinSG.GroupState,fn( obj,entry ){
 		//! \see AcceptDroppedStatesTrait
-		@(once) static AcceptDroppedStatesTrait = Std.require('NodeEditor/GUI/AcceptDroppedStatesTrait');								
-		Traits.addTrait( entry._label, AcceptDroppedStatesTrait);
+		@(once) static AcceptDroppedStatesTrait = Std.module('NodeEditor/GUI/AcceptDroppedStatesTrait');								
+		Std.Traits.addTrait( entry._label, AcceptDroppedStatesTrait);
 		entry._label.onStatesDropped += [obj] => fn(obj, source, Array states, actionType, evt){
 			AcceptDroppedStatesTrait.transferDroppedStates( source, obj, states, actionType); //! \see AcceptDroppedStatesTrait
 			for(var c=this; c; c=c.getParentComponent()){

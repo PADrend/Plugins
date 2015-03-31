@@ -16,7 +16,7 @@
  ** Graphical tools for managing semantic objects.
  **/
 
-static SemanticObject = Std.require('LibMinSGExt/SemanticObject');
+static SemanticObject = Std.module('LibMinSGExt/SemanticObject');
 static SemanticObjectEntryTrait = module('./SemanticObjectEntryTrait');
 
 var plugin = new Plugin({
@@ -104,7 +104,7 @@ plugin.initGUI := fn(gui){
 			}
 		];
 	});
-	static traitRegistry = Std.require('ObjectTraits/ObjectTraitRegistry');
+	static traitRegistry = Std.module('ObjectTraits/ObjectTraitRegistry');
 
 	static traitTitleProperties = [
 				new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,gui._createRectShape(new Util.Color4ub(200,200,200,255),new Util.Color4ub(200,200,200,255),true))
@@ -117,7 +117,7 @@ plugin.initGUI := fn(gui){
 
 	gui.register('ObjectEditor_ObjectConfig.5_traits',fn(MinSG.Node node,refreshCallback){
 		var entries = [];
-		foreach( Std.require('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node) as var traitId){
+		foreach( Std.module('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node) as var traitId){
 			var info = traitRegistry.getTraitInfos()[traitId];
 			var provider = traitRegistry.getGUIProvider(traitId);
 			if( provider ){
@@ -132,7 +132,7 @@ plugin.initGUI := fn(gui){
 					GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,40,16 ],
 					GUI.TOOLTIP : info ? ("["+traitId+"]\n\n"+info['description']): "["+traitId+"]"
 				};
-				var trait = Std.require(traitId);
+				var trait = Std.module(traitId);
 				if(trait.getRemovalAllowed()){
 					entries += {
 						GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
@@ -163,7 +163,7 @@ plugin.initGUI := fn(gui){
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Add object trait",
 				GUI.MENU : [node,refreshCallback] => fn(node,refreshCallback){
-					var enabledTraitNames =  new Set(Std.require('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node));
+					var enabledTraitNames =  new Set(Std.module('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node));
 					
 					var entries = [];
 					foreach( traitRegistry.getTraitInfos() as var moduleId,var info ){
@@ -176,7 +176,7 @@ plugin.initGUI := fn(gui){
 								GUI.LABEL : displayName,
 								GUI.WIDTH : 200,
 								GUI.ON_CLICK : [node,moduleId,refreshCallback] => fn(node,moduleId,refreshCallback){
-									Std.Traits.addTrait(node,Std.require(moduleId) );
+									Std.Traits.addTrait(node,Std.module(moduleId) );
 									gui.closeAllMenus();
 									refreshCallback();
 								},

@@ -29,7 +29,7 @@ MeasurementPlugin.samplePath := fn(	DataWrapper outputFileName,
 		throw "Invalid camera path.";
 	}
 
-	var evaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
+	var evaluator = Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator();
 	if(!evaluator) {
 		throw "Invalid evaluator.";
 	}

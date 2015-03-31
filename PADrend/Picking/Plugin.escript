@@ -28,7 +28,7 @@ plugin.init @(override) := fn(){
 
 static getRayCaster = fn(){
 	static caster;
-	@(once)	caster = new (Std.require('LibMinSGExt/RendRayCaster'));
+	@(once)	caster = new (Std.module('LibMinSGExt/RendRayCaster'));
 	return caster;
 };
 

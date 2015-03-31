@@ -54,8 +54,8 @@ plugin.init @(override) := fn() {
 		out("MinSG.Evaluator not found!\n");
 		return false;
 	}
-	Std.require('Evaluator/extendEvaluator');
-	Std.require('Evaluator/registerEvaluators');
+	Std.module('Evaluator/extendEvaluator');
+	Std.module('Evaluator/registerEvaluators');
 	
 	module.on('PADrend/gui', fn(gui){
 		gui.register('PADrend_PluginsMenu.evaluator',{
@@ -80,7 +80,7 @@ plugin.init @(override) := fn() {
 /*!	[ext:PADrend_Init */
 plugin.ex_Init := fn() {
 
-	Std.require('Evaluator/EvaluatorManager').updateEvaluatorList( PADrend.configCache.getValue('Evaluator.selectedEvaluator') );
+	Std.module('Evaluator/EvaluatorManager').updateEvaluatorList( PADrend.configCache.getValue('Evaluator.selectedEvaluator') );
 	
 	// store selected evaluator in config
 	Util.registerExtension('Evaluator_OnEvaluatorSelected', fn(e) {
@@ -136,7 +136,7 @@ plugin.createWindow := fn( posX, posY) {
 
 //! (static)
 plugin.createConfigPanel := fn() {
-	static EvaluatorManager = Std.require('Evaluator/EvaluatorManager');
+	static EvaluatorManager = Std.module('Evaluator/EvaluatorManager');
 	var panel = gui.create({
 		GUI.TYPE			:	GUI.TYPE_CONTAINER,
 		GUI.SIZE			:	GUI.SIZE_MAXIMIZE,
@@ -152,7 +152,7 @@ plugin.createConfigPanel := fn() {
 
 		panel += dd;
 
-		registerExtension('Evaluator_OnEvaluatorSelected', dd -> fn(e) {
+		Util.registerExtension('Evaluator_OnEvaluatorSelected', dd -> fn(e) {
 			if(e != getData()) {
 				setData(e);
 			}
@@ -196,7 +196,7 @@ plugin.createConfigPanel := fn() {
 			}
 			add(evaluator.createConfigPanel());
 		};
-		registerExtension('Evaluator_OnEvaluatorSelected', p -> fn(...) {
+		Util.registerExtension('Evaluator_OnEvaluatorSelected', p -> fn(...) {
 			refresh();
 		});
 		p.refresh();

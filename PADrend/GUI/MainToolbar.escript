@@ -129,7 +129,7 @@ static registerStdToolbarEntries = fn() {
 		
 		var filename = scene.isSet($filename) ? 
 								scene.filename : 
-								PADrend.getScenePath()+"/"+Std.require('LibMinSGExt/NodeMetaInfo').queryMetaInfo_Title(scene,"New")+".minsg";
+								PADrend.getScenePath()+"/"+Std.module('LibMinSGExt/NodeMetaInfo').queryMetaInfo_Title(scene,"New")+".minsg";
 
 		gui.openDialog({
 			GUI.TYPE :		GUI.TYPE_FILE_DIALOG,
@@ -720,7 +720,7 @@ static registerStdToolbarEntries = fn() {
 			return true;
 		};
 		sceneListView.update := fn(p...) {
-			var NodeMetaInfo = Std.require('LibMinSGExt/NodeMetaInfo');
+			var NodeMetaInfo = Std.module('LibMinSGExt/NodeMetaInfo');
 			var selected = getMarkedComponents();
 			var acticeScene=PADrend.getCurrentScene();
 			foreach(getContents() as var index,var entry){
@@ -747,13 +747,13 @@ static registerStdToolbarEntries = fn() {
 			}
 		};
 
-		registerExtension('PADrend_OnSceneListChanged',sceneListView->fn(sceneList){
+		Util.registerExtension('PADrend_OnSceneListChanged',sceneListView->fn(sceneList){
 			if(isDestroyed())
 				return Extension.REMOVE_EXTENSION;
 			rebuild(sceneList);
 		});
 							
-		registerExtension('PADrend_OnSceneSelected',sceneListView->fn(p...){
+		Util.registerExtension('PADrend_OnSceneSelected',sceneListView->fn(p...){
 			if(isDestroyed())
 				return Extension.REMOVE_EXTENSION;
 			update();
@@ -850,7 +850,7 @@ static registerStdToolbarEntries = fn() {
 	});
 	
 	gui.register('PADrend_SceneConfigMenu.05_sceneMetaData',fn(scene){
-		var NodeMetaInfo = Std.require('LibMinSGExt/NodeMetaInfo');
+		var NodeMetaInfo = Std.module('LibMinSGExt/NodeMetaInfo');
 		var entries = [];
 		entries += '----';
 		entries += {

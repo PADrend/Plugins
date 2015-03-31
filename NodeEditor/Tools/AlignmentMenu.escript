@@ -58,7 +58,7 @@ static getOffset_OriginToSnap = fn(MinSG.Node node, Number mode){
 // ----------------------------------------------------------
 gui.register('NodeEditor_AlignmentMenu.alignment',fn(){
 	@(once) static snapMode = Std.DataWrapper.createFromEntry(PADrend.configCache, "NodeEditor.alignmentMode", ALIGN_ORIGIN);
-	@(once) static NodeTransformationLogger = Std.require('PADrend/CommandHandling/NodeTransformationLogger');
+	@(once) static NodeTransformationLogger = Std.module('PADrend/CommandHandling/NodeTransformationLogger');
 
 	return [
 		'*Alignment*',

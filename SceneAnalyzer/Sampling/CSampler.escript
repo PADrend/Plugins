@@ -17,7 +17,7 @@
  ** Base class for gasp sampling algorithms
  ** TODO: camera.setAngle / screenRect /... /screenshot
  **/
-static Listener = Std.require('LibUtilExt/deprecated/Listener');
+static Listener = Std.module('LibUtilExt/deprecated/Listener');
 Listener.CSAMPLER_STEP:='csampler_step';
 
 // ------------------------------------------------------

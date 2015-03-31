@@ -50,7 +50,7 @@ plugin.Option.getMessage ::= fn(){
 plugin.init @(override) := fn() {
 
 	{ // Register ExtensionPointHandler:
-		registerExtension('PADrend_Init', this->this.ex_Init);
+		Util.registerExtension('PADrend_Init', this->this.ex_Init);
 	}
 
 	this.addOption("Speed",fn(){ return "< "+PADrend.getCameraMover().getSpeed() + " >"; },fn(value){
@@ -83,7 +83,7 @@ plugin.addOption @(public) := fn(p...){	options += new this.Option(p...);	};
 
 //!	[ext:PADrend_Init]
 plugin.ex_Init:=fn() {
-	var gamepads = PADrend.HID.getDevicesByTraits( Std.require('LibUtilExt/HID_Traits').ControllerHatTrait  ); //! \see HID_Traits.ControllerHatTrait
+	var gamepads = PADrend.HID.getDevicesByTraits( Std.module('LibUtilExt/HID_Traits').ControllerHatTrait  ); //! \see HID_Traits.ControllerHatTrait
 	foreach(gamepads as var gamepad){
 		
 		//! \see HID_Traits.ControllerHatTrait

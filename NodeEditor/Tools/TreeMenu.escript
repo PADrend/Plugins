@@ -321,7 +321,7 @@ gui.register('NodeEditor_TreeToolsMenu.cleanups',[
 			static counter = 0;
 			foreach(NodeEditor.getSelectedNodes() as var subtree){
 				subtree.traverse( fn(node){
-					if( Std.require('LibMinSGExt/SemanticObject').isSemanticObject(node) ){
+					if( Std.module('LibMinSGExt/SemanticObject').isSemanticObject(node) ){
 						if(!node.isClosed()){
 							++counter;
 							node.setClosed(true);
@@ -380,7 +380,7 @@ gui.register('NodeEditor_TreeToolsMenu.cleanups',[
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL:"Remove invalid NodeTraits",
 		GUI.ON_CLICK:fn(){
-			static PersistentNodeTrait = Std.require('LibMinSGExt/Traits/PersistentNodeTrait');
+			static PersistentNodeTrait = Std.module('LibMinSGExt/Traits/PersistentNodeTrait');
 			showWaitingScreen();
 			foreach(NodeEditor.getSelectedNodes() as var subtree){
 				subtree.traverse( fn(node){

@@ -74,7 +74,7 @@ GUI.GUI_Manager.createBitmapFont ::= fn(filename,
 	\note Recommended font options: Match char height 'enabled', font smoothing 'enabled', supersampling 'disabled', charset 'utf8'
 	\note if a xml-parser warning '</font>' occurs, the broken 'kernings' tag has to be removed by hand. */
 GUI.GUI_Manager.createBitmapFontFromFNT ::= fn(filename){
-	static XML_Utils = Std.require('LibUtilExt/XML_Utils');
+	static XML_Utils = Std.module('LibUtilExt/XML_Utils');
 	
 	var font;
 	var lineHeight = 10;

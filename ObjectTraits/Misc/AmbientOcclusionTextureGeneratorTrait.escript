@@ -69,7 +69,7 @@ static createTexture = fn(MinSG.Node projectionNode, Array sceneNodes,Geometry.V
 	// set up camera
 	var dolly = new MinSG.ListNode;
 	//! \see CameraFrameAdjustmentTrait
-	Std.Traits.addTrait( dolly, Std.require('LibMinSGExt/Traits/CameraFrameAdjustmentTrait') );
+	Std.Traits.addTrait( dolly, Std.module('LibMinSGExt/Traits/CameraFrameAdjustmentTrait') );
 
 	var bb =  projectionNode.getBoundingBox();
 	//! \see CameraFrameAdjustmentTrait
@@ -91,7 +91,7 @@ static createTexture = fn(MinSG.Node projectionNode, Array sceneNodes,Geometry.V
 
 	cleanup += [dolly]=>MinSG.destroy;
 
-	static TextureProcessor = Std.require('LibRenderingExt/TextureProcessor');
+	static TextureProcessor = Std.module('LibRenderingExt/TextureProcessor');
 	var t_depth = Rendering.createDepthTexture(resolution.x(),resolution.y());
 	var t_color = Rendering.createStdTexture(resolution.x(),resolution.y(),true);
 	var t_accum = Rendering.createHDRTexture(resolution.x(),resolution.y(),true);
@@ -109,7 +109,7 @@ static createTexture = fn(MinSG.Node projectionNode, Array sceneNodes,Geometry.V
 	blending.setBlendFunc(Rendering.BlendFunc.ONE,Rendering.BlendFunc.ONE);
 	blending.setBlendEquation(Rendering.BlendEquation.FUNC_ADD);
 
-	static ProgressiveBlueNoiseCreator = Std.require('LibGeometryExt/ProgressiveBlueNoiseCreator');
+	static ProgressiveBlueNoiseCreator = Std.module('LibGeometryExt/ProgressiveBlueNoiseCreator');
 
 	foreach((new ProgressiveBlueNoiseCreator(  [bb]=>fn(bb){
 					var p;

@@ -19,13 +19,13 @@ t.attributes.channelHandler @(private,init) := Map;
 
 //! \see LibUtilExt/Network/MultiChannelReceiverTrait
 t.attributes.setChannelHandler ::= fn(Number channel,listener){
-	Traits.requireTrait(listener,Traits.CallableTrait);
+	Std.Traits.requireTrait(listener,Traits.CallableTrait);
 	this.channelHandler[channel] = listener;
 	return this;
 };
-static ExtUDPSocket = Std.require('LibUtilExt/Network/ExtUDPSocket');
+static ExtUDPSocket = Std.module('LibUtilExt/Network/ExtUDPSocket');
 t.onInit += fn(ExtUDPSocket socket){
-	Traits.addTrait(socket, Std.require('LibUtilExt/Network/MultiChannelReceiverTrait'));		//!	\see	LibUtilExt/Network/MultiChannelReceiverTrait
+	Std.Traits.addTrait(socket, Std.module('LibUtilExt/Network/MultiChannelReceiverTrait'));		//!	\see	LibUtilExt/Network/MultiChannelReceiverTrait
 	socket.onDataReceived += fn(data){
 		var parts = data.data.split(":",2);
 		if(parts.count()==2){

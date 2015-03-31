@@ -21,10 +21,10 @@ var t = new Std.Traits.GenericTrait('MultiChannel_SyncVarSender_Trait');
 t.allowMultipleUses();
 
 t.onInit += fn(connection,Number channelId, DataWrapperContainer syncVars,serialize=fn(p){return toJSON(p,false);}){
-	Traits.requireTrait(connection, Std.require('LibUtilExt/Network/NetworkServiceTrait'));		//!	\see	LibUtilExt/Network/NetworkServiceTrait
-	Traits.requireTrait(connection, Std.require('LibUtilExt/Network/MultiChannelSenderTrait'));	//!	\see	LibUtilExt/Network/MultiChannelSenderTrait
-	Traits.requireTrait(connection, Std.require('LibUtilExt/Network/MultiChannelReceiverTrait'));	//!	\see	LibUtilExt/Network/MultiChannelReceiverTrait
-	Traits.requireTrait(serialize,Traits.CallableTrait);										//!	\see	Traits.CallableTrait
+	Std.Traits.requireTrait(connection, Std.module('LibUtilExt/Network/NetworkServiceTrait'));		//!	\see	LibUtilExt/Network/NetworkServiceTrait
+	Std.Traits.requireTrait(connection, Std.module('LibUtilExt/Network/MultiChannelSenderTrait'));	//!	\see	LibUtilExt/Network/MultiChannelSenderTrait
+	Std.Traits.requireTrait(connection, Std.module('LibUtilExt/Network/MultiChannelReceiverTrait'));	//!	\see	LibUtilExt/Network/MultiChannelReceiverTrait
+	Std.Traits.requireTrait(serialize,Traits.CallableTrait);										//!	\see	Std.Traits.CallableTrait
 	
 	var sender = [connection,channelId,serialize] => fn(connection,channelId,serialize, key,value){
 		if(!connection.isOpen())																//!	\see	LibUtilExt/Network/NetworkServiceTrait

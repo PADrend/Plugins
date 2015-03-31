@@ -15,7 +15,7 @@
  **/
 
 
-var Effect = new Type( Std.require('Effects/PPEffect') );
+var Effect = new Type( Std.module('Effects/PPEffect') );
 
 Effect.debug := void;
 

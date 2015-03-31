@@ -10,7 +10,7 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-static SemanticObject = Std.require('LibMinSGExt/SemanticObject');
+static SemanticObject = Std.module('LibMinSGExt/SemanticObject');
 
 /*! Trait for GUI.TreeViewEntries.
 	When the entry is opened, for each contained semantic object a new subentry is created.

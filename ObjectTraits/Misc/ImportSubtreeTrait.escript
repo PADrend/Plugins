@@ -26,7 +26,7 @@ trait.attributes.reloadSubtree ::= fn(){
 		foreach( MinSG.getChildNodes(this) as var c)
 			MinSG.destroy(c);
 		this += subtree;
-		Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(subtree);
+		Std.module('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(subtree);
 	}
 };
 

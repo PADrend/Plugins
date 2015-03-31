@@ -30,7 +30,7 @@ plugin.init @(override) := fn(){
 			GUI.ON_CLICK : toggleWindow
 		}]);
 	});
-	registerExtension('PADrend_KeyPressed', fn(evt) {
+	Util.registerExtension('PADrend_KeyPressed', fn(evt) {
 		if((evt.key == Util.UI.KEY_CIRCUMFLEX || evt.key == Util.UI.KEY_GRAVE) && 
 				!PADrend.getEventContext().isCtrlPressed()) {
 			toggleWindow();
@@ -57,7 +57,7 @@ static toggleWindow = fn(){
 			GUI.POSITION : [100,100], 
 		});
 		//! \see GUI.StorableRectTrait
-		Traits.addTrait(window, Std.require('LibGUIExt/Traits/StorableRectTrait'), 
+		Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'), 
 						DataWrapper.createFromConfig(PADrend.configCache, "Tools.debug", [200,200,300,300]));
 
 		var tabPanel = gui.create({

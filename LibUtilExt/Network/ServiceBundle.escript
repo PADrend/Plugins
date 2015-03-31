@@ -14,13 +14,13 @@
 /*! A collection of NetworkServices.
 	\see LibUtilExt/Network/NetworkServiceTrait	*/
 var T = new Type;
-Traits.addTrait(T,Traits.PrintableNameTrait,$ServiceBundle);						//! \see 	Traits.PrintableNameTrait
+Traits.addTrait(T,Traits.PrintableNameTrait,$ServiceBundle);						//! \see 	Std.Traits.PrintableNameTrait
 
 T.services @(private,init) := Array;
 
 //!	Add network service
 T."+="				::= fn(c){	
-	Traits.requireTrait(c, Std.require('LibUtilExt/Network/NetworkServiceTrait'));	//!	\see 	'LibUtilExt/Network/NetworkServiceTrait'
+	Std.Traits.requireTrait(c, Std.module('LibUtilExt/Network/NetworkServiceTrait'));	//!	\see 	'LibUtilExt/Network/NetworkServiceTrait'
 	this.services += c;	
 };
 //!	Remove network service
