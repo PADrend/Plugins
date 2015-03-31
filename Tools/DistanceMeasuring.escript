@@ -128,7 +128,7 @@ plugin.initGUI := fn(gui) {
 		GUI.ON_CLICK : fn(){
 			PADrend.setActiveUITool(TOOL_ID);
 		},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			var switchFun = fn(button,b){
 				if(button.isDestroyed())
 					return $REMOVE;

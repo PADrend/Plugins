@@ -77,7 +77,7 @@ static registerGUI = fn(gui){
 			GUI.CONTENTS : activeIcon,
 			GUI.ICON : mode_selectOnIntersection() ? icons[0] : icons[1], // initially, a valid icon is required to properly init the color properties
 			GUI.ON_CLICK : fn(){	PADrend.setActiveUITool(TOOL_ID);	},
-			GUI.ON_INIT : fn(...){
+			GUI.ON_INIT : fn(){
 				var switchFun = [this]=>fn(button,b){
 					if(button.isDestroyed())
 						return $REMOVE;

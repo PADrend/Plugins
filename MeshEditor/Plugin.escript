@@ -177,7 +177,7 @@ plugin.registerMenus:=fn() {
 		GUI.ICON : '#TriangleMove',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Move');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			PADrend.accessUIToolConfigurator('MeshEditorTools_Move')
 				.registerActivationListener([this,true]=>switchFun)
 				.registerDeactivationListener([this,false]=>switchFun);
@@ -189,7 +189,7 @@ plugin.registerMenus:=fn() {
 		GUI.ICON : '#TriangleRotate',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Rotate');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			PADrend.accessUIToolConfigurator('MeshEditorTools_Rotate')
 				.registerActivationListener([this,true]=>switchFun)
 				.registerDeactivationListener([this,false]=>switchFun);
@@ -201,7 +201,7 @@ plugin.registerMenus:=fn() {
 		GUI.ICON : '#TriangleScale',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Scale');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			PADrend.accessUIToolConfigurator('MeshEditorTools_Scale')
 				.registerActivationListener([this,true]=>switchFun)
 				.registerDeactivationListener([this,false]=>switchFun);
@@ -213,7 +213,7 @@ plugin.registerMenus:=fn() {
 		GUI.ICON : '#TriangleExtrude',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Extrude');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			PADrend.accessUIToolConfigurator('MeshEditorTools_Extrude')
 				.registerActivationListener([this,true]=>switchFun)
 				.registerDeactivationListener([this,false]=>switchFun);
@@ -225,7 +225,7 @@ plugin.registerMenus:=fn() {
 		GUI.ICON : '#TriangleKnife',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Knife');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			PADrend.accessUIToolConfigurator('MeshEditorTools_Knife')
 				.registerActivationListener([this,true]=>switchFun)
 				.registerDeactivationListener([this,false]=>switchFun);

@@ -434,7 +434,7 @@ return fn(tabbedPanel){
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Undo",
 		GUI.ON_CLICK : fn(){ PathManagement.getCommandHistory().undo(); },
-		GUI.ON_INIT : fn(description){
+		GUI.ON_INIT : fn(){
 			PathManagement.getCommandHistory().onUndoRedoChanged += this->fn(){
 				if(!PathManagement.getCommandHistory().canUndo())
 					this.setTooltip("Nothing to be undone.");
@@ -449,7 +449,7 @@ return fn(tabbedPanel){
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Redo",
 		GUI.ON_CLICK : fn(){ PathManagement.getCommandHistory().redo(); },
-		GUI.ON_INIT : fn(description){
+		GUI.ON_INIT : fn(){
 			PathManagement.getCommandHistory().onUndoRedoChanged += this->fn(){
 				if(!PathManagement.getCommandHistory().canRedo())
 					this.setTooltip("Nothing to be redone.");

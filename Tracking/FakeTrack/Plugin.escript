@@ -146,7 +146,7 @@ plugin.init @(override) := fn(){
 						outln( "Button: ", evt.button, " ",evt.pressed);
 						mouseTracker.sendButtonEvent(evt.button,evt.pressed);	//! \see HID_Traits.ControllerButtonTrait
 					},
-					GUI.ON_INIT : fn(m){
+					GUI.ON_INIT : fn(){
 						gui.onMouseMove += [this] => fn(panel, evt){
 							if(panel.isDestroyed())
 								return $REMOVE;

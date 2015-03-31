@@ -88,8 +88,7 @@ GUI.GUI_Manager.createComponent ::= GUI.GUI_Manager.create; // alias
 						e.g. [new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
 											gui._createRectShape(new Util.Color4f(0.9,0.3,0.3,0.5),new Util.Color4ub(0,0,0,0),true)),1,false]
 		GUI.LABEL : 	(optional) label text (not supported by all components)
-		GUI.ON_INIT :	(optional) function which is called on the newly created component after creation with
-									the description map as parameter.
+		GUI.ON_INIT :	(optional) function which is called on the newly created component after creation as final step.
 		GUI.ON_MOUSE_BUTTON:(optional) Function which is called when a mouse button is pressed or released.
 						Signature:   $CONTINUE|$BREAK|$CONTINUE_AND_REMOVE|$BREAK_AND_REMOVE|Void fn(ExtObject evt)
 						The parameter contains $button,$pressed,$position,$absPosition.
@@ -722,11 +721,6 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 				component.addComponentHoverProperty(propertyEntry...);
 		}
 
-		// call optional init function
-		if( description[GUI.ON_INIT] ){
-			(component->description[GUI.ON_INIT])(description);
-		}
-
 		// optional contents (children)
 		{
 			var contents = description[GUI.CONTENTS];
@@ -774,6 +768,11 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			if(description[GUI.LABEL])
 				s+=" '"+description[GUI.LABEL]+"'";
 			component.__destructionMarker := gui._destructionMonitor.createMarker(s);
+		}
+		
+		// call optional init function
+		if( description[GUI.ON_INIT] ){
+			(component->description[GUI.ON_INIT])();
 		}
 	}
 	return component;

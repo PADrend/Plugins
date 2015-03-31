@@ -33,7 +33,7 @@
 		GUI.PRESET : './toolIcon',
 		GUI.WIDTH : 15,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MyTool');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 				var switchFun = [this]=>fn(button,b){
 					if(button.isDestroyed())
 						return $REMOVE;

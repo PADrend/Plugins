@@ -103,7 +103,7 @@ static registerToolIcons = fn(gui) {
 		GUI.ICON : '#NodeTranslate',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Move');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			PADrend.accessUIToolConfigurator('TransformationTools3_Move')
 				.registerActivationListener([this,true]=>switchFun)
 				.registerDeactivationListener([this,false]=>switchFun);
@@ -115,7 +115,7 @@ static registerToolIcons = fn(gui) {
 		GUI.ICON : '#NodeRotate',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Rotate');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			PADrend.accessUIToolConfigurator('TransformationTools3_Rotate')
 				.registerActivationListener([this,true]=>switchFun)
 				.registerDeactivationListener([this,false]=>switchFun);
@@ -128,7 +128,7 @@ static registerToolIcons = fn(gui) {
 		GUI.ICON : '#NodeScale',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Scale');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			PADrend.accessUIToolConfigurator('TransformationTools3_Scale')
 				.registerActivationListener([this,true]=>switchFun)
 				.registerDeactivationListener([this,false]=>switchFun);
@@ -141,7 +141,7 @@ static registerToolIcons = fn(gui) {
 		GUI.ICON : '#NodeSnap',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool(snapToolMode() ? 'TransformationTools3_Snap': 'TransformationTools3_Snap2');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			PADrend.accessUIToolConfigurator('TransformationTools3_Snap')
 				.registerActivationListener([this,true]=>switchFun)
 				.registerDeactivationListener([this,false]=>switchFun);
@@ -157,7 +157,7 @@ static registerToolIcons = fn(gui) {
 		GUI.ICON : '#Anchor',
 		GUI.WIDTH : 24,
 		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('TransformationTools3_Anchor');	},
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			PADrend.accessUIToolConfigurator('TransformationTools3_Anchor')
 				.registerActivationListener( [this,true]=>switchFun )
 				.registerDeactivationListener( [this,false]=>switchFun );

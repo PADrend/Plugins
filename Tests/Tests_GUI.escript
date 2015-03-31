@@ -736,7 +736,7 @@ plugin.showWindow:=fn(){
 		GUI.HEIGHT : 60,
 		GUI.LABEL : "Drag me!",
 		GUI.TOOLTIP : "Drag me with the left mouse button",
-		GUI.ON_INIT : fn(...){
+		GUI.ON_INIT : fn(){
 			this.x:=0;
 			this.y:=0;
 		},

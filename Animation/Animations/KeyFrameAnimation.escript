@@ -247,16 +247,14 @@ T.createAnimationBar @(override) ::= fn(storyBoardPanel){
 			while(animationBar.grabbers.count() < animationBar.animation.keyFrames.count()){
 				var index = animationBar.grabbers.count();
 				var grabber = gui.create({
-					'index' : index,
-					'animationBar' : animationBar,
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : "",
 					GUI.WIDTH : 4,
 					GUI.HEIGHT : 6,
 					GUI.BUTTON_SHAPE : GUI.BUTTON_SHAPE_TOP_RIGHT,
-					GUI.ON_INIT : fn(description){
-						this.index := description['index'];
-						this.animationBar := description['animationBar'];
+					GUI.ON_INIT : [index,animationBar] => fn(index,animationBar){
+						this.index := index;
+						this.animationBar := animationBar;
 					},
 					GUI.DRAGGING_ENABLED : true,
 					GUI.ON_DRAG : fn(evt){
