@@ -70,46 +70,29 @@ plugin.init @(override) := fn(){
 	return true;
 };
  
-static TOOLBAR_ID = 'PADrend_MainToolbar';
- 
-//! Create the window containing the main toolbar
+//! Create the main toolbar
 static createToolbar = fn(){
-	var layouter = (new GUI.FlowLayouter).setMargin(0).setPadding(3).enableAutoBreak();
-
-	var entries = [];
-	var width = 10;
-	foreach(gui.createComponents({ 
-						GUI.TYPE : GUI.TYPE_COMPONENTS,
-						GUI.PROVIDER : TOOLBAR_ID,
-					}) as var e){
-		e.layout();
-		width+=e.getWidth()+5;
-		entries+=e;
-	}
-	var container = gui.create({
-		GUI.TYPE : GUI.TYPE_CONTAINER,
-		GUI.FLAGS : GUI.BACKGROUND,
-		GUI.LAYOUT : layouter,//GUI.LAYOUT_BREAKABLE_TIGHT_FLOW,
-		GUI.CONTENTS : entries,
-		GUI.SIZE : GUI.SIZE_MAXIMIZE,
-	});
-	container._componentId := TOOLBAR_ID;
-	
+	var wWidth = new Std.DataWrapper; // used to initially adjust the window's width
 	toolbar = gui.create({
 		GUI.TYPE : GUI.TYPE_WINDOW,
-		GUI.SIZE : [width,40],
+		GUI.SIZE : [50,40],
 		GUI.LABEL : "InteractionTools",
 		GUI.FLAGS : GUI.HIDDEN_WINDOW | GUI.ONE_TIME_WINDOW,
-		GUI.ON_WINDOW_CLOSED : fn(){
-//			out("!!!!!");
-			toolbarEnabled(false);
-		},
-		
-		GUI.CONTENTS : [container]
+		GUI.ON_WINDOW_CLOSED : fn(){	toolbarEnabled(false);	},
+		GUI.ON_INIT : [wWidth] => fn(wWidth){	this.setWidth(wWidth());	},
+		GUI.CONTENTS : [{
+			GUI.TYPE : GUI.TYPE_CONTAINER,
+			GUI.PRESET : 'toolbar',
+			GUI.CONTENTS : 'PADrend_MainToolbar',
+			GUI.SIZE : GUI.SIZE_MAXIMIZE,
+			GUI.ON_INIT : [wWidth] => fn(wWidth){
+				var width = 10;
+				foreach(this.getContents() as var child)
+					width += child.getWidth()+3;
+				wWidth(width);
+			}
+		}]
 	});
-	container.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,GUI.NULL_SHAPE) );
-	container.addProperty(module('PADrend/GUI/Style').TOOLBAR_BG_SHAPE);
-
 	toolbar.setPosition(0,-10);
 
 	gui.windows['Toolbar'] = toolbar;

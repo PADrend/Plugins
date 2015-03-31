@@ -99,17 +99,25 @@ gui.registerPreset('menu/header',{
 											gui._createRectShape( color_accent1,color_accent1,true)) ]
 });
 
+gui.registerPreset('toolbar',{
+	GUI.FLAGS : GUI.BACKGROUND,
+	GUI.LAYOUT : (new GUI.FlowLayouter).setMargin(0).setPadding(3).enableAutoBreak(),
+	GUI.PROPERTIES : [
+			new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,GUI.NULL_SHAPE),
+			NS.TOOLBAR_BG_SHAPE
+	]
+});
+gui.registerPreset('toolbar/toolIcon',{
+		GUI.PROPERTIES : [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, NS.TOOLBAR_ICON_COLOR)	],
+		GUI.HOVER_PROPERTIES : [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
+											gui._createRectShape(color_accent1,GUI.NO_COLOR,true)),1,false] ]
+});
+// temp:
 gui.registerPreset('toolIcon',{
 		GUI.PROPERTIES : [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, NS.TOOLBAR_ICON_COLOR)	],
 		GUI.HOVER_PROPERTIES : [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
 											gui._createRectShape(color_accent1,GUI.NO_COLOR,true)),1,false] ]
 });
-
-//gui.registerPreset('mainToolbar',{
-//		GUI.PROPERTIES : [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, NS.TOOLBAR_ICON_COLOR)	],
-//		GUI.HOVER_PROPERTIES : [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
-//											gui._createRectShape(color_accent1,GUI.NO_COLOR,true)),1,false] ]
-//});
 
 gui.registerPreset('menu/toolIcon',{
 		GUI.PROPERTIES : [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,GUI.WHITE)	],
