@@ -53,31 +53,27 @@ plugin.init @(override) := fn() {
 	if(!MinSG.isSet($Evaluator)){
 		out("MinSG.Evaluator not found!\n");
 		return false;
-
 	}
-	{
-		Std.require('Evaluator/extendEvaluator');
-		Std.require('Evaluator/registerEvaluators');
-	}
-	{ /// Register ExtensionPointHandler:
-		registerExtension('PADrend_Init', this->fn(){
-			gui.register('PADrend_PluginsMenu.evaluator',{
-				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : "Evaluator",
-				GUI.ON_CLICK : fn() {
-					if(!GLOBALS.gui.windows['Evaluator']) {
-						GLOBALS.gui.windows['Evaluator'] = plugin.createWindow( 10, 40);
-					}else{
-						GLOBALS.gui.windows['Evaluator'].toggleVisibility();
-					}
-					this.setSwitch(GLOBALS.gui.windows['Evaluator'].isVisible());
+	Std.require('Evaluator/extendEvaluator');
+	Std.require('Evaluator/registerEvaluators');
+	
+	module.on('PADrend/gui', fn(gui){
+		gui.register('PADrend_PluginsMenu.evaluator',{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Evaluator",
+			GUI.ON_CLICK : fn() {
+				if(!GLOBALS.gui.windows['Evaluator']) {
+					GLOBALS.gui.windows['Evaluator'] = plugin.createWindow( 10, 40);
+				}else{
+					GLOBALS.gui.windows['Evaluator'].toggleVisibility();
 				}
-			});
+				this.setSwitch(GLOBALS.gui.windows['Evaluator'].isVisible());
+			}
 		});
-		registerExtension('PADrend_Init', this->this.ex_Init);
+	});
+	Util.registerExtension('PADrend_Init', this->this.ex_Init);
+	Util.registerExtension('Evaluator_QueryEvaluators', this->this.ex_QueryEvaluators,Extension.HIGH_PRIORITY);
 
-		registerExtension('Evaluator_QueryEvaluators', this->this.ex_QueryEvaluators,Extension.HIGH_PRIORITY);
-	}
 	return true;
 };
 
@@ -87,7 +83,7 @@ plugin.ex_Init := fn() {
 	Std.require('Evaluator/EvaluatorManager').updateEvaluatorList( PADrend.configCache.getValue('Evaluator.selectedEvaluator') );
 	
 	// store selected evaluator in config
-	registerExtension('Evaluator_OnEvaluatorSelected', fn(e) {
+	Util.registerExtension('Evaluator_OnEvaluatorSelected', fn(e) {
 		PADrend.configCache.setValue('Evaluator.selectedEvaluator', e.getEvaluatorTypeName());
 		outln("Evaluator '", e.getEvaluatorTypeName(), "' selected.");
 	});
@@ -182,9 +178,9 @@ plugin.createConfigPanel := fn() {
 		};
 
 	}
-	panel++;
+	panel += GUI.NEXT_ROW;
 	panel += "----";
-	panel++;
+	panel += GUI.NEXT_ROW;
 	{ // config panel container
 		var p = gui.create({
 			GUI.TYPE			:	GUI.TYPE_CONTAINER,

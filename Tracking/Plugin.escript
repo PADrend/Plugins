@@ -28,14 +28,14 @@ var plugin = new Plugin({
 
 plugin.init @(override) :=fn(){
 
-	registerExtension('PADrend_Init',this->fn(){
+	module.on('PADrend/gui',this->fn(gui){
 		gui.register('PADrend_MainWindowTabs.20_Tracking', this->createMainWindowTab);
 	});
 	var modules = [
         __DIR__+"/FakeTrack/Plugin.escript",
-        __DIR__+"/Applications/Plugin.escript"	
+        __DIR__+"/Applications/Plugin.escript"
 	];
-	loadPlugins( modules,true);
+	Util.loadPlugins( modules,true);
 		
 	return true;
 };

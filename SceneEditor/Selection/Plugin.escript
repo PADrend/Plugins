@@ -122,7 +122,8 @@ static registerGUI = fn(gui){
 				},
 			],
 			GUI.HEIGHT : 24
-		}
+		},
+		'----'
 	]);
 	
 };

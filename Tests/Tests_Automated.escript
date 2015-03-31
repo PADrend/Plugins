@@ -29,17 +29,15 @@ Tests.AutomatedTestsPlugin := new Plugin({
 static plugin = Tests.AutomatedTestsPlugin;
 
 plugin.init @(override) := fn(){
-	if (queryPlugin('PADrend/GUI')) {
-		registerExtension('PADrend_Init', fn(){
-			gui.registerComponentProvider('Tests_TestsMenu.automatedTests',[{
-					GUI.TYPE : GUI.TYPE_BUTTON,
-					GUI.LABEL : "Automated tests...",
-					GUI.ON_CLICK : fn() {
-						showResults(plugin.execute());
-					}
-			}]);
-		});
-	}
+	module.on('PADrend/gui', fn(gui){
+		gui.register('Tests_TestsMenu.automatedTests',[{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "Automated tests...",
+				GUI.ON_CLICK : fn() {
+					showResults(plugin.execute());
+				}
+		}]);
+	});
 	return true;
 };
 

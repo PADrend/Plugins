@@ -25,15 +25,15 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn(){
-	registerExtension('PADrend_Init', this->fn(){
-		gui.register('Tools_DebugWindowTabs.console',	this->createTab);
+	module.on('PADrend/gui',this->fn(gui){
+		gui.register('Tools_DebugWindowTabs.console',	[gui]=>this->createTab);
 	});
 	return true;
 };
 
 
 
-plugin.createTab := fn(){
+plugin.createTab := fn(gui){
 	var windowContainer = gui.create({
 		GUI.TYPE			:	GUI.TYPE_CONTAINER,
 		GUI.SIZE			:	GUI.SIZE_MAXIMIZE,

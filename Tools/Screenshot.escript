@@ -44,7 +44,7 @@ plugin.init @(override) := fn() {
 		};);
 		
 		
-	Util.registerExtension('PADrend_Init',fn(){
+	module.on('PADrend/gui',fn(gui){
 		gui.register('Tools_ToolsMenu.screenshot',{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Screenshot ...",

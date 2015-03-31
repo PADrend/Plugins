@@ -29,14 +29,12 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : []
 });
 
-/*! ---|> Plugin	*/
 plugin.init @(override) := fn() {
-	{ // Register ExtensionPointHandler:
-		registerExtension('PADrend_Init',this->registerMenus);
-	}
-	
-	var resourceFolder = __DIR__+"/resources";
-	gui.loadIconFile( resourceFolder+"/ToolIcons.json");
+	module.on('PADrend/gui',this->fn(gui){
+			this.registerMenus(gui);
+			var resourceFolder = __DIR__+"/resources";
+			gui.loadIconFile( resourceFolder+"/ToolIcons.json");
+	});
 		
 	var modules = [];
 	modules+=__DIR__+"/Camera/Plugin.escript";
@@ -66,7 +64,7 @@ plugin.init @(override) := fn() {
 };
 
 
-plugin.registerMenus:=fn(){
+plugin.registerMenus:=fn(gui){
   	gui.register('PADrend_MainToolbar.60_tools',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.PRESET : './toolIcon',

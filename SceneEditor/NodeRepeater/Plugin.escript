@@ -57,7 +57,7 @@ plugin.init @(override) := fn(){
 		}
 	};
 
-	registerExtension('PADrend_Init',this->fn(){
+	module.on('PADrend/gui',this->fn(gui){
 		gui.register('NodeEditor_TreeToolsMenu._10_nodeRepeater_showWindow',{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Node Repeater",
@@ -101,11 +101,11 @@ plugin.showWindow := fn(){
             Traits.addTrait(comp,NodeRepeater.AcceptsDataSettingTrait,arr[1]);
             panel.nextColumn(6);
         }
-        panel++;
+        panel += GUI.NEXT_ROW;
     }
-	panel++;
+	panel += GUI.NEXT_ROW;
 	panel += '----';
-	panel++;
+	panel += GUI.NEXT_ROW;
     panel.nextRow(6);
     var container =gui.create({
         GUI.TYPE:	GUI.TYPE_CONTAINER,
@@ -148,7 +148,7 @@ plugin.showWindow := fn(){
         },
     };
     panel+=container;
-    panel++;
+    panel += GUI.NEXT_ROW;
     panel.nextRow(4);
     panel+={
         GUI.TYPE : GUI.TYPE_BUTTON,

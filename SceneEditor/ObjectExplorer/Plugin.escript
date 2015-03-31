@@ -30,11 +30,11 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn(){
-	Util.registerExtension('PADrend_Init',this->initGUI);
+	module.on('PADrend/gui',this->initGUI);
 	return true;
 };
 
-plugin.initGUI := fn(){
+plugin.initGUI := fn(gui){
 
 	static entryBG = new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
 												gui._createRectShape(new Util.Color4ub(240,240,240,255),new Util.Color4ub(0,0,0,255),true));

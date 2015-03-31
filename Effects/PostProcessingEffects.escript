@@ -44,8 +44,8 @@ static plugin = PPEffectPlugin;
 
 PPEffectPlugin.init @(override) := fn(){
 	
+	module.on('PADrend/gui',initMenus);
 	Util.registerExtension('PADrend_Init',fn(){
-		initMenus();
 		if(defaultEffect())
 			plugin.loadAndSetEffect(defaultEffect());
 	});
@@ -102,14 +102,14 @@ static fillOptionWindow = fn( window, effect){
 			});
 			foreach(gui.createComponents(c) as var entry){
 				panel +=entry;
-				panel++;
+				panel += GUI.NEXT_ROW;
 			}
 			window += panel;
 		}
 	}
 };
 
-static initMenus = fn(){
+static initMenus = fn(gui){
 	static optionWindow;
 	
 	static createOtionWindow = fn(effect){

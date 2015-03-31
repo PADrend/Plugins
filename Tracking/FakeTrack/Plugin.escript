@@ -129,7 +129,7 @@ plugin.init @(override) := fn(){
 
 	static posText = new Std.DataWrapper("...");
 
-	registerExtension('PADrend_Init', fn(){
+	module.on('PADrend/gui',fn(gui){
 
 		gui.register('Tracking_drivers.mouse',[{
 			GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,

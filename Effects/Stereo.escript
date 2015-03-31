@@ -193,8 +193,10 @@ plugin.init @(override) := fn(){
                 return true;
             },
         });
+	});
         
-        // ------------------------
+	// ------------------------
+	module.on('PADrend/gui', fn(gui){
 		// gui
 		gui.register('Effects_MainMenu.stereo',[
 			{

@@ -77,7 +77,7 @@ plugin.init @(override) := fn() {
 		return false;
 	});
 	
-	registerExtension('PADrend_Init',this->fn(){
+	module.on('PADrend/gui',this->fn(gui){
 		gui.register('PADrend_SceneToolMenu.presets',{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Presets",

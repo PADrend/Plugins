@@ -116,7 +116,7 @@ static initGUI_FBO = fn(){
     renderingContext.pushAndSetFBO(gui_FBO);
     gui_Texture = Rendering.createStdTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
     gui_FBO.attachColorTexture(renderingContext,gui_Texture);
-    out(gui_FBO.getStatusMessage(renderingContext),"\n");
+    outln(gui_FBO.getStatusMessage(renderingContext));
 
     renderingContext.popFBO();
 };

@@ -24,7 +24,7 @@ static CONFIG_PREFIX = 'Evaluator_Config_';
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 // OverdrawFactorEvaluator
 
-Util.registerExtension('PADrend_Init', fn(){
+module.on('PADrend/gui', fn(gui){
 	gui.register( CONFIG_PREFIX + MinSG.OverdrawFactorEvaluator.toString(), fn(evaluator){
 		var entries = gui.createComponents( {
 				GUI.TYPE : GUI.TYPE_COMPONENTS,
@@ -69,7 +69,7 @@ Util.registerExtension('PADrend_Init', fn(){
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 // StatsEvaluator
 
-Util.registerExtension('PADrend_Init', fn(){
+module.on('PADrend/gui', fn(gui){
 	gui.register( CONFIG_PREFIX + MinSG.StatsEvaluator.toString(), fn(evaluator){
 		var entries = gui.createComponents( {
 				GUI.TYPE : GUI.TYPE_COMPONENTS,
@@ -152,7 +152,7 @@ PADrend.Serialization.registerType( MinSG.StatsEvaluator, "MinSG.StatsEvaluator"
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 // VisibilityEvaluator
 
-Util.registerExtension('PADrend_Init', fn(){
+module.on('PADrend/gui', fn(gui){
 	gui.register( CONFIG_PREFIX + MinSG.VisibilityEvaluator.toString(), fn(evaluator){
 		var entries = gui.createComponents( {
 				GUI.TYPE : GUI.TYPE_COMPONENTS,

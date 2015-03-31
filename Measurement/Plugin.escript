@@ -35,7 +35,7 @@ MeasurementPlugin.init @(override) :=fn() {
 	load(__DIR__+"/SamplePath.escript");
 	load(__DIR__+"/InterpolatedTest.escript");
 
-	registerExtension('PADrend_Init',this->fn(){
+	module.on('PADrend/gui',this->fn(gui){
 		gui.register('PADrend_MainWindowTabs.50_Measurement', this->createTab);
 	});
 
@@ -43,7 +43,7 @@ MeasurementPlugin.init @(override) :=fn() {
 };
 
 
-MeasurementPlugin.createTab @(private) := fn() {
+MeasurementPlugin.createTab @(private) := fn(gui) {
 
 	var page = gui.createPanel();
 
@@ -61,7 +61,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 		page += panel;
 		
 		panel += "*Tests along current path using evaluator*";
-		panel++;
+		panel += GUI.NEXT_ROW;
 
 		var currentEvaluator = Std.require('Evaluator/EvaluatorManager').getSelectedEvaluator();
 		var evaluatorName = DataWrapper.createFromValue(currentEvaluator ? currentEvaluator.name() : "");
@@ -78,7 +78,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 				if(evaluator) 
 					dataWrapper(description);
 			});
-		panel++;
+		panel += GUI.NEXT_ROW;
 		
 		var outputFileName = DataWrapper.createFromValue("output.tsv");
 		panel += {
@@ -129,7 +129,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 										},
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
-		panel++;
+		panel += GUI.NEXT_ROW;
 		
 		var pointIterations = DataWrapper.createFromValue(3);
 		panel += {
@@ -141,7 +141,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 			GUI.DATA_WRAPPER		:	pointIterations,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
-		panel++;
+		panel += GUI.NEXT_ROW;
 		
 		var pathIterations = DataWrapper.createFromValue(1);
 		panel += {
@@ -153,7 +153,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 			GUI.DATA_WRAPPER		:	pathIterations,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
-		panel++;
+		panel += GUI.NEXT_ROW;
 		
 		var stepSize = DataWrapper.createFromValue(1.0);
 		panel += {
@@ -165,7 +165,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 			GUI.DATA_WRAPPER		:	stepSize,
 			GUI.SIZE				:	[GUI.WIDTH_FILL_ABS, 10, 0]
 		};
-		panel++;
+		panel += GUI.NEXT_ROW;
 		
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_BUTTON,
@@ -192,7 +192,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 		page += panel;
 
 		panel+="*Tests along current path using stats*";
-		panel++;
+		panel += GUI.NEXT_ROW;
 		
 		var configData = new ExtObject();
 		configData.exportFilename := "output.tsv";
@@ -205,7 +205,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 			'object' : configData,
 			'attr' : $exportFilename
 		};
-		panel++;
+		panel += GUI.NEXT_ROW;
 		panel+={
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.LABEL : "Num steps",
@@ -215,7 +215,7 @@ MeasurementPlugin.createTab @(private) := fn() {
 			GUI.TOOLTIP : "The timestamps for frame n on the selected path is\n (n * path.getMaxTime()/numSteps)",
 			'attr' : $numSteps
 		};
-		panel++;
+		panel += GUI.NEXT_ROW;
 		panel+={
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "execute",

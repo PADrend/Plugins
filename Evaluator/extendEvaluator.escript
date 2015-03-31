@@ -122,7 +122,7 @@ MinSG.Evaluator.update ::= fn(...) {
 
 static CONFIG_PREFIX = 'Evaluator_Config_';
 
-Util.registerExtension('PADrend_Init', fn(){
+module.on('PADrend/gui', fn(gui){
 
 	gui.register( CONFIG_PREFIX + MinSG.Evaluator.toString(), fn(evaluator){
 		var resultDataWrapper = new Std.DataWrapper("");

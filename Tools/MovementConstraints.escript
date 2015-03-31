@@ -42,7 +42,7 @@ plugin.init @(override) := fn(){
 	restrictHeight = DataWrapper.createFromConfig( systemConfig,'Tools.MovementConstraints.restrictHeight',true);
 	restrictHeight.onDataChanged += update;
 
-	registerExtension('PADrend_Init',fn(){
+	module.on('PADrend/gui',fn(gui){
 		gui.register('Tools_ToolsMenu.movementContraints',[
 			{
 				GUI.TYPE : GUI.TYPE_MENU,

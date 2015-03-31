@@ -26,18 +26,14 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn(){
-	{ // Register ExtensionPointHandler:
-		if (queryPlugin('PADrend/GUI')) {
-			registerExtension('PADrend_Init', this->fn(){
-				gui.register('Tests_TestsMenu.distributedTests',{
-					GUI.TYPE : GUI.TYPE_BUTTON,
-					GUI.LABEL : "Distributed tests",
-					GUI.ON_CLICK : this->execute
-				});
-			});
-		}
-    }
-    return true;
+	module.on('PADrend/gui', this->fn(gui){
+		gui.register('Tests_TestsMenu.distributedTests',{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Distributed tests",
+			GUI.ON_CLICK : this->execute
+		});
+	});
+	return true;
 };
 
 

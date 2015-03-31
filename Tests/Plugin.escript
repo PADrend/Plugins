@@ -35,15 +35,13 @@ plugin.init @(override) :=fn() {
 		registerExtension('PADrend_Init',this->initAutoTest,Extension.LOW_PRIORITY*10);
 	} else { 
 		// Register ExtensionPointHandler:
-        if(queryPlugin('PADrend/GUI')){
-			registerExtension('PADrend_Init', this->fn(){
-				gui.register('PADrend_PluginsMenu.tests',{
-					GUI.TYPE : GUI.TYPE_MENU,
-					GUI.LABEL : "Tests",
-					GUI.MENU : 'Tests_TestsMenu'
-				});
+        module.on('PADrend/gui',this->fn(gui){
+			gui.register('PADrend_PluginsMenu.tests',{
+				GUI.TYPE : GUI.TYPE_MENU,
+				GUI.LABEL : "Tests",
+				GUI.MENU : 'Tests_TestsMenu'
 			});
-        }
+		});
     }
 
 	var testModules = [

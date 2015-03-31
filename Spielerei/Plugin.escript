@@ -26,7 +26,7 @@ static plugin = new Plugin({
 
 
 plugin.init @(override) :=fn() {
-	registerExtension('PADrend_Init',this->registerMenus);
+	module.on('PADrend/gui',this->registerMenus);
 
     // ----
 	var modules = [];
@@ -46,7 +46,7 @@ plugin.init @(override) :=fn() {
 // ------------------------------------------------------------------------------
 
 
-plugin.registerMenus := fn(){
+plugin.registerMenus := fn(gui){
 	gui.register('PADrend_MainToolbar.70_spielerei',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.PRESET : './toolIcon',

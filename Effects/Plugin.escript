@@ -27,9 +27,8 @@ GLOBALS.EffectsPlugin := new Plugin({
 });
 
 EffectsPlugin.init @(override) :=fn() {
-	{ // Register ExtensionPointHandler:
-		registerExtension('PADrend_Init',this->registerMenus);
-	}
+	module.on('PADrend/gui',registerMenus);
+
 	var modules = [];
 	modules+=__DIR__+"/"+"DynamicSky.escript";
 	modules+=__DIR__+"/"+"InfiniteGround.escript";
@@ -37,13 +36,12 @@ EffectsPlugin.init @(override) :=fn() {
 	modules+=__DIR__+"/"+"LimitFPS.escript";
 	modules+=__DIR__+"/"+"Stereo.escript";
 
-	loadPlugins( modules,false );
+	Util.loadPlugins( modules,false );
 
     return true;
 };
 
-//!	[ext:PADrend_Init]
-EffectsPlugin.registerMenus:=fn(){
+static registerMenus = fn(gui){
 	gui.register('PADrend_MainToolbar.70_effects',{
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.PRESET : './toolIcon',

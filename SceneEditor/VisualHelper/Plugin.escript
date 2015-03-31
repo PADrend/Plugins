@@ -28,13 +28,13 @@ plugin.gridEnabled := DataWrapper.createFromValue(false);
 
 //! Register functions at extension points.
 plugin.init @(override) := fn() {
-	registerExtension('PADrend_Init', this -> createMenuEntries);
-	registerExtension('PADrend_AfterRendering', this -> drawHelperObjects);
+	module.on('PADrend/gui', this->createMenuEntries);
+	registerExtension('PADrend_AfterRendering', this->drawHelperObjects);
 	return true;
 };
 
 //! Create and register menu entries.
-plugin.createMenuEntries := fn() {
+plugin.createMenuEntries := fn(gui) {
 	gui.register('SceneEditor_ConfigMenu.drawCoordSystem', {
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.LABEL			:	"Draw coordinate system",

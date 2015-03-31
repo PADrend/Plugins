@@ -47,7 +47,7 @@ plugin.init @(override) := fn() {
 	};
 	enabled.forceRefresh();
 
-	registerExtension('PADrend_Init', [enabled, fps] => fn(enabled, fps) {
+	module.on('PADrend/gui', [enabled, fps] => fn(enabled, fps, gui) {
 		gui.register('Effects_MiscEffectsMenu.limitFps', [
 			{
 				GUI.TYPE			:	GUI.TYPE_BOOL,

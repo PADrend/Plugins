@@ -72,7 +72,8 @@ WaypointsPlugin.init @(override) := fn() {
 			PathManagement.loadPath(f);
 
 		PathManagement.animation_attachedCamera(PADrend.getDolly());
-	
+	});
+	module.on('PADrend/gui',fn(gui){
 		gui.register('PADrend_MainWindowTabs.20_Waypoints',fn(){
 			return Std.require('Waypoints/GUI/GUI')();
 		});

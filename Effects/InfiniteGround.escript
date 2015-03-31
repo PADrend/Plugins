@@ -53,7 +53,7 @@ plugin.getHazeColor := fn(){
 
 	
 plugin.init @(override) := fn(){
-	registerExtension('PADrend_Init', registerGUI);
+	module.on('PADrend/gui',registerGUI);
 
 	{	// enabled
 		static revoce = new Std.MultiProcedure;
@@ -302,7 +302,7 @@ static ext_PADrend_AfterRendering = fn(...){
 	}
 };
 
-static registerGUI = fn(){
+static registerGUI = fn(gui){
 	gui.register('Effects_MainMenu.20_infiniteGround',[
 		"*Infinite Ground*",
 		{

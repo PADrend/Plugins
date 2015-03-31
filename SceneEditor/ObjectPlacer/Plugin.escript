@@ -38,7 +38,9 @@ var plugin = new Plugin({
 
 
 plugin.init @(override) := fn(){
-	registerExtension('PADrend_Init',this->this.ex_Init);
+	module.on('PADrend/gui',this->fn(gui){
+		gui.register('SceneEditor_ToolsConfigTabs.Prototypes',[gui]=>this->createUITab);
+	});
 	registerExtension('ObjectPlacer_OnObjectInserted',	Std.require('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree );
 
 	var modules = [
@@ -50,14 +52,8 @@ plugin.init @(override) := fn(){
 	return true;
 };
 
-//!	[ext:PADrend_Init]
-plugin.ex_Init := fn(){
-	//! \see SceneEditor
-	gui.register('SceneEditor_ToolsConfigTabs.Prototypes',this->createUITab);
-};
 
-
-plugin.createUITab := fn(){
+plugin.createUITab := fn(gui){
 	var panel = gui.create({
 		GUI.TYPE : GUI.TYPE_PANEL
 	});
@@ -81,7 +77,7 @@ plugin.createUITab := fn(){
 	gui.addComponentProviderListener('SceneEditor_ObjectProviderEntries',refreshTv);
 	refreshTv();
 
-	panel++;
+	panel += GUI.NEXT_ROW;
 	panel += {
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.MENU : 'SceneEditor_AddObjectProvider',

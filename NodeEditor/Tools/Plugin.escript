@@ -50,7 +50,7 @@ plugin.registerMenus := fn(){
 				GUI.LABEL : "NodeId:",
 				GUI.DATA_VALUE : id ? id : "",
 				GUI.ON_DATA_CHANGED : node->fn(data){
-					var newId = data.trim();			
+					var newId = data.trim();
 					if(newId.empty()){
 						var oldId = PADrend.getSceneManager().getNameOfRegisteredNode(this);
 						if(oldId){

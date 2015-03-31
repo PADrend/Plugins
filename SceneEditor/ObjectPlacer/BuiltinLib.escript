@@ -26,7 +26,7 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn(){
-	registerExtension('PADrend_Init',fn(){
+	module.on('PADrend/gui',fn(gui){
 		//! \see SceneEditor/ObjectPlacer
 		gui.register('SceneEditor_ObjectProviderEntries.builtIn',this->fn(){
 			var entries = ["BuiltIn"];

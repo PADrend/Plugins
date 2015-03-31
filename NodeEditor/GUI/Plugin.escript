@@ -84,7 +84,6 @@ plugin.registerGUIProviders := fn(_gui){
 
 	// node selection
 	gui.register('PADrend_SceneToolMenu.05_selectNode',[
-		'----',
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Select Node",

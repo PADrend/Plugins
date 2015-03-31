@@ -58,15 +58,15 @@ plugin.init @(override) := fn(){
 			foreach(libs as var id,var libDescription){
 				if(!oldLibs[id]){
 					//! \see SceneEditor/ObjectPlacer
-					gui.registerComponentProvider('SceneEditor_ObjectProviderEntries.lib_'+id, [id,libDescription...] => createLibEntry);
+					gui.register('SceneEditor_ObjectProviderEntries.lib_'+id, [id,libDescription...] => createLibEntry);
 				}
 			}
 			oldLibs = libs.clone();
 		};
 		registeredLibraries.forceRefresh();
 	});
-	Util.registerExtension('PADrend_Init',fn(){
-		gui.registerComponentProvider('SceneEditor_ObjectProviderEntries.lib_00UsedFiles', fn(){
+	module.on('PADrend/gui',fn(gui){
+		gui.register('SceneEditor_ObjectProviderEntries.lib_00UsedFiles', fn(){
 			return {
 				GUI.TYPE : GUI.TYPE_TREE_GROUP,
 				GUI.FLAGS : GUI.COLLAPSED_ENTRY,
@@ -91,7 +91,7 @@ plugin.init @(override) := fn(){
 		
 
 		//! \see ObjectPlacer/Plugin
-		gui.registerComponentProvider('SceneEditor_AddObjectProvider.addFileLibs',[{
+		gui.register('SceneEditor_AddObjectProvider.addFileLibs',[{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Add file library",
 			GUI.ON_CLICK : fn(){

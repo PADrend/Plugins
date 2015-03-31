@@ -70,7 +70,7 @@ plugin.createMessageWindow := fn() {
 			GUI.COLOR	:	GUI.WHITE
 		});
 		panel += label;
-		panel++;
+		panel += GUI.NEXT_ROW;
 		restore();
 		panel.layout();
 		panel.scrollTo(new Geometry.Vec2(0,panel.getContentContainer().getHeight()), 2.0);

@@ -23,7 +23,7 @@ var plugin = new Plugin({
 
 plugin.init @(override) := fn(){
 
-	registerExtension('PADrend_Init', fn(){
+	module.on('PADrend/gui', fn(gui){
 		gui.register('PADrend_PluginsMenu.dbgWindow',[{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Debug Tools",

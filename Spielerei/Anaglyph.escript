@@ -41,7 +41,7 @@ plugin.init @(override) := fn() {
 		}
 	};
 
-	registerExtension('PADrend_Init',fn(){
+	module.on('PADrend/gui',fn(gui){
 		gui.register('Spielerei.anaglyph',[
 			{
 				GUI.TYPE : GUI.TYPE_BOOL,

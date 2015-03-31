@@ -22,16 +22,13 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn() {
-	if (queryPlugin('PADrend/GUI')) {
-		registerExtension('PADrend_Init', this->fn(){
-			gui.register('Tests_TestsMenu.triangulation',{
-				GUI.TYPE : GUI.TYPE_BUTTON,
-				GUI.LABEL : "Triangulation Tests",
-				GUI.ON_CLICK : this->execute
-			});
+	module.on('PADrend/gui', this->fn(gui){
+		gui.register('Tests_TestsMenu.triangulation',{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Triangulation Tests",
+			GUI.ON_CLICK : this->execute
 		});
-	}
-
+	});
 	return true;
 };
 

@@ -38,24 +38,23 @@ plugin.enabled := false;
 /*!	---|> Plugin */
 plugin.init @(override) := fn(){
 	Util.requirePlugin('Tools_JumpNRun', 1.0);
-	 { // Register ExtensionPointHandler:
-		registerExtension('PADrend_Init',this->fn(){
-			gui.register('Tools_ToolsMenu.avatar',[
-				"*Avatar*",
-				{
-					GUI.TYPE : GUI.TYPE_BUTTON,
-					GUI.LABEL : "Enable",
-					GUI.ON_CLICK : this->enable
-				},
-				{
-					GUI.TYPE : GUI.TYPE_BUTTON,
-					GUI.LABEL : "Disable",
-					GUI.ON_CLICK : this->disable
-				},
-				'----'
-			]);
-		});
-	}
+	module.on('PADrend/gui',this->fn(gui){
+		gui.register('Tools_ToolsMenu.avatar',[
+			"*Avatar*",
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "Enable",
+				GUI.ON_CLICK : this->enable
+			},
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "Disable",
+				GUI.ON_CLICK : this->disable
+			},
+			'----'
+		]);
+	});
+
 	return true;
 };
 

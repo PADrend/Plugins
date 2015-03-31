@@ -204,7 +204,7 @@ plugin.init @(override) := fn(){
 	PADrend.syncVars.addDataWrapper('Effects.DynSky.starsEnabled', pStarsEnabled);
 	PADrend.syncVars.addDataWrapper('Effects.DynSky.maxSunBrightness', pMaxSunBrightness);
 	
-	Util.registerExtension('PADrend_Init', initGUI);
+	module.on('PADrend/gui', initGUI);
 	return true;
 };
 
@@ -332,7 +332,7 @@ static updateSkyValues = fn(...){
 };
 
 
-static initGUI = fn(){
+static initGUI = fn(gui){
 	gui.register('Effects_MainMenu.10_dynamicSky', fn(){
 
 		var menu=[];

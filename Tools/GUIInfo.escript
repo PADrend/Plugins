@@ -29,8 +29,8 @@ var plugin = new Plugin({
 
 
 plugin.init @(override) := fn(){
-	Util.registerExtension('PADrend_Init', fn(){
-		gui.register('Tools_DebugWindowTabs.x_guiInfo',	createTab);
+	module.on('PADrend/gui', fn(gui){
+		gui.register('Tools_DebugWindowTabs.x_guiInfo',	[gui]=>createTab);
 	});
 	static revoce = new Std.MultiProcedure;
 	enabled.onDataChanged += fn(b){
@@ -78,7 +78,7 @@ plugin.init @(override) := fn(){
 	return true;
 };
 
-static createTab = fn(){
+static createTab = fn(gui){
 	var panel = gui.create({
 		GUI.TYPE			:	GUI.TYPE_CONTAINER,
 		GUI.SIZE			:	GUI.SIZE_MAXIMIZE,
