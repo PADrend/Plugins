@@ -39,19 +39,17 @@ gui.registerFonts({
 
 var color_accent1 = new Util.Color4ub(0,58,128,255);
 var color_accent2 = new Util.Color4ub(255,221,0,255);
+var color_toolbarBackground = new Util.Color4ub(120,120,120,192);
+var color_menuBackground = new Util.Color4ub(100,100,100,220);
 
 var NS = new Namespace;
 
-NS.TOOLBAR_ICON_COLOR := new Util.Color4f(0.0,0,0,0.9);
-NS.TOOLBAR_BG_SHAPE := new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
-											gui._createRectShape(new Util.Color4f(0.3,0.3,0.3,0.5),new Util.Color4ub(0,0,0,0),true));
+NS.TOOLBAR_ICON_COLOR := new Util.Color4f(0.0,0,0,1.0);
 
 
 NS.TOOLBAR_ACTIVE_BUTTON_PROPERTIES := [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, GUI.BLACK),
 											new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
-											gui._createRectShape(color_accent2,new Util.Color4ub(0,0,0,0),true))];
-//									PROPERTY_BUTTON_ENABLED_COLOR
-//									TOOLBAR_ACTIVE_BUTTON_PROPERTIES
+											gui._createRectShape(color_accent2, GUI.NO_COLOR,true))];
 											
 NS.resourceFolder := resourceFolder;
 											
@@ -61,23 +59,10 @@ gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_DEFAULT, NS.CURSOR_DEFAULT, 0, 
 gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_TEXTFIELD, Util.loadBitmap(resourceFolder+"/MouseCursors/TextfieldCursor.png"), 8, 8);
 gui.registerMouseCursor(GUI.PROPERTY_MOUSECURSOR_RESIZEDIAGONAL, Util.loadBitmap(resourceFolder+"/MouseCursors/resizeCursor.png"), 9, 9);
 
-
-
-
 gui.registerPreset('header',{
 	GUI.SIZE : [GUI.WIDTH_ABS|GUI.HEIGHT_ABS,-20,15],
 	GUI.FONT : GUI.FONT_ID_HEADING
 });
-
-
-// menu
-//gui.setDefaultColor(GUI.PROPERTY_MENU_TEXT_COLOR,new Util.Color4ub(255,0,0,255));
-//gui.setDefaultShape(GUI.PROPERTY_MENU_SHAPE,
-//						gui._createShadowedRectShape( new Util.Color4ub(20,20,20,200),new Util.Color4ub(150,150,150,200),true) );
-//gui.setDefaultShape(GUI.PROPERTY_TEXTFIELD_SHAPE,
-//						gui._createRectShape( new Util.Color4ub(230,230,230,240),new Util.Color4ub(128,128,128,128),true ));
-
-
 
 gui.registerPreset('menu',{
 	GUI.PROPERTIES : [
@@ -85,7 +70,7 @@ gui.registerPreset('menu',{
 			new GUI.ColorProperty(GUI.PROPERTY_BUTTON_HOVERED_TEXT_COLOR, color_accent1 ),
 			new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_HOVERED_SHAPE, gui._createRectShape( color_accent2,color_accent2,true ) ),
 			new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE, gui.getNullShape() ),
-			new GUI.ShapeProperty(GUI.PROPERTY_MENU_SHAPE, gui._createShadowedRectShape( new Util.Color4ub(20,20,20,200),GUI.NO_COLOR,true) ),
+			new GUI.ShapeProperty(GUI.PROPERTY_MENU_SHAPE, gui._createShadowedRectShape( color_menuBackground,GUI.NO_COLOR,true) ),
 			new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, GUI.WHITE ),
 	],
 	GUI.MENU_WIDTH : 150,
@@ -104,7 +89,8 @@ gui.registerPreset('toolbar',{
 	GUI.LAYOUT : (new GUI.FlowLayouter).setMargin(0).setPadding(3).enableAutoBreak(),
 	GUI.PROPERTIES : [
 			new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,GUI.NULL_SHAPE),
-			NS.TOOLBAR_BG_SHAPE
+			new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
+											gui._createRectShape(color_toolbarBackground,GUI.NO_COLOR,true))
 	]
 });
 gui.registerPreset('toolbar/toolIcon',{
