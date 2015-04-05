@@ -40,7 +40,8 @@ gui.registerFonts({
 var color_accent1 = new Util.Color4ub(0,58,128,255);
 var color_accent2 = new Util.Color4ub(255,221,0,255);
 var color_toolbarBackground = new Util.Color4ub(120,120,120,192);
-var color_menuBackground = new Util.Color4ub(100,100,100,220);
+var color_menuBackground = new Util.Color4ub(100,100,100,230);
+var color_strongShadow = new Util.Color4ub(0,0,0,0x50);
 
 var NS = new Namespace;
 
@@ -70,7 +71,7 @@ gui.registerPreset('menu',{
 			new GUI.ColorProperty(GUI.PROPERTY_BUTTON_HOVERED_TEXT_COLOR, color_accent1 ),
 			new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_HOVERED_SHAPE, gui._createRectShape( color_accent2,color_accent2,true ) ),
 			new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE, gui.getNullShape() ),
-			new GUI.ShapeProperty(GUI.PROPERTY_MENU_SHAPE, gui._createShadowedRectShape( color_menuBackground,GUI.NO_COLOR,true) ),
+			new GUI.ShapeProperty(GUI.PROPERTY_MENU_SHAPE, gui._createRectShape( color_menuBackground,GUI.NO_COLOR,true) ),
 			new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, GUI.WHITE ),
 	],
 	GUI.MENU_WIDTH : 150,
@@ -110,5 +111,12 @@ gui.registerPreset('menu/toolIcon',{
 		GUI.HOVER_PROPERTIES : [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
 											gui._createRectShape(color_accent2,GUI.NO_COLOR,true)),1,false] ]
 });
+
+gui.setDefaultShape(GUI.PROPERTY_WINDOW_ACTIVE_SHAPE,gui._createRectShape(new Util.Color4ub(0xE8,0xE8,0xE8,250),GUI.NO_COLOR,true));
+gui.setDefaultShape(GUI.PROPERTY_WINDOW_PASSIVE_SHAPE,gui._createRectShape(new Util.Color4ub(0xE8,0xE8,0xE8,230),GUI.NO_COLOR,true));
+gui.setDefaultShape(GUI.PROPERTY_WINDOW_ACTIVE_OUTER_SHAPE,gui._createOuterRectShadowShape(-2,4,-2,4,color_strongShadow));
+
+
+
 return NS;
 
