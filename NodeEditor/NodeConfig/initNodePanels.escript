@@ -89,7 +89,7 @@ gui.register(CONFIG_PREFIX + MinSG.Node, fn(node){
 		GUI.LABEL : "is semantic obj",
 		GUI.DATA_VALUE : SemanticObject.isSemanticObject(node),
 		GUI.ON_DATA_CHANGED : [node] => SemanticObject.markAsSemanticObject,
-		GUI.TOOLTIP : "Mark to show if the node is a semantic object."
+		GUI.TOOLTIP : "Marking to declare the node as a semantic object."
 	};
 	{// rendering Layers
 		var accessibleLayers = 0xffff;
@@ -150,126 +150,82 @@ gui.register(CONFIG_PREFIX + MinSG.Node, fn(node){
 
 /*!	GroupNode	*/
 gui.register(CONFIG_PREFIX + MinSG.GroupNode, fn(node){
-	var entries = getBaseTypeEntries(node,MinSG.GroupNode.getBaseType());
-	entries += "*GroupNode Info:*";
-
-	entries += GUI.NEXT_ROW;
-	var cb=gui.createCheckbox("is closed",node.isClosed());
-	cb.node:=node;
-	cb.onDataChanged = fn(data){
-		node.setClosed(data);
-	};
-	entries += (cb);
-
-	entries += GUI.NEXT_ROW;
-
-	var button = gui.createButton(150,20,"Count values in (sub)tree:");
-
-	button.resetValues := fn(){
-		this.values.nodes := 0;
-		this.values.geonodes := 0;
-		this.values.groupnodes := 0;
-		this.values.triangles := 0;
-		this.values.vertices := 0;
-		this.values.states := 0;
-	};
-
-	button.createLabels := fn(){
-		this.labels.nodes := gui.createLabel(this.values.nodes);
-		this.labels.geonodes := gui.createLabel(this.values.geonodes);
-		this.labels.groupnodes := gui.createLabel(this.values.groupnodes);
-		this.labels.triangles := gui.createLabel(this.values.triangles);
-		this.labels.vertices := gui.createLabel(this.values.vertices);
-		this.labels.states := gui.createLabel(this.values.states);
-	};
-
-	button.calcValues := fn(){
-		foreach(MinSG.collectNodes(node) as var n){
-			this.values.nodes++;
-			if(n.isA(MinSG.GeometryNode)){
-				this.values.geonodes++;
-				this.values.triangles += n.getTriangleCount();
-				this.values.vertices += n.getVertexCount();
+	var stats = new Std.DataWrapper("...");
+	var levelStats = new Std.DataWrapper("...");
+	
+	return getBaseTypeEntries(node,MinSG.GroupNode.getBaseType()).append([
+		"*GroupNode Info:*",
+		GUI.NEXT_ROW,
+		{
+			GUI.TYPE : GUI.TYPE_BOOL,
+			GUI.LABEL : "is closed subtree",
+			GUI.DATA_VALUE : node.isClosed(),
+			GUI.ON_DATA_CHANGED : node->node.setClosed,
+			GUI.TOOLTIP : "Rendering algorithms treat closed nodes as atomic entities."
+		},
+		GUI.NEXT_ROW,
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Get subtree statistics",
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS , 10, 0],
+			GUI.ON_CLICK : [node,stats] => fn(node,stats){
+				var nodes = 0;
+				var geonodes = 0;
+				var groupnodes = 0;
+				var triangles = 0;
+				var vertices = 0;
+				var states = 0;
+				
+				foreach(MinSG.collectNodes(node) as var n){
+					nodes++;
+					if(n.isA(MinSG.GeometryNode)){
+						geonodes++;
+						triangles += n.getTriangleCount();
+						vertices += n.getVertexCount();
+					}
+					if(n.isA(MinSG.GroupNode))
+						groupnodes++;
+					if(n.hasStates())
+						states += n.getStates().count();
+				}
+				stats(
+						"Nodes:					"+nodes+"\n"+
+						"GroupNodes:		"+groupnodes+"\n"+
+						"GeometryNodes:	"+geonodes+"\n"+
+						"Triangles:				"+triangles+"\n"+
+						"Vertices:				"+vertices+"\n"+
+						"States:					"+states
+				);
 			}
-			if(n.isA(MinSG.GroupNode))
-				this.values.groupnodes++;
-			if(n.hasStates())
-				this.values.states += n.getStates().count();
-		}
-	};
+		},
+		GUI.NEXT_ROW,
+		{
+			GUI.TYPE : GUI.TYPE_LABEL,
+			GUI.LABEL : "",
+			GUI.DATA_WRAPPER : stats
+		},
+		GUI.NEXT_ROW,
+		{
+			GUI.TYPE			:	GUI.TYPE_BUTTON,
+			GUI.LABEL			:	"Get subtree levels statistics",
+			GUI.TOOLTIP			:	"Output how many nodes are on which level of the scene graph.",
+			GUI.ON_CLICK		:	[node,levelStats] => fn(MinSG.GroupNode groupNode,levelStats) {
+										var s = "";
+										foreach(MinSG.countNodesInLevels(groupNode) as var level, var count)
+											s+="Level #" + level + ":\t" + count + " node(s)\n";
+										levelStats(s);
+									},
+			GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
+		},
+		GUI.NEXT_ROW,
+		{
+			GUI.TYPE : GUI.TYPE_LABEL,
+			GUI.LABEL : "",
+			GUI.DATA_WRAPPER : levelStats
+		},
+		GUI.NEXT_ROW
+	]);
 
-	button.updateLabels := fn(){
-		this.labels.nodes.setText(this.values.nodes);
-		this.labels.geonodes.setText(this.values.geonodes);
-		this.labels.groupnodes.setText(this.values.groupnodes);
-		this.labels.triangles.setText(this.values.triangles);
-		this.labels.vertices.setText(this.values.vertices);
-		this.labels.states.setText(this.values.states);
-	};
-
-	button.onClick = fn(){
-		this.resetValues();
-		this.calcValues();
-		this.updateLabels();
-	};
-
-	button.node := node;
-	button.values := new ExtObject;
-	button.resetValues();
-	button.labels := new ExtObject;
-	button.createLabels();
-
-	entries += (button);
-	entries += GUI.NEXT_ROW;
-
-	entries += "Nodes:		 ";
-	entries += GUI.NEXT_COLUMN;
-	entries += (button.labels.nodes);
-	entries += GUI.NEXT_ROW;
-
-	entries += "GroupNodes:	";
-	entries += GUI.NEXT_COLUMN;
-	entries += (button.labels.groupnodes);
-	entries += GUI.NEXT_ROW;
-
-	entries += "GeometryNodes: ";
-	entries += GUI.NEXT_COLUMN;
-	entries += (button.labels.geonodes);
-	entries += GUI.NEXT_ROW;
-
-	entries += "Triangles:	 ";
-	entries += GUI.NEXT_COLUMN;
-	entries += button.labels.triangles;
-	entries += GUI.NEXT_ROW;
-
-	entries += "Vertices:	  ";
-	entries += GUI.NEXT_COLUMN;
-	entries += (button.labels.vertices);
-	entries += GUI.NEXT_ROW;
-
-	entries += "States:		";
-	entries += GUI.NEXT_COLUMN;
-	entries += (button.labels.states);
-	entries += GUI.NEXT_ROW;
-
-	entries += {
-		GUI.TYPE			:	GUI.TYPE_BUTTON,
-		GUI.LABEL			:	"Levels",
-		GUI.TOOLTIP			:	"Output how many nodes are on which level of the scene graph.",
-		GUI.ON_CLICK		:	[node] => fn(MinSG.GroupNode groupNode) {
-									var levelCounts = MinSG.countNodesInLevels(groupNode);
-									var firstLine = "Level:";
-									var secondLine = "Count:";
-									foreach(levelCounts as var level, var count) {
-										firstLine += "\t" + level;
-										secondLine += "\t" + count;
-									}
-									outln(firstLine, "\n", secondLine);
-								},
-		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
-	};
-	entries += GUI.NEXT_ROW;
-	return entries;
 });
 
 // ----
