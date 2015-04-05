@@ -41,7 +41,13 @@ var color_accent1 = new Util.Color4ub(0,58,128,255);
 var color_accent2 = new Util.Color4ub(255,221,0,255);
 var color_toolbarBackground = new Util.Color4ub(120,120,120,192);
 var color_menuBackground = new Util.Color4ub(100,100,100,230);
-var color_strongShadow = new Util.Color4ub(0,0,0,0x50);
+var color_strongShadow = new Util.Color4ub(0,0,0,0x80);
+var color_shadow = new Util.Color4ub(0,0,0,0x50);
+
+//const Util::Color4ub Colors::COMPONENT_COLOR_1(0xA0,0xA0,0xA0,0x30);
+//const Util::Color4ub Colors::COMPONENT_COLOR_2(0xF8,0xF8,0xF8,0x90);
+var color_component1 = new Util.Color4ub(0xA0,0xA0,0xA0,0xF0);
+var color_component2 = new Util.Color4ub(0xF8,0xF8,0xF8,0xF0);
 
 var NS = new Namespace;
 
@@ -114,7 +120,15 @@ gui.registerPreset('menu/toolIcon',{
 
 gui.setDefaultShape(GUI.PROPERTY_WINDOW_ACTIVE_SHAPE,gui._createRectShape(new Util.Color4ub(0xE8,0xE8,0xE8,250),GUI.NO_COLOR,true));
 gui.setDefaultShape(GUI.PROPERTY_WINDOW_PASSIVE_SHAPE,gui._createRectShape(new Util.Color4ub(0xE8,0xE8,0xE8,230),GUI.NO_COLOR,true));
-gui.setDefaultShape(GUI.PROPERTY_WINDOW_ACTIVE_OUTER_SHAPE,gui._createOuterRectShadowShape(-2,4,-2,4,color_strongShadow));
+gui.setDefaultShape(GUI.PROPERTY_WINDOW_ACTIVE_OUTER_SHAPE,gui._createOuterRectShadowShape(-2,4,-2,4,color_shadow));
+
+//gui.setDefaultShape(GUI.PROPERTY_TAB_HEADER_ACTIVE_SHAPE,gui._createOuterRectShadowShape(1,0,6,6,color_shadow));
+//gui.setDefaultColor(GUI.PROPERTY_TAB_HEADER_PASSIVE_TEXT_COLOR, GUI.WHITE);
+//gui.setDefaultColor(GUI.PROPERTY_TAB_HEADER_ACTIVE_TEXT_COLOR, GUI.WHITE);
+gui.setDefaultColor(GUI.PROPERTY_TAB_HEADER_ACTIVE_TEXT_COLOR, GUI.BLACK);
+//gui.setDefaultShape(GUI.PROPERTY_TAB_HEADER_ACTIVE_SHAPE,gui._createRectShape(color_accent1,GUI.NO_COLOR,true));
+gui.setDefaultShape(GUI.PROPERTY_TAB_HEADER_ACTIVE_SHAPE,gui._createRectShape(color_component2,GUI.NO_COLOR,true));
+gui.setDefaultShape(GUI.PROPERTY_TAB_HEADER_PASSIVE_SHAPE,gui._createOuterRectShadowShape(0,0,1,1,color_shadow));
 
 
 
