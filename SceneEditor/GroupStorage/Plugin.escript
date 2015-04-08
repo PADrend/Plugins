@@ -33,15 +33,11 @@ static registerGUIComponents = fn(gui){
 											gui._createRectShape(new Util.Color4f(0.6,0.6,0.6,0.9),new Util.Color4ub(0.6,0.6,0.6,0.9),true));
 	
 	gui.register('PADrend_ToolsToolbar.10_storedSelections', [gui]=>fn(gui){
-		var panel = gui.create({
-			GUI.TYPE : GUI.TYPE_CONTAINER,
-			GUI.SIZE : [GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 25, 25],
-			GUI.LAYOUT : GUI.LAYOUT_TIGHT_FLOW,
-		});
-		panel += { GUI.TYPE : GUI.TYPE_NEXT_ROW,GUI.SPACING : 2 };
+		
+		var contents = [];
+		contents += { GUI.TYPE : GUI.TYPE_NEXT_ROW,GUI.SPACING : 2 };
 		for(var index = 1; index< 10; index++){
-
-			var button = gui.create({
+			contents += {
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.PRESET : './toolIcon',
 				GUI.LABEL : index,
@@ -96,49 +92,48 @@ static registerGUIComponents = fn(gui){
 							}])...
 
 					];
-				}
-			});
-			panel += button;
-			if(index ==3 || index ==6) panel++;
-			var updateButton = [index, button]=>fn(buttonId, button, index, selection){
-				if(button.isDestroyed())
-					return $REMOVE;
-				if(buttonId == index){
-					button.clearLocalProperties();
-					if( selection && !selection.empty()){
+				},
+				GUI.ON_INIT : [index]=>fn(index){
+					var updateButton = [index, this]=>fn(buttonId, button, index, selection){
+						if(button.isDestroyed())
+							return $REMOVE;
+						if(buttonId == index){
+							button.clearLocalProperties();
+							if( selection && !selection.empty()){
 
-						foreach(module('PADrend/GUI/Style').TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
-							button.addProperty(p);
-
-//						button.setColor( COLOR_ACTIVE );
-//						button.addLocalProperty(ACTIVE_BG_SHAPE);
-//						button.setFlag(GUI.BACKGROUND,true);
-						var t = "["+index+"] Select/goTo stored nodes ("+selection.count()+"):";
-						foreach(selection as var i,var n){
-							if(i>10){
-								t += "\n... ";
-								break;
+								foreach(module('PADrend/GUI/Style').TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
+									button.addProperty(p);
+								var t = "["+index+"] Select/goTo stored nodes ("+selection.count()+"):";
+								foreach(selection as var i,var n){
+									if(i>10){
+										t += "\n... ";
+										break;
+									}
+									t += "\n"+NodeEditor.getNodeString(n);
+								}
+								button.setTooltip(t);
 							}
-							t += "\n"+NodeEditor.getNodeString(n);
+							else{
+								foreach(module('PADrend/GUI/Style').TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
+									button.removeProperty(p);
+								button.setTooltip( "[CTRL]+["+index+"] Update stored selection.");
+							}
 						}
-						button.setTooltip(t);
-					}
-					else{
-						foreach(module('PADrend/GUI/Style').TOOLBAR_ACTIVE_BUTTON_PROPERTIES as var p)
-							button.removeProperty(p);
-
-//						button.setFlag(GUI.BACKGROUND,false);
-//						button.setColor( COLOR_PASSIVE );
-						button.setTooltip( "[CTRL]+["+index+"] Update stored selection.");
-						
-					}
+					};
+					selectedNodesStorage.onSelectionChanged += updateButton;
+					updateButton( index,selectedNodesStorage.getStoredSelection(index) );
 				}
-
 			};
-			selectedNodesStorage.onSelectionChanged += updateButton;
-			updateButton( index,selectedNodesStorage.getStoredSelection(index) );
+
+			if(index ==3 || index ==6) 
+				contents += GUI.NEXT_ROW;
 		};
-		return [panel];
+		return [{
+			GUI.TYPE : GUI.TYPE_CONTAINER,
+			GUI.SIZE : [GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 25, 25],
+			GUI.LAYOUT : GUI.LAYOUT_TIGHT_FLOW,
+			GUI.CONTENTS : contents
+		}];
 	});
 
 };

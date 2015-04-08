@@ -98,12 +98,12 @@ gui.registerPreset('toolbar/toolIcon',{
 		GUI.HOVER_PROPERTIES : [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
 											gui._createRectShape(color_accent1,GUI.NO_COLOR,true)),1,false] ]
 });
-// temp:
-gui.registerPreset('toolIcon',{
-		GUI.PROPERTIES : [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, NS.TOOLBAR_ICON_COLOR)	],
-		GUI.HOVER_PROPERTIES : [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
-											gui._createRectShape(color_accent1,GUI.NO_COLOR,true)),1,false] ]
-});
+//// temp:
+//gui.registerPreset('toolIcon',{
+//		GUI.PROPERTIES : [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR, NS.TOOLBAR_ICON_COLOR)	],
+//		GUI.HOVER_PROPERTIES : [ [new GUI.ShapeProperty(GUI.PROPERTY_BUTTON_SHAPE,
+//											gui._createRectShape(color_accent1,GUI.NO_COLOR,true)),1,false] ]
+//});
 
 gui.registerPreset('menu/toolIcon',{
 		GUI.PROPERTIES : [	new GUI.ColorProperty(GUI.PROPERTY_ICON_COLOR,GUI.WHITE)	],
