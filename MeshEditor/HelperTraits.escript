@@ -341,7 +341,7 @@ HelperTraits.TriangleHighlightTrait := new Traits.GenericTrait("HelperTraits.Tri
 			this._revoceAfterRender += Util.registerExtensionRevocably('PADrend_AfterRenderingPass', this->this.highlightTriangles); 
 		}
 		return this;
-	};
+	};	
 
 	t.attributes.disableHighlight ::= fn(){
 		if(this._revoceAfterRender){
@@ -372,18 +372,18 @@ HelperTraits.TriangleHighlightTrait := new Traits.GenericTrait("HelperTraits.Tri
 		
 		renderingContext.pushAndSetLighting(false);
 		renderingContext.pushAndSetDepthBuffer(true,false,Rendering.Comparison.LEQUAL);
-		
+				
 		if(_drawWireFrame) {
 			renderingContext.pushAndSetPolygonMode(Rendering.PolygonModeParameters.LINE);
 			renderingContext.pushAndSetLine(1);
-			renderingContext.pushAndSetColorMaterial(new Util.Color4f(0,0,0,1));			
+			renderingContext.pushAndSetColorMaterial(new Util.Color4f(0,0,0,1));	
 			frameContext.displayMesh(mesh);			
 			renderingContext.popMaterial();
 			renderingContext.popLine();
 			renderingContext.popPolygonMode();
 		}
 
-		renderingContext.pushAndSetColorMaterial(new Util.Color4f(1,0.5,0.5,1));
+		renderingContext.pushAndSetColorMaterial(new Util.Color4f(1,0.5,0.5,1));	
 		//renderingContext.pushAndSetPolygonOffset(-1.0, -1.0);
 		foreach(triangles as var tri) {
 			if(tri < maxCount)
@@ -394,7 +394,7 @@ HelperTraits.TriangleHighlightTrait := new Traits.GenericTrait("HelperTraits.Tri
 		
 		renderingContext.pushAndSetPolygonMode(Rendering.PolygonModeParameters.LINE);
 		renderingContext.pushAndSetLine(1);
-		renderingContext.pushAndSetColorMaterial(new Util.Color4f(0,0,0,1));
+		renderingContext.pushAndSetColorMaterial(new Util.Color4f(0,0,0,1));	
 		foreach(triangles as var tri) {
 			if(tri < maxCount)
 				frameContext.displayMesh(mesh,tri*3,3 );

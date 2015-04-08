@@ -34,9 +34,14 @@ Tool.makeCut := fn() {
 	var triangles = this.getSelectedTriangles();
 	if(!this.cuttingLine || !mesh || triangles.empty())
 		return;
+	var mat = getSelectedNodes()[0].getWorldToLocalMatrix();
 	var v1 = Picking.getPickingRay(this.cuttingLine[0].toArray()).getOrigin();
 	var v2 = Picking.getPickingRay(this.cuttingLine[0].toArray()).getPoint(1);
 	var v3 = Picking.getPickingRay(this.cuttingLine[1].toArray()).getPoint(1);
+	
+	v1 = mat.transformPosition(v1);
+	v2 = mat.transformPosition(v2);
+	v3 = mat.transformPosition(v3);
 	
 	var p = new Geometry.Plane(v1,v2,v3);
 	var oldMesh = new Rendering.Mesh(mesh);
