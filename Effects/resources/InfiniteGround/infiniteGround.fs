@@ -61,6 +61,7 @@ uniform bool useHaze;
 uniform float hazeNear;
 uniform float hazeFar;
 uniform vec3 hazeColor;
+uniform vec3 groundColor;
 
 uniform vec3 sunPosition;
 uniform vec3 sunAmbient;
@@ -229,7 +230,7 @@ void main(void) {
 //		color *= dot(worldLightDir, worldNormal);
 	}
 	if( type == TYPE_WHITE) {
-		color = vec3(1.0,1.0,1.0);
+		color = groundColor;
 	}
 
 	// add haze

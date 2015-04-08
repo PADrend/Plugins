@@ -51,6 +51,7 @@ plugin.getHazeColor := fn(){
 	return (skyPlugin && skyPlugin.isEnabled() && skyPlugin.getHazeColor()) ? skyPlugin.getHazeColor() :  PADrend.getBGColor();
 };
 
+plugin.groundColor := DataWrapper.createFromValue(new Util.Color4f(1,1,1,1));
 	
 plugin.init @(override) := fn(){
 	module.on('PADrend/gui',registerGUI);
@@ -218,6 +219,9 @@ static ext_PADrend_AfterRendering = fn(...){
 
 		var hC = plugin.getHazeColor();
 		shaderState.setUniform('hazeColor',  Rendering.Uniform.VEC3F,[ [hC.r(),hC.g(),hC.b()] ]);
+		
+		var gc = plugin.groundColor();
+		shaderState.setUniform('groundColor',  Rendering.Uniform.VEC3F,[ [gc.r(),gc.g(),gc.b()] ]);
 	}
 
 	var p = sun.getWorldOrigin();
@@ -392,6 +396,12 @@ static registerGUI = fn(gui){
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.RANGE : [0,1],
 			GUI.DATA_WRAPPER : plugin.waterRefraction
+		},
+		{
+			GUI.TYPE : GUI.TYPE_COLOR,
+			GUI.LABEL : "Ground Color",
+			GUI.DATA_WRAPPER : plugin.groundColor,
+			GUI.TOOLTIP : "Adjust the ground color (for type WHITE(4))."
 		}
 	]);
 
