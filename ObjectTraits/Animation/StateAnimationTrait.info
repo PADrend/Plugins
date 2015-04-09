@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/StateAnimationTrait",
+	"aliases" : ["ObjectTraits/StateAnimationTrait"],
+	"description" : "Animate an object along a spline path.",
+	"displayName" : "Animation/StateAnimationTrait"
+}
