@@ -38,7 +38,7 @@ trait.onInit += fn(MinSG.GroupNode node){
 
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
-		outln("onAnimationInit (StateAnimationTrait)");
+//		outln("onAnimationInit (StateAnimationTrait)");
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationPlay += [activeNode]=>fn(activeNode,time,lastTime){
@@ -48,12 +48,18 @@ trait.onInit += fn(MinSG.GroupNode node){
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationStop += [activeNode]=>fn(activeNode,...){
-		outln("onAnimationStop (StateAnimationTrait)");
 		activeNode(void);
 	};
 };
 
 trait.allowRemoval();
+
+trait.onRemove += fn(node){
+	node.stateContainer(void);
+	node.state_animationSpeed(0);
+	node.unsetNodeAttribute('stateAnmiation_stateId');
+	node.unsetNodeAttribute('stateAnmiation_animationSpeed');
+};
 
 module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
@@ -62,7 +68,7 @@ module.on('../ObjectTraitRegistry', fn(registry){
 			{
 				GUI.TYPE : GUI.TYPE_RANGE,
 				GUI.RANGE : [1,10],
-				GUI.LABEL : "m/sek",
+				GUI.LABEL : "steps/sek",
 				GUI.WIDTH : 200,
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.state_animationSpeed
