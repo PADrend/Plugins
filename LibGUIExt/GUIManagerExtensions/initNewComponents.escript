@@ -152,7 +152,7 @@ GUI.GUI_Manager.createCombobox ::= fn( width, height, [Collection,void] entries=
 	cb += cb.tf;
 
 	// open options menu
-	cb.button.onClick := cb->fn(){
+	cb.button.onClick := [this] => cb->fn(gui){
 		var menu = gui.createMenu();
 
 		// find containing menu (required for proper closing of other submenus)
@@ -278,6 +278,7 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 	attr.entryContainer @(private) := void;
 	attr.options @(init) := Array;
 	attr.optionsProvider @(private) := void; // optional; function returning the current options [ [option1],[...], ... ]
+	attr._gui @(private) := void; 
 	
 	/*! Add an option to the drop down component.
 		@param  value	Value of the component
@@ -296,8 +297,8 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 			menuComponent = value;
 		if(selectedComponent===void)
 			selectedComponent = menuComponent;
-		option.menuComponent := gui.create(menuComponent,getWidth() );
-		option.selectedComponent := gui.create(selectedComponent,getWidth()-getHeight());
+		option.menuComponent := this._gui.create(menuComponent,getWidth() );
+		option.selectedComponent := this._gui.create(selectedComponent,getWidth()-getHeight());
 		option.tooltip := tooltip;
 		option.value := value;
 		this.options += option;
@@ -325,6 +326,7 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 	};
 	attr._activeMenu := void;
 	attr.init := fn(gui,width, height){
+		this._gui = gui;
 		this.addProperty(new GUI.UseShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,GUI.PROPERTY_COMPONENT_LOWERED_BORDER_SHAPE));
 		this.setFlag(GUI.BACKGROUND);
 
@@ -405,11 +407,11 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 			return;
 		}
 		
-		var menu = gui.createMenu();
+		var menu = this._gui.createMenu();
 		this._activeMenu = menu;
 		var selectedEntry;
 		foreach(getOptions() as var option){
-			var button = gui.createButton(getWidth(),getHeight(),"");
+			var button = this._gui.createButton(getWidth(),getHeight(),"");
 			button.setFlag(GUI.FLAT_BUTTON,true);
 			button.setTextStyle (GUI.TEXT_ALIGN_LEFT|GUI.TEXT_ALIGN_MIDDLE);
 			button.add(option.menuComponent);
@@ -575,7 +577,7 @@ GUI.GUI_Manager.createPopupWindow ::= fn( Number width=300,Number height=50,Stri
 	window._options := [];
 	window._originalAdd := window.add; // backup
 
-	window.addOption:=fn(component,Bool adjustSize=true){
+	window.addOption := [this]=>fn(gui,component,Bool adjustSize=true){
 		var c = gui.create(component);
 		if(adjustSize)
 			c.setExtLayout(
@@ -593,7 +595,7 @@ GUI.GUI_Manager.createPopupWindow ::= fn( Number width=300,Number height=50,Stri
 		_actions+={'name':actionName,'action':action,'tooltip':tooltip};
 	};
 
-	window.init := fn(){
+	window.init := [this]=>fn(gui){
 		clear();
 		// add options
 		if(_options.count()>0){
@@ -707,7 +709,7 @@ GUI.GUI_Manager.createRadioButtonSet ::= fn(heading=false){
 
 	container.setData:=container.setValue;
 	container.getData:=container.getValue;
-	container.addOption := fn(value,label=false){
+	container.addOption := [this]=>fn(gui,value,label=false){
 		var cb=gui.createCheckbox(label ? label : value,false);
 		
 		cb.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_CHECKBOX_SHAPE,GUI.BUTTON_SHAPE_NORMAL));
@@ -768,12 +770,12 @@ GUI.GUI_Manager.createToolbar ::= fn(Number width,Number height,Array entries,[N
 				}
 				part=part.replaceAll('�',"");
 				if(part.length()>0){
-					toolbar.add(gui.createLabel(part));
+					toolbar.add(this.createLabel(part));
 					xPos+=entryWidth;
 				}
 			}
 		}else{
-			var c=gui.create(entry,entryWidth);
+			var c=this.create(entry,entryWidth);
 			toolbar.add(c);
 			if(c.isA(GUI.Button)){
 				if(xPos==0)

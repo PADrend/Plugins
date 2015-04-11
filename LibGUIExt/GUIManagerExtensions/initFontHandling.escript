@@ -30,7 +30,7 @@ GUI.GUI_Manager._applyDefaultFonts ::= fn(){
 	@see http://sourceforge.net/projects/bitmapfont/	*/
 GUI.GUI_Manager.createBitmapFont ::= fn(filename,
 									chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"){ // '
-	var image=gui.loadImage(filename);
+	var image = this.loadImage(filename);
 	if(!image) return false;
 
 	var fontHeight=image.getHeight()-2;
@@ -96,7 +96,7 @@ GUI.GUI_Manager.createBitmapFontFromFNT ::= fn(filename){
 			// add path extracted from filename
 			bitmapFile = filename.substr(0,filename.rFind("/")+1)+bitmapFile;
 			
-			var image=gui.loadImage(bitmapFile);
+			var image = this.loadImage(bitmapFile);
 			if(!image)
 				throw new Exception("Could not load font bitmap '"+bitmapFile+"'");
 			font = new GUI.BitmapFont(image,lineHeight);

@@ -431,7 +431,7 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 		}else if(preset.isA(String)){
 			if(presetIdPrefix.isA(String))
 				preset = IO.condensePath( presetIdPrefix+"/"+preset );
-			preset = gui.getPreset(preset);
+			preset = this.getPreset(preset);
 		}else{
 			preset = preset();
 		}
@@ -741,7 +741,7 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 								return $REMOVE;
 							}else{
 								component.destroyContents();
-								foreach( gui.createComponents({
+								foreach( this.createComponents({
 										GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
 										GUI.PRESET : childrenPresetIdPrefix,
 										GUI.PROVIDER : contents }) as var c)
@@ -772,11 +772,11 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 			}
 		}
 
-		if(gui._destructionMonitor){
+		if(this._destructionMonitor){
 			var s = component.toString();
 			if(description[GUI.LABEL])
 				s+=" '"+description[GUI.LABEL]+"'";
-			component.__destructionMarker := gui._destructionMonitor.createMarker(s);
+			component.__destructionMarker := this._destructionMonitor.createMarker(s);
 		}
 		
 		// call optional init function
@@ -842,7 +842,7 @@ GUI.GUI_Manager._componentFactories ::= {
 
 		if(input.description[GUI.ICON]) {
 
-			var icon = gui.getIcon(input.description[GUI.ICON]);
+			var icon = this.getIcon(input.description[GUI.ICON]);
 
 			if(icon.isA(GUI.Component)){
 				button.setText('');
@@ -993,13 +993,13 @@ GUI.GUI_Manager._componentFactories ::= {
 	GUI.TYPE_CRITICAL_BUTTON : fn(input,result){
 		var description2 = input.description.clone();
 		description2[GUI.TYPE] = GUI.TYPE_BUTTON;
-		description2[GUI.ON_CLICK] = [input.description.get(GUI.REQUEST_MESSAGE, input.description[GUI.LABEL]), input.description[GUI.ON_CLICK]] => fn(message,action){
+		description2[GUI.ON_CLICK] = [this,input.description.get(GUI.REQUEST_MESSAGE, input.description[GUI.LABEL]), input.description[GUI.ON_CLICK]] => fn(gui,message,action){
 			gui.openMenu(getAbsPosition()-new Geometry.Vec2(10,10),[{
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : message,
 				GUI.WIDTH : 220,
 				GUI.HEIGHT : 30,
-				GUI.ON_CLICK : [action] => this->fn(action){
+				GUI.ON_CLICK : [gui,action] => this->fn(gui,action){
 					(this->action)();
 					gui.closeAllMenus();
 				}
@@ -1141,7 +1141,7 @@ GUI.GUI_Manager._componentFactories ::= {
 			}
 			return this;
 		};
-		wrapper.addOption := fn(value,c){
+		wrapper.addOption := [this]=>fn(gui,value,c){
 			c = gui.create(c);
 			c.__ListViewData__ := value;
 			list.add(c);
@@ -1218,7 +1218,7 @@ GUI.GUI_Manager._componentFactories ::= {
 		}
 		if(input.description[GUI.ICON]) {
 
-			var icon = gui.getIcon(input.description[GUI.ICON]);
+			var icon = this.getIcon(input.description[GUI.ICON]);
 
 			if(icon.isA(GUI.Component)){
 				button.setText('');
@@ -1401,7 +1401,7 @@ GUI.GUI_Manager._componentFactories ::= {
 	GUI.TYPE_MULTILINE_TEXT : fn(input,result){
 		var w = input.width?input.width:300;
 
-		var textarea = gui.createTextarea();
+		var textarea = this.createTextarea();
 		result.inputComponent = textarea;
 
 		if(input.label){

@@ -26,7 +26,7 @@ t.attributes._backgroundProperty @(private) := void;
 t.attributes._bgColor @(private) := GUI.NO_COLOR;
 t.attributes._lineColor @(private) := GUI.NO_COLOR;
 t.attributes._refreshBGColor @(private) := fn(){
-	this._backgroundProperty.setShape(gui._createRectShape(_bgColor, _lineColor, true));
+	this._backgroundProperty.setShape(this.getGUI()._createRectShape(_bgColor, _lineColor, true));
 };
 
 t.onInit += fn(GUI.Component component,Std.DataWrapper bgColor,[Std.DataWrapper,void] lineColor=void){
