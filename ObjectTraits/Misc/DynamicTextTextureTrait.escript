@@ -12,55 +12,64 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-
-static font =  GUI.FONT_ID_LARGE;
-
-static createTexture = fn(String text){
-
+	 
+static createTexture = fn(String text, Number bg){
+	static gui;
+	@(once) {
+		gui = new (Std.module('LibGUIExt/GUI_ManagerExt'));
+		gui.initDefaultFonts();
+		gui.registerFonts({
+		//	GUI.FONT_ID_DEFAULT : Std.module('PADrend/gui').getFont(GUI.FONT_ID_XLARGE)
+			GUI.FONT_ID_DEFAULT : Std.module('PADrend/gui').getFont(GUI.FONT_ID_HUGE)
+		});
+		gui.setDefaultColor(GUI.PROPERTY_TEXT_COLOR, GUI.WHITE);
+	};
+	
 	var label = gui.create({
 		GUI.TYPE : GUI.TYPE_LABEL,
 		GUI.LABEL : text,
-//		GUI.SIZE : [GUI.WIDTH_ABS|GUI.HEIGHT_ABS , -10.0,-10.0],
-		GUI.POSITION : [5,5],
-		GUI.FONT : font,
-		GUI.COLOR : GUI.WHITE
+		GUI.POSITION : [5,5]
 	});
-	label.layout();
+	label.layout(); // calculate required size
 
-	var width = label.getWidth()+10;
-	var height = label.getHeight()+10;
-	var p = gui.create({
-		GUI.TYPE : GUI.TYPE_CONTAINER,
-		GUI.SIZE : [width,height],
-		GUI.POSITION : [0,0],
-		GUI.FLAGS : GUI.BACKGROUND,
-		GUI.PROPERTIES : [ // clear backround
-			new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
-					gui._createRectShape(new Util.Color4ub(0,0,0,50),new Util.Color4ub(0,0,0,0),false))
-		],
-		GUI.CONTENTS : [ label ]
-	});
+	var width = (label.getWidth()+10).round(4);
+	var height = (label.getHeight()+10).round(4);
 
-	gui.registerWindow(p);
+	var fbo = new Rendering.FBO;
+	renderingContext.pushAndSetFBO(fbo);
 
+	var texture = Rendering.createStdTexture(width,height,true);
+	fbo.attachColorTexture(renderingContext,texture);
+//	outln(fbo.getStatusMessage(renderingContext));
+
+	renderingContext.clearScreen( new Util.Color4f(0,0,0,bg) );
+	renderingContext.pushViewport();
+	renderingContext.setViewport(0,0,width,height);
+	
+	gui.registerWindow(label);
 	gui.display();
-	gui.markForRemoval(p);
-	return Rendering.createTextureFromScreen( new Geometry.Rect(0,renderingContext.getWindowHeight()-height,width,height),true);
+	gui.markForRemoval(label);
+	
+	renderingContext.popViewport();
+	renderingContext.popFBO();
+	return texture;
 };
 
 var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn( node){
+	node.annotationBG := node.getNodeAttributeWrapper('annotationBG', 0.5 );
 	node.annotationText := node.getNodeAttributeWrapper('annotationText', " " );
-	node.annotationText.onDataChanged += [node]=>fn(node,text){
-		foreach(node.getStates() as var state){	// remove all former texture states
+	
+	var update = [node,node.annotationText,node.annotationBG]=>fn(node,annotationText,annotationBG,...){
+		foreach(node.getStates() as var state)	// remove all former texture states
 			if(state.isA(MinSG.TextureState))
 				node.removeState(state);
 
-		var texture = createTexture(text);
+		var texture = createTexture(annotationText(),annotationBG());
 		if(node.isA(MinSG.BillboardNode)){
-			var scale = 0.01;
+			var scale = 0.005;
 			var width = texture.getWidth()*scale;
 			var height = texture.getHeight()*scale;
 			node.setRect(new Geometry.Rect(-width, 3-height , width, height));
@@ -69,8 +78,9 @@ trait.onInit += fn( node){
 		textState.setTempState(true);
 		node.addState(textState) ;
 	};
-	
-	node.annotationText.forceRefresh();
+	node.annotationText.onDataChanged += update;
+	node.annotationBG.onDataChanged += update;
+	update();
 };
 
 trait.allowRemoval();
@@ -84,6 +94,13 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.LABEL : "Text",
 				GUI.HEIGHT : 100,
 				GUI.DATA_WRAPPER : node.annotationText
+			},
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE : GUI.TYPE_RANGE,
+				GUI.LABEL : "BG Strength",
+				GUI.RANGE : [0,1],
+				GUI.DATA_WRAPPER : node.annotationBG
 			},
 
 		];
