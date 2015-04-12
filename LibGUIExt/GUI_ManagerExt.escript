@@ -60,36 +60,23 @@ GUI.GUI_Manager.getPreset ::= fn(String id){
 	return preset;
 };
 
-//GUI.GUI_Manager.onMouseMove @(init,const) :=  Std.MultiProcedure; // \todo (Cl) not working correctly until now...
 
-
-//! Creates global guiManager GLOBALS.gui.
-return fn(Util.UI.Window window, Util.UI.EventContext eventContext) {
-	if(GLOBALS.isSet($gui)&& GLOBALS.gui)
-		Runtime.exception("Global GUIManager (GLOBALS.gui) already exists.");
+module('./GUIManagerExtensions/initComponentFactories');
+module('./GUIManagerExtensions/initComponentGroupFactories');
+module('./GUIManagerExtensions/initComponentRegistry');
+module('./GUIManagerExtensions/initDialogFactories');
+module('./GUIManagerExtensions/initFontHandling');
+module('./GUIManagerExtensions/initIconHandling');
+module('./GUIManagerExtensions/initMenuHandling');
+module('./GUIManagerExtensions/initNewComponents');
 	
-	module('./GUIManagerExtensions/initComponentFactories');
-	module('./GUIManagerExtensions/initComponentGroupFactories');
-	module('./GUIManagerExtensions/initComponentRegistry');
-	module('./GUIManagerExtensions/initDialogFactories');
-	module('./GUIManagerExtensions/initFontHandling');
-	module('./GUIManagerExtensions/initIconHandling');
-	module('./GUIManagerExtensions/initMenuHandling');
-	module('./GUIManagerExtensions/initNewComponents');
-		
-	module('./initComponentExtensions');
-	
-	GLOBALS.gui := new GUI.GUI_Manager(eventContext);
-	gui.setWindow(window);
-	gui.initDefaultFonts();  // see FontHandling.escript
-	gui._destructionMonitor := void; // (optional for debugging) Util.DestructionMonitor
-	gui.onMouseMove := new Std.MultiProcedure; // \todo (Cl) replace by @(init) alternative below when Type._supportsInit() is implemented.
-	gui.onMouseButton := new Std.MultiProcedure; // \todo (Cl) replace by @(init) alternative below when Type._supportsInit() is implemented.
+module('./initComponentExtensions');
+
+GUI.GUI_Manager.onMouseMove @(init,const) :=  Std.MultiProcedure; 
+GUI.GUI_Manager.onMouseButton @(init,const) :=  Std.MultiProcedure; 
+GUI.GUI_Manager._destructionMonitor := void;
 
 
-	GLOBALS.gui.windows := new Map; //! \deprecated
-	return gui;
-};
-
+return GUI.GUI_Manager;
 
 // ------------------------------------------------------------------------------------

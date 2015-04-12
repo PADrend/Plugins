@@ -736,12 +736,12 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 				
 					// if contents is dynamic (e.g. Std.DataWrapper)
 					if(contents.isSet($onDataChanged)){
-						contents.onDataChanged += [this,component,insideMenu,childrenPresetIdPrefix] => fn(gui,component,insideMenu,childrenPresetIdPrefix,contents){
+						contents.onDataChanged += [component,insideMenu,childrenPresetIdPrefix] => fn(component,insideMenu,childrenPresetIdPrefix,contents){
 							if(component.isDestroyed()){
 								return $REMOVE;
 							}else{
 								component.destroyContents();
-								foreach( this.createComponents({
+								foreach( component.getGUI().createComponents({
 										GUI.TYPE : insideMenu ? GUI.TYPE_MENU_ENTRIES : GUI.TYPE_COMPONENTS,
 										GUI.PRESET : childrenPresetIdPrefix,
 										GUI.PROVIDER : contents }) as var c)

@@ -28,8 +28,13 @@ static gui;
 
 plugin.init @(override) := fn(){
 	//  Init global GUI Manager
-	gui = module('LibGUIExt/createGlobalGUIManager')( PADrend.SystemUI.getWindow(), PADrend.getEventContext() );
+	gui = new (module('LibGUIExt/GUI_ManagerExt'))( PADrend.getEventContext() );
+	gui.setWindow( PADrend.SystemUI.getWindow() );
+	gui.initDefaultFonts();  // see FontHandling.escript
 	
+	GLOBALS.gui := gui; //! \deprecated
+	gui.windows := new Map; //! \deprecated
+		
 	Util.registerExtension('PADrend_Init',			fn(){
 		module('LibGUIExt/FileDialog').folderCacheProvider = PADrend.configCache;
 		module('./Style'); // init style
@@ -62,7 +67,7 @@ plugin.init @(override) := fn(){
 	Util.registerExtension('PADrend_Init', fn(){
 //		module._registerModule('PADrend/gui',load('PADrend/gui.escript',{$__injectedGUIObject:GLOBALS.gui}));
 		// workaround for bug in _registerModule.
-		GLOBALS.__injectedGUIObject := GLOBALS.gui;
+		GLOBALS.__injectedGUIObject := gui;
 		module('PADrend/gui');
 	});
 	
@@ -89,7 +94,7 @@ plugin.init @(override) := fn(){
 		});
 	}
 
-	loadPlugins([
+	Util.loadPlugins([
 			__DIR__+"/MainToolbar.escript",
 			__DIR__+"/MainWindow.escript",
 			__DIR__+"/ToolsToolbar.escript" ],true);
