@@ -56,7 +56,7 @@ Tool.onToolInitOnce_static += fn(){
 				node.setRelTransformation( newMatrix.toSRT() );
 			}else{
 				node.setRelTransformation(newMatrix);
-			}					
+			}
 			this.snapSelectedNode(pos,direction, node);
 		}
 

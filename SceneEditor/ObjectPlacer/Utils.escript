@@ -169,13 +169,18 @@ NS.defaultNodeInserter := fn(screenPos,MinSG.Node node){
 			node.rotateLocal_deg(90,new Geometry.Vec3(1,0,0));
 		}
 		
-		var snappingNormal = PADrend.getWorldUpVector();
-		var nodeAnchor = node.getWorldBB().getRelPosition(	0.5-snappingNormal.x()*0.5,
-															0.5-snappingNormal.y()*0.5,
-															0.5-snappingNormal.z()*0.5);
-															
-//		var nodeAnchor = n.getBB().getCenter()+ new Geometry.Vec3(0,-n.getBB().getExtentY()*0.5,0);
-		node.setWorldOrigin(pos-nodeAnchor);
+		
+		var placingAnchor = module('LibMinSGExt/NodeAnchors').findAnchor(node,'placingPos');
+		if( placingAnchor && placingAnchor().isA(Geometry.Vec3) ){
+			node.setWorldOrigin(pos-node.localDirToWorldDir(placingAnchor()));
+		}else{
+			var snappingNormal = PADrend.getWorldUpVector();
+			node.setWorldOrigin(pos-node.getWorldBB().getRelPosition(	0.5-snappingNormal.x()*0.5,
+																		0.5-snappingNormal.y()*0.5,
+																		0.5-snappingNormal.z()*0.5));
+		}
+		
+
 		NodeEditor.selectNode(node);
 		
 		Util.executeExtensions('ObjectPlacer_OnObjectInserted',node);

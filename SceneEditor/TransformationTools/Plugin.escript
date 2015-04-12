@@ -78,13 +78,15 @@ plugin.ex_Init:=fn(){
 static registerToolIcons = fn(gui) {
 
 	static snapToolMode = new Std.DataWrapper(false);
-	var chooseSnapToolMode = {
-		GUI.TYPE : GUI.TYPE_BOOL,
-		GUI.DATA_WRAPPER : snapToolMode,
-		GUI.LABEL : "Snap geometry (slow)"
-	};
-	gui.register('PADrend_UIToolConfig:TransformationTools3_Snap',[chooseSnapToolMode]);
-	gui.register('PADrend_UIToolConfig:TransformationTools3_Snap2',[chooseSnapToolMode]);
+	var chooseSnapToolMode = [
+		{
+			GUI.TYPE : GUI.TYPE_BOOL,
+			GUI.DATA_WRAPPER : snapToolMode,
+			GUI.LABEL : "Snap to geometry"
+		}
+	];
+	gui.register('PADrend_UIToolConfig:TransformationTools3_Snap',chooseSnapToolMode);
+	gui.register('PADrend_UIToolConfig:TransformationTools3_Snap2',chooseSnapToolMode);
 	snapToolMode.onDataChanged += [gui]=>fn(gui,mode){
 		PADrend.setActiveUITool(mode?'TransformationTools3_Snap':'TransformationTools3_Snap2');
 		gui.closeAllMenus();

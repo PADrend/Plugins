@@ -332,7 +332,8 @@ Tool.doCreateContextMenu ::= fn(){
 				"Anchor name:",
 				{
 					GUI.TYPE : GUI.TYPE_TEXT,
-					GUI.DATA_WRAPPER : name
+					GUI.DATA_WRAPPER : name,
+					GUI.OPTIONS : ["placingPos"]
 				},
 				{
 					GUI.TYPE : GUI.TYPE_BOOL,

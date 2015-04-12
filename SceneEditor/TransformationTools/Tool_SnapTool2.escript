@@ -14,6 +14,7 @@
 static EditNodeFactories = module('./EditNodeFactories');
 static EditNodeTraits = module('./EditNodeTraits');
 static ToolHelperTraits = module('./ToolHelperTraits');
+static NodeAnchors = module('LibMinSGExt/NodeAnchors');
 
 var Tool = new Type;
 
@@ -27,13 +28,19 @@ Tool.nodeMarkerNode @(private) := 	void;	// a geometry node with a "cast segment
 Tool.nodeRays @(private,init) := Map;  // node -> cast segment (Segment3)
 
 // ------------------------------
-Tool.getSnappingNormal @(private) := fn(){	return PADrend.getWorldUpVector(); };
+Tool.getSnappingNormal := fn(){	return PADrend.getWorldUpVector(); };
 
 Tool.getNodeWorldAnchor @(private) := fn(node){ // this might also return a predefined anchor point stored as node attribute
-	var snapNormal = this.getSnappingNormal();
-	return node.getWorldBB().getRelPosition(	0.5-snapNormal.x()*0.5,
-												0.5-snapNormal.y()*0.5,
-												0.5-snapNormal.z()*0.5);
+	var placingAnchor = NodeAnchors.findAnchor(node,'placingPos');
+	if( placingAnchor && placingAnchor().isA(Geometry.Vec3) ){
+		return node.localPosToWorldPos(placingAnchor());
+		outln(  toolOrigin );
+	}else{
+		var snapNormal = this.getSnappingNormal();
+		return node.getWorldBB().getRelPosition(	0.5-snapNormal.x()*0.5,
+													0.5-snapNormal.y()*0.5,
+													0.5-snapNormal.z()*0.5);
+	}
 };
 
 //! \see ToolHelperTraits.NodeSelectionListenerTrait
@@ -46,7 +53,7 @@ Tool.onNodesSelected_static += fn(nodes){
 
 	var snapNormal = this.getSnappingNormal();
 	//! \see ToolHelperTraits.MetaNodeContainerTrait
-	this.getMetaNode().setWorldOrigin( this.getNodeWorldAnchor(nodes[0]) );
+	this.getMetaNode().setWorldOrigin( this.getNodeWorldAnchor(nodes.back()) );
 
 	this.refreshRelNodePositions(nodes);
 };
@@ -230,4 +237,43 @@ Tool.refreshRelNodePositions ::= fn(nodes){ // relative to startPos
 	}
 };
 
+//! \see ToolHelperTraits.ContextMenuProviderTrait
+Tool.doCreateContextMenu ::= fn(){
+	var entries = [
+		"*Snapping Tool*",
+	];
+	//! \see ToolHelperTraits.NodeSelectionListenerTrait
+	if( !this.getSelectedNodes().empty() ){
+		if(NodeAnchors.findAnchor(this.getSelectedNodes().back(),'placingPos')){
+			entries += {
+				GUI.TYPE : GUI.TYPE_LABEL,
+				GUI.LABEL : "'placingPos' anchor available",
+				GUI.TOOLTIP : "The snapping tool snaps itself to \nthe node's 'placingPos' anchor."
+			};
+		}else{
+			entries += {
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "Create 'placingPos' anchor",
+				GUI.ON_CLICK : [this,this.getSelectedNodes().back()] => fn(tool,node){
+					
+					var snapNormal = tool.getSnappingNormal();
+					NodeAnchors.createAnchor(node,'placingPos', 
+												node.worldPosToLocalPos(node.getWorldBB().getRelPosition(
+																							0.5-snapNormal.x()*0.5,
+																							0.5-snapNormal.y()*0.5,
+																							0.5-snapNormal.z()*0.5)));
+					this.getGUI().closeAllMenus();
+					PADrend.message("Anchor created.");
+				},
+				GUI.TOOLTIP : "The snapping tool snaps itself to \nthe node's 'placingPos' anchor."
+			};
+		}
+	}
+	
+	
+
+	
+	return entries;
+};
+	
 return Tool;
