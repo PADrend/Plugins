@@ -25,7 +25,7 @@ GUI.MouseButtonListenerTrait := new Std.Traits.GenericTrait("GUI.MouseButtonList
 var t = GUI.MouseButtonListenerTrait;
 t.attributes.onMouseButton @(init) := module('../ChainedEventHandler');
 t.onInit += fn(GUI.Component c){
-	gui.enableMouseButtonListener(c);
+	c.getGUI().enableMouseButtonListener(c);
 };
 
 return t;

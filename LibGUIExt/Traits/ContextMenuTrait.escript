@@ -50,6 +50,7 @@ t.onInit += fn(GUI.Component c,Number menuWidth = 150){
 		if(buttonEvent.button == Util.UI.MOUSE_BUTTON_RIGHT && buttonEvent.pressed) {
 			var absPos = new Geometry.Vec2(buttonEvent.x, buttonEvent.y);
 			var entries = [];
+			var gui = this.getGUI();
 			foreach(this.contextMenuProvider as var p)
 				entries.append( gui.createComponents({
 										GUI.TYPE : GUI.TYPE_MENU_ENTRIES,

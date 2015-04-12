@@ -44,7 +44,7 @@ t.onInit += fn(GUI.Container container, contentDescription = void){
 				return $REMOVE;
 			}else{
 				this.destroyContents();
-				foreach( gui.createComponents(contentDescription) as var c)
+				foreach( this.getGUI().createComponents(contentDescription) as var c)
 					this += c;
 			}
 		};

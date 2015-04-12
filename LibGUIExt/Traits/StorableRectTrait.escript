@@ -42,7 +42,7 @@ t.onInit += fn(GUI.Component component,Std.DataWrapper rectWrapper){
 			GUI.TOOLTIP : "Store component's size and position",
 			GUI.ON_CLICK : [component,rectWrapper] => fn(component,rectWrapper){
 				rectWrapper([component.getPosition().x(),component.getPosition().y(),component.getWidth(),component.getHeight()]);		
-				gui.closeAllMenus();
+				component.getGUI().closeAllMenus();
 			}
 		},
 		{
@@ -53,9 +53,9 @@ t.onInit += fn(GUI.Component component,Std.DataWrapper rectWrapper){
 				var r = rectWrapper();
 				component.setPosition(r[0],r[1]);
 				component.setSize(r[2],r[3]);
-				gui.closeAllMenus();
+				component.getGUI().closeAllMenus();
 			}
-		}];			
+		}];
 	};
 
 	var r = rectWrapper();

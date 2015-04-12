@@ -57,12 +57,12 @@ t.onInit += fn(GUI.Component c,Array mouseButtons = [Util.UI.MOUSE_BUTTON_LEFT, 
 		this._dragging_button @(private) := evt.button;
 		this._dragging_active @(private) := true;
 		
-		onStartDragging(evt);
-		if(!_dragging_active) // onStartDragging may disable the dragging!
+		this.onStartDragging(evt);
+		if(!this._dragging_active) // onStartDragging may disable the dragging!
 			return $CONTINUE; // event not handled
 		
 		// register global mouse button listener
-		gui.onMouseButton += this->fn(evt){
+		this.getGUI().onMouseButton += this->fn(evt){
 			if(this.isDestroyed() || !_dragging_active)
 				return $REMOVE;
 			
@@ -70,18 +70,18 @@ t.onInit += fn(GUI.Component c,Array mouseButtons = [Util.UI.MOUSE_BUTTON_LEFT, 
 				stopDragging();
 							
 				var evt2 = evt.clone();
-				var screenPos = gui.guiPosToScreenPos( [evt2.x,evt2.y] );
+				var screenPos = this.getGUI().guiPosToScreenPos( [evt2.x,evt2.y] );
 				evt2.x = screenPos.x();
 				evt2.y = screenPos.y();
 				this.onDrop(evt2);
 			}
 		};
 
-		gui.onMouseMove += this->fn(evt){
+		this.getGUI().onMouseMove += this->fn(evt){
 			if(this.isDestroyed() || !this._dragging_active)
 				return $REMOVE;
 			var evt2 = evt.clone();
-			var screenPos = gui.guiPosToScreenPos( [evt2.x,evt2.y] );
+			var screenPos = this.getGUI().guiPosToScreenPos( [evt2.x,evt2.y] );
 			evt2.x = screenPos.x();
 			evt2.y = screenPos.y();
 			this.onDrag(evt2);

@@ -53,39 +53,39 @@ t.onInit += fn(GUI.Component c, markerFactory = void){
 	
 	c.onStartDragging += fn(evt){
 		var marker;
-		this._draggingMarker_relPos := getAbsPosition() - gui.screenPosToGUIPos( [evt.x,evt.y] );
+		this._draggingMarker_relPos := this.getAbsPosition() - this.getGUI().screenPosToGUIPos( [evt.x,evt.y] );
 
-		if(isSet($_dragging_markerFactory) && _dragging_markerFactory){
-			marker = gui.create( _dragging_markerFactory(this) );
+		if(this.isSet($_dragging_markerFactory) && this._dragging_markerFactory){
+			marker = this.getGUI().create( this._dragging_markerFactory(this) );
 		}else{
-			marker = gui.create({
+			marker = this.getGUI().create({
 				GUI.TYPE : GUI.TYPE_CONTAINER,
 				GUI.FLAGS : GUI.BACKGROUND,
-				GUI.SIZE : [getWidth(),getHeight()]
+				GUI.SIZE : [this.getWidth(),this.getHeight()]
 			});
 			marker.addProperty(new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
-									gui._createRectShape(new Util.Color4ub(255,255,255,45),new Util.Color4ub(20,20,20,45),true)));
+									this.getGUI()._createRectShape(new Util.Color4ub(255,255,255,45),new Util.Color4ub(20,20,20,45),true)));
 		}
 		marker.setFlag( GUI.ALWAYS_ON_TOP );
 		this._draggingMarker_marker := marker;
 
 
-		gui.registerWindow( marker );
+		this.getGUI().registerWindow( marker );
 		marker.setPosition(getAbsPosition());
 
 	};
 	c.onStopDragging += fn(){
-		var marker = _draggingMarker_marker;
+		var marker = this._draggingMarker_marker;
 		if(marker){
-			gui.unregisterWindow( marker );
-			gui.markForRemoval( marker );
-			_draggingMarker_marker = void;
+			this.getGUI().unregisterWindow( marker );
+			this.getGUI().markForRemoval( marker );
+			this._draggingMarker_marker = void;
 		}
 	};
 	c.onDrag += fn(evt){
-		var marker = _draggingMarker_marker;
+		var marker = this._draggingMarker_marker;
 		if(marker){
-			marker.setPosition( gui.screenPosToGUIPos( [evt.x,evt.y] ) + _draggingMarker_relPos );
+			marker.setPosition( this.getGUI().screenPosToGUIPos( [evt.x,evt.y] ) + this._draggingMarker_relPos );
 		}
 	};
 };

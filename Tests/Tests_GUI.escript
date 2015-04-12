@@ -1189,7 +1189,7 @@ plugin.showWindow:=fn(){
 			GUI.PRESET : 'test',
 			GUI.CONTENTS : [{
 					GUI.TYPE : GUI.TYPE_CONTAINER,
-					GUI.WIDTH : GUI.SIZE_MAXIMIZE,
+					GUI.SIZE : GUI.SIZE_MAXIMIZE,
 					GUI.CONTENTS : [{
 						GUI.TYPE : GUI.LABEL,
 						GUI.PRESET : './greenLabel1',

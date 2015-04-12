@@ -60,9 +60,9 @@ t.onInit += fn(GUI.Component c){
 	
 	//! \see GUI.DraggableTrait
 	c.onStartDragging += fn(evt){
-		var connector = gui.createConnector();
+		var connector = this.getGUI().createConnector();
 		connector.setFlag( GUI.ALWAYS_ON_TOP );
-		gui.registerWindow( connector );
+		this.getGUI().registerWindow( connector );
 		
 		connector.setFirstComponent( this );
 		connector.setSecondComponent( this.getDraggingMarker()); //! \see GUI.DraggingMarkerTrait
@@ -71,16 +71,16 @@ t.onInit += fn(GUI.Component c){
 	};
 	//! \see GUI.DraggableTrait
 	c.onStopDragging += fn(){
-		var connector = _draggingMarker_connector;
+		var connector = this._draggingMarker_connector;
 		if(connector){
-			gui.unregisterWindow( connector );
-			gui.markForRemoval( connector );
-			_draggingMarker_connector = void;
+			this.getGUI().unregisterWindow( connector );
+			this.getGUI().markForRemoval( connector );
+			this._draggingMarker_connector = void;
 		}
 	};
 	//! \see GUI.DraggableTrait
 	c.onDrag += fn(evt){
-		var connector = _draggingMarker_connector;
+		var connector = this._draggingMarker_connector;
 		var marker = this.getDraggingMarker(); //! \see GUI.DraggingMarkerTrait
 		if(connector&&marker){
 			connector.invalidateLayout(); // this is required to update the connector

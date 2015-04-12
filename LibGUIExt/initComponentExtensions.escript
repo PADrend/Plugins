@@ -51,7 +51,7 @@ GUI.Button.setButtonShape ::= fn( GUI.AbstractShape  s){
 // Component 
 
 GUI.Component.destroy ::= fn(){
-	gui.markForRemoval(this);
+	this.getGUI().markForRemoval(this);
 	return this;
 };
 
@@ -148,6 +148,7 @@ GUI.Container._add::=GUI.Container.add;  // store original 'add' function
 		panel.add( [ "*Heading*", GUI.NEXT_ROW, GUI.H_DELIMITER, GUI.NEXT_ROW , "Some text..." ] );
 		 */
 GUI.Container.add::=fn(componentOrArrayOrDescription){
+	var gui = this.getGUI();
 	if(componentOrArrayOrDescription.isA(Array)){
 		foreach(componentOrArrayOrDescription as var c){
 			this._add(gui.create(c));
@@ -159,7 +160,7 @@ GUI.Container.add::=fn(componentOrArrayOrDescription){
 GUI.Container.append ::= fn( mixed,p... ){
 	if(mixed.isA(String))// for debugging
 		this._componentId := mixed;
-	foreach( gui.createComponents( mixed,p... ) as var c)
+	foreach( this.getGUI().createComponents( mixed,p... ) as var c)
 		this._add(c);
 	return this;
 };
@@ -169,11 +170,11 @@ GUI.Container."+="::=GUI.Container.add;
 
 
 GUI.Container.nextColumn ::= fn(additionalSpacing=0){
-	this.add( gui.createNextColumn(additionalSpacing) );
+	this.add( this.getGUI().createNextColumn(additionalSpacing) );
 	return this;
 };
 GUI.Container.nextRow ::= fn(additionalSpacing=0){
-	this.add( gui.createNextRow(additionalSpacing) );
+	this.add( this.getGUI().createNextRow(additionalSpacing) );
 	return this;
 };
 
@@ -186,6 +187,7 @@ GUI.Container."++_post"::=GUI.Container.nextRow;
 /*! Close prior submenus and open the given menu as submenu next to the given entry of the current menu.
 	\see gui.openMenu(...)	*/
 GUI.Menu.openSubmenu ::= fn(GUI.Component entry, menuEntries,width=150,context...){
+	var gui = this.getGUI();
 	var menu = menuEntries.isA(GUI.Menu) ? menuEntries : gui.createMenu(menuEntries,width,context...);
 
 	menu.layout(); // assure the height is initialized
@@ -223,7 +225,7 @@ GUI.TabbedPanel.add ::= fn(GUI.Tab tab){	__add(tab);	};
 GUI.TabbedPanel.'+=' ::= GUI.TabbedPanel.add;
 GUI.TabbedPanel._addTab ::= GUI.TabbedPanel.addTab;
 GUI.TabbedPanel.addTab ::= fn(String title,content,tooltip=false){
-	var t = _addTab(title,gui.create(content));
+	var t = _addTab(title,this.getGUI().create(content));
 	if(tooltip)
 		t.setTooltip(tooltip);
 	return t;
@@ -231,7 +233,7 @@ GUI.TabbedPanel.addTab ::= fn(String title,content,tooltip=false){
 GUI.TabbedPanel.addTabs ::= fn( tabsOrComponentId){
 	if(tabsOrComponentId.isA(String))// for debugging
 		this._componentId := tabsOrComponentId;
-	foreach(gui.createComponents(tabsOrComponentId) as var tab)
+	foreach(this.getGUI().createComponents(tabsOrComponentId) as var tab)
 		this.add(tab);
 	return this;
 };
@@ -240,6 +242,7 @@ GUI.TabbedPanel.addTabs ::= fn( tabsOrComponentId){
 // TreeViewEntry
 
 GUI.TreeViewEntry.clearSubentries ::= fn(){
+	var gui = this.getGUI();
 	for(var c=this.getFirstChild().getNext();c;c=c.getNext())
 		gui.markForRemoval(c);
 };
