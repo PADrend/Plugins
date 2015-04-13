@@ -923,6 +923,7 @@ static registerStdToolbarEntries = fn() {
 		GUI.MENU				:	'PADrend_PluginsMenu',
 		GUI.ICON				:	"#Plugins",
 	});
+	
  // ----------------------------------------------------------------------------------
 	// Config-Menu
 
@@ -1337,7 +1338,38 @@ static registerStdToolbarEntries = fn() {
 	]);
 
 
-	// ------------------
+	// ----------------------------------------------------------------------------------
+
+	gui.register('PADrend_MainToolbar.90_help',{
+		GUI.TYPE				:	GUI.TYPE_MENU,
+		GUI.PRESET				:	'./toolIcon',
+		GUI.LABEL				:	"Help",
+		GUI.MENU				:	'PADrend_HelpMenu',
+		GUI.ICON				:	"#Help",
+	});
+	gui.register('PADrend_HelpMenu.50_todo',[
+		"*Todo*",
+		"Tutorials >>",
+		"Help >>",
+		"Development >>",
+		"License >>",
+		'----'
+	]);
+	gui.register('PADrend_HelpMenu.90_about',[
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "About...",
+			GUI.ON_CLICK : fn(){
+				this.getGUI().openDialog({
+						GUI.TYPE : GUI.TYPE_POPUP_DIALOG,
+						GUI.LABEL : "About",
+						GUI.SIZE : [500,300],
+						GUI.OPTIONS : PADrend.about,
+						GUI.ACTIONS : ["Close"]
+				});
+			}
+		}
+	]);
 };
 
 return plugin;

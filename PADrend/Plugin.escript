@@ -222,7 +222,18 @@ PADrend.renderScene := fn( p... ){
 };
 
 PADrend.about := fn(){
+	var Version = Std.module('PADrend/Version');
 	var arr = [];
+
+	arr += "*"+Version.VERSION_FULL_STRING+"*";
+	arr += "----";
+	arr += "Build:\t"+ Version.BUILD;
+	arr += "Libs:";
+	foreach( Util.getLibVersionStrings() as var lib,var version)
+		arr += "\t"+version;
+	arr += "----";
+
+
 	arr += "*Maintainers*";
 	arr += "Benjamin Eikel <benjamin@eikel.org>";
 	arr += "Claudius Jaehn <claudius@uni-paderborn.de>";
@@ -243,14 +254,14 @@ PADrend.about := fn(){
 	foreach(Util.getPluginRegistry() as var plugin) {
 		arr += "*" + plugin.getName() + " (version "+ plugin.getVersion() + ")*";
 		if( plugin.getPluginProperty(Plugin.AUTHORS) )
-			arr +=	"Authors: " + plugin.getPluginProperty(Plugin.AUTHORS);
+			arr +=	"	Authors: " + plugin.getPluginProperty(Plugin.AUTHORS);
 		if( plugin.getPluginProperty(Plugin.OWNER) )
-			arr +=	"Owner: " + plugin.getPluginProperty(Plugin.OWNER);
+			arr +=	"	Owner: " + plugin.getPluginProperty(Plugin.OWNER);
 		if( plugin.getPluginProperty(Plugin.CONTRIBUTORS) )
-			arr +=	"Contributors: " + plugin.getPluginProperty(Plugin.CONTRIBUTORS);
+			arr +=	"	Contributors: " + plugin.getPluginProperty(Plugin.CONTRIBUTORS);
 		if( plugin.getPluginProperty(Plugin.LICENSE) )
-			arr +=	"License: " + plugin.getPluginProperty(Plugin.LICENSE);
-		arr += plugin.getDescription();
+			arr +=	"	License: " + plugin.getPluginProperty(Plugin.LICENSE);
+		arr += "	"+plugin.getDescription();
 		arr +="";
 	}
 	return arr;

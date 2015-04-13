@@ -41,18 +41,6 @@ plugin.init @(override) := fn(){
 				},
 			GUI.TOOLTIP		:	"Show/Hide Main Window [F1]"
 		});
-		gui.register('PADrend_MainWindowTabs.90_About',fn(){
-			var page = gui.createPanel();
-			foreach(PADrend.about() as var entry){
-				page+=entry;
-				page++;
-			}
-			return {
-				GUI.TYPE : GUI.TYPE_TAB,
-				GUI.LABEL : "About",
-				GUI.TAB_CONTENT : page
-			};
-		});
 		// toggle main window on [F1]
 		Util.registerExtension( 'PADrend_KeyPressed',fn(evt){
 			if (evt.key == Util.UI.KEY_F1) { // F1
