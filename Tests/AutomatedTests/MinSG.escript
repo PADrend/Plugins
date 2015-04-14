@@ -142,6 +142,7 @@ tests += new AutomatedTest( "MinSG: create/load/save scenes",fn(){
 	var filename = tmpDir.getPath()+"tmp_"+time().toIntStr();
 	
 	var randomPos;
+	var testAttr = ["multiLineAttrTest","foo\n bar\tincluding tab\n"];
 
 	var sceneString = "";
 	// create and save a scene
@@ -150,6 +151,12 @@ tests += new AutomatedTest( "MinSG: create/load/save scenes",fn(){
 		var root = new MinSG.ListNode;
 		root.setNodeAttribute("WurzelTag",true);
 		sceneManager.registerNode("WurzelId",root);
+		
+		{	// node with attribute
+			var attributeContainer = new MinSG.ListNode;
+			attributeContainer.setNodeAttribute(testAttr...);
+			root += attributeContainer;
+		}
 		
 		// add some transformed nodes (only use int values to ignore floating point issues)
 		var parentNode = root;
@@ -245,6 +252,8 @@ tests += new AutomatedTest( "MinSG: create/load/save scenes",fn(){
 		var root = sceneManager.loadScene(filename + ".minsg");
 		var a = MinSG.collectNodesWithAttribute(root,"WurzelTag");
 		addResult( "tag test", a.count()==1 && sceneManager.getRegisteredNode("WurzelId") == a[0]);
+		
+		addResult( "escapted attibute", testAttr[1] === root.getChild(0).getNodeAttribute(testAttr[0])); // first child contains attribute
 		
 		// check transformations
 		var pos = sceneManager.getRegisteredNode("lastRandomNode").getWorldOrigin();
