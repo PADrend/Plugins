@@ -59,15 +59,15 @@ var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn( node){
-	node.annotationBG := node.getNodeAttributeWrapper('annotationBG', 0.5 );
-	node.annotationText := node.getNodeAttributeWrapper('annotationText', " " );
+	node.textureBGStrength := node.getNodeAttributeWrapper('textureBGStrength', 0.5 );
+	node.textureText := node.getNodeAttributeWrapper('textureText', " " );
 	
-	var update = [node,node.annotationText,node.annotationBG]=>fn(node,annotationText,annotationBG,...){
+	var update = [node,node.textureText,node.textureBGStrength]=>fn(node,textureText,textureBGStrength,...){
 		foreach(node.getStates() as var state)	// remove all former texture states
 			if(state.isA(MinSG.TextureState))
 				node.removeState(state);
 
-		var texture = createTexture(annotationText(),annotationBG());
+		var texture = createTexture(textureText(),textureBGStrength());
 		if(node.isA(MinSG.BillboardNode)){
 			var scale = 0.005;
 			var width = texture.getWidth()*scale;
@@ -78,8 +78,8 @@ trait.onInit += fn( node){
 		textState.setTempState(true);
 		node.addState(textState) ;
 	};
-	node.annotationText.onDataChanged += update;
-	node.annotationBG.onDataChanged += update;
+	node.textureText.onDataChanged += update;
+	node.textureBGStrength.onDataChanged += update;
 	update();
 };
 
@@ -92,15 +92,16 @@ module.on('../ObjectTraitRegistry', fn(registry){
 			{
 				GUI.TYPE : GUI.TYPE_MULTILINE_TEXT,
 				GUI.LABEL : "Text",
-				GUI.HEIGHT : 100,
-				GUI.DATA_WRAPPER : node.annotationText
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,100 ],
+				GUI.DATA_WRAPPER : node.textureText
 			},
 			GUI.NEXT_ROW,
 			{
 				GUI.TYPE : GUI.TYPE_RANGE,
 				GUI.LABEL : "BG Strength",
 				GUI.RANGE : [0,1],
-				GUI.DATA_WRAPPER : node.annotationBG
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.DATA_WRAPPER : node.textureBGStrength
 			},
 
 		];
