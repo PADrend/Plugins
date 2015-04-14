@@ -1,0 +1,5 @@
+{
+	"moduleId" : "ObjectTraits/Geometry/DynamicSphereTrait",
+	"description" : "Create a sphere mesh (requires GeometryNode)",
+	"displayName" : "Geometry/Sphere"
+}
