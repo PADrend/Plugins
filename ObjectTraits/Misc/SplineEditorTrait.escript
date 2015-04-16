@@ -185,6 +185,9 @@ static rebuildEditNodes = fn( data ){
 		geoNode.setRelOrigin(point.getPosition());
 		geoNode += blendingState;
 		Std.Traits.addTrait(geoNode,module('../Basic/MetaObjectTrait'));
+
+		module('LibMinSGExt/NodeAnchors').createAnchor(geoNode,'placingPos', new Geometry.Vec3(0,0,0)); // snap to origin and not to lower bounding box center
+	
 //		geoNode.setRelScaling(0.3);
 
 		if(pointNr % 3== 0)
