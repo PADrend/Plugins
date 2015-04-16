@@ -171,5 +171,15 @@ NodeEditor.unselectNodes:=fn(Array nodesToRemove){
 
 // @}
 
+NodeEditor.pickingSelectionRoot := Std.DataWrapper.createFromFunctions(
+		fn(){
+			var scene = PADrend.getCurrentScene();
+			return (scene&&scene.isSet($__NodeEditorPickingSelectionRoot)) ? scene.__NodeEditorPickingSelectionRoot : scene;
+		},
+		fn([MinSG.Node,void] newRoot){
+			PADrend.getCurrentScene().__NodeEditorPickingSelectionRoot := newRoot;
+		};
+);
+
 return NodeEditor;
 // ----------------------------------------------------------------

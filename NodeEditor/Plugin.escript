@@ -56,7 +56,7 @@ plugin.init @(override) := fn() {
 
 			@(once) static Picking = Util.requirePlugin('PADrend/Picking');
 
-			var node = Picking.pickNode( [evt.x,evt.y] );
+			var node = Picking.pickNode( [evt.x,evt.y], NodeEditor.pickingSelectionRoot() );
 			if(node && evt.button == Util.UI.MOUSE_BUTTON_RIGHT)
 				node = objectIdentifier(node);
 

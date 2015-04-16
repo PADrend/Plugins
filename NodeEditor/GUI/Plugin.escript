@@ -87,11 +87,11 @@ plugin.registerGUIProviders := fn(_gui){
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Select Node",
-			GUI.MENU_WIDTH : 200,
+			GUI.MENU_WIDTH : 300,
 			GUI.MENU : [this] => fn(plugin){
 				var subMenu=[];
 
-				var node;
+				var node = NodeEditor.getSelectedNode();
 				if(!NodeEditor.getSelectedNodes().empty()){
 					subMenu += {
 						GUI.TYPE : GUI.TYPE_BUTTON,
@@ -103,8 +103,53 @@ plugin.registerGUIProviders := fn(_gui){
 					};
 					subMenu += '----';
 				}
+				
+				var a=[];
+				var currentNode=(node && node!=PADrend.getRootNode()) ? node : PADrend.getCurrentScene();
+				var level = 0;
+				while(currentNode){
+					if(currentNode==node){
+						a.pushFront({
+							GUI.TYPE : GUI.TYPE_LABEL,
+							GUI.LABEL : "(0) "+NodeEditor.getString(currentNode),
+							GUI.TOOLTIP : "Currently selected node"
+						});
+					}else{
+						var label;
+						if(currentNode==PADrend.getRootNode()){
+							label="RootNode";
+						}else if(currentNode==PADrend.getCurrentScene()){
+							label="Scene ("+NodeEditor.getString(currentNode)+")";
+						}else{
+							label=NodeEditor.getString(currentNode);
+						}
+						a.pushFront({
+							GUI.TYPE : GUI.TYPE_BUTTON,
+							GUI.LABEL : "("+level+") "+label,
+							GUI.ON_CLICK : currentNode->fn(){
+								NodeEditor.selectNode(this);
+								gui.closeAllMenus();
+							},
+							GUI.TOOLTIP : "Select node '"+label+"'."
+						});
+					}
+					currentNode=currentNode.getParent();
+					--level;
+				}
+				subMenu.append(a);
+				
+				if(node.isA(MinSG.GroupNode)){
+					subMenu+="----";
+					subMenu+={
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Select child node...",
+						GUI.ON_CLICK : fn(){
+							openChildSelectorMenu(getAbsPosition()+new Geometry.Vec2(0,10),NodeEditor.getSelectedNode());
+						}
+					};
+				}
 				if(NodeEditor.getSelectedNodes().count()==1){
-					node = NodeEditor.getSelectedNode();
+					subMenu+="----";
 					if(node.isInstance()){
 						subMenu+={
 							GUI.TYPE : GUI.TYPE_BUTTON,
@@ -127,49 +172,42 @@ plugin.registerGUIProviders := fn(_gui){
 							}
 						};
 					}
-					subMenu+='----';
-				}
-				var a=[];
-				var currentNode=(node && node!=PADrend.getRootNode()) ? node : PADrend.getCurrentScene();
-				while(currentNode){
-					if(currentNode==node){
-						a.pushFront("*"+NodeEditor.getString(currentNode)+"*");
-					}else{
-						var label;
-						if(currentNode==PADrend.getRootNode()){
-							label="RootNode";
-						}else if(currentNode==PADrend.getCurrentScene()){
-							label="Scene";
-						}else{
-							label=NodeEditor.getString(currentNode);
-						}
-						a.pushFront({
-							GUI.TYPE : GUI.TYPE_BUTTON,
-							GUI.LABEL : label,
-							GUI.ON_CLICK : currentNode->fn(){
-								NodeEditor.selectNode(this);
-								gui.closeAllMenus();
-							}
-						});
-					}
-					currentNode=currentNode.getParent();
-				}
-				subMenu.append(a);
-
-				if(node.isA(MinSG.GroupNode)){
-					subMenu+="----";
-					subMenu+={
-						GUI.TYPE : GUI.TYPE_BUTTON,
-						GUI.LABEL : "Children",
-						GUI.ON_CLICK : fn(){
-							openChildSelectorMenu(getAbsPosition()+new Geometry.Vec2(0,10),NodeEditor.getSelectedNode());
-						}
-					};
 				}
 				return subMenu;
 			}
 		}
 	]);
+	
+	
+	// node selection
+	gui.register('PADrend_ConfigMenu.37_NodeEditor',[
+		'----',
+		{
+			GUI.TYPE : GUI.TYPE_MENU,
+			GUI.LABEL : "Node Editor",
+			GUI.MENU : 'NodeEditor_ConfigMenu',
+			GUI.MENU_WIDTH : 300,
+		}
+	]);
+
+	gui.register('NodeEditor_ConfigMenu.10_Picking',fn(){
+		var entries = [ 
+			"*Selection picking [strg]*" ,
+		];
+		var node = NodeEditor.getSelectedNode();
+		var sRoot = NodeEditor.pickingSelectionRoot();
+		entries+={
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Picking selection-root: " + ((!sRoot || sRoot==PADrend.getCurrentScene()) ? "Current scene" : NodeEditor.getString(sRoot)),
+			GUI.ON_CLICK : [node]=>fn(node){
+				NodeEditor.pickingSelectionRoot( node );
+				PADrend.message("Selected new root for picking-selections.");
+				this.getGUI().closeAllMenus();
+			},
+			GUI.TOOLTIP : "Set the currently selected node \n'"+NodeEditor.getString(node)+"'\nas root node used for picking with [strg]+[l-click]."
+		};
+		return entries;
+	});
 	
 	/*! ______________
 		| Node Editor \ _____________________________________________
