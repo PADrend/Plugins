@@ -43,10 +43,10 @@ trait.onInit += fn(MinSG.Node node){
 	node.buttonState := new DataWrapper(false);
 	node._buttonFixedNextSwitchTime := void; // internal
 	node.buttonState.onDataChanged += [node]=>fn(node, value){
-		if(value) //! TEMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			node.setRelScaling(1.5);
-		else
-			node.setRelScaling(1.0);
+//		if(value) //! TEMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//			node.setRelScaling(1.5);
+//		else
+//			node.setRelScaling(1.0);
 		var time;
 		if(node._buttonFixedNextSwitchTime) {
 			time = node._buttonFixedNextSwitchTime;
