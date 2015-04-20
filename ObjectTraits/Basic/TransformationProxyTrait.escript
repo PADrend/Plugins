@@ -51,12 +51,12 @@ trait.onInit += fn(MinSG.Node node){
 	var localToRel_SRT =  node.getRelTransformationSRT();
 	localToRel_SRT.setScale(1.0);
 
-	var updateTransformationOffsets = [node,transformedNodes] => fn(sourceNode,transformedNodes){
-		var worldToLocalSource_Matrix = sourceNode.getWorldTransformationMatrix().inverse();
+	var updateTransformationOffsets = [node,transformedNodes] => fn(proxyNode,transformedNodes){
+		var worldToLocalProxy_Matrix = proxyNode.getWorldTransformationMatrix().inverse();
 		foreach(transformedNodes as var targetNode, var entry){
 			if(entry[0]==LINK_ROLE_SNAP_OFFSET){
 				var localTargetToWorld_Matrix = targetNode.getWorldTransformationMatrix();
-				entry[2] = localTargetToWorld_Matrix * worldToLocalSource_Matrix;
+				entry[2] = worldToLocalProxy_Matrix * localTargetToWorld_Matrix;
 				outln("updateTransformationOffsets: ",entry[2]);
 			}else{
 				outln(entry[0]);
@@ -68,11 +68,11 @@ trait.onInit += fn(MinSG.Node node){
 		if(b)updateTransformationOffsets();
 	};
 	
-	var transformConnectedNodes = [transformedNodes,	localToWorld_SRT.inverse(),	localToRel_SRT.inverse(),	new Std.DataWrapper(false)] => 
-								fn(transformedNodes,	lastWorldToLocal_SRT,		lastRelToLocal_SRT,			transformationInProgress, node){
+	var transformConnectedNodes = [transformedNodes,	localToWorld_SRT,		localToRel_SRT.inverse(),	new Std.DataWrapper(false)] => 
+								fn(transformedNodes,	lastLocalToWorld_SRT,	lastRelToLocal_SRT,			transformationInProgress, node){
+		
 		var localToWorld_SRT = node.getWorldTransformationSRT();
 		localToWorld_SRT.setScale(1.0);
-		lastWorldToLocal_SRT.setScale(1.0);
 		
 		var localToRel_SRT = node.getRelTransformationSRT();
 		localToRel_SRT.setScale(1.0);
@@ -86,7 +86,7 @@ trait.onInit += fn(MinSG.Node node){
 					var role = entry[0];
 					switch(role){
 						case LINK_ROLE_ABS_DELTA:{
-							var deltaWorldTransformation = localToWorld_SRT * lastWorldToLocal_SRT;
+							var deltaWorldTransformation = localToWorld_SRT * lastLocalToWorld_SRT.inverse();
 							var deltaWorldRotation = deltaWorldTransformation.getRotation();
 							var targetWorldSRT = targetNode.getWorldTransformationSRT();
 							targetWorldSRT.setRotation( deltaWorldRotation * targetWorldSRT.getRotation());
@@ -109,7 +109,14 @@ trait.onInit += fn(MinSG.Node node){
 						}
 						case LINK_ROLE_SNAP_OFFSET:{
 							var proxy_localToWorldMatrix = new Geometry.Matrix4x4(localToWorld_SRT);
-							targetNode.setWorldTransformation( (proxy_localToWorldMatrix*entry[2])._toSRT() );
+							var offsetTransformation_TargetToSource = entry[2];
+//							if(!offsetTransformation_TargetToSource){
+//								var localTargetToWorld_Matrix = targetNode.getWorldTransformationMatrix();
+//								entry[2] = localTargetToWorld_Matrix * new Geometry.Matrix4x4(lastLocalToWorld_SRT);
+//								outln("!!! init updateTransformationOffsets: ",entry[2]);
+//								offsetTransformation_TargetToSource = entry[2];
+//							}
+							targetNode.setWorldTransformation( (proxy_localToWorldMatrix*offsetTransformation_TargetToSource)._toSRT() );
 							break;
 						}
 						case LINK_ROLE_SNAP_POS:{
@@ -128,7 +135,8 @@ trait.onInit += fn(MinSG.Node node){
 			}
 			transformationInProgress(false);
 		}
-		lastWorldToLocal_SRT.setValue( localToWorld_SRT.inverse() );
+		lastLocalToWorld_SRT.setValue( localToWorld_SRT );
+		
 		lastRelToLocal_SRT.setValue( localToRel_SRT.inverse() );
 		
 	};
