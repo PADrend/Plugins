@@ -429,15 +429,17 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 		if(preset.isA(Map)){
 			preset = preset.clone();
 		}else if(preset.isA(String)){
-			if(presetIdPrefix.isA(String))
+			if(presetIdPrefix.isA(String) && (preset.beginsWith("./")||preset.beginsWith("../")))
 				preset = IO.condensePath( presetIdPrefix+"/"+preset );
+			else if( preset.beginsWith("/"))
+				preset = IO.condensePath( preset );
 			preset = this.getPreset(preset);
 		}else{
 			preset = preset();
 		}
 		
 		if(!preset.isA(Map)){
-			Runtime.warn("Invalid gui-preset: "+description[GUI.PRESET];);
+			Runtime.warn("Invalid gui-preset: "+description[GUI.PRESET]);
 		}else{
 			description = preset.merge(description);
 		}
