@@ -85,12 +85,11 @@ T.initTraitsInSubtree ::= fn(MinSG.Node root){
 				if(!Std.Traits.queryTrait(node,traitName)){
 					var trait = Std.module(traitName);
 					
-					outln("Adding trait ",traitName," to ",node);
+//					outln("Adding trait ",traitName," to ",node);
 					Std.Traits.assureTrait(node,trait); // assureTrait instead of addTrait as the traitName may be a deprecated alias.
-//					Std.Traits.addTraitByName(node,traitName);
 				}
 			}catch(e){
-				PADrend.message("Could not add NodeTrait '"+traitName+"'");
+				PADrend.message("Could not add NodeTrait '"+traitName+"' to node '"+node+"'");
 				Runtime.warn(e);
 			}
 		}
