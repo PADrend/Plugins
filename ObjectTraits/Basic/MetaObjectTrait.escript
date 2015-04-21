@@ -11,7 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-static META_OBJECT_LAYER = 4; // layer 2 (2^2)
+static META_OBJECT_LAYER = 4+1; // layer 2 (2^2)
  
 static Renderer = new Type( MinSG.ScriptedNodeRendererState );
 Renderer._printableName @(override) ::= "_MetaObjectRenderer(tmp)";
@@ -126,14 +126,14 @@ static trait = new PersistentNodeTrait(module.getId());
 
 trait.onInit += fn(MinSG.GeometryNode node){
 	node += highlightState;
-	node.setRenderingLayers( META_OBJECT_LAYER );
+//	node.setRenderingLayers( META_OBJECT_LAYER );
 };
 
 trait.allowRemoval();
 trait.onRemove += fn(node){
 	outln("Remove state.");
 	node.removeState(highlightState);
-	node.setRenderingLayers( 1 ); // layer 0 (2^0)
+//	node.setRenderingLayers( 1 ); // layer 0 (2^0)
 };
 
 module.on('../ObjectTraitRegistry', fn(registry){
