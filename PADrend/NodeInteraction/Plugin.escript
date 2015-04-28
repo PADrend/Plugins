@@ -123,9 +123,12 @@ plugin.ex_UIEvent:=fn(evt){
 		if(!node)
 			node = Picking.pickNode([evt.x,evt.y],PADrend.getCurrentScene());
 		
-		if(node){
-			if(node.isSet($onClick))
+		while(node){
+			if(node.isSet($onClick)){
 				node.onClick(evt);
+				break;
+			}
+			node = node.getParent();
 		}
 	}
 	return Extension.CONTINUE;
