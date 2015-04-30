@@ -16,11 +16,18 @@ var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
 static TransformationObserverTrait = Std.module('LibMinSGExt/Traits/TransformationObserverTrait');
 
+static locationToPos = fn(l){	return l.isA(Geometry.Vec3) ? l : l.getTranslation(); };
 
-static openMenu = fn(pointNr, data, event){
-	static locationToPos = fn(l){	return l.isA(Geometry.Vec3) ? l : l.getTranslation(); };
-	
-	gui.openMenu(new Geometry.Vec2(event.x, event.y),[
+module.on('PADrend/gui',fn(gui){
+	gui.register('SplineEditorTrait_ControlPointType1_Config',fn(dataAndIndex){
+		[var pointNr, var data] = dataAndIndex;
+		return "Foo "+pointNr;
+	});
+});
+
+static getConfigEntries_PointType1 = fn(pointNr, data){
+	return [
+		"*Spline control point #"+pointNr+"*",
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Toggle SRT/Pos",
@@ -126,11 +133,13 @@ static openMenu = fn(pointNr, data, event){
 
 			}
 
-		}
-	], 100);
+		},
+		'----'
+	];
 };
-static openMenu2 = fn(pointNr, data, event){
-	gui.openMenu(new Geometry.Vec2(event.x, event.y),[
+static getConfigEntries_PointType2 = fn(pointNr, data){
+	return [
+		"*Spline control point #"+pointNr+"*",
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Set straight",
@@ -167,8 +176,8 @@ static openMenu2 = fn(pointNr, data, event){
 				points.forceRefresh();
 			}
 		},
-		
-	], 100);
+		'----'
+	];
 };
 
 static blendingState = new MinSG.BlendingState;
@@ -178,9 +187,16 @@ static rebuildEditNodes = fn( data ){
 		MinSG.destroy(n);
 	data.editNodes.clear();
 
+	@(once) module.on('PADrend/gui',fn(gui){
+		gui.register('PADrend_SceneToolMenu.00_splineEdit',fn(){
+			var node = NodeEditor.getSelectedNode();
+			return node.isSet($__getConfigEntries) ? node.__getConfigEntries() : [];
+		});
+	});
 
 	foreach(data.spline_controlPoints() as var pointNr, var point){
 		var geoNode = new MinSG.GeometryNode;
+
 		geoNode.setTempNode(true);
 		geoNode.setRelOrigin(point.getPosition());
 		geoNode += blendingState;
@@ -191,9 +207,12 @@ static rebuildEditNodes = fn( data ){
 //		geoNode.setRelScaling(0.3);
 
 		if(pointNr % 3== 0)
-			geoNode.onClick := [pointNr, data] => openMenu;
+			geoNode.__getConfigEntries := [pointNr,data] => getConfigEntries_PointType1;
 		else
-			geoNode.onClick := [pointNr, data] => openMenu2;
+			geoNode.__getConfigEntries := [pointNr,data] => getConfigEntries_PointType2;
+
+			
+		geoNode.onClick :=	fn(event){	module('PADrend/gui').openMenu(new Geometry.Vec2(event.x, event.y),this.__getConfigEntries()); };
 
 		Std.Traits.assureTrait(geoNode, TransformationObserverTrait );
 		geoNode.onNodeTransformed += [pointNr, data]=>fn(pointNr, data, ...){
