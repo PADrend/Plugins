@@ -287,7 +287,7 @@ GUI.TreeViewEntry.DynamicSubentriesTrait ::= new Std.Traits.GenericTrait;
 			};
 		}
 		var p = [provider] => fn(provider){
-			foreach(provider() as var entry)
+			foreach( (this->provider)() as var entry)
 				this += entry;
 		};
 		entry.onOpen += p;
