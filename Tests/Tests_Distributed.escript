@@ -17,7 +17,7 @@
 
 var plugin = new Plugin({
 		Plugin.NAME : 'Tests/Tests_Distributed',
-		Plugin.DESCRIPTION : "For testing client/server functions.\n***Connect at least on MultiView-Client***",
+		Plugin.DESCRIPTION : "For testing client/server functions.\n***Connect at least one InstanceSyncing-Client***",
 		Plugin.VERSION : 0.1,
 		Plugin.AUTHORS : "Claudius",
 		Plugin.OWNER : "All",
@@ -123,7 +123,7 @@ plugin.execute:=fn(){
 	PADrend.planTask( 0.5, [tests]=>fn(tests){
 
 		var p=gui.createPopupWindow( 400,300,"Distributed Tests");
-		p.addOption("*Note: Needs at least one connected MultiView-Client.*");
+		p.addOption("*Note: Needs at least one connected InstanceSyncing-Client.*");
 		var success=true;
 		foreach(tests as var t){
 			t.query();
