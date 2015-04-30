@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./Box",
+	"description" : "Adjustable box.",
+	"displayName" : "Geometry/Box"
+}

@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./Sphere",
+	"description" : "Adjustable sphere.",
+	"displayName" : "Geometry/Sphere"
+}

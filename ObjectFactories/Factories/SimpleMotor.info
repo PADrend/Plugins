@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./SimpleMotor",
+	"description" : "Meta object as time source for animated objects.",
+	"displayName" : "Functional/SimpleMotor"
+}

@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./AOccPlate",
+	"description" : "Transparent rect with automatically generated ambient occlusion texture.",
+	"displayName" : "Fx/AOccPlate"
+}

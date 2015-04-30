@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./PositionProxy",
+	"description" : "Meta object to transform linked objects.",
+	"displayName" : "Functional/PositionProxy"
+}

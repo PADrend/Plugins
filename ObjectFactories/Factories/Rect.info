@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./Rect",
+	"description" : "Adjustable rect.",
+	"displayName" : "Geometry/Rect"
+}

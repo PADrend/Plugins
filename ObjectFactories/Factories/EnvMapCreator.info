@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./EnvMapCreator",
+	"description" : "Node to automatically create an environment map (layer #2)",
+	"displayName" : "Fx/EnvMapCreator"
+}

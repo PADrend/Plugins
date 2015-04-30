@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./RotatingDoor",
+	"description" : "Meta object for creating a rotating door with a handle.",
+	"displayName" : "Functional/Door(rotating)"
+}

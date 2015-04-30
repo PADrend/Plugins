@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./SlidingDoor",
+	"description" : "Meta object for creating a door with a handle.",
+	"displayName" : "Functional/Door(sliding)"
+}

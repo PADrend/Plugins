@@ -14,9 +14,10 @@
 
 var plugin = new Plugin({
 			Plugin.NAME : "ObjectTraits",
-			Plugin.VERSION : "1.0",
-			Plugin.DESCRIPTION : "Collection of traits for (semantic) objects.\n Includes a registry for such traits and configuration guis.",
+			Plugin.VERSION : "1.1",
+			Plugin.DESCRIPTION : "Collection of traits for (semantic) objects.\n Includes a registry for such traits and configuration interfaces.",
 			Plugin.AUTHORS : "Claudius",
+			Plugin.LICENSE	: "Mozilla Public License, v. 2.0",
 			Plugin.OWNER : "All",
 			Plugin.REQUIRES : []
 });

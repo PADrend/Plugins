@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./Fader",
+	"description" : "Meta object to control a fade out.",
+	"displayName" : "Functional/Fader"
+}

@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./RayCastSensor",
+	"description" : "Meta object for measuring distances.",
+	"displayName" : "Functional/RayCastSensor"
+}

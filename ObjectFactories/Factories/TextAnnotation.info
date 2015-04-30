@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./TextAnnotation",
+	"description" : "A flag with customizable text.",
+	"displayName" : "Fx/TextAnnotation"
+}

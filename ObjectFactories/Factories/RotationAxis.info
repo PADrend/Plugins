@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./RotationAxis",
+	"description" : "Meta object for rotating objects.",
+	"displayName" : "Functional/RotationAxis"
+}
