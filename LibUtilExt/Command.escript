@@ -20,7 +20,7 @@
  * - execute: Store pre-state and execute some action
  * - undo: Undo all harm done by last execute-call
  * - getDescription: Description to display command in GUI-elements
- * - flags that indicate where the Command should be executed: locally, remotely (e.g. via MultiView) or both.
+ * - flags that indicate where the Command should be executed: locally, remotely (e.g. via InstanceSyncing) or both.
  */
 static Command = new Type;
 

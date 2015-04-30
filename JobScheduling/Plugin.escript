@@ -21,7 +21,7 @@
 
 static plugin = new Plugin({
 		Plugin.NAME : 'JobScheduling',
-		Plugin.DESCRIPTION : 'Distributed job scheduling using MultiView.',
+		Plugin.DESCRIPTION : 'Distributed job scheduling.',
 		Plugin.VERSION : 0.2,
 		Plugin.AUTHORS : "Claudius Jaehn",
 		Plugin.OWNER : "All",
