@@ -25,7 +25,7 @@ static plugin = new Plugin({
 		Plugin.VERSION : 0.2,
 		Plugin.AUTHORS : "Claudius Jaehn",
 		Plugin.OWNER : "All",
-		Plugin.REQUIRES : ['PADrend/EventLoop','PADrend/CommandHandling','ClientServer'],
+		Plugin.REQUIRES : ['PADrend/EventLoop','PADrend/CommandHandling'],
 		Plugin.EXTENSION_POINTS : [ ]
 });
 
