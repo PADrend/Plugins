@@ -1,0 +1,6 @@
+{
+	"moduleId" : "Physics/ObjectTraits/SimulationContainerTrait",
+	"aliases" : [],
+	"description" : "Node manages a physics simulation.",
+	"displayName" : "Physics/SimulationContainer"
+}

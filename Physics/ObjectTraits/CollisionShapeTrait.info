@@ -1,0 +1,6 @@
+{
+	"moduleId" : "Physics/ObjectTraits/CollisionShapeTrait",
+	"aliases" : [],
+	"description" : "Node provides a physics collision shape.",
+	"displayName" : "Physics/CollisionShape"
+}

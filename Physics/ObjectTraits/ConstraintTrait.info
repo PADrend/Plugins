@@ -1,0 +1,6 @@
+{
+	"moduleId" : "Physics/ObjectTraits/ConstraintTrait",
+	"description" : "Physics constraints (point to point or hinge)",
+	"aliases" : ["Physics/ObjectTraits/P2PConstraintTrait"],
+	"displayName" : "Physics/Constraints"
+}
