@@ -383,6 +383,108 @@ tests += new AutomatedTest( "Util/Generated comparison functions" , fn(){
 
 // -----------------------------------------------------------------------------------------------
 
+tests += new AutomatedTest( "Util/HTMLParser" , fn(){
+
+	var HTML = Std.require('LibUtilExt/HTMLParser');
+	
+	addResult("Test1",	HTML.parse("<p>text<BR>bla<IMG Src=foo.png></p>") == [
+		{
+			HTML.TAG_TYPE : HTML.TAG_TYPE_NORMAL_TAG,
+			HTML.TAG_NAME : "p",
+			HTML.TAG_CHILDREN : [
+				"text",
+				{
+					HTML.TAG_TYPE : HTML.TAG_TYPE_NORMAL_TAG,
+					HTML.TAG_NAME : "br",
+				},
+				"bla",
+				{
+					HTML.TAG_TYPE : HTML.TAG_TYPE_NORMAL_TAG,
+					HTML.TAG_NAME : "img",
+					HTML.TAG_ATTRIBUTES : {
+						"src" : "foo.png"
+					}
+				},
+			]
+		}
+	]);
+	addResult("Simple tags", HTML.parse("<foo>text<BR/>bla</Foo>") == [
+		{
+			HTML.TAG_TYPE : HTML.TAG_TYPE_NORMAL_TAG,
+			HTML.TAG_NAME : "foo",
+			HTML.TAG_CHILDREN : [
+				"text",
+				{
+					HTML.TAG_TYPE : HTML.TAG_TYPE_NORMAL_TAG,
+					HTML.TAG_NAME : "br",
+				},
+				"bla"
+			]
+		}
+	]);
+	addResult("Attributes and escaping", HTML.parse("<FOO attr1='someV&Ouml;lue' attr2 =bar>&#65;&#66;&#x4E;</Foo>") == [
+		{
+			HTML.TAG_TYPE : HTML.TAG_TYPE_NORMAL_TAG,
+			HTML.TAG_NAME : "foo",
+			HTML.TAG_ATTRIBUTES : {
+				"attr1" : "someVÖlue",
+				"attr2" : "bar"
+			},
+			HTML.TAG_CHILDREN : ["ABN"]
+		}
+	]);
+	addResult("Unclosed tag; closed, but not opened tags",	HTML.parse("<t1><t2><br></t3>foo</t2>") == [
+		{
+			HTML.TAG_TYPE : HTML.TAG_TYPE_NORMAL_TAG,
+			HTML.TAG_NAME : "t1",
+			HTML.TAG_CHILDREN : [
+				{
+					HTML.TAG_TYPE : HTML.TAG_TYPE_NORMAL_TAG,
+					HTML.TAG_NAME : "t2",
+					HTML.TAG_CHILDREN : [
+						{
+							HTML.TAG_TYPE : HTML.TAG_TYPE_NORMAL_TAG,
+							HTML.TAG_NAME : "br"
+						},
+						"foo"
+					]
+				}
+			]
+		}
+	]);
+	addResult("Doctype and preprocessing tags",	HTML.parse("<!DOCTYPE html><?preProc attr1 = \"a1\" ?>end") == [
+		{
+			HTML.TAG_TYPE : HTML.TAG_TYPE_DOCTYPE,
+			HTML.TAG_DATA : "html"
+		},
+		{
+			HTML.TAG_TYPE : HTML.TAG_TYPE_PREPROCESSING,
+			HTML.TAG_NAME : "preProc",
+			HTML.TAG_ATTRIBUTES : {
+				"attr1" : "a1"
+			},
+		},
+		"end"
+	]);
+	addResult("Script-tag special case", HTML.parse("<script>if(1<2)outln('>&gt;');</script>") == [
+		{
+			HTML.TAG_TYPE : HTML.TAG_TYPE_NORMAL_TAG,
+			HTML.TAG_NAME : "script",
+			HTML.TAG_CHILDREN : [
+				"if(1<2)outln('>&gt;');"
+			]
+		}
+	]);
+	addResult("CDATA",	HTML.parse("<![CDATA[plainText<>foo&gt;]]>bar") == [
+		{
+			HTML.TAG_TYPE : HTML.TAG_TYPE_CDATA,
+			HTML.TAG_DATA : "plainText<>foo&gt;"
+		},
+		"bar"
+	]);
+});
+// -----------------------------------------------------------------------------------------------
+
 tests += new AutomatedTest( "Util/Listener" , fn(){
 	static Listener = Std.module('LibUtilExt/deprecated/Listener');
 	var notifier = new Notifier;
