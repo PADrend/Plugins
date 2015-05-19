@@ -16,6 +16,7 @@
 			
 	- node.animationSpeed 		DataWrapper( Number )
 	- node.animationKeyFrames 	DataWrapper( [ time,SRT|Vec3]* } )
+	- node.node.loopAnimation	DataWrapper(Boolean)
 	
 	\see ObjectTraits/Animation/_AnimatedBaseTrait
 	
@@ -43,6 +44,7 @@ static sortKeyFrames = fn(array){
 
 trait.onInit += fn(MinSG.Node node){
 	node.animationSpeed :=  node.getNodeAttributeWrapper('animationSpeed', 1.0 );
+	node.loopAnimation := node.getNodeAttributeWrapper('loopAnimation', false);
 	// time0 x0 y0 z0 | time1 x1 y1 y2 | ...
 	// OR time0 x0 y0 z0 dx0 dy0 dz0 upx0 upy0 upz0 scale| ...
 	var serializedKeyFrames =  node.getNodeAttributeWrapper('keyframes', "" );
@@ -116,11 +118,17 @@ trait.onInit += fn(MinSG.Node node){
 			prevLocation = nextLocation;
 			prevTime = nextTime;
 		}
+		
 		if(prevLocation==nextLocation){
-			if(prevLocation.isA(Geometry.SRT)){
-				this.setRelTransformation(prevLocation);
+			if(this.loopAnimation()){
+				this._animationStartingTime  := time;
+				this._animationInitialSRT  := this.getRelTransformationSRT();
 			}else{
-				this.setRelPosition( prevLocation );
+				if(prevLocation.isA(Geometry.SRT)){
+					this.setRelTransformation(prevLocation);
+				}else{
+					this.setRelPosition( prevLocation );
+				}
 			}
 		}else{ //! \todo mixed interpolation!
 //			outln( relTime," ",prevTime," ",nextTime);
@@ -166,6 +174,13 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.keyFrame_smoothFactor
 			},	
+			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+			{
+				GUI.TYPE : GUI.TYPE_BOOL,
+				GUI.LABEL : "loop animation",
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.DATA_WRAPPER : node.loopAnimation
+			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			'----'
 		];
