@@ -113,6 +113,68 @@ tests += new AutomatedTest( "Util/Command" , fn(){
 });
 // -----------------------------------------------------------------------------------------------
 
+
+tests += new AutomatedTest( "Util/ConfigGroup" , fn(){
+	{
+		var ok = true;
+
+		var mainConfig = {
+			"v1" : 1,
+			"v3" : 27,
+			"v4" : 100
+		};
+		
+		var specialConfig = new (Std.module('LibUtilExt/ConfigGroup'))(mainConfig);
+		var wrapper1 = Std.DataWrapper.createFromEntry(specialConfig,"v1","myDefaultValue1");
+		var wrapper2 = Std.DataWrapper.createFromEntry(specialConfig,"v2","myDefaultValue2");
+		var wrapper3 = Std.DataWrapper.createFromEntry(specialConfig,"v3");
+
+		ok &= mainConfig["v1"] === 1;
+		ok &= !mainConfig["v2"];
+		ok &= wrapper3() === 27;
+		wrapper3(28);
+		ok &= mainConfig["v3"] === 27;
+		ok &= specialConfig["v4"] === 100;
+		specialConfig.save();
+
+		ok &= mainConfig["v1"] === 1;
+		ok &= mainConfig["v2"] === "myDefaultValue2";
+		ok &= mainConfig["v3"] === 28;
+
+		addResult("Map",ok);
+	}
+	{
+		var ok = true;
+
+		var mainConfig = new Std.JSONDataStore;
+		mainConfig["Foo.v1"] = 1;
+		mainConfig["Foo.v3"] = 27;
+		mainConfig["Foo.v4"] = 100;
+		
+		var specialConfig = new (Std.module('LibUtilExt/ConfigGroup'))(mainConfig,"Foo");
+		var wrapper1 = Std.DataWrapper.createFromEntry(specialConfig,"v1","myDefaultValue1");
+		var wrapper2 = Std.DataWrapper.createFromEntry(specialConfig,"v2","myDefaultValue2");
+		var wrapper3 = Std.DataWrapper.createFromEntry(specialConfig,"v3");
+
+		ok &= mainConfig["Foo.v1"] === 1;
+		ok &= !mainConfig["Foo.v2"];
+		ok &= wrapper3() === 27;
+		wrapper3(28);
+		ok &= mainConfig["Foo.v3"] === 27;
+		ok &= specialConfig["v4"] === 100;
+		specialConfig.save();
+
+		ok &= mainConfig["Foo.v1"] === 1;
+		ok &= mainConfig["Foo.v2"] === "myDefaultValue2";
+		ok &= mainConfig["Foo.v3"] === 28;
+
+		addResult("JSONDataStore ",ok);
+	}
+// todo JSONDataStore.set( Map )
+});
+
+// -----------------------------------------------------------------------------------------------
+
 tests += new AutomatedTest( "Util/DataWrapper" , fn(){
 
 	{
