@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2015 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2011-2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2011-2012 Sascha Brandt
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -32,20 +32,20 @@ static plugin = new Plugin({
 
 plugin.init @(override) :=fn() {
 	if(!queryPlugin('PADrend/GUI')){
-		registerExtension('PADrend_Init',this->initAutoTest,Extension.LOW_PRIORITY*10);
+		Util.registerExtension('PADrend_Init',this->initAutoTest,Extension.LOW_PRIORITY*10);
 	} else { 
 		// Register ExtensionPointHandler:
-        module.on('PADrend/gui',this->fn(gui){
+		module.on('PADrend/gui',this->fn(gui){
 			gui.register('PADrend_PluginsMenu.tests',{
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Tests",
 				GUI.MENU : 'Tests_TestsMenu'
 			});
 		});
-    }
+	}
 
 	var testModules = [
-		__DIR__+"/Tests_GUI.escript",
+		__DIR__+"/GUITests/Plugin.escript",
 		__DIR__+"/Tests_Scene.escript",
 		__DIR__+"/Tests_Automated.escript",
 		__DIR__+"/Tests_Distributed.escript" ];
@@ -56,7 +56,7 @@ plugin.init @(override) :=fn() {
 	if(MinSG.isSet($Triangulation)) 
 		testModules += __DIR__ + "/Tests_Triangulation.escript";
 
-	loadPlugins( testModules,false);
+	Util.loadPlugins( testModules,false);
 	return true;
 };
 
