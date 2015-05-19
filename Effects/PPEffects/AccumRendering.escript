@@ -34,14 +34,14 @@ Effect.begin @(override) ::= fn() {
 	renderingContext.pushAndSetFBO(fbo);
 	var newSRT=PADrend.getDolly().getRelTransformationSRT();
 	if( this.srt == newSRT)
-		PADrend.EventLoop.doClearScreen = false;
+		PADrend.EventLoop.setting_doClearScreen(false);
 	else
 		srt=newSRT;
 };
 
 /*! ---|> PPEffect  */
 Effect.end @(override) ::= fn() {
-	PADrend.EventLoop.doClearScreen = true;
+	PADrend.EventLoop.setting_doClearScreen(true);
 	
 	renderingContext.popFBO();
 	Rendering.drawTextureToScreen(renderingContext,new Geometry.Rect(0, 0, renderingContext.getWindowWidth(), renderingContext.getWindowHeight()),

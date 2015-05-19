@@ -91,37 +91,51 @@ static plugin = new Plugin({
 		]
 });
 
-
-PADrend.EventLoop := plugin;
 // -------------------
 
-static active = true;
-static activeCamera = void; 
-plugin.bgColor := void; 
-plugin.doClearScreen := true;
-static glErrorChecking = Std.DataWrapper.createFromEntry(systemConfig,'PADrend.Rendering.GLErrorChecking',false);
-static renderingFlags = 0;
-plugin.taskScheduler := void;
-plugin.waitForGlFinish := void;
-static camerasUsedForLastFrame = [];
+static config = new (module('LibUtilExt/ConfigGroup'))(systemConfig,'PADrend.Rendering');
+static setting_bgColor; 
+{
+	var bgColor_config = Std.DataWrapper.createFromEntry(config,'bgColor',[0.5,0.5,0.5,1.0]);
+	setting_bgColor = new Std.DataWrapper( new Util.Color4f(bgColor_config()...) );
+	setting_bgColor.onDataChanged += [bgColor_config]=>fn(bgColor_config,Util.Color4f c){	bgColor_config( [c.r(),c.g(),c.b(),c.a()] );	};
+}
+static setting_doClearScreen = new Std.DataWrapper(true);
+static setting_glErrorChecking = Std.DataWrapper.createFromEntry(config,'GLErrorChecking',false);
+static setting_renderingFlags =  Std.DataWrapper.createFromEntry(config,'flags',MinSG.FRUSTUM_CULLING);
+static setting_waitForGlFinish = Std.DataWrapper.createFromEntry(config,'waitForGlFinish',true);
+static setting_glDebugOutput = Std.DataWrapper.createFromEntry(config,'GLDebugOutput',false);
+static setting_renderingLayers = Std.DataWrapper.createFromEntry(config,'renderingLayers',1);
 
-static renderingLayers = 1;
+static active = true;
+static activeCamera; 
+static taskScheduler;
+static camerasUsedForLastFrame = [];
 
 plugin.init @(override) := fn(){
 	PADrend.RenderingPass := Std.module( 'PADrend/EventLoop/RenderingPass' ); //alias
 
-	Util.registerExtension('PADrend_Init',this->ex_Init,Extension.HIGH_PRIORITY+1);
-	Util.registerExtension('PADrend_Start',this->ex_Start);
-
+	// activate normal camera by default
+	Util.registerExtension('PADrend_Init', this->fn(){
+		setting_glDebugOutput.onDataChanged += fn(b){
+			if(b) {
+				Rendering.enableDebugOutput();
+			} else {
+				Rendering.disableDebugOutput();
+			}
+		};
+		setting_glDebugOutput.forceRefresh();
+		this.setActiveCamera(GLOBALS.camera);	
+	},Extension.HIGH_PRIORITY+1);
 
 	//  Task scheduler
 	// The task sheduler is called with a timeslot of 0.1 sec after every frame
-	this.taskScheduler := new (Std.module('LibUtilExt/TaskScheduler'));
-	Util.registerExtension('PADrend_AfterRendering',	this->fn(...){	taskScheduler.execute(0.1); } );
+	taskScheduler = new (Std.module('LibUtilExt/TaskScheduler'));
+	Util.registerExtension('PADrend_AfterRendering',	fn(...){	taskScheduler.execute(0.1); } );
 	
 	// Behaviour manager
 	if(MinSG.isSet($BehaviourManager)){
-		Util.registerExtension('PADrend_AfterRendering',	this->fn(...){
+		Util.registerExtension('PADrend_AfterRendering',	fn(...){
 			try{
 				PADrend.getSceneManager().getBehaviourManager().executeBehaviours( PADrend.getSyncClock() );
 			}catch(e){
@@ -153,64 +167,55 @@ plugin.init @(override) := fn(){
 	Util.registerExtension('PADrend_AfterRendering', fn(...){
 			renderingContext.setGlobalUniform("sg_time",Rendering.Uniform.FLOAT,[PADrend.getSyncClock()]);
 	});
-		
+	
+	Util.registerExtension('PADrend_Start',this->fn(){
+		while(active){
+			outln("Starting EventLoop...");
+			try{
+				while(active)
+					this.singleFrame();
+			}catch(e){
+				Runtime.log(Runtime.LOG_ERROR,e);
+				continue;
+			}
+		}
+	});
 	return true;
 };
 // ------------------
 
 
-//! [ext:PADrend_Init]
-plugin.ex_Init := fn(){
-   //  set rendering parameters
-	renderingFlags = systemConfig.getValue('PADrend.Rendering.flags',MinSG.FRUSTUM_CULLING);
-	this.waitForGlFinish = systemConfig.getValue('PADrend.Rendering.waitForGlFinish',true);
-
-	//  set bgColor
-	this.bgColor = new Util.Color4f( systemConfig.getValue('PADrend.Rendering.bgColor',[0.5,0.5,0.5,1.0]) );
-
-	// activate normal camera by default
-	this.setActiveCamera(GLOBALS.camera);
-};
-//! [ext:PADrend_Start]
-plugin.ex_Start := fn(){
-	while(active){
-		out("Starting EventLoop...\n");
-		try{
-			while(active)
-				this.singleFrame();
-		}catch(e){
-			Runtime.log(Runtime.LOG_ERROR,e);
-			continue;
-		}
-	}
-
-};
 plugin.getActiveCamera := 				fn(){	return activeCamera;	};
-plugin.getBGColor := 					fn(){	return this.bgColor;	};
+plugin.getBGColor := 					fn(){	return setting_bgColor();	};
 plugin.getCamerasUsedForLastFrame :=	fn(){	return camerasUsedForLastFrame;	};
-plugin.getRenderingFlags :=				fn(){	return renderingFlags;	};
-plugin.getRenderingLayers := 			fn(){	return renderingLayers;	};
+plugin.getRenderingFlags :=				fn(){	return setting_renderingFlags();	};
+plugin.getRenderingLayers := 			fn(){	return setting_renderingLayers();	};
 
 plugin.setActiveCamera :=				fn(MinSG.AbstractCameraNode newCamera){	activeCamera = newCamera;	};
 
-plugin.setBGColor := fn(Util.Color4f newColor){
-	systemConfig.setValue('PADrend.Rendering.bgColor',[newColor.r(),newColor.g(),newColor.b(),newColor.a()]);
-	this.bgColor = newColor;
+plugin.setBGColor := fn(p...){
+	setting_bgColor(new Util.Color4f(p...));
 };
 
-plugin.setRenderingFlags :=		fn(Number f){	renderingFlags = f;	};
-plugin.setRenderingLayers :=	fn(Number l){	renderingLayers = l;	};
+plugin.setRenderingFlags :=		fn(Number f){	setting_renderingFlags(f);	};
+plugin.setRenderingLayers :=	fn(Number l){	setting_renderingLayers(l);	};
 
 
-plugin.planTask := fn(time,fun){
-	this.taskScheduler.plan(time,fun);
+plugin.planTask := fn(mixed_TimeOrCallback,callback=void){
+	if(callback)
+		taskScheduler.plan(mixed_TimeOrCallback,callback);
+	else 
+		taskScheduler.plan(0,mixed_TimeOrCallback);
 };
 
 plugin.singleFrame := fn() {
 
 	// create "default" rendering pass
-	var renderingPasses = [ new (Std.module('PADrend/EventLoop/RenderingPass'))("default",PADrend.getRootNode(),activeCamera, renderingFlags, this.doClearScreen ? this.bgColor : false,renderingLayers) ];
-	executeExtensions('PADrend_BeforeRendering',renderingPasses);
+	var renderingPasses = [ 
+			new (Std.module('PADrend/EventLoop/RenderingPass'))("default",PADrend.getRootNode(),activeCamera, setting_renderingFlags(), 
+																setting_doClearScreen() ? setting_bgColor() : false,setting_renderingLayers()) 
+	];
+	Util.executeExtensions('PADrend_BeforeRendering',renderingPasses);
 	
 	// -------------------
 	// ---- Render Scene
@@ -221,17 +226,16 @@ plugin.singleFrame := fn() {
 	while(!renderingPasses.empty()){
 		var renderingPass = renderingPasses.popFront();
 		usedCameras += renderingPass.getCamera();
-		executeExtensions('PADrend_BeforeRenderingPass',renderingPass);
+		Util.executeExtensions('PADrend_BeforeRenderingPass',renderingPass);
 		renderingPass.execute();
-		executeExtensions('PADrend_AfterRenderingPass',renderingPass);		
+		Util.executeExtensions('PADrend_AfterRenderingPass',renderingPass);		
 	}
 
 	// restore default camera (in case e.g. the viewport has been changed);
 	frameContext.setCamera(PADrend.getActiveCamera());
+	frameContext.endFrame(setting_waitForGlFinish());
 
-	frameContext.endFrame(this.waitForGlFinish);
-
-	executeExtensions('PADrend_AfterRendering',getActiveCamera());
+	Util.executeExtensions('PADrend_AfterRendering',getActiveCamera());
 
 	camerasUsedForLastFrame.swap( usedCameras );
 	
@@ -242,10 +246,10 @@ plugin.singleFrame := fn() {
 		var evt = PADrend.getEventQueue().popEvent();
 		try {
 			// [ext:PADrend_UIEvent]
-			if ( executeExtensions('PADrend_UIEvent',evt) ){
+			if ( Util.executeExtensions('PADrend_UIEvent',evt) ){
 			}else if (evt.type==Util.UI.EVENT_KEYBOARD && evt.pressed) {
 				// [ext:PADrend_KeyPressed]
-				if(executeExtensions('PADrend_KeyPressed',evt)) {
+				if(Util.executeExtensions('PADrend_KeyPressed',evt)) {
 				} else if( (evt.key==Util.UI.KEY_F4 && PADrend.getEventContext().isAltPressed()) || // [ALT] + [F4]
 						(evt.key == Util.UI.KEY_Q && PADrend.getEventContext().isCtrlPressed()) ) { // [CTRL] + [q]{ 
 					plugin.stop();
@@ -265,7 +269,7 @@ plugin.singleFrame := fn() {
 	// - execute tastScheduler
 	// - update fpsCounter
 	// - execute cameraMover (in PADrend/Navigation
-	executeExtensions('PADrend_AfterFrame');
+	Util.executeExtensions('PADrend_AfterFrame');
 	
 	
 	// -------------------
@@ -276,7 +280,7 @@ plugin.singleFrame := fn() {
 	// ---- Check for GL error
 	Rendering.enableGLErrorChecking();
 	Rendering.checkGLError();
-	if(!glErrorChecking()) 
+	if(!setting_glErrorChecking()) 
 		Rendering.disableGLErrorChecking();
 };
 
@@ -285,12 +289,23 @@ plugin.stop := fn(){
 	PADrend.message("Stopping event loop...");
 };
 
+plugin.storeSettings := fn(){
+	config.save();
+};
+
 // --------------------
 // Aliases
 
+// public data wrappers
+plugin.setting_bgColor := setting_bgColor;
+plugin.setting_doClearScreen := setting_doClearScreen;
+plugin.setting_glDebugOutput := setting_glDebugOutput;
+plugin.setting_glErrorChecking := setting_glErrorChecking;
+plugin.setting_renderingFlags := setting_renderingFlags;
+plugin.setting_renderingLayers := setting_renderingLayers;
+plugin.setting_waitForGlFinish := setting_waitForGlFinish;
 
-plugin.glErrorChecking := glErrorChecking;
-
+PADrend.EventLoop := plugin;
 PADrend.getActiveCamera := 		plugin -> plugin.getActiveCamera;
 PADrend.getBGColor := 			plugin -> plugin.getBGColor;
 PADrend.getRenderingFlags :=	plugin -> plugin.getRenderingFlags;
@@ -300,9 +315,6 @@ PADrend.setBGColor := 			plugin -> plugin.setBGColor;
 PADrend.setRenderingFlags :=	plugin -> plugin.setRenderingFlags;
 PADrend.setRenderingLayers :=	plugin -> plugin.setRenderingLayers;
 PADrend.planTask :=				plugin -> plugin.planTask;
-
-// --------------------
-
 
 return plugin;
 // ------------------------------------------------------------------------------

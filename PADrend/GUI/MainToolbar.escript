@@ -947,29 +947,24 @@ static registerStdToolbarEntries = fn() {
 	}]);
 
 	gui.register('PADrend_RenderingSettings',fn(){
-		var m = [];
+		static eventLoop = Util.requirePlugin('PADrend/EventLoop');
 		
+		var m = [];
 		m += "*Rendering flags*";
-
 		foreach( ['BOUNDING_BOXES','SHOW_META_OBJECTS','NO_GEOMETRY','NO_STATES','FRUSTUM_CULLING','USE_WORLD_MATRIX','SHOW_COORD_SYSTEM'] as var flagName){
+			var mask = MinSG.getAttribute(flagName);
+			var dataWrapper = new DataWrapper( (eventLoop.getRenderingFlags()&mask)>0);
+			dataWrapper.onDataChanged += [mask] => fn(mask,b){
+				eventLoop.setRenderingFlags(eventLoop.getRenderingFlags().setBitMask(mask,b) );
+			};
 			m += {
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.LABEL : flagName,
-				GUI.DATA_PROVIDER : [flagName] => fn(flagName){
-					return (PADrend.getRenderingFlags() & MinSG.getAttribute(flagName))>0;
-				},
-				GUI.ON_DATA_CHANGED : [flagName] => fn(flagName, data){
-					var mask = MinSG.getAttribute(flagName);
-					PADrend.setRenderingFlags( (PADrend.getRenderingFlags()-(PADrend.getRenderingFlags()&mask))| (data?mask:0) );
-					systemConfig.setValue('PADrend.Rendering.flags',PADrend.getRenderingFlags());
-				},
-			
+				GUI.DATA_WRAPPER : dataWrapper
 			};
 		}
 
 		{// rendering Layers
-			static eventLoop = Util.requirePlugin('PADrend/EventLoop');
-
 			m += "Rendering layer:";
 
 			var container = gui.create({
@@ -999,41 +994,31 @@ static registerStdToolbarEntries = fn() {
 		m += {
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "waitForGlFinish",
-			GUI.DATA_PROVIDER : fn(){ return PADrend.EventLoop.waitForGlFinish; },
-			GUI.ON_DATA_CHANGED : fn(d){
-				PADrend.EventLoop.waitForGlFinish = d;
-				systemConfig.setValue('PADrend.Rendering.waitForGlFinish',d);
-			}
+			GUI.DATA_WRAPPER : PADrend.EventLoop.setting_waitForGlFinish
 		};
 		m += {
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "GL Error Checking",
-			GUI.DATA_WRAPPER : PADrend.EventLoop.glErrorChecking
+			GUI.DATA_WRAPPER : PADrend.EventLoop.setting_glErrorChecking
 		};
 		m += {
 			GUI.TYPE			:	GUI.TYPE_BOOL,
 			GUI.LABEL			:	"GL Debug Output",
 			GUI.TOOLTIP			:	"Enable debug output, if the OpenGL extension GL_ARB_debug_output is supported.",
-			GUI.DATA_PROVIDER	:	fn() { return systemConfig.getValue('PADrend.Rendering.GLDebugOutput', false); },
-			GUI.ON_DATA_CHANGED	:	fn(data) {
-										systemConfig.setValue('PADrend.Rendering.GLDebugOutput', data);
-										if(data) {
-											Rendering.enableDebugOutput();
-										} else {
-											Rendering.disableDebugOutput();
-										}
-									}
+			GUI.DATA_WRAPPER	:	PADrend.EventLoop.setting_glDebugOutput
 		};
 		m += "*Background color*";
 		m += {
 			GUI.TYPE : GUI.TYPE_COLOR,
 			GUI.LABEL : "Color",
-			GUI.DATA_PROVIDER : fn(){ return PADrend.EventLoop.getBGColor(); },
-			GUI.ON_DATA_CHANGED : fn(data){
-				PADrend.setBGColor(data);
-			},
+			GUI.DATA_WRAPPER : PADrend.EventLoop.setting_bgColor,
 			GUI.TOOLTIP : "Adjust the background color."
-			
+		};
+		m += '----';
+		m += {
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "Set as default",
+				GUI.ON_CLICK : fn(){	PADrend.EventLoop.storeSettings(); PADrend.message("Settings stored.");	}
 		};
 		return m;
 	});
@@ -1053,22 +1038,14 @@ static registerStdToolbarEntries = fn() {
 		{
 			GUI.TYPE : 	GUI.TYPE_BOOL,
 			GUI.LABEL : "Invert Mouse-Y Axis",
-			GUI.DATA_PROVIDER : fn(){ return PADrend.getCameraMover().getInvertYAxis();},
-			GUI.ON_DATA_CHANGED : fn(data){
-				PADrend.getCameraMover().setInvertYAxis(data);
-				systemConfig.setValue('PADrend.Input.invertMouse',data);
-			}
+			GUI.DATA_WRAPPER : PADrend.Navigation.setting_invertMouse
 		},
 		{
 			GUI.TYPE : 	GUI.TYPE_BOOL,
 			GUI.LABEL : "Smooth Mouse rotation",
-			GUI.DATA_PROVIDER : fn(){ return PADrend.getCameraMover().smoothMouse;},
-			GUI.ON_DATA_CHANGED : fn(data){
-				PADrend.getCameraMover().smoothMouse = data;
-				PADrend.configCache.setValue('PADrend.Input.smoothMouse',data);
-			}
+			GUI.DATA_WRAPPER : PADrend.Navigation.setting_smoothMouse
 		},
-		"Movement speed",
+		"Movement speed*",
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.RANGE : [-3,10],
@@ -1080,7 +1057,7 @@ static registerStdToolbarEntries = fn() {
 			},
 			GUI.TOOLTIP : "NOTE: This value is not saved to the config!"
 		},
-		"Rotation speed for [q],[e]",
+		"Rotation speed for [q],[e] *",
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.RANGE : [0.0,3.0],
@@ -1095,28 +1072,20 @@ static registerStdToolbarEntries = fn() {
 		{
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Joystick support(req. restart)",
-			GUI.DATA_WRAPPER : PADrend.Navigation.joystickSupport
+			GUI.DATA_WRAPPER : PADrend.Navigation.setting_joystickSupport
 		},
 		"Joystick rotation",
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.RANGE : [0.1,5],
-			GUI.DATA_PROVIDER : fn(){ return PADrend.getCameraMover().joypad_rotationFactor;	},
-			GUI.ON_DATA_CHANGED : fn(data){
-				PADrend.getCameraMover().joypad_rotationFactor = data;
-				systemConfig.setValue('PADrend.Input.rotationFactor',data);
-			},
+			GUI.DATA_WRAPPER :  PADrend.Navigation.setting_joypadRotationFactor,
 			GUI.TOOLTIP : "Factor"
 		},
 		{
 			GUI.TYPE : GUI.TYPE_SELECT,
 			GUI.LABEL : "Rot. exp.",
 			GUI.OPTIONS : [ [1,"1"], [2,"2"], [4,"4"], [8,"8"] ],
-			GUI.DATA_PROVIDER : fn(){ return PADrend.getCameraMover().joypad_rotationExponent;	},
-			GUI.ON_DATA_CHANGED : fn(data){
-				PADrend.getCameraMover().joypad_rotationExponent = data;
-				systemConfig.setValue('PADrend.Input.rotationExponent',data);
-			},
+			GUI.DATA_WRAPPER :  PADrend.Navigation.setting_joypadRotationExponent,
 			GUI.TOOLTIP : "Exponent used for calculatin the rotation."
 		}
 	];});
@@ -1132,6 +1101,14 @@ static registerStdToolbarEntries = fn() {
 		}
 		return entries;
 	});
+	gui.register('PADrend_NavigationConfigMenu.90_storeSettings',[
+		'----',
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Set as default",
+			GUI.ON_CLICK : fn(){	PADrend.Navigation.storeSettings(); PADrend.message("Settings stored.");	}
+		}
+	]);
 	
 	
 	// ------------------------
