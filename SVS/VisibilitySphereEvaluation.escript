@@ -157,7 +157,7 @@ SVS.setUpVisibilitySphereEvaluation := fn(plugin) {
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	windowPanel++;
-	var resolution = DataWrapper.createFromValue(4096);
+	var resolution = new Std.DataWrapper(4096);
 	windowPanel += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"Resolution",

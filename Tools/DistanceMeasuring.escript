@@ -46,7 +46,7 @@ plugin.init @(override) := fn(){
 	this.measurement:=false;
 	this.window:=false;
 	this.infoLabel:=false;
-	this.jumpDistance:=DataWrapper.createFromValue(1.0);
+	this.jumpDistance:=new Std.DataWrapper(1.0);
 	this.flyToHandler:=void;
 	this.rayCaster:=void;
 	

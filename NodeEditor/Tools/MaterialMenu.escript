@@ -62,9 +62,9 @@ gui.register('NodeEditor_MaterialMenu',[
 		GUI.LABEL : "Reset ambient colors ...",
 		GUI.ON_CLICK : fn() {
 			var p = gui.createPopupWindow( 400, 140,"Reset ambient color" );
-			var factor = DataWrapper.createFromConfig( PADrend.configCache,'NodeEditor.resetAmbient.factor',0.5);
-			var saturation = DataWrapper.createFromConfig( PADrend.configCache,'NodeEditor.resetAmbient.saturation',1.0);
-			var baseBrightness = DataWrapper.createFromConfig( PADrend.configCache,'NodeEditor.resetAmbient.brightness',0.0);
+			var factor = Std.DataWrapper.createFromEntry( PADrend.configCache,'NodeEditor.resetAmbient.factor',0.5);
+			var saturation = Std.DataWrapper.createFromEntry( PADrend.configCache,'NodeEditor.resetAmbient.saturation',1.0);
+			var baseBrightness = Std.DataWrapper.createFromEntry( PADrend.configCache,'NodeEditor.resetAmbient.brightness',0.0);
 			
 			p.addOption({
 				GUI.TYPE : GUI.TYPE_RANGE,

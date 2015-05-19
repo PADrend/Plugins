@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2012-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2012-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -134,7 +134,7 @@ Std.DataWrapper.setOptions ::= fn(Array options){
 
 /*! Set a function providing options (caller is the DataWrapper, must return an Array).
 	\code
-		var myDataWrapper = DataWrapper.createFromValue(5).setOptionsProvider( fn(){ return [this(),this()*2] } );
+		var myDataWrapper = (new Std.DataWrapper(5)).setOptionsProvider( fn(){ return [this(),this()*2] } );
 		print_r(myDataWrapper.getOptions()); // [5,10]
 */
 Std.DataWrapper.setOptionsProvider ::= fn(callable){

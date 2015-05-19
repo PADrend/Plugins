@@ -69,7 +69,7 @@ PADrend.Navigation.ex_Init := fn(){
 	Util.registerExtension('PADrend_UIEvent',[cameraMover] => fn(cameraMover,evt){	return cameraMover.getMouseView() ? cameraMover.handleEvent(evt,false) : false;	}, Extension.HIGH_PRIORITY);
 	Util.registerExtension('PADrend_UIEvent',[cameraMover] => fn(cameraMover,evt){	return cameraMover.getMouseView() ? false : cameraMover.handleEvent(evt,false);	}, Extension.LOW_PRIORITY);
 
-	joystickSupport = DataWrapper.createFromConfig(systemConfig,'PADrend.Input.joystickSupport',false);
+	joystickSupport = Std.DataWrapper.createFromEntry(systemConfig,'PADrend.Input.joystickSupport',false);
 	if(joystickSupport())
 		cameraMover.registerGamepad( PADrend.HID.getDevice("Gamepad_1")  );
 	

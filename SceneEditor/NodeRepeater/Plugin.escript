@@ -30,17 +30,17 @@ NodeRepeater.plugin := new Plugin({
 
 var plugin = NodeRepeater.plugin;
 
-plugin.windowEnabled @(private) := DataWrapper.createFromValue(false);
+plugin.windowEnabled @(private) := new Std.DataWrapper(false);
 plugin.window @(private):= void;
 plugin.iterations := [];
 
 plugin.init @(override) := fn(){
     for(var i=0;i<3;++i){
         this.iterations += new ExtObject({
-                $count : DataWrapper.createFromValue(0),
-                $x : DataWrapper.createFromValue(0),
-                $y: DataWrapper.createFromValue(0),
-                $z : DataWrapper.createFromValue(0),
+                $count : new Std.DataWrapper(0),
+                $x : new Std.DataWrapper(0),
+                $y: new Std.DataWrapper(0),
+                $z : new Std.DataWrapper(0),
         });
     }
 
@@ -202,7 +202,7 @@ plugin.showWindow := fn(){
     };
 	window += panel;
 	Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'), 
-							DataWrapper.createFromConfig(PADrend.configCache, "Node_Repeator.winRect", [200,100,240,100]));
+							Std.DataWrapper.createFromEntry(PADrend.configCache, "Node_Repeator.winRect", [200,100,240,100]));
 };
 
 plugin.repeatNode :=fn(Array nodes,ExtObject iteration,MinSG.GroupNode scene){

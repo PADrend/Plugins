@@ -19,7 +19,7 @@ return fn(MinSG.AbstractCameraNode camera) {
 		GUI.ICON	:	gui.createIcon(gui.createImage(1, 1), new Geometry.Rect(0, 0, 1, 1)),
 		GUI.SIZE	:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	});
-	cameraViewIcon.refreshCameraView := DataWrapper.createFromValue(false);
+	cameraViewIcon.refreshCameraView := new Std.DataWrapper(false);
 	cameraViewIcon.afterRenderingRegistered := false;
 
 	static fbo = new Rendering.FBO;

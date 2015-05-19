@@ -46,14 +46,14 @@ Effect._constructor:=fn(){
     this.blurResolution:=0.5;
     
     this.settings := new ExtObject({
-		$autoFocusRange : DataWrapper.createFromValue(2.5),
-		$autoFocus : DataWrapper.createFromValue(false),
-		$bloomingLimit : DataWrapper.createFromValue(1.9),
-		$blurRange : DataWrapper.createFromValue(7),
-		$dofArea_1 : DataWrapper.createFromValue(0.7),
-		$dofArea_2 : DataWrapper.createFromValue(1.5),
-		$dofArea_3 : DataWrapper.createFromValue(500),
-		$dofArea_4 : DataWrapper.createFromValue(800),
+		$autoFocusRange : new Std.DataWrapper(2.5),
+		$autoFocus : new Std.DataWrapper(false),
+		$bloomingLimit : new Std.DataWrapper(1.9),
+		$blurRange : new Std.DataWrapper(7),
+		$dofArea_1 : new Std.DataWrapper(0.7),
+		$dofArea_2 : new Std.DataWrapper(1.5),
+		$dofArea_3 : new Std.DataWrapper(500),
+		$dofArea_4 : new Std.DataWrapper(800),
 	});
 
 //    this.blurFBO:=new Rendering.FBO;

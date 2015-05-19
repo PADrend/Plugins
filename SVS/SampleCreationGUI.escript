@@ -211,7 +211,7 @@ SVS.setUpSampleCreationGUI := fn(plugin) {
 											GUI.ON_CLICK	:	(fn(Array samples, GUI.RefreshGroup samplesRefreshGroup) {
 																	
 																	var dialog = gui.createPopupWindow(300, 100);
-																	var numSamples = DataWrapper.createFromValue(100);
+																	var numSamples = new Std.DataWrapper(100);
 																	dialog.addOption({
 																		GUI.TYPE			:	GUI.TYPE_RANGE,
 																		GUI.LABEL			:	"Number",

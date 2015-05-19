@@ -36,7 +36,7 @@ static toolbar;
 static gui;
 
 plugin.init @(override) := fn(){
-	toolbarEnabled = DataWrapper.createFromConfig(PADrend.configCache,'PADrend.GUI.mainToolbarEnabled',true);
+	toolbarEnabled = Std.DataWrapper.createFromEntry(PADrend.configCache,'PADrend.GUI.mainToolbarEnabled',true);
 	Util.registerExtension( 'PADrend_Init', fn(){
 		out(("Creating main toolbar").fillUp(40));
 		toolbarEnabled.forceRefresh();
@@ -176,7 +176,7 @@ static registerStdToolbarEntries = fn() {
 			GUI.TOOLTIP		:	"Show a dialog to choose a file, and read a scene from that file.\nSupported types: .minsg, .dae",
 			GUI.ON_CLICK	:	fn() {
 				var config = new ExtObject({
-					$scale : DataWrapper.createFromValue(1.0),
+					$scale : new Std.DataWrapper(1.0),
 					$importOptions : PADrend.configCache.getValue('PADrend.importOptions', 
 											MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | 
 											MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY),

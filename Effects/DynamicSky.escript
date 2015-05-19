@@ -135,7 +135,7 @@ plugin.init @(override) := fn(){
 	// time
 	pSkyClockOffset = new Std.DataWrapper(0);
 	// if 'useActualTime' is true, the current system time is taken as initial time. Otherwise, 'time' is taken.
-	pUseActualTime = DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.useActualTime',false);
+	pUseActualTime = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.useActualTime',false);
 	pUseActualTime.onDataChanged += fn(Bool b){
 		if(b)
 			setTimeOfDay( (getDate()["hours"]+getDate()["minutes"]/60) );
@@ -144,7 +144,7 @@ plugin.init @(override) := fn(){
 	if(!pUseActualTime())
 		setTimeOfDay(  systemConfig.getValue('Effects.DynSky.time',13.0) );
 
-	pTimeFactor = DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.timeFactor',0.0);
+	pTimeFactor = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.timeFactor',0.0);
 	pTimeFactor.onDataChanged += fn(Number v){
 		var t = getTimeOfDay();
 		activeTimeFactor = v;
@@ -153,8 +153,8 @@ plugin.init @(override) := fn(){
 	pTimeFactor.forceRefresh();
 
 	// date
-	pJulianDay = DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.julianDay',180);
-	pUseActualDay = DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.useActualDay',false);
+	pJulianDay = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.julianDay',180);
+	pUseActualDay = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.useActualDay',false);
 	pUseActualDay.onDataChanged += fn(Bool b){
 		if(b)
 			pJulianDay(getDate()["yday"]);
@@ -163,24 +163,24 @@ plugin.init @(override) := fn(){
 
 	// clouds
 	pCloudClockOffset = new Std.DataWrapper(0);
-	pCloudSpeed = DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.cloudSpeed',0.004);
+	pCloudSpeed = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.cloudSpeed',0.004);
 	pCloudSpeed.onDataChanged += fn(Number v){
 		var t = getCloudTime();
 		cloudActiveSpeed = v;
 		setCloudTime(t);
 	};
 	pCloudSpeed.forceRefresh();
-	pCloudDensity = DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.cloudDensity',0.6);
-	pMaxSunBrightness = DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.maxSunBrightness',100);
+	pCloudDensity = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.cloudDensity',0.6);
+	pMaxSunBrightness = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.maxSunBrightness',100);
 	
 	// misc
-	pInfluenceSunLight = DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.influenceSunLight',false);
-	pStarsEnabled = DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.starsEnabled',false);
+	pInfluenceSunLight = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.influenceSunLight',false);
+	pStarsEnabled = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.starsEnabled',false);
 	
 	{	//enabled
 		static envState;
 		static revoce = new Std.MultiProcedure;
-		pEnabled = DataWrapper.createFromConfig(systemConfig,'Effects.DynSky.enabled',false);
+		pEnabled = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.enabled',false);
 		pEnabled.onDataChanged += fn(Bool b){  
 			revoce(); 	
 			if(b){

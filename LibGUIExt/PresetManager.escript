@@ -32,8 +32,8 @@
 	\code
 		// create a settings-object having two entries
 		var settings = new ExtObject({
-			$value1 : Std.DataWrapper.createFromValue( "" ).setOptions([ "a","b"]),
-			$value2 : Std.DataWrapper.createFromValue( 42 )
+			$value1 : (new Std.DataWrapper( "" )).setOptions([ "a","b"]),
+			$value2 : new Std.DataWrapper( 42 )
 		});
 		var presetManager = new PresetManager( myConfigManager, 'MyPlugin', settings );
 		
@@ -64,7 +64,7 @@ T._constructor ::= fn(Std.JSONDataStore _config,String _keyBase,[ExtObject,Map] 
 	settings = _settings.isA(Map) ? _settings.clone() : _settings._getAttributes();
 
 	activePreset = Std.DataWrapper.createFromEntry( config, keyBase + 'activePreset', "default" );
-	configChanged = Std.DataWrapper.createFromValue( false );
+	configChanged = new Std.DataWrapper( false );
 	
 	// whenever a setting changes, set configChanged to true
 	foreach(settings as var dataWrapper)

@@ -52,7 +52,7 @@ plugin._message := fn(	text ){
 			GUI.FLAGS : GUI.HIDDEN_WINDOW
 		});
 		Std.Traits.addTrait(_window, Std.module('LibGUIExt/Traits/StorableRectTrait'),
-					DataWrapper.createFromConfig(PADrend.configCache, "Effects.OSD.winRect", [	(r.getWidth() - width)*_position[0],(r.getHeight() - height)*_position[1],width,height]));
+					Std.DataWrapper.createFromEntry(PADrend.configCache, "Effects.OSD.winRect", [	(r.getWidth() - width)*_position[0],(r.getHeight() - height)*_position[1],width,height]));
 		var c = gui.create({
 			GUI.TYPE : GUI.TYPE_CONTAINER,
 			GUI.FLAGS : GUI.BORDER|GUI.BACKGROUND|GUI.AUTO_MAXIMIZE,

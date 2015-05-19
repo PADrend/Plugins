@@ -23,8 +23,8 @@ var plugin = new Plugin({
 	Plugin.EXTENSION_POINTS	:	[]
 });
 
-plugin.coordSystemEnabled := DataWrapper.createFromValue(false);
-plugin.gridEnabled := DataWrapper.createFromValue(false);
+plugin.coordSystemEnabled := new Std.DataWrapper(false);
+plugin.gridEnabled := new Std.DataWrapper(false);
 
 //! Register functions at extension points.
 plugin.init @(override) := fn() {

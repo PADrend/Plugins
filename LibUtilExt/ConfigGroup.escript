@@ -13,6 +13,14 @@
 
 /*! A configGroup is a subset of config entries from a config (a Std.JSONDataStore or similar) that can be changed independently from the
 	underlying config. The changes can be applied to the underlying config by calling .save().
+	
+	var mainConfig = new Std.JSONDataStore; // some config 
+		
+	var specialConfig = new (Std.module('LibUtilExt/ConfigGroup'))(mainConfig,"Foo"); // subgroup "Foo"
+	var entry = Std.DataWrapper.createFromEntry(specialConfig,"v1","myDefaultValue1"); // entry with name "Foo.v1"
+	// change entry value
+	specialConfig.save(); // apply the value of the entry to the mainConfig.
+	
 */
 var T = new Type;
 

@@ -178,7 +178,7 @@ tests += new AutomatedTest( "Util/ConfigGroup" , fn(){
 tests += new AutomatedTest( "Util/DataWrapper" , fn(){
 
 	{
-		var sideLength = DataWrapper.createFromValue( 10 );
+		var sideLength = new Std.DataWrapper( 10 );
 		var area = DataWrapper.createFromFunctions( [sideLength]=>fn(sideLength){	return sideLength()*sideLength(); },
 													[sideLength]=>fn(sideLength,data){	sideLength.set(data.sqrt());} );
 		
@@ -231,9 +231,9 @@ tests += new AutomatedTest( "Util/DataWrapper" , fn(){
 	{
 		var ok = true;
 		
-		var d1 = DataWrapper.createFromValue(1);
+		var d1 = new Std.DataWrapper(1);
 		var g = new DataWrapperContainer({ 
-				$d2 : DataWrapper.createFromValue(2)
+				$d2 : new Std.DataWrapper(2)
 		});
 		g.addDataWrapper($d1,d1);
 		
@@ -243,7 +243,7 @@ tests += new AutomatedTest( "Util/DataWrapper" , fn(){
 		};
 		
 		g.merge({
-			$d3 : DataWrapper.createFromValue(3)
+			$d3 : new Std.DataWrapper(3)
 		});
 
 		{
@@ -279,9 +279,9 @@ tests += new AutomatedTest( "Util/DataWrapper" , fn(){
 	
 	{	//Options
 		var options = [0,2,4];
-		var wrapper1 = DataWrapper.createFromValue(1).setOptions(options);
-		var wrapper2 = DataWrapper.createFromValue(2);
-		var wrapper3 = DataWrapper.createFromValue(3).setOptionsProvider( fn() { return [get(),get()*2,get()*3 ]; });
+		var wrapper1 = (new Std.DataWrapper(1)).setOptions(options);
+		var wrapper2 = new Std.DataWrapper(2);
+		var wrapper3 = (new Std.DataWrapper(3)).setOptionsProvider( fn() { return [get(),get()*2,get()*3 ]; });
 		
 		options+="Should not influence wrapper1's options.";
 		

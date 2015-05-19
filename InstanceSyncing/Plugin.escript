@@ -40,8 +40,8 @@ Std.Traits.addTrait(plugin,Util.ReloadablePluginTrait);	//!	\see Util.Reloadable
 
 plugin.init @(override) := fn() {
 
-	this.serverPort := Std.DataWrapper.createFromConfig(systemConfig,'MultiView.port',2000);
-	this.serverName := Std.DataWrapper.createFromConfig(systemConfig,'MultiView.IP',"127.0.0.1");
+	this.serverPort := Std.DataWrapper.createFromEntry(systemConfig,'MultiView.port',2000);
+	this.serverName := Std.DataWrapper.createFromEntry(systemConfig,'MultiView.IP',"127.0.0.1");
 
 	module('LibUtilExt/initNetworkUtils');
 	module('./initBasicSyncFeatures'); // --> initFeatures

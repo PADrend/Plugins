@@ -54,14 +54,14 @@ plugin.init @(override) := fn() {
 	
 	// settings
 	settings = new ExtObject({
-		$alpha : DataWrapper.createFromConfig( PADrend.configCache,'Tools.ScreenShot.alpha',false ),
-		$filename : DataWrapper.createFromConfig( PADrend.configCache,'Tools.ScreenShot.filename',"scr_${counter}_(${date})" ),
-		$path : DataWrapper.createFromConfig( PADrend.configCache,'Tools.ScreenShot.path',PADrend.getUserPath()+"screens/" ),
-		$shotCounter : DataWrapper.createFromConfig( PADrend.configCache,'Tools.ScreenShot.shotCounter',0 ),
-		$showGUI : DataWrapper.createFromConfig( PADrend.configCache,'Tools.ScreenShot.showGUI',false ),
-		$hrScale : DataWrapper.createFromConfig( PADrend.configCache,'Tools.ScreenShot.hrScale',9 ),
-		$hqSteps : DataWrapper.createFromConfig( PADrend.configCache,'Tools.ScreenShot.hqSteps',11 ),
-		$stopClock : DataWrapper.createFromConfig( PADrend.configCache,'Tools.ScreenShot.stopClock',true ),
+		$alpha : Std.DataWrapper.createFromEntry( PADrend.configCache,'Tools.ScreenShot.alpha',false ),
+		$filename : Std.DataWrapper.createFromEntry( PADrend.configCache,'Tools.ScreenShot.filename',"scr_${counter}_(${date})" ),
+		$path : Std.DataWrapper.createFromEntry( PADrend.configCache,'Tools.ScreenShot.path',PADrend.getUserPath()+"screens/" ),
+		$shotCounter : Std.DataWrapper.createFromEntry( PADrend.configCache,'Tools.ScreenShot.shotCounter',0 ),
+		$showGUI : Std.DataWrapper.createFromEntry( PADrend.configCache,'Tools.ScreenShot.showGUI',false ),
+		$hrScale : Std.DataWrapper.createFromEntry( PADrend.configCache,'Tools.ScreenShot.hrScale',9 ),
+		$hqSteps : Std.DataWrapper.createFromEntry( PADrend.configCache,'Tools.ScreenShot.hqSteps',11 ),
+		$stopClock : Std.DataWrapper.createFromEntry( PADrend.configCache,'Tools.ScreenShot.stopClock',true ),
 	});
 	return true;
 };

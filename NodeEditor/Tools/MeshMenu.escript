@@ -261,7 +261,7 @@ gui.register('NodeEditor_MeshToolsMenu.meshModifications',[
 				return  maxSideLengths.max();
 			};
 
-			var lengthWrapper = DataWrapper.createFromValue(getMaxSideLength());
+			var lengthWrapper = new Std.DataWrapper(getMaxSideLength());
 			gui.openDialog({
 				GUI.TYPE : GUI.TYPE_POPUP_DIALOG,
 				GUI.LABEL : "Split polygons",

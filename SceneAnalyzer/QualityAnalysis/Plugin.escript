@@ -26,8 +26,8 @@ var plugin = new Plugin({
 		Plugin.EXTENSION_POINTS : [	]
 });
 
-static filename = DataWrapper.createFromConfig(PADrend.configCache,'SceneAnalyzerEval.qFile',"qualy_${time}.csv");
-static sampleCount = DataWrapper.createFromConfig(PADrend.configCache,'SceneAnalyzerEval.qSampleCount',1000);
+static filename = Std.DataWrapper.createFromEntry(PADrend.configCache,'SceneAnalyzerEval.qFile',"qualy_${time}.csv");
+static sampleCount = Std.DataWrapper.createFromEntry(PADrend.configCache,'SceneAnalyzerEval.qSampleCount',1000);
 
 static formatFilename = fn(filename){
 	if(filename.isA(Util.FileName))

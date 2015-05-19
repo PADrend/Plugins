@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2012-2013 Claudius Jähn <claudius@uni-paderborn.de>
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -19,36 +19,36 @@ var Effect = new Type( Std.module('Effects/PPEffect') );
 
 Effect._constructor:=fn(){
 
-    this.fbo:=new Rendering.FBO;
-    renderingContext.pushAndSetFBO(fbo);
-    this.colorTexture_1:=Rendering.createHDRTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
-    fbo.attachColorTexture(renderingContext,colorTexture_1);
-    
-    this.depthTexture:=Rendering.createDepthTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight());
-    fbo.attachDepthTexture(renderingContext,depthTexture);
-    out(fbo.getStatusMessage(renderingContext),"\n");
-    renderingContext.popFBO();
-    
-    this.shader:=Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs",getShaderFolder()+"SSAO.fs");
+	this.fbo:=new Rendering.FBO;
+	renderingContext.pushAndSetFBO(fbo);
+	this.colorTexture_1:=Rendering.createHDRTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
+	fbo.attachColorTexture(renderingContext,colorTexture_1);
+
+	this.depthTexture:=Rendering.createDepthTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight());
+	fbo.attachDepthTexture(renderingContext,depthTexture);
+	out(fbo.getStatusMessage(renderingContext),"\n");
+	renderingContext.popFBO();
+
+	this.shader:=Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs",getShaderFolder()+"SSAO.fs");
 	renderingContext.pushAndSetShader(shader);
-    shader.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]) ;
-    shader.setUniform(renderingContext,'TDepth',Rendering.Uniform.INT,[1]) ;
-    shader.setUniform(renderingContext,'pixelSizeX',Rendering.Uniform.FLOAT,[1.0/renderingContext.getWindowWidth()]) ;
-    shader.setUniform(renderingContext,'pixelSizeY',Rendering.Uniform.FLOAT,[1.0/renderingContext.getWindowHeight()]) ;
+	shader.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]) ;
+	shader.setUniform(renderingContext,'TDepth',Rendering.Uniform.INT,[1]) ;
+	shader.setUniform(renderingContext,'pixelSizeX',Rendering.Uniform.FLOAT,[1.0/renderingContext.getWindowWidth()]) ;
+	shader.setUniform(renderingContext,'pixelSizeY',Rendering.Uniform.FLOAT,[1.0/renderingContext.getWindowHeight()]) ;
 
 	// settings
 	this.settings := {
-		'debugBorder' : DataWrapper.createFromValue( shader.getUniform('debugBorder').getData()[0] ),
-		'debugBlend' : DataWrapper.createFromValue( shader.getUniform('debugBlend').getData()[0] ),
-		'distancePow' : DataWrapper.createFromValue( shader.getUniform('distancePow').getData()[0] ).setOptions([1.0]),
-		'intensityFactor' : DataWrapper.createFromValue( shader.getUniform('intensityFactor').getData()[0] ),
-		'intensityOffset' : DataWrapper.createFromValue( shader.getUniform('intensityOffset').getData()[0] ),
-		'maxBrightness' : DataWrapper.createFromValue( shader.getUniform('maxBrightness').getData()[0] ),
-		'minPlaneDistance' : DataWrapper.createFromValue( shader.getUniform('minPlaneDistance').getData()[0] ),
-		'numSamples' : DataWrapper.createFromValue( shader.getUniform('numSamples').getData()[0] ),
-		'radiusIncrease' : DataWrapper.createFromValue( shader.getUniform('radiusIncrease').getData()[0] ),
-		'samplingRadius' : DataWrapper.createFromValue( shader.getUniform('samplingRadius').getData()[0] ),
-		'useNoise' : DataWrapper.createFromValue( shader.getUniform('useNoise').getData()[0] ),
+		'debugBorder' : new Std.DataWrapper( shader.getUniform('debugBorder').getData()[0] ),
+		'debugBlend' : new Std.DataWrapper( shader.getUniform('debugBlend').getData()[0] ),
+		'distancePow' : (new Std.DataWrapper( shader.getUniform('distancePow').getData()[0] )).setOptions([1.0]),
+		'intensityFactor' : new Std.DataWrapper( shader.getUniform('intensityFactor').getData()[0] ),
+		'intensityOffset' : new Std.DataWrapper( shader.getUniform('intensityOffset').getData()[0] ),
+		'maxBrightness' : new Std.DataWrapper( shader.getUniform('maxBrightness').getData()[0] ),
+		'minPlaneDistance' : new Std.DataWrapper( shader.getUniform('minPlaneDistance').getData()[0] ),
+		'numSamples' : new Std.DataWrapper( shader.getUniform('numSamples').getData()[0] ),
+		'radiusIncrease' : new Std.DataWrapper( shader.getUniform('radiusIncrease').getData()[0] ),
+		'samplingRadius' : new Std.DataWrapper( shader.getUniform('samplingRadius').getData()[0] ),
+		'useNoise' : new Std.DataWrapper( shader.getUniform('useNoise').getData()[0] ),
 	};
 
 	this.presetManager := new (Std.module('LibGUIExt/PresetManager'))( PADrend.configCache, 'Effects.SSAO', settings );
@@ -57,7 +57,7 @@ Effect._constructor:=fn(){
 };
 /*! ---|> PPEffect  */
 Effect.begin @(override) := fn(){
-    renderingContext.pushAndSetFBO(fbo);
+	renderingContext.pushAndSetFBO(fbo);
 };
 /*! ---|> PPEffect  */
 Effect.end @(override) :=fn(){
@@ -65,10 +65,10 @@ Effect.end @(override) :=fn(){
 	// pass 1: Calculate AO
 	renderingContext.pushAndSetShader(shader);
 	var m = renderingContext.getMatrix_cameraToClipping().inverse();
-	
+
 	shader.setUniform(renderingContext,'inverseProjectionMatrix' , Rendering.Uniform.MATRIX_4X4F,[m]);
 	shader.setUniform(renderingContext,'projectionMatrix' , Rendering.Uniform.MATRIX_4X4F,[renderingContext.getMatrix_cameraToClipping()]);
-	
+
 	shader.setUniform(renderingContext,'distancePow' , Rendering.Uniform.FLOAT,[settings['distancePow']() ]);
 	shader.setUniform(renderingContext,'samplingRadius' , Rendering.Uniform.FLOAT,[settings['samplingRadius']() ]);
 	shader.setUniform(renderingContext,'intensityOffset' , Rendering.Uniform.FLOAT,[settings['intensityOffset']() ]);
@@ -81,103 +81,103 @@ Effect.end @(override) :=fn(){
 	shader.setUniform(renderingContext,'radiusIncrease' , Rendering.Uniform.FLOAT,[settings['radiusIncrease']() ]);
 	shader.setUniform(renderingContext,'numSamples' , Rendering.Uniform.INT,[settings['numSamples']() ]);
 
-    renderingContext.popFBO();
-    
+	renderingContext.popFBO();
 
-    Rendering.drawTextureToScreen(renderingContext,new Geometry.Rect(0,0,renderingContext.getWindowWidth(),renderingContext.getWindowHeight()) ,
-                            [this.colorTexture_1,depthTexture],[new Geometry.Rect(0,0,1,1),new Geometry.Rect(0,0,1,1)]);
+
+	Rendering.drawTextureToScreen(renderingContext,new Geometry.Rect(0,0,renderingContext.getWindowWidth(),renderingContext.getWindowHeight()) ,
+							[this.colorTexture_1,depthTexture],[new Geometry.Rect(0,0,1,1),new Geometry.Rect(0,0,1,1)]);
 
 	renderingContext.popShader();
 
 
-	
+
 };
 /*! ---|> PPEffect  */
 Effect.getOptionPanel:=fn(){
-    var p=gui.createPanel(200,200,GUI.AUTO_MAXIMIZE|GUI.AUTO_LAYOUT);
-    presetManager.createGUI( p );
+	var p=gui.createPanel(200,200,GUI.AUTO_MAXIMIZE|GUI.AUTO_LAYOUT);
+	presetManager.createGUI( p );
 
-    p++;
-    p+='----';
-    p++;
-    p+={
+	p++;
+	p+='----';
+	p++;
+	p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "samplingRadius",
 		GUI.RANGE : [ 0.001,0.01 ],
 		GUI.DATA_WRAPPER : settings['samplingRadius'],
-    };
-    p++;    
-    p+={
+	};
+	p++;
+	p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "radiusIncrease",
 		GUI.RANGE : [ 1.0,1.2 ],
 		GUI.DATA_WRAPPER : settings['radiusIncrease']
-    };
-    p++;   
-     p+={
+	};
+	p++;
+	 p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "distancePow",
 		GUI.RANGE : [ 0.0,2.0 ],
 		GUI.DATA_WRAPPER : settings['distancePow']
-    };
-    p++;
-    p+={
+	};
+	p++;
+	p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "intensityOffset",
 		GUI.RANGE : [ 0.0,1.0 ],
 		GUI.DATA_WRAPPER : settings['intensityOffset']
-    };
+	};
 	p++;
-    p+={
+	p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "intensityFactor",
 		GUI.RANGE : [ 0.5,3.0 ],
 		GUI.DATA_WRAPPER : settings['intensityFactor']
-    };
-    p++;      
-    p+={
+	};
+	p++;
+	p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "minPlaneDistance",
 		GUI.RANGE : [ 0.0,1.0 ],
 		GUI.DATA_WRAPPER : settings['minPlaneDistance']
-    };    
-    p++;    
-    p+={
+	};
+	p++;
+	p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "numSamples",
 		GUI.RANGE : [ 1.0,64.0 ],
 		GUI.RANGE_STEPS : 63,
 		GUI.DATA_WRAPPER : settings['numSamples']
-    };    
-    p++;   
-    p+={
+	};
+	p++;
+	p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "maxBrightness",
 		GUI.RANGE : [ 1.0,10.0 ],
 		GUI.DATA_WRAPPER : settings['maxBrightness']
-    };    
-    p++;
-    p+={
+	};
+	p++;
+	p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "debugBlend",
 		GUI.RANGE : [ 0.0,1.0 ],
 		GUI.DATA_WRAPPER : settings['debugBlend']
-    };
-    p++;      
-    p+={
+	};
+	p++;
+	p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "debugBorder",
 		GUI.RANGE : [ 0.0,1.0 ],
 		GUI.DATA_WRAPPER : settings['debugBorder']
-    };    
-    p++;      
-    p+={
+	};
+	p++;
+	p+={
 		GUI.TYPE : GUI.TYPE_BOOL,
 		GUI.LABEL : "useNoise",
 		GUI.DATA_WRAPPER : settings['useNoise']
-    };
-    p++;    
-    return p;
+	};
+	p++;
+	return p;
 };
 
 return new Effect;

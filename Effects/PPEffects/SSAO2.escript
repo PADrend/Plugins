@@ -38,16 +38,16 @@ Effect._constructor:=fn(){
 
 	// settings
 	this.settings := {
-		'debugBlend' : DataWrapper.createFromValue( 0+shader.getUniform('debugBlend').getData()[0] ),
-		'debugBorder' : DataWrapper.createFromValue( 0+shader.getUniform('debugBorder').getData()[0] ),
-		'intensityExponent' : DataWrapper.createFromValue( 0+shader.getUniform('intensityExponent').getData()[0] ),
-		'intensityFactor' : DataWrapper.createFromValue( 0+shader.getUniform('intensityFactor').getData()[0] ),
-		'initialRadius' : DataWrapper.createFromValue( 0+shader.getUniform('initialRadius').getData()[0] ),
-		'maxBrightness' : DataWrapper.createFromValue( 0+shader.getUniform('maxBrightness').getData()[0] ),
-		'numDirections' : DataWrapper.createFromValue( 0+shader.getUniform('numDirections').getData()[0] ),
-		'numSteps' : DataWrapper.createFromValue( 0+shader.getUniform('numSteps').getData()[0] ),
-		'radiusIncrease' : DataWrapper.createFromValue( 0+shader.getUniform('radiusIncrease').getData()[0] ),
-		'fxaa' : DataWrapper.createFromValue(true ),
+		'debugBlend' : new Std.DataWrapper( 0+shader.getUniform('debugBlend').getData()[0] ),
+		'debugBorder' : new Std.DataWrapper( 0+shader.getUniform('debugBorder').getData()[0] ),
+		'intensityExponent' : new Std.DataWrapper( 0+shader.getUniform('intensityExponent').getData()[0] ),
+		'intensityFactor' : new Std.DataWrapper( 0+shader.getUniform('intensityFactor').getData()[0] ),
+		'initialRadius' : new Std.DataWrapper( 0+shader.getUniform('initialRadius').getData()[0] ),
+		'maxBrightness' : new Std.DataWrapper( 0+shader.getUniform('maxBrightness').getData()[0] ),
+		'numDirections' : new Std.DataWrapper( 0+shader.getUniform('numDirections').getData()[0] ),
+		'numSteps' : new Std.DataWrapper( 0+shader.getUniform('numSteps').getData()[0] ),
+		'radiusIncrease' : new Std.DataWrapper( 0+shader.getUniform('radiusIncrease').getData()[0] ),
+		'fxaa' : new Std.DataWrapper(true ),
 	};
 	this.presetManager := new (Std.module('LibGUIExt/PresetManager'))( PADrend.configCache, 'Effects.SSAO2', settings );
 

@@ -21,9 +21,9 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn() {
-	var fps = DataWrapper.createFromConfig(systemConfig, 'Effects.LimitFPS.fps', 25);
+	var fps = Std.DataWrapper.createFromEntry(systemConfig, 'Effects.LimitFPS.fps', 25);
 
-	var enabled = DataWrapper.createFromConfig(systemConfig, 'Effects.LimitFPS.enabled', false);
+	var enabled = Std.DataWrapper.createFromEntry(systemConfig, 'Effects.LimitFPS.enabled', false);
 	enabled.onDataChanged += [fps] => fn(DataWrapper fps, value) {
 		if(value) {
 			registerExtension(

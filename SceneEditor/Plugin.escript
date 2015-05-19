@@ -32,7 +32,7 @@ SceneEditor.plugin := new Plugin({
 
 var plugin = SceneEditor.plugin;
 
-plugin.windowEnabled @(private) := DataWrapper.createFromValue(false);
+plugin.windowEnabled @(private) := new Std.DataWrapper(false);
 plugin.window @(private):= void;
 
 plugin.init @(override) := fn(){
@@ -110,7 +110,7 @@ plugin.showWindow := fn(){
 	});
 
 	Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'),
-						DataWrapper.createFromConfig(PADrend.configCache, "SceneEditor.winRect", [100,100,300,350]));
+						Std.DataWrapper.createFromEntry(PADrend.configCache, "SceneEditor.winRect", [100,100,300,350]));
 
 	var tabPanel =gui.create({
 		GUI.TYPE:	GUI.TYPE_TABBED_PANEL,

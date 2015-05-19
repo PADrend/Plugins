@@ -100,9 +100,9 @@ PADrend.init @(override) := fn(){
 		}
 	
 		// Paths
-		this.userPath = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.user',"./");
-		this.dataPath = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.data',"data/");
-		this.scenePath = DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.scene',dataPath()+"scene/");
+		this.userPath = Std.DataWrapper.createFromEntry(systemConfig,'PADrend.Paths.user',"./");
+		this.dataPath = Std.DataWrapper.createFromEntry(systemConfig,'PADrend.Paths.data',"data/");
+		this.scenePath = Std.DataWrapper.createFromEntry(systemConfig,'PADrend.Paths.scene',dataPath()+"scene/");
 
 		// assure paths end with "/"
 		foreach([this.userPath,this.dataPath,this.scenePath] as var p){
@@ -119,7 +119,7 @@ PADrend.init @(override) := fn(){
 	
 	// setup plugin registry
 	static PluginRegistry = Std.module('LibUtilExt/GlobalPluginRegistry');
-	this.pluginFolders = Std.DataWrapper.createFromConfig(systemConfig,'PADrend.Paths.plugins',[
+	this.pluginFolders = Std.DataWrapper.createFromEntry(systemConfig,'PADrend.Paths.plugins',[
 												IO.condensePath(__DIR__+"/../../extPlugins/"),
 												IO.condensePath(__DIR__+"/../")]);
 	// set plugin folders as module search paths

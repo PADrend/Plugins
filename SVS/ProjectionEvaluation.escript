@@ -40,7 +40,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 	};
 	panel++;
 
-	var numSamplingDirections = DataWrapper.createFromValue(0);
+	var numSamplingDirections = new Std.DataWrapper(0);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_NUMBER,
 		GUI.LABEL			:	"#SamplingDirections:",
@@ -59,7 +59,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 	};
 	panel++;
 
-	var visibilitySphere = DataWrapper.createFromValue(void);
+	var visibilitySphere = new Std.DataWrapper(void);
 	selectedNode.onDataChanged += [visibilitySphere]=>fn(DataWrapper visibilitySphere, selectedNode) {
 		if(!selectedNode || !(selectedNode ---|> MinSG.GroupNode)) {
 			visibilitySphere(void);
@@ -94,7 +94,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 	panel += "*Actions*";
 	panel++;
 
-	var sampleIndex = DataWrapper.createFromValue(0);
+	var sampleIndex = new Std.DataWrapper(0);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_NUMBER,
 		GUI.LABEL			:	"Sample index",
@@ -104,7 +104,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 	};
 	panel++;
 
-	var frustumAngle = DataWrapper.createFromValue(1);
+	var frustumAngle = new Std.DataWrapper(1);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"Frustum angle",
@@ -116,7 +116,7 @@ SVS.setUpProjectionEvaluationWindow := fn() {
 	};
 	panel++;
 
-	var resolution = DataWrapper.createFromValue(512);
+	var resolution = new Std.DataWrapper(512);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"Resolution",

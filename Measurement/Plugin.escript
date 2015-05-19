@@ -64,7 +64,7 @@ MeasurementPlugin.createTab @(private) := fn(gui) {
 		panel += GUI.NEXT_ROW;
 
 		var currentEvaluator = Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator();
-		var evaluatorName = DataWrapper.createFromValue(currentEvaluator ? currentEvaluator.name() : "");
+		var evaluatorName = new Std.DataWrapper(currentEvaluator ? currentEvaluator.name() : "");
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_TEXT,
 			GUI.LABEL				:	"Selected evaluator:",
@@ -80,7 +80,7 @@ MeasurementPlugin.createTab @(private) := fn(gui) {
 			});
 		panel += GUI.NEXT_ROW;
 		
-		var outputFileName = DataWrapper.createFromValue("output.tsv");
+		var outputFileName = new Std.DataWrapper("output.tsv");
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_FILE,
 			GUI.ENDINGS				:	[".tsv"],
@@ -131,7 +131,7 @@ MeasurementPlugin.createTab @(private) := fn(gui) {
 		};
 		panel += GUI.NEXT_ROW;
 		
-		var pointIterations = DataWrapper.createFromValue(3);
+		var pointIterations = new Std.DataWrapper(3);
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_RANGE,
 			GUI.RANGE				:	[1, 10],
@@ -143,7 +143,7 @@ MeasurementPlugin.createTab @(private) := fn(gui) {
 		};
 		panel += GUI.NEXT_ROW;
 		
-		var pathIterations = DataWrapper.createFromValue(1);
+		var pathIterations = new Std.DataWrapper(1);
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_RANGE,
 			GUI.RANGE				:	[1, 10],
@@ -155,7 +155,7 @@ MeasurementPlugin.createTab @(private) := fn(gui) {
 		};
 		panel += GUI.NEXT_ROW;
 		
-		var stepSize = DataWrapper.createFromValue(1.0);
+		var stepSize = new Std.DataWrapper(1.0);
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_RANGE,
 			GUI.RANGE				:	[0.5, 100.0],

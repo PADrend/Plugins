@@ -41,11 +41,11 @@ var plugin = new Plugin({
 	Plugin initialization.	*/
 plugin.init @(override) := fn() {
 
-	var presetPaths = DataWrapper.createFromConfig(systemConfig,'Tools.SpeedDial.folders',[PADrend.getUserPath()+"presets/"]);
+	var presetPaths = Std.DataWrapper.createFromEntry(systemConfig,'Tools.SpeedDial.folders',[PADrend.getUserPath()+"presets/"]);
 	
 	{ // remove after 2014-06
 		
-		var oldPath = DataWrapper.createFromConfig(systemConfig,'Tools.SpeedDial.folder',void);
+		var oldPath = Std.DataWrapper.createFromEntry(systemConfig,'Tools.SpeedDial.folder',void);
 		if(oldPath()){
 			if(!presetPaths().contains(oldPath()))
 				presetPaths( [oldPath()].append(presetPaths())  );
@@ -54,10 +54,10 @@ plugin.init @(override) := fn() {
 	}
 	this.TAG_FOR_THE_UNTAGGED := " - UNTAGGED - ";
 
-	this.mainWindowTags := DataWrapper.createFromConfig(PADrend.configCache,'Tools.SpeedDial.mainWindowTags',[TAG_FOR_THE_UNTAGGED]);
+	this.mainWindowTags := Std.DataWrapper.createFromEntry(PADrend.configCache,'Tools.SpeedDial.mainWindowTags',[TAG_FOR_THE_UNTAGGED]);
 	this.mainWindowTags.onDataChanged += this->fn(...){ this.showWindow(); };
 
-	this.sceneToolTags := DataWrapper.createFromConfig(PADrend.configCache,'Tools.SpeedDial.sceneToolTags',[TAG_FOR_THE_UNTAGGED]);
+	this.sceneToolTags := Std.DataWrapper.createFromEntry(PADrend.configCache,'Tools.SpeedDial.sceneToolTags',[TAG_FOR_THE_UNTAGGED]);
 
 	// Register ExtensionPointHandler:
 	Util.registerExtension('PADrend_KeyPressed',this->fn(evt) {
@@ -217,8 +217,8 @@ plugin.Preset := new Type;
 			var config = new Std.JSONDataStore(true);
 			config.init(this.path+".info");
 
-			this.bgColor = DataWrapper.createFromConfig( config,"bgColor", [0.5,0.5,0.5,0.5] );
-			this.tags = DataWrapper.createFromConfig( config,"tags", [] );
+			this.bgColor = Std.DataWrapper.createFromEntry( config,"bgColor", [0.5,0.5,0.5,0.5] );
+			this.tags = Std.DataWrapper.createFromEntry( config,"tags", [] );
 
 			// backward compatibility \todo remove after 2014-01
 			var enabled = config.getValue('enabled');
@@ -230,7 +230,7 @@ plugin.Preset := new Type;
 					this.tags(tags);
 				}
 			}
-			this.description := DataWrapper.createFromConfig( config,"description", "" );
+			this.description := Std.DataWrapper.createFromEntry( config,"description", "" );
 		}
 	};
 	T.hasTags ::= fn(){	return this.tags && !this.tags().empty();	};

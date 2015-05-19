@@ -41,7 +41,7 @@ plugin.init @(override) := fn(){
     this.fbo:=void;
     this.jump:=false;
     this.lastDirDist:=false;
-    this.ghostMode:= DataWrapper.createFromValue(false);
+    this.ghostMode:= new Std.DataWrapper(false);
 
     this.gravity:=-20.0;
 
@@ -53,7 +53,7 @@ plugin.init @(override) := fn(){
 	this.pos_2 := false;
 
 	this.rayCaster :=void;
-	this.size := DataWrapper.createFromConfig( systemConfig,'Tools.JumpNRun.size',1.5);
+	this.size := Std.DataWrapper.createFromEntry( systemConfig,'Tools.JumpNRun.size',1.5);
 
 	return true;
 };

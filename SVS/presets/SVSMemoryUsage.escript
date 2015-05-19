@@ -11,8 +11,8 @@
  * http://mozilla.org/MPL/2.0/.
  */
 var rootNode = PADrend.getCurrentScene();
-var svsSize = DataWrapper.createFromValue(0);
-var memNodes = DataWrapper.createFromValue(0);
+var svsSize = new Std.DataWrapper(0);
+var memNodes = new Std.DataWrapper(0);
 var meshes = new Map;
 var textures = new Map;
 

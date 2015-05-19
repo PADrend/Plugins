@@ -75,7 +75,7 @@ SceneAnalyzerGUI.createWindow:=fn(posX,posY) {
 	});
 
 	Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'),
-						Std.DataWrapper.createFromConfig(PADrend.configCache, "SceneAnalyzer.winRect", [200,100,420,410]));
+						Std.DataWrapper.createFromEntry(PADrend.configCache, "SceneAnalyzer.winRect", [200,100,420,410]));
 
 	var tabPanel = gui.create({
 		GUI.TYPE:	GUI.TYPE_TABBED_PANEL,
@@ -296,10 +296,10 @@ static createCreationPanel = fn(panel){
 	panel++;
 
 	var config = new ExtObject({
-		$bb : DataWrapper.createFromConfig( PADrend.configCache,'SceneAnalyzer.bb',GASPManager.defaultBB.front() ),
-		$scale : DataWrapper.createFromConfig( PADrend.configCache,'Tools.ScreenShot.bbScale',1.0 ),
-		$resolution : DataWrapper.createFromConfig( PADrend.configCache,'SceneAnalyzer.resolution',GASPManager.defaultResolutions.front() ),
-		$factor : DataWrapper.createFromConfig( PADrend.configCache,'SceneAnalyzer.factor',32 ),
+		$bb : Std.DataWrapper.createFromEntry( PADrend.configCache,'SceneAnalyzer.bb',GASPManager.defaultBB.front() ),
+		$scale : Std.DataWrapper.createFromEntry( PADrend.configCache,'Tools.ScreenShot.bbScale',1.0 ),
+		$resolution : Std.DataWrapper.createFromEntry( PADrend.configCache,'SceneAnalyzer.resolution',GASPManager.defaultResolutions.front() ),
+		$factor : Std.DataWrapper.createFromEntry( PADrend.configCache,'SceneAnalyzer.factor',32 ),
 	});
 
 	panel += {
@@ -631,7 +631,7 @@ static createDisplayPanel = fn(panel){
 
 
 
-	var dirCombineCode = DataWrapper.createFromConfig(PADrend.configCache,'SceneAnalyzer.dirCombine',"" );
+	var dirCombineCode = Std.DataWrapper.createFromEntry(PADrend.configCache,'SceneAnalyzer.dirCombine',"" );
 	panel += {
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "DirCombine-Function:",

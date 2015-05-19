@@ -35,7 +35,7 @@ plugin.init @(override) := fn() {
 	return true;
 };
 static getFolderWrapper = fn(){
-	@(once) static folder = Std.DataWrapper.createFromConfig(PADrend.configCache,"Slides.folder","./screens/");
+	@(once) static folder = Std.DataWrapper.createFromEntry(PADrend.configCache,"Slides.folder","./screens/");
 	return folder;	
 };
 
@@ -57,10 +57,10 @@ static getPresenter = fn(){
 	static presenter;
 	@(once){
 		presenter = new (Std.module('SlidePresenter/SlidePresenter'))(
-													Std.DataWrapper.createFromConfig(PADrend.configCache,"Slides.wRect",[100,100,320,200]),
+													Std.DataWrapper.createFromEntry(PADrend.configCache,"Slides.wRect",[100,100,320,200]),
 													getFolderWrapper(),
-													Std.DataWrapper.createFromConfig(PADrend.configCache,"Slides.fullscreen",false),
-													Std.DataWrapper.createFromConfig(PADrend.configCache,"Slides.stretch",false));
+													Std.DataWrapper.createFromEntry(PADrend.configCache,"Slides.fullscreen",false),
+													Std.DataWrapper.createFromEntry(PADrend.configCache,"Slides.stretch",false));
 	}
 	return presenter;
 };

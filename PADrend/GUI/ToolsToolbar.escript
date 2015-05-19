@@ -25,10 +25,10 @@ var plugin = new Plugin({
 
 // -------------------
 
-static toolbarEnabled = DataWrapper.createFromConfig(PADrend.configCache,'PADrend.GUI.toolsToolbarEnabled',false);
+static toolbarEnabled = Std.DataWrapper.createFromEntry(PADrend.configCache,'PADrend.GUI.toolsToolbarEnabled',false);
 plugin.toolbarEnabled := toolbarEnabled; // public interface
 static toolbar;
-static componentFilter = DataWrapper.createFromConfig(PADrend.configCache,'PADrend.GUI.toolsToolbarFiltered',[]);
+static componentFilter = Std.DataWrapper.createFromEntry(PADrend.configCache,'PADrend.GUI.toolsToolbarFiltered',[]);
 static gui;
 
 plugin.init @(override) := fn(){

@@ -21,7 +21,7 @@ var Tool = new Type;
 Traits.addTrait(Tool,HelperTraits.GenericMeshEditTrait);
 Traits.addTrait(Tool,HelperTraits.AfterRenderingListenerTrait);
 
-Tool.tolerance @(init) := fn(){	return DataWrapper.createFromValue(0.0001);	};
+Tool.tolerance @(init) := fn(){	return new Std.DataWrapper(0.0001);	};
 Tool.cuttingLine @(private) := void;
 
 //! \see ToolHelperTraits.UIToolTrait

@@ -21,8 +21,8 @@ var Tool = new Type;
 
 Traits.addTrait(Tool,ToolHelperTraits.GenericNodeTransformToolTrait);
 
-Tool.localTransform @(init) := fn(){	return DataWrapper.createFromValue(false);	};
-Tool.smartSteps @(init) := fn(){	return DataWrapper.createFromValue(true);	};
+Tool.localTransform @(init) := fn(){	return new Std.DataWrapper(false);	};
+Tool.smartSteps @(init) := fn(){	return new Std.DataWrapper(true);	};
 
 Tool.translationEditNode @(private) := void;
 Tool.gridSizes @(private,const) ::= { // scaling -> grid size
@@ -108,10 +108,10 @@ Tool.onToolInitOnce_static += fn(){
 	metaRootNode += translationEditNode;
 
 	//! \see EditNodeTraits.AnnotatableTrait
-	Traits.addTrait( translationEditNode, EditNodeTraits.AnnotatableTrait);
+	Std.Traits.addTrait( translationEditNode, EditNodeTraits.AnnotatableTrait);
 
 	//! \see EditNodeTraits.AdjustableProjSizeTrait
-	Traits.addTrait( translationEditNode, EditNodeTraits.AdjustableProjSizeTrait);
+	Std.Traits.addTrait( translationEditNode, EditNodeTraits.AdjustableProjSizeTrait);
 
 	translationEditNode.onTranslationStart += this->fn(){
 		this.applyNodeTransformations();				//! \see ToolHelperTraits.NodeTransformationHandlerTrait

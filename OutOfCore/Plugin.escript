@@ -90,7 +90,7 @@ plugin.createNewWindow := fn() {
 			GUI.FLAGS				:	GUI.LOCKED
 		};
 		panelContents += {GUI.TYPE : GUI.TYPE_NEXT_COLUMN};
-		var usedMemory = DataWrapper.createFromValue(0);
+		var usedMemory = new Std.DataWrapper(0);
 		panelContents += {
 			GUI.TYPE				:	GUI.TYPE_NUMBER, 
 			GUI.DATA_WRAPPER		:	usedMemory,
@@ -98,7 +98,7 @@ plugin.createNewWindow := fn() {
 			GUI.FLAGS				:	GUI.LOCKED
 		};
 		panelContents += {GUI.TYPE : GUI.TYPE_NEXT_COLUMN};
-		var overallMemory = DataWrapper.createFromValue(0);
+		var overallMemory = new Std.DataWrapper(0);
 		panelContents += {
 			GUI.TYPE				:	GUI.TYPE_NUMBER, 
 			GUI.DATA_WRAPPER		:	overallMemory,
@@ -106,7 +106,7 @@ plugin.createNewWindow := fn() {
 			GUI.FLAGS				:	GUI.LOCKED
 		};
 		panelContents += {GUI.TYPE : GUI.TYPE_NEXT_COLUMN};
-		var fillLevel = DataWrapper.createFromValue(100);
+		var fillLevel = new Std.DataWrapper(100);
 		panelContents += {
 			GUI.TYPE				:	GUI.TYPE_NUMBER, 
 			GUI.DATA_WRAPPER		:	fillLevel,
@@ -114,7 +114,7 @@ plugin.createNewWindow := fn() {
 			GUI.FLAGS				:	GUI.LOCKED
 		};
 		panelContents += {GUI.TYPE : GUI.TYPE_NEXT_COLUMN};
-		var objects = DataWrapper.createFromValue(0);
+		var objects = new Std.DataWrapper(0);
 		panelContents += {
 			GUI.TYPE				:	GUI.TYPE_NUMBER, 
 			GUI.DATA_WRAPPER		:	objects,
@@ -122,7 +122,7 @@ plugin.createNewWindow := fn() {
 			GUI.FLAGS				:	GUI.LOCKED
 		};
 		panelContents += {GUI.TYPE : GUI.TYPE_NEXT_COLUMN};
-		var lastWorkDuration = DataWrapper.createFromValue(0.0);
+		var lastWorkDuration = new Std.DataWrapper(0.0);
 		panelContents += {
 			GUI.TYPE				:	GUI.TYPE_NUMBER, 
 			GUI.DATA_WRAPPER		:	lastWorkDuration,

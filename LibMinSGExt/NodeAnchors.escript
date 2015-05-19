@@ -91,7 +91,7 @@ static initAnchors = fn(node){
 			Runtime.warn("MinSG.Node._initAnchors: invalid value data: '"+locationValues+"'");
 			continue;
 		}
-		var anchor = DataWrapper.createFromValue( location );
+		var anchor = new Std.DataWrapper( location );
 		anchor.onDataChanged += [node] => updateAnchorAttributes;
 		node.__anchors[attrName] = anchor;
 	}
@@ -106,7 +106,7 @@ NodeAnchors.createAnchor := fn(MinSG.Node node,String anchorName, [Geometry.Vec3
 	var anchor = NodeAnchors.getAnchor(node,anchorName);
 	if(!anchor){
 		// create new anchor
-		anchor = DataWrapper.createFromValue( void );
+		anchor = new Std.DataWrapper( void );
 		anchor.onDataChanged += [node] => updateAnchorAttributes;
 		node.__anchors[anchorName] = anchor;
 	}

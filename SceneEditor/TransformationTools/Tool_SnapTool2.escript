@@ -20,7 +20,7 @@ var Tool = new Type;
 
 Traits.addTrait(Tool,ToolHelperTraits.GenericNodeTransformToolTrait);
 
-Tool.handleIndividualNodes @(init) := fn(){	return DataWrapper.createFromValue(true);	};
+Tool.handleIndividualNodes @(init) := fn(){	return new Std.DataWrapper(true);	};
 Tool.startPos @(private) := void;	// position of the metaNode in worldCoordinates when start dragging or void
 Tool.castSegmentScaling @(private) := 1.0; // influences the length of the casting segments 
 

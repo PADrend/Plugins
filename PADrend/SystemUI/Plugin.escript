@@ -123,8 +123,8 @@ PADrend.SystemUI.init @(override) := fn(){
 	}
 
 	{ // Replace default font
-		var fontFile = DataWrapper.createFromConfig(systemConfig, 'PADrend.renderingFont.fileName', "");
-		var fontSize = DataWrapper.createFromConfig(systemConfig, 'PADrend.renderingFont.size', 24);
+		var fontFile = Std.DataWrapper.createFromEntry(systemConfig, 'PADrend.renderingFont.fileName', "");
+		var fontSize = Std.DataWrapper.createFromEntry(systemConfig, 'PADrend.renderingFont.size', 24);
 		var replaceDefaultFont = [fontFile, fontSize] => fn(DataWrapper fontFile, DataWrapper fontSize, ...) {
 			if(!fontFile().empty() && fontSize() > 0) {
 				if(Util.isFile(fontFile())) {

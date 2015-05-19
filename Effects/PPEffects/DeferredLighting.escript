@@ -20,7 +20,7 @@ var Effect = new Type( Std.module('Effects/PPEffect') );
 Effect.debug := void;
 
 Effect._constructor ::= fn() {
-	debug = DataWrapper.createFromValue(false);
+	debug = new Std.DataWrapper(false);
 	
 	this.fbo := new Rendering.FBO();
 	renderingContext.pushAndSetFBO(fbo);

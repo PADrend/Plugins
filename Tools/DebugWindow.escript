@@ -58,7 +58,7 @@ static toggleWindow = fn(){
 		});
 		//! \see GUI.StorableRectTrait
 		Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'), 
-						DataWrapper.createFromConfig(PADrend.configCache, "Tools.debug", [200,200,300,300]));
+						Std.DataWrapper.createFromEntry(PADrend.configCache, "Tools.debug", [200,200,300,300]));
 
 		var tabPanel = gui.create({
 			GUI.TYPE:	GUI.TYPE_TABBED_PANEL,

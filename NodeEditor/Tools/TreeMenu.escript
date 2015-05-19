@@ -264,7 +264,7 @@ gui.register('NodeEditor_TreeToolsMenu.treeOperations',[
 			showWaitingScreen();
 			out("Remove state...\n");
 			var dataWrap =new ExtObject({
-				$state : DataWrapper.createFromValue( "" ),
+				$state : new Std.DataWrapper( "" ),
 			});
 			var popup = gui.createPopupWindow( 180,180,"Remove state" );
 			var states = new Map();

@@ -16,9 +16,9 @@ var Evaluator = new Type(MinSG.ScriptedEvaluator);
 Evaluator._constructor ::= fn() {
 	this.imageComparator := void;
 
-	this.firstImageDirectory := DataWrapper.createFromConfig(PADrend.configCache, 'MinSG.ImageCompare.firstReadDirectory', "");
-	this.secondImageDirectory := DataWrapper.createFromConfig(PADrend.configCache, 'MinSG.ImageCompare.secondReadDirectory', "");
-	this.imageCounter := DataWrapper.createFromValue(0);
+	this.firstImageDirectory := Std.DataWrapper.createFromEntry(PADrend.configCache, 'MinSG.ImageCompare.firstReadDirectory', "");
+	this.secondImageDirectory := Std.DataWrapper.createFromEntry(PADrend.configCache, 'MinSG.ImageCompare.secondReadDirectory', "");
+	this.imageCounter := new Std.DataWrapper(0);
 
 	this.result := void;
 };

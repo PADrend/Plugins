@@ -25,11 +25,11 @@ sampler.name = "Adaptive Sampler";
 
 
 sampler.settings := new ExtObject({
-	$breakExpression : DataWrapper.createFromValue( "" ).setOptions([ "ctxt.sampleCount>500","ctxt.sampleCount>1000"]),
-	$numberOfSamplesExpression : DataWrapper.createFromValue( "" ).setOptions(["region.getSize().sqrt().floor()*0.1+1","region.getDiameter().floor()*0.1+1"]),
-	$qualityExpression : DataWrapper.createFromValue( "" ).setOptions([ "numSamples / (diff*region.getDiameter())" ]),
-	$sampleExpression1 : DataWrapper.createFromValue( "" ).setOptions([ "getRandomPositions2(ctxt,region,numNewSamples)" ]),
-	$sampleExpression2 : DataWrapper.createFromValue( "" ).setOptions([ "getRegionCorners(newRegion)","[]"]),
+	$breakExpression : (new Std.DataWrapper( "" )).setOptions([ "ctxt.sampleCount>500","ctxt.sampleCount>1000"]),
+	$numberOfSamplesExpression : (new Std.DataWrapper( "" )).setOptions(["region.getSize().sqrt().floor()*0.1+1","region.getDiameter().floor()*0.1+1"]),
+	$qualityExpression : (new Std.DataWrapper( "" )).setOptions([ "numSamples / (diff*region.getDiameter())" ]),
+	$sampleExpression1 : (new Std.DataWrapper( "" )).setOptions([ "getRandomPositions2(ctxt,region,numNewSamples)" ]),
+	$sampleExpression2 : (new Std.DataWrapper( "" )).setOptions([ "getRegionCorners(newRegion)","[]"]),
 });
 
 sampler.presetManager := new (Std.module('LibGUIExt/PresetManager'))( PADrend.configCache,'SceneAnalyzer.cSampler',sampler.settings );

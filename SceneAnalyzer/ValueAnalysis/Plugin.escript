@@ -38,7 +38,7 @@ plugin.ex_Init := fn(...){
 		var page=gui.createPanel(100,100,GUI.AUTO_LAYOUT);
 
 		var settings = new ExtObject({
-				$numBuckets : DataWrapper.createFromConfig( PADrend.configCache,'SceneAnalyzer.ValuaAnalysis.numBuckets',20 ),
+				$numBuckets : Std.DataWrapper.createFromEntry( PADrend.configCache,'SceneAnalyzer.ValuaAnalysis.numBuckets',20 ),
 		});
 
 		page += [ 

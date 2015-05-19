@@ -23,8 +23,8 @@ Traits.addTrait(Tool,HelperTraits.GenericMeshEditTrait);
 Traits.addTrait(Tool,HelperTraits.MeshTransformationHandlerTrait);
 
 
-Tool.normalTransform @(init) := fn(){	return DataWrapper.createFromValue(false);	};
-Tool.vertexMode @(init) := fn(){	return DataWrapper.createFromValue(false);	};
+Tool.normalTransform @(init) := fn(){	return new Std.DataWrapper(false);	};
+Tool.vertexMode @(init) := fn(){	return new Std.DataWrapper(false);	};
 
 Tool.editNode @(private) := void;
 
@@ -48,10 +48,10 @@ Tool.onToolInitOnce_static += fn(){
 	metaRootNode += editNode;
 
 	//! \see EditNodeTraits.AnnotatableTrait
-	Traits.addTrait( editNode, EditNodeTraits.AnnotatableTrait);
+	Std.Traits.addTrait( editNode, EditNodeTraits.AnnotatableTrait);
 
 	//! \see EditNodeTraits.AdjustableProjSizeTrait
-	Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait);
+	Std.Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait);
 
 	editNode.onTranslationStart += this->fn(){
 		this.applyVertexTransformations();				//! \see HelperTraits.MeshTransformationHandlerTrait

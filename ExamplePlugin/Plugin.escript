@@ -56,7 +56,7 @@ static cash; // holds your current amount of gold
  */
 plugin.init @(override) :=fn() {
 	// cash = new Std.DataWrapper(100); // always start with 100 gold
-	cash = Std.DataWrapper.createFromConfig( PADrend.configCache,'ExamplePlugin.gold',100 ); // automatically store the gold in the config
+	cash = Std.DataWrapper.createFromEntry( PADrend.configCache,'ExamplePlugin.gold',100 ); // automatically store the gold in the config
 	cash.onDataChanged += fn(value)	{	
 		PADrend.message("You now have "+value+" gold.\n");
 	};

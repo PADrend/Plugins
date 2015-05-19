@@ -33,16 +33,16 @@ static plugin = new Plugin({
 });
 
 
-plugin.autoGroundLevel @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.autoGroundLevel',true);
-plugin.enabled @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.enabled',false);
-plugin.groundLevel @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.groundLevel',0);
-plugin.hazeEnabled @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.useHaze',true);
-plugin.hazeFar @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.hazeFar',250);
-plugin.hazeNear @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.hazeNear',100);
-plugin.scale @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.scale',1);
-plugin.type @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.type',0);
-plugin.waterRefraction @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.waterRefraction',0.1);
-plugin.waterReflection @(const) := DataWrapper.createFromConfig(systemConfig,'Effects.InfiniteGround.waterReflection',0.5);
+plugin.autoGroundLevel @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.autoGroundLevel',true);
+plugin.enabled @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.enabled',false);
+plugin.groundLevel @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.groundLevel',0);
+plugin.hazeEnabled @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.useHaze',true);
+plugin.hazeFar @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.hazeFar',250);
+plugin.hazeNear @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.hazeNear',100);
+plugin.scale @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.scale',1);
+plugin.type @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.type',0);
+plugin.waterRefraction @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.waterRefraction',0.1);
+plugin.waterReflection @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.waterReflection',0.5);
 
 static resourcesFolder = __DIR__+"/resources";
 
@@ -51,7 +51,7 @@ plugin.getHazeColor := fn(){
 	return (skyPlugin && skyPlugin.isEnabled() && skyPlugin.getHazeColor()) ? skyPlugin.getHazeColor() :  PADrend.getBGColor();
 };
 
-plugin.groundColor := DataWrapper.createFromValue(new Util.Color4f(1,1,1,1));
+plugin.groundColor := new Std.DataWrapper(new Util.Color4f(1,1,1,1));
 	
 plugin.init @(override) := fn(){
 	module.on('PADrend/gui',registerGUI);

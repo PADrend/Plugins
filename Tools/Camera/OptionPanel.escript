@@ -59,8 +59,8 @@ CameraWindowPlugin.createOptionPanel := fn(MinSG.AbstractCameraNode camera) {
 		};
 		panel++;
 
-		var dollyStorage = DataWrapper.createFromValue(void);
-		var moveCamera = DataWrapper.createFromValue(false);
+		var dollyStorage = new Std.DataWrapper(void);
+		var moveCamera = new Std.DataWrapper(false);
 		moveCamera.onDataChanged +=	[camera, dollyStorage] => fn(camera, dollyStorage, moveCamera) {
 										if(moveCamera) {
 											dollyStorage(PADrend.getCameraMover().getDolly());
@@ -80,7 +80,7 @@ CameraWindowPlugin.createOptionPanel := fn(MinSG.AbstractCameraNode camera) {
 		panel++;
 	}
 
-	var displayFrustum = DataWrapper.createFromValue(false);
+	var displayFrustum = new Std.DataWrapper(false);
 	displayFrustum.onDataChanged +=	[camera] => fn(camera, displayFrustum) {
 										if(displayFrustum) {
 											registerExtension('PADrend_AfterRenderingPass', [camera, this] => fn(camera, displayFrustum, dummy) {
@@ -106,7 +106,7 @@ CameraWindowPlugin.createOptionPanel := fn(MinSG.AbstractCameraNode camera) {
 		$icon				:	void,
 		$isRegisteredBefore	:	false,
 		$isRegisteredAfter	:	false,
-		$doDisplay			:	DataWrapper.createFromValue(0),
+		$doDisplay			:	new Std.DataWrapper(0),
 
 		$textureToIcon 		: fn(texture, icon){
 			texture.download(GLOBALS.renderingContext);

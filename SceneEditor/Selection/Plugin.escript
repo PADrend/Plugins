@@ -34,7 +34,7 @@ static TOOL_ID = 'SceneEditor_Selection';
 static selectionRect;
 static selectionStartingPos;
 static mode_selectOnIntersection = new Std.DataWrapper(true); 
-static includeSemObj  = DataWrapper.createFromValue(false);
+static includeSemObj  = new Std.DataWrapper(false);
 
 plugin.init @(override) := fn(){
 	module.on('PADrend/gui',registerGUI);

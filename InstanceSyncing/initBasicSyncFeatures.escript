@@ -73,7 +73,7 @@ Util.registerExtension('InstanceSyncing_AddClientFeatures', fn(client){
 
 	static activeComponent;
 
-	static autoCreateServer = Std.DataWrapper.createFromConfig(systemConfig,'MultiView.autoCreateServer',false); 
+	static autoCreateServer = Std.DataWrapper.createFromEntry(systemConfig,'MultiView.autoCreateServer',false); 
 	autoCreateServer.onDataChanged += fn(enabled){
 		if(enabled){
 			@(once) PADrend.planTask(2.0,fn(){
@@ -94,7 +94,7 @@ Util.registerExtension('InstanceSyncing_AddClientFeatures', fn(client){
 		server.onClose += fn(){		activeComponent = void;	};
 	});
 
-	static autoConnectClient = Std.DataWrapper.createFromConfig(systemConfig,'MultiView.autoConnectClient',false); 
+	static autoConnectClient = Std.DataWrapper.createFromEntry(systemConfig,'MultiView.autoConnectClient',false); 
 	autoConnectClient.onDataChanged += fn(enabled){
 		if(enabled){
 			@(once)	PADrend.planTask(1.0,fn(){
@@ -151,13 +151,13 @@ Util.registerExtension('InstanceSyncing_AddClientFeatures', fn(client){
 //! \note requires per client sync vars.
 {
 
-static clientId =Std.DataWrapper.createFromConfig(systemConfig,'MultiView.clientId',"Client"); // this instance's clientId.
+static clientId =Std.DataWrapper.createFromEntry(systemConfig,'MultiView.clientId',"Client"); // this instance's clientId.
 
 //! \see [ext:InstanceSyncing_AddServerFeatures]
 Util.registerExtension('InstanceSyncing_AddServerFeatures', fn(server){
 	server.onNewClientStub += fn(ClientStub clientStub){
 		assert(clientStub.syncVars);
-		clientStub.syncVars.addDataWrapper('clientId',DataWrapper.createFromValue(void));
+		clientStub.syncVars.addDataWrapper('clientId',new Std.DataWrapper(void));
 	};
 });
 

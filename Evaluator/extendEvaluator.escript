@@ -60,10 +60,10 @@ MinSG.Evaluator.getDirectionPresets ::= fn(){
 
 /*!	Called once upon registration. */
 MinSG.Evaluator.init ::= fn() {
-	this.cameraAngle := DataWrapper.createFromConfig(PADrend.configCache, 'MinSG.Evaluator.cameraAngle', 120);
+	this.cameraAngle := Std.DataWrapper.createFromEntry(PADrend.configCache, 'MinSG.Evaluator.cameraAngle', 120);
 	this.measurementResolution := void;
 	this.measurementResolutionExpression := void;
-	this.directionPresetName := DataWrapper.createFromConfig(PADrend.configCache, 'MinSG.Evaluator.directions', 'octrahedron');
+	this.directionPresetName := Std.DataWrapper.createFromEntry(PADrend.configCache, 'MinSG.Evaluator.directions', 'octrahedron');
 	this.directionPresetName.onDataChanged += this->update;
 
 	this.name := new Std.DataWrapper(this.createName());

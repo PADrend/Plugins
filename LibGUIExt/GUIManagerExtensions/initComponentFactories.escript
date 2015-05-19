@@ -528,9 +528,9 @@ GUI.GUI_Manager._createComponentFromDescription @(private) ::= fn(Map descriptio
 				dataWrapper = _dataWrapper;
 			} // single value?
 			else if(description.containsKey(GUI.DATA_VALUE)){
-				dataWrapper = Std.DataWrapper.createFromValue(description[GUI.DATA_VALUE]);
+				dataWrapper = new Std.DataWrapper(description[GUI.DATA_VALUE]);
 			}else{ // no data given?
-				dataWrapper = Std.DataWrapper.createFromValue( inputComponent.getData() );
+				dataWrapper = new Std.DataWrapper( inputComponent.getData() );
 			}
 			if(!inputComponent.setData){
 				print_r(description);
@@ -915,7 +915,7 @@ GUI.GUI_Manager._componentFactories ::= {
 		
 		var collapsed = input.description.get(GUI.COLLAPSED,false);
 		if(! (collapsed.isA(Std.DataWrapper)))
-			collapsed = Std.DataWrapper.createFromValue(collapsed);
+			collapsed = new Std.DataWrapper(collapsed);
 		
 
 		var header = this.create({

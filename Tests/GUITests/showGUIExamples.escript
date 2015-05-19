@@ -486,7 +486,7 @@ p += GUI.NEXT_ROW;
 	// ------------------------------------------
 	p += "*DataWrapper*";
 	p += GUI.NEXT_ROW;
-	var sideLength =Std.DataWrapper.createFromConfig( PADrend.configCache,'Test.GuiTests.sideLength',1 ).setOptions([1,2,4,9]);
+	var sideLength =Std.DataWrapper.createFromEntry( PADrend.configCache,'Test.GuiTests.sideLength',1 ).setOptions([1,2,4,9]);
 	var area =Std.DataWrapper.createFromFunctions( [sideLength]=>fn(sideLength){	return sideLength()*sideLength(); },
 												[sideLength]=>fn(sideLength,data){	sideLength.set(data.sqrt());} );
 	// propagate changes of the sideLength to the area. sideLength and data are now directly connected, even without any gui element triggering a refreshGroup.
@@ -970,7 +970,7 @@ p += {
 	GUI.TYPE : GUI.TYPE_COLLAPSIBLE_CONTAINER,
 	GUI.HEADER : ["Collapsible"," container ","II"],
 	GUI.CONTENTS : fn(){return ["The collapsing state of this container\nis stored in the config."];},
-	GUI.COLLAPSED :Std.DataWrapper.createFromConfig( PADrend.configCache,'Test.GuiTests.collapsedContainer',false )
+	GUI.COLLAPSED :Std.DataWrapper.createFromEntry( PADrend.configCache,'Test.GuiTests.collapsedContainer',false )
 };
 p += GUI.NEXT_ROW;
 p += '----';
@@ -1080,6 +1080,25 @@ p += GUI.NEXT_ROW;
 	p += GUI.NEXT_ROW;
 }
 
+//static LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. "
+//	"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit "
+//	"in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia "
+//	"deserunt mollit anim id est laborum."
+//
+//p += {
+//	GUI.TYPE : GUI.TYPE_FLOW_TEXT_CONTAINER
+//	GUI.SIZE :  [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_CHILDREN_ABS,30,10],
+//	GUI.CONTENTS : [
+//		LOREM_IPSUM
+//	]
+//};
+
+
+
+
+// ----------------------------------------------------------------------------------------------
+// bugs
+
 p += "----";
 p += GUI.NEXT_ROW;
 p += "*Bug Testcases*";
@@ -1140,7 +1159,4 @@ p += {
 		]
 		
 	};
-	
-	
-	
 }

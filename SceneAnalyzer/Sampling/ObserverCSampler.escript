@@ -26,8 +26,8 @@ sampler.name = "Observer Sampler";
 
 
 sampler.config := new ExtObject({
-//	$breakExpression : DataWrapper.createFromConfig( PADrend.configCache,'SceneAnalyzer.cSampler.break',"ctxt.sampleCount>500" ),
-	$qualityExpression : DataWrapper.createFromConfig( PADrend.configCache,'SceneAnalyzer.cSampler.quality',"numSamples / (diff*region.getDiameter())" ),
+//	$breakExpression : Std.DataWrapper.createFromEntry( PADrend.configCache,'SceneAnalyzer.cSampler.break',"ctxt.sampleCount>500" ),
+	$qualityExpression : Std.DataWrapper.createFromEntry( PADrend.configCache,'SceneAnalyzer.cSampler.quality',"numSamples / (diff*region.getDiameter())" ),
 });
 
 sampler.activeContext := void;

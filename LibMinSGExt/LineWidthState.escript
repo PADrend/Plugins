@@ -15,7 +15,7 @@ var LineWidthState = new Type(MinSG.ScriptedState);
 LineWidthState._printableName @(override) ::= $LineWidthState;
 
 LineWidthState.lineWidth @(init) := fn() {
-	return DataWrapper.createFromValue(1.0);
+	return new Std.DataWrapper(1.0);
 };
 
 LineWidthState.doEnableState @(override) ::= fn(d*) {

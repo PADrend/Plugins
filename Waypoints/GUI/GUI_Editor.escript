@@ -341,7 +341,7 @@ return fn(tabbedPanel){
 		GUI.TOOLTIP : "Swap selected waypoints (timestamp)"
 	};
 	
-	var speedDataWrapper = DataWrapper.createFromValue(1.0);
+	var speedDataWrapper = new Std.DataWrapper(1.0);
 	toolbarEntries+={
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "Timestamp",

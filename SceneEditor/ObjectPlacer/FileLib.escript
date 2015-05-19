@@ -44,7 +44,7 @@ static registeredLibraries;
 plugin.init @(override) := fn(){
 	Util.registerExtension('PADrend_Init',fn(){
 
-		registeredLibraries = DataWrapper.createFromConfig(PADrend.configCache,'ObjectPlacer.libs2',new Map); // id -> [path,Bool recursive,Bool meshes]
+		registeredLibraries = Std.DataWrapper.createFromEntry(PADrend.configCache,'ObjectPlacer.libs2',new Map); // id -> [path,Bool recursive,Bool meshes]
 		// register gui components when registeredLibraries changes.
 		registeredLibraries.onDataChanged += fn( libs ){
 			@(once) static oldLibs = new Map;
@@ -95,8 +95,8 @@ plugin.init @(override) := fn(){
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Add file library",
 			GUI.ON_CLICK : fn(){
-				var recursive =  DataWrapper.createFromConfig(PADrend.configCache,'ObjectPlacer.recursive',false); // default setting for new libraries
-				var meshes =  DataWrapper.createFromConfig(PADrend.configCache,'ObjectPlacer.meshes',true); // default setting for new libraries
+				var recursive =  Std.DataWrapper.createFromEntry(PADrend.configCache,'ObjectPlacer.recursive',false); // default setting for new libraries
+				var meshes =  Std.DataWrapper.createFromEntry(PADrend.configCache,'ObjectPlacer.meshes',true); // default setting for new libraries
 				gui.openDialog({
 					GUI.TYPE : GUI.TYPE_FOLDER_DIALOG,
 					GUI.LABEL : "Select Library Folder ",

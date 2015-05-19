@@ -23,12 +23,12 @@ Traits.addTrait(Tool,HelperTraits.GenericMeshEditTrait);
 Traits.addTrait(Tool,HelperTraits.MeshTransformationHandlerTrait);
 
 
-Tool.normalTransform @(init) := fn(){	return DataWrapper.createFromValue(false);	};
+Tool.normalTransform @(init) := fn(){	return new Std.DataWrapper(false);	};
 
 Tool.editNode @(private) := void;
-Tool.pivot_ws @(init) := fn(){	return DataWrapper.createFromValue(void);	};
-Tool.stepSize @(private,init) := fn(){	return DataWrapper.createFromValue(1);	};
-Tool.vertexMode @(init) := fn(){	return DataWrapper.createFromValue(false);	};
+Tool.pivot_ws @(init) := fn(){	return new Std.DataWrapper(void);	};
+Tool.stepSize @(private,init) := fn(){	return new Std.DataWrapper(1);	};
+Tool.vertexMode @(init) := fn(){	return new Std.DataWrapper(false);	};
 
 Tool.onUIEvent = fn(evt) {
 	if(vertexMode()) {
@@ -50,10 +50,10 @@ Tool.onToolInitOnce_static += fn(){
 	metaRootNode += editNode;
 
 	//! \see EditNodeTraits.AnnotatableTrait
-	Traits.addTrait( editNode, EditNodeTraits.AnnotatableTrait);
+	Std.Traits.addTrait( editNode, EditNodeTraits.AnnotatableTrait);
 
 	//! \see EditNodeTraits.AdjustableProjSizeTrait
-	Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait);
+	Std.Traits.addTrait( editNode, EditNodeTraits.AdjustableProjSizeTrait);
 
 	//! \see ToolHelperTraits.FrameListenerTrait
 	this.onFrame +=	editNode->editNode.adjustProjSize; //! \see EditNodeTraits.AdjustableProjSizeTrait

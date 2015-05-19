@@ -33,13 +33,13 @@ plugin.init @(override) := fn(){
 
 	enabled.onDataChanged += update;
 	
-	height = DataWrapper.createFromConfig( systemConfig,'Tools.MovementConstraints.height',0.0);
+	height = Std.DataWrapper.createFromEntry( systemConfig,'Tools.MovementConstraints.height',0.0);
 	height.onDataChanged += update;
 		
-	restrictXRotation = DataWrapper.createFromConfig( systemConfig,'Tools.MovementConstraints.restrictXRotation',true);
+	restrictXRotation = Std.DataWrapper.createFromEntry( systemConfig,'Tools.MovementConstraints.restrictXRotation',true);
 	restrictXRotation.onDataChanged += update;
 
-	restrictHeight = DataWrapper.createFromConfig( systemConfig,'Tools.MovementConstraints.restrictHeight',true);
+	restrictHeight = Std.DataWrapper.createFromEntry( systemConfig,'Tools.MovementConstraints.restrictHeight',true);
 	restrictHeight.onDataChanged += update;
 
 	module.on('PADrend/gui',fn(gui){

@@ -110,7 +110,7 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 	};
 	panel++;
 
-	var numSamplingDirections = DataWrapper.createFromValue(0);
+	var numSamplingDirections = new Std.DataWrapper(0);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_NUMBER,
 		GUI.LABEL			:	"#SamplingDirections:",
@@ -129,7 +129,7 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 	};
 	panel++;
 
-	var visibilitySphere = DataWrapper.createFromValue(void);
+	var visibilitySphere = new Std.DataWrapper(void);
 	selectedNode.onDataChanged += [visibilitySphere] => fn(DataWrapper visibilitySphere, selectedNode) {
 		if(!selectedNode || !(selectedNode ---|> MinSG.GroupNode)) {
 			visibilitySphere(void);
@@ -164,7 +164,7 @@ SVS.setUpVisibleSetEvaluationWindow := fn() {
 	panel += "*Actions*";
 	panel++;
 
-	var resolution = DataWrapper.createFromValue(8192);
+	var resolution = new Std.DataWrapper(8192);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"Resolution",

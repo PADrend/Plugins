@@ -16,7 +16,7 @@ SVS.VisibleSetEvaluator := new Type(MinSG.ScriptedEvaluator);
 
 SVS.VisibleSetEvaluator._constructor ::= fn() {
 	this.fbo := new Rendering.FBO;
-	this.pvsSource := DataWrapper.createFromValue(void);
+	this.pvsSource := new Std.DataWrapper(void);
 
 	this.potentiallyVisibleSet := void;
 	this.exactVisibleSet := void;

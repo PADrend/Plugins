@@ -16,8 +16,8 @@ var Evaluator = new Type(MinSG.ScriptedEvaluator);
 Evaluator._constructor ::= fn() {
 	this.fbo := new Rendering.FBO;
 
-	this.imageDirectory := DataWrapper.createFromConfig(PADrend.configCache, 'MinSG.ImageCompare.writeDirectory', "");
-	this.imageCounter := DataWrapper.createFromValue(0);
+	this.imageDirectory := Std.DataWrapper.createFromEntry(PADrend.configCache, 'MinSG.ImageCompare.writeDirectory', "");
+	this.imageCounter := new Std.DataWrapper(0);
 };
 
 Evaluator.beginMeasure @(override)::= fn() {

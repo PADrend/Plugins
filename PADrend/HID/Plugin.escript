@@ -25,7 +25,7 @@ var plugin = new Plugin({
 plugin.init @(override) := fn(){
 	
 
-	PADrend.HID.initDefaultGamepad( DataWrapper.createFromConfig(systemConfig,'PADrend.Input.analogSensitivity',0.05) );
+	PADrend.HID.initDefaultGamepad( Std.DataWrapper.createFromEntry(systemConfig,'PADrend.Input.analogSensitivity',0.05) );
 
 
 //		// create and register virtual keyboard gamepad \see #677

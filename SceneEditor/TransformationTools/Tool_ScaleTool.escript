@@ -20,7 +20,7 @@ var Tool = new Type;
 
 Traits.addTrait(Tool,ToolHelperTraits.GenericNodeTransformToolTrait);
 
-Tool.localTransform @(init) := fn(){	return DataWrapper.createFromValue(false);	};
+Tool.localTransform @(init) := fn(){	return new Std.DataWrapper(false);	};
 
 //! \see ToolHelperTraits.UIToolTrait
 Tool.onToolInitOnce_static += fn(){

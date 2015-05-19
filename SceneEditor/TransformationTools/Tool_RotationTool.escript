@@ -54,10 +54,10 @@ var Tool = new Type;
 //! \see ToolHelperTraits.GenericNodeTransformToolTrait
 Traits.addTrait(Tool,ToolHelperTraits.GenericNodeTransformToolTrait);
 
-Tool.pivot_ws @(init) := fn(){	return DataWrapper.createFromValue(void);	};
+Tool.pivot_ws @(init) := fn(){	return new Std.DataWrapper(void);	};
 Tool.editNode @(private) := void;
-Tool.stepSize @(private,init) := fn(){	return DataWrapper.createFromValue(1);	};
-Tool.localTransform @(init) := fn(){	return DataWrapper.createFromValue(true);	};
+Tool.stepSize @(private,init) := fn(){	return new Std.DataWrapper(1);	};
+Tool.localTransform @(init) := fn(){	return new Std.DataWrapper(true);	};
 
 //! (internal) Call to store the current pivot at the node if necessary.
 Tool.storePivotAtNode ::= fn(){
@@ -339,7 +339,7 @@ Tool.doCreateContextMenu ::= fn(){
 		GUI.TYPE : GUI.TYPE_MENU,
 		GUI.LABEL : "Rotate",
 		GUI.MENU : this->fn(){
-			var value = DataWrapper.createFromValue(0);
+			var value = new Std.DataWrapper(0);
 			var refreshGroup = new GUI.RefreshGroup;
 
 			var localContainer = gui.create({

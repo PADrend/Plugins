@@ -14,9 +14,9 @@
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
 Effect._constructor ::= fn() @(super(Rendering.Shader.loadShader(getShaderFolder() + "Simple_130.vs", getShaderFolder() + "DepthDerivative.fs", Rendering.Shader.USE_UNIFORMS))) {
-	this.derivativeOrder := DataWrapper.createFromValue(3);
-	this.edgeHighlightMode := DataWrapper.createFromValue(true);
-	this.epsilon := DataWrapper.createFromValue(0.00001);
+	this.derivativeOrder := new Std.DataWrapper(3);
+	this.edgeHighlightMode := new Std.DataWrapper(true);
+	this.epsilon := new Std.DataWrapper(0.00001);
 };
 
 Effect.applyUniforms @(override) ::= fn() {

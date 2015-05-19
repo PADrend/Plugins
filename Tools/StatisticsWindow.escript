@@ -94,20 +94,20 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 
 	//! \see GUI.StorableRectTrait
 	Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'),
-			DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".rect", windowRectDefault));
+			Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".rect", windowRectDefault));
 
 
-	var openAutomatically = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".openAutomatically", false);
+	var openAutomatically = Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".openAutomatically", false);
 
 	// *** Window Title ***
-	var windowTitle = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".title", windowConfigPrefix);
+	var windowTitle = Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".title", windowConfigPrefix);
 	windowTitle.onDataChanged += window -> window.setTitle;
 	window.setTitle(windowTitle());
 
 	// *** Window Colors ***
-	var windowForegroundColor = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".foregroundColor", [1, 1, 1, 1]);
-	var windowBackgroundColor = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".backgroundColor", [0, 0, 0, 0]);
-	var windowHighlightColor = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".highlightColor", [1, 0, 0, 1]);
+	var windowForegroundColor = Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".foregroundColor", [1, 1, 1, 1]);
+	var windowBackgroundColor = Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".backgroundColor", [0, 0, 0, 0]);
+	var windowHighlightColor = Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".highlightColor", [1, 0, 0, 1]);
 	var backgroundShapeProperty = new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,
 														gui._createRectShape(GUI.BLACK, GUI.NO_COLOR, true));
 
@@ -117,7 +117,7 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 	};
 	windowBackgroundColor.onDataChanged += resetBackground;
 
-	var fontSize = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".fontSize", 1);
+	var fontSize = Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".fontSize", 1);
 
 	// *** Context Menu *** \see GUI.ContextMenuTrait
 	window.contextMenuProvider += [
@@ -198,7 +198,7 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 
 	// *** Labels for Counters ***
 	var counterConfigData = [];
-	var showFpsLabel = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".showFpsLabel", true);
+	var showFpsLabel = Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".showFpsLabel", true);
 	var rebuildLabels = [page, counterConfigData, showFpsLabel, windowForegroundColor, windowHighlightColor, fontSize] =>
 							fn(panel, Array counterConfigData, showFpsLabel, fgValues, highlightValues, fontSize, ...) {
 		panel.destroyContents();
@@ -311,7 +311,7 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 	var refreshConfigData =  [windowConfigPrefix,rebuildLabels,counterConfigData] => fn(windowConfigPrefix,rebuildLabels,counterConfigData){
 		for(var counter = 0; counter < PADrend.frameStatistics.getNumCounters(); ++counter) {
 			var description = PADrend.frameStatistics.getDescription(counter);
-			counterConfigData[counter] = DataWrapper.createFromConfig(PADrend.configCache, windowConfigPrefix + ".Counters." + description, false);
+			counterConfigData[counter] = Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".Counters." + description, false);
 			// Rebuild the panel when a counter is changed
 			counterConfigData[counter].onDataChanged += rebuildLabels;
 		}

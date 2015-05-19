@@ -32,13 +32,13 @@ var Tool = new Type;
 Traits.addTrait(Tool,HelperTraits.GenericMeshEditTrait);
 Traits.addTrait(Tool,HelperTraits.MeshTransformationHandlerTrait);
 
-Tool.normalTransform @(init) := fn(){	return DataWrapper.createFromValue(false);	};
+Tool.normalTransform @(init) := fn(){	return new Std.DataWrapper(false);	};
 
 Tool.editNode @(private) := void;
 Tool.scaleNode @(private) := void;
-Tool.pivot_ws @(init) := fn(){	return DataWrapper.createFromValue(void);	};
-Tool.stepSize @(private,init) := fn(){	return DataWrapper.createFromValue(1);	};
-Tool.vertexMode @(init) := fn(){	return DataWrapper.createFromValue(false);	};
+Tool.pivot_ws @(init) := fn(){	return new Std.DataWrapper(void);	};
+Tool.stepSize @(private,init) := fn(){	return new Std.DataWrapper(1);	};
+Tool.vertexMode @(init) := fn(){	return new Std.DataWrapper(false);	};
 
 Tool.onUIEvent = fn(evt) {
 	if(vertexMode()) {

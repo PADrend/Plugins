@@ -1562,7 +1562,7 @@ gui.register(CONFIG_PREFIX + MinSG.TextureState, fn(MinSG.TextureState state) {
 	};
 	entries += GUI.NEXT_ROW;
 
-	var textureFile = Std.DataWrapper.createFromValue("");
+	var textureFile = new Std.DataWrapper("");
 	if(state.hasTexture()) {
 		textureFile(state.getTexture().getFileName().toString());
 	}

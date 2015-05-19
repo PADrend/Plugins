@@ -105,13 +105,13 @@ static createRenderingPasses = fn(renderingPasses){
 
 
 plugin.init @(override) := fn(){
-	stereoMode = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.stereoMode',MODE_DISABLED);
-	compressGUI = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.compressGUI',false);
+	stereoMode = Std.DataWrapper.createFromEntry(systemConfig,'Effects.Stereo.stereoMode',MODE_DISABLED);
+	compressGUI = Std.DataWrapper.createFromEntry(systemConfig,'Effects.Stereo.compressGUI',false);
 	compressGUI.onDataChanged += fn(...){
 		stereoMode.forceRefresh();
 	};
-	leftEyeHeadOffset = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.lOffset',"-0.03 0 0");
-	rightEyeHeadOffset = DataWrapper.createFromConfig(systemConfig,'Effects.Stereo.rOffset',"0.03 0 0");
+	leftEyeHeadOffset = Std.DataWrapper.createFromEntry(systemConfig,'Effects.Stereo.lOffset',"-0.03 0 0");
+	rightEyeHeadOffset = Std.DataWrapper.createFromEntry(systemConfig,'Effects.Stereo.rOffset',"0.03 0 0");
 	
 	PADrend.syncVars.addDataWrapper('Effects.Stereo.lOffset', leftEyeHeadOffset);
 	PADrend.syncVars.addDataWrapper('Effects.Stereo.rOffset', rightEyeHeadOffset);
@@ -187,14 +187,14 @@ plugin.init @(override) := fn(){
 		stereoMode.forceRefresh();
 
 		Util.requirePlugin('PADrend/RemoteControl').registerFunctions({
-            'EffectsStereo.toggle' : fn(){
-                stereoMode(stereoMode() != MODE_DISABLED ? MODE_DISABLED : MODE_SIDE_BY_SIDE_LR ) ;
-                print_r(stereoMode());
-                return true;
-            },
-        });
+			'EffectsStereo.toggle' : fn(){
+				stereoMode(stereoMode() != MODE_DISABLED ? MODE_DISABLED : MODE_SIDE_BY_SIDE_LR ) ;
+				print_r(stereoMode());
+				return true;
+			},
+		});
 	});
-        
+		
 	// ------------------------
 	module.on('PADrend/gui', fn(gui){
 		// gui

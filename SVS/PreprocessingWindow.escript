@@ -40,7 +40,7 @@ SVS.setUpPreprocessingWindow := fn() {
 	};
 	panel++;
 
-	var numGroupNodes = DataWrapper.createFromValue(0);
+	var numGroupNodes = new Std.DataWrapper(0);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_NUMBER,
 		GUI.LABEL			:	"#GroupNodes:",
@@ -51,7 +51,7 @@ SVS.setUpPreprocessingWindow := fn() {
 	};
 	panel++;
 
-	var numVisibilitySpheres = DataWrapper.createFromValue(0);
+	var numVisibilitySpheres = new Std.DataWrapper(0);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_NUMBER,
 		GUI.LABEL			:	"#VisibilitySpheres:",
@@ -96,7 +96,7 @@ SVS.setUpPreprocessingWindow := fn() {
 	panel += "*Actions*";
 	panel++;
 
-	var resolution = DataWrapper.createFromValue(512);
+	var resolution = new Std.DataWrapper(512);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_RANGE,
 		GUI.LABEL			:	"Resolution",
@@ -109,7 +109,7 @@ SVS.setUpPreprocessingWindow := fn() {
 	};
 	panel++;
 
-	var useExistingVisibilityResults = DataWrapper.createFromValue(false);
+	var useExistingVisibilityResults = new Std.DataWrapper(false);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.LABEL			:	"Use Existing Visibility Results",
@@ -119,7 +119,7 @@ SVS.setUpPreprocessingWindow := fn() {
 	};
 	panel++;
 
-	var computeTightInnerBoundingSpheres = DataWrapper.createFromValue(false);
+	var computeTightInnerBoundingSpheres = new Std.DataWrapper(false);
 	panel += {
 		GUI.TYPE			:	GUI.TYPE_BOOL,
 		GUI.LABEL			:	"Compute Tight Inner Bounding Spheres",
@@ -267,8 +267,8 @@ SVS.setUpPreprocessingWindow := fn() {
 		GUI.TOOLTIP			:	"Run the preprocessing multiple times with\ndifferent parameters.",
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0],
 		GUI.ON_CLICK		:	[selectedNode] => fn(DataWrapper selectedNode) {
-			var minResolution = DataWrapper.createFromValue(64);
-			var maxResolution = DataWrapper.createFromValue(4096);
+			var minResolution = new Std.DataWrapper(64);
+			var maxResolution = new Std.DataWrapper(4096);
 			gui.openDialog({
 				GUI.TYPE	:	GUI.TYPE_POPUP_DIALOG,
 				GUI.LABEL	:	"Preprocessing settings",

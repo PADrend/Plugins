@@ -326,8 +326,8 @@ Tool.doCreateContextMenu ::= fn(){
 		GUI.LABEL : "New Anchor",
 		GUI.MENU : [node] => fn(node){
 			
-			var name = DataWrapper.createFromValue("anchor#"+NodeAnchors.findAnchors(node).count());
-			var dir = DataWrapper.createFromValue(false);
+			var name = new Std.DataWrapper("anchor#"+NodeAnchors.findAnchors(node).count());
+			var dir = new Std.DataWrapper(false);
 			return [
 				"Anchor name:",
 				{
