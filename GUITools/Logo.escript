@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2011 Ralf Petring <ralf@petring.net>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -30,14 +30,16 @@ static activeLogoName;
 static enabled;
 static whiteBackground;
 static autoTooltip;
+static config;
 
 plugin.init @(override) := fn() {
+	config = new (module('LibUtilExt/ConfigGroup'))(systemConfig,'Effects.Logo');
 
 	path = IO.condensePath(__DIR__ + "/../PADrend/resources/Logos");
-	activeLogoName = Std.DataWrapper.createFromEntry( systemConfig,'Effects.Logo.logo', path + "/logo_padrend_small.png" );
-	enabled = Std.DataWrapper.createFromEntry( systemConfig,'Effects.Logo.enabled',true );
-	whiteBackground = Std.DataWrapper.createFromEntry( systemConfig,'Effects.Logo.whiteBackground', false);
-	autoTooltip = Std.DataWrapper.createFromEntry( systemConfig,'Effects.Logo.autoTooltip', true);
+	activeLogoName = Std.DataWrapper.createFromEntry( config,'logo', path + "/logo_padrend_small.png" );
+	enabled = Std.DataWrapper.createFromEntry( config,'enabled',true );
+	whiteBackground = Std.DataWrapper.createFromEntry( config,'whiteBackground', false);
+	autoTooltip = Std.DataWrapper.createFromEntry( config,'autoTooltip', true);
 
 	enabled.onDataChanged += refresh;
 	activeLogoName.onDataChanged += refresh;
@@ -93,6 +95,12 @@ static refresh = fn(...){
 						GUI.TOOLTIP :entry
 					};
 				}
+				m += '----';
+				m += {
+					GUI.TYPE : GUI.TYPE_BUTTON,
+					GUI.LABEL : "Set as default",
+					GUI.ON_CLICK : fn(){	config.save(); PADrend.message("Settings stored.");	}
+				};
 				return m;
 			},
 			GUI.CONTEXT_MENU_WIDTH : 200,

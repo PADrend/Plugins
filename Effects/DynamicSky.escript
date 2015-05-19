@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2009-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2009-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2009-2011 Ralf Petring <ralf@petring.net>
  * Copyright (C) 2010 Robert Gmyr
  * Copyright (C) 2011-2012 Sascha Brandt
@@ -67,6 +67,8 @@ static pCloudDensity;
 static pCloudClockOffset;
 static pCloudSpeed;
 static pMaxSunBrightness;
+
+static config;
 
 static getCloudTime = fn(){
 	var seconds = cloudActiveSpeed == 0 ? 
@@ -132,19 +134,22 @@ static changeTimeOfDay = fn(Number hours, Number duration=0.3){
 	});
 };
 plugin.init @(override) := fn(){
+	config = new (module('LibUtilExt/ConfigGroup'))(systemConfig,'Effects.DynSky');
+	pTimeFactor = Std.DataWrapper.createFromEntry(config,'timeFactor',0.0);
+
 	// time
 	pSkyClockOffset = new Std.DataWrapper(0);
 	// if 'useActualTime' is true, the current system time is taken as initial time. Otherwise, 'time' is taken.
-	pUseActualTime = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.useActualTime',false);
+	pUseActualTime = Std.DataWrapper.createFromEntry(config,'useActualTime',false);
 	pUseActualTime.onDataChanged += fn(Bool b){
 		if(b)
 			setTimeOfDay( (getDate()["hours"]+getDate()["minutes"]/60) );
 	};
 	pUseActualTime.forceRefresh();
 	if(!pUseActualTime())
-		setTimeOfDay(  systemConfig.getValue('Effects.DynSky.time',13.0) );
+		setTimeOfDay(  config.get('time',13.0) );
 
-	pTimeFactor = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.timeFactor',0.0);
+	pTimeFactor = Std.DataWrapper.createFromEntry(config,'timeFactor',0.0);
 	pTimeFactor.onDataChanged += fn(Number v){
 		var t = getTimeOfDay();
 		activeTimeFactor = v;
@@ -153,8 +158,8 @@ plugin.init @(override) := fn(){
 	pTimeFactor.forceRefresh();
 
 	// date
-	pJulianDay = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.julianDay',180);
-	pUseActualDay = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.useActualDay',false);
+	pJulianDay = Std.DataWrapper.createFromEntry(config,'julianDay',180);
+	pUseActualDay = Std.DataWrapper.createFromEntry(config,'useActualDay',false);
 	pUseActualDay.onDataChanged += fn(Bool b){
 		if(b)
 			pJulianDay(getDate()["yday"]);
@@ -163,24 +168,24 @@ plugin.init @(override) := fn(){
 
 	// clouds
 	pCloudClockOffset = new Std.DataWrapper(0);
-	pCloudSpeed = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.cloudSpeed',0.004);
+	pCloudSpeed = Std.DataWrapper.createFromEntry(config,'cloudSpeed',0.004);
 	pCloudSpeed.onDataChanged += fn(Number v){
 		var t = getCloudTime();
 		cloudActiveSpeed = v;
 		setCloudTime(t);
 	};
 	pCloudSpeed.forceRefresh();
-	pCloudDensity = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.cloudDensity',0.6);
-	pMaxSunBrightness = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.maxSunBrightness',100);
+	pCloudDensity = Std.DataWrapper.createFromEntry(config,'cloudDensity',0.6);
+	pMaxSunBrightness = Std.DataWrapper.createFromEntry(config,'maxSunBrightness',100);
 	
 	// misc
-	pInfluenceSunLight = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.influenceSunLight',false);
-	pStarsEnabled = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.starsEnabled',false);
+	pInfluenceSunLight = Std.DataWrapper.createFromEntry(config,'influenceSunLight',false);
+	pStarsEnabled = Std.DataWrapper.createFromEntry(config,'starsEnabled',false);
 	
 	{	//enabled
 		static envState;
 		static revoce = new Std.MultiProcedure;
-		pEnabled = Std.DataWrapper.createFromEntry(systemConfig,'Effects.DynSky.enabled',false);
+		pEnabled = Std.DataWrapper.createFromEntry(config,'enabled',false);
 		pEnabled.onDataChanged += fn(Bool b){  
 			revoce(); 	
 			if(b){
@@ -334,37 +339,36 @@ static updateSkyValues = fn(...){
 
 static initGUI = fn(gui){
 	gui.register('Effects_MainMenu.10_dynamicSky', fn(){
+		return [
+			"*Dynamic Sky*",
+			{
+				GUI.TYPE : GUI.TYPE_BOOL,
+				GUI.LABEL : "Enabled",
+				GUI.DATA_WRAPPER : pEnabled
+			},
+			{
+				GUI.TYPE : GUI.TYPE_RANGE,
+				GUI.RANGE : [0,24],
+				GUI.RANGE_STEPS : 24,
+				GUI.ON_DATA_CHANGED : changeTimeOfDay,
+				GUI.WIDTH : 100,
+				GUI.TOOLTIP : "Time of day",
+				GUI.ON_INIT : fn(...){
+					Util.registerExtension('PADrend_AfterFrame',[this] => fn(timeSlider){
+						if(timeSlider.isDestroyed())
+							return Extension.REMOVE_EXTENSION;
+						timeSlider.setData( getTimeOfDay() );
+					});
 
-		var menu=[];
-	  
-		menu+="*Dynamic Sky*";
-		menu+={
-			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.LABEL : "Enabled",
-			GUI.DATA_WRAPPER : pEnabled
-		};
-
-		var timeSlider=gui.create({
-			GUI.TYPE : GUI.TYPE_RANGE,
-			GUI.RANGE : [0,24],
-			GUI.RANGE_STEPS : 24,
-			GUI.ON_DATA_CHANGED : changeTimeOfDay,
-			GUI.WIDTH : 100,
-			GUI.TOOLTIP : "Time of day"
-		});
-		menu+=timeSlider;
-		Util.registerExtension('PADrend_AfterFrame',[timeSlider] => fn(timeSlider){
-			if(timeSlider.isDestroyed())
-				return Extension.REMOVE_EXTENSION;
-			timeSlider.setData( getTimeOfDay() );
-		});
-		menu += {
-			GUI.TYPE : GUI.TYPE_MENU,
-			GUI.LABEL : "Options",
-			GUI.MENU_WIDTH : 200,
-			GUI.MENU : 'Effects_DynamicSkyOptions'
-		};
-		return menu;
+				}
+			},
+			{
+				GUI.TYPE : GUI.TYPE_MENU,
+				GUI.LABEL : "Options",
+				GUI.MENU_WIDTH : 200,
+				GUI.MENU : 'Effects_DynamicSkyOptions'
+			}
+		];
 	});
 		
 		
@@ -437,6 +441,12 @@ static initGUI = fn(gui){
 					PADrend.executeCommand( fn(){ PADrend.SceneManagement.initDefaultLightParameters(); } );
 				},
 				GUI.TOOLTIP : "Set the default light's parameter to the ones \nset in the config."
+			},
+			'----',
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "Set as default",
+				GUI.ON_CLICK : fn(){	config.save(); PADrend.message("Settings stored.");	}
 			}
 		];
 	});

@@ -73,7 +73,7 @@ Util.registerExtension('InstanceSyncing_AddClientFeatures', fn(client){
 
 	static activeComponent;
 
-	static autoCreateServer = Std.DataWrapper.createFromEntry(systemConfig,'MultiView.autoCreateServer',false); 
+	static autoCreateServer = Std.DataWrapper.createFromEntry(Util.requirePlugin('InstanceSyncing').config,'MultiView.autoCreateServer',false); 
 	autoCreateServer.onDataChanged += fn(enabled){
 		if(enabled){
 			@(once) PADrend.planTask(2.0,fn(){
@@ -94,7 +94,7 @@ Util.registerExtension('InstanceSyncing_AddClientFeatures', fn(client){
 		server.onClose += fn(){		activeComponent = void;	};
 	});
 
-	static autoConnectClient = Std.DataWrapper.createFromEntry(systemConfig,'MultiView.autoConnectClient',false); 
+	static autoConnectClient = Std.DataWrapper.createFromEntry(Util.requirePlugin('InstanceSyncing').config,'MultiView.autoConnectClient',false); 
 	autoConnectClient.onDataChanged += fn(enabled){
 		if(enabled){
 			@(once)	PADrend.planTask(1.0,fn(){
@@ -151,7 +151,7 @@ Util.registerExtension('InstanceSyncing_AddClientFeatures', fn(client){
 //! \note requires per client sync vars.
 {
 
-static clientId =Std.DataWrapper.createFromEntry(systemConfig,'MultiView.clientId',"Client"); // this instance's clientId.
+static clientId =Std.DataWrapper.createFromEntry(Util.requirePlugin('InstanceSyncing').config,'MultiView.clientId',"Client"); // this instance's clientId.
 
 //! \see [ext:InstanceSyncing_AddServerFeatures]
 Util.registerExtension('InstanceSyncing_AddServerFeatures', fn(server){

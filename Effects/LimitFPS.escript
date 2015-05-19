@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2012 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2012-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2013 Benjamin Eikel <benjamin@eikel.org>
  * 
  * PADrend consists of an open source part and a proprietary part.
@@ -19,11 +19,14 @@ var plugin = new Plugin({
 			Plugin.OWNER : "All",
 			Plugin.REQUIRES : ['PADrend','PADrend/GUI','PADrend/EventLoop']
 });
+static config;
 
 plugin.init @(override) := fn() {
-	var fps = Std.DataWrapper.createFromEntry(systemConfig, 'Effects.LimitFPS.fps', 25);
+	config = new (module('LibUtilExt/ConfigGroup'))(systemConfig,'Effects.LimitFPS');
+	
+	var fps = Std.DataWrapper.createFromEntry(config,'fps', 25);
 
-	var enabled = Std.DataWrapper.createFromEntry(systemConfig, 'Effects.LimitFPS.enabled', false);
+	var enabled = Std.DataWrapper.createFromEntry(config,'enabled', false);
 	enabled.onDataChanged += [fps] => fn(DataWrapper fps, value) {
 		if(value) {
 			registerExtension(
@@ -63,7 +66,13 @@ plugin.init @(override) := fn() {
 				GUI.RANGE_STEP_SIZE	:	1,
 				GUI.DATA_WRAPPER	:	fps
 			},
-			'----'
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "Set as default",
+				GUI.ON_CLICK : fn(){	config.save(); PADrend.message("Settings stored.");	}
+			},
+			'----',
+			
 		]);
 	});
 

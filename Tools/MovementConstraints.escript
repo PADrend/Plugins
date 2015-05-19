@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2014-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -23,23 +23,26 @@ static plugin = new Plugin({
 });
 
 
-static enabled = new Std.DataWrapper(false);
+static enabled;
 static height;
 static restrictXRotation;
 static restrictHeight;
+static config;
 
 plugin.init @(override) := fn(){
-	var update = fn(...){	if(enabled()) applyConstraints( PADrend.getDolly() );	};
-
-	enabled.onDataChanged += update;
+	config = new (module('LibUtilExt/ConfigGroup'))(systemConfig,'Tools.MovementConstraints');
 	
-	height = Std.DataWrapper.createFromEntry( systemConfig,'Tools.MovementConstraints.height',0.0);
+	enabled = Std.DataWrapper.createFromEntry(config,'enabled',false);
+	 
+	var update = fn(...){	if(enabled()) applyConstraints( PADrend.getDolly() );	};
+	
+	height = Std.DataWrapper.createFromEntry(config,'height',0.0);
 	height.onDataChanged += update;
 		
-	restrictXRotation = Std.DataWrapper.createFromEntry( systemConfig,'Tools.MovementConstraints.restrictXRotation',true);
+	restrictXRotation = Std.DataWrapper.createFromEntry(config,'restrictXRotation',true);
 	restrictXRotation.onDataChanged += update;
 
-	restrictHeight = Std.DataWrapper.createFromEntry( systemConfig,'Tools.MovementConstraints.restrictHeight',true);
+	restrictHeight = Std.DataWrapper.createFromEntry(config,'restrictHeight',true);
 	restrictHeight.onDataChanged += update;
 
 	module.on('PADrend/gui',fn(gui){
@@ -72,6 +75,12 @@ plugin.init @(override) := fn(){
 				GUI.LABEL : "No X-Rotation",
 				GUI.DATA_WRAPPER : restrictXRotation
 			},
+			'----',
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "Set as default",
+				GUI.ON_CLICK : fn(){	config.save(); PADrend.message("Settings stored.");	}
+			}
 		]);
 
 	});
@@ -81,6 +90,7 @@ plugin.init @(override) := fn(){
 		clear();
 		if(b){
 			var dolly = PADrend.getDolly();
+			applyConstraints(dolly);
 			//! \see MinSG.TransformationObserverTrait
 			Std.Traits.assureTrait(dolly,Std.module('LibMinSGExt/Traits/TransformationObserverTrait'));
 			
@@ -99,6 +109,7 @@ plugin.init @(override) := fn(){
 			});
 		}
 	};
+	PADrend.planTask( 0.1, fn(){ enabled.forceRefresh();} );
 	
 	return true;
 };

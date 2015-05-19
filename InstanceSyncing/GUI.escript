@@ -66,21 +66,38 @@ InstanceSyncingGUI.createConfigEntry := fn(gui,obj,ctxt...){
 }
 module.on('PADrend/gui', fn(gui){
 	gui.register('PADrend_MainWindowTabs.21_Sync', [gui]=>fn(gui){
-		var treeview = gui.create({
-			GUI.TYPE : GUI.TYPE_TREE,
-			GUI.OPTIONS : []
-		});
-		configuredObjects.onDataChanged += [treeview] => fn(treeview, Array objs){
-			if(treeview.isDestroyed())
-				return $REMOVE;
-			treeview.destroyContents();
-			foreach(objs as var obj)
-				treeview += InstanceSyncingGUI.createConfigEntry(treeview.getGUI(),obj);
-		};
-		configuredObjects.forceRefresh();
+
 		return {
 			GUI.TYPE : GUI.TYPE_TAB,
-			GUI.TAB_CONTENT : treeview,
+			GUI.TAB_CONTENT : {
+				GUI.TYPE : GUI.TYPE_CONTAINER,
+				GUI.LAYOUT : GUI.LAYOUT_TIGHT_FLOW,
+				GUI.SIZE : GUI.SIZE_MAXIMIZE,
+				GUI.CONTENTS : [
+					{
+						GUI.TYPE : GUI.TYPE_TREE,
+						GUI.OPTIONS : [],
+						GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_FILL_ABS,0, 20],
+						GUI.ON_INIT : fn(...){
+							configuredObjects.onDataChanged += [this] => fn(treeview, Array objs){
+								if(treeview.isDestroyed())
+									return $REMOVE;
+								treeview.destroyContents();
+								foreach(objs as var obj)
+									treeview += InstanceSyncingGUI.createConfigEntry(treeview.getGUI(),obj);
+							};
+							configuredObjects.forceRefresh();
+						}
+					},
+					GUI.NEXT_ROW,
+					{
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Set as default",
+						GUI.ON_CLICK : fn(){	Util.requirePlugin('InstanceSyncing').config.save(); PADrend.message("Settings stored.");	},
+					}
+				
+				]
+			},
 			GUI.LABEL : "Sync"
 		};	
 	});

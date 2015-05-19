@@ -51,6 +51,7 @@ T.get ::= fn( String key, defaultValue = void){
 		return value;
 	}
 };
+T.getValue ::= T.get; // deprecated alias
 
 //! Apply configuration to baseConfig.
 T.save ::= fn(_filename = void){

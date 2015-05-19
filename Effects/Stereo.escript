@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2015 Claudius Jähn <claudius@uni-paderborn.de>
  *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -103,20 +103,23 @@ static createRenderingPasses = fn(renderingPasses){
 	}
 };
 
+static config;
 
 plugin.init @(override) := fn(){
-	stereoMode = Std.DataWrapper.createFromEntry(systemConfig,'Effects.Stereo.stereoMode',MODE_DISABLED);
-	compressGUI = Std.DataWrapper.createFromEntry(systemConfig,'Effects.Stereo.compressGUI',false);
+	config = new (module('LibUtilExt/ConfigGroup'))(systemConfig,'Effects.Stereo');
+
+	stereoMode = Std.DataWrapper.createFromEntry(config,'stereoMode',MODE_DISABLED);
+	compressGUI = Std.DataWrapper.createFromEntry(config,'compressGUI',false);
 	compressGUI.onDataChanged += fn(...){
 		stereoMode.forceRefresh();
 	};
-	leftEyeHeadOffset = Std.DataWrapper.createFromEntry(systemConfig,'Effects.Stereo.lOffset',"-0.03 0 0");
-	rightEyeHeadOffset = Std.DataWrapper.createFromEntry(systemConfig,'Effects.Stereo.rOffset',"0.03 0 0");
-	
+	leftEyeHeadOffset = Std.DataWrapper.createFromEntry(config,'lOffset',"-0.03 0 0");
+	rightEyeHeadOffset = Std.DataWrapper.createFromEntry(config,'rOffset',"0.03 0 0");
+
 	PADrend.syncVars.addDataWrapper('Effects.Stereo.lOffset', leftEyeHeadOffset);
 	PADrend.syncVars.addDataWrapper('Effects.Stereo.rOffset', rightEyeHeadOffset);
 
-	
+
 	registerExtension('PADrend_Init',this->fn(){
 
 		leftEyeHeadOffset.onDataChanged += fn(str){
@@ -194,7 +197,7 @@ plugin.init @(override) := fn(){
 			},
 		});
 	});
-		
+
 	// ------------------------
 	module.on('PADrend/gui', fn(gui){
 		// gui
@@ -237,7 +240,12 @@ plugin.init @(override) := fn(){
 				GUI.LABEL : "Compress GUI",
 				GUI.TOOLTIP : "Enable for sideBySide stereo configurations\n having halved horizontal resolution.",
 			},
-			'----'
+			'----',
+			{
+				GUI.TYPE : GUI.TYPE_BUTTON,
+				GUI.LABEL : "Set as default",
+				GUI.ON_CLICK : fn(){	config.save(); PADrend.message("Settings stored.");	}
+			}
 		]);
 
 	});

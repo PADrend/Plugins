@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2010-2012 Benjamin Eikel <benjamin@eikel.org>
- * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2010-2015 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2012 Ralf Petring <ralf@petring.net>
  * Copyright (C) 2010 Robert Gmyr
  * Copyright (C) 2011-2012 Sascha Brandt
@@ -32,17 +32,18 @@ static plugin = new Plugin({
 			Plugin.REQUIRES : []
 });
 
-
-plugin.autoGroundLevel @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.autoGroundLevel',true);
-plugin.enabled @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.enabled',false);
-plugin.groundLevel @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.groundLevel',0);
-plugin.hazeEnabled @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.useHaze',true);
-plugin.hazeFar @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.hazeFar',250);
-plugin.hazeNear @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.hazeNear',100);
-plugin.scale @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.scale',1);
-plugin.type @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.type',0);
-plugin.waterRefraction @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.waterRefraction',0.1);
-plugin.waterReflection @(const) := Std.DataWrapper.createFromEntry(systemConfig,'Effects.InfiniteGround.waterReflection',0.5);
+static config = new (module('LibUtilExt/ConfigGroup'))(systemConfig,'Effects.InfiniteGround');
+	
+plugin.autoGroundLevel @(const) := Std.DataWrapper.createFromEntry(config,'autoGroundLevel',true);
+plugin.enabled @(const) := Std.DataWrapper.createFromEntry(config,'enabled',false);
+plugin.groundLevel @(const) := Std.DataWrapper.createFromEntry(config,'groundLevel',0);
+plugin.hazeEnabled @(const) := Std.DataWrapper.createFromEntry(config,'useHaze',true);
+plugin.hazeFar @(const) := Std.DataWrapper.createFromEntry(config,'hazeFar',250);
+plugin.hazeNear @(const) := Std.DataWrapper.createFromEntry(config,'hazeNear',100);
+plugin.scale @(const) := Std.DataWrapper.createFromEntry(config,'scale',1);
+plugin.type @(const) := Std.DataWrapper.createFromEntry(config,'type',0);
+plugin.waterRefraction @(const) := Std.DataWrapper.createFromEntry(config,'waterRefraction',0.1);
+plugin.waterReflection @(const) := Std.DataWrapper.createFromEntry(config,'waterReflection',0.5);
 
 static resourcesFolder = __DIR__+"/resources";
 
@@ -326,9 +327,15 @@ static registerGUI = fn(gui){
 	gui.register('Effects_InfiniteGroundOptions.00Main',[
 		{
 			GUI.LABEL : "Type",
-			GUI.TYPE : GUI.TYPE_RANGE,
-			GUI.RANGE : [0,5],
-			GUI.RANGE_STEPS : 5,
+			GUI.TYPE : GUI.TYPE_SELECT,
+			GUI.OPTIONS : [
+				[TYPE_GRASS, "Grass"],
+				[TYPE_CONCRETE,"Concrete"],
+				[TYPE_CHECKBOARD,"Checkboard"],
+				[TYPE_WATER,"Water"],
+				[TYPE_WHITE,"Single Color"],
+				[TYPE_GRID,"Grid"]
+			],
 			GUI.DATA_WRAPPER : plugin.type
 		},
 		{
@@ -356,13 +363,17 @@ static registerGUI = fn(gui){
 		{
 			GUI.LABEL				:	"Haze near",
 			GUI.TYPE				:	GUI.TYPE_RANGE,
-			GUI.RANGE				:	[0, 1000],
+			GUI.RANGE				:	[-1, 5],
+			GUI.RANGE_FN_BASE		:	10,
+			GUI.RANGE_STEP_SIZE		:	0.1,
 			GUI.DATA_WRAPPER		:	plugin.hazeNear,
 		},
 		{
 			GUI.LABEL				:	"Haze far",
 			GUI.TYPE				:	GUI.TYPE_RANGE,
-			GUI.RANGE				:	[10, 1010],
+			GUI.RANGE				:	[-1, 5],
+			GUI.RANGE_FN_BASE		:	10,
+			GUI.RANGE_STEP_SIZE		:	0.1,
 			GUI.DATA_WRAPPER		:	plugin.hazeFar
 		},
 		{
@@ -401,7 +412,14 @@ static registerGUI = fn(gui){
 			GUI.TYPE : GUI.TYPE_COLOR,
 			GUI.LABEL : "Ground Color",
 			GUI.DATA_WRAPPER : plugin.groundColor,
-			GUI.TOOLTIP : "Adjust the ground color (for type WHITE(4))."
+			GUI.TOOLTIP : "Adjust the ground color (for type WHITE(4)).",
+			GUI.WIDTH  : 200
+		},
+		'----',
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Set as default",
+			GUI.ON_CLICK : fn(){	config.save(); PADrend.message("Settings stored.");	}
 		}
 	]);
 
