@@ -150,16 +150,6 @@ Std.DataWrapper.setOptionsProvider ::= fn(callable){
 Std.JSONDataStore.getValue ::= Std.JSONDataStore.get;
 Std.JSONDataStore.setValue ::= Std.JSONDataStore.set;
 
-// system' main config manager
-GLOBALS.systemConfig := new Std.JSONDataStore;
-
-// compatibility interface
-GLOBALS.getConfigValue := systemConfig->systemConfig.getValue;
-GLOBALS.loadConfig := systemConfig->systemConfig.init;
-GLOBALS.saveConfig  := systemConfig->systemConfig.save;
-GLOBALS.setConfigInfo := systemConfig->systemConfig.setInfo;
-GLOBALS.setConfigValue := systemConfig->systemConfig.setValue;
-
 // ---------------------------------------------------
 // Function extensions 
 

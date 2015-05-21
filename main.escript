@@ -33,8 +33,10 @@ if(!IO.isFile(configFile)){
 	IO.saveTextFile(configFile,"");
 }
 
+// system' main config manager
+GLOBALS.systemConfig := new Std.JSONDataStore(true);
 systemConfig.init(configFile);
-setConfigInfo('System.mainScript',"Main script file (default: PADrend/PADrend.escript)");
+systemConfig.setInfo('System.mainScript',"Main script file (default: PADrend/PADrend.escript)");
 load(systemConfig.getValue('System.mainScript',"PADrend/PADrend.escript"));
 
 if( _processResult.isA(Exception) )

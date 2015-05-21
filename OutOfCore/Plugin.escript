@@ -49,9 +49,9 @@ plugin.ex_Init := fn() {
 	
 	// Add the out-of-core cache levels.
 	var configString = 'OutOfCore.CacheLevel';
-	setConfigInfo("OutOfCore", "Cache level configuration (0 is the lowest, 7 is the highest cache level)");
+	systemConfig.setInfo("OutOfCore", "Cache level configuration (0 is the lowest, 7 is the highest cache level)");
 	for(var i = 0; i < 8; ++i) {
-		setConfigInfo(configString + i, "Type (deactivated = 0, FileSystem = 1, Files = 2, MainMemory = 3, GraphicsMemory = 4) and size (in MiB) of cache level " + i);
+		systemConfig.setInfo(configString + i, "Type (deactivated = 0, FileSystem = 1, Files = 2, MainMemory = 3, GraphicsMemory = 4) and size (in MiB) of cache level " + i);
 		var cacheLevelType = systemConfig.getValue(configString + i + ".type", i == 0 ? 1 : 0);
 		if(cacheLevelType == 0) {
 			break;

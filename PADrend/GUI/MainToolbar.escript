@@ -1209,6 +1209,7 @@ static registerStdToolbarEntries = fn() {
 						GUI.DATA_VALUE : enabled,
 						GUI.ON_DATA_CHANGED : [name]=>fn(name,value){
 							systemConfig.setValue('PADrend.plugins.'+name,value);
+							PADrend.message("Plugin '"+name+"' ("+value+"). Restart required.");
 						},
 						GUI.TOOLTIP : plugin ? "(ACTIVE)\n"+plugin.getDescription() : name
 			}];
@@ -1218,7 +1219,7 @@ static registerStdToolbarEntries = fn() {
 					GUI.ICON : "#AddSmall",
 					GUI.FLAGS : GUI.FLAT_BUTTON,
 					GUI.POSITION : [GUI.POS_X_ABS|GUI.REFERENCE_X_RIGHT|GUI.ALIGN_X_RIGHT|
-						GUI.POS_Y_ABS|GUI.REFERENCE_Y_TOP|GUI.ALIGN_Y_TOP, 15,4],
+						GUI.POS_Y_ABS|GUI.REFERENCE_Y_TOP|GUI.ALIGN_Y_TOP, 15,-2],
 					GUI.SIZE : [15,10],
 					GUI.TOOLTIP : "Try to load the '"+name+"' plugin now.",
 					GUI.ON_CLICK : [name] => fn(name){
@@ -1235,7 +1236,7 @@ static registerStdToolbarEntries = fn() {
 					GUI.ICON : "#RefreshSmall",
 					GUI.FLAGS : GUI.FLAT_BUTTON,
 					GUI.POSITION : [GUI.POS_X_ABS|GUI.REFERENCE_X_RIGHT|GUI.ALIGN_X_RIGHT|
-						GUI.POS_Y_ABS|GUI.REFERENCE_Y_TOP|GUI.ALIGN_Y_TOP, 15,4],
+						GUI.POS_Y_ABS|GUI.REFERENCE_Y_TOP|GUI.ALIGN_Y_TOP, 15,-2],
 					GUI.SIZE : [15,10],
 					GUI.TOOLTIP : "Try to reload the '"+name+"' plugin.",
 					GUI.ON_CLICK : [plugin,name] => fn(plugin,name){
@@ -1253,15 +1254,6 @@ static registerStdToolbarEntries = fn() {
 				GUI.CONTENTS : parts,
 			};
 		}
-		entries += '----';
-		entries += 	{
-			GUI.LABEL		:	"Save configuration",
-			GUI.TOOLTIP		:	"Write configuration to \"" + systemConfig.getFilename() + "\".",
-			GUI.ON_CLICK	:	fn() {
-									systemConfig.save();
-									PADrend.message("Configuration successfully written to \"" + systemConfig.getFilename() + "\".");
-								}
-		};
 		return entries;
 	
 	});
@@ -1299,14 +1291,6 @@ static registerStdToolbarEntries = fn() {
 	// config file group
 	gui.register('PADrend_ConfigMenu.90_config',[
 		'----',
-		{
-			GUI.LABEL		:	"Save configuration",
-			GUI.TOOLTIP		:	"Write configuration to \"" + systemConfig.getFilename() + "\".",
-			GUI.ON_CLICK	:	fn() {
-									systemConfig.save();
-									PADrend.message("Configuration successfully written to \"" + systemConfig.getFilename() + "\".");
-								}
-		},
 		{
 			GUI.LABEL		:	"Edit configuration ...",
 			GUI.TOOLTIP		:	"Open \"" + systemConfig.getFilename() + "\" in a text editor.",

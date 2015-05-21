@@ -253,20 +253,10 @@ registerExtension('InstanceSyncing_AddServerFeatures', fn(server){
 			GUI.LABEL : "restart all",
 			GUI.WIDTH : 70,
 			GUI.ON_CLICK : [server]=>fn(server){
+				PADrend.message("Restarting...");
 				PADrend.CommandHandling.executeRemoteCommand(fn(){PADrend.restart();}); 
 				PADrend.planTask(0.5, [server]=>fn(server){server.close(); });
 				PADrend.planTask(1.0, fn(){PADrend.restart();});
-			}
-		};
-		entry.container += {
-			GUI.TYPE : GUI.TYPE_BUTTON,
-			GUI.LABEL : "save config",
-			GUI.WIDTH : 70,
-			GUI.ON_CLICK :fn(){
-				PADrend.executeCommand(fn(){
-					PADrend.message("Save config...");
-					systemConfig.save();
-				});
 			}
 		};
 		entry += InstanceSyncingGUI.createConfigEntry(entry.getGUI(),'connectedClients',server);

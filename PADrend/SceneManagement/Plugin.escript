@@ -114,8 +114,8 @@ SceneManagement.ex_Init := fn(...){
 		Std.Traits.addTrait( dolly,Std.module('LibMinSGExt/Traits/DefaultDollyNodeTrait'),camera );
 
 
-		setConfigInfo('PADrend.Camera.observerPosition',"[x,y,z] or false. If false, the default 'angle'-based camera is used.");
-		setConfigInfo('PADrend.Camera.frame',"false or corners of projection frame e.g. [[-1,1,-1],[-1,-1,-1],[1,-1,-1]]. To use the frame, observerPosition has to be set. ");
+		systemConfig.setInfo('PADrend.Camera.observerPosition',"[x,y,z] or false. If false, the default 'angle'-based camera is used.");
+		systemConfig.setInfo('PADrend.Camera.frame',"false or corners of projection frame e.g. [[-1,1,-1],[-1,-1,-1],[1,-1,-1]]. To use the frame, observerPosition has to be set. ");
 
 		dolly.setFrame(systemConfig.getValue('PADrend.Camera.frame',false));//[[-1,1,-1],[-1,-1,-1],[1,-1,-1]]
 		dolly.setRelPosition(new Geometry.Vec3(systemConfig.getValue('PADrend.Camera.position',[0,0,0])));
@@ -146,7 +146,7 @@ SceneManagement.ex_Init := fn(...){
 		rootNode = new MinSG.ListNode;
 		getRootNode().name := "RootNode";
 
-		setConfigInfo('PADrend.sun',"Global directional light source.");
+		systemConfig.setInfo('PADrend.sun',"Global directional light source.");
 		if(systemConfig.getValue('PADrend.sun.enabled',true)){
 			_defaultLight = new MinSG.LightNode;
 			SceneManagement.initDefaultLightParameters();
