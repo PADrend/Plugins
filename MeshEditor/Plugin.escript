@@ -58,7 +58,7 @@ plugin.addSelectedTriangles := fn(Array triangles){
 	foreach(triangles as var t){
 		if(t && !selectedTrianglesSet.contains(t)){
 			selectedTrianglesSet+=t;
-			selectedTriangles+=t;			
+			selectedTriangles+=t;
 		}
 	}
 	Util.executeExtensions('MeshEditor_OnTrianglesSelected',selectedTriangles);
@@ -67,7 +67,7 @@ plugin.removeTrianglesFromSelection := fn(Array triangles){
 	foreach(triangles as var t){
 		if(t && selectedTrianglesSet.contains(t)){
 			selectedTrianglesSet-=t;
-			selectedTriangles.removeValue(t);			
+			selectedTriangles.removeValue(t);
 		}
 	}
 	Util.executeExtensions('MeshEditor_OnTrianglesSelected',selectedTriangles);
@@ -95,7 +95,7 @@ plugin.addSelectedVertices := fn(Array vertices){
 	foreach(vertices as var v){
 		if(v && !selectedVerticesSet.contains(v)){
 			selectedVerticesSet+=v;
-			selectedVertices+=v;			
+			selectedVertices+=v;
 		}
 	}
 	Util.executeExtensions('MeshEditor_OnVerticesSelected',selectedVertices);
@@ -104,7 +104,7 @@ plugin.removeVerticesFromSelection := fn(Array vertices){
 	foreach(vertices as var v){
 		if(v && selectedVerticesSet.contains(v)){
 			selectedVerticesSet-=v;
-			selectedVertices.removeValue(v);			
+			selectedVertices.removeValue(v);
 		}
 	}
 	Util.executeExtensions('MeshEditor_OnVerticesSelected',selectedVertices);
@@ -120,39 +120,46 @@ plugin.isVertexSelected := fn(v) { return v && selectedVerticesSet.contains(v); 
 //------------------------------------------------------------------------------------------------------
 
 //!	[ext:PADrend_Init]
-plugin.ex_Init := fn(){	
+plugin.ex_Init := fn(){
 	gui.loadIconFile( __DIR__+"/resources/Icons.json");
-	
+
 	registerMenus();
-		
+
+	{
+		var t = new (Std.module('MeshEditor/Tools/Select'));
+		PADrend.registerUITool('MeshEditorTools_Select')
+			.registerActivationListener(t->t.activateTool)
+			.registerDeactivationListener(t->t.deactivateTool);
+	}
+
 	{
 		var t = new (Std.module('MeshEditor/Tools/Move'));
 		PADrend.registerUITool('MeshEditorTools_Move')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
-		
+
 	{
 		var t = new (Std.module('MeshEditor/Tools/Rotate'));
 		PADrend.registerUITool('MeshEditorTools_Rotate')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
-		
+
 	{
 		var t = new (Std.module('MeshEditor/Tools/Scale'));
 		PADrend.registerUITool('MeshEditorTools_Scale')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
-		
+
 	{
 		var t = new (Std.module('MeshEditor/Tools/Extrude'));
 		PADrend.registerUITool('MeshEditorTools_Extrude')
 			.registerActivationListener(t->t.activateTool)
 			.registerDeactivationListener(t->t.deactivateTool);
 	}
-		
+
 	{
 		var t = new (Std.module('MeshEditor/Tools/Knife'));
 		PADrend.registerUITool('MeshEditorTools_Knife')
@@ -171,6 +178,18 @@ plugin.registerMenus:=fn() {
 	};
 
 	gui.register('PADrend_ToolsToolbar.80_MeshEditorTools',[{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.PRESET : './toolIcon',
+		GUI.TOOLTIP	: "Triangle Selection Tool: Allows the selection of the triangles of a selected geometry node.",
+		GUI.ICON : '#TriangleSelect',
+		GUI.WIDTH : 24,
+		GUI.ON_CLICK : fn(){	PADrend.setActiveUITool('MeshEditorTools_Select');	},
+		GUI.ON_INIT : fn(){
+			PADrend.accessUIToolConfigurator('MeshEditorTools_Select')
+				.registerActivationListener([this,true]=>switchFun)
+				.registerDeactivationListener([this,false]=>switchFun);
+		},
+	},{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.PRESET : './toolIcon',
 		GUI.TOOLTIP	: "Triangle Move Tool: Allows the selection and movement of the triangles of a selected geometry node.",
