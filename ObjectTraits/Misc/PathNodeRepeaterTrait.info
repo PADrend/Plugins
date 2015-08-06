@@ -1,0 +1,5 @@
+{
+	"moduleId" : "ObjectTraits/Misc/PathNodeRepeaterTrait",
+	"description" : "Duplicate a linked node in this subtree.",
+	"displayName" : "Misc/PathNodeRepeaterTrait"
+}

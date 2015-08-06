@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Misc/LockAxisTrait",
+	"aliases" : ["ObjectTraits/LockAxisTrait"],
+	"description" : "Locks movement of one or more axes",
+	"displayName" : "Misc/LockAxisTrait"
+}

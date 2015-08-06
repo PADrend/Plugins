@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/PathAnimationTrait",
+	"aliases" : ["ObjectTraits/PathAnimationTrait"],
+	"description" : "Animate an object along a path.",
+	"displayName" : "Animation/PathAnimationTrait"
+}

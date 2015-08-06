@@ -1,0 +1,5 @@
+{
+	"moduleId" : "ObjectTraits/Misc/PathRestrictionTrait",
+	"description" : "Restricts path animation to a path segment.",
+	"displayName" : "Misc/PathRestrictionTrait"
+}
