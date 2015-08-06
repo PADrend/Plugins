@@ -356,7 +356,7 @@ MinSG.pullUpStates := fn(MinSG.Node subtree){
 	if(stateCount==0)
 		return removedStateCount;
 
-	foreach(children as child){
+	foreach(children as var child){
 		var childStates=child.getStates();
 		if(childStates.count()!=stateCount)
 			return removedStateCount;
