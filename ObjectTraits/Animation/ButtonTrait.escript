@@ -3,18 +3,18 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2014 Claudius Jähn <claudius@uni-paderborn.de>
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
- 
- 
+
+
  /*
      Use global listener, broadcast and time
- 
+
  */
 
 var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
@@ -32,14 +32,16 @@ static createRelativeNodeQuery = fn(MinSG.Node source,MinSG.Node target){
 trait.onInit += fn(MinSG.Node node){
 
 	Std.Traits.assureTrait(node,module('../Basic/NodeLinkTrait'));
-	
+
 	node.buttonFn1 := node.getNodeAttributeWrapper('buttonFn1', "animationPlay" );
 	node.buttonFn2 := node.getNodeAttributeWrapper('buttonFn2', "animationPause" );
 	node.buttonLinkRole := node.getNodeAttributeWrapper('buttonLinkRole', "switch" );
-	
+  node.buttonFn1_params := node.getNodeAttributeWrapper('buttonFn1_params', "[]" );
+  node.buttonFn2_params := node.getNodeAttributeWrapper('buttonFn2_params', "[]" );
+
 	//! \see ObjectTraits/NodeLinkTrait
 	node.availableLinkRoleNames += "switch";
-	
+
 	node.buttonState := new DataWrapper(false);
 	node._buttonFixedNextSwitchTime := void; // internal
 	node.buttonState.onDataChanged += [node]=>fn(node, value){
@@ -55,42 +57,50 @@ trait.onInit += fn(MinSG.Node node){
 			time = PADrend.getSyncClock();
 			// distribute
 			var pathToButton = createRelativeNodeQuery(PADrend.getCurrentScene(),node);
-			
+
 			@(once) static CommandHandling = Util.requirePlugin('PADrend/CommandHandling');
 			CommandHandling.executeRemoteCommand( [pathToButton,time,value]=>fn(pathToButton,time,value){
 				var button = Std.module('LibMinSGExt/TreeQuery').execute(pathToButton,PADrend.getSceneManager(),[PADrend.getCurrentScene()]).toArray().front();
 				button._buttonFixedNextSwitchTime = time;
 				button.buttonState(value);
 			} );
-			
+
 			outln("Switch remote: ",pathToButton," ",time," ",value);
 		}
-		
-		
+
+
 		//! \see ObjectTraits/NodeLinkTrait
 		var nodes = node.getLinkedNodes( node.buttonLinkRole() );
-	
+
 		var fnName = value ? node.buttonFn1() : node.buttonFn2();
 		if(node.buttonFn2().empty())
 			fnName = node.buttonFn1();
-		
+
+    var params = (value || node.buttonFn2().empty()) ? parseJSON(node.buttonFn1_params()) : parseJSON(node.buttonFn2_params());
+
+    if(!params || !(params ---|> Array)) {
+      Runtime.warn("ButtonTrait: could not parse parameter string: "+node.buttonFn1_params());
+      params = [];
+    }
+    params += time;
+
 		if(!fnName.empty()){
 			foreach(nodes as var node){
 				try{
-					(node->node.getAttribute(fnName))(time);
+					(node->node.getAttribute(fnName))(params...);
 				}catch(e){
 					Runtime.warn(e);
 				}
 			}
 		}
 	};
-	
+
 	node.onClick := fn(evt){
 		var ctxt = Util.requirePlugin( 'PADrend/SystemUI').getEventContext();
 		if( evt.button == 0 && !ctxt.isAltPressed() && !ctxt.isCtrlPressed() )
 			this.buttonState(!this.buttonState());
 	};
-	
+
 };
 
 trait.allowRemoval();
@@ -103,35 +113,49 @@ trait.onRemove += fn(node){
 module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
-		return [ 
+		return [
 			{
 				GUI.TYPE : GUI.TYPE_BOOL,
 				GUI.LABEL : "active",
 				GUI.WIDTH : 200,
 				GUI.DATA_WRAPPER : node.buttonState
-			},	
+			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
 				GUI.TYPE : GUI.TYPE_TEXT,
 				GUI.LABEL : "fn1",
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.buttonFn1
-			},	
+			},
+			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+			{
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.LABEL : "fn1 parameter",
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.DATA_WRAPPER : node.buttonFn1_params
+			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
 				GUI.TYPE : GUI.TYPE_TEXT,
 				GUI.LABEL : "fn2",
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.buttonFn2
-			},	
+			},
+			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+			{
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.LABEL : "fn2 parameter",
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.DATA_WRAPPER : node.buttonFn2_params
+			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
 				GUI.TYPE : GUI.TYPE_TEXT,
 				GUI.LABEL : "linkRole",
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.buttonLinkRole
-			},	
-			
+			},
+
 		];
 	});
 });
