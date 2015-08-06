@@ -3,7 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2014 Claudius Jähn <claudius@uni-paderborn.de>
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -13,12 +13,12 @@
 
 /*! Animate an object according to key frames.
 	The following members are added to the given Node:
-			
+
 	- node.animationSpeed 		DataWrapper( Number )
 	- node.animationKeyFrames 	DataWrapper( [ time,SRT|Vec3]* } )
-	
+
 	\see ObjectTraits/Animation/_AnimatedBaseTrait
-	
+
 	\todo support other interpolation methods.
 	\todo visualize locations?
 	\todo support position locations
@@ -26,7 +26,7 @@
 var PersistentNodeTrait = module('LibMinSGExt/Traits/PersistentNodeTrait');
 static trait = new PersistentNodeTrait(module.getId());
 
-	
+
 static simpleSmootTime = fn(relTime,smoothness){
 	if(smoothness == 0||relTime<0||relTime>=1.0){
 		return relTime;
@@ -43,13 +43,14 @@ static sortKeyFrames = fn(array){
 
 trait.onInit += fn(MinSG.Node node){
 	node.animationSpeed :=  node.getNodeAttributeWrapper('animationSpeed', 1.0 );
+	node.loopAnimation :=  node.getNodeAttributeWrapper('loopAnimation', false );
 	// time0 x0 y0 z0 | time1 x1 y1 y2 | ...
 	// OR time0 x0 y0 z0 dx0 dy0 dz0 upx0 upy0 upz0 scale| ...
 	var serializedKeyFrames =  node.getNodeAttributeWrapper('keyframes', "" );
 	node.keyFrame_smoothFactor :=  node.getNodeAttributeWrapper('keyframes_smoothFactor', 0 );
 
 	var keyFrames = new DataWrapper;
-	
+
 	{ // init existing key frames
 		var arr = []; // [time,SRT | Vec3]*
 		foreach(serializedKeyFrames().split(',') as var singleKeyFrameString){
@@ -74,7 +75,7 @@ trait.onInit += fn(MinSG.Node node){
 		var parts = [];
 		foreach(arr as var entry){
 			[var time, var location] = entry;
-			
+
 			var parts2 = [time];
 			if(location.isA(Geometry.Vec3))
 				parts2.append(location.toArray());
@@ -92,7 +93,7 @@ trait.onInit += fn(MinSG.Node node){
 
 
 	Traits.assureTrait(node,module('./_AnimatedBaseTrait'));
-	
+
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
 		outln("onAnimationInit (KeyFrameAnimationTrait)");
@@ -105,6 +106,8 @@ trait.onInit += fn(MinSG.Node node){
 		if(this.animationKeyFrames().empty())
 			return;
 		var relTime = (time-_animationStartingTime)*this.animationSpeed();
+		if(this.loopAnimation() && !this.animationKeyFrames().empty())
+			relTime %= this.animationKeyFrames().back()[0];
 		var prevLocation = this._animationInitialSRT;
 		var nextLocation;
 		var prevTime = 0;
@@ -124,7 +127,7 @@ trait.onInit += fn(MinSG.Node node){
 			}
 		}else{ //! \todo mixed interpolation!
 //			outln( relTime," ",prevTime," ",nextTime);
-			
+
 			var d = (prevTime==nextTime ? 0.0 : simpleSmootTime((relTime-prevTime) / (nextTime-prevTime),this.keyFrame_smoothFactor()) );
 			if(prevLocation.isA(Geometry.SRT)){
 				this.setRelTransformation( new Geometry.SRT(prevLocation,nextLocation,d));
@@ -140,7 +143,7 @@ trait.onInit += fn(MinSG.Node node){
 		if(this.isSet($_animationInitialSRT) && this._animationInitialSRT)
 			this.setRelTransformation( this._animationInitialSRT );
 	};
-	
+
 };
 
 trait.allowRemoval();
@@ -156,7 +159,7 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.RANGE_STEP_SIZE : 0.1,
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.animationSpeed
-			},	
+			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
 				GUI.TYPE : GUI.TYPE_RANGE,
@@ -165,12 +168,18 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.RANGE_STEP_SIZE : 0.1,
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.keyFrame_smoothFactor
-			},	
+			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
+			{
+				GUI.TYPE : GUI.TYPE_BOOL,
+				GUI.LABEL : "loop",
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.DATA_WRAPPER : node.loopAnimation
+			},
 			'----'
 		];
 		var steps = [];
-		
+
 		foreach(node.animationKeyFrames() as var index, var entry){
 			[var time,var location] = entry;
 			entries += {	GUI.TYPE : GUI.TYPE_NEXT_ROW	};
@@ -233,10 +242,9 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				refreshCallback();
 			}
 		};
-		
+
 		return entries;
 	});
 });
 
 return trait;
-
