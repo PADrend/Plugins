@@ -64,43 +64,46 @@ trait.onInit += fn(MinSG.Node node){
 		if(!mAnchor)
 			return;
 		mAnchor = mAnchor();
+		node.resetRelTransformation();
 		var worldUp = mAnchor.isA(Geometry.SRT) ? mNode.localPosToWorldPos(mAnchor.getUpVector()) : node.getWorldTransformationSRT().getUpVector();
 		var worldSource = mNode.localPosToWorldPos( mAnchor.isA(Geometry.SRT) ? mAnchor.getTranslation() : mAnchor );
-		
+
 		var targetNode = node.__targetNode();
 		var worldTarget;
-		
+
 		if( targetNode ){
 			var tAnchor = targetNode.findAnchor( node.__targetAnchorId() );
 			if(tAnchor){
 				tAnchor = tAnchor();
 				worldTarget = targetNode.localPosToWorldPos( tAnchor.isA(Geometry.SRT) ? tAnchor.getTranslation() : tAnchor );
 			}
-			
+
 		}
-		
+
 		if(worldTarget){
 			node.setWorldTransformation(new Geometry.SRT( worldSource, worldTarget-worldSource, worldUp, node.getWorldTransformationSRT().getScale() ));
 		}else{
 			node.setWorldOrigin( worldSource );
 		}
-		
+
 	};
 	var registerTransformationListener = [updateLocation] => fn(updateLocation,revoce, newNode){
 		revoce();
 		//! \see  MinSG.TransformationObserverTrait
-		Traits.assureTrait(newNode, module('LibMinSGExt/Traits/TransformationObserverTrait'));
-		revoce += addRevocably( newNode.onNodeTransformed, updateLocation);
+		if(newNode) {
+			Traits.assureTrait(newNode, module('LibMinSGExt/Traits/TransformationObserverTrait'));
+			revoce += addRevocably( newNode.onNodeTransformed, updateLocation);
+		}
 	};
 
 	node.__mountNode.onDataChanged += updateLocation;
 	node.__mountNode.onDataChanged += [new MultiProcedure] => registerTransformationListener;
 	node.__targetNode.onDataChanged += updateLocation;
 	node.__targetNode.onDataChanged +=[new MultiProcedure] =>  registerTransformationListener;
-	
+
 	node.__mountAnchorId.onDataChanged += updateLocation;
 	node.__targetAnchorId.onDataChanged += updateLocation;
-	
+
 
 
 	// ---------------------------------------------------
@@ -177,7 +180,7 @@ module.on('../ObjectTraitRegistry', fn(registry){
 					}
 					return entries;
 				}
-				
+
 			},
 			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
@@ -195,11 +198,10 @@ module.on('../ObjectTraitRegistry', fn(registry){
 					}
 					return entries;
 				}
-				
+
 			},
 		];
 	});
 });
 
 return trait;
-
