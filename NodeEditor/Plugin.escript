@@ -45,7 +45,7 @@ plugin.init @(override) := fn() {
 
 	NodeEditor = Std.module('NodeEditor/NodeEditor');
 	SemanticObject = Std.module('LibMinSGExt/SemanticObject');
-	
+
 	/// Register ExtensionPointHandler:
 	Util.registerExtension('PADrend_Init', fn(){	NodeEditor.selectNode(PADrend.getCurrentScene());	});
 	Util.registerExtension('PADrend_UIEvent',fn(evt){
@@ -98,7 +98,7 @@ plugin.init @(override) := fn() {
 		NodeEditor.onSelectionChanged += fn(selectedNodes){
 			revoce();
 			if(!selectedNodes.empty()){
-				
+
 				revoce += Util.registerExtensionRevocably('PADrend_AfterRenderingPass', [selectedNodes] => highlightNodes );
 			}
 		};
@@ -108,7 +108,7 @@ plugin.init @(override) := fn() {
 		static COLOR_TEXT_ORIGINAL = new Util.Color4f(1,1,1,1);
 		static COLOR_TEXT_INSTANCE = new Util.Color4f(0.9,0.9,0.9,1);
 		static COLOR_FIRST_BARS = new Util.Color4f(1.0,1.0,1.0,1);
-	
+
 		static highlightNodes = fn(selectedNodes,...){
 			foreach(selectedNodes as var node){
 				if(!node || node==PADrend.getCurrentScene() || node==PADrend.getRootNode())
@@ -136,7 +136,7 @@ plugin.init @(override) := fn() {
 				renderingContext.popBlending();
 			}
 			var last = selectedNodes.count()-1;
-			for(var i=selectedNodes.count()>20 ? last : 0; i<=last; ++i){ 
+			for(var i=selectedNodes.count()>20 ? last : 0; i<=last; ++i){
 				var node = selectedNodes[i];
 				if(node && node!=PADrend.getCurrentScene() && node!=PADrend.getRootNode()){
 					if( i==last && selectedNodes.count()>1){ // show bars to mark first selected node
@@ -160,6 +160,31 @@ plugin.init @(override) := fn() {
 		return handler ? handler() : false;
 	});
 
+	keyMap[Util.UI.KEY_A] = fn(){					// [ctrl] + [a] toggle active
+		if(PADrend.getEventContext().isCtrlPressed() && !NodeEditor.getSelectedNodes().empty()){
+			var activate = !NodeEditor.getSelectedNode().isActive();
+			foreach(NodeEditor.getSelectedNodes() as var node) {
+				if(activate)
+					node.activate();
+				else
+					node.deactivate();
+			}
+			return true;
+		}
+		return false;
+	};
+
+	keyMap[Util.UI.KEY_S] = fn(){					// [ctrl] + [alt] + [s] toggle semantic object
+		if(PADrend.getEventContext().isCtrlPressed() && PADrend.getEventContext().isAltPressed() && !NodeEditor.getSelectedNodes().empty()){
+			static SemanticObject = Std.module('LibMinSGExt/SemanticObject');
+			var markSemantic = !SemanticObject.isSemanticObject(NodeEditor.getSelectedNode());
+			foreach(NodeEditor.getSelectedNodes() as var node) {
+				SemanticObject.markAsSemanticObject(node, markSemantic);
+			}
+			return true;
+		}
+		return false;
+	};
 	keyMap[Util.UI.KEY_DELETE] = fn(){				// [entf] delete selected nodes
 		var p;
 		foreach(NodeEditor.getSelectedNodes() as var node){
