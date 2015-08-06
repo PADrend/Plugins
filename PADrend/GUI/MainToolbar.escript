@@ -1250,7 +1250,7 @@ static registerStdToolbarEntries = fn() {
 			
 			entries += {
 				GUI.TYPE : GUI.TYPE_CONTAINER,
-				GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_CHILDREN_REL ,4,1.0 ],
+				GUI.SIZE : [GUI.WIDTH_ABS|GUI.HEIGHT_CHILDREN_REL ,200,1.0 ],
 				GUI.CONTENTS : parts,
 			};
 		}
