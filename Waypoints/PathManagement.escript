@@ -5,7 +5,7 @@
  * Copyright (C) 2010-2013 Benjamin Eikel <benjamin@eikel.org>
  * Copyright (C) 2010-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Jan Krems
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -14,7 +14,7 @@
  */
 
 static PathManagement = new Namespace;
- 
+
 static activePath = new Std.DataWrapper; // void || MinSG.PathNode
 
 //! @return Get the currently active path.
@@ -91,7 +91,7 @@ PathManagement.createPath := fn( [MinSG.GroupNode,void] container = void ){
 	PADrend.getSceneManager().registerNode(path);
 	path.name := "<created>";
 	if(container)
-		conatiner += path;
+		container += path;
 	return path;
 };
 
@@ -152,7 +152,7 @@ animation_active.onDataChanged += fn(Bool b){
 			return 0; // reschedule
 		});
 	}
-	
+
 };
 
 static animation_attachedCamera = new Std.DataWrapper;
@@ -176,7 +176,7 @@ PathManagement.animation_attachedCamera.onDataChanged += fn( [MinSG.Node,void] n
 // fly to
 
 /**
-* Fly to the waypoint/position at timestamp 
+* Fly to the waypoint/position at timestamp
 *
 * @param index [Number] Timestamp of the position to fly to
 * @param flight_time [Number] Time in seconds to reach the target location
@@ -207,12 +207,12 @@ PathManagement.flyTo := fn(Number timestamp,Number duration = 1.0){
 			}else{
 				var d = (now-activeFlightTask.startTime) / (activeFlightTask.endClock-activeFlightTask.startTime);
 				d = Geometry.interpolate2dPolynom(polynomPoints,d).clamp(0,1);
-				animation_attachedCamera().setRelTransformation( 
+				animation_attachedCamera().setRelTransformation(
 							new Geometry.SRT(activeFlightTask.startPoint,activeFlightTask.endPoint,d));
 				return 0; // reschedule
 			}
 		});
-		
+
 	}
 	var now = PADrend.getSyncClock();
 	activeFlightTask.startTime := now;
@@ -224,7 +224,7 @@ PathManagement.flyTo := fn(Number timestamp,Number duration = 1.0){
 };
 
 
-    
+
 
 /**
 * Move the camera to the next waypoint over <duration> secs.
@@ -237,10 +237,10 @@ PathManagement.flyToNextWaypoint := fn(Number duration = 2){
 	var wps = activePath().getWaypoints();
 	var idx = 0;
 	if( animation_currentTime() < wps[wps.count()-1].getTime()) {
-		while(idx < wps.count() && wps[idx].getTime() <= animation_currentTime()) 
+		while(idx < wps.count() && wps[idx].getTime() <= animation_currentTime())
 			++idx;
 	}
-	PathManagement.flyTo(wps[idx].getTime(),duration ); 
+	PathManagement.flyTo(wps[idx].getTime(),duration );
 };
 
 /**
@@ -253,7 +253,7 @@ PathManagement.flyToPrevWaypoint := fn(duration){
 		PADrend.message("No active path.");
 		return;
 	}
-	
+
 	PathManagement.animation_active(false);
 
 	// find previous Waypoint
@@ -380,9 +380,9 @@ static insertIndex = 0;
 * time a waypoint is added).
 */
 PathManagement.createWaypoint := fn(Geometry.SRT srt, timestamp = void){
-	if(!timestamp) 
+	if(!timestamp)
 		timestamp = insertIndex;
-	
+
 	var cmd = Command.create("Add waypoint",
 		fn(){ // execute
 			if(!this.path)
@@ -495,34 +495,34 @@ PathManagement.setTimecodesToIndices := fn() {
 	var path = activePath();
 	if(path) {
 		var wps = path.getWaypoints();
-		if(!wps || wps.empty()) 
+		if(!wps || wps.empty())
 			return;
-		
+
 		// set times to a nonexisting area to prevent duplicate times
-		foreach(wps as var index, var wp) 
+		foreach(wps as var index, var wp)
 			wp.setTime(index * 0.001);
-		
+
 		var t = 0;
 		// set new times
-		foreach(wps as var wp) 
+		foreach(wps as var wp)
 			wp.setTime(t++);
-		
+
 		Util.executeExtensions('Waypoints_PathChanged', path);
 	}
 };
 
 PathManagement.setTimecodesByDistance := fn(MinSG.PathNode path, Number speed) {
-	var path = activePath();
+	//var path = activePath();
 	if(path) {
 		var wps = path.getWaypoints();
 		if(!wps || wps.empty()) {
 			return;
 		}
 		// set times to a nonexisting area to prevent duplicate times
-		foreach(wps as var time, var wp) 
+		foreach(wps as var time, var wp)
 			wp.setTime(time * 0.001);
 
-		if(speed <= 0.0) 
+		if(speed <= 0.0)
 			speed = 1.0;
 
 		var lastTime = 0.0;
@@ -533,8 +533,8 @@ PathManagement.setTimecodesByDistance := fn(MinSG.PathNode path, Number speed) {
 			var lastSRT = wps[i-1].getRelTransformationSRT();
 			var curSRT = wps[i].getRelTransformationSRT();
 
-			var distance = curSRT.getUpVector().dot(lastSRT.getUpVector())//.length()
-				+curSRT.getDirVector().dot(lastSRT.getDirVector())//.length()
+			var distance = (1-curSRT.getUpVector().dot(lastSRT.getUpVector()))//.length()
+				+(1-curSRT.getDirVector().dot(lastSRT.getDirVector()))//.length()
 				+(curSRT.getTranslation()-lastSRT.getTranslation()).length();
 
 			lastTime += distance / speed;
@@ -555,7 +555,7 @@ PathManagement.updateScreenshots := fn(wps = void){
 	if(!path)
 		return;
 
-	if(!wps) 
+	if(!wps)
 		wps = path.getWaypoints();
 
 	var oldViewport = camera.getViewport();
