@@ -23,7 +23,8 @@ static LINK_ROLE_REL_DELTA = 'transformRel';
 static LINK_ROLE_SNAP = 'transformSnap'; // snap lower center of target's bounding box to proxy's origin(rotation and position)
 static LINK_ROLE_SNAP_OFFSET = 'transformSnapOffset';  // preserve the same relative transformation between the proxy and the target.
 static LINK_ROLE_SNAP_POS = 'transformSnapPos'; // snap lower center of target's bounding box to proxy's origin (only position)
-static LINK_ROLES = [LINK_ROLE_ABS_DELTA,LINK_ROLE_REL_DELTA,LINK_ROLE_SNAP,LINK_ROLE_SNAP_OFFSET,LINK_ROLE_SNAP_POS];
+static LINK_ROLE_ROTATION = 'transformRotation'; // rotation only
+static LINK_ROLES = [LINK_ROLE_ABS_DELTA,LINK_ROLE_REL_DELTA,LINK_ROLE_SNAP,LINK_ROLE_SNAP_OFFSET,LINK_ROLE_SNAP_POS, LINK_ROLE_ROTATION];
 
 trait.onInit += fn(MinSG.Node node){
 	node.transformationProxyEnabled := new DataWrapper(true);
@@ -122,6 +123,14 @@ trait.onInit += fn(MinSG.Node node){
 						case LINK_ROLE_SNAP_POS:{
 							var targetWorldPosition = targetNode.localPosToWorldPos( targetNode.getBB().getRelPosition(0.5,0,0.5) );
 							targetNode.moveLocal( targetNode.worldDirToLocalDir( node.getWorldOrigin()-targetWorldPosition ));
+							break;
+						}
+						case LINK_ROLE_ROTATION:{
+							var deltaWorldTransformation = localToWorld_SRT * lastLocalToWorld_SRT.inverse();
+							var deltaWorldRotation = deltaWorldTransformation.getRotation();
+							var targetWorldSRT = targetNode.getWorldTransformationSRT();
+							targetWorldSRT.setRotation( deltaWorldRotation * targetWorldSRT.getRotation());
+							targetNode.setWorldTransformation(targetWorldSRT);
 							break;
 						}
 						default: 
