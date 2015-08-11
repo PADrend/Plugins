@@ -159,6 +159,7 @@ plugin.init @(override) := fn() {
 		var handler = keyMap[evt.key];
 		return handler ? handler() : false;
 	});
+	static Command = Std.module('LibUtilExt/Command');
 
 	keyMap[Util.UI.KEY_A] = fn(){					// [ctrl] + [a] toggle active
 		if(PADrend.getEventContext().isCtrlPressed() && !NodeEditor.getSelectedNodes().empty()){
@@ -369,6 +370,48 @@ plugin.init @(override) := fn() {
 			return true;
 		};
 	}
+
+	keyMap[Util.UI.KEY_G] = fn(){					// [ctrl] + [g] group nodes
+		if(PADrend.getEventContext().isCtrlPressed() && !NodeEditor.getSelectedNodes().empty()){
+			
+			var oldParents = new Map;
+			
+			var subtreeRoot = NodeEditor.getSelectedNodes().front();
+			if(NodeEditor.getSelectedNodes().count()>1){
+				foreach(NodeEditor.getSelectedNodes() as var node){
+					subtreeRoot = MinSG.getRootOfCommonSubtree(subtreeRoot,node);
+					assert(subtreeRoot);
+					oldParents[node] = node.getParent();
+				}
+			}else {
+				oldParents[subtreeRoot] = subtreeRoot.getParent();
+				subtreeRoot = subtreeRoot.getParent();
+			}
+			var newGroup = new MinSG.ListNode;
+			
+			PADrend.executeCommand({
+				Command.DESCRIPTION : "Group Nodes",
+				Command.EXECUTE : 	[subtreeRoot, NodeEditor.getSelectedNodes(), newGroup] => fn(subtreeRoot, nodes, newGroup) {
+					subtreeRoot += newGroup;					
+					foreach(nodes as var node){
+						MinSG.changeParentKeepTransformation(node, newGroup);
+					}
+					NodeEditor.selectNode( newGroup );
+				},
+				Command.UNDO : 		[newGroup, oldParents] => fn(newGroup, oldParents) {
+					var nodes = [];
+					foreach(oldParents as var node, var parent){
+						MinSG.changeParentKeepTransformation(node, parent);
+						nodes += node;
+					}
+					MinSG.destroy(newGroup);
+					NodeEditor.selectNodes(nodes);
+				}
+			});
+			return true;
+		}
+		return false;
+	};
 
 	// temporary!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	static follower;
