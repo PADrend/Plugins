@@ -36,8 +36,8 @@ trait.onInit += fn(MinSG.Node node){
 	node.buttonFn1 := node.getNodeAttributeWrapper('buttonFn1', "animationPlay" );
 	node.buttonFn2 := node.getNodeAttributeWrapper('buttonFn2', "animationPause" );
 	node.buttonLinkRole := node.getNodeAttributeWrapper('buttonLinkRole', "switch" );
-  node.buttonFn1_params := node.getNodeAttributeWrapper('buttonFn1_params', "[]" );
-  node.buttonFn2_params := node.getNodeAttributeWrapper('buttonFn2_params', "[]" );
+  node.buttonFn1_params := node.getNodeAttributeWrapper('buttonFn1_params', "['$TIME']" );
+  node.buttonFn2_params := node.getNodeAttributeWrapper('buttonFn2_params', "['$TIME']" );
 
 	//! \see ObjectTraits/NodeLinkTrait
 	node.availableLinkRoleNames += "switch";
@@ -82,8 +82,11 @@ trait.onInit += fn(MinSG.Node node){
       Runtime.warn("ButtonTrait: could not parse parameter string: "+node.buttonFn1_params());
       params = [];
     }
-    params += time;
-
+		for(var i=0; i<params.count(); ++i) {
+			if(params[i] == '$TIME')
+				params[i] = time;
+		}
+		
 		if(!fnName.empty()){
 			foreach(nodes as var node){
 				try{
@@ -107,6 +110,8 @@ trait.allowRemoval();
 trait.onRemove += fn(node){
 	node.buttonFn1(void);
 	node.buttonFn2(void);
+	node.buttonFn1_params(void);
+	node.buttonFn2_params(void);
 	node.buttonLinkRole(void);
 };
 
