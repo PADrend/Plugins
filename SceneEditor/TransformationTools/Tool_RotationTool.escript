@@ -259,6 +259,7 @@ Tool.doCreateContextMenu ::= fn(){
 						return toJSON(arr.map(fn(key,value){return value.round(0.0001);}),false);
 					},
 					GUI.ON_DATA_CHANGED : this->fn(t){
+						var nodes = getTransformedNodes();
 						pivot_ws( nodes[0].localPosToWorldPos(new Geometry.Vec3( parseJSON(t))) );
 						storePivotAtNode();
 					},
