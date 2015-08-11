@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/AlternatingAnimatorTrait",
+	"aliases" : ["ObjectTraits/AlternatingAnimatorTrait"],
+	"description" : "Alternating animator ",
+	"displayName" : "Animation/AlternatingAnimatorTrait"
+}

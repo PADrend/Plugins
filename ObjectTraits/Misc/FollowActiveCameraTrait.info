@@ -1,0 +1,5 @@
+{
+	"moduleId" : "ObjectTraits/Misc/FollowActiveCameraTrait",
+	"description" : "Let linked nodes follow the active camera.",
+	"displayName" : "Misc/FollowActiveCameraTrait"
+}
