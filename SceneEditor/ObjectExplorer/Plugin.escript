@@ -59,7 +59,12 @@ plugin.initGUI := fn(gui){
 				GUI.FLAGS : GUI.BACKGROUND | GUI.USE_SCISSOR,
 				GUI.PROPERTIES : [objectHeading_bg,objectHeading_textColor],
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS|GUI.HEIGHT_ABS,0,16 ],
-				GUI.ON_CLICK : [node] => fn(node){ NodeEditor.selectNode(node);	},
+				GUI.ON_CLICK : [node] => fn(node){ 
+					if(PADrend.getEventContext().isShiftPressed())
+						NodeEditor.addSelectedNode(node);	
+					else
+						NodeEditor.selectNode(node);	
+				},
 				GUI.TEXT_ALIGNMENT : GUI.TEXT_ALIGN_LEFT | GUI.TEXT_ALIGN_MIDDLE,
 				GUI.TOOLTIP : "Click to select."
 			},
