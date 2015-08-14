@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/ActionTimerTrait",
+	"aliases" : ["ObjectTraits/ActionTimerTrait"],
+	"description" : "Perform timed actions.",
+	"displayName" : "Animation/ActionTimerTrait"
+}
