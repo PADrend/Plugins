@@ -83,7 +83,7 @@ trait.onInit += fn(MinSG.Node node){
       params = [];
     }
 		for(var i=0; i<params.count(); ++i) {
-			if(params[i] == '$TIME')
+			if(params[i] === '$TIME')
 				params[i] = time;
 		}
 		
