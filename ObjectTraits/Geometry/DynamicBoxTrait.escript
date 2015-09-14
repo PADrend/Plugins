@@ -18,22 +18,26 @@ trait.onInit += fn(MinSG.GeometryNode node){
 	var boxDimX = new Std.DataWrapper(node.getBB().getExtentX());
 	var boxDimY = new Std.DataWrapper(node.getBB().getExtentY());
 	var boxDimZ = new Std.DataWrapper(node.getBB().getExtentZ());
+	var boxUseCenter = node.getNodeAttributeWrapper('boxUseCenter', false);
 	
-	var regenerate = [node,boxDimX,boxDimY,boxDimZ]=>fn(node,boxDimX,boxDimY,boxDimZ,value){
+	var regenerate = [node,boxDimX,boxDimY,boxDimZ,boxUseCenter]=>fn(node,boxDimX,boxDimY,boxDimZ,boxUseCenter,value){
 		var mb = new Rendering.MeshBuilder;
 		mb.color( new Util.Color4f(1,1,1,1) );
 		var x = boxDimX();
 		var y = boxDimY();
 		var z = boxDimZ();
-		mb.addBox( new Geometry.Box(new Geometry.Vec3(x*0.5,y*0.5,z*0.5),x,y,z) );
+		var center = boxUseCenter() ? new Geometry.Vec3(0,0,0) : new Geometry.Vec3(x*0.5,y*0.5,z*0.5);
+		mb.addBox( new Geometry.Box(center,x,y,z) );
 		node.setMesh( mb.buildMesh() );
 	};
 	boxDimX.onDataChanged += regenerate;
 	boxDimY.onDataChanged += regenerate;
 	boxDimZ.onDataChanged += regenerate;
+	boxUseCenter.onDataChanged += regenerate;
 	node.boxDimX := boxDimX;
 	node.boxDimY := boxDimY;
 	node.boxDimZ := boxDimZ;	
+	node.boxUseCenter := boxUseCenter;	
 };
 
 trait.allowRemoval();
@@ -42,6 +46,13 @@ module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
 	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){
 		return [ 
+			{
+				GUI.TYPE : GUI.TYPE_BOOL,
+				GUI.LABEL : "Origin at center",
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.DATA_WRAPPER : node.boxUseCenter
+			},
+			{	GUI.TYPE : GUI.TYPE_NEXT_ROW	},
 			{
 				GUI.TYPE : GUI.TYPE_RANGE,
 				GUI.RANGE : [-3,2],
