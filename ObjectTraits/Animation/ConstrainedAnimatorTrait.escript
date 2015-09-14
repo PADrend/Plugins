@@ -53,7 +53,9 @@ trait.onInit += fn(MinSG.Node node){
 	node.animatorGoToMax := fn(time=void){		this.animatorGoTo(this.animatorMax(),time);	};
 	
 	node.animationPlay := fn(startingTime=void){		this.animatorGoTo(this.animatorMax(),startingTime,void,true);	};
-		
+	
+	node._animatorIsActive := false;
+	
 	static handler = fn(...){
 	
 		while( !this.isDestroyed() && this._animatorTargetLocalTime){
@@ -84,9 +86,18 @@ trait.onInit += fn(MinSG.Node node){
 				var localTime = _animatorTargetLocalTime* smoothedTime + (1 - smoothedTime)*_animatorSourceLocalTime;
 				this._animatorLocalTime(localTime);
 			}
+			if(!this._animatorIsActive) {
+				this._animatorTargetLocalTime = void; 
+				this.animationCallbacks("pause",this._animatorLocalTime());
+				break;
+			}
 			yield;
 		}
 		return $REMOVE;
+	};
+	
+	node.animationPause := fn( time=void ){
+		this._animatorIsActive = false;
 	};
 	
 	node.animatorGoTo := fn( Number targetLocalTime, startingTime = void, endTime = void, repeat = false ){
@@ -105,6 +116,7 @@ trait.onInit += fn(MinSG.Node node){
 		this._animatorSourceTime = startingTime;
 		this._animatorSourceLocalTime = _animatorLocalTime();
 		this._animatorTargetLocalTime = targetLocalTime;
+		this._animatorIsActive = true;
 	};
 	
 //	node.animationPlay := fn( time=void ){
@@ -116,6 +128,7 @@ trait.onInit += fn(MinSG.Node node){
 		this._animatorTargetTime = void;
 		this._animatorSourceLocalTime = void;
 		this._animatorLocalTime( this.animatorMin() );
+		this._animatorIsActive = false;
 	};
 	
 };
