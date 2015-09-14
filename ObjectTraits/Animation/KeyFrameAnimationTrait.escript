@@ -96,7 +96,7 @@ trait.onInit += fn(MinSG.Node node){
 
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
-		outln("onAnimationInit (KeyFrameAnimationTrait)");
+		//outln("onAnimationInit (KeyFrameAnimationTrait)");
 		this._animationStartingTime  := time;
 //////		this._animationInitialSRT  := (this.animationKeyFrames()[0]---|> Geometry.SRT) ? this.animationKeyFrames()[0] : this.getRelTransformationSRT();
 		this._animationInitialSRT  := this.getRelTransformationSRT();
@@ -139,7 +139,7 @@ trait.onInit += fn(MinSG.Node node){
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
-		outln("stop");
+		//outln("stop");
 		if(this.isSet($_animationInitialSRT) && this._animationInitialSRT)
 			this.setRelTransformation( this._animationInitialSRT );
 	};

@@ -58,9 +58,9 @@ trait.onInit += fn(MinSG.Node node){
 			if(entry[0]==LINK_ROLE_SNAP_OFFSET){
 				var localTargetToWorld_Matrix = targetNode.getWorldTransformationMatrix();
 				entry[2] = worldToLocalProxy_Matrix * localTargetToWorld_Matrix;
-				outln("updateTransformationOffsets: ",entry[2]);
+				//outln("updateTransformationOffsets: ",entry[2]);
 			}else{
-				outln(entry[0]);
+				//outln(entry[0]);
 			}
 		}
 	};

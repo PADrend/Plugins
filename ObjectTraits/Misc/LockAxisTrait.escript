@@ -95,7 +95,7 @@ trait.onInit += fn(MinSG.Node node){
 	var updateLockedAxes = [transformedNodes] => fn(transformedNodes){
 		foreach(transformedNodes as var targetNode, var entry){
 			entry[0].setValue(targetNode.getRelTransformationSRT());
-			outln("updateLockedAxes: ",entry);
+			//outln("updateLockedAxes: ",entry);
 		}
 	};
 

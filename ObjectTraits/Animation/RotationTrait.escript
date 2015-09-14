@@ -20,7 +20,7 @@ trait.onInit += fn(MinSG.Node node){
 	
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
-		outln("onAnimationInit (RotationTrait)");
+		//outln("onAnimationInit (RotationTrait)");
 		this._rotationInitialSRT  := this.getRelTransformationSRT();
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
@@ -36,7 +36,7 @@ trait.onInit += fn(MinSG.Node node){
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
-		outln("onAnimationStop (RotationTrait)");
+		//outln("onAnimationStop (RotationTrait)");
 		if(this.isSet($_rotationInitialSRT) && this._rotationInitialSRT)
 			this.setRelTransformation( this._rotationInitialSRT );
 	};
