@@ -41,7 +41,7 @@ trait.onInit += fn(MinSG.Node node){
 		} 
 		t = this.repeatAnimation() ? t % maxTime : t.clamp(0,maxTime);
 		if(t<0)
-			t += maxTime;
+			t+=(-t/maxTime).ceil()*maxTime;
 		return t;
 	};
 
@@ -49,7 +49,8 @@ trait.onInit += fn(MinSG.Node node){
 		var path = this.path_pathNode();
 		var t = this.getPathTime(time);
 		//transf.setTranslation(path.localPosToWorldPos(transf.getTranslation()));
-		return path.getWorldTransformationSRT() * path.getPosition(t);
+		//return path.getWorldTransformationSRT() * path.getPosition(t);
+		return path.getWorldPosition(t);
 	};
 	
 	//! \see ObjectTraits/NodeLinkTrait
@@ -103,20 +104,21 @@ trait.onInit += fn(MinSG.Node node){
 
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
-		outln("onAnimationInit (PathAnimationTrait)");
+		//outln("onAnimationInit (PathAnimationTrait)");
+		this._animationStartingTime := time;
 		this.animationCallbacks("play", 0);
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationPlay += fn(time,lastTime){
 		if(this.path_pathNode() ---|> MinSG.PathNode){
-			this.setWorldTransformation(this.getPathWorldTransformation(time));
-			this.animationCallbacks("play", this.getPathTime(time));
+			this.setWorldTransformation(this.getPathWorldTransformation(time-_animationStartingTime));
+			this.animationCallbacks("play", this.getPathTime(time-_animationStartingTime));
 		}else outln("No path node selected!");
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
-		outln("onAnimationStop (PathAnimationTrait)");
-		this.setWorldTransformation(this.getPathWorldTransformation(0));
+		//outln("onAnimationStop (PathAnimationTrait)");
+		this.setWorldTransformation(this.getPathWorldTransformation(this.getPathTime(0)));
 		this.animationCallbacks("stop", 0);
 	};
 };

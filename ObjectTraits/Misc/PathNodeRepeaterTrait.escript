@@ -69,32 +69,34 @@ trait.onInit += fn(MinSG.GroupNode node){
 		// fix node links and transform nodes
 		foreach(nodes as var source, var clones) {
 			foreach(clones as var entry) {
+				[var clone, var i] = entry;
 				// fix relative node links
-				if(Traits.queryTrait(entry[0], NodeLinkTrait)) {
-					foreach(entry[0].accessLinkedNodes().clone() as var nodeLink) {
-						entry[0].removeLinkedNodes(nodeLink.role, nodeLink.query);
+				if(Traits.queryTrait(clone, NodeLinkTrait)) {
+					foreach(clone.accessLinkedNodes().clone() as var nodeLink) {
+						clone.removeLinkedNodes(nodeLink.role, nodeLink.query);
 					}
 					foreach(source.accessLinkedNodes() as var nodeLink) {
 						if(!nodeLink.nodes.empty()) {
-							var query = createRelativeNodeQuery(entry[0], nodeLink.nodes.front());
-							entry[0].addLinkedNodes(nodeLink.role, query);
+							var query = createRelativeNodeQuery(clone, nodeLink.nodes.front());
+							clone.addLinkedNodes(nodeLink.role, query);
 						}
 					}
 				}
 					
 				var transformation = void;				
 				// update offsets of path animation trait
-				if(Traits.queryTrait(entry[0], PathAnimationTrait)) {
-					entry[0].pathOffset(entry[1]*this.pathRepeater_offset());
-					transformation = entry[0].getPathWorldTransformation(startTime);
+				if(Traits.queryTrait(clone, PathAnimationTrait)) {
+					clone.pathOffset(i*this.pathRepeater_offset());
+					transformation = clone.getPathWorldTransformation(startTime);
 				} else {
-					var t = startTime + (entry[1]*this.pathRepeater_offset());
+					var t = startTime + (i*this.pathRepeater_offset());
 					t %= path.getMaxTime();
 					if(t<0)
 						t += path.getMaxTime();
 					transformation = path.getWorldTransformationSRT() * path.getPosition(t);
 				}
-				entry[0].setWorldTransformation( transformation );
+				clone.setWorldTransformation( transformation );
+				
 			}
 		}
 	};
