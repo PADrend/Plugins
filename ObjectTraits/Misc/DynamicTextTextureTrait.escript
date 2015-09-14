@@ -2,7 +2,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2013-2015 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2013-2015 Claudius Jï¿½hn <claudius@uni-paderborn.de>
  * Copyright (C) 2014 Mouns Almarrani <murrani@mail.upb.de>
  *
  * PADrend consists of an open source part and a proprietary part.
@@ -13,7 +13,7 @@
  */
 
 	 
-static createTexture = fn(String text, Number bg){
+static createTexture = fn(String text, Number bg, Number align=GUI.TEXT_ALIGN_LEFT){
 	static gui;
 	@(once) {
 		gui = new (Std.module('LibGUIExt/GUI_ManagerExt'));
@@ -28,6 +28,7 @@ static createTexture = fn(String text, Number bg){
 	var label = gui.create({
 		GUI.TYPE : GUI.TYPE_LABEL,
 		GUI.LABEL : text,
+		GUI.TEXT_ALIGNMENT : align,
 		GUI.POSITION : [5,5]
 	});
 	label.layout(); // calculate required size
@@ -61,18 +62,21 @@ static trait = new PersistentNodeTrait(module.getId());
 trait.onInit += fn( node){
 	node.textureBGStrength := node.getNodeAttributeWrapper('textureBGStrength', 0.5 );
 	node.textureText := node.getNodeAttributeWrapper('textureText', " " );
+	node.textureAlign := node.getNodeAttributeWrapper('textureAlign', GUI.TEXT_ALIGN_LEFT );
 	
 	var update = [node,node.textureText,node.textureBGStrength]=>fn(node,textureText,textureBGStrength,...){
 		foreach(node.getStates() as var state)	// remove all former texture states
 			if(state.isA(MinSG.TextureState))
 				node.removeState(state);
 
-		var texture = createTexture(textureText(),textureBGStrength());
+		var texture = createTexture(textureText(),textureBGStrength(), node.textureAlign());
 		if(node.isA(MinSG.BillboardNode)){
 			var scale = 0.005;
 			var width = texture.getWidth()*scale;
 			var height = texture.getHeight()*scale;
-			node.setRect(new Geometry.Rect(-width, 3-height , width, height));
+			var hAlign = 	(node.textureAlign() & GUI.TEXT_ALIGN_CENTER)>0 ? -width/2 :
+										((node.textureAlign() & GUI.TEXT_ALIGN_RIGHT)>0 ? 0 : -width);
+			node.setRect(new Geometry.Rect(hAlign, 3-height , width, height));
 		}
 		var textState = new MinSG.TextureState(texture);
 		textState.setTempState(true);
@@ -80,6 +84,7 @@ trait.onInit += fn( node){
 	};
 	node.textureText.onDataChanged += update;
 	node.textureBGStrength.onDataChanged += update;
+	node.textureAlign.onDataChanged += update;
 	update();
 };
 
@@ -103,7 +108,18 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
 				GUI.DATA_WRAPPER : node.textureBGStrength
 			},
-
+			GUI.NEXT_ROW,
+			{
+				GUI.TYPE : GUI.TYPE_SELECT,
+				GUI.LABEL : "Align",
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.OPTIONS : [ 
+					[GUI.TEXT_ALIGN_LEFT,"left"],
+					[GUI.TEXT_ALIGN_CENTER,"center"],
+					[GUI.TEXT_ALIGN_RIGHT,"right"],
+				],
+				GUI.DATA_WRAPPER : node.textureAlign
+			},
 		];
 	});
 });
