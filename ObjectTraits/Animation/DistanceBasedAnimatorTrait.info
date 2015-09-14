@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/DistanceBasedAnimatorTrait",
+	"aliases" : ["ObjectTraits/DistanceBasedAnimatorTrait"],
+	"description" : "Animates based on the distance to the object.",
+	"displayName" : "Animation/DistanceAnimator"
+}
