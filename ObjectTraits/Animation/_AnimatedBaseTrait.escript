@@ -27,9 +27,13 @@ static AnimationHandler = new Type;
 AnimationHandler.subject := void;
 AnimationHandler.currentMode := void;
 AnimationHandler.lastTime := void;
+AnimationHandler.lastClock := void;
 AnimationHandler._constructor ::= fn(_subject){
 	this.subject = _subject;
 };
+
+
+
 AnimationHandler._call ::= fn(caller,mode,time=0){
 	if(!subject || !subject.isSet($onAnimationPlay))
 		return;
@@ -39,15 +43,42 @@ AnimationHandler._call ::= fn(caller,mode,time=0){
 			this.subject.onAnimationInit(time);
 			this.currentMode = mode;
 			this.lastTime = time;
+			this.lastClock = PADrend.getSyncClock();
 		}
+		if(!subject.isActive())
+			return;
+			
+		var camera = PADrend.getActiveCamera();
+		var distSqr = 0;
+		var maxDistSqr = this.subject.animCullDist()*this.subject.animCullDist();
+		var minDistSqr = this.subject.animCullDistMin()*this.subject.animCullDistMin();
+	
+		if(maxDistSqr > 0 || minDistSqr > 0)
+			distSqr = this.subject.getWorldPosition().distanceSquared(camera.getWorldPosition());
+	
+		if(maxDistSqr > 0 && distSqr > maxDistSqr )
+			return;
+			
+		if(minDistSqr > 0 && distSqr > minDistSqr
+			&& (PADrend.getSyncClock() - this.lastClock) < ((distSqr-minDistSqr)/(maxDistSqr-minDistSqr)) )
+			return;
+						
+		if(this.subject.animFrustumCulling() 
+			&& camera.testBoxFrustumIntersection(this.subject.getWorldBB()) == Geometry.Frustum.OUTSIDE 
+			&& ((this.subject.animFrustumCullingRate() <= 0) || (PADrend.getSyncClock() - this.lastClock < this.subject.animFrustumCullingRate())) )
+			return;
+			
 		this.subject.onAnimationPlay(time,this.lastTime);
 		this.lastTime = time;
+		this.lastClock = PADrend.getSyncClock();
+		
 		break;
 	case 'stop':
 		if(this.currentMode!=mode){
 			this.subject.onAnimationStop(time,this.lastTime);
 			this.currentMode = mode;
 			this.lastTime = time;
+			this.lastClock = PADrend.getSyncClock();
 		}
 	case 'pause':
 		break;
@@ -68,7 +99,7 @@ trait.onInit += fn(MinSG.Node node){
 
 
 	var connectTo = [node,handler] => fn(node,handler, [MinSG.Node,void] animatorNode){
-		outln(" Connecting ",node," to ",animatorNode);
+		//outln(" Connecting ",node," to ",animatorNode);
 		if(node.isSet($__myAnimatorNode) && node.__myAnimatorNode){
 			node.__myAnimatorNode.animationCallbacks.accessFunctions().removeValue(handler); //! \see ObjectTraits/Helper/AnimatorBaseTrait
 			handler( "stop" );
@@ -115,6 +146,11 @@ trait.onInit += fn(MinSG.Node node){
 	node.onAnimationPlay := new MultiProcedure;
 	node.onAnimationInit := new MultiProcedure;
 	node.onAnimationStop := new MultiProcedure;
+	
+	node.animFrustumCulling := node.getNodeAttributeWrapper("animFrustumCulling", false);
+	node.animFrustumCullingRate := node.getNodeAttributeWrapper("animFrustumCullingRate", 0);
+	node.animCullDist := node.getNodeAttributeWrapper("animCullDist", 0);
+	node.animCullDistMin := node.getNodeAttributeWrapper("animCullDistMin", 0);
 };
 
 trait.allowRemoval();
@@ -124,7 +160,6 @@ trait.onRemove := fn(node){
 	node.onAnimationPlay.clear();
 	node.onAnimationInit.clear();
 };
-
 
 return trait;
 

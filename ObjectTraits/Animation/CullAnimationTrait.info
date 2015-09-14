@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/CullAnimationTrait",
+	"aliases" : ["ObjectTraits/CullAnimationTrait"],
+	"description" : "Cull animations at a certain distance or outside frustum.",
+	"displayName" : "Animation/CullAnimationTrait"
+}
