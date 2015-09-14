@@ -44,6 +44,7 @@ plugin.scale @(const) := Std.DataWrapper.createFromEntry(config,'scale',1);
 plugin.type @(const) := Std.DataWrapper.createFromEntry(config,'type',0);
 plugin.waterRefraction @(const) := Std.DataWrapper.createFromEntry(config,'waterRefraction',0.1);
 plugin.waterReflection @(const) := Std.DataWrapper.createFromEntry(config,'waterReflection',0.5);
+plugin.groundColor @(const) := Std.DataWrapper.createFromEntry(config,'groundColor',[1,1,1,1]);
 
 static resourcesFolder = __DIR__+"/resources";
 
@@ -52,7 +53,15 @@ plugin.getHazeColor := fn(){
 	return (skyPlugin && skyPlugin.isEnabled() && skyPlugin.getHazeColor()) ? skyPlugin.getHazeColor() :  PADrend.getBGColor();
 };
 
-plugin.groundColor := new Std.DataWrapper(new Util.Color4f(1,1,1,1));
+plugin.groundColorWrapper := DataWrapper.createFromFunctions(
+	plugin->fn(){
+		return new Util.Color4f(this.groundColor());
+	},
+	plugin->fn(d){
+		this.groundColor(d.toArray());
+		return d; 
+	}
+);
 	
 plugin.init @(override) := fn(){
 	module.on('PADrend/gui',registerGUI);
@@ -221,7 +230,7 @@ static ext_PADrend_AfterRendering = fn(...){
 		var hC = plugin.getHazeColor();
 		shaderState.setUniform('hazeColor',  Rendering.Uniform.VEC3F,[ [hC.r(),hC.g(),hC.b()] ]);
 		
-		var gc = plugin.groundColor();
+		var gc = plugin.groundColorWrapper();
 		shaderState.setUniform('groundColor',  Rendering.Uniform.VEC3F,[ [gc.r(),gc.g(),gc.b()] ]);
 	}
 
@@ -411,7 +420,7 @@ static registerGUI = fn(gui){
 		{
 			GUI.TYPE : GUI.TYPE_COLOR,
 			GUI.LABEL : "Ground Color",
-			GUI.DATA_WRAPPER : plugin.groundColor,
+			GUI.DATA_WRAPPER : plugin.groundColorWrapper,
 			GUI.TOOLTIP : "Adjust the ground color (for type WHITE(4)).",
 			GUI.WIDTH  : 200
 		},
