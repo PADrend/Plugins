@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Animation/AnimationFunctionTrait",
+	"aliases" : ["ObjectTraits/AnimationFunctionTrait"],
+	"description" : "Modifies the time from a different animator and uses it as its own animator time.",
+	"displayName" : "Animation/AnimationFunction"
+}
