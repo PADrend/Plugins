@@ -65,7 +65,7 @@ trait.onInit += fn(MinSG.Node node){
 			return;
 		mAnchor = mAnchor();
 		node.resetRelTransformation();
-		var worldUp = mAnchor.isA(Geometry.SRT) ? mNode.localPosToWorldPos(mAnchor.getUpVector()) : node.getWorldTransformationSRT().getUpVector();
+		var worldUp = mAnchor.isA(Geometry.SRT) ? mNode.localDirToWorldDir(mAnchor.getUpVector()) : node.getWorldTransformationSRT().getUpVector();
 		var worldSource = mNode.localPosToWorldPos( mAnchor.isA(Geometry.SRT) ? mAnchor.getTranslation() : mAnchor );
 
 		var targetNode = node.__targetNode();
