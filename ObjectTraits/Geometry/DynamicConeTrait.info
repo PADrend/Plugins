@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Geometry/DynamicConeTrait",
+	"aliases" : ["ObjectTraits/DynamicConeTrait"],
+	"description" : "Create a cone mesh (needs GeometryNode)",
+	"displayName" : "Geometry/Cone"
+}
