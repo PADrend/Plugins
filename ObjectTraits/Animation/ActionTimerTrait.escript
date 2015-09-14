@@ -58,6 +58,7 @@ trait.onInit += fn(MinSG.Node node){
 	actions.onDataChanged := [serializedActions] => fn(serializedActions, arr){
 		serializedActions( toJSON(arr) );
 	};
+	node._animationStartingTime := 0;
 	node.animationActions := actions;
 	node.testFn := fn() { outln("Test!"); };
 	
@@ -65,8 +66,8 @@ trait.onInit += fn(MinSG.Node node){
 
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationInit += fn(time){
-		outln("onAnimationInit (ActionAnimationTrait)");
-		this._animationStartingTime  := time;
+		//outln("onAnimationInit (ActionAnimationTrait)");
+		this._animationStartingTime = time;
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationPlay += fn(time,lastTime){
@@ -104,7 +105,7 @@ trait.onInit += fn(MinSG.Node node){
 	};
 	//! \see ObjectTraits/Animation/_AnimatedBaseTrait
 	node.onAnimationStop += fn(...){
-		outln("stop");
+		//outln("stop");
 	};
 
 };
