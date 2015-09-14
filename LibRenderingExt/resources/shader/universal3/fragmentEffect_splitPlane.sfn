@@ -1,0 +1,72 @@
+#version 120
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+// ------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+struct VertexProperties {
+	vec3 position_cs, normal_cs;
+	float pointSize;
+};
+
+//! \see main.sfn
+void provideFragmentEffectVars(in VertexProperties vert){}
+
+#endif
+// ------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+uniform vec4 splitPlane;
+uniform vec4 backfaceColor;
+uniform bool splitEnabled;
+
+struct CompositeColor {
+	vec4 ambient, diffuse, specular;
+};
+
+struct SurfaceProperties {
+	vec3 position_cs, normal_cs, tangent_cs;
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+
+
+vec4 sg_cameraToWorld(in vec4 pos_hms); //! \see sgHelpers.sfn
+
+//! \see main.sfn
+void addFragmentEffect(in SurfaceProperties surface, inout CompositeColor color){
+	gl_FragDepth = gl_FragCoord.z;
+	if(!splitEnabled)
+		return;
+	vec3 position_ws = sg_cameraToWorld(vec4(surface.position_cs,1.0)).xyz;
+	vec3 planeNormal = normalize(splitPlane.xyz);
+	float planeOffset = splitPlane.w;
+	position_ws -= planeNormal*planeOffset;
+	if(dot(planeNormal, position_ws) > 0)  
+		discard;
+	if(!gl_FrontFacing) {
+		color.diffuse = backfaceColor;
+		color.ambient = backfaceColor;
+		color.specular = backfaceColor;
+		gl_FragDepth = gl_FragCoord.z * 1.0001;
+	}
+}
+
+
+
+#endif
+// ------------------

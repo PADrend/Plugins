@@ -69,7 +69,7 @@ m["Shader: univeral3 (compose)"] = fn(){
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "fragmentEffect",
 		GUI.DATA_WRAPPER :  config.fragmentEffect,
-		GUI.OPTIONS : ["fragmentEffect_none", "fragmentEffect_highlight", "fragmentEffect_normalToAlpha" ]
+		GUI.OPTIONS : ["fragmentEffect_none", "fragmentEffect_highlight", "fragmentEffect_normalToAlpha", "fragmentEffect_splitPlane" ]
 	});
 	
 	p.addAction( "Init Shader",	config->fn(){
