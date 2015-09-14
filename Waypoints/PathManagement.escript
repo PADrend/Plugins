@@ -511,7 +511,7 @@ PathManagement.setTimecodesToIndices := fn() {
 	}
 };
 
-PathManagement.setTimecodesByDistance := fn(MinSG.PathNode path, Number speed) {
+PathManagement.setTimecodesByDistance := fn(MinSG.PathNode path, Number speed, includeDir=true) {
 	//var path = activePath();
 	if(path) {
 		var wps = path.getWaypoints();
@@ -533,9 +533,12 @@ PathManagement.setTimecodesByDistance := fn(MinSG.PathNode path, Number speed) {
 			var lastSRT = wps[i-1].getRelTransformationSRT();
 			var curSRT = wps[i].getRelTransformationSRT();
 
-			var distance = (1-curSRT.getUpVector().dot(lastSRT.getUpVector()))//.length()
-				+(1-curSRT.getDirVector().dot(lastSRT.getDirVector()))//.length()
-				+(curSRT.getTranslation()-lastSRT.getTranslation()).length();
+			var distance = (curSRT.getTranslation()-lastSRT.getTranslation()).length();
+				
+			if(includeDir) {
+				distance += (1-curSRT.getUpVector().dot(lastSRT.getUpVector()))
+					+(1-curSRT.getDirVector().dot(lastSRT.getDirVector()));
+			}
 
 			lastTime += distance / speed;
 			wps[i].setTime(lastTime);
