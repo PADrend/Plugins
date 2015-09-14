@@ -216,7 +216,69 @@ gui.register('NodeEditor_MaterialMenu',[
 			});
 		},
 		GUI.TOOLTIP : "Import the color values of registered Material-States"
-	}
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON, 
+		GUI.LABEL : "Merge Materials",
+		GUI.ON_CLICK : fn() {
+			static sm = PADrend.getResponsibleSceneManager(NodeEditor.getSelectedNode());
+			
+			static getMaterialState = fn(node) {
+				var matState = false;
+				foreach(node.getStates() as var state) {
+					if(state ---|> MinSG.MaterialState) {
+						if(matState) {
+							var id = sm.getNameOfRegisteredNode(node);
+							outln("WARNING: Node ",id ? id : node," has multiple material states");
+							var p = node;
+							var path = "";
+							while(p) {
+								path = "" + sm.getNameOfRegisteredNode(p) + "/" + path;
+								p = p.getParent();
+							}
+							outln(path);
+						}
+						matState = state;
+					}
+				}
+				return matState;
+			};
+			
+			static getKey = fn(state) {
+				var str = "";
+				str += state.getAmbient();
+				str += state.getDiffuse();
+				str += state.getSpecular();
+				str += state.getShininess();
+				return str;
+			};
+			
+			var nodes = NodeEditor.getSelectedNodes();
+			var states = new Map();
+			var replacedCount = 0;
+			while(!nodes.empty()){
+				var node = nodes.popBack();
+				var state = getMaterialState(node);
+				if(state) {
+					var key = getKey(state);
+					if(states[key] && states[key] != state) {
+						node -= state;
+						node += states[key];
+						++replacedCount;
+					} else {
+						states[key] = state;
+						if(!sm.getNameOfRegisteredState(state)) {
+							sm.registerState(state);
+						}
+					}
+				}
+				nodes.append(MinSG.getChildNodes(node));
+			}
+			outln("Replaced ", replacedCount, " states with ", states.count(), " states.");
+			gui.closeAllMenus();
+		},
+		GUI.TOOLTIP : "Merges materials with the same color to a single shared material"
+	},
 ]);
 
 
