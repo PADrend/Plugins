@@ -6,6 +6,7 @@
  * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2012 Mouns R. Husan Almarrani
  * Copyright (C) 2011-2012 Ralf Petring <ralf@petring.net>
+ * Copyright (C) 2015 Sascha Brandt <myeti@mail.uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -91,7 +92,59 @@ gui.register('NodeEditor_MiscToolsMenu.helper',[
 		},
 		GUI.TOOLTIP :  "Export the selected sub graph as GraphViz DOT file."
 
-	}
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Tag Nodes",
+		GUI.ON_CLICK : fn(){
+			showWaitingScreen();
+			var dialog = gui.createPopupWindow(300, 100);		
+			static Tagging = Std.module('LibMinSGExt/NodeTagFunctions');						
+			var tag = Std.DataWrapper.createFromEntry(PADrend.configCache,'NodeEditor.MiscMenu.lastTag',"tag#0");				
+			dialog.addOption({
+				GUI.TYPE : GUI.TYPE_TEXT,
+				GUI.LABEL : "Tag Name",
+				GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+				GUI.DATA_WRAPPER : tag,
+				GUI.OPTIONS_PROVIDER : fn(){
+					var entries = new Set;
+					foreach(NodeEditor.getSelectedNodes() as var node) {
+						entries.merge(Tagging.getTags(node));
+					}
+					return entries.toArray();
+				}
+			});	
+			dialog.addAction("Tag", [tag] => fn(tag) {				
+				foreach(NodeEditor.getSelectedNodes() as var node) {
+					Tagging.addTag(node, tag());
+				}
+			});
+			dialog.addAction("Untag", [tag] => fn(tag) {				
+				foreach(NodeEditor.getSelectedNodes() as var node) {
+					Tagging.removeLocalTag(node, tag());
+				}
+			});
+			dialog.addAction("Cancel");
+			dialog.init();				
+		},
+		GUI.TOOLTIP :  "Tag selected nodes."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Fly To Selection",
+		GUI.ON_CLICK : fn(){
+			PADrend.Navigation.flyTo(NodeEditor.getSelectedNode().getWorldTransformationSRT());
+		},
+		GUI.TOOLTIP :  "Fly to selected node."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Selection To Camera",
+		GUI.ON_CLICK : fn(){
+			NodeEditor.getSelectedNode().setWorldTransformation(PADrend.getDolly().getWorldTransformationSRT());
+		},
+		GUI.TOOLTIP :  "Move selected node to current camera position."
+	},
 ]);
 
 gui.register('NodeEditor_MiscToolsMenu.experiments',[

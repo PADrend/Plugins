@@ -7,6 +7,7 @@
  * Copyright (C) 2013 Mouns R. Husan Almarrani
  * Copyright (C) 2010-2011 Paul Justus
  * Copyright (C) 2011-2012 Ralf Petring <ralf@petring.net>
+ * Copyright (C) 2015 Sascha Brandt <myeti@mail.uni-paderborn.de>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -14,7 +15,8 @@
  * with this library; see the file LICENSE. If not, you can obtain one at
  * http://mozilla.org/MPL/2.0/.
  */
-
+ 
+static Command = Std.module('LibUtilExt/Command');
 
 gui.register('NodeEditor_NodeToolsMenu.treeTools',fn(Array nodes){
 	return nodes.empty() ? [] : [
@@ -297,6 +299,97 @@ gui.register('NodeEditor_TreeToolsMenu.treeOperations',[
 
 		},
 		GUI.TOOLTIP: "Remove the selected state from the scene."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Activate All",
+		GUI.ON_CLICK : fn(){
+			showWaitingScreen();
+			foreach(NodeEditor.getSelectedNodes() as var selection)
+				foreach(MinSG.collectNodes(selection) as var node)
+					node.activate();
+		},
+		GUI.TOOLTIP: "Activates all nodes in the selected subtrees."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Deactivate Other",
+		GUI.ON_CLICK : fn(){
+			showWaitingScreen();
+			var selection = NodeEditor.getSelectedNodes();
+			PADrend.getCurrentScene().traverse([selection] => fn(selection, node) {
+					if(selection.contains(node))
+						return $BREAK_TRAVERSAL;
+					node.deactivate();
+				});
+			foreach(selection as var node) {
+				while(node != PADrend.getCurrentScene()) {
+					node.activate();
+					node = node.getParent();
+				}
+			}
+			PADrend.getCurrentScene().activate();
+		},
+		GUI.TOOLTIP: "Deactivates all nodes that are not contained in the selected subtrees."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Select Active Children",
+		GUI.ON_CLICK : fn(){
+			var selection = new Set;
+			foreach(NodeEditor.getSelectedNodes() as var node){
+				foreach(MinSG.getChildNodes(node) as var child){
+					if(child.isActive())
+						selection += child;
+
+					if(selection.count()>=5000){
+						Runtime.warn("Number of selected Nodes reached 5000. Stopping here... ");
+						NodeEditor.selectNodes(selection.toArray());
+						return;
+					}
+				}
+			}
+			NodeEditor.selectNodes(selection.toArray());
+		},
+		GUI.TOOLTIP: "Selects all active children in selected subtrees."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Reparent Node",
+		GUI.ON_CLICK : fn(){
+			showWaitingScreen();
+			var nodes = NodeEditor.getSelectedNodes();
+			if(!(nodes.back() ---|> MinSG.ListNode)) {
+				PADrend.message("Active Node should be a ListNode");
+				return;
+			}
+			var newParent = nodes.popBack();
+			var oldParents = new Map; // node -> oldParent
+			foreach(nodes as var node) {
+				if(node != newParent)
+					oldParents[node] = node.getParent();
+			}
+				
+			PADrend.executeCommand({
+				Command.DESCRIPTION : "Reparent Nodes",
+				Command.EXECUTE : [nodes, newParent] => fn(nodes, newParent) {
+					foreach(nodes as var node) {
+						var srt = node.getWorldTransformationSRT();
+						if(node != newParent)
+							newParent.addChild(node);
+						node.setWorldTransformation(srt);
+					}
+				},
+				Command.UNDO : [oldParents] => fn(oldParents) {
+					foreach(oldParents as var node, var parent) {
+						var srt = node.getWorldTransformationSRT();
+						parent.addChild(node);
+						node.setWorldTransformation(srt);
+					}
+				}
+			});
+		},
+		GUI.TOOLTIP: "Changes the parents of all selected nodes to the active node (keeps world transformation)."
 	},
 ]);
 gui.register('NodeEditor_TreeToolsMenu.cleanups',[

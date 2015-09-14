@@ -9,6 +9,7 @@
  * Copyright (C) 2010-2011 Jonas Knoll
  * Copyright (C) 2010 Paul Justus
  * Copyright (C) 2010-2012 Ralf Petring <ralf@petring.net>
+ * Copyright (C) 2015 Sascha Brandt <myeti@mail.uni-paderborn.de>
  *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -54,8 +55,28 @@ gui.register('NodeEditor_MeshToolsMenu.meshModifications',[
 		},
 		GUI.TOOLTIP :  "Combines group transformations of inner nodes \n"+
 						"into global transformations of the meshes."
-	}
-	,{
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Reset Mesh Origins",
+		GUI.ON_CLICK : fn(){
+			showWaitingScreen();
+			var nodes = new Set;
+			foreach(NodeEditor.getSelectedNodes() as var node)
+				nodes.merge(MinSG.collectGeoNodes(node));
+			foreach(nodes as var node) {
+				var mesh = node.getMesh();
+				var bb = mesh.getBoundingBox();
+				var matrix = new Geometry.Matrix4x4();
+				matrix.translate(-bb.getCenter());
+				Rendering.transformMesh(mesh, matrix);
+				node.setMesh(mesh);
+				node.moveLocal(bb.getCenter());
+			}
+		},
+		GUI.TOOLTIP :  "Sets the origin of the meshes to its bounding box center."
+	},
+	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Calculate tangent-space vectors",
 		GUI.ON_CLICK : fn() {
@@ -301,6 +322,23 @@ gui.register('NodeEditor_MeshToolsMenu.meshModifications',[
 
 
 		}
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Swap meshes",
+		GUI.ON_CLICK : fn(){
+			showWaitingScreen();
+			var nodes = NodeEditor.getSelectedNodes();
+			if(nodes.count() != 2 || !(nodes[0] ---|> MinSG.GeometryNode) || !(nodes[1] ---|> MinSG.GeometryNode)) {
+				PADrend.message("Please select 2 geometry nodes");
+				return;
+			}
+			var mesh1 = nodes[0].getMesh();
+			var mesh2 = nodes[1].getMesh();
+			nodes[0].setMesh(mesh2);
+			nodes[1].setMesh(mesh1);
+		},
+		GUI.TOOLTIP : "Swaps the meshes of two selected geometry nodes.",
 	},
 	'----'
 ]);
