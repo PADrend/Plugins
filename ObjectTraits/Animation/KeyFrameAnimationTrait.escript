@@ -147,6 +147,9 @@ trait.onInit += fn(MinSG.Node node){
 };
 
 trait.allowRemoval();
+trait.onRemove += fn(node){
+	node.animationKeyFrames([]);
+};
 
 module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
