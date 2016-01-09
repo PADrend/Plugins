@@ -146,6 +146,9 @@ if(MinSG.isSet($MAR))
 	m["[ext] MAR Surfel Renderer"] = fn(){return new MinSG.MAR.SurfelRenderer;};
 m["[ext] Mirror"] = fn() { var state = new MinSG.MirrorState(512); return state; };
 m["[ext] OccludeeRenderer"] = fn() { return new MinSG.OccludeeRenderer; };
+if (MinSG.isSet($PipelineStatistics)) {
+	m["[ext] Pipeline Statistics Collector"] = fn() { return new MinSG.PipelineStatistics.Collector; };
+}
 m["[ext] Shadow"] = fn(){return new MinSG.ShadowState(4096);};
 m["[deprecated] Shader: Universal2"] = fn(){
 	var shaderState = new MinSG.ShaderState;
