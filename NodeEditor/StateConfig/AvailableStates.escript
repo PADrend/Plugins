@@ -45,7 +45,7 @@ m["Shader: univeral3 (compose)"] = fn(){
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "vertexEffect",
 		GUI.DATA_WRAPPER :  config.vertexEffect,
-		GUI.OPTIONS : ["vertexEffect_none","vertexEffect_dynamicPointSize" ]
+		GUI.OPTIONS : ["vertexEffect_none","vertexEffect_dynamicPointSize" ,"vertexEffect_instanced"]
 	});
 	p.addOption({
 		GUI.TYPE : GUI.TYPE_TEXT,
@@ -226,6 +226,9 @@ m["[deprecated] Shader: Universal2"] = fn(){
 m["[ext] Strange renderer"] = new MinSG.StrangeExampleRenderer;
 if(MinSG.isSet($SurfelRenderer))		
 	m[ "[ext] SurfelRenderer" ] = fn(){return new MinSG.SurfelRenderer;};
+if(MinSG.isSet($SurfelRenderer2))		
+	m[ "[ext] SurfelRenderer2" ] = fn(){return new MinSG.SurfelRenderer2;};
+  
 if(MinSG.isSet($TreeVisualization))
 	m["[ext] TreeVisualization"] = fn() { return new MinSG.TreeVisualization; };
 

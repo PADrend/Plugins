@@ -1841,7 +1841,7 @@ gui.register(CONFIG_PREFIX + MinSG.TwinPartitionsRenderer, fn(MinSG.TwinPartitio
 });
 
 //! BlueSurfels
-if(MinSG.isSet($SurfelRenderer))
+if(MinSG.isSet($SurfelRenderer)) 
 	gui.register('NodeEditor_ObjConfig_'+MinSG.SurfelRenderer, fn(renderer){
 		var entries = gui.createComponents( {	GUI.TYPE:GUI.TYPE_COMPONENTS, GUI.PROVIDER:'NodeEditor_ObjConfig_'+MinSG.SurfelRenderer.getBaseType().toString(), GUI.CONTEXT:renderer });
 
@@ -1892,6 +1892,42 @@ if(MinSG.isSet($SurfelRenderer))
 			GUI.RANGE : [1.0,1000.0],
 			GUI.RANGE_STEP_SIZE : 10,
 			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxSideLength, renderer->renderer.setMaxSideLength)
+		};
+		entries += GUI.NEXT_ROW;
+		return entries;
+	});
+  
+if(MinSG.isSet($SurfelRenderer2)) 
+	gui.register('NodeEditor_ObjConfig_'+MinSG.SurfelRenderer2, fn(renderer){
+		var entries = gui.createComponents( {	GUI.TYPE:GUI.TYPE_COMPONENTS, GUI.PROVIDER:'NodeEditor_ObjConfig_'+MinSG.SurfelRenderer2.getBaseType().toString(), GUI.CONTEXT:renderer });
+
+		entries += {
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "Count factor",
+			GUI.RANGE : [0.1,10.0],
+			GUI.RANGE_STEP_SIZE : 0.1,
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getCountFactor, renderer->renderer.setCountFactor)
+		};
+		entries += GUI.NEXT_ROW;
+		
+		entries += {
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "Size factor",
+			GUI.RANGE : [1.0,20.0],
+			GUI.RANGE_STEP_SIZE : 1,
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getSizeFactor, renderer->renderer.setSizeFactor)
+		};
+		entries += GUI.NEXT_ROW;
+		
+		entries += {
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "Max Surfel Size",
+			GUI.RANGE : [1.0,32.0],
+			GUI.RANGE_STEP_SIZE : 1,
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxSurfelSize, renderer->renderer.setMaxSurfelSize)
 		};
 		entries += GUI.NEXT_ROW;
 		return entries;
