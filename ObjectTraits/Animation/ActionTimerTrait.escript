@@ -33,6 +33,7 @@ static executeAction = fn(node, entry) {
 		PADrend.message("Could not find nodes with role: " + role);
 	foreach(nodes as var target) {
 		try{
+			outln("Execute action: " + actionFn + " on " + target);
 			(target->target.getAttribute(actionFn))(params...);
 		}catch(e){
 			Runtime.warn(e);

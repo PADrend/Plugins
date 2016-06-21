@@ -129,9 +129,11 @@ trait.onInit += fn(MinSG.Node node){
 //			outln( relTime," ",prevTime," ",nextTime);
 
 			var d = (prevTime==nextTime ? 0.0 : simpleSmootTime((relTime-prevTime) / (nextTime-prevTime),this.keyFrame_smoothFactor()) );
-			if(prevLocation.isA(Geometry.SRT)){
+			if(prevLocation.isA(Geometry.SRT) && nextLocation.isA(Geometry.SRT)){
 				this.setRelTransformation( new Geometry.SRT(prevLocation,nextLocation,d));
-			}else{
+			} else if(prevLocation.isA(Geometry.SRT) && nextLocation.isA(Geometry.Vec3)) {
+				this.setRelPosition( prevLocation.getTranslation()*d + nextLocation*(1-d) );
+			} else {
 				this.setRelPosition( prevLocation*d + nextLocation*(1-d) );
 			}
 		}
@@ -217,7 +219,12 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				GUI.WIDTH : 40,
 				GUI.LABEL : "Apply",
 				GUI.ON_CLICK : [node,node.animationKeyFrames,index] => fn(node,keyFrames,index){
-					node.setRelTransformation(keyFrames()[index][1]);
+					var location = keyFrames()[index][1];
+					if(location.isA(Geometry.SRT)){
+						node.setRelTransformation( location );
+					}else{
+						node.setRelPosition( location );
+					}
 				}
 			};
 			entries += {

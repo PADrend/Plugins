@@ -109,11 +109,14 @@ plugin.init @(override) := fn() {
 		static COLOR_TEXT_INSTANCE = new Util.Color4f(0.9,0.9,0.9,1);
 		static COLOR_FIRST_BARS = new Util.Color4f(1.0,1.0,1.0,1);
 
-		static highlightNodes = fn(selectedNodes,...){
+		static highlightNodes = fn(selectedNodes,pass){
+		
+			frameContext.pushAndSetCamera(pass.camera);
+			
 			foreach(selectedNodes as var node){
 				if(!node || node==PADrend.getCurrentScene() || node==PADrend.getRootNode())
 					continue;
-
+				
 				renderingContext.pushAndSetMatrix_modelToCamera( renderingContext.getMatrix_worldToCamera() );
 				renderingContext.multMatrix_modelToCamera(node.getWorldTransformationMatrix());
 
@@ -149,6 +152,8 @@ plugin.init @(override) := fn() {
 												SemanticObject.isSemanticObject(node) ?  COLOR_BG_SEM_OBJ : COLOR_BG_NODE);
 				}
 			}
+			
+			frameContext.popCamera();
 
 		};
 	}

@@ -93,7 +93,8 @@ static createToolbar = fn(){
 			}
 		}]
 	});
-	toolbar.setPosition(0,-10);
+	var tPos = PADrend.configCache.getValue('PADrend.toolbarPos',[0,-10]);
+	toolbar.setPosition(tPos[0],tPos[1]);
 
 	gui.windows['Toolbar'] = toolbar;
 };
@@ -264,9 +265,9 @@ static registerStdToolbarEntries = fn() {
 							GUI.DATA_WRAPPER	:	config.sceneManager,
 							GUI.OPTIONS_PROVIDER : fn(){
 								var options = [ ];
+								options += [true,"create new namespace"];
 								foreach( PADrend.SceneManagement.getNamedMapOfAvaiableSceneManagers() as var sceneManager,var name)
 									options += [sceneManager,name];
-								options += [true,"create new namespace"];
 								return options;
 							},
 							GUI.TOOLTIP : "Use existing id-namespace or create a new one.\nNode and State ids are unique in a namespace and are \n lost when Nodes are transferred into another namespace."
@@ -286,7 +287,7 @@ static registerStdToolbarEntries = fn() {
 						GUI.TYPE : GUI.TYPE_BUTTON,
 						GUI.LABEL : (new Util.FileName(filename)).getFile(),
 						GUI.ON_CLICK : [filename] => fn(filename){
-							var n = PADrend.loadScene(filename,  PADrend.configCache['PADrend.importOptions']);
+							var n = PADrend.loadScene(filename,  PADrend.configCache['PADrend.importOptions'], true);
 							if(n){
 								PADrend.selectScene(n);
 								addToRecentSceneList(filename);

@@ -141,6 +141,7 @@ trait.allowRemoval();
 
 module.on('../ObjectTraitRegistry', fn(registry){
 	registry.registerTrait(trait);
+	registry.registerTraitConfigGUI(trait,fn(node,refreshCallback){ return [];});
 });
 
 return trait;

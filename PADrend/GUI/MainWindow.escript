@@ -69,6 +69,9 @@ static createMainWindow = fn(gui){
     var pos=0;
     var tPanel =gui.createTabbedPanel(width,height,GUI.AUTO_MAXIMIZE);
     window += tPanel;
+	
+		Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'),
+							Std.DataWrapper.createFromEntry(PADrend.configCache, "MainWindow.winRect", [5,40,500,450]));
 
 	registerExtension('PADrend_OnAvgFPSUpdated',window->fn(fps){
 		this.setTitle("Main "+fps+"fps");

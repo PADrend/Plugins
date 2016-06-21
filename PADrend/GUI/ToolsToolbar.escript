@@ -131,7 +131,8 @@ static createToolbar = fn(){
 			}
 		}]
 	});
-	toolbar.setPosition(gui.windows['Toolbar'].getWidth(),-10);
+	var tPos = PADrend.configCache.getValue('PADrend.toolbarPos',[0,-10]);
+	toolbar.setPosition(gui.windows['Toolbar'].getWidth(),tPos[1]);
 };
  
 return plugin;
