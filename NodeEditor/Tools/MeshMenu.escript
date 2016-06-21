@@ -192,6 +192,21 @@ gui.register('NodeEditor_MeshToolsMenu.meshModifications',[
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Shrink Normals",
+		GUI.ON_CLICK : fn() {
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				foreach(MinSG.collectGeoNodes(subtree) as var geoNode){
+					var mesh = geoNode.getMesh();
+					Rendering.shrinkMesh(mesh);
+					out(".");
+				}
+			}
+			outln();
+		},
+		GUI.TOOLTIP : "converts normals from 3 * GL_FLOAT to 4 * GL_BYTE if present."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Remove duplicated vertices",
 		GUI.ON_CLICK : fn() {
 			foreach(NodeEditor.getSelectedNodes() as var subtree){
