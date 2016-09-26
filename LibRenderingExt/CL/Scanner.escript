@@ -36,7 +36,8 @@ T.stats @(private, init) := Map;
 
 T.reduceKernel @(private) := void;
 T.scanSmallKernel @(private) := void;
-T.scanKernel @(private) := void;
+T.scanExcKernel @(private) := void;
+T.scanIncKernel @(private) := void;
 T.sumsBuffer @(private) := void;
 
 T.warpSizeMem @(private) := 1;
@@ -112,18 +113,20 @@ T.build ::= fn(options="") {;
 	if(built) {
 		reduceKernel = new CL.Kernel(program, "reduce");
 		scanSmallKernel = new CL.Kernel(program, "scanExclusiveSmall");
-		scanKernel = new CL.Kernel(program, "scanExclusive");		
+		scanExcKernel = new CL.Kernel(program, "scanExclusive");		
+		scanIncKernel = new CL.Kernel(program, "scanInclusive");		
 		sumsBuffer = new CL.Buffer(context, CL.READ_WRITE, elementSize * scanBlocks);
 	} else {
 		reduceKernel = void;
 		scanSmallKernel = void;
-		scanKernel = void;
+		scanExcKernel = void;
+		scanIncKernel = void;
 		sumsBuffer = void;
 	}
 	return built;
 };
 
-T.scan ::= fn(CL.Buffer inBuffer, CL.Buffer outBuffer, elementCount, profiling=false) {	
+T.scan ::= fn(CL.Buffer inBuffer, CL.Buffer outBuffer, elementCount, inclusive=false, profiling=false) {	
 	if(!built)
 		Runtime.exception( "program was not build!");
 	var timer = new Util.Timer();
@@ -145,6 +148,7 @@ T.scan ::= fn(CL.Buffer inBuffer, CL.Buffer outBuffer, elementCount, profiling=f
 	assert(scanSmallKernel.setArg(1, 0, Util.TypeConstant.INT32));
 	var scanSmallEvent = new CL.Event();
 	
+	var scanKernel = inclusive ? scanIncKernel : scanExcKernel;
 	assert(scanKernel.setArg(0, inBuffer));
 	assert(scanKernel.setArg(1, outBuffer));
 	assert(scanKernel.setArg(2, sumsBuffer));
@@ -155,7 +159,7 @@ T.scan ::= fn(CL.Buffer inBuffer, CL.Buffer outBuffer, elementCount, profiling=f
 	assert(queue.execute(reduceKernel, [], [reduceWorkGroupSize * (allBlocks-1)], [reduceWorkGroupSize], [], reduceEvent));
 	assert(queue.execute(scanSmallKernel, [], [scanBlocks/2], [scanBlocks/2], [reduceEvent], scanSmallEvent));
 	assert(queue.execute(scanKernel, [], [scanWorkGroupSize * allBlocks], [scanWorkGroupSize], [scanSmallEvent], scanEvent));
-	
+		
 	if(profiling) {
 		scanEvent.wait();
 		stats["t_reduce"] = reduceEvent.getProfilingMilliseconds();

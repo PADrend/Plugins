@@ -51,7 +51,7 @@ tests += new AutomatedTest("OpenCL: availability",fn(){
 tests += new AutomatedTest("OpenCL: PrefixSum (GPU)",fn(){
 	static Scanner = Std.module('LibRenderingExt/CL/Scanner');
 	
-	{ // GPU
+	{ // GPU exclusive
 		var context = new CL.Context(CL.TYPE_GPU, false);
 		var device = context.getDevices()[0];
 		var queue = new CL.CommandQueue(context, device, false, true);
@@ -74,7 +74,7 @@ tests += new AutomatedTest("OpenCL: PrefixSum (GPU)",fn(){
 		var scanner = new Scanner(context, device, queue);
 		var result = scanner.build();
 		if(result) {
-			scanner.scan(buffer, buffer, elements, true);
+			scanner.scan(buffer, buffer, elements, false, true);
 			queue.finish();
 			bufferAcc.begin();
 			var resultValues = bufferAcc.read(Util.TypeConstant.INT32, elements);
@@ -82,11 +82,49 @@ tests += new AutomatedTest("OpenCL: PrefixSum (GPU)",fn(){
 			for(var i=0; i<elements; ++i) {
 				result = result && (prefixSums[i] == resultValues[i]);
 			}
-			out("PrefixSum (GPU)");
+			out("PrefixSum exclusive (GPU)");
 			print_r(scanner.getProfilingResults());
 			outln();
-		}				
-		addResult("Simple Test",result);
+		}	
+		addResult("Exclusive",result);
+	}
+	
+	{ // GPU inclusive
+		var context = new CL.Context(CL.TYPE_GPU, false);
+		var device = context.getDevices()[0];
+		var queue = new CL.CommandQueue(context, device, false, true);
+		
+		var elements = 1024;
+		var buffer = new CL.Buffer(context, CL.READ_WRITE, elements, Util.TypeConstant.INT32);		
+		var bufferAcc = new CL.BufferAccessor(buffer, queue);
+		
+		var prefixSums = [];
+		var accumulator = 0;
+		bufferAcc.begin();
+		for(var i=0; i<elements; ++i) {
+			var value = Rand.uniform(5,100).round();
+			bufferAcc.write(value, Util.TypeConstant.INT32);
+			accumulator += value;
+			prefixSums += accumulator;
+		}
+		bufferAcc.end();
+		
+		var scanner = new Scanner(context, device, queue);
+		var result = scanner.build();
+		if(result) {
+			scanner.scan(buffer, buffer, elements, true, true);
+			queue.finish();
+			bufferAcc.begin();
+			var resultValues = bufferAcc.read(Util.TypeConstant.INT32, elements);
+			bufferAcc.end();
+			for(var i=0; i<elements; ++i) {
+				result = result && (prefixSums[i] == resultValues[i]);
+			}
+			out("PrefixSum inclusive (GPU)");
+			print_r(scanner.getProfilingResults());
+			outln();
+		}	
+		addResult("Inclusive",result);
 	}
 });
 
@@ -115,7 +153,7 @@ tests += new AutomatedTest("OpenCL: PrefixSum (CPU)",fn(){
 		var scanner = new Scanner(context, device, queue);
 		var result = scanner.build();
 		if(result) {
-			scanner.scan(buffer, buffer, elements, true);
+			scanner.scan(buffer, buffer, elements, false, true);
 			queue.finish();
 			bufferAcc.begin();
 			var resultValues = bufferAcc.read(Util.TypeConstant.INT32, elements);
@@ -530,6 +568,110 @@ tests += new AutomatedTest("OpenCL: Sort (GPU)",fn(){
 			}				
 			addResult("RadixSort (GPU, Keys+Values)",result);
 		}
+	}
+});
+
+tests += new AutomatedTest("OpenCL: Compact (GPU)",fn(){
+	static Compact = Std.module('LibRenderingExt/CL/Compact');
+	
+	{ // int32
+		var context = new CL.Context(CL.TYPE_GPU, false);
+		var device = context.getDevices()[0];
+		var queue = new CL.CommandQueue(context, device, false, true);
+		
+		var elements = 1024;
+		var bufferIn = new CL.Buffer(context, CL.READ_WRITE, elements, Util.TypeConstant.INT32);	
+		var bufferInAcc = new CL.BufferAccessor(bufferIn, queue);
+		var bufferOut = new CL.Buffer(context, CL.READ_WRITE, elements, Util.TypeConstant.INT32);	
+		var bufferOutAcc = new CL.BufferAccessor(bufferOut, queue);
+		var validBuf = new CL.Buffer(context, CL.READ_WRITE, elements, Util.TypeConstant.UINT32);		
+		var validBufAcc = new CL.BufferAccessor(validBuf, queue);
+		
+		var compacted = [];
+		bufferInAcc.begin();
+		validBufAcc.begin();
+		for(var i=0; i<elements; ++i) {
+			var value = Rand.equilikely(-1000,1000);
+			bufferInAcc.write(value, Util.TypeConstant.INT32);
+			var valid = Rand.equilikely(0,1);
+			validBufAcc.write(valid, Util.TypeConstant.UINT32);
+			if(valid == 1)
+				compacted += value;
+		}
+		bufferInAcc.end();
+		validBufAcc.end();
+		
+		var compact = new Compact(context, device, queue);
+		compact.setType(Util.TypeConstant.INT32);
+		var result = compact.build();
+		if(result) {
+			compact.compact(bufferIn, bufferOut, validBuf, elements, true);
+			queue.finish();
+			bufferOutAcc.begin();
+			var resultValues = bufferOutAcc.read(Util.TypeConstant.INT32, elements);
+			bufferOutAcc.end();
+			var numValids = compact.getNumValids();
+			result = result && numValids == compacted.count();
+			if(result) {			
+				for(var i=0; i<numValids; ++i) {
+					result = result && (compacted[i] == resultValues[i]);
+				}
+			}
+			out("Compact (GPU)");
+			print_r(compact.getProfilingResults());
+			outln();
+		}				
+		addResult("Compact (GPU, int32)",result);
+	}
+	
+	{ // float4
+		var context = new CL.Context(CL.TYPE_GPU, false);
+		var device = context.getDevices()[0];
+		var queue = new CL.CommandQueue(context, device, false, true);
+		
+		var elements = 1024;
+		var bufferIn = new CL.Buffer(context, CL.READ_WRITE, elements*4, Util.TypeConstant.FLOAT);	
+		var bufferInAcc = new CL.BufferAccessor(bufferIn, queue);
+		var bufferOut = new CL.Buffer(context, CL.READ_WRITE, elements*4, Util.TypeConstant.FLOAT);	
+		var bufferOutAcc = new CL.BufferAccessor(bufferOut, queue);
+		var validBuf = new CL.Buffer(context, CL.READ_WRITE, elements, Util.TypeConstant.UINT32);		
+		var validBufAcc = new CL.BufferAccessor(validBuf, queue);
+		
+		var compacted = [];
+		bufferInAcc.begin();
+		validBufAcc.begin();
+		for(var i=0; i<elements; ++i) {
+			var value = new Geometry.Vec4(Rand.uniform(-1000,1000),Rand.uniform(-1000,1000),Rand.uniform(-1000,1000),Rand.uniform(-1000,1000));
+			bufferInAcc.write(value, Util.TypeConstant.FLOAT);
+			var valid = Rand.equilikely(0,1);
+			validBufAcc.write(valid, Util.TypeConstant.UINT32);
+			if(valid == 1)
+				compacted += value;
+		}
+		bufferInAcc.end();
+		validBufAcc.end();
+		
+		var compact = new Compact(context, device, queue);
+		compact.setType("float4",4*4);
+		var result = compact.build();
+		if(result) {
+			compact.compact(bufferIn, bufferOut, validBuf, elements, true);
+			queue.finish();
+			bufferOutAcc.begin();
+			var resultValues = bufferOutAcc.readVec4(Util.TypeConstant.FLOAT, elements);
+			bufferOutAcc.end();
+			var numValids = compact.getNumValids();
+			result = result && numValids == compacted.count();
+			if(result) {			
+				for(var i=0; i<numValids; ++i) {
+					result = result && (compacted[i] == resultValues[i]);
+				}
+			}
+			out("Compact (GPU)");
+			print_r(compact.getProfilingResults());
+			outln();
+		}				
+		addResult("Compact (GPU, float4)",result);
 	}
 });
 

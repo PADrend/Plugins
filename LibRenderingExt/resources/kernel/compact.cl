@@ -26,6 +26,11 @@
 #define restrict
 #endif
 
+#ifndef COMPACT_T
+# error "COMPACT_T must be specified"
+# define COMPACT_T int
+#endif
+
 // Phase 1: Count valid elements per thread block
 // Hard-code 128 thd/blk
 unsigned int sumReduce128(__local unsigned int* arr) {
@@ -107,16 +112,16 @@ int exclusivePrescan128(__local const unsigned int* in, __local unsigned int* ou
     return outAndTemp[127]+in[127]; // Return sum of all elements
 }
 
-int compactSIMDPrefixSum(__local const unsigned int* dsData, __local const unsigned int* dsValid, __local unsigned int* dsCompact, __local unsigned int* dsLocalIndex) {
+int compactSIMDPrefixSum(__local const COMPACT_T* dsData, __local const unsigned int* dsValid, __local COMPACT_T* dsCompact, __local unsigned int* dsLocalIndex) {
     int numValid = exclusivePrescan128(dsValid,dsLocalIndex);
     int thread = get_local_id(0);
     if (dsValid[get_local_id(0)]) dsCompact[dsLocalIndex[get_local_id(0)]] = dsData[get_local_id(0)];
     return numValid;
 }
 
-__kernel void moveValidElementsStaged(__global const unsigned int* restrict dgData, __global unsigned int* restrict dgCompact, __global const unsigned int* restrict dgValid,
+__kernel void moveValidElementsStaged(__global const COMPACT_T* restrict dgData, __global COMPACT_T* restrict dgCompact, __global const unsigned int* restrict dgValid,
             __global const unsigned int* restrict dgBlockCounts, unsigned int len, __global unsigned int* restrict dNumValidElements,
-            __local unsigned int* restrict inBlock, __local unsigned int* restrict validBlock, __local unsigned int* restrict compactBlock) {
+            __local COMPACT_T* restrict inBlock, __local unsigned int* restrict validBlock, __local COMPACT_T* restrict compactBlock) {
     __local unsigned int dsLocalIndex[256];
     int blockOutOffset=0;
     // Sum up the blockCounts before us to find our offset
@@ -160,7 +165,7 @@ __kernel void moveValidElementsStaged(__global const unsigned int* restrict dgDa
         *dNumValidElements = blockOutOffset;
     }
 }
-
+/*
 __kernel void moveValidIndicesStaged(__global unsigned int* restrict dgCompact, __global const unsigned int* restrict dgValid,
             __global const unsigned int* restrict dgBlockCounts, unsigned int len, __global unsigned int* restrict dNumValidElements,
             __local unsigned int* restrict inBlock, __local unsigned int* restrict validBlock, __local unsigned int* restrict compactBlock) {
@@ -207,3 +212,4 @@ __kernel void moveValidIndicesStaged(__global unsigned int* restrict dgCompact, 
         *dNumValidElements = blockOutOffset;
     }
 }
+*/

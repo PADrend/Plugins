@@ -424,3 +424,18 @@ void scanExclusive(
         barrier(CLK_LOCAL_MEM_FENCE);
     }
 }
+
+
+KERNEL(SCAN_WORK_GROUP_SIZE)
+void scanInclusive(
+   __global const SCAN_T *in,
+   __global SCAN_T *out,
+   __global const SCAN_T *offsets,
+   uint len,
+   uint total)
+{
+  const uint gid = get_global_id(0);
+  const SCAN_T value = in[gid];
+  scanExclusive(in, out, offsets, len, total);
+  out[gid] += value;
+}
