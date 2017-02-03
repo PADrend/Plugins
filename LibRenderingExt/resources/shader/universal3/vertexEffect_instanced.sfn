@@ -1,0 +1,41 @@
+#version 330
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2012-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2012 Ralf Petring <ralf@petring.net>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+// ------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+in vec3 sg_InstanceOffset;
+in mat4 sg_InstanceMatrix;
+uniform int sg_InstancingMode;
+
+//! \see main.sfn
+void addVertexEffect(inout vec3 pos_ms, inout vec3 normal_ms, inout float pointSize){
+  if(sg_InstancingMode == 1) {
+    pos_ms += sg_InstanceOffset;
+  } else if(sg_InstancingMode == 2) {
+    pos_ms = (sg_InstanceMatrix * vec4(pos_ms, 1.0)).xyz;
+    normal_ms = (sg_InstanceMatrix * vec4(normal_ms, 0.0)).xyz;
+  }
+}
+
+#endif
+// ------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+#endif
+// ------------------

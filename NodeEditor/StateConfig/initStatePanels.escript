@@ -1930,6 +1930,14 @@ if(MinSG.isSet($SurfelRenderer2))
 			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxSurfelSize, renderer->renderer.setMaxSurfelSize)
 		};
 		entries += GUI.NEXT_ROW;
+		
+		entries += {
+			GUI.TYPE : GUI.TYPE_BOOL,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "Fix surfels (debug)",
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.isDebugCameraEnabled, renderer->renderer.setDebugCameraEnabled)
+		};
+		entries += GUI.NEXT_ROW;
 		return entries;
 	});
 // --------------------------------------------------------------------------

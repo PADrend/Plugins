@@ -1,0 +1,78 @@
+#version 120
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+// ------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+vec4 sg_getVertexColor();						//!	\see sgHelper.sfn
+
+struct VertexProperties {
+	vec3 position_cs, normal_cs;
+	float pointSize;
+};
+attribute vec2 sg_TexCoord0;
+varying vec2 var_texCoord0;
+
+//! \see main.sfn
+void provideFragmentEffectVars(in VertexProperties vert){
+	var_texCoord0 = sg_TexCoord0;
+}
+
+#endif
+// ------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+uniform sampler2D sg_texture0;
+varying vec2 var_texCoord0;
+uniform bool renderSurfels;
+
+// number of textures in the texture atlas
+uniform float atlasSize; 
+
+struct CompositeColor {
+	vec4 ambient, diffuse, specular;
+};
+
+struct SurfaceProperties {
+	vec3 position_cs, normal_cs, tangent_cs;
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+
+//! \see main.sfn
+void addFragmentEffect(in SurfaceProperties surface, inout CompositeColor color) {
+	// return if no surfels are rendered
+	if(!renderSurfels)
+		return;
+		
+	// texture coordinates for one surfel
+	vec2 surfelCoord = (gl_PointCoord * vec2(1.0/atlasSize, -1.0)) + var_texCoord0;
+	
+	// lookup texture for alpha value
+	float alphaOverride = texture2D(sg_texture0, surfelCoord).a;
+	
+	// discard fragments with alpha value less then 0.5 (optional)
+	if(alphaOverride < 0.5 )
+		discard;
+		
+	color.ambient.a = alphaOverride;
+	color.diffuse.a = alphaOverride;
+	color.specular.a = alphaOverride;
+}
+
+#endif
+// ------------------

@@ -45,7 +45,7 @@ m["Shader: univeral3 (compose)"] = fn(){
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "vertexEffect",
 		GUI.DATA_WRAPPER :  config.vertexEffect,
-		GUI.OPTIONS : ["vertexEffect_none","vertexEffect_dynamicPointSize" ,"vertexEffect_instanced"]
+		GUI.OPTIONS : ["vertexEffect_none","vertexEffect_dynamicPointSize" ,"vertexEffect_instanced","vertexEffect_surfelSize"]
 	});
 	p.addOption({
 		GUI.TYPE : GUI.TYPE_TEXT,

@@ -384,7 +384,7 @@ GUI.GUI_Manager.createDropdown ::= fn( width, height){
 		entryContainer.clear();
 		currentOption=void;
 		foreach(getOptions() as var option){
-			if(option.value===data){
+			if(option.value==data){
 				selectOption(option, false);
 				break;
 			}
