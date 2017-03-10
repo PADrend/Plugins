@@ -25,12 +25,9 @@ vec4 sg_getVertexColor();						//!	\see sgHelper.sfn
 //! \see main.sfn
 void addVertexEffect(inout vec3 pos_ms, inout vec3 normal_ms, inout float pointSize){
 
-	// reduce point size when seeing the point from the side
 	float d = - dot( normalize(sg_modelToCamera(vec4(normal_ms,0.0)).xyz),  normalize(sg_modelToCamera(vec4(pos_ms,1.0)).xyz) );
 	
-	if(d>0){ // front facing?
-		pointSize *= sg_getVertexColor().a;
-	} else {
+	if(d <= 0){ // front facing?
 		pointSize = 0.0;
 	}
 }
