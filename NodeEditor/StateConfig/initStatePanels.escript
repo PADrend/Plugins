@@ -1897,9 +1897,9 @@ if(MinSG.isSet($SurfelRenderer))
 		return entries;
 	});
   
-if(MinSG.isSet($SurfelRenderer2)) 
-	gui.register('NodeEditor_ObjConfig_'+MinSG.SurfelRenderer2, fn(renderer){
-		var entries = gui.createComponents( {	GUI.TYPE:GUI.TYPE_COMPONENTS, GUI.PROVIDER:'NodeEditor_ObjConfig_'+MinSG.SurfelRenderer2.getBaseType().toString(), GUI.CONTEXT:renderer });
+if(MinSG.isSet($SurfelRendererFixedSize)) 
+	gui.register('NodeEditor_ObjConfig_'+MinSG.SurfelRendererFixedSize, fn(renderer){
+		var entries = gui.createComponents( {	GUI.TYPE:GUI.TYPE_COMPONENTS, GUI.PROVIDER:'NodeEditor_ObjConfig_'+MinSG.SurfelRendererFixedSize.getBaseType().toString(), GUI.CONTEXT:renderer });
 
 		entries += {
 			GUI.TYPE : GUI.TYPE_RANGE,
@@ -1940,6 +1940,50 @@ if(MinSG.isSet($SurfelRenderer2))
 		entries += GUI.NEXT_ROW;
 		return entries;
 	});
+  
+  if(MinSG.isSet($SurfelRendererBudget)) 
+  gui.register('NodeEditor_ObjConfig_'+MinSG.SurfelRendererBudget, fn(renderer){
+    var entries = gui.createComponents( {	GUI.TYPE:GUI.TYPE_COMPONENTS, GUI.PROVIDER:'NodeEditor_ObjConfig_'+MinSG.SurfelRendererBudget.getBaseType().toString(), GUI.CONTEXT:renderer });
+
+    entries += {
+      GUI.TYPE : GUI.TYPE_RANGE,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Count factor",
+      GUI.RANGE : [0.1,10.0],
+      GUI.RANGE_STEP_SIZE : 0.1,
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getCountFactor, renderer->renderer.setCountFactor)
+    };
+    entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_RANGE,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Size factor",
+      GUI.RANGE : [1.0,20.0],
+      GUI.RANGE_STEP_SIZE : 1,
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getSizeFactor, renderer->renderer.setSizeFactor)
+    };
+    entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_RANGE,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Max Surfel Size",
+      GUI.RANGE : [1.0,32.0],
+      GUI.RANGE_STEP_SIZE : 1,
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxSurfelSize, renderer->renderer.setMaxSurfelSize)
+    };
+    entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_BOOL,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Fix surfels (debug)",
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.isDebugCameraEnabled, renderer->renderer.setDebugCameraEnabled)
+    };
+    entries += GUI.NEXT_ROW;
+    return entries;
+  });
 // --------------------------------------------------------------------------
 
 return true;
