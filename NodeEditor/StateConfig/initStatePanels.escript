@@ -1938,6 +1938,22 @@ if(MinSG.isSet($SurfelRendererFixedSize))
 			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.isDebugCameraEnabled, renderer->renderer.setDebugCameraEnabled)
 		};
 		entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_BOOL,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Hide surfels (debug)",
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDebugHideSurfels, renderer->renderer.setDebugHideSufels)
+    };
+    entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_BOOL,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Deferred",
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDeferredSurfels, renderer->renderer.setDeferredSurfels)
+    };
+    entries += GUI.NEXT_ROW;
 		return entries;
 	});
   
@@ -1948,20 +1964,11 @@ if(MinSG.isSet($SurfelRendererFixedSize))
     entries += {
       GUI.TYPE : GUI.TYPE_RANGE,
       GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
-      GUI.LABEL : "Count factor",
-      GUI.RANGE : [0.1,10.0],
-      GUI.RANGE_STEP_SIZE : 0.1,
-      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getCountFactor, renderer->renderer.setCountFactor)
-    };
-    entries += GUI.NEXT_ROW;
-    
-    entries += {
-      GUI.TYPE : GUI.TYPE_RANGE,
-      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
-      GUI.LABEL : "Size factor",
-      GUI.RANGE : [1.0,20.0],
+      GUI.LABEL : "Budget",
+      GUI.RANGE : [1,10.0],
       GUI.RANGE_STEP_SIZE : 1,
-      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getSizeFactor, renderer->renderer.setSizeFactor)
+      GUI.RANGE_FN_BASE : 10,
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getBudget, renderer->renderer.setBudget)
     };
     entries += GUI.NEXT_ROW;
     
@@ -1980,6 +1987,22 @@ if(MinSG.isSet($SurfelRendererFixedSize))
       GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
       GUI.LABEL : "Fix surfels (debug)",
       GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.isDebugCameraEnabled, renderer->renderer.setDebugCameraEnabled)
+    };
+    entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_BOOL,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Hide surfels (debug)",
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDebugHideSurfels, renderer->renderer.setDebugHideSufels)
+    };
+    entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_BOOL,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Deferred",
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDeferredSurfels, renderer->renderer.setDeferredSurfels)
     };
     entries += GUI.NEXT_ROW;
     return entries;
