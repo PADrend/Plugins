@@ -1915,7 +1915,7 @@ if(MinSG.isSet($SurfelRendererFixedSize))
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
 			GUI.LABEL : "Size factor",
-			GUI.RANGE : [1.0,20.0],
+			GUI.RANGE : [1.0,128.0],
 			GUI.RANGE_STEP_SIZE : 1,
 			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getSizeFactor, renderer->renderer.setSizeFactor)
 		};
@@ -1925,7 +1925,7 @@ if(MinSG.isSet($SurfelRendererFixedSize))
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
 			GUI.LABEL : "Max Surfel Size",
-			GUI.RANGE : [1.0,32.0],
+			GUI.RANGE : [1.0,1024.0],
 			GUI.RANGE_STEP_SIZE : 1,
 			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxSurfelSize, renderer->renderer.setMaxSurfelSize)
 		};
@@ -1943,7 +1943,7 @@ if(MinSG.isSet($SurfelRendererFixedSize))
       GUI.TYPE : GUI.TYPE_BOOL,
       GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
       GUI.LABEL : "Hide surfels (debug)",
-      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDebugHideSurfels, renderer->renderer.setDebugHideSufels)
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDebugHideSurfels, renderer->renderer.setDebugHideSurfels)
     };
     entries += GUI.NEXT_ROW;
     
@@ -1976,7 +1976,7 @@ if(MinSG.isSet($SurfelRendererFixedSize))
       GUI.TYPE : GUI.TYPE_RANGE,
       GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
       GUI.LABEL : "Max Surfel Size",
-      GUI.RANGE : [1.0,32.0],
+      GUI.RANGE : [1.0,1024.0],
       GUI.RANGE_STEP_SIZE : 1,
       GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxSurfelSize, renderer->renderer.setMaxSurfelSize)
     };
@@ -1994,7 +1994,7 @@ if(MinSG.isSet($SurfelRendererFixedSize))
       GUI.TYPE : GUI.TYPE_BOOL,
       GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
       GUI.LABEL : "Hide surfels (debug)",
-      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDebugHideSurfels, renderer->renderer.setDebugHideSufels)
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDebugHideSurfels, renderer->renderer.setDebugHideSurfels)
     };
     entries += GUI.NEXT_ROW;
     

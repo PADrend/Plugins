@@ -1,4 +1,4 @@
-#version 120
+#version 330
 
 /*
  * This file is part of the open source part of the
@@ -13,11 +13,13 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-varying vec4 var_vertexColor;
-
 // ------------------------------------------------------------------------
 // vs
 #ifdef SG_VERTEX_SHADER
+
+out Color {
+	vec4 vertexColor;
+};
 
 struct VertexProperties {
 	vec3 position_cs, normal_cs;
@@ -28,7 +30,7 @@ vec4 sg_getVertexColor();	//!	\see sgHelper.sfn
 
 //! \see main.sfn
 void provideSurfaceVars(in VertexProperties vec){
-	var_vertexColor = sg_getVertexColor();
+	vertexColor = sg_getVertexColor();
 }
 
 #endif
@@ -36,6 +38,10 @@ void provideSurfaceVars(in VertexProperties vec){
 // ------------------------------------------------------------------------
 // fs
 #ifdef SG_FRAGMENT_SHADER
+
+in Color {
+	vec4 vertexColor;
+};
 
 struct SurfaceProperties {
 	vec3 position_cs, normal_cs, tangent_cs;
@@ -55,7 +61,7 @@ void calcSurfaceProperties(inout SurfaceProperties surface){
 	if(sg_isMaterialEnabled()){
 		sg_initSurfaceFromSGMaterial(surface);
 	}else{
-		initSurfaceColor_AmDiSp(surface,var_vertexColor);
+		initSurfaceColor_AmDiSp(surface,vertexColor);
 		surface.emission = vec4(0.0);
 		surface.shininess = 0.0;
 	}

@@ -69,7 +69,7 @@ varying vec3 var_cotangent_cs;
 uniform mat4 sg_matrix_cameraToClipping;
 uniform mat4 sg_matrix_clippingToCamera;
 uniform int[4] sg_viewport;
-uniform float surfelRadius;
+//uniform float surfelRadius;
 uniform bool renderSurfels;
 uniform bool depthOnly = false;
 uniform float depthOffset = 0.0;
@@ -82,24 +82,17 @@ void addFragmentEffect(in SurfaceProperties surface, inout CompositeColor color)
 	float depth_cs = surface.position_cs.z;
 
 	if(renderSurfels) {
-		/*
-		vec2 coord = (gl_PointCoord*2.0-1.0) * vec2(1.0, -1.0);
-		float dz = dot(surface.normal_cs.xy,coord) / surface.normal_cs.z;
-		vec3 splat = vec3(coord.x, coord.y, dz);
-		if(length(splat) > 1)
-			discard;
-		*/
+		
 		vec4 viewport = vec4(sg_viewport[0], sg_viewport[1], sg_viewport[2], sg_viewport[3]);
-
-/*
-		vec4 pos_clip = sg_cameraToClipping(vec4(surface.position_cs,1.0));
-		pos_clip.xyz /= pos_clip.w;
-		float rad_clip = sg_getPointSize() / viewport.z * 0.5;
-		vec4 p2_clip = pos_clip + vec4(rad_clip, 0, pos_clip.z, 1);
+		
+		vec4 center_cs = vec4(surface.position_cs,1.0);
+		vec4 pos_clip = sg_cameraToClipping(center_cs);
+		pos_clip = vec4(pos_clip.xyz / pos_clip.w, 1.0);		
+		vec4 p2_clip = pos_clip + vec4(sg_getPointSize() / viewport.z, 0, 0, 0);
 		vec4 p2_cs = sg_matrix_clippingToCamera * p2_clip;
-		p2_cs.xyz /= p2_cs.w;
-		float surfelRadius = distance(surface.position_cs, p2_cs.xyz);*/
-
+		p2_cs = vec4(p2_cs.xyz / p2_cs.w, 1);
+		float surfelRadius = distance(center_cs, p2_cs);
+		
 		// transform fragment coordinates to clipping space [-1,1]x[-1,1]x[-1,1]
 		vec4 frag_clip = vec4((gl_FragCoord.xy - viewport.xy) / viewport.zw * 2.0 - 1.0, -1.0, 1.0);
 		// transform fragment to camera space

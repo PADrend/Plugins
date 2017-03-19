@@ -6,7 +6,7 @@
 		"shader/universal3/surfaceProps_matTex.sfn",
 		"shader/universal3/surfaceEffect_none.sfn",
 		"shader/universal3/lighting_phong.sfn",
-		"shader/universal3/fragmentEffect_none.sfn"
+		"shader/universal3/fragmentEffect_ellipticSurfels.sfn"
 	],
 	"shader/glsl_gs" : [
 	],
@@ -17,7 +17,7 @@
 		"shader/universal3/surfaceProps_matTex.sfn",
 		"shader/universal3/surfaceEffect_none.sfn",
 		"shader/universal3/lighting_phong.sfn",
-		"shader/universal3/fragmentEffect_none.sfn"
+		"shader/universal3/fragmentEffect_ellipticSurfels.sfn"
 	],
 	"usesClassicGL" : false,
 	"usesSGUniforms" : true

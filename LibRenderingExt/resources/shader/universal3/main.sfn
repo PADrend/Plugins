@@ -1,4 +1,4 @@
-#version 120
+#version 330
 
 /*
  * This file is part of the open source part of the
@@ -13,12 +13,14 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-varying vec3 var_normal_cs;
-varying vec4 var_position_hcs;
-
 // -------------------------------------------------
 // vs
 #ifdef SG_VERTEX_SHADER
+
+out VertexData {
+	vec3 normal_cs;
+	vec4 position_hcs;
+} v_out;
 
 float sg_getPointSize();						//!	\see sgHelper.sfn
 vec3 sg_getVertexPosition_ms();					//!	\see sgHelper.sfn
@@ -57,8 +59,8 @@ void main (void) {
 	provideLightingVars(vert);
 	provideFragmentEffectVars(vert);
 
-	var_position_hcs = vec4(vert.position_cs,1.0);
-	var_normal_cs = vert.normal_cs;
+	v_out.position_hcs = vec4(vert.position_cs,1.0);
+	v_out.normal_cs = vert.normal_cs;
 	gl_PointSize = pointSize;
 	gl_Position = sg_modelToClipping(vec4(position_ms,1.0));
 }
@@ -69,6 +71,11 @@ void main (void) {
 // -------------------------------------------------
 // fs
 #ifdef SG_FRAGMENT_SHADER
+
+in VertexData {
+	vec3 normal_cs;
+	vec4 position_hcs;
+} v_in;
 
 struct CompositeColor {
 	vec4 ambient, diffuse, specular;
@@ -89,8 +96,8 @@ void addFragmentEffect(in SurfaceProperties,inout CompositeColor);	//! \see frag
 void main (void) {
 	// init surface properties
 	SurfaceProperties surface;
-	surface.position_cs = var_position_hcs.xyz / var_position_hcs.w;
-	surface.normal_cs = normalize(var_normal_cs);
+	surface.position_cs = v_in.position_hcs.xyz / v_in.position_hcs.w;
+	surface.normal_cs = normalize(v_in.normal_cs);
 
 	calcSurfaceProperties(surface);				// get surface properties (material, textures, ...)
 	addSurfaceEffects(surface);					// optionally add a surface effect (e.g. add snow)

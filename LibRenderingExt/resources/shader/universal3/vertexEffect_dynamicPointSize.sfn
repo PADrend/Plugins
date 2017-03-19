@@ -32,8 +32,8 @@ void addVertexEffect(inout vec3 pos_ms, inout vec3 normal_ms, inout float pointS
 //	float d = dot( normalize(normal_cs),vec3(0,0,1) );
 
 	if(d>0){ // front facing?
-		d = (0.5*d + 0.5) * sg_getVertexColor().a; // adjust size according to (hopefully) unused vertex alpha value.
-//		d = (0.5*d + 0.5) ;
+		//d = (0.5*d + 0.5) * sg_getVertexColor().a; // adjust size according to (hopefully) unused vertex alpha value.
+		d = (0.5*d + 0.5) ;
 	}
 	pointSize *= d;
 }
