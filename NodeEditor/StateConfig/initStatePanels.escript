@@ -1971,6 +1971,17 @@ if(MinSG.isSet($SurfelRendererFixedSize))
       GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getBudget, renderer->renderer.setBudget)
     };
     entries += GUI.NEXT_ROW;
+    entries += {
+      GUI.TYPE : GUI.TYPE_RANGE,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Max. Increment",
+      GUI.RANGE : [1,5.0],
+      GUI.RANGE_STEP_SIZE : 1,
+      GUI.RANGE_FN_BASE : 10,
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxIncrement, renderer->renderer.setMaxIncrement)
+    };
+    entries += GUI.NEXT_ROW;
+    
     
     entries += {
       GUI.TYPE : GUI.TYPE_RANGE,
@@ -2003,6 +2014,26 @@ if(MinSG.isSet($SurfelRendererFixedSize))
       GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
       GUI.LABEL : "Deferred",
       GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDeferredSurfels, renderer->renderer.setDeferredSurfels)
+    };
+    entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_BOOL,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Debug Assignment",
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDebugAssignment, renderer->renderer.setDebugAssignment)
+    };
+    entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_BUTTON,
+      GUI.LABEL : "Clear Assignment",
+      GUI.ON_CLICK : renderer->renderer.clearAssignment
+    };
+    entries += {
+      GUI.TYPE : GUI.TYPE_BUTTON,
+      GUI.LABEL : "Step Assignment",
+      GUI.ON_CLICK : renderer->renderer.assignmentStep
     };
     entries += GUI.NEXT_ROW;
     return entries;
