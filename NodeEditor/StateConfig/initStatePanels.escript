@@ -1916,7 +1916,7 @@ if(MinSG.isSet($SurfelRendererFixedSize))
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
 			GUI.LABEL : "Size factor",
 			GUI.RANGE : [1.0,128.0],
-			GUI.RANGE_STEP_SIZE : 1,
+			GUI.RANGE_STEP_SIZE : 0.1,
 			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getSizeFactor, renderer->renderer.setSizeFactor)
 		};
 		entries += GUI.NEXT_ROW;
@@ -1953,6 +1953,23 @@ if(MinSG.isSet($SurfelRendererFixedSize))
       GUI.LABEL : "Deferred",
       GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDeferredSurfels, renderer->renderer.setDeferredSurfels)
     };
+    entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_BOOL,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Adaptive",
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.isAdaptive, renderer->renderer.setAdaptive)
+    };		
+		entries += GUI.NEXT_ROW;
+		entries += {
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "Max Frame Time (ms)",
+			GUI.RANGE : [1.0,100.0],
+			GUI.RANGE_STEP_SIZE : 1,
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxFrameTime, renderer->renderer.setMaxFrameTime)
+		};
     entries += GUI.NEXT_ROW;
 		return entries;
 	});
@@ -2009,13 +2026,13 @@ if(MinSG.isSet($SurfelRendererFixedSize))
     };
     entries += GUI.NEXT_ROW;
     
-    entries += {
+    /*entries += {
       GUI.TYPE : GUI.TYPE_BOOL,
       GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
       GUI.LABEL : "Deferred",
       GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDeferredSurfels, renderer->renderer.setDeferredSurfels)
     };
-    entries += GUI.NEXT_ROW;
+    entries += GUI.NEXT_ROW;*/
     
     entries += {
       GUI.TYPE : GUI.TYPE_BOOL,
