@@ -1915,11 +1915,21 @@ if(MinSG.isSet($SurfelRendererFixedSize))
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
 			GUI.LABEL : "Size factor",
-			GUI.RANGE : [1.0,128.0],
-			GUI.RANGE_STEP_SIZE : 0.1,
+			GUI.RANGE : [0.01,2.0],
 			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getSizeFactor, renderer->renderer.setSizeFactor)
 		};
 		entries += GUI.NEXT_ROW;
+		
+		entries += {
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "Surfel Size",
+			GUI.RANGE : [1.0,128.0],
+			GUI.RANGE_STEP_SIZE : 0.1,
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getSurfelSize, renderer->renderer.setSurfelSize)
+		};
+		entries += GUI.NEXT_ROW;
+		
 		
 		entries += {
 			GUI.TYPE : GUI.TYPE_RANGE,
@@ -1971,6 +1981,28 @@ if(MinSG.isSet($SurfelRendererFixedSize))
 			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxFrameTime, renderer->renderer.setMaxFrameTime)
 		};
     entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_BOOL,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Foveated",
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.isFoveated, renderer->renderer.setFoveated)
+    };		
+		entries += GUI.NEXT_ROW;
+    
+		entries += {
+			GUI.TYPE			:	GUI.TYPE_TEXT,
+			GUI.LABEL			:	"Foveat Zones",
+			GUI.OPTIONS			:	["0.5, 2.0"],
+			GUI.SIZE 			: 	[GUI.WIDTH_ABS, -30,0],
+			GUI.DATA_PROVIDER : [renderer] => fn(renderer){
+        return renderer.getFoveatZones().implode(",");
+			},
+			GUI.ON_DATA_CHANGED : [renderer] => fn(renderer,data) {
+        renderer.setFoveatZones(parseJSON("["+data+"]"));
+			}
+		};
+		entries += GUI.NEXT_ROW;
 		return entries;
 	});
   
