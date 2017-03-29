@@ -2003,6 +2003,14 @@ if(MinSG.isSet($SurfelRendererFixedSize))
 			}
 		};
 		entries += GUI.NEXT_ROW;
+    
+    entries += {
+      GUI.TYPE : GUI.TYPE_BOOL,
+      GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+      GUI.LABEL : "Debug Foveated",
+      GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getDebugFoveated, renderer->renderer.setDebugFoveated)
+    };		
+		entries += GUI.NEXT_ROW;
 		return entries;
 	});
   
