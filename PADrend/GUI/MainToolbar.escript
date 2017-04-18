@@ -343,6 +343,7 @@ static registerStdToolbarEntries = fn() {
 				var config = new ExtObject;
 				config.meshOptions := 0;
 				config.id := new Std.DataWrapper("");
+				config.embed := new Std.DataWrapper(false);
 				
 				gui.openDialog({
 					GUI.TYPE : GUI.TYPE_FILE_DIALOG,
@@ -359,6 +360,9 @@ static registerStdToolbarEntries = fn() {
 						if(!n)
 							return;
 						PADrend.getCurrentScene().addChild(n);
+						if(config.embed())
+							n.getMesh().setFileName();
+						
 						var id = config.id().trim();
 						if(id.empty()){
 							PADrend.getSceneManager().registerNode(id,n);
@@ -391,6 +395,12 @@ static registerStdToolbarEntries = fn() {
 							GUI.DATA_OBJECT		:	config,
 							GUI.DATA_ATTRIBUTE	:	$meshOptions,
 							GUI.DATA_BIT		:	MinSG.MESH_AUTO_SCALE
+						},
+						{
+							GUI.TYPE			:	GUI.TYPE_BOOL,
+							GUI.LABEL			:	"Embed mesh",
+							GUI.DATA_WRAPPER		:	config.embed,
+							GUI.TOOLTIP			:	"Embeds the mesh into the scene."
 						},
 						"*Node options*",
 						{
