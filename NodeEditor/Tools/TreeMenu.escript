@@ -102,7 +102,8 @@ gui.register('NodeEditor_TreeToolsMenu.treeOperations',[
 		GUI.LABEL:"Combine leafs",
 		GUI.ON_CLICK:fn(){
 			showWaitingScreen();
-      MinSG.combineLeafs(NodeEditor.getSelectedNode(),1);
+      foreach(NodeEditor.getSelectedNodes() as var node)
+			   MinSG.combineLeafs(node,1);
 		},
 		GUI.TOOLTIP: "Combine the meshes of leaf nodes, which have the same set of states and the same VertexDescription."
 	},
