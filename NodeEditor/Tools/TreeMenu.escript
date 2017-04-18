@@ -102,7 +102,7 @@ gui.register('NodeEditor_TreeToolsMenu.treeOperations',[
 		GUI.LABEL:"Combine leafs",
 		GUI.ON_CLICK:fn(){
 			showWaitingScreen();
-			MinSG.combineLeafs(NodeEditor.getSelectedNode(),1);
+      MinSG.combineLeafs(NodeEditor.getSelectedNode(),1);
 		},
 		GUI.TOOLTIP: "Combine the meshes of leaf nodes, which have the same set of states and the same VertexDescription."
 	},
@@ -538,17 +538,25 @@ gui.register('NodeEditor_TreeToolsMenu.prototypes',[
 			var counter = [0];
 			while(!nodes.empty()){
 				var node = nodes.popBack();
+        var sm = PADrend.getResponsibleSceneManager(node);
 				if(node.isInstance()){
 					// up
 					for(var n=node;n&&n.isInstance();n=n.getParent()){
 						++counter[0];
+            var name = sm.getNameOfRegisteredNode(n.getPrototype());
 						n._setPrototype(void);
+            if(name)
+              sm.registerNode(name + "_" + counter[0], n);
 					}
 					// down
 					node.traverse( counter->fn(node){
 						if(node.isInstance()){
+              var sm = PADrend.getResponsibleSceneManager(node);
+              var name = sm.getNameOfRegisteredNode(node.getPrototype());
 							node._setPrototype(void);
 							++this[0];
+              if(name)
+                sm.registerNode(name + "_" + this[0], node);
 						}});
 				}else{
 					nodes.append(MinSG.getChildNodes(node));
