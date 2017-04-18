@@ -267,7 +267,8 @@ gui.register('NodeEditor_MeshToolsMenu.meshModifications',[
 			showWaitingScreen();
 			var m = n.getMesh();
 			var t = new Util.Timer;
-			var parts = Std.module('LibRenderingExt/splitMeshIntoConnectedParts')(m,0.001);
+			//var parts = Std.module('LibRenderingExt/splitMeshIntoConnectedParts')(m,0.001);
+			var parts = Rendering.splitIntoConnectedComponents(m,0.001);
 			if(parts.count()<=1){
 				PADrend.message("SplitMesh: Only one conntected component. ("+t.getSeconds()+")");
 				return;
