@@ -31,6 +31,8 @@
 	uniform mat4 sg_matrix_modelToCamera;
 	uniform mat4 sg_matrix_modelToClipping;
 	uniform mat4 sg_matrix_worldToCamera;
+	uniform mat4 sg_matrix_clippingToCamera;
+	uniform int[4] sg_viewport;
 	
 	//! [fs,vs] Convert an homogeneous coordinate from Camera(=Eye,View)Space into WorldSpace.
 	vec4 sg_cameraToWorld(in vec4 hcs)			{	return sg_matrix_cameraToWorld  * hcs;	}
@@ -49,6 +51,12 @@
 
 	//! [fs,vs] Convert an homogeneous coordinate from WorldSpace into CameraSpace.
 	vec4 sg_worldToCamera(in vec4 hws)			{	return sg_matrix_worldToCamera * hws; }
+	
+	//! [fs,vs] Convert an homogeneous coordinate from ClippingSpace into CameraSpace.
+	vec4 sg_clippingToCamera(in vec4 hcs) {	return sg_matrix_worldToCamera * hcs; }
+	
+	//! [fs,vs] Returns the active viewport.
+	vec4 sg_getViewport() { return vec4(sg_viewport[0], sg_viewport[1], sg_viewport[2], sg_viewport[3]); }
 //! \}
 
 // -------------------
