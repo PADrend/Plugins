@@ -48,7 +48,7 @@ T.loadLibary ::= fn(name) {
     outln("Could not find library: ", fileName);
     return false;
   } 
-  outln(lib.getPath());
+  //outln(lib.getPath());
   return Util.loadELibrary(lib.getPath());
 };
 
