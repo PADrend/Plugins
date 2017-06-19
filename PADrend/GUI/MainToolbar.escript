@@ -181,7 +181,7 @@ static registerStdToolbarEntries = fn() {
 					$importOptions : PADrend.configCache.getValue('PADrend.importOptions', 
 											MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | 
 											MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY),
-					$sceneManager : new Std.DataWrapper(void)
+					$sceneManager : new Std.DataWrapper(true)
 				});
 				gui.openDialog({
 					GUI.TYPE : GUI.TYPE_FILE_DIALOG,
