@@ -199,8 +199,9 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 	// *** Labels for Counters ***
 	var counterConfigData = [];
 	var showFpsLabel = Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".showFpsLabel", true);
-	var rebuildLabels = [page, counterConfigData, showFpsLabel, windowForegroundColor, windowHighlightColor, fontSize] =>
-							fn(panel, Array counterConfigData, showFpsLabel, fgValues, highlightValues, fontSize, ...) {
+	var showFrameTimeLabel = Std.DataWrapper.createFromEntry(PADrend.configCache, windowConfigPrefix + ".showFrameTimeLabel", true);
+	var rebuildLabels = [page, counterConfigData, showFpsLabel, showFrameTimeLabel, windowForegroundColor, windowHighlightColor, fontSize] =>
+							fn(panel, Array counterConfigData, showFpsLabel, showFrameTimeLabel, fgValues, highlightValues, fontSize, ...) {
 		panel.destroyContents();
 		var fgColor = new Util.Color4ub(new Util.Color4f(fgValues()));
 		var highlightColor = new Util.Color4ub(new Util.Color4f(highlightValues()));
@@ -237,6 +238,41 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 					return Extension.REMOVE_EXTENSION;
 				}
 				fpsLabel.setText("" + fps.round(0.1) + " fps");
+			});
+			panel++;
+		}
+		// Special label for avg. frame time
+		if(showFrameTimeLabel()) {
+			var frameTimeLabel = gui.create({
+				GUI.TYPE			:	GUI.TYPE_LABEL,
+				GUI.LABEL			:	"...",
+				GUI.COLOR			:	fgColor,
+				GUI.FONT			:	font,
+				GUI.ON_MOUSE_BUTTON	:	[highlightColor, fgColor]=>fn( Util.Color4ub highlightColor, Util.Color4ub normalColor,event) {
+											if(event.button != Util.UI.MOUSE_BUTTON_LEFT || !event.pressed) {
+												return false;
+											}
+											highlight = !highlight;
+											setColor(highlight ? highlightColor : normalColor);
+											return true;
+										},
+				GUI.SIZE			:	[GUI.WIDTH_FILL_ABS,10,0],
+				GUI.TEXT_ALIGNMENT	:	GUI.TEXT_ALIGN_RIGHT
+			});
+			frameTimeLabel.highlight := false;
+			panel += {
+				GUI.TYPE			:	GUI.TYPE_LABEL,
+				GUI.LABEL			:	"Avg. frame duration",
+				GUI.COLOR			:	fgColor,
+				GUI.FONT			:	font
+			};
+			panel += {	GUI.TYPE	:	GUI.TYPE_NEXT_COLUMN	};
+			panel += frameTimeLabel;
+			Util.registerExtension('PADrend_OnAvgFPSUpdated', [frameTimeLabel]=>fn(frameTimeLabel,fps) {
+				if(frameTimeLabel.isDestroyed()) {
+					return Extension.REMOVE_EXTENSION;
+				}
+				frameTimeLabel.setText("" + (1000.0/fps).round(0.1) + " ms");
 			});
 			panel++;
 		}
@@ -300,11 +336,17 @@ plugin.createStatisticsWindow := fn(String windowConfigPrefix) {
 
 	// Rebuild the panel when the value is changed
 	showFpsLabel.onDataChanged += rebuildLabels;
+	showFrameTimeLabel.onDataChanged += rebuildLabels;
 	window.contextMenuProvider += [
 		{
 			GUI.TYPE			:	GUI.TYPE_BOOL,
 			GUI.LABEL			:	"frame rate",
 			GUI.DATA_WRAPPER	:	showFpsLabel
+		},
+		{
+			GUI.TYPE			:	GUI.TYPE_BOOL,
+			GUI.LABEL			:	"frame time",
+			GUI.DATA_WRAPPER	:	showFrameTimeLabel
 		}
 	];
 	
