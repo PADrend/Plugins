@@ -749,6 +749,19 @@ gui.register(CONFIG_PREFIX + MinSG.MaterialState, fn(MinSG.MaterialState state) 
 		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.48, 0]
 	};
+	entries += {
+		GUI.TYPE				:	GUI.TYPE_COLOR,
+		GUI.LABEL				:	"Emission",
+		GUI.DATA_PROVIDER		:	state -> fn() {
+										return getParameters().getEmission();
+									},
+		GUI.ON_DATA_CHANGED		:	state -> fn(newColor) {
+										setParameters(getParameters().setEmission(newColor));
+									},
+		GUI.DATA_REFRESH_GROUP	:	refreshGroup,
+		GUI.SIZE				:	[GUI.WIDTH_REL, 0.48, 0]
+	};
+	entries += GUI.NEXT_ROW;
 	var shininessPanel = gui.create({
 		GUI.TYPE				:	GUI.TYPE_CONTAINER,
 		GUI.LAYOUT				:	GUI.LAYOUT_FLOW,

@@ -182,7 +182,7 @@
 		float shininess;
 	};
 	struct sg_MaterialParameters {
-		vec4 ambient, diffuse, specular; //vec4 emission;?
+		vec4 ambient, diffuse, specular, emission;
 		float shininess;
 	};
 
@@ -211,7 +211,7 @@
 		surface.ambient = sg_Material.ambient;
 		surface.diffuse = sg_Material.diffuse;
 		surface.specular = sg_Material.specular;
-		surface.emission = vec4(0.0);
+		surface.emission = sg_Material.emission;
 		surface.shininess = sg_Material.shininess;
 	}
 //! \}
