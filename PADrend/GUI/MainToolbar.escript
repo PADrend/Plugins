@@ -181,13 +181,18 @@ static registerStdToolbarEntries = fn() {
 					$importOptions : PADrend.configCache.getValue('PADrend.importOptions', 
 											MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | 
 											MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY),
-					$sceneManager : new Std.DataWrapper(true)
+					$sceneManager : new Std.DataWrapper(true),
 				});
+				var lastFile = new Util.FileName(PADrend.getScenePath());
+				var recentList = getRecentSceneList();
+				if(!recentList.empty()) 
+					lastFile = new Util.FileName(recentList.front());
 				gui.openDialog({
 					GUI.TYPE : GUI.TYPE_FILE_DIALOG,
 					GUI.LABEL : "Load Scene ...",
-					GUI.DIR : PADrend.getScenePath(),
-					GUI.ENDINGS : [".minsg", ".dae", ".DAE"],
+					GUI.DIR : lastFile.getDir(),
+					GUI.FILENAME : lastFile.getFile(),
+					GUI.ENDINGS : PADrend.SceneManagement.getFileExtensions(),
 					GUI.ON_ACCEPT  : [config] => fn(config,filename){
 						// Collect flags.
 						out("Load Scene \"",filename,"\"...");

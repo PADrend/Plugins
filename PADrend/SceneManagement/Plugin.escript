@@ -5,6 +5,7 @@
  * Copyright (C) 2011 Benjamin Eikel <benjamin@eikel.org>
  * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2011-2012 Ralf Petring <ralf@petring.net>
+ * Copyright (C) 2017 Sascha Brandt <sascha@brandt.graphics>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -57,6 +58,7 @@ static rootNode = void;
 static activeScene = void;
 static defaultSceneManager = void;
 static dolly = void;
+static registeredLoaders = [];
 
 static _defaultLight; // directional light 0; formerly known as PADrend.sun
 
@@ -269,7 +271,16 @@ SceneManagement.loadScene := fn(filename,
 		sceneManager = SceneManagement.getDefaultSceneManager();
 	else if(true===sceneManager)
 		sceneManager = SceneManagement.createNewSceneManager();
-	var sceneRoot = sceneManager.loadScene(filename,importOptions);
+	
+	var ending = "." + (new Util.FileName(filename)).getEnding();
+	var loader = fn(sm, filename, importOptions) { return sm.loadScene(filename,importOptions); }; // default loader
+	foreach(registeredLoaders as var entry) {
+		if(entry[1].contains(ending)) {
+			loader = entry[0];
+		}
+	}
+		
+	var sceneRoot = loader(sceneManager, filename, importOptions);
 	if(sceneRoot){
 		Std.Traits.assureTrait(sceneRoot,SceneMarkerTrait);
 		sceneRoot.sceneData.sceneManager := sceneManager; //! \see SceneMarkerTrait
@@ -370,6 +381,18 @@ SceneManagement.assureScene := fn( [MinSG.Node,String] mixed,p...){
 	}
 };
 
+SceneManagement.registerLoader := fn(loaderFn, Array extensions) {
+	registeredLoaders += [loaderFn, extensions];
+};
+
+SceneManagement.getFileExtensions := fn() {
+	var extensions = new Std.Set;
+	extensions.merge([".minsg", ".dae", ".DAE"]);
+	foreach(registeredLoaders as var entry) {
+		extensions.merge(entry[1]);
+	}
+	return extensions.toArray();
+};
 
 // --------------------------------------------------------------------------------------------
 // World Up Vector / root Node transformation
