@@ -147,7 +147,7 @@ plugin.stripExtension := fn(String name){
 };
 
 //! @return { file -> path }
-plugin.getPresetFiles := fn(){
+plugin.getPresetFiles := fn() {
 	var paths = [];
 	executeExtensions('Tools_SpeedDial_QueryFolders',paths);
 	var files = [];
@@ -213,23 +213,13 @@ plugin.Preset := new Type;
 	T._constructor ::= fn(_path,_name){
 		this.path = _path;
 		this.name = _name;
-		if(IO.isFile(path+".info")){
+		var folder = (new Util.FileName(path)).getDir();
+		if(IO.isFile(path+".info") || IO.isFile(folder+"_folder.info")){
 			var config = new Std.JSONDataStore(true);
-			config.init(this.path+".info");
+			config.init(IO.isFile(path+".info") ? this.path+".info" : folder+"_folder.info");
 
 			this.bgColor = Std.DataWrapper.createFromEntry( config,"bgColor", [0.5,0.5,0.5,0.5] );
-			this.tags = Std.DataWrapper.createFromEntry( config,"tags", [] );
-
-			// backward compatibility \todo remove after 2014-01
-			var enabled = config.getValue('enabled');
-			if(void!=enabled){
-				config.unset('enabled');
-				if(enabled == false && !this.tags().contains('disabled')){
-					var tags = this.tags().clone();
-					tags+='disabled';
-					this.tags(tags);
-				}
-			}
+			this.tags = Std.DataWrapper.createFromEntry( config,"tags", [] );			
 			this.description := Std.DataWrapper.createFromEntry( config,"description", "" );
 		}
 	};
