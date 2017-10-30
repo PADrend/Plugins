@@ -24,7 +24,7 @@ CLUtils.LocalBuffer._constructor ::= fn(s=0) { this.size = s; };
 CLUtils.roundUp := fn(x, y) { return ((x + y - 1) / y).floor() * y; };
 
 CLUtils.createSharedVBO := fn(context, Rendering.Mesh mesh) {
-  mesh._upload(); // ensure that data is on GPU
+  //mesh._upload(); // ensure that data is on GPU
   var vbo = new Rendering.BufferObject(); // create temporary buffer object
   mesh._swapVertexBuffer(vbo); // swap valid vertex buffer object with empty buffer object
   var cl_vbo = new CL.Buffer(context, CL.READ_WRITE, vbo); // bind vertex buffer object to OpenCL buffer
@@ -33,7 +33,7 @@ CLUtils.createSharedVBO := fn(context, Rendering.Mesh mesh) {
 };
 
 CLUtils.createSharedIBO := fn(context, Rendering.Mesh mesh) {
-  mesh._upload(); // ensure that data is on GPU
+  //mesh._upload(); // ensure that data is on GPU
   var ibo = new Rendering.BufferObject(); // create temporary buffer object
   mesh._swapIndexBuffer(ibo); // swap valid index buffer object with empty buffer object
   var cl_ibo = new CL.Buffer(context, CL.READ_WRITE, ibo); // bind index buffer object to OpenCL buffer
