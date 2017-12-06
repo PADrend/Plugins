@@ -1522,6 +1522,7 @@ gui.register(CONFIG_PREFIX + MinSG.ShadowState, fn(MinSG.ShadowState state) {
 			var option = this.addOption(light, NodeEditor.getString(light));
 		}
 		this.setData(this.state.getLight());
+    this.state.update();
 	};
 	dd.onDataChanged = fn(data) {
 		if(data) {
@@ -1551,6 +1552,15 @@ gui.register(CONFIG_PREFIX + MinSG.ShadowState, fn(MinSG.ShadowState state) {
 		this.dd.refresh();
 	};
 	entries += button;
+  
+  entries += GUI.NEXT_ROW;
+	entries += {
+		GUI.TYPE			:	GUI.TYPE_BOOL,
+		GUI.LABEL			:	"Static",
+		GUI.DATA_WRAPPER	:	DataWrapper.createFromFunctions(state -> state.isStatic,
+																state -> state.setStatic),
+		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
+	};
 
 	entries += GUI.NEXT_ROW;
 	return entries;
