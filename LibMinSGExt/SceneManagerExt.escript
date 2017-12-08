@@ -64,8 +64,8 @@ T.saveCOLLADA ::= fn( p...){
 T.__searchPaths @(init,private) := Array; 
 T.__workspaceRootPath @(private) := false; // String or false; The folder in which the current
 
-T.addSearchPath ::= 		fn(String p){			this.__searchPaths += p;	};
-T.getWorkspaceRootPath ::= 	fn(){					return this.__workspaceRootPath ;	};
+T.addSearchPath ::= 		fn(String p){	if(!this.__searchPaths.contains(p)) this.__searchPaths += p; };
+T.getWorkspaceRootPath ::= 	fn(){ return this.__workspaceRootPath;	};
 T.setWorkspaceRootPath ::= 	fn([String,false] p){	this.__workspaceRootPath = p;	};
 
 //! Node|false sceneManager.loadScene( filename of .minsg or .dae [, Number importOptions=0])
