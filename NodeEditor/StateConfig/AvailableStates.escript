@@ -31,7 +31,7 @@ m["ProjSizeFilterState"] = fn(){return new MinSG.ProjSizeFilterState;};
 m["Shader"] = fn(){	return new MinSG.ShaderState;	};
 m["Shader: univeral3 (compose)"] = fn(){
 	var shaderState = new MinSG.ShaderState;
-	var p = gui.createPopupWindow(200,200);
+	var p = gui.createPopupWindow(400,200);
 
 	var config = new ExtObject;
 	config.vertexEffect := new Std.DataWrapper("vertexEffect_none");
@@ -40,36 +40,62 @@ m["Shader: univeral3 (compose)"] = fn(){
 	config.lighting := new Std.DataWrapper("lighting_phong");
 	config.fragmentEffect := new Std.DataWrapper("fragmentEffect_none");
 	config.shaderState := shaderState;
-
+  
+  PADrend.getSceneManager().addSearchPath(Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/universal3/");
+  
+  var vertexEffectOptions = [];
+  var surfacePropsOptions = [];
+  var surfaceEffectOptions = [];
+  var lightingOptions = [];
+  var fragmentEffectOptions = [];
+  
+  foreach(PADrend.getSceneManager()._getSearchPaths() as var path){
+    foreach(Util.getFilesInDir(path,[".sfn"]) as var filename) {
+      var file = (new Util.FileName(filename)).getFile();
+      file = file.substr(0,file.length() - 4);
+      if(file.beginsWith("vertexEffect_"))
+        vertexEffectOptions += file;
+      if(file.beginsWith("surfaceProps_"))
+        surfacePropsOptions += file;
+      if(file.beginsWith("surfaceEffect_"))
+        surfaceEffectOptions += file;
+      if(file.beginsWith("lighting_"))
+        lightingOptions += file;
+      if(file.beginsWith("fragmentEffect_"))
+        fragmentEffectOptions += file;
+    }
+  }
+  
+  
 	p.addOption({
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "vertexEffect",
 		GUI.DATA_WRAPPER :  config.vertexEffect,
-		GUI.OPTIONS : ["vertexEffect_none","vertexEffect_dynamicPointSize" ,"vertexEffect_instanced","vertexEffect_surfelSize"]
+		GUI.OPTIONS : vertexEffectOptions
 	});
 	p.addOption({
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "surfaceProps",
 		GUI.DATA_WRAPPER :  config.surfaceProps,
-		GUI.OPTIONS : ["surfaceProps_mat","surfaceProps_matTex","surfaceProps_matTexSpecNorm" ,"surfaceProps_terrain_1" ]
+		GUI.OPTIONS : surfacePropsOptions
 	});
 	p.addOption({
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "surfaceEffect",
 		GUI.DATA_WRAPPER :  config.surfaceEffect,
-		GUI.OPTIONS : ["surfaceEffect_none","surfaceEffect_reflection","surfaceEffect_translucency" ]
+		GUI.OPTIONS : surfaceEffectOptions
 	});
 	p.addOption({
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "lighting",
 		GUI.DATA_WRAPPER :  config.lighting,
-		GUI.OPTIONS : ["lighting_none","lighting_phong","lighting_phongEnv","lighting_shadow" ]
+		GUI.OPTIONS : lightingOptions
 	});
 	p.addOption({
 		GUI.TYPE : GUI.TYPE_TEXT,
 		GUI.LABEL : "fragmentEffect",
 		GUI.DATA_WRAPPER :  config.fragmentEffect,
-		GUI.OPTIONS : ["fragmentEffect_none", "fragmentEffect_highlight", "fragmentEffect_normalToAlpha", "fragmentEffect_splitPlane", "fragmentEffect_ellipticSurfels" ]
+		GUI.OPTIONS : fragmentEffectOptions
 	});
 	
 	p.addAction( "Init Shader",	config->fn(){
@@ -78,8 +104,8 @@ m["Shader: univeral3 (compose)"] = fn(){
 		var vs = [path+"main.sfn",path+"sgHelpers.sfn"];
 		var fs = [path+"main.sfn",path+"sgHelpers.sfn"];
 		foreach([this.vertexEffect,this.surfaceProps,this.surfaceEffect,this.lighting,this.fragmentEffect] as var f){
-			vs+=path+f()+".sfn";
-			fs+=path+f()+".sfn";
+			vs+=f()+".sfn";
+			fs+=f()+".sfn";
 		}
 		MinSG.initShaderState(shaderState,vs, [], fs, Rendering.Shader.USE_UNIFORMS,PADrend.getSceneManager().getFileLocator());
 		NodeEditor.refreshSelectedNodes(); // refresh the gui
