@@ -59,6 +59,7 @@ static activeScene = void;
 static defaultSceneManager = void;
 static dolly = void;
 static registeredLoaders = [];
+static globalSearchPaths = [];
 
 static _defaultLight; // directional light 0; formerly known as PADrend.sun
 
@@ -67,7 +68,8 @@ static SceneManager = Std.module( 'LibMinSGExt/SceneManagerExt' );
 static SceneMarkerTrait = Std.module('LibMinSGExt/Traits/SceneMarkerTrait');
 
 static initSceneManager = fn(sceneManager){
-	sceneManager.addSearchPath( Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/" );
+	foreach(globalSearchPaths as var path)
+		sceneManager.addSearchPath(path);
 	sceneManager.registerNode( "L:Sun", _defaultLight );
 };
 
@@ -161,6 +163,7 @@ SceneManagement.ex_Init := fn(...){
 		getRootNode().addChild(dolly);
 		SceneManagement.createNewSceneRoot("new MinSG.ListNode",false);
 	}
+	
 	initSceneManager( defaultSceneManager );
 
 };
@@ -392,6 +395,14 @@ SceneManagement.getFileExtensions := fn() {
 		extensions.merge(entry[1]);
 	}
 	return extensions.toArray();
+};
+
+SceneManagement.addSearchPath := fn(path) {
+	if(!globalSearchPaths.contains(path))
+		globalSearchPaths += path;
+	foreach(this.getSceneList() as var scene) {
+		this.getResponsibleSceneManager(scene).addSearchPath(path);
+	}
 };
 
 // --------------------------------------------------------------------------------------------

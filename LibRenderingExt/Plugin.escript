@@ -21,6 +21,8 @@ var plugin = new Plugin({
 });
 
 plugin.init @(override) := fn() {
+  PADrend.SceneManagement.addSearchPath(__DIR__ + "/resources/");
+  PADrend.SceneManagement.addSearchPath(__DIR__ + "/resources/shader/universal3/");
 	return true;
 };
 

@@ -40,9 +40,7 @@ m["Shader: univeral3 (compose)"] = fn(){
 	config.lighting := new Std.DataWrapper("lighting_phong");
 	config.fragmentEffect := new Std.DataWrapper("fragmentEffect_none");
 	config.shaderState := shaderState;
-  
-  PADrend.getSceneManager().addSearchPath(Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/universal3/");
-  
+    
   var vertexEffectOptions = [];
   var surfacePropsOptions = [];
   var surfaceEffectOptions = [];
