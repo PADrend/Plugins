@@ -1,0 +1,226 @@
+#version 330
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2017 Sascha Brandt <sascha@brandt.graphics>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+// ------------------------------------------------------------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+struct VertexProperties {
+	vec3 position_cs, normal_cs;
+	float pointSize;
+};
+
+out vec3 tangent_cs;
+out vec3 bitangent_cs;
+
+void provideLightingVars(in VertexProperties vert){	
+	tangent_cs = normalize(dot(vert.normal_cs,vec3(0,1,0)) != 0 ? cross(vert.normal_cs,vec3(0,1,0)) : cross(vert.normal_cs,vec3(1,0,0)));
+	bitangent_cs = normalize(cross(vert.normal_cs, tangent_cs));
+}
+
+#endif
+
+// ------------------------------------------------------------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+struct CompositeColor {
+	vec4 ambient, diffuse, specular;
+};
+
+struct SurfaceProperties {
+	vec3 position_cs, normal_cs, tangent_cs;
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+
+struct sg_LightSourceParameters {
+	int type; 							// has to be DIRECTIONAL, POINT or SPOT
+	vec3 position; 						// position of the light  ????????????????????????????????
+	vec3 direction; 					// direction of the light, has to be normalized ????????????????????????????????
+	vec4 ambient, diffuse, specular;	// light colors for all lights
+	float constant, linear, quadratic;	// attenuations for point & spot lights
+	float exponent, cosCutoff;			// spot light parameters
+};
+uniform sg_LightSourceParameters	sg_LightSource[8];
+int sg_getLightCount();		//! \see sgHelper.sfn
+const int DIRECTIONAL = 1;
+const int POINT = 2;
+const int SPOT = 3;
+
+in vec3 tangent_cs;
+in vec3 bitangent_cs;
+
+const float PI = 3.14159265358979323846;
+const float PI_INV = 1.0/PI;
+const vec3 lumFactor = vec3(0.3, 0.6, 0.1);
+
+// pbr material
+uniform float metallic = 0.0;
+uniform float subsurface = 0.0;
+uniform float specular = 0.0;
+uniform float roughness = 0.5;
+uniform float specularTint = 0.0;
+uniform float anisotropic = 0.0;
+uniform float sheen = 0.0;
+uniform float sheenTint = 0.5;
+uniform float clearcoat = 0.0;
+uniform float clearcoatGloss = 1.0;
+
+float sqr(float x) { return x * x; }
+
+float fresnel(float u) {
+	float m = clamp(1.0-u, 0.0, 1.0);
+	float m2 = m*m;
+	return m2*m2*m; // m^5
+}
+
+float smithG_GGX_aniso(float NdotV, float VdotX, float VdotY, float ax, float ay) {
+    return 1 / (NdotV + sqrt( sqr(VdotX*ax) + sqr(VdotY*ay) + sqr(NdotV) ));
+}
+
+float smithG_GGX(float NdotV, float alphaG) {
+    float a = alphaG*alphaG;
+    float b = NdotV*NdotV;
+    return 1 / (NdotV + sqrt(a + b - a*b));
+}
+
+void principled_brdf(in SurfaceProperties surface, in sg_LightSourceParameters light, out CompositeColor result) {
+	vec3 normal = gl_FrontFacing ? surface.normal_cs : -surface.normal_cs;
+	vec3 tangent = normalize(tangent_cs);
+	vec3 bitangent = normalize(bitangent_cs);
+	vec3 lightDir = normalize(light.type != DIRECTIONAL ? (light.position - surface.position_cs) : -light.direction);
+	vec3 eyeDir = normalize(-surface.position_cs);
+	
+	result.ambient.rgb = light.ambient.rgb;
+	result.specular.rgb = vec3(0.0);
+	result.diffuse.rgb = vec3(0.0);
+	
+	
+	float normalDotLight = dot(normal, lightDir);
+	float normalDotEye = dot(normal, eyeDir);
+		
+	if(normalDotLight < 0.0 || normalDotEye < 0.0)
+		return;
+		
+	vec3 half = normalize(lightDir + eyeDir);
+	float normalDotHalf2 = sqr(dot(normal, half));
+	float lightDotHalf = dot(lightDir, half);
+		
+	vec3 linearColor = pow(surface.diffuse.rgb, vec3(2.2));
+	float luminance = dot(linearColor, lumFactor);
+	
+	vec3 tint = luminance > 0 ? linearColor/luminance : vec3(1.0);
+	vec3 spec = mix(specular * 0.08 * mix(vec3(1.0), tint, specularTint), linearColor, metallic);
+	vec3 sheenColor = mix(vec3(1.0), tint, sheenTint);
+	
+	// diffuse fresnel
+	float fresnelLight = fresnel(normalDotLight);
+	float fresnelEye = fresnel(normalDotEye);
+	float d90 = 0.5 + 2.0 * lightDotHalf * lightDotHalf * roughness;
+	float diffuseFresnel = mix(1.0, d90, fresnelLight) * mix(1.0, d90, fresnelEye);
+	
+	// subsurface scattering
+	float ss90 = lightDotHalf * lightDotHalf * roughness;
+	float ssFresnel = mix(1.0, ss90, fresnelLight) * mix(1.0, ss90, fresnelEye);
+	float ss = 1.25 * (ssFresnel * (1.0 / (normalDotLight + normalDotEye) - 0.5) + 0.5);
+	
+	// specular
+	float aspect = sqrt(1.0 - anisotropic * 0.9);
+	float ax = max(0.001, sqr(roughness) / aspect);
+	float ay = max(0.001, sqr(roughness) * aspect);
+  float ds = 1.0 / (PI * ax * ay * sqr( sqr(dot(half, tangent)/ax) + sqr(dot(half, bitangent)/ay) + normalDotHalf2 ));
+	float fresnelHalf = fresnel(lightDotHalf);
+	vec3 specFresnel = mix(spec, vec3(1.0), fresnelHalf);
+	ds *= smithG_GGX_aniso(normalDotLight, dot(lightDir, tangent), dot(lightDir, bitangent), ax, ay)
+	    * smithG_GGX_aniso(normalDotEye, dot(eyeDir, tangent), dot(eyeDir, bitangent), ax, ay);
+			
+	// sheen
+	vec3 sheenFresnel = fresnelHalf * sheen * sheenColor;
+	
+	// clearcoat
+	float gloss = mix(0.1, 0.001, clearcoatGloss);
+	float gloss2 = gloss*gloss;
+	float refl = gloss < 1.0 ? (gloss2-1.0) / (PI * log(gloss2) * (1.0 + (gloss2-1.0) * normalDotHalf2)) : PI_INV;
+	float reflFresnel = mix(0.04, 1.0, fresnelHalf);
+	refl *= smithG_GGX(normalDotLight, 0.25) * smithG_GGX(normalDotEye, 0.25);
+	
+	result.diffuse.rgb = (PI_INV * mix(diffuseFresnel, ss, subsurface) * linearColor + sheenFresnel) * (1.0 - metallic)
+											+ specFresnel * ds
+											+ 0.25*clearcoat*reflFresnel*refl;
+	result.diffuse.rgb = max(result.diffuse.rgb * light.diffuse.rgb, vec3(0.0)) * normalDotLight;
+	//result.diffuse.rgb = normal;
+}
+
+//! [fs,vs] Add the light of the given light source to lightSum.
+void addLight(in int sgLightNr, in SurfaceProperties surface, inout CompositeColor result){
+	sg_LightSourceParameters light = sg_LightSource[sgLightNr];
+	
+	// for DIRECTIONAL lights
+	float distPixToLight = 0.0; 
+	float attenuation = 1.0;
+	vec3 pixToLight = -light.direction;
+	
+	// for POINT & SPOT lights
+	if(light.type != DIRECTIONAL){ 
+		pixToLight = light.position - surface.position_cs;
+		distPixToLight = length(pixToLight); 
+		pixToLight = normalize(pixToLight); 
+		attenuation	/= ( 	light.constant + light.linear * distPixToLight + light.quadratic * distPixToLight * distPixToLight);
+	}
+	// for SPOT lights
+	if(light.type == SPOT){
+		float spotDot = dot(pixToLight, -light.direction);
+		float spotAttenuation;
+		if(spotDot < light.cosCutoff) {
+			spotAttenuation = 0.0;
+		} else {
+			spotAttenuation = pow(spotDot, light.exponent);
+		}
+		attenuation *= spotAttenuation;
+	}
+	// for ALL lights
+	CompositeColor brdf_color;
+	principled_brdf(surface, light, brdf_color);
+	result.ambient += brdf_color.ambient * attenuation;
+	result.diffuse += brdf_color.diffuse * attenuation;
+	result.specular += brdf_color.specular * attenuation;
+}
+
+void calcLighting(in SurfaceProperties surface, out CompositeColor color){
+	CompositeColor lightSum = CompositeColor(vec4(0.0), vec4(0.0), vec4(0.0));
+
+	int lightCount = sg_getLightCount();
+
+	if(lightCount==0){ // default lighting
+		lightSum.ambient = vec4(0.3);
+		lightSum.diffuse = vec4(0.7);
+	}
+
+	for(int i = 0; i < 8; i++){
+		if( i >= lightCount )
+			break;
+		addLight(i, surface, lightSum);
+	}
+
+	lightSum.ambient.a = lightSum.diffuse.a = lightSum.specular.a = 1.0;
+	
+	color.ambient = surface.ambient * lightSum.ambient;
+	color.diffuse = lightSum.diffuse + surface.emission;
+	color.specular = lightSum.specular;
+}
+#endif
+// ------------------

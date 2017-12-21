@@ -148,20 +148,20 @@
 		if(norDotPixToLight != 0.0){
 			result.diffuse += light.diffuse * norDotPixToLight * attenuation;
 
-			if(shininess>0.0){
+			//if(shininess>0.0){
 				vec3 pixToEye = normalize(-position_cs);
 				vec3 refl = reflect(-pixToLight, normal_cs);
 				float eyeDotRefl = dot(pixToEye, refl);
 				if(eyeDotRefl>0.0)
 					result.specular += light.specular * pow(eyeDotRefl, shininess/4.0) * attenuation;
-			}
+			//}
 		}
 	}
 
 	//! [fs,vs] Add the light of light #sgLightNr to lightSum.
 	void sg_addLight(in int sgLightNr,in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor lightSum){
 		vec3 n_cs = normal_cs;
-		#ifdef SG_FS
+		#ifdef SG_FRAGMENT_SHADER
 		if(! gl_FrontFacing) 
 			n_cs = -n_cs;
 		#endif
@@ -201,6 +201,13 @@
 		surface.ambient *= c;
 		surface.diffuse *= c;
 		surface.specular *= c;
+	}
+
+	//! [fs,vs] Add a surface's ambient, diffuse and specular value.
+	void addSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c){
+		surface.ambient += c;
+		surface.diffuse += c;
+		surface.specular += c;
 	}
 	
 	//! [fs,vs] Returns if materials are enabled.

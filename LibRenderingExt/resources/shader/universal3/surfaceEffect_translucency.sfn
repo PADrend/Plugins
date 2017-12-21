@@ -40,6 +40,7 @@ struct CompositeColor {
 	vec4 ambient, diffuse, specular;
 };
 
+uniform float sg_Translucency = 0.0;
 
 void calcLighting(in SurfaceProperties,out CompositeColor);			//! \see main.sfn
 
@@ -51,13 +52,15 @@ void addSurfaceEffects(inout SurfaceProperties surface){
 	SurfaceProperties surface2 = surface;
 	surface2.normal_cs *= -1.0;
 	surface2.shininess = 2;
-//	surface2.specular = vec4(0.9,0.8,0.7,1.0);
-	surface2.diffuse = surface2.specular *0.5;
+	//surface2.specular = vec4(0.9,0.8,0.7,1.0);
+	surface2.diffuse = surface.diffuse * sg_Translucency;
 	
 	calcLighting(surface2,transColor);
 	float avg = (transColor.diffuse.r + transColor.diffuse.g + transColor.diffuse.b)/3.0;
 	surface.emission += (transColor.diffuse+vec4(avg)) * vec4(0.9,0.85,0.7,1.0); //+ transColor.specular*0.1;
 	surface.emission.a = 0.0;
+	
+	surface.emission = transColor.diffuse;
 }
 
 #endif

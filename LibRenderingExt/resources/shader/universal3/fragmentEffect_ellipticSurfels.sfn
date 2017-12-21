@@ -120,13 +120,14 @@ void addFragmentEffect(in SurfaceProperties surface, inout CompositeColor color)
 		// discard fragment if the projected fragment lies outside of the surfel disc
 		if(length(frag_local) > surfelRadius )
 			discard;
-			
-		color.diffuse.a = 1.0;
-		if(filtering) {
-			color.diffuse.a = texture(t_filter, length(frag_local)/surfelRadius).r;
-		}
-		color.ambient.a = color.diffuse.a;
-		color.specular.a = color.diffuse.a;
+		
+		//color.specular = vec4(0);
+		//color.diffuse.a = 1.0;
+		//if(filtering) {
+		//	color.diffuse.a = texture(t_filter, length(frag_local)/surfelRadius).r;
+		//}
+		//color.ambient.a = color.diffuse.a;
+		//color.specular.a = color.diffuse.a;
 	} 
 
 	//vec2 clipZW = depth_cs * sg_matrix_cameraToClipping[2].zw + sg_matrix_cameraToClipping[3].zw;

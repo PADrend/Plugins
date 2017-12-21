@@ -53,6 +53,7 @@ void main (void) {
 	VertexProperties vert;
 	vert.position_cs = sg_modelToCamera(vec4(position_ms,1.0)).xyz;
 	vert.normal_cs = sg_modelToCamera(vec4(normal_ms,0.0)).xyz; // \note the value is not normalized!
+	vert.pointSize = pointSize;
 
 	provideSurfaceVars(vert);
 	provideSurfaceEffectVars(vert);
@@ -107,6 +108,7 @@ void main (void) {
 
 	addFragmentEffect(surface,color);			// add effects (e.g. fog)
 	gl_FragColor = color.ambient+color.diffuse+color.specular;	// combine color components into one color.
+	gl_FragColor.a = color.diffuse.a;
 //	gl_FragColor = vec4(surface.normal_cs,1.0)+vec4(0.5);
 }
 
