@@ -100,6 +100,8 @@ PADrend.SystemUI.init @(override) := fn(){
 	// ------------------
 	{
 		out("Creating Rendering Context".fillUp(40));
+		Rendering.RenderingContext.initGLState();
+		
 		GLOBALS.frameContext = new MinSG.FrameContext();
 		
 		PADrend.frameStatistics = frameContext.getStatistics();
@@ -109,13 +111,11 @@ PADrend.SystemUI.init @(override) := fn(){
 		this.onWindowResized += fn(Number width,Number height){
 			renderingContext.setWindowClientArea(0, 0, width, height);
 		};
-
-		renderingContext.initGLState();
-		
 		
 		showWaitingScreen(false);
 
 		outln("ok.");
+		
 	}
 	Rendering.outputGLInformation();
 	if(systemConfig.getValue('PADrend.Rendering.GLDebugOutput', false)) {
