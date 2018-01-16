@@ -181,7 +181,7 @@ static registerStdToolbarEntries = fn() {
 					$importOptions : PADrend.configCache.getValue('PADrend.importOptions', 
 											MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY | 
 											MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY),
-					$sceneManager : new Std.DataWrapper(true),
+					$sceneManager : new Std.DataWrapper($new),
 				});
 				var lastFile = new Util.FileName(PADrend.getScenePath());
 				var recentList = getRecentSceneList();
@@ -199,7 +199,7 @@ static registerStdToolbarEntries = fn() {
 						PADrend.message("Load scene \""+filename+"\"...");
 
 						PADrend.configCache.setValue('PADrend.importOptions', config.importOptions);
-						var node=PADrend.loadScene(filename, /*sceneNode,*/ config.importOptions, config.sceneManager());
+						var node=PADrend.loadScene(filename, /*sceneNode,*/ config.importOptions, config.sceneManager() == $new ? true : config.sceneManager());
 						if(!node){
 							PADrend.message("Loading scene '"+filename+"' failed.");
 						}else{
@@ -270,7 +270,7 @@ static registerStdToolbarEntries = fn() {
 							GUI.DATA_WRAPPER	:	config.sceneManager,
 							GUI.OPTIONS_PROVIDER : fn(){
 								var options = [ ];
-								options += [true,"create new namespace"];
+								options += [$new,"create new namespace"];
 								foreach( PADrend.SceneManagement.getNamedMapOfAvaiableSceneManagers() as var sceneManager,var name)
 									options += [sceneManager,name];
 								return options;
@@ -640,7 +640,7 @@ static registerStdToolbarEntries = fn() {
 		sceneMenu += "*Create new scene root*";
 		var container = gui.create({
 			GUI.TYPE				:	GUI.TYPE_CONTAINER,
-			GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 500, 40],
+			GUI.SIZE				:	[GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 600, 40],
 			GUI.LAYOUT				:	GUI.LAYOUT_FLOW
 		});
 
