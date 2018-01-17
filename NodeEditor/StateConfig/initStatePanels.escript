@@ -1963,6 +1963,16 @@ if(MinSG.isSet($SurfelRendererFixedSize))
 			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getMaxSurfelSize, renderer->renderer.setMaxSurfelSize)
 		};
 		entries += GUI.NEXT_ROW;
+
+		entries += {
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS,10,0],
+			GUI.LABEL : "Blend factor",
+			GUI.RANGE : [0.0,2.0],
+			GUI.RANGE_STEP_SIZE : 0.1,
+			GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( renderer->renderer.getBlendFactor, renderer->renderer.setBlendFactor)
+		};
+		entries += GUI.NEXT_ROW;
 		
 		entries += {
 			GUI.TYPE : GUI.TYPE_BOOL,
