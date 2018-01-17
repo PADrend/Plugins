@@ -349,11 +349,12 @@ static registerStdToolbarEntries = fn() {
 				config.meshOptions := 0;
 				config.id := new Std.DataWrapper("");
 				config.embed := new Std.DataWrapper(false);
+				config.recent := Std.DataWrapper.createFromEntry(PADrend.configCache,'PADrend.GUI.recentMeshPath',PADrend.getDataPath());
 				
 				gui.openDialog({
 					GUI.TYPE : GUI.TYPE_FILE_DIALOG,
 					GUI.LABEL : "Load Mesh",
-					GUI.DIR : PADrend.getDataPath(),
+					GUI.DIR : config.recent(),
 					GUI.ENDINGS : [".obj",".ply",".mmf",".mvbo",".MVBO",".ngc", ".md2", ".MD2", ".xyz"],
 					GUI.ON_ACCEPT  : [config] => fn(config,filename){
 						out("Load Mesh \"",filename,"\"...");
@@ -372,6 +373,7 @@ static registerStdToolbarEntries = fn() {
 						if(id.empty()){
 							PADrend.getSceneManager().registerNode(id,n);
 						}	out("\nDone. ",(clock()-start)," sek\n");
+						config.recent((new Util.FileName(filename)).getDir());
 
 						out("\nDone. ",(clock()-start)," sek\n");
 					},
@@ -426,11 +428,12 @@ static registerStdToolbarEntries = fn() {
 			GUI.ON_CLICK	:	fn() {
 				var config = new ExtObject;
 				config.meshOptions := 0;
+				config.recent := Std.DataWrapper.createFromEntry(PADrend.configCache,'PADrend.GUI.recentMeshPath',PADrend.getDataPath());
 
 				gui.openDialog({
 					GUI.TYPE : GUI.TYPE_FOLDER_DIALOG,
 					GUI.LABEL : "Load all Meshes in folder",
-					GUI.DIR : PADrend.getDataPath(),
+					GUI.DIR : config.recent(),
 					GUI.ENDINGS : [".obj",".ply",".mmf",".mvbo",".MVBO",".ngc", ".md2", ".MD2", ".xyz"],
 					GUI.ON_ACCEPT : [config] => fn(config, folder){
 						out("Load Meshes \"",folder,"\"...");
@@ -447,6 +450,7 @@ static registerStdToolbarEntries = fn() {
 								out(".");
 	//						out(file);
 						}
+						config.recent(folder);
 						out("\nDone. ",(clock()-start)," sek\n");
 					},
 					GUI.OPTIONS : [
