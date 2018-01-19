@@ -101,7 +101,7 @@ PathManagement.createPath := fn( [MinSG.GroupNode,void] container = void ){
 static showPath = new Std.DataWrapper(false);
 PathManagement.showPath := showPath;								// alias
 showPath.onDataChanged += fn(Bool b){
-	static revoce;
+	@(once) static revoce;
 	if(revoce)
 		revoce();
 	else
@@ -129,7 +129,7 @@ PathManagement.animation_speed := animation_speed;					// alias
 static animation_active = new Std.DataWrapper(false);
 PathManagement.animation_active := animation_active;				// alias
 animation_active.onDataChanged += fn(Bool b){
-	static handlerRegistered;
+	@(once) static handlerRegistered;
 	if(b && !handlerRegistered){
 		PADrend.planTask(0.0,fn(){
 			if(!animation_active()){
@@ -137,7 +137,7 @@ animation_active.onDataChanged += fn(Bool b){
 				return;
 			}
 			if(activePath()){
-				static lastClock;
+				@(once) static lastClock;
 				var now = PADrend.getSyncClock();
 				if(!lastClock)
 					lastClock = now;
@@ -158,7 +158,7 @@ animation_active.onDataChanged += fn(Bool b){
 static animation_attachedCamera = new Std.DataWrapper;
 PathManagement.animation_attachedCamera := animation_attachedCamera;	// alias
 PathManagement.animation_attachedCamera.onDataChanged += fn( [MinSG.Node,void] node){
-	static revoce;
+	@(once) static revoce;
 	if(revoce)
 		revoce();
 	else
@@ -183,7 +183,7 @@ PathManagement.animation_attachedCamera.onDataChanged += fn( [MinSG.Node,void] n
 */
 static polynomPoints = [ new Geometry.Vec2(0,0),new Geometry.Vec2(0.3,0.2),new Geometry.Vec2(0.8,0.9),new Geometry.Vec2(1,1)];
 PathManagement.flyTo := fn(Number timestamp,Number duration = 1.0){
-	static activeFlightTask;
+	@(once) static activeFlightTask;
 	PathManagement.animation_active(false);
 
 	var path = activePath();
@@ -248,7 +248,7 @@ PathManagement.flyToNextWaypoint := fn(Number duration = 2){
 * If no <time> is specified, the standard-time of the plugin is used
 * (PathManagement.flight_time).
 */
-PathManagement.flyToPrevWaypoint := fn(duration){
+PathManagement.flyToPrevWaypoint := fn(duration = 1){
 	if(!activePath()){
 		PADrend.message("No active path.");
 		return;
