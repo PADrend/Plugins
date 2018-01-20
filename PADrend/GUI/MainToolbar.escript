@@ -489,15 +489,17 @@ static registerStdToolbarEntries = fn() {
 				var currentFolder = new Std.DataWrapper;
 				var dbfsName = new Std.DataWrapper("new.dbfs");
 				var zipName = new Std.DataWrapper("new.zip");
+				var recent = Std.DataWrapper.createFromEntry(PADrend.configCache,'PADrend.GUI.recentMeshPath',PADrend.getDataPath());
+				
 				currentFolder.onDataChanged += [dbfsName] => fn(dbfsName,folder){	dbfsName(folder+"/new.dbfs");	};
 				currentFolder.onDataChanged += [zipName] => fn(zipName,folder){	zipName(folder+"/new.zip");	};
-				currentFolder(PADrend.getDataPath());
+				currentFolder(recent());
 
 				gui.openDialog({
 					GUI.TYPE : GUI.TYPE_FOLDER_DIALOG,
 					GUI.LABEL : "Export all Meshes to ...",
-					GUI.DIR : PADrend.getDataPath(),
-					GUI.ON_ACCEPT : [exportRegisteredCB,exportFormat] => fn(exportRegisteredCB,exportFormat, folder){
+					GUI.DIR : recent(),
+					GUI.ON_ACCEPT : [exportRegisteredCB,exportFormat,recent] => fn(exportRegisteredCB,exportFormat,recent, folder){
 												
 						outln("Exporting meshes to ",folder);
 						showWaitingScreen();
@@ -512,6 +514,7 @@ static registerStdToolbarEntries = fn() {
 									folder,
 									exportRegisteredCB());
 						}
+						recent(folder);
 						Util.flush(folder);
 					},
 					GUI.ON_FOLDER_CHANGED : [currentFolder]=>fn(currentFolder,folder){	currentFolder(folder);	},
