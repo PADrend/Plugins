@@ -67,10 +67,10 @@ MinSG.State.getStateAttributeWrapper ::= fn(String key, defaultValue=void){
 	If the function returns $BREAK_TRAVERSAL for a node, the corresponding subtree is skipped.
 	If the funciton returns $EXIT_TRAVERSAL, the traversal is stopped. 
 	All other return values are ignored. */
-MinSG.Node.traverse ::= fn(fun){
+MinSG.Node.traverse ::= fn(fun, breadthFirst = false){
 	var nodes=[this];
 	while(!nodes.empty()){
-		var node=nodes.popBack();
+		var node = breadthFirst ? nodes.popFront() : nodes.popBack();
 		var result = fun(node);
 		if(result == $BREAK_TRAVERSAL){
 			continue;
