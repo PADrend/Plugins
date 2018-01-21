@@ -129,15 +129,14 @@ PathManagement.animation_speed := animation_speed;					// alias
 static animation_active = new Std.DataWrapper(false);
 PathManagement.animation_active := animation_active;				// alias
 animation_active.onDataChanged += fn(Bool b){
-	@(once) static handlerRegistered;
-	if(b && !handlerRegistered){
+	if(b) {
 		PADrend.planTask(0.0,fn(){
+			@(once) static lastClock;
 			if(!animation_active()){
-				handlerRegistered = false;
+				lastClock = false;
 				return;
 			}
-			if(activePath()){
-				@(once) static lastClock;
+			if(activePath()) {
 				var now = PADrend.getSyncClock();
 				if(!lastClock)
 					lastClock = now;
@@ -146,10 +145,11 @@ animation_active.onDataChanged += fn(Bool b){
 				if( timestamp<0 ) timestamp += activePath().getMaxTime();
 				animation_currentTime(timestamp);
 				lastClock = now;
-			}else{
+				return 0; // reschedule
+			} else {
 				animation_currentTime(0);
+				lastClock = false;
 			}
-			return 0; // reschedule
 		});
 	}
 
