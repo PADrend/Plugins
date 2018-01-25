@@ -46,10 +46,10 @@ Evaluator.measure @(override) ::= fn(MinSG.FrameContext frameContext, MinSG.Node
 	
 	if(!firstTexture||firstTexture.getWidth()!=width||firstTexture.getHeight()!=height){
 		outln("ImageCompareEvaluator: Recreate textures.");
-		firstTexture = Rendering.createStdTexture(width, height, true);
-		secondTexture = Rendering.createStdTexture(width, height, true);
+		firstTexture = Rendering.createStdTexture(width, height, false);
+		secondTexture = Rendering.createStdTexture(width, height, false);
 		depthTexture = Rendering.createDepthTexture(width,height);
-		resultTexture = Rendering.createStdTexture(width, height, true);
+		resultTexture = Rendering.createStdTexture(width, height, false);
 	}
 	
 	renderingContext.pushAndSetFBO(fbo);
