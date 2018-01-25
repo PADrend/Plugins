@@ -110,7 +110,7 @@ static createPathMenu = fn() {
 /**
 * Creates the panel used to select the path, create a path, load, save etc.
 */
-static addPathMenu = fn(panel){
+static addPathMenu = fn(panel){	
 	var toolBar = [];
 	toolBar += {
 		GUI.TYPE				:	GUI.TYPE_BUTTON,
@@ -133,9 +133,18 @@ static addPathMenu = fn(panel){
 		GUI.LABEL				:	"Load path ...",
 		GUI.TOOLTIP				:	"Load a path from a file",
 		GUI.ON_CLICK			:	fn() {
-										GUI._openFileDialog("Load path", systemConfig.getValue('Waypoint.path', "."), ".path",
-				PathManagement -> PathManagement.loadPath);
-									},
+			var recentPath = Std.DataWrapper.createFromEntry(PADrend.configCache,'Waypoint.path',PADrend.getDataPath());			
+			gui.openDialog({
+				GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+				GUI.LABEL : "Load Path",
+				GUI.FILENAME : recentPath(),
+				GUI.ENDINGS : [".path"],
+				GUI.ON_ACCEPT : [recentPath] => fn(recentPath, folder){											
+					PathManagement.loadPath(folder);
+					recentPath(folder);
+				},
+			});
+		},
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 	toolBar += {
@@ -143,9 +152,18 @@ static addPathMenu = fn(panel){
 		GUI.LABEL				:	"Save path ...",
 		GUI.TOOLTIP				:	"Save the current path to a file",
 		GUI.ON_CLICK			:	fn() {
-										GUI._openFileDialog("Save path", systemConfig.getValue('Waypoint.path', "."), ".path",
-				PathManagement -> PathManagement.savePath);
-									},
+			var recentPath = Std.DataWrapper.createFromEntry(PADrend.configCache,'Waypoint.path',PADrend.getDataPath());			
+			gui.openDialog({
+				GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+				GUI.LABEL : "Save Path",
+				GUI.FILENAME : recentPath(),
+				GUI.ENDINGS : [".path"],
+				GUI.ON_ACCEPT : [recentPath] => fn(recentPath, folder){											
+					PathManagement.savePath(folder);
+					recentPath(folder);
+				},
+			});
+		},
 		GUI.SIZE				:	[GUI.WIDTH_REL, 0.2, 0]
 	};
 	toolBar += {
