@@ -193,7 +193,7 @@
 	void initSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c){
 		surface.ambient = c;
 		surface.diffuse = c;
-		surface.specular = c;
+		surface.specular = vec4(0.0);
 	}
 
 	//! [fs,vs] Multiply a surface's ambient, diffuse and specular value.

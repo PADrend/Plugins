@@ -1,4 +1,4 @@
-#version 120
+#version 330
 
 /*
  * This file is part of the open source part of the
@@ -33,6 +33,11 @@ varying vec4 var_position_hcs;
 // vs
 #ifdef SG_VERTEX_SHADER
 
+out VertexData {
+	vec3 normal_cs;
+	vec4 position_hcs;
+} v_out;
+
 float sg_getPointSize();						//!	\see sgHelper.sfn
 vec3 sg_getVertexPosition_ms();					//!	\see sgHelper.sfn
 vec3 sg_getVertexNormal_ms();					//!	\see sgHelper.sfn
@@ -64,18 +69,18 @@ void main (void) {
 	VertexProperties vert;
 	vert.position_cs = sg_modelToCamera(vec4(position_ms,1.0)).xyz;
 	vert.normal_cs = sg_modelToCamera(vec4(normal_ms,0.0)).xyz; // \note the value is not normalized!
+	vert.pointSize = pointSize;
 
 	provideSurfaceVars(vert);
 	provideSurfaceEffectVars(vert);
 	provideLightingVars(vert);
 	provideFragmentEffectVars(vert);
-
-	var_position_hcs = vec4(vert.position_cs,1.0);
-	var_normal_cs = vert.normal_cs;
+  
+	v_out.position_hcs = vec4(vert.position_cs,1.0);
+	v_out.normal_cs = vert.normal_cs;
 	gl_PointSize = pointSize;
 	gl_Position = sg_modelToClipping(vec4(position_ms,1.0));
 }
-
 
 #endif
 
@@ -84,6 +89,11 @@ void main (void) {
 #ifdef SG_FRAGMENT_SHADER
 
 uniform mat4 sg_mrt_matrix_cameraToCustom = mat4(1.0);
+
+in VertexData {
+	vec3 normal_cs;
+	vec4 position_hcs;
+} v_in;
 
 struct CompositeColor {
 	vec4 ambient, diffuse, specular;
@@ -95,6 +105,12 @@ struct SurfaceProperties {
 	float shininess;
 };
 
+layout(location = 0) out vec4 out_color;
+layout(location = 1) out vec4 out_position;
+layout(location = 2) out vec4 out_normal;
+layout(location = 3) out vec4 out_ambient;
+layout(location = 4) out vec4 out_diffuse;
+layout(location = 5) out vec4 out_specular;
 
 void calcSurfaceProperties(inout SurfaceProperties surface);		//! \see surfaceProps_???.sfn
 void addSurfaceEffects(inout SurfaceProperties surface);			//! \see surfaceEffect_???.sfn
@@ -104,8 +120,8 @@ void addFragmentEffect(in SurfaceProperties,inout CompositeColor);	//! \see frag
 void main (void) {
 	// init surface properties
 	SurfaceProperties surface;
-	surface.position_cs = var_position_hcs.xyz / var_position_hcs.w;
-	surface.normal_cs = normalize(var_normal_cs);
+	surface.position_cs = v_in.position_hcs.xyz / v_in.position_hcs.w;
+	surface.normal_cs = normalize(v_in.normal_cs);
 
 	calcSurfaceProperties(surface);				// get surface properties (material, textures, ...)
 	addSurfaceEffects(surface);					// optionally add a surface effect (e.g. add snow)
@@ -117,15 +133,15 @@ void main (void) {
 	
 	// 
 	
-	gl_FragData[0] = color.ambient+color.diffuse+color.specular;	// combine color components into one color.
-  gl_FragData[0].a = color.diffuse.a;
+	out_color = color.ambient+color.diffuse+color.specular;	// combine color components into one color.
+  out_color.a = color.diffuse.a;
 	vec4 pos_hxs = sg_mrt_matrix_cameraToCustom * vec4( surface.position_cs,1.0);
-	gl_FragData[1] = vec4( pos_hxs.xyz/pos_hxs.w , 1.0 );
-	gl_FragData[2] = vec4( normalize( (sg_mrt_matrix_cameraToCustom * vec4(surface.normal_cs,0.0)).xyz), 1.0 );
+	out_position = vec4( pos_hxs.xyz/pos_hxs.w , 1.0 );
+	out_normal = vec4( normalize( (sg_mrt_matrix_cameraToCustom * vec4(surface.normal_cs,0.0)).xyz), 1.0 );
 	
-	gl_FragData[3] = surface.ambient;
-	gl_FragData[4] = surface.diffuse;
-	gl_FragData[5] = surface.specular;
+	out_ambient = surface.ambient;
+	out_diffuse = surface.diffuse;
+	out_specular = surface.specular;
 }
 
 #endif

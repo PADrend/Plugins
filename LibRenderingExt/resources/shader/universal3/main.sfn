@@ -88,6 +88,7 @@ struct SurfaceProperties {
 	float shininess;
 };
 
+layout(location=0) out vec4 fragColor;
 
 void calcSurfaceProperties(inout SurfaceProperties surface);		//! \see surfaceProps_???.sfn
 void addSurfaceEffects(inout SurfaceProperties surface);			//! \see surfaceEffect_???.sfn
@@ -107,8 +108,8 @@ void main (void) {
 	calcLighting(surface,color);				// add lighting and calculate color
 
 	addFragmentEffect(surface,color);			// add effects (e.g. fog)
-	gl_FragColor = color.ambient+color.diffuse+color.specular;	// combine color components into one color.
-	gl_FragColor.a = color.diffuse.a;
+	fragColor = color.ambient+color.diffuse+color.specular;	// combine color components into one color.
+	fragColor.a = color.diffuse.a;
 //	gl_FragColor = vec4(surface.normal_cs,1.0)+vec4(0.5);
 }
 
