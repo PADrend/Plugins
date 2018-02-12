@@ -26,6 +26,7 @@ m["CullFaceState"] = fn(){return new MinSG.CullFaceState;};
 m["GroupState"] = fn() { return new MinSG.GroupState; };
 m["Lighting"] = fn(){return new MinSG.LightingState;};
 m["MaterialState"] = fn(){return new MinSG.MaterialState;};
+m["PointParameterState"] = fn(){return new MinSG.PointParameterState;};
 m["PolygonModeState"] = fn(){return new MinSG.PolygonModeState;};
 m["ProjSizeFilterState"] = fn(){return new MinSG.ProjSizeFilterState;};
 m["Shader"] = fn(){	return new MinSG.ShaderState;	};

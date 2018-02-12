@@ -1056,6 +1056,30 @@ gui.register(CONFIG_PREFIX + MinSG.NaiveOccRenderer, fn(MinSG.NaiveOccRenderer s
 
 // ----
 
+//! PointParameterState
+gui.register(CONFIG_PREFIX + MinSG.PointParameterState, fn(MinSG.PointParameterState state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*PointParameterState:*";
+	entries += GUI.NEXT_ROW;
+	entries += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "Smooth",
+		GUI.DATA_WRAPPER : Std.DataWrapper.createFromFunctions( state->state.isPointSmoothingEnabled,state->state.setPointSmoothingEnabled ),
+		GUI.SIZE : [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.18, 20]
+	};
+	entries += GUI.NEXT_ROW;
+	entries+={
+		GUI.TYPE : GUI.TYPE_RANGE,
+		GUI.LABEL : "Point size",
+		GUI.RANGE : [1,128],
+    GUI.RANGE_STEP_SIZE : 1,
+		GUI.DATA_WRAPPER :	Std.DataWrapper.createFromFunctions( state->state.getSize,state->state.setSize ),
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0]
+	};
+	entries += GUI.NEXT_ROW;
+	return entries;
+});
+
 //! PolygonModeState
 gui.register(CONFIG_PREFIX + MinSG.PolygonModeState, fn(MinSG.PolygonModeState state) {
 	var entries = getBaseTypeEntries(state);
