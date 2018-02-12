@@ -159,6 +159,11 @@ MinSG.Node.getOriginalNode ::= fn(){
 MinSG.Node.getBoundingBox ::= MinSG.Node.getBB;
 MinSG.Node.getWorldBoundingBox ::= MinSG.Node.getWorldBB;
 
+MinSG.GroupNode.clear ::= fn() {
+	foreach(MinSG.getChildNodes(this) as var n)
+	  MinSG.destroy(n);
+};
+
 // --------------
 
 MinSG.GroupState."+=" ::= fn( MinSG.State obj){
