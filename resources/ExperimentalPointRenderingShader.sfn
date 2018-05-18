@@ -1,0 +1,145 @@
+#version 150
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2016 Claudius Jähn <claudius@uni-paderborn.de>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+ 
+ /*
+ - Renders points as virtual textured quads
+ - a ray is cast through each fragment of the point primitive and its intersection with the virtual quad is computed
+ - Only works for point primitives
+ - Add this file as vs-FragmentEffect and fs-FramgmentEffect to an universal3-shader (with material-only surface properties)
+ */
+ 
+// ------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+struct VertexProperties {
+	vec3 position_cs, normal_cs;
+	float pointSize;
+};
+
+//! \see main.sfn
+void provideFragmentEffectVars(in VertexProperties vert){}
+
+#endif
+// ------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+struct CompositeColor {
+	vec4 ambient, diffuse, specular;
+};
+
+struct SurfaceProperties {
+	vec3 position_cs, normal_cs, tangent_cs;
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+
+uniform bool sg_textureEnabled[8];
+uniform mat4 sg_matrix_cameraToClipping;
+uniform mat4 sg_matrix_modelToCamera;
+uniform sampler2D	sg_texture0;
+uniform int[4] sg_viewport;
+uniform float clusterSize=0.01;
+
+in vec4 gl_FragCoord;
+
+vec3 screenPosToClipPos(in vec3 screenPos){
+	return vec3( 
+               2.0 * (screenPos.x - float(sg_viewport[0])) / float(sg_viewport[2]) - 1.0, 
+               2.0 * (screenPos.y - float(sg_viewport[1])) / float(sg_viewport[3]) - 1.0,
+               2.0 * screenPos.z - 1.0);
+}
+
+
+vec2 getLineRectIntersection(in vec3 lineOrigin, in vec3 lineDirection, 
+		in vec3 rectOrigin, in vec3 rectEdge1, in vec3 rectEdge2){
+	vec3 pVec = cross(lineDirection, rectEdge2);
+	float det = dot(rectEdge1,pVec);
+	if(det > -0.00001 && det < -0.00001)
+		return vec2(-1,-1);
+
+	float invDet = 1.0 / det;
+	vec3 tVec = lineOrigin - rectOrigin;
+	float u = dot(tVec,pVec) * invDet;
+	if(u < 0.0 || u > 1.0) 
+		return vec2(-1,-1);
+
+	vec3 qVec = cross(tVec,rectEdge1);
+	float v = dot(lineDirection,qVec) * invDet;
+	//if(v < 0.0 || u + v > 1.0) { // triangle test
+	if(v < 0.0 || u >1.0 || v>1.0)
+		return vec2(-1,-1);
+	return vec2(u,v);
+}
+uniform float sg_time;
+
+//! \see main.sfn
+void addFragmentEffect(in SurfaceProperties surface, inout CompositeColor color){
+	
+	float rotationAngle = mod(sg_time,3.142*2);
+	
+	// --------
+	mat4 matClipToCam = inverse(sg_matrix_cameraToClipping);
+	mat4 matCamToModel = inverse(sg_matrix_modelToCamera);
+	vec3 normal_ms = (matCamToModel * vec4(surface.normal_cs,0.0)).xyz;
+
+	// rotate the rightVec around normal_ms with rotationAngle
+	vec3 rightVec_ms = normalize(cross(normal_ms,vec3(0.0,1.0,1.0))); // use arbitrary tangent vector
+	float cosAlpha = cos(rotationAngle);
+	float sinAlpha = sin(rotationAngle);
+	float f = dot(rightVec_ms,normal_ms)*(1.0-cosAlpha);
+	rightVec_ms = vec3( 
+		normal_ms.x * f+rightVec_ms.x*cosAlpha+sinAlpha*(normal_ms.y*rightVec_ms.z-normal_ms.z*rightVec_ms.y),
+		normal_ms.y * f+rightVec_ms.y*cosAlpha+sinAlpha*(normal_ms.z*rightVec_ms.x-normal_ms.x*rightVec_ms.z),
+		normal_ms.z * f+rightVec_ms.z*cosAlpha+sinAlpha*(normal_ms.x*rightVec_ms.y-normal_ms.y*rightVec_ms.x));
+	vec3 upVec_ms = normalize(cross(normal_ms,rightVec_ms));
+
+	vec4 fragPos_hclip = vec4(screenPosToClipPos(gl_FragCoord.xyz),1);
+	vec4 rayOrigin_hcam = matClipToCam * fragPos_hclip;
+	vec3 rayOrigin_cam = rayOrigin_hcam.xyz / rayOrigin_hcam.w;
+	vec3 rayDirection_cam = vec3(0,0,1);
+	
+	vec4 position_hms = matCamToModel * vec4( surface.position_cs,1.0);
+	vec3 position_ms = position_hms.xyz/position_hms.w;
+	vec4 rayOrigin_hms = matCamToModel * vec4( rayOrigin_cam,1.0);
+	vec3 rayOrigin_ms = rayOrigin_hms.xyz/rayOrigin_hms.w;
+	vec3 rayDir_ms = (matCamToModel * vec4(rayDirection_cam,0)).xyz;
+
+	// ray - virtual quad intersection test
+	vec3 a = rightVec_ms*clusterSize;
+	vec3 b = upVec_ms*clusterSize;
+	vec2 intersectionValues = getLineRectIntersection(rayOrigin_ms, rayDir_ms, position_ms - a*0.5 - b*0.5, a, b);
+	
+	vec4 c;
+	if(intersectionValues.x>=0){
+		if( sg_textureEnabled[0] )
+			c = texture2D(sg_texture0, intersectionValues);
+		else
+			c = vec4( intersectionValues,0,intersectionValues.x);
+	}else{
+		c = vec4(0);
+	}
+	
+	color.ambient *= c;
+	color.diffuse *= c;
+// -------
+
+}
+
+
+
+#endif
+// ------------------

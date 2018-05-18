@@ -1,0 +1,41 @@
+#version 120
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2012 Ralf Petring <ralf@petring.net>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+#ifdef SG_VERTEX_SHADER
+
+varying vec3 var_normal_es;
+
+vec3 sg_calcDefaultNormal_es();
+vec4 sg_calcDefaultPosition_hcs();
+
+void main (void) {
+	gl_Position = sg_calcDefaultPosition_hcs();
+	var_normal_es = sg_calcDefaultNormal_es();
+}
+
+#endif
+
+#ifdef SG_FRAGMENT_SHADER
+
+uniform mat4 inverseModelMatrix;
+varying vec3 var_normal_es;
+vec4 sg_eyeToWorld_hws(vec4);
+
+void main (void) {
+	vec4 normal_ws = inverseModelMatrix * sg_eyeToWorld_hws(vec4(var_normal_es,0.0));
+	gl_FragColor = vec4(normalize(normal_ws.xyz),1.0);//+vec4(0.5,0.5,0.5,0.0)
+}
+
+#endif
