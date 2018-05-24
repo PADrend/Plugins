@@ -598,18 +598,29 @@ static registerStdToolbarEntries = fn() {
 			GUI.LABEL		:	"Load Script ...",
 			GUI.TOOLTIP		:	"Show a dialog to choose a file, and load that file and execute it.\nSupported types: .escript",
 			GUI.ON_CLICK	:	fn() {
-				GUI._openFileDialog("Load Script",".",[".escript"],
-					fn(filename){
-						PADrend.message("Load Script \""+filename+"\"...");
-						out("\n");
-						try{
-							load(filename);
-						}catch(e){
-							Runtime.log(Runtime.LOG_ERROR,e);
+				var recentScript = Std.DataWrapper.createFromEntry(PADrend.configCache,'PADrend.GUI.recentScript',PADrend.getDataPath());
+				var filename = new Util.FileName(recentScript());
+				
+				gui.openDialog({
+					GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+					GUI.LABEL : "Load Script",
+					GUI.DIR : filename.getDir(),
+					GUI.FILENAME : filename.getFile(),
+					GUI.ENDINGS : [".escript"],
+					GUI.ON_ACCEPT  : [recentScript] => fn(recentScript, filename) {
+						if(filename) {
+							PADrend.message("Load Script \""+filename+"\"...");
+							out("\n");
+							try{
+								load(filename);
+							}catch(e){
+								Runtime.log(Runtime.LOG_ERROR,e);
+							}
+							out("\n");
+							recentScript(filename);
 						}
-						out("\n");
-					}
-				);
+					},
+				});
 			}
 		}
 	]);
