@@ -25,8 +25,16 @@ trait.attributes.reloadSubtree ::= fn(){
 		var e;
 		foreach( MinSG.getChildNodes(this) as var c)
 			MinSG.destroy(c);
-		this += subtree;
-		Std.module('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(subtree);
+		
+		if(this.subtreeImportSceneRoot()) {
+			this += subtree;
+			Std.module('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(subtree);
+		} else {
+			foreach(MinSG.getChildNodes(subtree) as var c) {
+				this += c;
+				Std.module('LibMinSGExt/Traits/PersistentNodeTrait').initTraitsInSubtree(c);
+			}
+		}
 	}
 };
 
@@ -36,6 +44,7 @@ trait.onInit += fn(MinSG.GroupNode node){
 														MinSG.SceneManagement.IMPORT_OPTION_REUSE_EXISTING_STATES|
 														MinSG.SceneManagement.IMPORT_OPTION_USE_TEXTURE_REGISTRY|
 														MinSG.SceneManagement.IMPORT_OPTION_USE_MESH_REGISTRY );
+	node.subtreeImportSceneRoot := node.getNodeAttributeWrapper('subtreeImportSceneRoot', true);
 };
 
 trait.allowRemoval();
@@ -71,6 +80,13 @@ module.on('../ObjectTraitRegistry', fn(registry){
 				},
 			};
 		}
+		entries += {	GUI.TYPE : GUI.TYPE_NEXT_ROW	};
+		entries += {
+			GUI.TYPE			:	GUI.TYPE_BOOL,
+			GUI.LABEL			:	"Import Scene Root",
+			GUI.SIZE			:	[GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS,2,15 ],
+			GUI.DATA_WRAPPER		:	node.subtreeImportSceneRoot,
+		};
 		entries += {	GUI.TYPE : GUI.TYPE_NEXT_ROW	};
 		entries += {
 				GUI.TYPE : GUI.TYPE_BUTTON,
