@@ -249,12 +249,6 @@ m["[deprecated] Shader: Universal2"] = fn(){
 };
 
 m["[ext] Strange renderer"] = new MinSG.StrangeExampleRenderer;
-if(MinSG.isSet($SurfelRenderer))		
-	m[ "[ext] SurfelRenderer" ] = fn(){return new MinSG.SurfelRenderer;};
-if(MinSG.isSet($SurfelRendererFixedSize))		
-	m[ "[ext] SurfelRendererFixedSize" ] = fn(){return new MinSG.SurfelRendererFixedSize;};
-if(MinSG.isSet($SurfelRendererBudget))		
-	m[ "[ext] SurfelRendererBudget" ] = fn(){return new MinSG.SurfelRendererBudget;};
 if(MinSG.isSet($TreeVisualization))
 	m["[ext] TreeVisualization"] = fn() { return new MinSG.TreeVisualization; };
 

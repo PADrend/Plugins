@@ -151,7 +151,7 @@ plugin.collectMeshesAndTextures := fn(MinSG.Node scene, Set meshes, Set textures
             meshes += mesh;
         }
         if(MinSG.isSet($BlueSurfels)){
-			var surfels = MinSG.BlueSurfels.locateSurfels(node);
+			var surfels = Std.module("BlueSurfels/Utils").locateSurfels(node);
 			if(surfels){
 				surfels.setFileName(new Util.FileName());
 				meshes += surfels;
