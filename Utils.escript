@@ -225,12 +225,4 @@ NS.saveSurfelsToMMF := fn(MinSG.Node node, Util.FileName folder) {
 	});
 };
 
-NS.computeTotalSurface := fn(MinSG.Node node) {
-	var geoNodes = MinSG.collectGeoNodes(node);
-	var surface = 0;
-	foreach(geoNodes as var n)
-		surface += Rendering.computeSurfaceArea(n.getMesh()) * n.getWorldTransformationSRT().getScale();
-	return surface / node.getWorldTransformationSRT().getScale();
-};
-
 return NS;
