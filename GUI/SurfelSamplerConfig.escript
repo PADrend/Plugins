@@ -1,0 +1,105 @@
+/*
+ * This file is part of the proprietary part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2017-2018 Sascha Brandt <sascha@brandt.graphics>
+ *
+ * PADrend consists of an open source part and a proprietary part.
+ * For the proprietary part of PADrend all rights are reserved.
+ */
+static samplerRegistry = new Map;  // samplerName -> sampler
+static samplerGUIRegistry = new Map; // samplerName -> guiProvider(obj)
+static samplerConfigRegistry = new Map; // samplerName -> applyConfig(obj)
+
+var registry = new Namespace;
+
+registry.registerSampler := fn(sampler, String displayableName=""){
+	if(displayableName.empty())
+		displayableName = sampler._printableName;
+	samplerRegistry[displayableName] = sampler;
+};
+
+registry.registerSamplerConfigGUI := fn(sampler, provider) {
+	Std.Traits.requireTrait(provider, Std.Traits.CallableTrait);
+	samplerGUIRegistry[sampler._printableName] = provider;
+};
+
+registry.registerSamplerConfig := fn(sampler, applyConfig) {
+	Std.Traits.requireTrait(applyConfig, Std.Traits.CallableTrait);
+	samplerConfigRegistry[sampler._printableName] = applyConfig;
+};
+
+registry.getSamplers := fn() { return samplerRegistry.clone(); };
+registry.getSampler := fn(samplerName){ return samplerRegistry[samplerName]; };
+registry.getGUIProvider := fn(samplerName){ return samplerGUIRegistry[samplerName]; };
+registry.applyConfig := fn(sampler, config) {
+	applyCommonConfig(sampler, config);
+	samplerConfigRegistry[sampler._printableName](sampler, config);
+};
+
+static applyCommonConfig = fn(sampler, config) {
+	sampler.setSeed(config.seed());
+	sampler.setTargetCount(config.targetCount());
+};
+static getCommonConfigGUI = fn(config) {
+	return [
+		{
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.LABEL : "Target Surfels",
+			GUI.RANGE : [0,100000],
+			GUI.RANGE_STEP_SIZE : 1,
+			GUI.DATA_WRAPPER : config.targetCount,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
+		},
+    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.LABEL : "Seed",
+			GUI.RANGE : [0,10000],
+			GUI.RANGE_STEP_SIZE : 1,
+			GUI.DATA_WRAPPER : config.seed,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
+		},
+    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+	];
+};
+
+// -----------------------------------------------------------------------
+// MinSG.BlueSurfels.ProgressiveSampler
+
+registry.registerSampler(new MinSG.BlueSurfels.ProgressiveSampler);
+registry.registerSamplerConfig(MinSG.BlueSurfels.ProgressiveSampler, fn(sampler, config) {
+	sampler.setSamplesPerRound(config.samplesPerRound());
+});
+registry.registerSamplerConfigGUI(MinSG.BlueSurfels.ProgressiveSampler, fn(config) {
+	var entries = getCommonConfigGUI(config);
+	entries += {
+		GUI.TYPE : GUI.TYPE_RANGE,
+		GUI.LABEL : "Samples per round",
+		GUI.RANGE : [0,1000],
+		GUI.RANGE_STEP_SIZE : 1,
+		GUI.DATA_WRAPPER : config.samplesPerRound,
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
+	};
+	return entries;
+});
+
+// -----------------------------------------------------------------------
+// MinSG.BlueSurfels.RandomSampler
+
+registry.registerSampler(new MinSG.BlueSurfels.RandomSampler);
+registry.registerSamplerConfig(MinSG.BlueSurfels.RandomSampler, fn(sampler, config) { });
+registry.registerSamplerConfigGUI(MinSG.BlueSurfels.RandomSampler, fn(config) {
+	return getCommonConfigGUI(config);
+});
+
+// -----------------------------------------------------------------------
+// MinSG.BlueSurfels.GreedyCluster
+
+registry.registerSampler(new MinSG.BlueSurfels.GreedyCluster);
+registry.registerSamplerConfig(MinSG.BlueSurfels.GreedyCluster, fn(sampler, config) { });
+registry.registerSamplerConfigGUI(MinSG.BlueSurfels.GreedyCluster, fn(config) {
+	return getCommonConfigGUI(config);
+});
+
+return registry;

@@ -1,0 +1,149 @@
+#version 330
+/*
+ * This file is part of the proprietary part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2017-2018 Sascha Brandt <sascha@brandt.graphics>
+ *
+ * PADrend consists of an open source part and a proprietary part.
+ * For the proprietary part of PADrend all rights are reserved.
+ */
+ 
+// ------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+layout(location = 0) in vec3 sg_Position;
+layout(location = 1) in vec3 sg_Normal;
+layout(location = 2) in vec4 sg_Color;
+
+uniform mat4 sg_matrix_cameraToClipping;
+uniform mat4 sg_matrix_modelToCamera;
+uniform mat4 sg_matrix_clippingToCamera;
+uniform float	sg_pointSize;
+uniform int[4] sg_viewport;
+
+out VertexData {
+	vec4 position_hcs;
+	vec3 normal_cs;
+	vec4 color;
+  float pointSize;
+} v_out;
+
+void main() {
+  v_out.position_hcs = sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
+  v_out.normal_cs = normalize(sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;  
+  v_out.color = sg_Color;	
+				
+	float d = v_out.normal_cs.z;
+	v_out.pointSize = d < 0 ? 0.0 : sg_pointSize * d;
+
+	gl_Position = sg_matrix_cameraToClipping * v_out.position_hcs;
+	gl_PointSize = v_out.pointSize;
+}
+
+#endif
+// ------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+in VertexData {
+	vec4 position_hcs;
+	vec3 normal_cs;
+	vec4 color;
+  float pointSize;
+} v_in;
+
+const int DIRECTIONAL = 1;
+const int POINT = 2;
+const int SPOT = 3;
+struct sg_LightSourceParameters {
+	int type; 							// has to be DIRECTIONAL, POINT or SPOT
+	vec3 position; 						// position of the light  ????????????????????????????????
+	vec3 direction; 					// direction of the light, has to be normalized ????????????????????????????????
+	vec4 ambient, diffuse, specular;	// light colors for all lights
+	float constant, linear, quadratic;	// attenuations for point & spot lights
+	float exponent, cosCutoff;			// spot light parameters
+};
+struct CompositeColor {
+	vec4 ambient, diffuse, specular;
+};
+
+uniform sg_LightSourceParameters sg_LightSource[8];
+uniform int sg_lightCount;
+uniform int[4] sg_viewport;
+uniform float	sg_surfelRadius;
+uniform mat4 sg_matrix_clippingToCamera;
+
+layout(location = 0) out vec4 fragColor;
+
+void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result){
+	// for DIRECTIONAL lights
+	float distPixToLight = 0.0; 
+	float attenuation = 1.0;
+	vec3 pixToLight = -light.direction;
+	
+	// for POINT & SPOT lights
+	if(light.type != DIRECTIONAL){ 
+		pixToLight = light.position - position_cs;
+		distPixToLight = length(pixToLight); 
+		pixToLight = normalize(pixToLight); 
+		attenuation	/= ( 	light.constant + light.linear * distPixToLight + light.quadratic * distPixToLight * distPixToLight);
+	}
+	// for SPOT lights
+	if(light.type == SPOT){
+		float spotDot = dot(pixToLight, -light.direction);
+		float spotAttenuation;
+		if(spotDot < light.cosCutoff) {
+			spotAttenuation = 0.0;
+		} else {
+			spotAttenuation = pow(spotDot, light.exponent);
+		}
+		attenuation *= spotAttenuation;
+	}
+	// for ALL lights
+	result.ambient += light.ambient * attenuation;
+	
+	float norDotPixToLight = max(0.0, dot(normal_cs, pixToLight));
+	if(norDotPixToLight != 0.0){
+		result.diffuse += light.diffuse * norDotPixToLight * attenuation;
+
+		//if(shininess>0.0){
+			vec3 pixToEye = normalize(-position_cs);
+			vec3 refl = reflect(-pixToLight, normal_cs);
+			float eyeDotRefl = dot(pixToEye, refl);
+			if(eyeDotRefl>0.0)
+				result.specular += light.specular * pow(eyeDotRefl, shininess/4.0) * attenuation;
+		//}
+	}
+}
+
+void calculateLighting(in vec3 position_cs, in vec3 normal_cs, inout CompositeColor lightSum) {  
+	if(sg_lightCount==0){ // default lighting
+		lightSum.ambient = vec4(0.3);
+		lightSum.diffuse = vec4(0.7);
+	}  
+	for(int i = 0; i < sg_lightCount; ++i){
+  	addLighting(sg_LightSource[i],position_cs,normal_cs,0.0,lightSum);
+  }
+}
+
+void main() {
+  vec3 position_cs = v_in.position_hcs.xyz / v_in.position_hcs.w;
+  vec3 normal_cs = normalize(v_in.normal_cs);
+  vec4 color = v_in.color;
+      
+  // Compute lighting
+	CompositeColor lightSum;
+	lightSum.ambient = vec4(0.0);
+	lightSum.diffuse = vec4(0.0);
+	lightSum.specular = vec4(0.0);
+  
+  calculateLighting(position_cs, normal_cs, lightSum);
+  color.xyz *= lightSum.ambient.xyz + lightSum.diffuse.xyz;
+  		
+	fragColor = color;
+}
+
+#endif
+// ------------------

@@ -1,0 +1,96 @@
+#version 420
+/*
+ * This file is part of the proprietary part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2017-2018 Sascha Brandt <sascha@brandt.graphics>
+ *
+ * PADrend consists of an open source part and a proprietary part.
+ * For the proprietary part of PADrend all rights are reserved.
+ */
+ 
+// ------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+// uniform
+uniform mat4 sg_matrix_modelToClipping;
+uniform mat4 sg_matrix_modelToCamera;
+uniform mat4 sg_mrt_matrix_cameraToCustom;
+
+// in
+layout(location = 0) in vec3 sg_Position;
+layout(location = 1) in vec3 sg_Normal;
+layout(location = 2) in vec4 sg_Color;
+layout(location = 3) in vec2 sg_TexCoord0;
+
+// out
+out VertexData {
+	vec4 position_is;
+	vec4 normal_is;
+	vec4 color;
+  vec2 texCoord;
+} vOut;
+
+void main() {
+  mat4 modelToImpostor = sg_mrt_matrix_cameraToCustom * sg_matrix_modelToCamera;
+  vOut.position_is = modelToImpostor * vec4(sg_Position, 1.0);
+  vOut.normal_is = normalize(modelToImpostor * vec4(sg_Normal, 0.0));
+  vOut.color = sg_Color;
+  vOut.texCoord = sg_TexCoord0;
+	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position, 1.0);
+}
+#endif
+
+// ------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+// structs
+struct sg_MaterialParameters {
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+
+// uniform
+layout(binding = 0) uniform sampler2D sg_Diffuse;
+uniform bool sg_textureEnabled[8];
+uniform sg_MaterialParameters	sg_Material;
+uniform bool sg_useMaterials;
+
+// in
+in VertexData {
+	vec4 position_is;
+	vec4 normal_is;
+	vec4 color;
+  vec2 texCoord;
+} vIn;
+
+// out
+layout(location = 1) out vec4 fPosition;
+layout(location = 2) out vec4 fNormal;
+layout(location = 4) out vec4 fColor;
+
+void main() {
+  vec4 position_is = vIn.position_is / vIn.position_is.w;
+  vec4 normal_is = normalize(vIn.normal_is);
+  vec4 color = vIn.color;
+  vec2 texCoord = vIn.texCoord;
+      
+	// material
+	if(sg_useMaterials)
+		color = sg_Material.diffuse + sg_Material.emission;
+	
+	if(sg_textureEnabled[0])
+		color *= texture(sg_Diffuse, texCoord);
+			
+	if(color.a <= 0.1)
+		discard;
+	
+	fColor = color;
+  fPosition = position_is;
+  fNormal = normal_is;
+}
+
+#endif
+// ------------------
