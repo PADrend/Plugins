@@ -48,17 +48,12 @@ plugin.initGUI := fn(gui) {
 		new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,gui._createRectShape(new Util.Color4ub(200,200,200,255),new Util.Color4ub(200,200,200,255),true))
 	];
 	
-	static surfelWindow;
-	@(once) {
-		surfelWindow = Std.module('BlueSurfels/GUI').createWindow(440, 40, gui);
-		surfelWindow.toggleVisibility();
-	}
+	static blueSurfelsGUI = Std.module('BlueSurfels/GUI');
+	blueSurfelsGUI.initGUI(gui);
 	
 	Util.registerExtension('PADrend_KeyPressed' , fn(evt) {
 		if(evt.key == Util.UI.KEY_F6) {
-			surfelWindow.toggleVisibility();
-			if(surfelWindow.isVisible())
-				surfelWindow.restoreLastTab();
+			blueSurfelsGUI.toggleWindow(gui);
 			return true;
 		}
 		return false;
@@ -67,11 +62,7 @@ plugin.initGUI := fn(gui) {
 	gui.register('PADrend_PluginsMenu.blueSurfels', {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Blue Surfels...",
-		GUI.ON_CLICK : [gui] => fn(gui){
-			surfelWindow.toggleVisibility();
-			if(surfelWindow.isVisible())
-				surfelWindow.restoreLastTab();
-		}
+		GUI.ON_CLICK : [gui] => blueSurfelsGUI.toggleWindow
 	});
 
 	NodeEditor.registerConfigPanelProvider(MinSG.SurfelRenderer, fn(state, panel) {

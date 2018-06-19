@@ -14,37 +14,47 @@ static ScannerRegistry = Std.module("BlueSurfels/GUI/SurfaceScannerConfig");
 static Utils = Std.module("BlueSurfels/Utils");
 static progressBar = new (Std.module('Tools/ProgressBar'));
 
-BS_GUI.createWindow := fn(posX,posY,gui) {
-	@(once){
-		gui.register('BlueSurfels_Tabs.10_Blue_Surfels',[gui] => fn(gui){
-			return [{
-					GUI.TYPE : GUI.TYPE_TAB,
-					GUI.TAB_CONTENT : createSurfelPanel(gui),
-					GUI.LABEL : "Sampling"
-			}];
-		});
-		gui.register('BlueSurfels_Tabs.20_Info',[gui] => fn(gui){
-			return [{
-					GUI.TYPE : GUI.TYPE_TAB,
-					GUI.TAB_CONTENT : createInfoPanel(gui),
-					GUI.LABEL : "Info"
-			}];
-		});
-		gui.register('BlueSurfels_Tabs.99_Test',[gui] => fn(gui){
-			return [{
-					GUI.TYPE : GUI.TYPE_TAB,
-					GUI.TAB_CONTENT : createTestPanel(gui),
-					GUI.LABEL : "Tests"
-			}];
-		});
-	}
+BS_GUI.initGUI := fn(fui) {
+	gui.register('BlueSurfels_Tabs.10_Blue_Surfels',[gui] => fn(gui){
+		return [{
+				GUI.TYPE : GUI.TYPE_TAB,
+				GUI.TAB_CONTENT : createSurfelPanel(gui),
+				GUI.LABEL : "Sampling"
+		}];
+	});
+	gui.register('BlueSurfels_Tabs.20_Info',[gui] => fn(gui){
+		return [{
+				GUI.TYPE : GUI.TYPE_TAB,
+				GUI.TAB_CONTENT : createInfoPanel(gui),
+				GUI.LABEL : "Info"
+		}];
+	});
+	gui.register('BlueSurfels_Tabs.99_Test',[gui] => fn(gui){
+		return [{
+				GUI.TYPE : GUI.TYPE_TAB,
+				GUI.TAB_CONTENT : createTestPanel(gui),
+				GUI.LABEL : "Tests"
+		}];
+	});
+};
 
-	var window = gui.create({
+
+BS_GUI.toggleWindow := fn(gui) {
+	@(once) static surfelWindow;
+	
+	if(surfelWindow) {
+		surfelWindow.toggleVisibility();
+		if(surfelWindow.isVisible())
+			surfelWindow.restoreLastTab();
+		return;
+	}
+	
+	surfelWindow = gui.create({
 		GUI.TYPE : GUI.TYPE_WINDOW,
 		GUI.LABEL : "Blue Surfels"
 	});
 
-	Std.Traits.addTrait(window, Std.module('LibGUIExt/Traits/StorableRectTrait'),
+	Std.Traits.addTrait(surfelWindow, Std.module('LibGUIExt/Traits/StorableRectTrait'),
 						Std.DataWrapper.createFromEntry(PADrend.configCache, "BlueSurfels.winRect", [200,100,420,410]));
 	var lastTab = Std.DataWrapper.createFromEntry(PADrend.configCache, "BlueSurfels.tab", 0);
 	
@@ -52,17 +62,16 @@ BS_GUI.createWindow := fn(posX,posY,gui) {
 		GUI.TYPE : GUI.TYPE_TABBED_PANEL,
 		GUI.SIZE : GUI.SIZE_MAXIMIZE,
 	});
-	window += tabPanel;
+	surfelWindow += tabPanel;
 	tabPanel.addTabs('BlueSurfels_Tabs');
 	
-	window.onWindowClosed := [tabPanel, lastTab] => fn(tabPanel, lastTab) {
+	surfelWindow.onWindowClosed := [tabPanel, lastTab] => fn(tabPanel, lastTab) {
 		lastTab(tabPanel.getActiveTabIndex());
 	};
-	window.restoreLastTab := [tabPanel, lastTab] => fn(tabPanel, lastTab) {
+	surfelWindow.restoreLastTab := [tabPanel, lastTab] => fn(tabPanel, lastTab) {
 		tabPanel.setActiveTabIndex(lastTab());
 	};
-	
-	return window;
+	tabPanel.setActiveTabIndex(lastTab());
 };
 
 // -------------------------------------------------------------------

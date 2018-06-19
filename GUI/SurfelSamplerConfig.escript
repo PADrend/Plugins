@@ -11,7 +11,7 @@ static samplerRegistry = new Map;  // samplerName -> sampler
 static samplerGUIRegistry = new Map; // samplerName -> guiProvider(obj)
 static samplerConfigRegistry = new Map; // samplerName -> applyConfig(obj)
 
-var registry = new Namespace;
+static registry = new Namespace;
 
 registry.registerSampler := fn(sampler, String displayableName=""){
 	if(displayableName.empty())
@@ -41,7 +41,7 @@ static applyCommonConfig = fn(sampler, config) {
 	sampler.setSeed(config.seed());
 	sampler.setTargetCount(config.targetCount());
 };
-static getCommonConfigGUI = fn(config) {
+registry.getCommonConfigGUI := fn(config) {
 	return [
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
@@ -72,7 +72,7 @@ registry.registerSamplerConfig(MinSG.BlueSurfels.ProgressiveSampler, fn(sampler,
 	sampler.setSamplesPerRound(config.samplesPerRound());
 });
 registry.registerSamplerConfigGUI(MinSG.BlueSurfels.ProgressiveSampler, fn(config) {
-	var entries = getCommonConfigGUI(config);
+	var entries = registry.getCommonConfigGUI(config);
 	entries += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "Samples per round",
@@ -90,7 +90,7 @@ registry.registerSamplerConfigGUI(MinSG.BlueSurfels.ProgressiveSampler, fn(confi
 registry.registerSampler(new MinSG.BlueSurfels.RandomSampler);
 registry.registerSamplerConfig(MinSG.BlueSurfels.RandomSampler, fn(sampler, config) { });
 registry.registerSamplerConfigGUI(MinSG.BlueSurfels.RandomSampler, fn(config) {
-	return getCommonConfigGUI(config);
+	return registry.getCommonConfigGUI(config);
 });
 
 // -----------------------------------------------------------------------
@@ -99,7 +99,7 @@ registry.registerSamplerConfigGUI(MinSG.BlueSurfels.RandomSampler, fn(config) {
 registry.registerSampler(new MinSG.BlueSurfels.GreedyCluster);
 registry.registerSamplerConfig(MinSG.BlueSurfels.GreedyCluster, fn(sampler, config) { });
 registry.registerSamplerConfigGUI(MinSG.BlueSurfels.GreedyCluster, fn(config) {
-	return getCommonConfigGUI(config);
+	return registry.getCommonConfigGUI(config);
 });
 
 return registry;
