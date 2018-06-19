@@ -42,7 +42,7 @@ plugin.init:=fn() {
 };
 
 plugin.initGUI := fn(gui) {
-	static strategyRegistry = Std.module("BlueSurfels/GUI/SurfelStrategyConfig");
+	static strategyRegistry = Std.module("BlueSurfels/Config/SurfelStrategyConfig");
 		
 	static strategyTitleProperties = [
 		new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,gui._createRectShape(new Util.Color4ub(200,200,200,255),new Util.Color4ub(200,200,200,255),true))

@@ -9,8 +9,8 @@
  */
 static BS_GUI = new Namespace;
 static SurfelGenerator = Std.module("BlueSurfels/SurfelGenerator");
-static SamplerRegistry = Std.module("BlueSurfels/GUI/SurfelSamplerConfig");
-static ScannerRegistry = Std.module("BlueSurfels/GUI/SurfaceScannerConfig");
+static SamplerRegistry = Std.module("BlueSurfels/Config/SurfelSamplerConfig");
+static ScannerRegistry = Std.module("BlueSurfels/Config/SurfaceScannerConfig");
 static Utils = Std.module("BlueSurfels/Utils");
 static progressBar = new (Std.module('Tools/ProgressBar'));
 
@@ -354,7 +354,7 @@ static createTestPanel = fn(gui) {
 	panel += "*Test Scenes*";
 	panel++;
 	
-	var TestScenes = Std.module("BlueSurfels/GUI/TestScenes");
+	var TestScenes = Std.module("BlueSurfels/Config/TestScenes");
 	foreach(TestScenes.getScenes() as var scene) {
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_BUTTON,
