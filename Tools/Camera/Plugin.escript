@@ -84,6 +84,16 @@ CameraWindowPlugin.ex_Init := fn() {
 				entries += CameraWindowPlugin.createNearPlaneSlider(PADrend.getActiveCamera(), false);
 				entries += CameraWindowPlugin.createFarPlaneSlider(PADrend.getActiveCamera(), false);
 				entries += {
+						GUI.TYPE : GUI.TYPE_BUTTON,
+						GUI.LABEL : "Set as default",
+						GUI.ON_CLICK : fn() {
+							systemConfig.setValue('PADrend.Camera.near', PADrend.getActiveCamera().getNearPlane());
+							systemConfig.setValue('PADrend.Camera.far', PADrend.getActiveCamera().getFarPlane());
+							PADrend.message("Settings stored.");	
+						}
+				};
+				entries += "----";
+				entries += {
 					GUI.TYPE : GUI.TYPE_BUTTON,
 					GUI.LABEL : "Config window",
 					GUI.TOOLTIP : "Open a window to manage camera settings.",
