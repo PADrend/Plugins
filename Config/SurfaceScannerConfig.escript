@@ -37,6 +37,18 @@ registry.getGUIProvider := fn(scannerName){ return scannerGUIRegistry[scannerNam
 registry.applyConfig := fn(scanner, config) {
 	scannerConfigRegistry[scanner._printableName](scanner, config);
 };
+registry.getCachedConfig := fn() {
+	static config;
+	@(once) {
+		config = new ExtObject({
+			$scannerName : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.scanner','RasterScanner'),
+			$debug : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.debug', false),
+			$directionPresetName : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.directions', 'cube'),
+			$resolution : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.resolution', 512),
+		});
+	}
+	return config;
+};
 
 // -----------------------------------------------------------------------
 // RasterScanner

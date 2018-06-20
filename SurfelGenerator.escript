@@ -13,22 +13,6 @@ static progressBar = new ProgressBar;
 
 static T = new Type(ExtObject);
 
-T.getConfig := fn() {
-	return new ExtObject({
-		$samplerName : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.sampler','ProgressiveSampler'),
-		$scannerName : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.scanner','RasterScanner'),
-		$seed : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.seed', 0),
-		$debug : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.debug', false),
-		$directionPresetName : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.directions', 'cube'),
-		$resolution : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.resolution', 512),
-		$targetCount : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.targetCount', 10000),
-		$samplesPerRound : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.samplesPerRound', 200),
-		$sampleResolution : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.sampleResolution', 512),
-		$maxRounds : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.maxRounds', 1000),
-		$mitchellK : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.mitchellK', 1),
-	});
-};
-
 // -------------------------------
 // sampler
 T.sampler @(private, init) := MinSG.BlueSurfels.ProgressiveSampler;
@@ -47,6 +31,7 @@ T.setScanner @(public) ::= fn(value) {
   scanner = value;
   return this;
 };
+T.setResolution @(public) ::= fn(value) { scanner.setResolution(value); };
 
 // -------------------------------
 // statistics
@@ -121,14 +106,14 @@ T.createSurfelsForLeafNodes @(public) ::= fn(Array rootNodes) {
 	progressBar.setMaxValue(nodeSet.count());
 	progressBar.update(0);
 	
-	var config = getConfig();
+	//var config = getConfig();
 	
 	var maxSurfelCount = sampler.getTargetCount();
 	var count = 0;
 	foreach(todoList as var node) {
 		progressBar.setDescription("Blue Surfels: Processing " + (++count) + "/" + todoList.count());
 		
-		var directions = Utils.getDirectionsFromPreset(config.directionPresetName());
+		//var directions = Utils.getDirectionsFromPreset(config.directionPresetName());
 		//var size = Utils.getMinProjTriangleSize(node, directions);
 		//var resolution = [[Utils.nextPowOfTwo(size > 0 ? (1/size).ceil() : 1), 4].max(), 2048].min();
 		//var surfelCount = Utils.computeVisibleTriangles(node, directions, resolution);
@@ -153,7 +138,7 @@ T.createSurfelsForLeafNodes @(public) ::= fn(Array rootNodes) {
 
 T.createSurfelHierarchy @(public) ::= fn(Array rootNodes) {
   var timer = new Util.Timer;
-	var config = getConfig();	
+	//var config = getConfig();	
 	var maxSurfelCount = sampler.getTargetCount();
   
 	var innerNodes = new Set;
@@ -187,13 +172,13 @@ T.createSurfelHierarchy @(public) ::= fn(Array rootNodes) {
 	foreach(leafNodes as var node) {
 		progressBar.setDescription("Blue Surfels: Compute leaf surfel count " + (++count) + "/" + leafNodes.count());
 		
-		var directions = Utils.getDirectionsFromPreset(config.directionPresetName());
-		var size = Utils.getMinProjTriangleSize(node, directions);
-		var resolution = [[Utils.nextPowOfTwo(size > 0 ? (1/size).ceil() : 1), 4].max(), 2048].min();
-		var surfelCount = Utils.computeVisibleTriangles(node, directions, resolution);
-		surfelCount = [[surfelCount, 4].max(), maxSurfelCount].min();
-		var surface = Utils.estimateVisibleSurface(node, directions, resolution);
-		node.setNodeAttribute('$cs$targetSurfels', surfelCount);		
+		//var directions = Utils.getDirectionsFromPreset(config.directionPresetName());
+		//var size = Utils.getMinProjTriangleSize(node, directions);
+		//var resolution = [[Utils.nextPowOfTwo(size > 0 ? (1/size).ceil() : 1), 4].max(), 2048].min();
+		//var surfelCount = Utils.computeVisibleTriangles(node, directions, resolution);
+		//surfelCount = [[surfelCount, 4].max(), maxSurfelCount].min();
+		//var surface = Utils.estimateVisibleSurface(node, directions, resolution);
+		//node.setNodeAttribute('$cs$targetSurfels', surfelCount);		
 		
 		if(Utils.handleUserEvents()) {
 			statistics['status'] = "aborted";
@@ -227,11 +212,11 @@ T.recreateSurfelsForAllNodes @(public) ::= fn(Array rootNodes) {
 	progressBar.setMaxValue(nodeSet.count());
 	progressBar.update(0);
 	
-	var config = getConfig();
+	//var config = getConfig();
 	
 	var maxSurfelCount = sampler.getTargetCount();
 	var count = 0;
-	var directions = Utils.getDirectionsFromPreset(config.directionPresetName());
+	//var directions = Utils.getDirectionsFromPreset(config.directionPresetName());
 	var totalCount =  todoList.count();
 	
 	foreach(todoList as var node) {
@@ -248,6 +233,7 @@ T.recreateSurfelsForAllNodes @(public) ::= fn(Array rootNodes) {
 		}
 		progressBar.update(count);
 	}
+	sampler.setTargetCount(maxSurfelCount);
 	
   statistics['t_total'] = timer.getSeconds();
   statistics['processed'] = totalCount;

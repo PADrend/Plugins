@@ -36,6 +36,18 @@ registry.applyConfig := fn(sampler, config) {
 	applyCommonConfig(sampler, config);
 	samplerConfigRegistry[sampler._printableName](sampler, config);
 };
+registry.getCachedConfig := fn() {
+	static config;
+	@(once) {
+		config = new ExtObject({
+			$samplerName : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.sampler','ProgressiveSampler'),
+			$seed : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.seed', 0),
+			$targetCount : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.targetCount', 10000),
+			$samplesPerRound : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.samplesPerRound', 200),
+		});
+	}
+	return config;
+};
 
 static applyCommonConfig = fn(sampler, config) {
 	sampler.setSeed(config.seed());

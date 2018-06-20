@@ -77,13 +77,14 @@ BS_GUI.toggleWindow := fn(gui) {
 // -------------------------------------------------------------------
 	
 static createSurfelPanel = fn(gui) {
-	var config = SurfelGenerator.getConfig();
+	var scannerConfig = ScannerRegistry.getCachedConfig();
+	var samplerConfig = SamplerRegistry.getCachedConfig();
 	
-	var generatorFactory = [config] => fn(config) {
-		var sampler = (SamplerRegistry.getSampler(config.samplerName()));
-		SamplerRegistry.applyConfig(sampler, config);
-		var scanner = new (ScannerRegistry.getScanner(config.scannerName()));
-		ScannerRegistry.applyConfig(scanner, config);
+	var generatorFactory = [scannerConfig,samplerConfig] => fn(scannerConfig,samplerConfig) {
+		var sampler = (SamplerRegistry.getSampler(samplerConfig.samplerName()));
+		SamplerRegistry.applyConfig(sampler, samplerConfig);
+		var scanner = new (ScannerRegistry.getScanner(scannerConfig.scannerName()));
+		ScannerRegistry.applyConfig(scanner, scannerConfig);
 		return (new SurfelGenerator)
 			.setSampler(sampler)
 			.setScanner(scanner);
@@ -112,13 +113,13 @@ static createSurfelPanel = fn(gui) {
         options += [key];
       options;
 		},
-    GUI.DATA_WRAPPER : config.scannerName,
+    GUI.DATA_WRAPPER : scannerConfig.scannerName,
 	};	
 	panel++;
 		
-	var refreshScannerGUI = Std.DataWrapper.createFromFunctions([config] => fn(config) {
-		var provider = ScannerRegistry.getGUIProvider(config.scannerName());
-		return provider ? provider(config) : [];
+	var refreshScannerGUI = Std.DataWrapper.createFromFunctions([scannerConfig] => fn(scannerConfig) {
+		var provider = ScannerRegistry.getGUIProvider(scannerConfig.scannerName());
+		return provider ? provider(scannerConfig) : [];
 	});	
 	panel += {
 		GUI.TYPE : GUI.TYPE_CONTAINER,
@@ -129,7 +130,7 @@ static createSurfelPanel = fn(gui) {
 		GUI.FLAGS : GUI.BACKGROUND ,
 	};
 	panel++;	
-	config.scannerName.onDataChanged += [refreshScannerGUI] => fn(refreshScannerGUI, ...) { refreshScannerGUI.forceRefresh(); };
+	scannerConfig.scannerName.onDataChanged += [refreshScannerGUI] => fn(refreshScannerGUI, ...) { refreshScannerGUI.forceRefresh(); };
 		
 	panel += "----";
 	panel++;
@@ -144,13 +145,13 @@ static createSurfelPanel = fn(gui) {
         options += [key];
       options;
 		},
-    GUI.DATA_WRAPPER : config.samplerName,
+    GUI.DATA_WRAPPER : samplerConfig.samplerName,
 	};	
 	panel++;	
 		
-	var refreshSamplerGUI = Std.DataWrapper.createFromFunctions([config] => fn(config) {
-		var provider = SamplerRegistry.getGUIProvider(config.samplerName());
-		return provider ? provider(config) : [];
+	var refreshSamplerGUI = Std.DataWrapper.createFromFunctions([samplerConfig] => fn(samplerConfig) {
+		var provider = SamplerRegistry.getGUIProvider(samplerConfig.samplerName());
+		return provider ? provider(samplerConfig) : [];
 	});
 	
 	panel += {
@@ -163,7 +164,7 @@ static createSurfelPanel = fn(gui) {
 	};
 	panel++;
 	
-	config.samplerName.onDataChanged += [refreshSamplerGUI] => fn(refreshSamplerGUI, ...) { refreshSamplerGUI.forceRefresh(); };
+	samplerConfig.samplerName.onDataChanged += [refreshSamplerGUI] => fn(refreshSamplerGUI, ...) { refreshSamplerGUI.forceRefresh(); };
 	
 	panel += "----";
 	panel++;
