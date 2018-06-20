@@ -9,7 +9,7 @@
  * Copyright (C) 2010-2011 Jonas Knoll
  * Copyright (C) 2010 Paul Justus
  * Copyright (C) 2010-2012 Ralf Petring <ralf@petring.net>
- * Copyright (C) 2015 Sascha Brandt <myeti@mail.uni-paderborn.de>
+ * Copyright (C) 2015-2018 Sascha Brandt <myeti@mail.uni-paderborn.de>
  *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -204,6 +204,21 @@ gui.register('NodeEditor_MeshToolsMenu.meshModifications',[
 			outln();
 		},
 		GUI.TOOLTIP : "converts normals from 3 * GL_FLOAT to 4 * GL_BYTE if present."
+	},
+	{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Shrink Mesh",
+		GUI.ON_CLICK : fn() {
+			foreach(NodeEditor.getSelectedNodes() as var subtree){
+				foreach(MinSG.collectGeoNodes(subtree) as var geoNode){
+					var mesh = geoNode.getMesh();
+					Rendering.shrinkMesh(mesh, true);
+					out(".");
+				}
+			}
+			outln();
+		},
+		GUI.TOOLTIP : "converts position from 3 * GL_FLOAT to 4 * GL_HALF_FLOAT."
 	},
 	{
 		GUI.TYPE : GUI.TYPE_BUTTON,
