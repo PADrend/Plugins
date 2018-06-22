@@ -48,7 +48,7 @@ PADrend.SystemUI.init @(override) := fn(){
 		//! Create a rendering context with debugging support.
 		properties.debug					= systemConfig.getValue('PADrend.Rendering.GLDebugOutput', false);
 		//! Create a rendering context with a compatibility profile.
-		properties.compatibilityProfile 	= true; /* always set compatibility context flags */ 
+		properties.compatibilityProfile 	= false; /* always set compatibility context flags */ 
 		//! Create a fullscreen window.
 		properties.fullscreen				= systemConfig.getValue('PADrend.window.fullscreen', false);
 		//! Should the window should be resizable?

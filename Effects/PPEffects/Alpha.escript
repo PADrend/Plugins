@@ -14,7 +14,7 @@
 var Effect = new Type( Std.module('Effects/SimplePPEffect2') );
 
 Effect._constructor ::= fn() {
-	this.shader := Rendering.Shader.loadShader(getShaderFolder() + "Simple_GL.vs", getShaderFolder() + "DisplayAlpha.fs", Rendering.Shader.USE_GL);
+	this.shader := Rendering.Shader.loadShader(getShaderFolder() + "Default.vs", getShaderFolder() + "DisplayAlpha.fs", Rendering.Shader.USE_GL);
 };
 
 Effect.begin @(override) ::= fn() {

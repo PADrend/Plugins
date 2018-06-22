@@ -13,7 +13,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_130.vs", getShaderFolder()+"Posterize.fs", Rendering.Shader.USE_UNIFORMS))){
+Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Default.vs", getShaderFolder()+"Posterize.fs", Rendering.Shader.USE_UNIFORMS))){
 	
 	this.gamma := 0.6;
 	this.numColors := 8;

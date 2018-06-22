@@ -35,9 +35,9 @@ Effect._constructor:=fn(){
 //	shader1.setUniform(renderingContext,'TDepth',Rendering.Uniform.INT,[1]) ;
 
 	this.shader2:= Rendering.Shader.createShader();
-	shader2.attachVSFile(getShaderFolder()+"AA.fs");
+	shader2.attachVSFile(getShaderFolder()+"AA.sfn");
 	shader2.attachFSFile(getShaderFolder()+"Fxaa3_8_mod.sfn");
-	shader2.attachFSFile(getShaderFolder()+"AA.fs");
+	shader2.attachFSFile(getShaderFolder()+"AA.sfn");
 	
 	
 	shader2.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]) ;

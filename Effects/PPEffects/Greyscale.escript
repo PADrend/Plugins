@@ -13,7 +13,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_130.vs", getShaderFolder()+"Greyscale.fs", Rendering.Shader.USE_UNIFORMS))){
+Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Default.vs", getShaderFolder()+"Greyscale.fs", Rendering.Shader.USE_UNIFORMS))){
 	this.weight_r := 0.3;
 	this.weight_g := 0.59;
 	this.weight_b := 0.11;

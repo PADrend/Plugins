@@ -24,7 +24,7 @@ Effect._constructor ::= fn(){
 	out(fbo.getStatusMessage(renderingContext),"\n");
 	renderingContext.popFBO();
 	
-	this.shader:=Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs",getShaderFolder()+"Cartoon.fs");
+	this.shader:=Rendering.Shader.loadShader(getShaderFolder()+"Default.vs",getShaderFolder()+"Cartoon.fs");
 	renderingContext.pushAndSetShader(shader);
 	shader.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]) ;
 	shader.setUniform(renderingContext,'TDepth',Rendering.Uniform.INT,[1]) ;

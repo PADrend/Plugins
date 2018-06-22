@@ -13,7 +13,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs", getShaderFolder()+"CrossHatch.fs", Rendering.Shader.USE_GL))){
+Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Default.vs", getShaderFolder()+"CrossHatch.fs", Rendering.Shader.USE_GL))){
 	
 	this.hatch_y := 5; // other values don't make sense --> no gui entry
 	this.lum_1 := 1.0;

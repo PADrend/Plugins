@@ -1,4 +1,4 @@
-#version 120
+#version 330
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -6,6 +6,7 @@
  * Copyright (C) 2010 Benjamin Eikel <benjamin@eikel.org>
  * Copyright (C) 2009-2014 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2013 Lukas Kopecki
+ * Copyright (C) 2018 Sascha Brandt <sascha@brandt.graphics>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -27,9 +28,6 @@ uniform float cloudDensity;// = 0.6;
 uniform vec3 sunPosition;
 uniform bool starsEnabled;// = false;
 
-varying vec3 vpos; //, lpos;
-varying vec2 texCoord_1, texCoord_2, texCoord_3, skyPos_ws;
-
 uniform float maxSunBrightness = 100.0; // to get values beyond 1.0 for hdr
 const float bloomingExponent = 4.0;
 const float bloomingScale = 1.0;
@@ -38,12 +36,27 @@ const float cloudCutLine = 0.08; // 0.05-0.015
 
 uniform mat4 sg_matrix_worldToCamera; // used for mrt
 
-void main(void){
+in VertexData {
+	vec3 position;
+	vec2 texCoord_1;
+	vec2 texCoord_2;
+	vec2 texCoord_3;
+	vec2 skyPos_ws;
+} v_in;
+
+layout(location=0) out vec4 outColor;
+layout(location=1) out vec4 outPosition;
+layout(location=2) out vec4 outNormal;
+layout(location=3) out vec4 outAmbient;
+layout(location=4) out vec4 outDiffuse;
+layout(location=5) out vec4 outSpecular;
+
+void main(void) {
 
 	// Always output nearly maximum depth. Maximum depth (= 1.0) gets clipped.
 	gl_FragDepth = 0.99999;
 
-	vec3 norm = -normalize(vpos).xyz;
+	vec3 norm = -normalize(v_in.position).xyz;
 	vec3 lightDir = normalize(sunPosition.xyz);
 	float distanceToSun = 1.0 - max(0.0, dot(-lightDir,norm));
 
@@ -55,7 +68,7 @@ void main(void){
 	
 	// stars (experimental)
 	if(starsEnabled){
-		vec3 t = texture2D(BumpMap, skyPos_ws*10.0).xyz;
+		vec3 t = texture2D(BumpMap, v_in.skyPos_ws*10.0).xyz;
 		if( t.x < 0.02  )
 			skyColor += vec3( max(  t.y * (t.y - (skyColor.x+skyColor.y+skyColor.z)*0.33 ) *3.0 ,0.0 ) );
 		
@@ -71,10 +84,10 @@ void main(void){
 	if(noCloudsNearHorizon>0.20){
 		// ---------------------------
 		// -- calculate cloud depth
-		vec2 t1 = texture2D(ColorMap, texCoord_1).xy;
+		vec2 t1 = texture2D(ColorMap, v_in.texCoord_1).xy;
 		float cloudDepth_1 = t1.x;
-		float cloudDepth_2 = 0.5*texture2D(ColorMap, texCoord_2).x;
-		vec2 texCoord_3b= texCoord_3 - wobble*(1.0+norm.y)*vec2(cloudDepth_1,cloudDepth_2); // add wobbel
+		float cloudDepth_2 = 0.5*texture2D(ColorMap, v_in.texCoord_2).x;
+		vec2 texCoord_3b = v_in.texCoord_3 - wobble*(1.0+norm.y)*vec2(cloudDepth_1,cloudDepth_2); // add wobbel
 		float cloudDepth_3 = 0.25*texture2D(ColorMap, texCoord_3b ).x;
 
 		float cloudDepth = (cloudDepth_1 + cloudDepth_2 + cloudDepth_3)/1.75;
@@ -83,8 +96,8 @@ void main(void){
 
 		// ---------------------------
 		// -- calculate cloud normal
-		vec3 cNorm = normalize(texture2D(BumpMap, texCoord_1).xyz +
-							   0.5*texture2D(BumpMap, texCoord_2).xyz +
+		vec3 cNorm = normalize(texture2D(BumpMap, v_in.texCoord_1).xyz +
+							   0.5*texture2D(BumpMap, v_in.texCoord_2).xyz +
 							   0.25*texture2D(BumpMap, texCoord_3b).xyz);
 		// ---------------------------
 		// -- add clouds to skyColor
@@ -117,17 +130,15 @@ void main(void){
 		float coreSunPower = max( 2.0, maxSunBrightness * (1.0 - clamp( pow(1.0+norm.y,2.0) + cloudStrength,0.0,1.0) ));
 		skyColor += vec3(coreSunPower);
 	}
-
-//	gl_FragColor = vec4( skyColor,1.0); // "normal" color
 	
 	// multiple render targets \see universal3/main_mrt.sfn
 	{
-		gl_FragData[0] = vec4( skyColor,1.0);		// "normal" color
-		vec4 pos_hcs = sg_matrix_worldToCamera * vec4(vpos,1.0);
-		gl_FragData[1] = vec4( pos_hcs.xyz/pos_hcs.w,0.0); 									// pos_cs
-		gl_FragData[2] = vec4( (sg_matrix_worldToCamera * vec4(normal_ws,0.0)).xyz,0.0); 	// normal_cs
-		gl_FragData[3] = vec4( skyColor,1.0); 												// ambient (emission)
-		gl_FragData[4] = vec4( 0.0); 														// diffuse
-		gl_FragData[5] = vec4( 0.0); 														// specular
+		outColor = vec4( skyColor,1.0);		// "normal" color
+		vec4 pos_hcs = sg_matrix_worldToCamera * vec4(v_in.position,1.0);
+		outPosition = vec4( pos_hcs.xyz/pos_hcs.w,0.0); 									// pos_cs
+		outNormal = vec4( (sg_matrix_worldToCamera * vec4(normal_ws,0.0)).xyz,0.0); 	// normal_cs
+		outAmbient = vec4( skyColor,1.0); 												// ambient (emission)
+		outDiffuse = vec4( 0.0); 														// diffuse
+		outSpecular = vec4( 0.0); 														// specular
 	}
 }

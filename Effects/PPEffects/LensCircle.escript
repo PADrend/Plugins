@@ -13,7 +13,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs", getShaderFolder()+"LensCircle.fs", Rendering.Shader.USE_GL))){
+Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Default.vs", getShaderFolder()+"LensCircle.fs", Rendering.Shader.USE_GL))){
 	this.innerRadius := 0.1;
 	this.outerRadius := 0.55;
 	this.move := false;

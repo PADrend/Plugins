@@ -25,7 +25,7 @@ Effect._constructor ::= fn(){
     
     outln( fbo.getStatusMessage(renderingContext) );
 
-	this.shader := Rendering.Shader.loadShader( getShaderFolder()+"Simple_130.vs", getShaderFolder()+"Example_Green.fs", Rendering.Shader.USE_UNIFORMS);
+	this.shader := Rendering.Shader.loadShader( getShaderFolder()+"Default.vs", getShaderFolder()+"Example_Green.fs", Rendering.Shader.USE_UNIFORMS);
 
 };
 

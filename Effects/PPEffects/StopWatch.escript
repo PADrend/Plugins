@@ -12,7 +12,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_130.vs", getShaderFolder()+"StopWatch.fs", Rendering.Shader.USE_UNIFORMS))){
+Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Default.vs", getShaderFolder()+"StopWatch.fs", Rendering.Shader.USE_UNIFORMS))){
 	this.numbers = Rendering.createTextureFromFile(__DIR__+"/../resources/Textures/numbers.png");
 };
 

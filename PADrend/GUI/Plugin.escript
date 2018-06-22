@@ -128,6 +128,8 @@ static initGUI_FBO = fn(){
 
 
 static renderGUI = fn(){
+	// gui might mess with current shader
+	renderingContext.pushShader(); 
 	switch(guiMode()){
 		case MODE_NORMAL:
 			gui.display();
@@ -207,8 +209,7 @@ static renderGUI = fn(){
 		default:
 			@(once) Runtime.warn("@(once) Invalid gui mode:"+guiMode());
 	}
-	// gui might mess with current state, so we need to reapply all
-	renderingContext.applyChanges(true);	
+	renderingContext.popShader();
 };
 //Util.requirePlugin('PADrend/GUI').guiMode(2);
 

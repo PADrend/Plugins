@@ -111,6 +111,7 @@ static active = true;
 static activeCamera; 
 static taskScheduler;
 static camerasUsedForLastFrame = [];
+static defaultShader;
 
 plugin.init @(override) := fn(){
 	PADrend.RenderingPass := Std.module( 'PADrend/EventLoop/RenderingPass' ); //alias
@@ -176,10 +177,15 @@ plugin.init @(override) := fn(){
 					this.singleFrame();
 			}catch(e){
 				Runtime.log(Runtime.LOG_ERROR,e);
+			active = false;
 				continue;
 			}
 		}
 	});
+	
+	// initialize fallback shader
+	var shaderFile = Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/defaultShader.sfn";
+	defaultShader = Rendering.Shader.loadShader(shaderFile, shaderFile);
 	return true;
 };
 // ------------------
@@ -209,6 +215,8 @@ plugin.planTask := fn(mixed_TimeOrCallback,callback=void){
 };
 
 plugin.singleFrame := fn() {
+
+	renderingContext.setShader(defaultShader);
 
 	// create "default" rendering pass
 	var renderingPasses = [ 
