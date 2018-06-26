@@ -1,0 +1,80 @@
+#version 330
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2010-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2011 Ralf Petring <ralf@petring.net>
+ * Copyright (C) 2018 Sascha Brandt <sascha@brandt.graphics>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+
+
+uniform float pixelSizeY, pixelSizeX; 
+
+// ------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+layout(location = 0) in vec3 sg_Position;
+layout(location = 4) in vec2 sg_TexCoord0;
+
+out vec4 posPos;
+
+uniform mat4 sg_matrix_modelToClipping;
+
+uniform float FXAA_SUBPIX_SHIFT = 1.0/4.0;
+
+void main(void) {
+  vec2 rcpFrame = vec2(pixelSizeX, pixelSizeY);
+	posPos.xy = sg_TexCoord0;
+  posPos.zw = sg_TexCoord0 - (rcpFrame * (0.5 + FXAA_SUBPIX_SHIFT));
+	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position,1);
+}
+
+#endif
+// ------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+//! \see Fxaa3_8.sfn
+vec4 FxaaPixelShader(
+    // {xy} = center of pixel
+    vec2 pos,
+    // {xyzw} = not used on FXAA3 Quality
+    vec4 posPos,       
+    // {rgb_} = color in linear or perceptual color space
+    // {___a} = luma in perceptual color space (not linear) 
+    sampler2D tex,
+    // This must be from a constant/uniform.
+    // {x_} = 1.0/screenWidthInPixels
+    // {_y} = 1.0/screenHeightInPixels
+    vec2 rcpFrame,
+    // {xyzw} = not used on FXAA3 Quality
+    vec4 rcpFrameOpt 
+);
+
+in vec4 posPos;
+out vec4 fragColor;
+
+uniform sampler2D TUnit_1; // 0
+//	vec3 c = textureLodOffset(t, p, 0.0, o);
+//	return  sqrt(dot(color.rgb, vec3(0.299, 0.587, 0.114))); // compute luma
+void main() 
+{ 
+  vec2 uv = posPos.xy;
+  vec4 color = textureLodOffset(TUnit_1, uv, 0.0, ivec2(0,0));
+  color = FxaaPixelShader(uv,vec4(0),TUnit_1,vec2(pixelSizeX, pixelSizeY),vec4(0));
+  fragColor = color;
+}
+
+
+#endif
+// ------------------
