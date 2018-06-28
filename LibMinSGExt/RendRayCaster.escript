@@ -28,7 +28,16 @@ var T = MinSG.RendRayCaster;
 T.castCam @(private) := void;
 T.resolution @(private) := void;
 T.fbo @(private) := void;
+T.shader @(private) := void;
 T.renderingLayers @(public,init) := Std.module('Std/DataWrapper');
+
+static shader_src = "#version 330
+layout(location=0) in vec3 sg_Position;
+uniform mat4 sg_matrix_modelToClipping;
+void main() {
+	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position, 1.0);
+}
+";
 
 T._constructor ::= fn(Number _resolution=10){
 	this.renderingLayers( 1 );
@@ -36,18 +45,15 @@ T._constructor ::= fn(Number _resolution=10){
 	this.castCam = new MinSG.CameraNodeOrtho;
 	this.castCam.setViewport( new Geometry.Rect(0,0,resolution,resolution));
 	this.castCam.setFrustumFromScaledViewport(0.001);
+	
+	this.shader = Rendering.Shader.createShader(Rendering.Shader.USE_UNIFORMS);	
+	this.shader.attachVS(shader_src);
 
 	// create FBO
 	this.fbo = new Rendering.FBO;
-	renderingContext.pushAndSetFBO(fbo);
-	var renderBuffer = Rendering.createStdTexture(_resolution,_resolution,true);
-	this.fbo.attachColorTexture(renderingContext,renderBuffer);
-//	fbo.attachColorTexture(renderingContext,Rendering.createStdTexture(_resolution,_resolution,true)); //! \see #657
 	var depthBuffer = Rendering.createDepthTexture(_resolution,_resolution);
 	this.fbo.attachDepthTexture(renderingContext,depthBuffer);
-	renderingContext.popFBO();
 	Rendering.checkGLError();
-
 };
 
 /*! (internal) */
@@ -64,14 +70,18 @@ T.setup @(private) ::= fn(Geometry.Vec3 source,Geometry.Vec3 target){
 T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 source,Geometry.Vec3 target, Bool restrictSearchingDistance=false ){
 	Rendering.checkGLError();
 	this.setup(source,target);
-	fc.getRenderingContext().pushAndSetFBO(fbo);
-
+	var rc = fc.getRenderingContext();
+		
 	fc.pushAndSetCamera(castCam);
-
+	rc.pushAndSetShader(shader);
+	rc.pushAndSetFBO(fbo);
 
 	var maxDistance = false;
+	/* 
+	// this is not necessary
+	// maybe if we sample the depth of the current frame buffer without redrawing the entire scene
 	if(restrictSearchingDistance){
-		fc.getRenderingContext().clearScreen(new Util.Color4f(0,0,0,1));
+		rc.clearScreen(new Util.Color4f(0,0,0,1));
 
 		var params = (new MinSG.RenderParam)
 					.setFlags(MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING) //|MinSG.NO_STATES);
@@ -84,13 +94,14 @@ T.queryNode ::= fn(MinSG.FrameContext fc,MinSG.Node rootNode,Geometry.Vec3 sourc
 		// map to world coordinates
 		var worldIntersection = fc.convertScreenPosToWorldPos(new Geometry.Vec3(screenCenter,screenCenter,screenSpaceDepth));
 		maxDistance = (worldIntersection-source).length()*1.01;
-//		out(maxDistance,"\n");
-	}
-
- 	var nodes=MinSG.collectVisibleNodes(rootNode, fc, maxDistance, true,this.renderingLayers());
+		//out(maxDistance,"\n");
+	}*/
+	
+ 	var nodes = MinSG.collectVisibleNodes(rootNode, fc, maxDistance, true, this.renderingLayers());
+	rc.popFBO();
+	rc.popShader();
 	fc.popCamera();
-	fc.getRenderingContext().popFBO();
-		Rendering.checkGLError();
+	Rendering.checkGLError();
 	return nodes[0];
 };
 
@@ -113,13 +124,15 @@ T.queryIntersection ::= fn(MinSG.FrameContext fc,[MinSG.Node,Array] rootNodes,Ge
 		rootNodes = [rootNodes];
 	if(rootNodes.empty())
 		return;
+	var rc = fc.getRenderingContext();
 
 	this.setup(source,target);
-	fc.getRenderingContext().pushAndSetFBO(fbo);
+	rc.pushAndSetFBO(fbo);
+	rc.pushAndSetShader(shader);
 
 	// render scene
 	fc.pushAndSetCamera(castCam);
-	fc.getRenderingContext().clearScreen(new Util.Color4f(0,0,0,1));
+	rc.clearScreen(new Util.Color4f(0,0,0,1));
 	
 	var params = (new MinSG.RenderParam)
 					.setFlags(MinSG.USE_WORLD_MATRIX|MinSG.FRUSTUM_CULLING) //|MinSG.NO_STATES);
@@ -136,7 +149,8 @@ T.queryIntersection ::= fn(MinSG.FrameContext fc,[MinSG.Node,Array] rootNodes,Ge
 		result = fc.convertScreenPosToWorldPos(new Geometry.Vec3(screenCenter,screenCenter,depth));
 	}
 	fc.popCamera();
-	fc.getRenderingContext().popFBO();
+	rc.popShader();
+	rc.popFBO();
 		Rendering.checkGLError();
 	return result;
 };
