@@ -31,11 +31,17 @@ T.fbo @(private) := void;
 T.shader @(private) := void;
 T.renderingLayers @(public,init) := Std.module('Std/DataWrapper');
 
-static shader_src = "#version 330
+static shader_src = "#version 420
 layout(location=0) in vec3 sg_Position;
-uniform mat4 sg_matrix_modelToClipping;
+layout(std140, binding=0, row_major) uniform MatrixData {
+  uniform mat4 worldToCamera;
+  uniform mat4 cameraToWorld;
+  uniform mat4 cameraToClipping;
+  uniform mat4 clippingToCamera;
+  uniform mat4 modelToCamera;
+} sg_matrix;
 void main() {
-	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position, 1.0);
+	gl_Position = sg_matrix.cameraToClipping * sg_matrix.modelToCamera * vec4(sg_Position, 1.0);
 }
 ";
 

@@ -1,4 +1,4 @@
-#version 330
+#version 420
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -17,54 +17,52 @@
 #ifdef SG_VERTEX_SHADER
 
 // vertex attributes
-in vec3 sg_Position;
-in vec3 sg_Normal;
-in vec4 sg_Color;
-in vec3 sg_Tangent;
-in vec2 sg_TexCoord0;
+layout(location=0) in vec3 sg_Position;
+layout(location=1) in vec3 sg_Normal;
+layout(location=2) in vec4 sg_Color;
+layout(location=3) in vec3 sg_Tangent;
+layout(location=4) in vec2 sg_TexCoord0;
 
 // buffer objects
-//layout(std140, binding=0, row_major) uniform CameraMatrices {
-  uniform mat4 sg_matrix_worldToCamera;
-  uniform mat4 sg_matrix_cameraToWorld;
-  uniform mat4 sg_matrix_cameraToClipping;
-  uniform mat4 sg_matrix_clippingToCamera;
-//};
+layout(std140, binding=0, row_major) uniform MatrixData {
+  mat4 worldToCamera;
+  mat4 cameraToWorld;
+  mat4 cameraToClipping;
+  mat4 clippingToCamera;
+  mat4 modelToCamera;
+} sg_matrix;
 
-/*layout(std140, binding=1) uniform Material {
+layout(std140, binding=1) uniform MaterialData {
 	vec4 ambient;
 	vec4 diffuse;
 	vec4 specular;
 	vec4 emission;
   float shininess;
-} sg_Material;*/
+  bool enabled;
+} sg_Material;
 
-struct sg_MaterialParameters {
-  vec4 ambient, diffuse, specular, emission;
-  float shininess;
+struct sg_LightSourceParameters {
+	vec4 position;
+	vec4 direction;
+	vec4 ambient, diffuse, specular;
+  float constant, linear, quadratic;
+  float exponent, cosCutoff;
+  int type;
+  float _padding;
 };
-uniform sg_MaterialParameters	sg_Material;
 
-uniform mat4 sg_matrix_modelToCamera;
+layout(std140, binding=2) uniform LightData {
+  sg_LightSourceParameters sg_LightSource[8];
+};
 
 const int DIRECTIONAL = 1;
 const int POINT = 2;
 const int SPOT = 3;
-struct sg_LightSourceParameters {
-	int type; 							// has to be DIRECTIONAL, POINT or SPOT
-	vec3 position; 						// position of the light  ????????????????????????????????
-	vec3 direction; 					// direction of the light, has to be normalized ????????????????????????????????
-	vec4 ambient, diffuse, specular;	// light colors for all lights
-	float constant, linear, quadratic;	// attenuations for point & spot lights
-	float exponent, cosCutoff;			// spot light parameters
-};
 struct CompositeColor {
 	vec4 ambient, diffuse, specular;
 };
-uniform sg_LightSourceParameters sg_LightSource[8];
 uniform int sg_lightCount;
-
-uniform bool sg_useMaterials;
+uniform float	sg_pointSize;
 
 out VertexData {
 	vec4 position_hcs;
@@ -74,25 +72,26 @@ out VertexData {
 	vec4 diffuse;
 	vec4 specular;
 } v_out;
-
-
+//-2583.98,4243.93,-558.612
 //! [fs,vs] Add the light of the given light source to lightSum.
-void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result) {
+void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result) {  
 	// for DIRECTIONAL lights
 	float distPixToLight = 0.0; 
 	float attenuation = 1.0;
-	vec3 pixToLight = -light.direction;
+  vec3 light_direction = (sg_matrix.worldToCamera * light.direction).xyz;
+  vec3 light_position = (sg_matrix.worldToCamera * light.position).xyz;
+	vec3 pixToLight = -light_direction;
 	
 	// for POINT & SPOT lights
 	if(light.type != DIRECTIONAL){ 
-		pixToLight = light.position - position_cs;
+		pixToLight = light_position - position_cs;
 		distPixToLight = length(pixToLight); 
 		pixToLight = normalize(pixToLight); 
 		attenuation	/= ( 	light.constant + light.linear * distPixToLight + light.quadratic * distPixToLight * distPixToLight);
 	}
 	// for SPOT lights
 	if(light.type == SPOT){
-		float spotDot = dot(pixToLight, -light.direction);
+		float spotDot = dot(pixToLight, -light_direction);
 		float spotAttenuation;
 		if(spotDot < light.cosCutoff) {
 			spotAttenuation = 0.0;
@@ -118,19 +117,9 @@ void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3
 	}
 }
 
-//! [fs,vs] Add the light of light #sgLightNr to lightSum.
-void sg_addLight(in int sgLightNr,in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor lightSum){
-	vec3 n_cs = normal_cs;
-	#ifdef SG_FRAGMENT_SHADER
-	if(! gl_FrontFacing) 
-		n_cs = -n_cs;
-	#endif
-	addLighting(sg_LightSource[sgLightNr],position_cs,n_cs,shininess,lightSum);
-}
-
 void main() {	
-	v_out.position_hcs = sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
-	v_out.normal_cs = (sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+	v_out.position_hcs = sg_matrix.modelToCamera * vec4(sg_Position, 1.0);
+	v_out.normal_cs = (sg_matrix.modelToCamera * vec4(sg_Normal, 0.0)).xyz;
 	v_out.texCoord0 = sg_TexCoord0;
   
 	vec4 ambient = sg_Color;
@@ -138,7 +127,7 @@ void main() {
 	vec4 specular = vec4(0.0);	
 	vec4 emission = vec4(0.0);
 	float shininess = 0;
-	if(sg_useMaterials) {
+	if(sg_Material.enabled) {
 		ambient = sg_Material.ambient;
 		diffuse = sg_Material.diffuse;
 		specular = sg_Material.specular;
@@ -159,7 +148,7 @@ void main() {
 	for(int i = 0; i < 8; i++){
 		if( i >= sg_lightCount )
 			break;
-		sg_addLight(i,v_out.position_hcs.xyz, v_out.normal_cs, shininess, lightSum);
+  	addLighting(sg_LightSource[i],v_out.position_hcs.xyz,v_out.normal_cs,shininess,lightSum);
 	}
 
 	lightSum.ambient.a = lightSum.diffuse.a = lightSum.specular.a = 1.0;
@@ -167,7 +156,8 @@ void main() {
 	v_out.ambient = ambient * lightSum.ambient;
 	v_out.diffuse = diffuse * lightSum.diffuse + emission;
 	v_out.specular = specular * lightSum.specular;
-	gl_Position = sg_matrix_cameraToClipping * v_out.position_hcs;
+	gl_Position = sg_matrix.cameraToClipping * v_out.position_hcs;
+  gl_PointSize = sg_pointSize;
 }
 
 
@@ -187,27 +177,19 @@ in VertexData {
 	vec4 ambient;
 	vec4 diffuse;
 	vec4 specular;
-} v_in;
+} vIn;
 
-out vec4 fragColor;
-
-struct CompositeColor {
-	vec4 ambient, diffuse, specular;
-};
-
-void mulAmDi(inout CompositeColor col, in vec4 c) {
-	col.ambient *= c;
-	col.diffuse *= c;
-}
+layout(location=0) out vec4 fragColor;
 
 void main() {
-	CompositeColor c;
-	c.ambient = v_in.ambient;
-	c.diffuse = v_in.diffuse;
-	c.specular = v_in.specular;
-	//if(sg_textureEnabled[0]) 
-	//	mulAmDi(c, texture2D(sg_texture0, v_in.texCoord0));
-	fragColor = vec4(c.ambient.xyz + c.diffuse.xyz + c.specular.xyz, c.diffuse.w);
+	vec4 ambient = vIn.ambient;
+	vec4 diffuse = vIn.diffuse;
+	if(sg_textureEnabled[0]) {
+    vec4 tex = texture2D(sg_texture0, vIn.texCoord0);
+    ambient *= tex;
+    diffuse *= tex;
+  }
+	fragColor = vec4(ambient.xyz + diffuse.xyz + vIn.specular.xyz, diffuse.w);
 }
 
 #endif

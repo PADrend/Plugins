@@ -30,9 +30,8 @@ SimplePPEffect2._constructor ::= fn() {
 	Rendering.checkGLError();
 };
 
-SimplePPEffect2.drawTexture ::= fn(Rendering.Texture texture) {
-	Rendering.drawTextureToScreen(renderingContext, new Geometry.Rect(0, 0, renderingContext.getWindowWidth(), renderingContext.getWindowHeight()),
-								  [texture], [new Geometry.Rect(0, 0, 1, 1)]);
+SimplePPEffect2.drawTexture ::= fn(Rendering.Texture texture) {	
+	Rendering.drawTextureToScreen(renderingContext, renderingContext.getWindowClientArea(), [texture], [new Geometry.Rect(0, 0, 1, 1)]);
 };
 
 
