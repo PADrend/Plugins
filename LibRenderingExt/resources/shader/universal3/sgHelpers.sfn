@@ -1,10 +1,11 @@
-#version 120
+#version 420
 
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2013-2014 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2018 Sascha Brandt <sascha@brandt.graphics>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -26,37 +27,38 @@
 
 //! \name Coordinate transformations
 //!	\{
-	uniform mat4 sg_matrix_cameraToClipping;
-	uniform mat4 sg_matrix_cameraToWorld;
-	uniform mat4 sg_matrix_modelToCamera;
-	uniform mat4 sg_matrix_modelToClipping;
-	uniform mat4 sg_matrix_worldToCamera;
-	uniform mat4 sg_matrix_clippingToCamera;
-	uniform int[4] sg_viewport;
+	layout(std140, binding=0, row_major) uniform MatrixData {
+	  mat4 sg_matrix_worldToCamera;
+	  mat4 sg_matrix_cameraToWorld;
+	  mat4 sg_matrix_cameraToClipping;
+	  mat4 sg_matrix_clippingToCamera;
+	  mat4 sg_matrix_modelToCamera;
+	};
+	uniform vec4 sg_viewport;
 	
 	//! [fs,vs] Convert an homogeneous coordinate from Camera(=Eye,View)Space into WorldSpace.
-	vec4 sg_cameraToWorld(in vec4 hcs)			{	return sg_matrix_cameraToWorld  * hcs;	}
+	vec4 sg_cameraToWorld(in vec4 hcs) { return sg_matrix_cameraToWorld  * hcs; }
 
 	//! [fs,vs] Convert an homogeneous coordinate from CameraSpace into WorldSpace.
-	vec4 sg_cameraToClipping(in vec4 hcs)		{	return sg_matrix_cameraToClipping * hcs; }
+	vec4 sg_cameraToClipping(in vec4 hcs) { return sg_matrix_cameraToClipping * hcs; }
 
 	//! [fs,vs] Convert an homogeneous coordinate from ModelSpace into Eye(=View)Space.
-	vec4 sg_modelToCamera(in vec4 hms)			{	return sg_matrix_modelToCamera * hms;	}
+	vec4 sg_modelToCamera(in vec4 hms) { return sg_matrix_modelToCamera * hms; }
 
 	//! [fs,vs] Convert an homogeneous coordinate from ModelSpace into ClippingSpace.
-	vec4 sg_modelToClipping(in vec4 hms)		{	return sg_matrix_modelToClipping * hms; }
+	vec4 sg_modelToClipping(in vec4 hms) { return sg_matrix_cameraToClipping * sg_matrix_modelToCamera * hms; }
 
 	//! [fs,vs] Convert an homogeneous coordinate from ModelSpace into WorldSpace.
-	vec4 sg_modelToWorld(vec4 hms)				{	return sg_matrix_cameraToWorld * sg_matrix_modelToCamera * hms;	}
+	vec4 sg_modelToWorld(vec4 hms) { return sg_matrix_cameraToWorld * sg_matrix_modelToCamera * hms; }
 
 	//! [fs,vs] Convert an homogeneous coordinate from WorldSpace into CameraSpace.
-	vec4 sg_worldToCamera(in vec4 hws)			{	return sg_matrix_worldToCamera * hws; }
+	vec4 sg_worldToCamera(in vec4 hws) { return sg_matrix_worldToCamera * hws; }
 	
 	//! [fs,vs] Convert an homogeneous coordinate from ClippingSpace into CameraSpace.
-	vec4 sg_clippingToCamera(in vec4 hcs) {	return sg_matrix_clippingToCamera * hcs; }
+	vec4 sg_clippingToCamera(in vec4 hcs) { return sg_matrix_clippingToCamera * hcs; }
 	
 	//! [fs,vs] Returns the active viewport.
-	vec4 sg_getViewport() { return vec4(sg_viewport[0], sg_viewport[1], sg_viewport[2], sg_viewport[3]); }
+	vec4 sg_getViewport() { return sg_viewport; }
 //! \}
 
 // -------------------
@@ -64,21 +66,21 @@
 //! \name Conversions (without accessing SG-features)
 //!	\{
 
-	vec3 rgb2yuv(in vec3 rgb){
+	vec3 rgb2yuv(in vec3 rgb) {
 		float cY = 0.299 * rgb.r + 0.587*rgb.g + 0.114*rgb.b;
 		float cU = (rgb.b-cY) * 0.493;
 		float cV = (rgb.r-cY) * 0.877;
 		return vec3(cY,cU,cV);
 	}
 	
-	vec3 yuv2rgb(in vec3 yuv){
+	vec3 yuv2rgb(in vec3 yuv) {
 		float cY = yuv.x;
 		float cU = yuv.y;
 		float cV = yuv.z;
 		return vec3(cY+cV/0.877, cY-0.39466*cU-0.5806*cV, cY+cU/0.493);
 	}
 	//! \see http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
-	vec3 rgb2hsv(in vec3 rgb){
+	vec3 rgb2hsv(in vec3 rgb) {
 		vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 		vec4 p = mix(vec4(rgb.bg, K.wz), vec4(rgb.gb, K.xy), step(rgb.b, rgb.g));
 		vec4 q = mix(vec4(p.xyw, rgb.r), vec4(rgb.r, p.yzx), step(p.x, rgb.r));
@@ -88,7 +90,7 @@
 		return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 	}
 	//! \see http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
-	vec3 hsv2rgb(in vec3 hsv){
+	vec3 hsv2rgb(in vec3 hsv) {
 		vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
 		vec3 p = abs(fract(hsv.xxx + K.xyz) * 6.0 - K.www);
 		return hsv.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), hsv.y);
@@ -99,40 +101,46 @@
 
 //! \name Lighting
 //!	\{
-	struct CompositeColor {	vec4 ambient, diffuse, specular;	};
+	struct CompositeColor { vec4 ambient, diffuse, specular; };
 	const int DIRECTIONAL = 1;
 	const int POINT = 2;
 	const int SPOT = 3;
-
+	
 	struct sg_LightSourceParameters {
-		int type; 							// has to be DIRECTIONAL, POINT or SPOT
-		vec3 position; 						// position of the light  ????????????????????????????????
-		vec3 direction; 					// direction of the light, has to be normalized ????????????????????????????????
-		vec4 ambient, diffuse, specular;	// light colors for all lights
-		float constant, linear, quadratic;	// attenuations for point & spot lights
-		float exponent, cosCutoff;			// spot light parameters
+		vec4 position; // position of the light
+		vec4 direction; // direction of the light, has to be normalized
+		vec4 ambient, diffuse, specular; // light colors for all lights
+	  float constant, linear, quadratic; // attenuations for point & spot lights
+	  float exponent, cosCutoff; // spot light parameters
+	  int type; // has to be DIRECTIONAL, POINT or SPOT
+	  float _padding;
 	};
-	uniform sg_LightSourceParameters	sg_LightSource[8];
-	uniform int							sg_lightCount;
+
+	layout(std140, binding=2) uniform LightData {
+	  sg_LightSourceParameters sg_LightSource[8];
+	};
+	uniform int sg_lightCount;
 
 	//! [fs,vs] Add the light of the given light source to lightSum.
-	void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result){
+	void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result) {
 
 		// for DIRECTIONAL lights
 		float distPixToLight = 0.0; 
 		float attenuation = 1.0;
-		vec3 pixToLight = -light.direction;
+	  vec3 light_direction = (sg_matrix_worldToCamera * light.direction).xyz;
+	  vec3 light_position = (sg_matrix_worldToCamera * light.position).xyz;
+		vec3 pixToLight = -light_direction;
 		
 		// for POINT & SPOT lights
-		if(light.type != DIRECTIONAL){ 
-			pixToLight = light.position - position_cs;
+		if(light.type != DIRECTIONAL) { 
+			pixToLight = light_position - position_cs;
 			distPixToLight = length(pixToLight); 
 			pixToLight = normalize(pixToLight); 
 			attenuation	/= ( 	light.constant + light.linear * distPixToLight + light.quadratic * distPixToLight * distPixToLight);
 		}
 		// for SPOT lights
-		if(light.type == SPOT){
-			float spotDot = dot(pixToLight, -light.direction);
+		if(light.type == SPOT) {
+			float spotDot = dot(pixToLight, -light_direction);
 			float spotAttenuation;
 			if(spotDot < light.cosCutoff) {
 				spotAttenuation = 0.0;
@@ -145,10 +153,10 @@
 		result.ambient += light.ambient * attenuation;
 		
 		float norDotPixToLight = max(0.0, dot(normal_cs, pixToLight));
-		if(norDotPixToLight != 0.0){
+		if(norDotPixToLight != 0.0) {
 			result.diffuse += light.diffuse * norDotPixToLight * attenuation;
 
-			//if(shininess>0.0){
+			//if(shininess>0.0) {
 				vec3 pixToEye = normalize(-position_cs);
 				vec3 refl = reflect(-pixToLight, normal_cs);
 				float eyeDotRefl = dot(pixToEye, refl);
@@ -159,7 +167,7 @@
 	}
 
 	//! [fs,vs] Add the light of light #sgLightNr to lightSum.
-	void sg_addLight(in int sgLightNr,in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor lightSum){
+	void sg_addLight(in int sgLightNr,in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor lightSum) {
 		vec3 n_cs = normal_cs;
 		#ifdef SG_FRAGMENT_SHADER
 		if(! gl_FrontFacing) 
@@ -169,52 +177,54 @@
 	}
 
 	//! [fs,vs] Returns the sg_Color attribute.
-	int sg_getLightCount()					{	return sg_lightCount;	}
+	int sg_getLightCount() { return sg_lightCount; }
 //! \}
 
 // -------------------
 
 //! \name Materials and Surface properties
 //!	\{
+	layout(std140, binding=1) uniform MaterialData {
+		vec4 ambient;
+		vec4 diffuse;
+		vec4 specular;
+		vec4 emission;
+		float shininess;
+		bool enabled;
+	} sg_Material;
+
 	struct SurfaceProperties {
 		vec3 position_cs, normal_cs, tangent_cs;
 		vec4 ambient, diffuse, specular, emission;
 		float shininess;
 	};
-	struct sg_MaterialParameters {
-		vec4 ambient, diffuse, specular, emission;
-		float shininess;
-	};
-
-	uniform sg_MaterialParameters	sg_Material;
-	uniform bool					sg_useMaterials;
 
 	//! [fs,vs] Set a surface's ambient, diffuse and specular value.
-	void initSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c){
+	void initSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c) {
 		surface.ambient = c;
 		surface.diffuse = c;
 		surface.specular = vec4(0.0);
 	}
 
 	//! [fs,vs] Multiply a surface's ambient, diffuse and specular value.
-	void multSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c){
+	void multSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c) {
 		surface.ambient *= c;
 		surface.diffuse *= c;
 		surface.specular *= c;
 	}
 
 	//! [fs,vs] Add a surface's ambient, diffuse and specular value.
-	void addSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c){
+	void addSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c) {
 		surface.ambient += c;
 		surface.diffuse += c;
 		surface.specular += c;
 	}
 	
 	//! [fs,vs] Returns if materials are enabled.
-	bool sg_isMaterialEnabled()				{	return sg_useMaterials;	}
+	bool sg_isMaterialEnabled() { return sg_Material.enabled; }
 
 	//! [fs] Set the surface color members to those of sg_Material.
-	void sg_initSurfaceFromSGMaterial(inout SurfaceProperties surface){
+	void sg_initSurfaceFromSGMaterial(inout SurfaceProperties surface) {
 		surface.ambient = sg_Material.ambient;
 		surface.diffuse = sg_Material.diffuse;
 		surface.specular = sg_Material.specular;
@@ -231,7 +241,7 @@
 	uniform float	sg_pointSize;
 
 	//! [fs,vs] Return the sg_pointSize uniform.
-	float sg_getPointSize()					{	return sg_pointSize;	}
+	float sg_getPointSize() { return sg_pointSize; }
 //! \}
 
 // -------------------
@@ -239,22 +249,22 @@
 //! \name Vertex attributes
 //!	\{
 #ifdef SG_VERTEX_SHADER
-	attribute vec4 sg_Color;
-	attribute vec3 sg_Normal;
-	attribute vec3 sg_Position;
-	attribute vec3 sg_Tangent;
+	layout(location=0) in vec3 sg_Position;
+	layout(location=1) in vec3 sg_Normal;
+	layout(location=2) in vec4 sg_Color;
+	layout(location=3) in vec3 sg_Tangent;
 
 	//! [vs] Returns the sg_Color attribute.
-	vec4 sg_getVertexColor()						{	return sg_Color;	}
+	vec4 sg_getVertexColor() { return sg_Color; }
 
 	//! [vs] return the vertex position.
-	vec3 sg_getVertexPosition_ms()					{	return sg_Position;	}
+	vec3 sg_getVertexPosition_ms() { return sg_Position; }
 
 	//! [vs] returns the vertex normal.
-	vec3 sg_getVertexNormal_ms()					{	return sg_Normal;	}
+	vec3 sg_getVertexNormal_ms() { return sg_Normal; }
 	
 	//! [vs] returns the vertex tangent vector.
-	vec3 sg_getVertexTangent_ms()					{	return sg_Tangent;	}
+	vec3 sg_getVertexTangent_ms() { return sg_Tangent; }
 
 #endif
 //! \}
