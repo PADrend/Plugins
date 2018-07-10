@@ -1,4 +1,4 @@
-#version 420
+#version 430
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -24,13 +24,13 @@ layout(location=3) in vec3 sg_Tangent;
 layout(location=4) in vec2 sg_TexCoord0;
 
 // buffer objects
-layout(std140, binding=0, row_major) uniform MatrixData {
-  mat4 worldToCamera;
-  mat4 cameraToWorld;
-  mat4 cameraToClipping;
-  mat4 clippingToCamera;
-  mat4 modelToCamera;
-} sg_matrix;
+layout(std140, binding=0, row_major) uniform FrameData {
+  mat4 sg_matrix_worldToCamera;
+  mat4 sg_matrix_cameraToWorld;
+  mat4 sg_matrix_cameraToClipping;
+  mat4 sg_matrix_clippingToCamera;
+  vec4 sg_viewport;
+};
 
 layout(std140, binding=1) uniform MaterialData {
 	vec4 ambient;
@@ -41,18 +41,31 @@ layout(std140, binding=1) uniform MaterialData {
   bool enabled;
 } sg_Material;
 
+layout(std140, binding=2, row_major) uniform ObjectData {
+  mat4 sg_matrix_modelToCamera;
+  float sg_pointSize;
+  uint materialId;
+  uint lightSetId;
+  uint _pad;
+};
+
+layout(std140, binding=3) uniform LightSetData {
+  int sg_lightCount;
+  uint sg_enabledLights[8];
+};
+
 struct sg_LightSourceParameters {
 	vec4 position;
 	vec4 direction;
 	vec4 ambient, diffuse, specular;
-  float constant, linear, quadratic;
+  float constant, linear, quadratic, cutoff;
   float exponent, cosCutoff;
   int type;
-  float _padding;
+  int _pad;
 };
 
-layout(std140, binding=2) uniform LightData {
-  sg_LightSourceParameters sg_LightSource[8];
+layout(std430, binding=0) buffer LightData {
+  sg_LightSourceParameters sg_LightSource[];
 };
 
 const int DIRECTIONAL = 1;
@@ -61,8 +74,6 @@ const int SPOT = 3;
 struct CompositeColor {
 	vec4 ambient, diffuse, specular;
 };
-uniform int sg_lightCount;
-uniform float	sg_pointSize;
 
 out VertexData {
 	vec4 position_hcs;
@@ -72,14 +83,14 @@ out VertexData {
 	vec4 diffuse;
 	vec4 specular;
 } v_out;
-//-2583.98,4243.93,-558.612
+
 //! [fs,vs] Add the light of the given light source to lightSum.
 void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result) {  
 	// for DIRECTIONAL lights
 	float distPixToLight = 0.0; 
 	float attenuation = 1.0;
-  vec3 light_direction = (sg_matrix.worldToCamera * light.direction).xyz;
-  vec3 light_position = (sg_matrix.worldToCamera * light.position).xyz;
+  vec3 light_direction = (sg_matrix_worldToCamera * light.direction).xyz;
+  vec3 light_position = (sg_matrix_worldToCamera * light.position).xyz;
 	vec3 pixToLight = -light_direction;
 	
 	// for POINT & SPOT lights
@@ -118,8 +129,8 @@ void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3
 }
 
 void main() {	
-	v_out.position_hcs = sg_matrix.modelToCamera * vec4(sg_Position, 1.0);
-	v_out.normal_cs = (sg_matrix.modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+	v_out.position_hcs = sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
+	v_out.normal_cs = (sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
 	v_out.texCoord0 = sg_TexCoord0;
   
 	vec4 ambient = sg_Color;
@@ -148,7 +159,7 @@ void main() {
 	for(int i = 0; i < 8; i++){
 		if( i >= sg_lightCount )
 			break;
-  	addLighting(sg_LightSource[i],v_out.position_hcs.xyz,v_out.normal_cs,shininess,lightSum);
+  	addLighting(sg_LightSource[sg_enabledLights[i]],v_out.position_hcs.xyz,v_out.normal_cs,shininess,lightSum);
 	}
 
 	lightSum.ambient.a = lightSum.diffuse.a = lightSum.specular.a = 1.0;
@@ -156,7 +167,7 @@ void main() {
 	v_out.ambient = ambient * lightSum.ambient;
 	v_out.diffuse = diffuse * lightSum.diffuse + emission;
 	v_out.specular = specular * lightSum.specular;
-	gl_Position = sg_matrix.cameraToClipping * v_out.position_hcs;
+	gl_Position = sg_matrix_cameraToClipping * v_out.position_hcs;
   gl_PointSize = sg_pointSize;
 }
 
@@ -168,7 +179,7 @@ void main() {
 #ifdef SG_FRAGMENT_SHADER
 
 uniform sampler2D sg_texture0;
-uniform bool sg_textureEnabled[8];
+uniform bool sg_textureEnabled[16];
 
 in VertexData {
 	vec4 position_hcs;
