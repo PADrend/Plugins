@@ -63,7 +63,7 @@ layout(binding=4) uniform sampler2D sg_emissionMap;
 uniform bool sg_specularMappingEnabled, sg_normalMappingEnabled;
 uniform bool sg_emissionMappingEnabled;
 
-layout(std140, binding=4) uniform TextureSetData {
+layout(std140, binding=5) uniform TextureSetData {
 	bool sg_textureEnabled[16];
 };
 

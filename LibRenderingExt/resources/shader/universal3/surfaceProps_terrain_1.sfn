@@ -59,7 +59,7 @@ layout(binding=2) uniform sampler2D sg_specularMap;
 
 uniform bool sg_specularMappingEnabled = false;
 
-layout(std140, binding=4) uniform TextureSetData {
+layout(std140, binding=5) uniform TextureSetData {
 	bool sg_textureEnabled[16];
 };
 

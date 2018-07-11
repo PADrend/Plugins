@@ -48,7 +48,7 @@ void provideSurfaceVars(in VertexProperties vec){
 in vec4 var_vertexColor;
 in vec2 var_texCoord0, var_texCoord1;
 
-layout(std140, binding=4) uniform TextureSetData {
+layout(std140, binding=5) uniform TextureSetData {
 	bool sg_textureEnabled[16];
 };
 
