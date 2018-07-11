@@ -178,8 +178,11 @@ void main() {
 // fs
 #ifdef SG_FRAGMENT_SHADER
 
-uniform sampler2D sg_texture0;
-uniform bool sg_textureEnabled[16];
+layout(binding=0) uniform sampler2D sg_texture0;
+
+layout(std140, binding=4) uniform TextureSetData {
+  bool sg_textureEnabled[16];
+};
 
 in VertexData {
 	vec4 position_hcs;

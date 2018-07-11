@@ -33,15 +33,22 @@ T.renderingLayers @(public,init) := Std.module('Std/DataWrapper');
 
 static shader_src = "#version 420
 layout(location=0) in vec3 sg_Position;
-layout(std140, binding=0, row_major) uniform MatrixData {
-  uniform mat4 worldToCamera;
-  uniform mat4 cameraToWorld;
-  uniform mat4 cameraToClipping;
-  uniform mat4 clippingToCamera;
-  uniform mat4 modelToCamera;
-} sg_matrix;
+layout(std140, binding=0, row_major) uniform FrameData {
+  mat4 sg_matrix_worldToCamera;
+  mat4 sg_matrix_cameraToWorld;
+  mat4 sg_matrix_cameraToClipping;
+  mat4 sg_matrix_clippingToCamera;
+  vec4 sg_viewport;
+};
+layout(std140, binding=2, row_major) uniform ObjectData {
+  mat4 sg_matrix_modelToCamera;
+  float sg_pointSize;
+  uint materialId;
+  uint lightSetId;
+  uint _pad;
+};
 void main() {
-	gl_Position = sg_matrix.cameraToClipping * sg_matrix.modelToCamera * vec4(sg_Position, 1.0);
+	gl_Position = sg_matrix_cameraToClipping * sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
 }
 ";
 
