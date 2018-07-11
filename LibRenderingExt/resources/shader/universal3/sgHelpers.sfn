@@ -1,4 +1,4 @@
-#version 420
+#version 430
 
 /*
  * This file is part of the open source part of the
@@ -27,14 +27,21 @@
 
 //! \name Coordinate transformations
 //!	\{
-	layout(std140, binding=0, row_major) uniform MatrixData {
-	  mat4 sg_matrix_worldToCamera;
-	  mat4 sg_matrix_cameraToWorld;
-	  mat4 sg_matrix_cameraToClipping;
-	  mat4 sg_matrix_clippingToCamera;
-	  mat4 sg_matrix_modelToCamera;
+	layout(std140, binding=0, row_major) uniform FrameData {
+		mat4 sg_matrix_worldToCamera;
+		mat4 sg_matrix_cameraToWorld;
+		mat4 sg_matrix_cameraToClipping;
+		mat4 sg_matrix_clippingToCamera;
+		vec4 sg_viewport;
 	};
-	uniform vec4 sg_viewport;
+
+	layout(std140, binding=2, row_major) uniform ObjectData {
+	  mat4 sg_matrix_modelToCamera;
+	  float sg_pointSize;
+	  uint materialId;
+	  uint lightSetId;
+	  uint _pad;
+	};
 	
 	//! [fs,vs] Convert an homogeneous coordinate from Camera(=Eye,View)Space into WorldSpace.
 	vec4 sg_cameraToWorld(in vec4 hcs) { return sg_matrix_cameraToWorld  * hcs; }
@@ -115,11 +122,14 @@
 	  int type; // has to be DIRECTIONAL, POINT or SPOT
 	  float _padding;
 	};
-
-	layout(std140, binding=2) uniform LightData {
-	  sg_LightSourceParameters sg_LightSource[8];
+	
+	layout(std140, binding=3) uniform LightSetData {
+	  int sg_lightCount;
+	  uint sg_enabledLights[8];
 	};
-	uniform int sg_lightCount;
+	layout(std430, binding=0) buffer LightData {
+	  sg_LightSourceParameters sg_LightSource[];
+	};
 
 	//! [fs,vs] Add the light of the given light source to lightSum.
 	void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result) {
@@ -173,7 +183,7 @@
 		if(! gl_FrontFacing) 
 			n_cs = -n_cs;
 		#endif
-		addLighting(sg_LightSource[sgLightNr],position_cs,n_cs,shininess,lightSum);
+		addLighting(sg_LightSource[sg_enabledLights[sgLightNr]],position_cs,n_cs,shininess,lightSum);
 	}
 
 	//! [fs,vs] Returns the sg_Color attribute.
@@ -237,8 +247,6 @@
 
 //! \name Point rendering
 //!	\{
-
-	uniform float	sg_pointSize;
 
 	//! [fs,vs] Return the sg_pointSize uniform.
 	float sg_getPointSize() { return sg_pointSize; }

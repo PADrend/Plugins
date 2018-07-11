@@ -26,9 +26,6 @@
  
  */
  
-varying vec3 var_normal_cs;
-varying vec4 var_position_hcs;
-
 // -------------------------------------------------
 // vs
 #ifdef SG_VERTEX_SHADER

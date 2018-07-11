@@ -1,10 +1,11 @@
-#version 120
+#version 430
 
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2017-2018 Sascha Brandt <sascha@brandt.graphics>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -13,19 +14,16 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-uniform bool sg_textureEnabled[8];
-uniform bool sg_specularMappingEnabled, sg_normalMappingEnabled;
-
-varying vec4 var_vertexColor;
-varying vec2 var_texCoord0, var_texCoord1;
-varying vec3 var_tangent_cs, var_bitangent_cs;	// normal mapping
-
 // ------------------------------------------------------------------------
 // vs
 #ifdef SG_VERTEX_SHADER
 
-attribute vec2 sg_TexCoord0;
-attribute vec2 sg_TexCoord1;
+layout(location=4) in vec2 sg_TexCoord0;
+layout(location=5) in vec2 sg_TexCoord1;
+
+out vec4 var_vertexColor;
+out vec2 var_texCoord0, var_texCoord1;
+out vec3 var_tangent_cs, var_bitangent_cs;	// normal mapping
 
 struct VertexProperties {
 	vec3 position_cs, normal_cs;
@@ -39,15 +37,11 @@ vec4 sg_modelToCamera(in vec4 hms);					//!	\see sgHelper.sfn
 //! \see main.sfn
 void provideSurfaceVars(in VertexProperties vec){
 	var_vertexColor = sg_getVertexColor();
-	if(sg_textureEnabled[0] || sg_specularMappingEnabled)
-		var_texCoord0 = sg_TexCoord0;
-	if(sg_textureEnabled[1])
-		var_texCoord1 = sg_TexCoord1;
-	if(sg_normalMappingEnabled){
-		vec3 tangent_ms = sg_getVertexTangent_ms();
-		var_tangent_cs = sg_modelToCamera( vec4(tangent_ms,0.0) ).xyz;
-		var_bitangent_cs = sg_modelToCamera( vec4(cross(sg_getVertexNormal_ms(), tangent_ms),0.0) ).xyz; 
-	}
+	var_texCoord0 = sg_TexCoord0;
+	var_texCoord1 = sg_TexCoord1;
+	vec3 tangent_ms = sg_getVertexTangent_ms();
+	var_tangent_cs = sg_modelToCamera( vec4(tangent_ms,0.0) ).xyz;
+	var_bitangent_cs = sg_modelToCamera( vec4(cross(sg_getVertexNormal_ms(), tangent_ms),0.0) ).xyz;
 }
 
 #endif
@@ -56,10 +50,21 @@ void provideSurfaceVars(in VertexProperties vec){
 // fs
 #ifdef SG_FRAGMENT_SHADER
 
-uniform sampler2D	sg_texture0;
-uniform sampler2D	sg_texture1;
-uniform sampler2D	sg_specularMap;
-uniform sampler2D	sg_normalMap;
+in vec4 var_vertexColor;
+in vec2 var_texCoord0, var_texCoord1;
+in vec3 var_tangent_cs, var_bitangent_cs;	// normal mapping
+
+layout(binding=0) uniform sampler2D sg_texture0;
+layout(binding=1) uniform sampler2D sg_texture1;
+layout(binding=2) uniform sampler2D sg_specularMap;
+layout(binding=3) uniform sampler2D sg_normalMap;
+layout(binding=4) uniform sampler2D sg_emissionMap;
+
+uniform bool sg_specularMappingEnabled, sg_normalMappingEnabled;
+
+layout(std140, binding=4) uniform TextureSetData {
+	bool sg_textureEnabled[16];
+};
 
 struct SurfaceProperties {
 	vec3 position_cs, normal_cs, tangent_cs;
@@ -67,11 +72,15 @@ struct SurfaceProperties {
 	float shininess;
 };
 
-
 void initSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c);		//!	\see sgHelper.sfn
-void multSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c);		//!	\see sgHelper.sfn
 void sg_initSurfaceFromSGMaterial(inout SurfaceProperties surface);				//!	\see sgHelper.sfn
 bool sg_isMaterialEnabled();													//!	\see sgHelper.sfn
+
+//! [fs,vs] Multiply a surface's ambient, diffuse and specular value.
+void multSurfaceColor_AmDi(inout SurfaceProperties surface,in vec4 c){
+	surface.ambient *= c;
+	surface.diffuse *= c;
+}
 
 //! \see main.sfn
 void calcSurfaceProperties(inout SurfaceProperties surface){
@@ -79,19 +88,25 @@ void calcSurfaceProperties(inout SurfaceProperties surface){
 	// material
 	if(sg_isMaterialEnabled()){
 		sg_initSurfaceFromSGMaterial(surface);
+		surface.emission.a = 0.0;
 	}else{
 		initSurfaceColor_AmDiSp(surface,var_vertexColor);
 		surface.emission = vec4(0.0);
+		//surface.ambient = vec4(0.0);
+		surface.specular = vec4(0.0);
 		surface.shininess = 0.0;
 	}
 	// texture
 	if(sg_textureEnabled[0])
-		multSurfaceColor_AmDiSp(surface,texture2D(sg_texture0, var_texCoord0));
+		multSurfaceColor_AmDi(surface,texture2D(sg_texture0, var_texCoord0));
 	if(sg_textureEnabled[1])
-		multSurfaceColor_AmDiSp(surface,texture2D(sg_texture1, var_texCoord1));
+		multSurfaceColor_AmDi(surface,texture2D(sg_texture1, var_texCoord1));
 
-	if(sg_specularMappingEnabled)
-		surface.specular *= texture2D(sg_specularMap, var_texCoord0);
+	if(sg_specularMappingEnabled) {
+		surface.specular = texture2D(sg_specularMap, var_texCoord0);
+		surface.shininess *= surface.specular.a;
+		//surface.ambient += surface.specular;
+	}
 		
 	if(sg_normalMappingEnabled){
 		vec3 esTangent = normalize(var_tangent_cs);
@@ -101,7 +116,7 @@ void calcSurfaceProperties(inout SurfaceProperties surface){
 		mat3 tbnMat = mat3( esTangent, esBitangent, surface.normal_cs );
 		vec3 tsNormal = texture2D(sg_normalMap,var_texCoord0).xyz - vec3(0.5,0.5,0.5);
 		
-		surface.normal_cs = normalize(tbnMat * tsNormal) ;
+		surface.normal_cs = normalize(tbnMat * tsNormal);
 	}
 }
 
