@@ -24,6 +24,7 @@ layout(location=5) in vec2 sg_TexCoord1;
 out vec4 var_vertexColor;
 out vec2 var_texCoord0, var_texCoord1;
 out vec3 var_tangent_cs, var_bitangent_cs;	// normal mapping
+out flat uint materialId;
 
 struct VertexProperties {
 	vec3 position_cs, normal_cs;
@@ -33,6 +34,7 @@ vec4 sg_getVertexColor();							//!	\see sgHelper.sfn
 vec3 sg_getVertexNormal_ms();						//!	\see sgHelper.sfn
 vec3 sg_getVertexTangent_ms();						//!	\see sgHelper.sfn
 vec4 sg_modelToCamera(in vec4 hms);					//!	\see sgHelper.sfn
+uint sg_getMaterialId();	//!	\see sgHelper.sfn
 
 //! \see main.sfn
 void provideSurfaceVars(in VertexProperties vec){
@@ -42,6 +44,7 @@ void provideSurfaceVars(in VertexProperties vec){
 	vec3 tangent_ms = sg_getVertexTangent_ms();
 	var_tangent_cs = sg_modelToCamera( vec4(tangent_ms,0.0) ).xyz;
 	var_bitangent_cs = sg_modelToCamera( vec4(cross(sg_getVertexNormal_ms(), tangent_ms),0.0) ).xyz;
+	materialId = sg_getMaterialId();
 }
 
 #endif
@@ -53,6 +56,7 @@ void provideSurfaceVars(in VertexProperties vec){
 in vec4 var_vertexColor;
 in vec2 var_texCoord0, var_texCoord1;
 in vec3 var_tangent_cs, var_bitangent_cs;	// normal mapping
+in flat uint materialId;
 
 layout(binding=0) uniform sampler2D sg_texture0;
 layout(binding=1) uniform sampler2D sg_texture1;
@@ -74,8 +78,7 @@ struct SurfaceProperties {
 };
 
 void initSurfaceColor_AmDiSp(inout SurfaceProperties surface,in vec4 c);		//!	\see sgHelper.sfn
-void sg_initSurfaceFromSGMaterial(inout SurfaceProperties surface);				//!	\see sgHelper.sfn
-bool sg_isMaterialEnabled();													//!	\see sgHelper.sfn
+void sg_initSurfaceFromSGMaterial(in uint materialId, inout SurfaceProperties surface);				//!	\see sgHelper.sfn
 
 //! [fs,vs] Multiply a surface's ambient, diffuse and specular value.
 void multSurfaceColor_AmDi(inout SurfaceProperties surface,in vec4 c){
@@ -87,8 +90,8 @@ void multSurfaceColor_AmDi(inout SurfaceProperties surface,in vec4 c){
 void calcSurfaceProperties(inout SurfaceProperties surface){
 
 	// material
-	if(sg_isMaterialEnabled()){
-		sg_initSurfaceFromSGMaterial(surface);
+	if(materialId > 0){
+		sg_initSurfaceFromSGMaterial(materialId, surface);
 		surface.emission.a = 0.0;
 	}else{
 		initSurfaceColor_AmDiSp(surface,var_vertexColor);

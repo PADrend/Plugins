@@ -32,6 +32,7 @@ T.shader @(private) := void;
 T.renderingLayers @(public,init) := Std.module('Std/DataWrapper');
 
 static shader_src = "#version 420
+#extension GL_ARB_shader_draw_parameters : require
 layout(location=0) in vec3 sg_Position;
 layout(std140, binding=0, row_major) uniform FrameData {
   mat4 sg_matrix_worldToCamera;
@@ -40,15 +41,18 @@ layout(std140, binding=0, row_major) uniform FrameData {
   mat4 sg_matrix_clippingToCamera;
   vec4 sg_viewport;
 };
-layout(std140, binding=2, row_major) uniform ObjectData {
+struct Object {
   mat4 sg_matrix_modelToCamera;
   float sg_pointSize;
   uint materialId;
   uint lightSetId;
-  uint _pad;
+  uint drawId;
+};
+layout(std140, binding=4, row_major) uniform ObjectData {
+  Object objects[512];
 };
 void main() {
-	gl_Position = sg_matrix_cameraToClipping * sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
+	gl_Position = sg_matrix_cameraToClipping * objects[gl_BaseInstanceARB].sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
 }
 ";
 
