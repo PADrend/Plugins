@@ -114,4 +114,13 @@ registry.registerSamplerConfigGUI(MinSG.BlueSurfels.GreedyCluster, fn(config) {
 	return registry.getCommonConfigGUI(config);
 });
 
+
+// -----------------------------------------------------------------------
+// PassThroughSampler
+var PassThroughSampler = new Type(MinSG.BlueSurfels.ScriptedSampler);
+PassThroughSampler._printableName := $PassThroughSampler;
+PassThroughSampler.doSampleSurfels @(override) ::= fn(mesh) { return mesh; };
+registry.registerSampler(new PassThroughSampler);
+registry.registerSamplerConfig(PassThroughSampler, fn(sampler, config) { });
+registry.registerSamplerConfigGUI(PassThroughSampler, fn(config) { return []; });
 return registry;

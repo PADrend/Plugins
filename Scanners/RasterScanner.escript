@@ -46,14 +46,15 @@ T.scanSurface @(public) ::= fn(MinSG.Node node) {
 		
 	// create textures
 	var layers = directions.count();
-	var t_depth = Experiments.createDepthTextureArray(resolution, resolution, layers);	
+	var t_depth = Rendering.createDepthTexture(resolution, resolution, layers);
 	var t_color = Rendering.createDataTexture(Rendering.Texture.TEXTURE_2D_ARRAY, resolution, resolution, layers, Util.TypeConstant.UINT8, 4);	
 	var t_position = Rendering.createDataTexture(Rendering.Texture.TEXTURE_2D_ARRAY, resolution, resolution, layers, Util.TypeConstant.FLOAT, 3);	
 	var t_normal = Rendering.createDataTexture(Rendering.Texture.TEXTURE_2D_ARRAY, resolution, resolution, layers, Util.TypeConstant.FLOAT, 3);	
 	
 	// initialize FBO
 	var fbo = new Rendering.FBO;
-	renderingContext.pushAndSetFBO(fbo);	
+	renderingContext.pushAndSetFBO(fbo);
+	renderingContext.applyChanges();
 	fbo.setDrawBuffers(5);
 	
 	//renderingContext.pushAndSetCullFace((new Rendering.CullFaceParameters).disable());
@@ -69,9 +70,10 @@ T.scanSurface @(public) ::= fn(MinSG.Node node) {
 		var layer = 0;
 		renderingContext.pushAndSetShader(surfel_shader);
 		foreach(cameras as var camera) {
+			renderingContext.applyChanges();
 			fbo.attachDepthTexture(renderingContext,t_depth,0,layer);
-			fbo.attachColorTexture(renderingContext,t_color,4,0,layer);		
-			fbo.attachColorTexture(renderingContext,t_position,1,0,layer);		
+			fbo.attachColorTexture(renderingContext,t_color,4,0,layer);
+			fbo.attachColorTexture(renderingContext,t_position,1,0,layer);
 			fbo.attachColorTexture(renderingContext,t_normal,2,0,layer);
 			++layer;
 			renderingContext.clearScreen(new Util.Color4f(0,0,0,0));
@@ -93,16 +95,16 @@ T.scanSurface @(public) ::= fn(MinSG.Node node) {
 	
 	statistics["t_renderScene"] = timer.getSeconds();
 	
-	var packTimer = new Util.Timer;
-	var mesh = Utils.packMesh(t_depth, t_color, t_position, t_normal, resolution, layers);	
-	statistics["t_downloadMesh"] = packTimer.getSeconds();
-	
 	if(debug) {
 		Rendering.showDebugTexture(t_depth);
 		Rendering.showDebugTexture(t_color);
 		Rendering.showDebugTexture(t_position);
 		Rendering.showDebugTexture(t_normal);
 	}
+	
+	var packTimer = new Util.Timer;
+	var mesh = Utils.packMesh(t_depth, t_color, t_position, t_normal, resolution, layers);	
+	statistics["t_downloadMesh"] = packTimer.getSeconds();
 	
 	return mesh;
 };

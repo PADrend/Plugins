@@ -1,4 +1,5 @@
-#version 420
+#version 430
+#extension GL_ARB_shader_draw_parameters : require
 /*
  * This file is part of the proprietary part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -14,8 +15,52 @@
 #ifdef SG_VERTEX_SHADER
 
 // uniform
-uniform mat4 sg_matrix_modelToClipping;
-uniform mat4 sg_matrix_modelToCamera;
+#ifdef USE_UNIFORM_BUFFERS
+	layout(std140, binding=0, row_major) uniform FrameData {
+	  mat4 sg_matrix_worldToCamera;
+	  mat4 sg_matrix_cameraToWorld;
+	  mat4 sg_matrix_cameraToClipping;
+	  mat4 sg_matrix_clippingToCamera;
+	  vec4 sg_viewport;
+	};
+
+	struct Object {
+	  mat4 sg_matrix_modelToCamera;
+	  float sg_pointSize;
+	  uint materialId;
+	  uint lightSetId;
+	  uint drawId;
+	};
+	layout(std140, binding=4, row_major) uniform ObjectData {
+	  Object objects[512];
+	};
+  
+  struct sg_MaterialParameters {
+    vec4 ambient;
+    vec4 diffuse;
+    vec4 specular;
+    vec4 emission;
+    float shininess;
+    bool enabled;
+    uint _pad0;
+    uint _pad1;
+  };
+
+  layout(std140, binding=1) uniform MaterialData {
+    sg_MaterialParameters sg_Material[256];
+  };
+#else
+
+  struct sg_MaterialParameters {
+    vec4 ambient, diffuse, specular, emission;
+    float shininess;
+  };
+  uniform sg_MaterialParameters	sg_Material;
+  uniform bool sg_useMaterials;
+  
+  uniform mat4 sg_matrix_modelToCamera;
+  uniform mat4 sg_matrix_cameraToClipping;
+#endif
 uniform mat4 sg_mrt_matrix_cameraToCustom;
 
 // in
@@ -33,12 +78,24 @@ out VertexData {
 } vOut;
 
 void main() {
-  mat4 modelToImpostor = sg_mrt_matrix_cameraToCustom * sg_matrix_modelToCamera;
+  
+	#ifdef USE_UNIFORM_BUFFERS
+    const mat4 modelToCamera = objects[gl_BaseInstanceARB].sg_matrix_modelToCamera;
+    const sg_MaterialParameters material = sg_Material[objects[gl_BaseInstanceARB].materialId];
+    const bool materialEnabled = objects[gl_BaseInstanceARB].materialId > 0;
+	#else	
+    const mat4 modelToCamera = sg_matrix_modelToCamera;
+    const sg_MaterialParameters material = sg_Material;
+    const bool materialEnabled = sg_useMaterials;
+	#endif
+  
+  mat4 modelToImpostor = sg_mrt_matrix_cameraToCustom * modelToCamera;
   vOut.position_is = modelToImpostor * vec4(sg_Position, 1.0);
   vOut.normal_is = normalize(modelToImpostor * vec4(sg_Normal, 0.0));
-  vOut.color = sg_Color;
+	vOut.color = mix(sg_Color, material.diffuse + material.emission, materialEnabled);
+  
   vOut.texCoord = sg_TexCoord0;
-	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position, 1.0);
+	gl_Position = sg_matrix_cameraToClipping * modelToCamera * vec4(sg_Position, 1.0);
 }
 #endif
 
@@ -46,17 +103,16 @@ void main() {
 // fs
 #ifdef SG_FRAGMENT_SHADER
 
-// structs
-struct sg_MaterialParameters {
-	vec4 ambient, diffuse, specular, emission;
-	float shininess;
-};
+#ifdef USE_UNIFORM_BUFFERS
+  layout(std140, binding=5) uniform TextureSetData {
+    bool sg_textureEnabled[16];
+  };
+#else
+uniform bool sg_textureEnabled[8];
+#endif
 
 // uniform
 layout(binding = 0) uniform sampler2D sg_Diffuse;
-uniform bool sg_textureEnabled[8];
-uniform sg_MaterialParameters	sg_Material;
-uniform bool sg_useMaterials;
 
 // in
 in VertexData {
@@ -72,15 +128,12 @@ layout(location = 2) out vec4 fNormal;
 layout(location = 4) out vec4 fColor;
 
 void main() {
+  
   vec4 position_is = vIn.position_is / vIn.position_is.w;
   vec4 normal_is = normalize(vIn.normal_is);
   vec4 color = vIn.color;
   vec2 texCoord = vIn.texCoord;
-      
-	// material
-	if(sg_useMaterials)
-		color = sg_Material.diffuse + sg_Material.emission;
-	
+  	
 	if(sg_textureEnabled[0])
 		color *= texture(sg_Diffuse, texCoord);
 			

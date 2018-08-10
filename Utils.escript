@@ -134,7 +134,7 @@ NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
 		
 	// set up atomic buffer
 	var atomicBuffer = new Rendering.BufferObject;
-	atomicBuffer.uploadData(Rendering.TARGET_SHADER_STORAGE_BUFFER, [0], Rendering.USAGE_DYNAMIC_COPY, Util.TypeConstant.UINT32);				
+	atomicBuffer.uploadData(Rendering.TARGET_SHADER_STORAGE_BUFFER, [0], Rendering.USAGE_DYNAMIC_COPY, Util.TypeConstant.UINT32);
 	atomicBuffer._bind(Rendering.TARGET_SHADER_STORAGE_BUFFER, 0);
 	
 	// set up rendering context	
@@ -150,27 +150,39 @@ NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
 	// get pixel count & reset atomic buffer
 	var pixelCount = atomicBuffer.downloadData(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1, Util.TypeConstant.UINT32).front();
 	atomicBuffer.uploadSubData(Rendering.TARGET_SHADER_STORAGE_BUFFER, [0], 0, Util.TypeConstant.UINT32);
+	//outln("pixel: ",pixelCount);
 
 	// create & upload mesh
 	var vd = new Rendering.VertexDescription;
-	vd.appendPosition3D();
+	vd.appendPosition4DHalf();
 	vd.appendNormalByte();
 	vd.appendColorRGBAByte();
-	var mesh = new Rendering.Mesh(vd, pixelCount, 0);	
+	var mesh = new Rendering.Mesh(vd, pixelCount, 0);
 	mesh._upload();
 	mesh.releaseLocalData();
-	var surfelBuffer = new Rendering.BufferObject;
-	mesh._swapVertexBuffer(surfelBuffer);		
-	surfelBuffer._bind(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
+	var surfelBuffer;
+	
+	if(mesh.isSet($bindVertexBuffer)) {
+		mesh.bindVertexBuffer(renderingContext, Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
+	} else {		
+		surfelBuffer = new Rendering.BufferObject;
+		mesh._swapVertexBuffer(surfelBuffer);		
+		surfelBuffer._bind(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
+	}
 	
 	// copy pixels to mesh
   renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["packMesh"]);
   renderingContext.dispatchCompute(workGroups, workGroups, layers);
 	
 	// download mesh
-	surfelBuffer._unbind(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);		
-	mesh._swapVertexBuffer(surfelBuffer);
-	mesh.assureLocalData();
+	if(mesh.isSet($bindVertexBuffer)) {
+		renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
+	} else {		
+		surfelBuffer._unbind(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
+		mesh._swapVertexBuffer(surfelBuffer);
+	}
+	
+	//mesh.assureLocalData();
 	mesh._markAsChanged();
 	mesh.setUseIndexData(false);
 	mesh.setDrawPoints();

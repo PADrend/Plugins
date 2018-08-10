@@ -13,7 +13,8 @@ layout(local_size_x = BLOCK_SIZE, local_size_y = BLOCK_SIZE, local_size_z = 1) i
 
 // structs
 struct Vertex {
-  float posX, posY, posZ;
+  uint posXY;
+  uint posZW;
   uint normal;
   uint color;
 };
@@ -76,9 +77,8 @@ void packMesh() {
   vec4 normal = texelFetch(t_normal,coord,0);
   if(color.a > 0) {
     uint index = atomicAdd(counter, 1);
-    mesh[index].posX = position.x;
-    mesh[index].posY = position.y;
-    mesh[index].posZ = position.z;
+    mesh[index].posXY = packHalf2x16(position.xy);
+    mesh[index].posZW = packHalf2x16(position.zw);
     mesh[index].normal = packSnorm4x8(normal);    
     mesh[index].color = packUnorm4x8(color);
   }

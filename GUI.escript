@@ -400,6 +400,27 @@ static createTestPanel = fn(gui) {
 	};
 	panel++;
 	
+	panel += "*Other*";
+	panel++;
+	
+	panel += {
+		GUI.TYPE				:	GUI.TYPE_BUTTON,
+		GUI.LABEL				:	"Shrink surfel meshes",
+		GUI.ON_CLICK : fn() {			
+			var surfelNodes = MinSG.collectNodesReferencingAttribute(NodeEditor.getSelectedNode(), 'surfels');
+			var set = new Std.Set;
+			foreach(surfelNodes as var n) 
+			  set += n.findNodeAttribute('surfels');
+			var i=0;
+			foreach(set as var s) {
+			  Rendering.shrinkMesh(s, true);
+			  out("\r", ++i ,"/", set.count());
+			}
+		},
+		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
+	};
+	panel++;
+	
 	return panel;
 };
 
