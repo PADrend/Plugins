@@ -30,13 +30,13 @@ Effect._constructor:=fn(){
 
     renderingContext.popFBO();
 
-    this.blurShader:=Rendering.Shader.loadShader( getShaderFolder()+"Simple_GL.vs",getShaderFolder()+"Blur.fs");
+    this.blurShader:=Rendering.Shader.loadShader( getShaderFolder()+"Default.vs",getShaderFolder()+"Blur.fs");
     renderingContext.pushAndSetShader(blurShader);
     blurShader.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]) ;
     blurShader.setUniform(renderingContext,'range',Rendering.Uniform.INT,[10]) ;
 	renderingContext.popShader();
 
-    this.dofShader:=Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs",getShaderFolder()+"DoF.fs");
+    this.dofShader:=Rendering.Shader.loadShader(getShaderFolder()+"Default.vs",getShaderFolder()+"DoF.fs");
 	renderingContext.pushAndSetShader(dofShader);
     dofShader.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]) ;
     dofShader.setUniform(renderingContext,'TUnit_Blur',Rendering.Uniform.INT,[1]) ;

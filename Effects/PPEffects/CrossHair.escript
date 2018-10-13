@@ -12,7 +12,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor ::= fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_130.vs", getShaderFolder()+"CrossHair.fs", Rendering.Shader.USE_UNIFORMS))){
+Effect._constructor ::= fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Default.vs", getShaderFolder()+"CrossHair.fs", Rendering.Shader.USE_UNIFORMS))){
 };
 
 return new Effect;

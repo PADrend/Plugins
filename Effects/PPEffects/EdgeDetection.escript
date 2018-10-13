@@ -13,7 +13,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs", getShaderFolder()+"EdgeDetection.fs", Rendering.Shader.USE_GL))){
+Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Default.vs", getShaderFolder()+"EdgeDetection.fs", Rendering.Shader.USE_GL))){
 	this.colorize := false;
 	this.useDepth := false;
 	this.method := false;

@@ -13,7 +13,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs", getShaderFolder()+"NightVision.fs", Rendering.Shader.USE_GL))){
+Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Default.vs", getShaderFolder()+"NightVision.fs", Rendering.Shader.USE_GL))){
 	this.lumThres := 0.2;
 	this.colorAmp := 8.0;
 	this.maskSize := [renderingContext.getWindowWidth()/2, renderingContext.getWindowHeight()/2].min()/8;

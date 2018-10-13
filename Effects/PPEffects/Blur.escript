@@ -25,7 +25,7 @@ Effect._constructor ::= fn(){
 	out(fbo.getStatusMessage(renderingContext),"\n");
 	renderingContext.popFBO();
 	
-	this.shader:=Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs",getShaderFolder()+"Blur.fs");
+	this.shader:=Rendering.Shader.loadShader(getShaderFolder()+"Default.vs",getShaderFolder()+"Blur.fs");
 	renderingContext.pushAndSetShader(this.shader);
 	shader.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]) ;
 	

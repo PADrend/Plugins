@@ -1,3 +1,4 @@
+#version 110
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -14,7 +15,6 @@
 /*! DisplayAlpha - Post-processing fragment shader to display the alpha channel of the image.
     2011-07-15 Benjamin Eikel
  */
-#version 110
 
 uniform sampler2D colorTexture;
 

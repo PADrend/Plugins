@@ -13,7 +13,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor ::= fn() @(super(Rendering.Shader.loadShader(getShaderFolder() + "Simple_130.vs", getShaderFolder() + "DepthDerivative.fs", Rendering.Shader.USE_UNIFORMS))) {
+Effect._constructor ::= fn() @(super(Rendering.Shader.loadShader(getShaderFolder() + "Default.vs", getShaderFolder() + "DepthDerivative.fs", Rendering.Shader.USE_UNIFORMS))) {
 	this.derivativeOrder := new Std.DataWrapper(3);
 	this.edgeHighlightMode := new Std.DataWrapper(true);
 	this.epsilon := new Std.DataWrapper(0.00001);

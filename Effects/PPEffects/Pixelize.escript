@@ -13,7 +13,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_130.vs", getShaderFolder()+"Pixelize.fs", Rendering.Shader.USE_UNIFORMS))){
+Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Default.vs", getShaderFolder()+"Pixelize.fs", Rendering.Shader.USE_UNIFORMS))){
 	this.pixelSize := 16;
 };
 

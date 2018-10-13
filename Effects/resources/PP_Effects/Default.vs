@@ -4,8 +4,7 @@
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2012 Claudius Jähn <claudius@uni-paderborn.de>
- * Copyright (C) 2011 Ralf Petring <ralf@petring.net>
+ * Copyright (C) 2018 Sascha Brandt <sascha@brandt.graphics>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -15,9 +14,13 @@
  */
 
 in vec3 sg_Position;
+in vec2 sg_TexCoord0;
 
-uniform mat4 sg_matrix_modelToClipping;
+uniform mat4 sg_matrix_cameraToClipping;
+
+out vec2 texCoord;
 
 void main(void){
-	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position,1);
+	texCoord = sg_TexCoord0;
+	gl_Position = sg_matrix_cameraToClipping * vec4(sg_Position,1);
 }

@@ -208,7 +208,9 @@ static renderGUI = fn(){
 			@(once) Runtime.warn("@(once) Invalid gui mode:"+guiMode());
 	}
 	// gui might mess with current state, so we need to reapply all
-	renderingContext.applyChanges(true);	
+	renderingContext.pushShader();
+	renderingContext.popShader();
+	renderingContext.applyChanges(true);
 };
 //Util.requirePlugin('PADrend/GUI').guiMode(2);
 

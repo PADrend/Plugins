@@ -1,3 +1,4 @@
+#version 330
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -21,14 +22,16 @@ uniform int range;          //!< size of the filter cernel
 uniform float pixelSize;    //!< 1.0/horizonal or vertical resolution
 uniform int orientation;    //!< 0 for horizontal, 1 for vertical pass
 
+in vec2 texCoord;
+out vec4 fragColor;
 
 vec3 getColor(float x,float y,float d){
     return vec3(texture2D(TUnit_1,vec2(x,y))) * d;
 }
 
 void main(){
-    float x = gl_TexCoord[0].s;
-    float y = gl_TexCoord[0].t;
+    float x = texCoord.s;
+    float y = texCoord.t;
 
     float weight = 16.0;
     vec3 c=getColor(x,y,weight);
@@ -59,5 +62,5 @@ void main(){
         }
     }
 //    gl_FragColor = vec4( c.y/16.0,0.0,0.0,1);
-    gl_FragColor = vec4( c/weight ,1);
+    fragColor = vec4( c/weight ,1);
 }

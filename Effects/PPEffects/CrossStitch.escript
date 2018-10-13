@@ -13,7 +13,7 @@
  */
 var Effect = new Type( Std.module('Effects/SimplePPEffect') );
 
-Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Simple_GL.vs", getShaderFolder()+"CrossStitch.fs", Rendering.Shader.USE_GL))){
+Effect._constructor::=fn()@(super(Rendering.Shader.loadShader(getShaderFolder()+"Default.vs", getShaderFolder()+"CrossStitch.fs", Rendering.Shader.USE_GL))){
 	
 	this.stitchSize := 6;
 	this.invert := true;

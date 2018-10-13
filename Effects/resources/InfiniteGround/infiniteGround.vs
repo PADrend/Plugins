@@ -1,4 +1,4 @@
-#version 120
+#version 330
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -6,7 +6,7 @@
  * Copyright (C) 2012 Benjamin Eikel <benjamin@eikel.org>
  * Copyright (C) 2011-2012 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2010 Robert Gmyr
- * Copyright (C) 2011 Sascha Brandt
+ * Copyright (C) 2011 Sascha Brandt, 2018 Sascha Brandt <sascha@brandt.graphics>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -23,17 +23,21 @@
 #define TYPE_WATER 3
 #define TYPE_WHITE 4
 
+layout(location=0) in vec3 sg_Position;
+
+uniform mat4 sg_matrix_modelToClipping; 
+
 uniform float time;
 uniform int type;
 
-varying vec3 worldDir;  // negative normal of vertex of the dome
-varying vec4 wave0;
-varying vec4 wave1;
+out vec3 worldDir;  // negative normal of vertex of the dome
+out vec4 wave0;
+out vec4 wave1;
 
 void main(void) {
-	worldDir = normalize(gl_Vertex.xyz);
-
-	gl_Position = ftransform();
+	worldDir = normalize(sg_Position);
+	
+	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position,1);
 
 	if(type == TYPE_WATER) {
 		// used for type == WATER

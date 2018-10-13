@@ -1,4 +1,4 @@
-#version 120
+#version 330
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -8,7 +8,7 @@
  * Copyright (C) 2013 Lukas Kopecki
  * Copyright (C) 2010 Ralf Petring <ralf@petring.net>
  * Copyright (C) 2010 Robert Gmyr
- * Copyright (C) 2011-2012 Sascha Brandt
+ * Copyright (C) 2011-2012, 2018 Sascha Brandt <sascha@brandt.graphics>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -55,6 +55,7 @@ uniform float scale;
 uniform vec3 viewerPos;
 uniform mat3 worldRot;
 uniform mat4 sg_matrix_worldToCamera;
+uniform mat4 sg_matrix_cameraToClipping; 
 uniform float groundLevel;  // y-coordinate of the ground
 
 uniform bool useHaze;
@@ -72,11 +73,18 @@ uniform float reflection;
 uniform float refraction;
 uniform float screenRatio;
 
-varying vec3 worldDir;  // interpolated negative normal of vertex of the dome
+in vec3 worldDir;  // interpolated negative normal of vertex of the dome
 
 // used for type == TYPE_WATER
-varying vec4 wave0;
-varying vec4 wave1;
+in vec4 wave0;
+in vec4 wave1;
+
+layout(location=0) out vec4 outColor;
+layout(location=1) out vec4 outPosition;
+layout(location=2) out vec4 outNormal;
+layout(location=3) out vec4 outAmbient;
+layout(location=4) out vec4 outDiffuse;
+layout(location=5) out vec4 outSpecular;
 
 // ---------------------------------------------------
 // default uniforms
@@ -161,7 +169,7 @@ void calculateWater(const in vec2 groundPos, const in vec3 worldLightDir,  out v
 }
 // ----------------------------------------------------------------
 float calcFragmentDepth(const in vec3 groundPos_cam){
-	vec4 windowCoord = gl_ProjectionMatrix * vec4(groundPos_cam, 1.0);
+	vec4 windowCoord = sg_matrix_cameraToClipping * vec4(groundPos_cam, 1.0);
 	// Clamp here to prevent clipping.
 	return  clamp(0.5 + 0.5 * windowCoord.z / windowCoord.w, 0.0, 0.99999);
 }
@@ -185,16 +193,16 @@ void main(void) {
 	// ground intersection
 	vec3 worldGroundIntersection = viewerPos - worldDistance * nWorldDir;
 	vec3 groundPos_cam = worldPosToCamPos(worldGroundIntersection);
-	gl_FragData[1] = vec4( groundPos_cam,0.0); 											// pos_cs
-	gl_FragData[2] = vec4( (sg_matrix_worldToCamera * vec4(0.0,1.0,0.0,0.0)).xyz,0.0); 	// normal_cs
-	gl_FragData[4] = vec4( 0.0); 														// diffuse
-	gl_FragData[5] = vec4( 0.0); 														// specular
+	outPosition = vec4( groundPos_cam,0.0); 											// pos_cs
+	outNormal = vec4( (sg_matrix_worldToCamera * vec4(0.0,1.0,0.0,0.0)).xyz,0.0); 	// normal_cs
+	outDiffuse = vec4( 0.0); 														// diffuse
+	outSpecular = vec4( 0.0); 														// specular
 
 	vec3 worldLightDir = normalize(sunPosition.xyz);
 
 	// fragment completely in haze?
 	if(useHaze && worldDistance >= hazeFar) {
-		gl_FragData[0] = gl_FragData[3] = vec4( hazeColor + vec3(sunGlow(worldLightDir)) , 1.0);
+		outColor = outAmbient = vec4( hazeColor + vec3(sunGlow(worldLightDir)) , 1.0);
 		gl_FragDepth = calcFragmentDepth(groundPos_cam);
 		return;
 	}
@@ -243,8 +251,8 @@ void main(void) {
 	
 	// multiple render targets \see universal3/main_mrt.sfn
 	{
-		gl_FragData[0] = vec4( color,1.0);											// "normal" color
-		gl_FragData[3] = vec4( color,1.0); 											// ambient (emission)
+		outColor = vec4( color,1.0);											// "normal" color
+		outAmbient = vec4( color,1.0); 											// ambient (emission)
 	}
 
 }
