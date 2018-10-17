@@ -34,7 +34,7 @@ plugin.init @(override) := fn(){
 				GUI.TYPE : GUI.TYPE_BUTTON,
 				GUI.LABEL : "Automated tests...",
 				GUI.ON_CLICK : fn() {
-					showResults(plugin.execute());
+					plugin.showResults(plugin.execute());
 				}
 		}]);
 	});
@@ -103,12 +103,14 @@ plugin.execute := fn( [Array,void] testFiles=void ){
 };
 
 
-static showResults = fn(Map results){
+plugin.showResults := fn(Map results){
 	if(testDialog&&!testDialog.isDestroyed())
 		testDialog.destroy();
 	
 	var entries = [];
+	var files = new Std.Set;
 	foreach(results['parts'] as var result){
+		files += result['file'];
 		var partEntries = [
 			"File: " + result['file'],
 			GUI.NEXT_ROW,
@@ -135,7 +137,7 @@ static showResults = fn(Map results){
 				GUI.FLAGS : GUI.FLAT_BUTTON,
 				GUI.WIDTH : 16,
 				GUI.ICON : "#RefreshSmall",
-				GUI.ON_CLICK : [result['file']] => fn(file){	showResults(plugin.execute([file])); }
+				GUI.ON_CLICK : [result['file']] => fn(file){	plugin.showResults(plugin.execute([file])); }
 			}],
 			GUI.COLLAPSED : result['result'],
 			GUI.CONTENTS :  [{
@@ -155,7 +157,7 @@ static showResults = fn(Map results){
 		GUI.LABEL : "Results",
 		GUI.SIZE : [300,400],
 		GUI.CONTENTS : entries,
-		GUI.ACTIONS : [ [results['resultString']], ["Retry" , fn() {	showResults(plugin.execute());	},"Reload all tests"] ]
+		GUI.ACTIONS : [ [results['resultString']], ["Retry" , [files] => fn(files) { plugin.showResults(plugin.execute(files.toArray())); },"Reload all tests"] ]
 	});
 	testDialog.init();
 	
