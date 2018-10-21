@@ -18,10 +18,10 @@
 //------------------------------------
 
 //! Show the given texture on the sceen for the given time and swap the frame buffer.
-Rendering.showDebugTexture := fn(Rendering.Texture t, time = 0.5, scale = 1){
+Rendering.showDebugTexture := fn(Rendering.Texture t, time = 0.5, scale = 1, level = 0){
 	
-	if( t.getTextureType()!=Rendering.Texture.TEXTURE_2D ){
-		var b = Rendering.createBitmapFromTexture( renderingContext, t );
+	if( t.getTextureType()!=Rendering.Texture.TEXTURE_2D || level > 0 ){
+		var b = Rendering.createBitmapFromMipLevel( renderingContext, t, level );
 		t = Rendering.createTextureFromBitmap( b );
 	}
 	
