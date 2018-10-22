@@ -45,7 +45,7 @@
 	};
 
 	layout(std140, binding=4, row_major) uniform ObjectData {
-	  Object objects[512];
+	  Object objects[MAX_OBJECTDATA];
 	};
 	
 	//! [fs,vs] Convert an homogeneous coordinate from Camera(=Eye,View)Space into WorldSpace.
@@ -137,7 +137,7 @@
 	
 	layout(std140, binding=3) uniform LightSetData {
 	  int sg_lightCount;
-	  uint sg_enabledLights[8];
+	  uint sg_enabledLights[MAX_LIGHTSETS];
 	};
 	layout(std430, binding=1) buffer LightData {
 	  sg_LightSourceParameters sg_LightSource[];

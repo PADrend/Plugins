@@ -53,7 +53,7 @@ in vec2 var_texCoord0, var_texCoord1;
 in flat uint materialId;
 
 layout(std140, binding=5) uniform TextureSetData {
-	bool sg_textureEnabled[16];
+	bool sg_textureEnabled[MAX_TEXTURESETS];
 };
 
 layout(binding=0) uniform sampler2D sg_texture0;

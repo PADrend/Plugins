@@ -67,7 +67,7 @@ layout(binding=4) uniform sampler2D sg_emissionMap;
 uniform bool sg_specularMappingEnabled, sg_normalMappingEnabled;
 
 layout(std140, binding=5) uniform TextureSetData {
-	bool sg_textureEnabled[16];
+	bool sg_textureEnabled[MAX_TEXTURESETS];
 };
 
 struct SurfaceProperties {

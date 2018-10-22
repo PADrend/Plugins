@@ -45,12 +45,12 @@ struct sg_MaterialParamters {
 };
 
 layout(std140, binding=1) uniform MaterialData {
-  sg_MaterialParamters sg_Material[256];
+  sg_MaterialParamters sg_Material[MAX_MATERIALS];
 };
 
 layout(std140, binding=3) uniform LightSetData {
   int sg_lightCount;
-  uint sg_enabledLights[8];
+  uint sg_enabledLights[MAX_LIGHTSETS];
 };
 
 struct Object {
@@ -62,7 +62,7 @@ struct Object {
 };
 
 layout(std140, binding=4, row_major) uniform ObjectData {
-  Object objects[512];
+  Object objects[MAX_OBJECTDATA];
 };
 
 struct sg_LightSourceParameters {
@@ -194,7 +194,7 @@ void main() {
 layout(binding=0) uniform sampler2D sg_texture0;
 
 layout(std140, binding=5) uniform TextureSetData {
-  bool sg_textureEnabled[16];
+  bool sg_textureEnabled[MAX_TEXTURESETS];
 };
 
 in VertexData {
