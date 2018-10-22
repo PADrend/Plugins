@@ -35,7 +35,7 @@ const int SPOT = 3;
 	
 	layout(std140, binding=3) uniform LightSetData {
 	  int sg_lightCount;
-	  uint sg_enabledLights[8];
+	  uint sg_enabledLights[MAX_LIGHTSETS];
 	};
 
 	struct Object {
@@ -47,7 +47,7 @@ const int SPOT = 3;
 	};
 
 	layout(std140, binding=4, row_major) uniform ObjectData {
-	  Object objects[512];
+	  Object objects[MAX_OBJECTDATA];
 	};
 	
 	struct sg_LightSourceParameters {
