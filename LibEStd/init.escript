@@ -25,7 +25,8 @@ if(EScript.VERSION>=701){
 	// locate and load Std library
 	foreach( [	__DIR__ + "/../../modules/EScript/Std/complete.escript",
 				__DIR__ + "/../../../EScript/Std/complete.escript",
-				__DIR__ + "/../../../EScript.exp/Std/complete.escript"
+				__DIR__ + "/../../../EScript.exp/Std/complete.escript",
+				__DIR__ + "/../../EScript/Std/complete.escript",
 				] as var stdLibPath){
 		if(IO.isFile(stdLibPath)){
 			GLOBALS.Std := load(stdLibPath);
