@@ -145,4 +145,54 @@ Rendering.createSmoothedCubeMap := fn(Rendering.Texture sourceMap, Number iterat
 	}
 	return t_output;
 };
+
+
+
+// --------------------------------------
+
+Rendering.RenderingContext.bindBuffer ::= fn(buffer, target, location=-1){
+	if(location >= 0)
+		buffer._bind(target, location);
+	else
+		buffer._bind(target);
+};
+
+static dummyBuffer = new Rendering.BufferObject;
+Rendering.RenderingContext.unbindBuffer ::= fn(target, location=-1){
+	if(location >= 0)
+		dummyBuffer._unbind(target, location);
+	else
+		dummyBuffer._unbind(target);
+};
+
+Rendering.Mesh.bindVertexBuffer ::= fn(rc, target, location=-1) {
+	this._swapVertexBuffer(dummyBuffer);
+	rc.bindBuffer(dummyBuffer, target, location);
+	this._swapVertexBuffer(dummyBuffer);
+};
+
+Rendering.Mesh.bindIndexBuffer ::= fn(rc, target, location=-1) {
+	this._swapIndexBuffer(dummyBuffer);
+	rc.bindBuffer(dummyBuffer, target, location);
+	this._swapIndexBuffer(dummyBuffer);
+};
+
+Rendering.BufferObject.allocate ::= fn(size, hint=Rendering.USAGE_DYNAMIC_DRAW) {
+	this.allocateData(Rendering.TARGET_COPY_WRITE_BUFFER, size, hint);
+};
+
+Rendering.BufferObject.upload ::= fn(data, hint, type=void) {
+	this.uploadData(Rendering.TARGET_COPY_WRITE_BUFFER, data, hint, type);
+};
+
+Rendering.BufferObject.download ::= fn(count, type, offset=0) {
+	var data = this.downloadData(Rendering.TARGET_COPY_READ_BUFFER, offset+count, type);
+	if(offset>0)
+		data = data.slice(offset, count);
+	return data;
+};
+
+
+// --------------------------------------
+
 return Rendering;
