@@ -177,6 +177,19 @@ Rendering.Mesh.bindIndexBuffer ::= fn(rc, target, location=-1) {
 	this._swapIndexBuffer(dummyBuffer);
 };
 
+Rendering.Mesh.allocateGLData ::= fn() {
+	var tmpBuffer = new Rendering.BufferObject;
+	this._swapVertexBuffer(tmpBuffer);
+	var valid = tmpBuffer.isValid();
+	this._swapVertexBuffer(tmpBuffer);	
+	if(!valid) {
+		tmpBuffer.allocate(getVertexCount() * getVertexDescription().getVertexSize());
+		tmpBuffer.clear();
+		this._swapVertexBuffer(tmpBuffer);
+	}
+	return this;
+};
+
 Rendering.BufferObject.allocate ::= fn(size, hint=Rendering.USAGE_DYNAMIC_DRAW) {
 	this.allocateData(Rendering.TARGET_COPY_WRITE_BUFFER, size, hint);
 };
@@ -192,6 +205,11 @@ Rendering.BufferObject.download ::= fn(count, type, offset=0) {
 	return data;
 };
 
+Rendering.BufferObject._clear ::= Rendering.BufferObject.clear;
+
+Rendering.BufferObject.clear ::= fn(param...) {
+	this._clear(Rendering.TARGET_COPY_WRITE_BUFFER, param...);
+};
 
 // --------------------------------------
 
