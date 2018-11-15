@@ -70,6 +70,21 @@ Rendering.RenderingContext.setGlobalUniform ::= fn(params...){
 	return this._setGlobalUniform(new Rendering.Uniform(params...));
 };
 
+// --------------------------------------
+
+Rendering.Shader.createComputeFromFile := fn(file, defines=new Map) {
+	return Rendering.Shader.createShader().attachCSFile(file, defines);
+};
+
+// --------------------------------------
+
+Rendering.Shader.createGeometryFromFile := fn(file, defines=new Map) {
+	return Rendering.Shader.createShader()
+												 .attachVSFile(file, defines)
+												 .attachGSFile(file, defines)
+												 .attachFSFile(file, defines);
+};
+
 //-------------------------------------
 
 static getCubeSmoothShader = fn(){
