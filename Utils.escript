@@ -26,7 +26,7 @@ NS.getDirectionPresets := fn() {
 					"octahedron" : Rendering.createOctahedron(),
 					"icosahedron" : Rendering.createIcosahedron(),
 					"dodecahedron" : Rendering.createDodecahedron(),
-					"cube+down" : Rendering.createCube(),
+					"cube+top" : Rendering.createCube(),
 					"cube+octahedron" : Rendering.combineMeshes([Rendering.createCube(), Rendering.createOctahedron()]),
 					"cube+octahedron (upper)" : Rendering.combineMeshes([Rendering.createCube(), Rendering.createOctahedron()]),
 				}	as var name, var mesh) {
@@ -38,12 +38,13 @@ NS.getDirectionPresets := fn() {
 				if(!name.endsWith("(upper)") || dir.y() <= 0 )
 					arr += dir;
 			}
-      if(name.endsWith("+down")) {
+      if(name.endsWith("+top")) {
         arr += new Geometry.Vec3(0,-1,0);
       }
 			presets[name] = arr;
 		}
-		presets["down"] = [new Geometry.Vec3(0,-1,0)];
+		presets["top"] = [new Geometry.Vec3(0,-1,0)];
+		presets["top+bottom"] = [new Geometry.Vec3(0,1,0),new Geometry.Vec3(0,-1,0)];
 	}
 	return presets;
 };
