@@ -170,6 +170,7 @@ Rendering.RenderingContext.bindBuffer ::= fn(buffer, target, location=-1){
 		buffer._bind(target, location);
 	else
 		buffer._bind(target);
+	return this;
 };
 
 static dummyBuffer = new Rendering.BufferObject;
@@ -178,18 +179,21 @@ Rendering.RenderingContext.unbindBuffer ::= fn(target, location=-1){
 		dummyBuffer._unbind(target, location);
 	else
 		dummyBuffer._unbind(target);
+	return this;
 };
 
 Rendering.Mesh.bindVertexBuffer ::= fn(rc, target, location=-1) {
 	this._swapVertexBuffer(dummyBuffer);
 	rc.bindBuffer(dummyBuffer, target, location);
 	this._swapVertexBuffer(dummyBuffer);
+	return this;
 };
 
 Rendering.Mesh.bindIndexBuffer ::= fn(rc, target, location=-1) {
 	this._swapIndexBuffer(dummyBuffer);
 	rc.bindBuffer(dummyBuffer, target, location);
 	this._swapIndexBuffer(dummyBuffer);
+	return this;
 };
 
 Rendering.Mesh.allocateGLData ::= fn() {
@@ -206,11 +210,11 @@ Rendering.Mesh.allocateGLData ::= fn() {
 };
 
 Rendering.BufferObject.allocate ::= fn(size, hint=Rendering.USAGE_DYNAMIC_DRAW) {
-	this.allocateData(Rendering.TARGET_COPY_WRITE_BUFFER, size, hint);
+	return this.allocateData(Rendering.TARGET_COPY_WRITE_BUFFER, size, hint);
 };
 
 Rendering.BufferObject.upload ::= fn(data, hint, type=void) {
-	this.uploadData(Rendering.TARGET_COPY_WRITE_BUFFER, data, hint, type);
+	return this.uploadData(Rendering.TARGET_COPY_WRITE_BUFFER, data, hint, type);
 };
 
 Rendering.BufferObject.download ::= fn(count, type, offset=0) {
@@ -223,7 +227,7 @@ Rendering.BufferObject.download ::= fn(count, type, offset=0) {
 Rendering.BufferObject._clear ::= Rendering.BufferObject.clear;
 
 Rendering.BufferObject.clear ::= fn(param...) {
-	this._clear(Rendering.TARGET_COPY_WRITE_BUFFER, param...);
+	return this._clear(Rendering.TARGET_COPY_WRITE_BUFFER, param...);
 };
 
 // --------------------------------------
