@@ -209,12 +209,19 @@ Rendering.Mesh.allocateGLData ::= fn() {
 	return this;
 };
 
+Rendering.Mesh.clear ::= fn(param...) {
+	this._swapVertexBuffer(dummyBuffer);
+	dummyBuffer.clear(param...);
+	this._swapVertexBuffer(dummyBuffer);
+	return this;
+};
+
 Rendering.BufferObject.allocate ::= fn(size, hint=Rendering.USAGE_DYNAMIC_DRAW) {
 	return this.allocateData(Rendering.TARGET_COPY_WRITE_BUFFER, size, hint);
 };
 
-Rendering.BufferObject.upload ::= fn(data, hint, type=void) {
-	return this.uploadData(Rendering.TARGET_COPY_WRITE_BUFFER, data, hint, type);
+Rendering.BufferObject.upload ::= fn(data, offset=0, type=void) {
+	return this.uploadSubData(Rendering.TARGET_COPY_WRITE_BUFFER, data, offset, type);
 };
 
 Rendering.BufferObject.download ::= fn(count, type, offset=0) {
@@ -225,7 +232,6 @@ Rendering.BufferObject.download ::= fn(count, type, offset=0) {
 };
 
 Rendering.BufferObject._clear ::= Rendering.BufferObject.clear;
-
 Rendering.BufferObject.clear ::= fn(param...) {
 	return this._clear(Rendering.TARGET_COPY_WRITE_BUFFER, param...);
 };
