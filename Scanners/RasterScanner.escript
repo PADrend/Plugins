@@ -76,7 +76,9 @@ T.scanSurface @(public) ::= fn(MinSG.Node node) {
 			fbo.attachColorTexture(renderingContext,t_position,1,0,layer);
 			fbo.attachColorTexture(renderingContext,t_normal,2,0,layer);
 			++layer;
+			renderingContext.pushAndSetViewport(0,0,resolution,resolution);
 			renderingContext.clearScreen(new Util.Color4f(0,0,0,0));
+			renderingContext.popViewport();
 			
 			var matrix_cameraToImpostorRel = matrix_worldToImpostorRel * camera.getWorldTransformationMatrix();
 	    renderingContext.setGlobalUniform('sg_mrt_matrix_cameraToCustom', Rendering.Uniform.MATRIX_4X4F, [matrix_cameraToImpostorRel]);
