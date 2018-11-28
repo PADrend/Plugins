@@ -227,10 +227,7 @@ Rendering.BufferObject.upload ::= fn(data, offset=0, type=void) {
 };
 
 Rendering.BufferObject.download ::= fn(count, type, offset=0) {
-	var data = this.downloadData(Rendering.TARGET_COPY_READ_BUFFER, offset+count, type);
-	if(offset>0)
-		data = data.slice(offset, count);
-	return data;
+	return this.downloadData(Rendering.TARGET_COPY_READ_BUFFER, count, type, offset);
 };
 
 Rendering.BufferObject._clear ::= Rendering.BufferObject.clear;
