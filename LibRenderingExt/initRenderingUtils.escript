@@ -166,6 +166,8 @@ Rendering.createSmoothedCubeMap := fn(Rendering.Texture sourceMap, Number iterat
 // --------------------------------------
 
 Rendering.RenderingContext.bindBuffer ::= fn(buffer, target, location=-1){
+	if(buffer ---|> Rendering.Mesh)
+		return buffer.bindVertexBuffer(this, target, location);
 	if(location >= 0)
 		buffer._bind(target, location);
 	else
