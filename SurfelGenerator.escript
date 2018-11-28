@@ -51,6 +51,7 @@ T.getStatistics @(public) ::= fn() {
 T.createSurfelsForNode @(public) ::= fn(node, limit=false) {
   var timer = new Util.Timer;
   
+  Utils.removeSurfels(node);
   var initialSamples = scanner.scanSurface(node);
   if(!initialSamples) 
     return;  
@@ -65,18 +66,18 @@ T.createSurfelsForNode @(public) ::= fn(node, limit=false) {
   if(!surfels)
     return;
 		
-  // calculate median distance
-  var medianTimer = new Util.Timer;
-	var medianCount = [[100, surfels.getVertexCount()].min(), surfels.getVertexCount() * 0.1].max();
-  var median = MinSG.BlueSurfels.getMedianOfNthClosestNeighbours(surfels,medianCount,2);
-	var surface = medianCount * median * median;
-  statistics['t_median'] = medianTimer.getSeconds();
-  statistics['t_total'] = timer.getSeconds();
-  statistics['median'] = median;
+  // calculate surface
+  var surfaceTimer = new Util.Timer;
+  var surface = node.findNodeAttribute('surfelSurface');
+  if(!surface)
+    surface = Utils.estimateSurface(surfels);
+  statistics['t_surface'] = surfaceTimer.getSeconds();
   statistics['surface'] = surface;
   
   // attach surfels to node
 	Utils.attachSurfels(node, surfels, surface);
+  
+  statistics['t_total'] = timer.getSeconds();
 };
 
 T.createSurfelsForLeafNodes @(public) ::= fn(Array rootNodes) {
