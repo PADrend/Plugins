@@ -199,21 +199,12 @@ NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
 	return mesh;
 };
 
-/**
- * Estimate the visible surface area of a surfel mesh 
- */
-NS.estimateSurface := fn(Rendering.Mesh surfels) {
-	var medianCount = [[100, surfels.getVertexCount()].min(), surfels.getVertexCount() * 0.1].max();
-	var median = MinSG.BlueSurfels.getMedianOfNthClosestNeighbours(surfels,medianCount,2);
-	var surface = medianCount * median * median;
-	return surface;
-};
-
 //! @return true iff a surfel was removed.
 NS.removeSurfels := fn(MinSG.Node node){
 	if(node.isInstance())
 		node = node.getPrototype();
 	node.unsetNodeAttribute('surfelSurface');
+	node.unsetNodeAttribute('surfelPacking');
 	return node.unsetNodeAttribute('surfels');
 };
 
@@ -225,11 +216,11 @@ NS.getLocalSurfels := fn(MinSG.Node node){
 	return node.getNodeAttribute('surfels');
 };
 
-NS.attachSurfels := fn(MinSG.Node node, surfelMesh, surfelSurface){
+NS.attachSurfels := fn(MinSG.Node node, surfelMesh, surfelPacking) {
 	if(node.isInstance())
 		node = node.getPrototype();
 	node.setNodeAttribute('surfels', surfelMesh);
-	node.setNodeAttribute('surfelSurface', surfelSurface);
+	node.setNodeAttribute('surfelPacking', surfelPacking);
 };
 
 NS.saveSurfelsToMMF := fn(MinSG.Node node, Util.FileName folder) {

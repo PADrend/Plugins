@@ -66,16 +66,16 @@ T.createSurfelsForNode @(public) ::= fn(node, limit=false) {
   if(!surfels)
     return;
 		
-  // calculate surface
-  var surfaceTimer = new Util.Timer;
-  var surface = node.findNodeAttribute('surfelSurface');
-  if(!surface)
-    surface = Utils.estimateSurface(surfels);
-  statistics['t_surface'] = surfaceTimer.getSeconds();
-  statistics['surface'] = surface;
+  // calculate packing constant
+  var packingTimer = new Util.Timer;
+  var packing = node.findNodeAttribute('surfelPacking');
+  if(!packing)
+    packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
+  statistics['t_packingConstant'] = packingTimer.getSeconds();
+  statistics['packingConstant'] = packing;
   
   // attach surfels to node
-	Utils.attachSurfels(node, surfels, surface);
+	Utils.attachSurfels(node, surfels, packing);
   
   statistics['t_total'] = timer.getSeconds();
 };

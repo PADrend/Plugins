@@ -82,7 +82,7 @@ const int SPOT = 3;
 #endif
 
 // uniform
-uniform float sg_surfelSurface;
+uniform float sg_surfelPacking;
 
 // in
 layout(location = 0) in vec3 sg_Position;
@@ -192,12 +192,12 @@ void main() {
 
   const float ppm = float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
   const float r_inv = ppm / pointSize;
-  uint count = uint(sg_surfelSurface * r_inv * r_inv);
+  uint count = uint(sg_surfelPacking * r_inv * r_inv);
   
 	gl_PointSize = pointSize;
 	gl_Position = sg_matrix_cameraToClipping * vOut.position_cs;
-  gl_CullDistance[0] = mix(-1, 1, count > gl_VertexID && vOut.nDotV < 0);
-  //gl_CullDistance[0] = mix(-1, 1, vOut.nDotV < 0);
+  //gl_CullDistance[0] = mix(-1, 1, count > gl_VertexID && vOut.nDotV < 0);
+  gl_CullDistance[0] = mix(-1, 1, vOut.nDotV < 0);
 }
 
 #endif

@@ -36,23 +36,19 @@ Renderer.doEnableState @(override) ::= fn(node,params){
 	
 		if(sizeToCover) {
 			sizeToCover = false;
-			var medianCount = [1000, maxCount].min();
-			var medianDist = MinSG.BlueSurfels.getMedianOfNthClosestNeighbours(surfels, medianCount, 2);
+	    var packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
 			var mpp = MinSG.BlueSurfels.getMeterPerPixel(PADrend.getActiveCamera(), node);
-			var surface = medianCount * medianDist * medianDist;
 			var prefix = end() * maxCount;
-			var radius = (surface / prefix).sqrt();
+			var radius = MinSG.BlueSurfels.getRadiusForPrefix(prefix, packing);
 			pointSize(MinSG.BlueSurfels.radiusToSize(radius, mpp));
 		}		
 		
 		if(prefixToCover) {
 			prefixToCover = false;
-			var medianCount = [1000, maxCount].min();
-			var medianDist = MinSG.BlueSurfels.getMedianOfNthClosestNeighbours(surfels, medianCount, 2);
+	    var packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
 			var mpp = MinSG.BlueSurfels.getMeterPerPixel(PADrend.getActiveCamera(), node);
-			var surface = medianCount * medianDist * medianDist;
 			var radius = MinSG.BlueSurfels.sizeToRadius(pointSize(), mpp);
-			var prefix = [maxCount, surface / (radius * radius)].min();
+			var prefix = [maxCount, MinSG.BlueSurfels.getPrefixForRadius(radius, packing)].min();
 			end(prefix/maxCount);
 		}		
 		
@@ -73,12 +69,12 @@ Renderer.doEnableState @(override) ::= fn(node,params){
 	return MinSG.STATE_OK;
 };
 
-NodeEditor.registerConfigPanelProvider( Renderer, fn(renderer, panel){
+NodeEditor.registerConfigPanelProvider( Renderer, fn(renderer, panel) {
     panel += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "Start",
 		GUI.DATA_WRAPPER : renderer.start,
-		GUI.RANGE : [0,0],
+		GUI.RANGE : [0,1],
     };
     panel++;
     panel += {

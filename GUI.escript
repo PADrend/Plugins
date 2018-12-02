@@ -324,7 +324,7 @@ static createInfoPanel = fn(gui) {
 			}
 			if(surfels){
 				t += "Num surfels: "+surfels.getVertexCount()+"\n";
-				t += "Surface: "+node.findNodeAttribute('surfelSurface')+"\n";
+				t += "Surface: "+node.findNodeAttribute('surfelPacking')+"\n";
 			}
 			t += "----\n";
 		}

@@ -211,7 +211,7 @@ void main() {
 #else
   uniform mat4 sg_matrix_cameraToClipping;
 #endif
-uniform float sg_surfelSurface;
+uniform float sg_surfelPacking;
 
 // in
 layout(points) in;
@@ -238,7 +238,7 @@ void main() {
 	vec4 tangent = vec4(vIn[0].tangent_cs,0);
 	vec4 cotangent = vec4(vIn[0].cotangent_cs,0);
 	float r = vIn[0].surfelRadius;
-  uint count = uint(sg_surfelSurface / (r * r));
+  uint count = uint(sg_surfelPacking / (r * r));
   if(count <= vIn[0].vertexID || vIn[0].nDotV >= 0)
     return;
 		

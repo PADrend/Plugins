@@ -79,7 +79,7 @@ const int SPOT = 3;
 	uniform int sg_lightCount;
 #endif
 
-uniform float sg_surfelSurface;
+uniform float sg_surfelPacking;
 
 layout(location = 0) in vec3 sg_Position;
 layout(location = 1) in vec3 sg_Normal;
@@ -180,8 +180,8 @@ void main() {
 	const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
 
 	const float ppm = float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
-	const float r_inv = ppm / v_out.pointSize;
-	uint count = uint(sg_surfelSurface * r_inv * r_inv);
+  const float r_inv = ppm / v_out.pointSize;
+  uint count = uint(sg_surfelPacking * r_inv * r_inv);
 
 	gl_PointSize = v_out.pointSize;
 	gl_Position = sg_matrix_cameraToClipping * v_out.position_hcs;
