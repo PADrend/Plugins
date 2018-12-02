@@ -49,6 +49,7 @@ T.getStatistics @(public) ::= fn() {
 // -------------------------------
 
 T.createSurfelsForNode @(public) ::= fn(node, limit=false) {
+  statistics.clear();
   var timer = new Util.Timer;
   
   Utils.removeSurfels(node);
@@ -81,6 +82,7 @@ T.createSurfelsForNode @(public) ::= fn(node, limit=false) {
 };
 
 T.createSurfelsForLeafNodes @(public) ::= fn(Array rootNodes) {
+  statistics.clear();
   var timer = new Util.Timer;
   
 	var nodeSet = new Set;
@@ -138,6 +140,7 @@ T.createSurfelsForLeafNodes @(public) ::= fn(Array rootNodes) {
 };
 
 T.createSurfelHierarchy @(public) ::= fn(Array rootNodes) {
+  statistics.clear();
   var timer = new Util.Timer;
 	//var config = getConfig();	
 	var maxSurfelCount = sampler.getTargetCount();
@@ -191,6 +194,7 @@ T.createSurfelHierarchy @(public) ::= fn(Array rootNodes) {
 
 
 T.recreateSurfelsForAllNodes @(public) ::= fn(Array rootNodes) {
+  statistics.clear();
   var timer = new Util.Timer;
   
 	var nodeSet = new Set;
