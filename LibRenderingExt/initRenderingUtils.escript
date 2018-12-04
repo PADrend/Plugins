@@ -72,6 +72,18 @@ Rendering.RenderingContext.setGlobalUniform ::= fn(params...){
 
 // --------------------------------------
 
+Rendering.Shader.createVertexFromFile := fn(file, defines=new Map) {
+	return Rendering.Shader.createShader().attachVSFile(file, defines);
+};
+
+// --------------------------------------
+
+Rendering.Shader.createFromFile := fn(file, defines=new Map) {
+	return Rendering.Shader.createShader().attachVSFile(file, defines).attachFSFile(file, defines);
+};
+
+// --------------------------------------
+
 Rendering.Shader.createComputeFromFile := fn(file, defines=new Map) {
 	return Rendering.Shader.createShader().attachCSFile(file, defines);
 };
