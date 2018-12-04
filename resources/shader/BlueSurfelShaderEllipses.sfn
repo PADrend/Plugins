@@ -196,8 +196,8 @@ void main() {
   
 	gl_PointSize = pointSize;
 	gl_Position = sg_matrix_cameraToClipping * vOut.position_cs;
-  //gl_CullDistance[0] = mix(-1, 1, count > gl_VertexID && vOut.nDotV < 0);
-  gl_CullDistance[0] = mix(-1, 1, vOut.nDotV < 0);
+  gl_CullDistance[0] = mix(-1, 1, count > gl_VertexID && vOut.nDotV < 0);
+  //gl_CullDistance[0] = mix(-1, 1, vOut.nDotV < 0);
 }
 
 #endif
