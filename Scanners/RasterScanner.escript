@@ -55,7 +55,7 @@ T.scanSurface @(public) ::= fn(MinSG.Node node) {
 	var fbo = new Rendering.FBO;
 	renderingContext.pushAndSetFBO(fbo);
 	renderingContext.applyChanges();
-	fbo.setDrawBuffers(5);
+	fbo.setDrawBuffers(renderingContext,5);
 	
 	//renderingContext.pushAndSetCullFace((new Rendering.CullFaceParameters).disable());
 	
