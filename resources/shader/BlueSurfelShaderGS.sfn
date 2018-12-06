@@ -212,6 +212,7 @@ void main() {
   uniform mat4 sg_matrix_cameraToClipping;
 #endif
 uniform float sg_surfelPacking;
+uniform float sg_sizeFactor = 1.0;
 
 // in
 layout(points) in;
@@ -241,7 +242,7 @@ void main() {
   uint count = uint(sg_surfelPacking / (r * r));
   if(count <= vIn[0].vertexID || vIn[0].nDotV >= 0)
     return;
-  r *= 2; // ???
+  r *= 2 * sg_sizeFactor; // ???
 		
 	vec4 position_cs = pos + tangent * r * 2.0;
 	vOut.color = vIn[0].color;
