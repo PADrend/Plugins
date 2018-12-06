@@ -180,7 +180,7 @@ void main() {
 	const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
 
 	const float ppm = float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
-  const float r_inv = ppm / v_out.pointSize;
+  const float r_inv = 2 * ppm / v_out.pointSize;
   uint count = uint(sg_surfelPacking * r_inv * r_inv);
 
 	gl_PointSize = v_out.pointSize;

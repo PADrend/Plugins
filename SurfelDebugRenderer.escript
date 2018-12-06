@@ -37,19 +37,29 @@ Renderer.doEnableState @(override) ::= fn(node,params){
 		if(sizeToCover) {
 			sizeToCover = false;
 	    var packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
-			var mpp = MinSG.BlueSurfels.getMeterPerPixel(PADrend.getActiveCamera(), node);
+			var dp = MinSG.BlueSurfels.computeRelPixelSize(PADrend.getActiveCamera(), node);
 			var prefix = end() * maxCount;
 			var radius = MinSG.BlueSurfels.getRadiusForPrefix(prefix, packing);
-			pointSize(MinSG.BlueSurfels.radiusToSize(radius, mpp));
+			pointSize(MinSG.BlueSurfels.radiusToSize(radius, dp));
+			outln("Packing: ", packing);
+			outln("Rel. Pixel Size: ", dp);
+			outln("Prefix: ", prefix);
+			outln("Radius: ", radius);
+			outln("Point Size: ", pointSize());
 		}		
 		
 		if(prefixToCover) {
 			prefixToCover = false;
 	    var packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
-			var mpp = MinSG.BlueSurfels.getMeterPerPixel(PADrend.getActiveCamera(), node);
-			var radius = MinSG.BlueSurfels.sizeToRadius(pointSize(), mpp);
+			var dp = MinSG.BlueSurfels.computeRelPixelSize(PADrend.getActiveCamera(), node);
+			var radius = MinSG.BlueSurfels.sizeToRadius(pointSize(), dp);
 			var prefix = [maxCount, MinSG.BlueSurfels.getPrefixForRadius(radius, packing)].min();
 			end(prefix/maxCount);
+			outln("Packing: ", packing);
+			outln("Rel. Pixel Size: ", dp);
+			outln("Prefix: ", prefix);
+			outln("Radius: ", radius);
+			outln("Point Size: ", pointSize());
 		}		
 		
 		var first = [start(),0.0].max() * maxCount;
@@ -75,6 +85,7 @@ NodeEditor.registerConfigPanelProvider( Renderer, fn(renderer, panel) {
 		GUI.LABEL : "Start",
 		GUI.DATA_WRAPPER : renderer.start,
 		GUI.RANGE : [0,1],
+		GUI.RANGE_STEP_SIZE : 0.01,
     };
     panel++;
     panel += {
@@ -82,6 +93,7 @@ NodeEditor.registerConfigPanelProvider( Renderer, fn(renderer, panel) {
 		GUI.LABEL : "End",
 		GUI.DATA_WRAPPER : renderer.end,
 		GUI.RANGE : [0,1],
+		GUI.RANGE_STEP_SIZE : 0.01,
     };
     panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,

@@ -205,6 +205,7 @@ NS.removeSurfels := fn(MinSG.Node node){
 		node = node.getPrototype();
 	node.unsetNodeAttribute('surfelSurface');
 	node.unsetNodeAttribute('surfelPacking');
+	node.unsetNodeAttribute('surfelFirstK');
 	return node.unsetNodeAttribute('surfels');
 };
 

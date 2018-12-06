@@ -190,7 +190,7 @@ void main() {
   const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
 
   const float ppm = float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
-  vOut.surfelRadius = pointSize / ppm;
+  vOut.surfelRadius = 0.5 * pointSize / ppm;
   vOut.vertexID = gl_VertexID;
 }
 
@@ -241,6 +241,7 @@ void main() {
   uint count = uint(sg_surfelPacking / (r * r));
   if(count <= vIn[0].vertexID || vIn[0].nDotV >= 0)
     return;
+  r *= 2; // ???
 		
 	vec4 position_cs = pos + tangent * r * 2.0;
 	vOut.color = vIn[0].color;

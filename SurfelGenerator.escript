@@ -72,8 +72,8 @@ T.createSurfelsForNode @(public) ::= fn(node, limit=false) {
   var packing = node.findNodeAttribute('surfelPacking');
   if(!packing)
     packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
-  statistics['t_packingConstant'] = packingTimer.getSeconds();
-  statistics['packingConstant'] = packing;
+  statistics['t_packing'] = packingTimer.getSeconds();
+  statistics['packing'] = packing;
   
   // attach surfels to node
 	Utils.attachSurfels(node, surfels, packing);
