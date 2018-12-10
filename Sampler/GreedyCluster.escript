@@ -8,8 +8,7 @@
  * For the proprietary part of PADrend all rights are reserved.
  */
 static SamplerBase = Std.module("BlueSurfels/Sampler/SamplerBase");
-static ScannerRegistry = Std.module("BlueSurfels/Config/SurfaceScannerConfig");
-static SamplerRegistry = Std.module("BlueSurfels/GUI/SamplerRegistry");
+static Rasterizer = Std.module("BlueSurfels/Tools/Rasterizer");
 static Utils = Std.module("BlueSurfels/Utils");
 
 // --------------------------------------------------------------------------------
@@ -17,55 +16,55 @@ static Utils = Std.module("BlueSurfels/Utils");
 static T = new Type(SamplerBase);
 T._printableName := $GreedyCluster;
 
-T.resolution @(private) := 512;
-T.setResolution @(public) ::= fn(Number v) { resolution = v; return this; };
-T.getResolution @(public) ::= fn() { return resolution; };
+T.setResolution @(public) ::= fn(Number v) { rasterizer.setResolution(v); return this; };
+T.getResolution @(public) ::= fn() { return rasterizer.getResolution(); };
 
-T.directions @(private,init) := fn() {
-	return [
-		new Geometry.Vec3( 1, 1, 1), new Geometry.Vec3(-1,-1,-1), new Geometry.Vec3( 1, 1,-1), new Geometry.Vec3(-1,-1, 1),
-		new Geometry.Vec3( 1,-1, 1), new Geometry.Vec3(-1, 1,-1), new Geometry.Vec3( 1,-1,-1), new Geometry.Vec3(-1, 1, 1)
-	]; 
-};
-T.setDirections @(public) ::= fn(Array dir) { directions = dir; return this; };
-T.getDirections @(public) ::= fn() { return directions; };
+T.setDirections @(public) ::= fn(Array dir) { rasterizer.setDirections(dir); return this; };
+T.getDirections @(public) ::= fn() { return rasterizer.getDirections(); };
 
 // ----------------------------
 
 T._constructor ::= fn() {
-  this.sampler := new MinSG.BlueSurfels.GreedyCluster;
+  this.sampler = new MinSG.BlueSurfels.GreedyCluster;
+	this.rasterizer := new Rasterizer;
 };
 
 /**
  * Render node from multiple directions and stores resulting pixels in a mesh
  */
 T.sample @(override) ::= fn(MinSG.Node node) {
+	var totalTimer = new Util.Timer;
+	var timer = new Util.Timer;
 	statistics.clear();
-  
+	var layers = getDirections().count();
+	
+	[var t_depth, var t_color, var t_position, var t_normal] = rasterizer.rasterize(node);
+	
+	statistics["t_renderScene"] = timer.getSeconds();
+	
+	if(debug)
+		rasterizer.showDebugTextures();
+	
+	timer.reset();
+	var initialSamples = Utils.packMesh(t_depth, t_color, t_position, t_normal, getResolution(), layers);
+	statistics["t_downloadMesh"] = timer.getSeconds();
+	if(!initialSamples)
+		return void;
+	
+	var samples = sampler.sampleSurfels(initialSamples);
+  statistics.merge(sampler.getStatistics());
+	statistics["t_total"] = totalTimer.getSeconds();
+  return samples;
 };
 
 // --------------------------------------------------------------
 // GUI
 
-static SamplerRegistry = Std.module("BlueSurfels/GUI/SamplerRegistry");
-SamplerRegistry.registerSampler(T);
-SamplerRegistry.registerSamplerConfig(T, fn(scanner, config) {
-	scanner.setDebug(config.debug());
-	scanner.setDirections(Utils.getDirectionPresets()[config.directionPresetName()]);
-	scanner.setResolution(config.resolution());
-	scanner.setTargetCount(config.targetCount());
-	scanner.setLocalSort(config.sortLocal());
-	scanner.setGlobalSort(config.sortGlobal());
-	scanner.setSamplesPerRound(config.samplesPerRound());
-	scanner.setProfiling(config.profiling());
-	scanner.setAutodetect(config.autodetect());
-	scanner.setAdaptiveResolution(config.adaptiveRes());
-	scanner.setUsePacking(config.usePacking());
-	scanner.setUseMultilayer(config.multilayer());
-});
-ScannerRegistry.registerScannerConfigGUI(T, fn(config) {
-	SamplerRegistry.getCachedConfig().samplerName($PassThroughSampler);
-	return [
+static SurfelGUI = Std.module("BlueSurfels/GUI/SurfelGUI");
+SurfelGUI.registerSampler(T);
+SurfelGUI.registerSamplerGUI(T, fn(sampler) {
+	var elements = SamplerBase.getCommonGUI(sampler);
+	return elements.append([
 		{
 	    GUI.TYPE :	GUI.TYPE_SELECT,
 	    GUI.LABEL :	"Directions",
@@ -75,7 +74,9 @@ ScannerRegistry.registerScannerConfigGUI(T, fn(config) {
 	        dirOptions += [name, name + " ("+dirs.count()+")"];
 	      dirOptions;
 	    },	
-	    GUI.DATA_WRAPPER : config.directionPresetName,
+	    GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('directions', 'cube', [sampler] => fn(sampler, name) {
+				sampler.setDirections(Utils.getDirectionPresets()[name]);
+			}),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 	  },
     { GUI.TYPE : GUI.TYPE_NEXT_ROW },
@@ -85,87 +86,11 @@ ScannerRegistry.registerScannerConfigGUI(T, fn(config) {
 			GUI.RANGE : [0,10],
 			GUI.RANGE_STEP_SIZE : 1,
       GUI.RANGE_FN_BASE : 2,
-			GUI.DATA_WRAPPER : config.resolution,
+			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('resolution', 512, sampler->sampler.setResolution),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 		},
     { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-		{
-			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.LABEL : "Debug",
-			GUI.DATA_WRAPPER : config.debug,
-			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-		{
-			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.LABEL : "Profiling",
-			GUI.DATA_WRAPPER : config.profiling,
-			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-		{
-			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.LABEL : "Autodetect",
-			GUI.DATA_WRAPPER : config.autodetect,
-			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-		{
-			GUI.TYPE : GUI.TYPE_RANGE,
-			GUI.LABEL : "Target Surfels",
-			GUI.RANGE : [1,6],
-			GUI.RANGE_STEP_SIZE : 1,
-      GUI.RANGE_FN_BASE : 10,
-			GUI.DATA_WRAPPER : config.targetCount,
-			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-		{
-			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.LABEL : "Intermediate Sort",
-			GUI.DATA_WRAPPER : config.sortLocal,
-			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-		{
-			GUI.TYPE : GUI.TYPE_RANGE,
-			GUI.LABEL : "Samples per round",
-			GUI.TOOLTIP : "Only used when 'Intermediate Sort' is enabled.",
-			GUI.RANGE : [0,1],
-			GUI.RANGE_STEP_SIZE : 0.1,
-			GUI.DATA_WRAPPER : config.samplesPerRound,
-			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-		{
-			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.LABEL : "Final Sort",
-			GUI.DATA_WRAPPER : config.sortGlobal,
-			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-		{
-			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.LABEL : "Adaptive Resolution",
-			GUI.DATA_WRAPPER : config.adaptiveRes,
-			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-		{
-			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.LABEL : "Compute Packing Value",
-			GUI.DATA_WRAPPER : config.usePacking,
-			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-		{
-			GUI.TYPE : GUI.TYPE_BOOL,
-			GUI.LABEL : "Use Multilayer Rendering",
-			GUI.DATA_WRAPPER : config.multilayer,
-			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-	];
+	]);
 });
 
 return T;

@@ -217,10 +217,12 @@ NS.getLocalSurfels := fn(MinSG.Node node){
 	return node.getNodeAttribute('surfels');
 };
 
-NS.attachSurfels := fn(MinSG.Node node, surfelMesh, surfelPacking) {
+NS.attachSurfels := fn(MinSG.Node node, surfelMesh, surfelPacking=void) {
 	if(node.isInstance())
 		node = node.getPrototype();
 	node.setNodeAttribute('surfels', surfelMesh);
+  if(!surfelPacking)
+    surfelPacking = MinSG.BlueSurfels.computeSurfelPacking(surfelMesh);
 	node.setNodeAttribute('surfelPacking', surfelPacking);
 };
 

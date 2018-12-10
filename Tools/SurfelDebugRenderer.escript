@@ -31,7 +31,7 @@ Renderer.doEnableState @(override) ::= fn(node,params){
 	
 	var surfels = Utils.locateSurfels(node);
 	
-	if( surfels ){		
+	if( surfels ){
 		var maxCount = surfels.isUsingIndexData() ?  surfels.getIndexCount() : surfels.getVertexCount();
 	
 		if(sizeToCover) {
@@ -65,18 +65,27 @@ Renderer.doEnableState @(override) ::= fn(node,params){
 		var first = [start(),0.0].max() * maxCount;
 		first = [first,maxCount].min();
 		var count = [[end()-start(),0.0].max(),1.0].min() * maxCount;		
-		
-		
+				
 		renderingContext.pushAndSetPointParameters(new Rendering.PointParameters(pointSize()));
 		renderingContext.setGlobalUniform(new Rendering.Uniform('renderSurfels',  Rendering.Uniform.BOOL,[true]));
+		renderingContext.pushAndSetColorMaterial(new Util.Color4f(1,0,0));
 		
 		frameContext.displayMesh(surfels, first, count);
 		renderingContext.popPointParameters();
 		
+		renderingContext.popMaterial();
 		renderingContext.setGlobalUniform(new Rendering.Uniform('renderSurfels',  Rendering.Uniform.BOOL,[false]));
-		return MinSG.STATE_SKIP_RENDERING;	
+		//return MinSG.STATE_SKIP_RENDERING;	
 	}
+	
+	renderingContext.pushAndSetColorMaterial(new Util.Color4f(0.4,0.4,0.4));
+	renderingContext.pushAndSetPolygonOffset(0.9, 0);
 	return MinSG.STATE_OK;
+};
+
+Renderer.doDisableState @(override) ::= fn(node,params){
+	renderingContext.popMaterial();
+	renderingContext.popPolygonOffset();
 };
 
 NodeEditor.registerConfigPanelProvider( Renderer, fn(renderer, panel) {

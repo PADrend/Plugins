@@ -14,7 +14,7 @@ static Utils = Std.module("BlueSurfels/Utils");
 // --------------------------------------------------------------------------------
 
 static T = new Type(SamplerBase);
-T._printableName := $RandomSampler;
+T._printableName := $ProgressiveBlueSurfels;
 
 T.setResolution @(public) ::= fn(Number v) { rasterizer.setResolution(v); return this; };
 T.getResolution @(public) ::= fn() { return rasterizer.getResolution(); };
@@ -22,10 +22,13 @@ T.getResolution @(public) ::= fn() { return rasterizer.getResolution(); };
 T.setDirections @(public) ::= fn(Array dir) { rasterizer.setDirections(dir); return this; };
 T.getDirections @(public) ::= fn() { return rasterizer.getDirections(); };
 
+T.setSamplesPerRound @(public) ::= fn(Number v) { sampler.setSamplesPerRound(v); return this; };
+T.getSamplesPerRound @(public) ::= fn() { return sampler.getSamplesPerRound(); };
+
 // ----------------------------
 
 T._constructor ::= fn() {
-  this.sampler = new MinSG.BlueSurfels.RandomSampler;
+  this.sampler = new MinSG.BlueSurfels.ProgressiveSampler;
 	this.rasterizer := new Rasterizer;
 };
 
@@ -50,7 +53,7 @@ T.sample @(override) ::= fn(MinSG.Node node) {
 	statistics["t_downloadMesh"] = timer.getSeconds();
 	if(!initialSamples)
 		return void;
-	
+		
 	var samples = sampler.sampleSurfels(initialSamples);
   statistics.merge(sampler.getStatistics());
 	statistics["t_total"] = totalTimer.getSeconds();
@@ -87,6 +90,15 @@ SurfelGUI.registerSamplerGUI(T, fn(sampler) {
 			GUI.RANGE_STEP_SIZE : 1,
       GUI.RANGE_FN_BASE : 2,
 			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('resolution', 512, sampler->sampler.setResolution),
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
+		},
+    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.LABEL : "Samples per round",
+			GUI.RANGE : [0,1000],
+			GUI.RANGE_STEP_SIZE : 1,
+			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('samplesPerRound', 200, sampler->sampler.setSamplesPerRound),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 		},
     { GUI.TYPE : GUI.TYPE_NEXT_ROW },

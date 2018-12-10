@@ -11,80 +11,84 @@ static ProgressBar = Std.module('Tools/ProgressBar');
 static Utils = Std.module("BlueSurfels/Utils");
 static progressBar = new ProgressBar;
 
-static T = new Type(ExtObject);
+static NS = new Namespace;
 
-// -------------------------------
-// sampler
-T.sampler @(private, init) := MinSG.BlueSurfels.ProgressiveSampler;
-T.setSampler @(public) ::= fn(value) {
-  sampler = value;
-  return this;
+// ------------------------------------------------------------
+
+NS.accumulateStatistics @(public) := fn(statistics) {
+  if(statistics.count() <= 1)
+    return statistics.front();
+  var accStats = new Map;
+  foreach(statistics as var stat) {
+    foreach(stat as var key, var value) {
+      var aKey = key + ' (sum)';
+      if(value.isA(Number)) {
+        if(!accStats.containsKey(aKey))
+          accStats[aKey] = 0;
+        accStats[aKey] += value;
+      }
+    }
+  }
+  accStats['processed'] = statistics.count();
 };
-T.setTargetCount @(public) ::= fn(value) { sampler.setTargetCount(value); };
-T.setMaxAbsSurfels @(public) ::= fn(value) { sampler.setTargetCount(value); }; // deprecated
-T.setMaxRelSurfels @(public) ::= fn(value) { }; // deprecated
 
-// -------------------------------
-// scanner
-T.scanner @(private, init) := Std.module('BlueSurfels/Scanners/RasterScanner');
-T.setScanner @(public) ::= fn(value) {
-  scanner = value;
-  return this;
-};
-T.setResolution @(public) ::= fn(value) { scanner.setResolution(value); };
+// ------------------------------------------------------------
 
-// -------------------------------
-// statistics
-T.statistics @(private, init) := Map;
-T.getStatistics @(public) ::= fn() {
-  if(sampler)
-    statistics.merge(sampler.getStatistics());
-  if(scanner)
-    statistics.merge(scanner.getStatistics());
+NS.createSurfelsForNode @(public) := fn(node, sampler) {
+  var statistics = new Map;
+  var timer = new Util.Timer;
+  Utils.removeSurfels(node);
+  if(!sampler) {
+    statistics['status'] = "failed";
+    return statistics;
+  }
+  
+  var surfels = sampler.sample(node);
+  statistics.merge(sampler.getStatistics());
+  
+  if(!surfels) {
+    statistics['status'] = "failed";
+    return statistics;
+  }
+    
+  // attach surfels to node
+  var finalTimer = new Util.Timer;
+	Utils.attachSurfels(node, surfels, statistics['packing']);  
+  statistics['t_finalize'] = finalTimer.getSeconds();
+  
+  statistics['t_total'] = timer.getSeconds();
+  statistics['status'] = "success";
   return statistics;
 };
 
-// -------------------------------
+// ------------------------------------------------------------
 
-// -------------------------------
+NS.createSurfelsForNodes @(public) := fn(nodes, sampler) {
+  progressBar.setDescription("Blue Surfels");
+  progressBar.setSize(500, 32);
+  progressBar.setToScreenCenter();
+  progressBar.setMaxValue(nodes.count());
+  progressBar.update(0);
+  var statistics = [];
 
-T.createSurfelsForNode @(public) ::= fn(node, limit=false) {
-  statistics.clear();
-  var timer = new Util.Timer;
+  foreach(nodes as var index, var node) {    
+		progressBar.setDescription("Blue Surfels: Processing " + (index+1) + "/" + nodes.count());
+    
+    statistics += createSurfelsForNode(node, sampler);
+    
+    if(Utils.handleUserEvents())
+      break;
+      
+    progressBar.update(index+1);
+  }
   
-  Utils.removeSurfels(node);
-  var initialSamples = scanner.scanSurface(node);
-  if(!initialSamples) 
-    return;  
-			
-	var maxSurfelCount = sampler.getTargetCount();
-	if(limit)
-		sampler.setTargetCount([maxSurfelCount, MinSG.countTriangles(node)].min());
-		
-  var surfels = sampler.sampleSurfels(initialSamples);
-	sampler.setTargetCount(maxSurfelCount);
-	
-  if(!surfels)
-    return;
-		
-  // calculate packing constant
-  var packingTimer = new Util.Timer;
-  var packing = node.findNodeAttribute('surfelPacking');
-  if(!packing)
-    packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
-  statistics['t_packing'] = packingTimer.getSeconds();
-  statistics['packing'] = packing;
-  
-  // attach surfels to node
-	Utils.attachSurfels(node, surfels, packing);
-  
-  statistics['t_total'] = timer.getSeconds();
+  return statistics;
 };
 
-T.createSurfelsForLeafNodes @(public) ::= fn(Array rootNodes) {
-  statistics.clear();
-  var timer = new Util.Timer;
-  
+// ------------------------------------------------------------
+
+NS.createSurfelsForLeafNodes @(public) := fn(Array rootNodes, sampler) {
+  // Collect nodes
 	var nodeSet = new Set;
 	foreach(rootNodes as var root) {
 		root.traverse([nodeSet] => this->fn(todo, node) {
@@ -101,102 +105,35 @@ T.createSurfelsForLeafNodes @(public) ::= fn(Array rootNodes) {
 				todo += proto;
 		});
 	}
-	var todoList = nodeSet.toArray();
-	
-	progressBar.setDescription("Blue Surfels");
-	progressBar.setSize(500, 32);
-	progressBar.setToScreenCenter();
-	progressBar.setMaxValue(nodeSet.count());
-	progressBar.update(0);
-	
-	//var config = getConfig();
-	
-	var maxSurfelCount = sampler.getTargetCount();
-	var count = 0;
-	foreach(todoList as var node) {
-		progressBar.setDescription("Blue Surfels: Processing " + (++count) + "/" + todoList.count());
-		
-		//var directions = Utils.getDirectionsFromPreset(config.directionPresetName());
-		//var size = Utils.getMinProjTriangleSize(node, directions);
-		//var resolution = [[Utils.nextPowOfTwo(size > 0 ? (1/size).ceil() : 1), 4].max(), 2048].min();
-		//var surfelCount = Utils.computeVisibleTriangles(node, directions, resolution);
-		//surfelCount = [[surfelCount, 4].max(), maxSurfelCount].min();
-		var surfelCount = [MinSG.countTriangles(node), maxSurfelCount].min();
-		
-		//scanner.setResolution(resolution);
-		sampler.setTargetCount(surfelCount);
-		createSurfelsForNode(node);
-		
-		if(Utils.handleUserEvents()) {
-			statistics['status'] = "aborted";
-			break;
-		}
-		progressBar.update(count);
-	}
-	
-  statistics['t_total'] = timer.getSeconds();
-	statistics['status'] = "finished";
-	print_r(statistics);
+  return createSurfelsForNodes(nodeSet.toArray(), sampler);
 };
 
-T.createSurfelHierarchy @(public) ::= fn(Array rootNodes) {
-  statistics.clear();
-  var timer = new Util.Timer;
-	//var config = getConfig();	
-	var maxSurfelCount = sampler.getTargetCount();
-  
-	var innerNodes = new Set;
-	var leafNodes = new Set;
+// ------------------------------------------------------------
+
+NS.createSurfelHierarchy @(public) := fn(Array rootNodes, sampler) {
+  // Collect nodes
+	var nodeSet = new Set;
 	foreach(rootNodes as var root) {
-		root.traverse([innerNodes, leafNodes] => this->fn(innerNodes, leafNodes, node) {
+		root.traverse([nodeSet] => this->fn(todo, node) {
 			var proto = node.getPrototype();
 			if(!proto)
 				proto = node;
 			
-			if(proto.isClosed() || proto ---|> MinSG.GeometryNode) {
-				// leaf node
-				leafNodes += proto;
+			if(proto.isClosed()) {
+				todo += proto;
 				return $BREAK_TRAVERSAL;
 			}
 			
-			innerNodes += proto;
+			todo += proto;
 		});
 	}
-	innerNodes = innerNodes.toArray();
-	leafNodes = leafNodes.toArray();
-		
-	progressBar.setDescription("Blue Surfels");
-	progressBar.setSize(500, 32);
-	progressBar.setToScreenCenter();
-	progressBar.setMaxValue(leafNodes.count());
-	progressBar.update(0);
-	 
-	// annotate all leaf nodes with their intended surfel count	
-	var count = 0;
-	foreach(leafNodes as var node) {
-		progressBar.setDescription("Blue Surfels: Compute leaf surfel count " + (++count) + "/" + leafNodes.count());
-		
-		//var directions = Utils.getDirectionsFromPreset(config.directionPresetName());
-		//var size = Utils.getMinProjTriangleSize(node, directions);
-		//var resolution = [[Utils.nextPowOfTwo(size > 0 ? (1/size).ceil() : 1), 4].max(), 2048].min();
-		//var surfelCount = Utils.computeVisibleTriangles(node, directions, resolution);
-		//surfelCount = [[surfelCount, 4].max(), maxSurfelCount].min();
-		//var surface = Utils.estimateVisibleSurface(node, directions, resolution);
-		//node.setNodeAttribute('$cs$targetSurfels', surfelCount);		
-		
-		if(Utils.handleUserEvents()) {
-			statistics['status'] = "aborted";
-			break;
-		}
-		progressBar.update(count);
-	}
+  return createSurfelsForNodes(nodeSet.toArray(), sampler);
 };
 
+// ------------------------------------------------------------
 
-T.recreateSurfelsForAllNodes @(public) ::= fn(Array rootNodes) {
-  statistics.clear();
-  var timer = new Util.Timer;
-  
+NS.recreateSurfelsForAllNodes @(public) := fn(Array rootNodes, sampler) {
+  // Collect nodes
 	var nodeSet = new Set;
 	foreach(rootNodes as var root) {
 		root.traverse([nodeSet] => this->fn(todo, node) {
@@ -209,42 +146,31 @@ T.recreateSurfelsForAllNodes @(public) ::= fn(Array rootNodes) {
 				todo += proto;
 		});
 	}
-	var todoList = nodeSet.toArray();
-	
-	progressBar.setDescription("Blue Surfels");
-	progressBar.setSize(500, 32);
-	progressBar.setToScreenCenter();
-	progressBar.setMaxValue(nodeSet.count());
-	progressBar.update(0);
-	
-	//var config = getConfig();
-	
-	var maxSurfelCount = sampler.getTargetCount();
-	var count = 0;
-	//var directions = Utils.getDirectionsFromPreset(config.directionPresetName());
-	var totalCount =  todoList.count();
-	
-	foreach(todoList as var node) {
-		progressBar.setDescription("Blue Surfels: Processing " + (++count) + "/" + todoList.count());
-		
+	var nodes = nodeSet.toArray();
+
+  progressBar.setDescription("Blue Surfels");
+  progressBar.setSize(500, 32);
+  progressBar.setToScreenCenter();
+  progressBar.setMaxValue(nodes.count());
+  progressBar.update(0);
+  var statistics = [];
+  
+  var oldTargetCount = sampler.getTargetCount();
+  foreach(nodes as var index, var node) {    
+		progressBar.setDescription("Blue Surfels: Processing " + (index+1) + "/" + nodes.count());
+    
 		var oldSurfels = Utils.locateSurfels(node);
-		var surfelCount = oldSurfels.getVertexCount();
-		sampler.setTargetCount(surfelCount);
-		createSurfelsForNode(node);
-		
-		if(Utils.handleUserEvents()) {
-			statistics['status'] = "aborted";
-			break;
-		}
-		progressBar.update(count);
-	}
-	sampler.setTargetCount(maxSurfelCount);
-	
-  statistics['t_total'] = timer.getSeconds();
-  statistics['processed'] = totalCount;
-	statistics['status'] = "finished";
-	print_r(statistics);
-	Util.saveFile("./stats/benchmark_surfels.json", toJSON(statistics));
+		sampler.setTargetCount(oldSurfels.getVertexCount());
+    statistics += createSurfelsForNode(node, sampler);
+    
+    if(Utils.handleUserEvents())
+      break;
+      
+    progressBar.update(index+1);
+  }
+  sampler.setTargetCount(oldTargetCount);
+  
+  return statistics;
 };
 
-return T;
+return NS;

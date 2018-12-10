@@ -25,13 +25,12 @@ registry.registerSamplerGUI := fn(sampler, provider) {
 
 registry.getSamplers := fn() { return samplerRegistry.clone(); };
 registry.getSampler := fn(samplerName){ return samplerRegistry[samplerName]; };
+registry.createSampler := fn(samplerName){ return new (samplerRegistry[samplerName]); };
 registry.getGUIProvider := fn(samplerName){ return samplerGUIRegistry[samplerName]; };
 
 
-registry.applyConfig := fn(sampler, config) {
-	applyCommonConfig(sampler, config);
-	samplerConfigRegistry[sampler._printableName](sampler, config);
-};
+
+
 registry.getCachedConfig := fn() {
 	static config;
 	@(once) {

@@ -9,8 +9,9 @@
  */
 static mesh_sphere = Rendering.loadMesh(__DIR__ + "/../resources/meshes/sphere_10k.mmf");
 
-static surfelGenerator = new (Std.module("BlueSurfels/SurfelGenerator"));
-surfelGenerator.setTargetCount(10000);
+static SurfelGenerator = Std.module("BlueSurfels/SurfelGenerator");
+static sampler = new (Std.module("BlueSurfels/Sampler/GreedyCluster"));
+sampler.setTargetCount(10000);
 
 static surfelRenderer = new MinSG.SurfelRenderer;
 surfelRenderer.addSurfelStrategy(new MinSG.BlueSurfels.FixedSizeStrategy);
@@ -27,14 +28,14 @@ TS.addScene := fn(name, generator) {
 
 TS.addScene("Unit Sphere", fn() {
   var origNode = new MinSG.GeometryNode(mesh_sphere);
-  var result = surfelGenerator.createSurfelsForNode(origNode);
+  SurfelGenerator.createSurfelsForNode(origNode, sampler);
   PADrend.getCurrentScene() += origNode;
   PADrend.getCurrentScene() += surfelRenderer;
 });
 
 TS.addScene("Line of Spheres", fn() {
   var origNode = new MinSG.GeometryNode(mesh_sphere);
-  var result = surfelGenerator.createSurfelsForNode(origNode);
+  SurfelGenerator.createSurfelsForNode(origNode, sampler);
   
   for(var i=0; i<12; ++i) {
     var node = MinSG.Node.createInstance(origNode);
@@ -47,7 +48,7 @@ TS.addScene("Line of Spheres", fn() {
 
 TS.addScene("Row of Spheres", fn() {
   var origNode = new MinSG.GeometryNode(mesh_sphere);
-  var result = surfelGenerator.createSurfelsForNode(origNode);
+  SurfelGenerator.createSurfelsForNode(origNode, sampler);
   
   for(var i=0; i<12; ++i) {
     var node = MinSG.Node.createInstance(origNode);
@@ -60,7 +61,7 @@ TS.addScene("Row of Spheres", fn() {
 
 TS.addScene("Cluster of Spheres", fn() {
   var origNode = new MinSG.GeometryNode(mesh_sphere);
-  var result = surfelGenerator.createSurfelsForNode(origNode);
+  SurfelGenerator.createSurfelsForNode(origNode, sampler);
   
   var mesh = Rendering.createIcosahedron();
   var posAcc = Rendering.PositionAttributeAccessor.create(mesh);
@@ -76,7 +77,7 @@ TS.addScene("Cluster of Spheres", fn() {
 
 TS.addScene("Sphere in Sphere", fn() {
   var origNode = new MinSG.GeometryNode(mesh_sphere);
-  var result = surfelGenerator.createSurfelsForNode(origNode);
+  SurfelGenerator.createSurfelsForNode(origNode, sampler);
   
   for(var i=1; i>=0; --i){
     var s = 2.pow(i);    
@@ -90,7 +91,7 @@ TS.addScene("Sphere in Sphere", fn() {
 
 TS.addScene("Sphere in Sphere^12", fn() {
   var origNode = new MinSG.GeometryNode(mesh_sphere);
-  var result = surfelGenerator.createSurfelsForNode(origNode);
+  SurfelGenerator.createSurfelsForNode(origNode, sampler);
   
   for(var i=2; i>=-9; --i){
     var s = 2.pow(i);    
@@ -104,7 +105,7 @@ TS.addScene("Sphere in Sphere^12", fn() {
 
 TS.addScene("Random Spheres in Plane", fn() {
   var origNode = new MinSG.GeometryNode(mesh_sphere);
-  var result = surfelGenerator.createSurfelsForNode(origNode);
+  SurfelGenerator.createSurfelsForNode(origNode, sampler);
   
   var scale = 1000;
   for(var i=0; i<10000; ++i) {

@@ -2,17 +2,44 @@
  * This file is part of the proprietary part of the
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
- * Copyright (C) 2017 Sascha Brandt
+ * Copyright (C) 2017-2018 Sascha Brandt <sascha@brandt.graphics>
  *
  * PADrend consists of an open source part and a proprietary part.
  * For the proprietary part of PADrend all rights are reserved.
  */
 static NS = new Namespace;
 static SurfelGenerator = Std.module("BlueSurfels/SurfelGenerator");
-static SamplerRegistry = Std.module("BlueSurfels/GUI/SamplerRegistry");
-static ScannerRegistry = Std.module("BlueSurfels/Config/SurfaceScannerConfig");
 static Utils = Std.module("BlueSurfels/Utils");
-static progressBar = new (Std.module('Tools/ProgressBar'));
+
+// -------------------------------------------------------------------
+
+static samplerRegistry = new Map;  // samplerName -> sampler
+static samplerGUIRegistry = new Map; // samplerName -> guiProvider(obj)
+
+NS.registerSampler := fn(sampler, String displayableName=""){
+	if(displayableName.empty())
+		displayableName = sampler._printableName;
+	samplerRegistry[displayableName] = sampler;
+};
+
+NS.registerSamplerGUI := fn(sampler, provider) {
+	Std.Traits.requireTrait(provider, Std.Traits.CallableTrait);
+	samplerGUIRegistry[sampler._printableName] = provider;
+};
+
+NS.getSamplers := fn() { return samplerRegistry.clone(); };
+NS.getSampler := fn(samplerName){ return samplerRegistry[samplerName]; };
+NS.createSampler := fn(samplerName){ return new (samplerRegistry[samplerName]); };
+NS.getGUIProvider := fn(samplerName){ return samplerGUIRegistry[samplerName]; };
+
+NS.createConfigWrapper := fn(name, defaultValue, callback=void) {
+	var config = Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.' + name, defaultValue);
+	if(callback) {
+		config.onDataChanged += callback;
+		config.forceRefresh();
+	}
+	return config;
+};
 
 // -------------------------------------------------------------------
 
@@ -31,21 +58,23 @@ NS.initGUI := fn(fui) {
 				GUI.LABEL : "Info"
 		}];
 	});
-	gui.register('BlueSurfels_Tabs.99_Test',[gui] => fn(gui){
+	gui.register('BlueSurfels_Tabs.30_Utils',[gui] => fn(gui){
 		return [{
 				GUI.TYPE : GUI.TYPE_TAB,
-				GUI.TAB_CONTENT : createTestPanel(gui),
-				GUI.LABEL : "Tests"
+				GUI.TAB_CONTENT : createUtilPanel(gui),
+				GUI.LABEL : "Utils"
 		}];
 	});
+	
 	gui.register('PADrend_PluginsMenu.blueSurfels', {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Blue Surfels...",
-		GUI.ON_CLICK : [gui] => blueSurfelsGUI.toggleWindow
+		GUI.ON_CLICK : [gui] => NS.toggleWindow
 	});
+	
 	Util.registerExtension('PADrend_KeyPressed' , fn(evt) {
 		if(evt.key == Util.UI.KEY_F6) {
-			blueSurfelsGUI.toggleWindow(gui);
+			NS.toggleWindow(gui);
 			return true;
 		}
 		return false;
@@ -90,21 +119,14 @@ NS.toggleWindow := fn(gui) {
 };
 
 // -------------------------------------------------------------------
-	
-static createSurfelPanel = fn(gui) {
-	var scannerConfig = ScannerRegistry.getCachedConfig();
-	var samplerConfig = SamplerRegistry.getCachedConfig();
-	
-	var generatorFactory = [scannerConfig,samplerConfig] => fn(scannerConfig,samplerConfig) {
-		var sampler = (SamplerRegistry.getSampler(samplerConfig.samplerName()));
-		SamplerRegistry.applyConfig(sampler, samplerConfig);
-		var scanner = new (ScannerRegistry.getScanner(scannerConfig.scannerName()));
-		ScannerRegistry.applyConfig(scanner, scannerConfig);
-		return (new SurfelGenerator)
-			.setSampler(sampler)
-			.setScanner(scanner);
-	};
-	
+
+static createSurfelPanel = fn(gui) {	
+	var samplerConfig = new ExtObject({
+		$samplerName : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.sampler','GreedyCluster'),
+		$currentSampler : void,
+	});
+	samplerConfig.currentSampler = NS.createSampler(samplerConfig.samplerName());
+		
 	static panelProperties = [
 		new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,gui._createRectShape(new Util.Color4ub(230,230,230,255),new Util.Color4ub(150,150,150,255),true))
 	];
@@ -117,46 +139,14 @@ static createSurfelPanel = fn(gui) {
 	
 	panel += "----";
 	panel++;
-	
-	panel += {
-		GUI.TYPE : GUI.TYPE_SELECT,
-		GUI.LABEL : "Scanner",
-		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
-		GUI.OPTIONS : {
-      var options = [];
-      foreach(ScannerRegistry.getScanners() as var key, var value)
-        options += [key];
-      options;
-		},
-    GUI.DATA_WRAPPER : scannerConfig.scannerName,
-	};	
-	panel++;
 		
-	var refreshScannerGUI = Std.DataWrapper.createFromFunctions([scannerConfig] => fn(scannerConfig) {
-		var provider = ScannerRegistry.getGUIProvider(scannerConfig.scannerName());
-		return provider ? provider(scannerConfig) : [];
-	});	
-	panel += {
-		GUI.TYPE : GUI.TYPE_CONTAINER,
-		GUI.CONTENTS : refreshScannerGUI,
-		GUI.SIZE : [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS, 10, 10],
-		GUI.LAYOUT : (new GUI.FlowLayouter()).setMargin(10),
-		GUI.PROPERTIES : panelProperties,
-		GUI.FLAGS : GUI.BACKGROUND ,
-	};
-	panel++;	
-	scannerConfig.scannerName.onDataChanged += [refreshScannerGUI] => fn(refreshScannerGUI, ...) { refreshScannerGUI.forceRefresh(); };
-		
-	panel += "----";
-	panel++;
-	
 	panel += {
 		GUI.TYPE : GUI.TYPE_SELECT,
 		GUI.LABEL : "Sampler",
 		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
 		GUI.OPTIONS : {
       var options = [];
-      foreach(SamplerRegistry.getSamplers() as var key, var value)
+      foreach(NS.getSamplers() as var key, var value)
         options += [key];
       options;
 		},
@@ -164,9 +154,9 @@ static createSurfelPanel = fn(gui) {
 	};	
 	panel++;	
 		
-	var refreshSamplerGUI = Std.DataWrapper.createFromFunctions([samplerConfig] => fn(samplerConfig) {
-		var provider = SamplerRegistry.getGUIProvider(samplerConfig.samplerName());
-		return provider ? provider(samplerConfig) : [];
+	var refreshSamplerGUI = Std.DataWrapper.createFromFunctions([samplerConfig] => fn(config) {
+		var provider = NS.getGUIProvider(config.samplerName());
+		return provider ? provider(config.currentSampler) : [];
 	});
 	
 	panel += {
@@ -179,73 +169,57 @@ static createSurfelPanel = fn(gui) {
 	};
 	panel++;
 	
-	samplerConfig.samplerName.onDataChanged += [refreshSamplerGUI] => fn(refreshSamplerGUI, ...) { refreshSamplerGUI.forceRefresh(); };
+	samplerConfig.samplerName.onDataChanged += [samplerConfig, refreshSamplerGUI] => fn(config, refreshSamplerGUI, name) {
+		config.currentSampler = NS.createSampler(config.samplerName());
+		refreshSamplerGUI.forceRefresh(); 
+	};
+	//samplerConfig.samplerName.forceRefresh();
 	
 	panel += "----";
 	panel++;
 	
+	// ------------------------------------
+	
 	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Create surfels for selected nodes",
-		GUI.ON_CLICK : [generatorFactory] => fn(generatorFactory) {
-			progressBar.setDescription("Blue Surfels");
-			progressBar.setSize(500, 32);
-			progressBar.setToScreenCenter();
-			progressBar.setMaxValue(NodeEditor.getSelectedNodes().count());
-			progressBar.update(0);
-		
-			var generator = generatorFactory();
-			foreach(NodeEditor.getSelectedNodes() as var index, var node) {
-				generator.createSurfelsForNode(node);
-			  print_r(generator.getStatistics());
-				
-				if(Utils.handleUserEvents()) {
-					break;
-				}
-				progressBar.update(index+1);
-			}
+		GUI.ON_CLICK : [samplerConfig] => fn(config) {
+			var statistics = SurfelGenerator.createSurfelsForNodes(NodeEditor.getSelectedNodes(), config.currentSampler);
+			outln("\nSurfel Statistics (saved to ./surfel_stats.json): ");
+			print_r(SurfelGenerator.accumulateStatistics(statistics));
+			Util.saveFile("./surfel_stats.json", toJSON(statistics));
+			// reselect nodes to trigger info update
+			NodeEditor.selectNodes(NodeEditor.getSelectedNodes());
 		},
 		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
 	};
 	panel++;
-	
+		
 	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL : "Create surfels for selected nodes (limited)",
-		GUI.ON_CLICK : [generatorFactory] => fn(generatorFactory) {
-			progressBar.setDescription("Blue Surfels");
-			progressBar.setSize(500, 32);
-			progressBar.setToScreenCenter();
-			progressBar.setMaxValue(NodeEditor.getSelectedNodes().count());
-			progressBar.update(0);
-		
-			var generator = generatorFactory();
-			var todo = new Set;
-			foreach(NodeEditor.getSelectedNodes() as var index, var node) {
-				var proto = node.getPrototype() ? node.getPrototype() : node;
-				todo += proto;
-			}
-			
-			foreach(todo.toArray() as var index, var node) {
-				generator.createSurfelsForNode(node, true);
-			  print_r(generator.getStatistics());
-				
-				if(Utils.handleUserEvents()) {
-					break;
-				}
-				progressBar.update(index+1);
-			}
+		GUI.LABEL : "Create surfels Hierarchy",
+		GUI.ON_CLICK : [samplerConfig] => fn(config) {
+			var statistics = SurfelGenerator.createSurfelHierarchy(NodeEditor.getSelectedNodes(), config.currentSampler);
+			outln("\nSurfel Statistics (saved to ./surfel_stats.json): ");
+			print_r(SurfelGenerator.accumulateStatistics(statistics));
+			Util.saveFile("./surfel_stats.json", toJSON(statistics));
+			// reselect nodes to trigger info update
+			NodeEditor.selectNodes(NodeEditor.getSelectedNodes());
 		},
 		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
 	};
 	panel++;
-	
+		
 	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Create surfels for all leaf nodes",
-		GUI.ON_CLICK : [generatorFactory] => fn(generatorFactory) {
-			var generator = generatorFactory();
-			generator.createSurfelsForLeafNodes(NodeEditor.getSelectedNodes());
+		GUI.ON_CLICK : [samplerConfig] => fn(config) {
+			var statistics = SurfelGenerator.createSurfelsForLeafNodes(NodeEditor.getSelectedNodes(), config.currentSampler);
+			outln("\nSurfel Statistics (saved to ./surfel_stats.json): ");
+			print_r(SurfelGenerator.accumulateStatistics(statistics));
+			Util.saveFile("./surfel_stats.json", toJSON(statistics));
+			// reselect nodes to trigger info update
+			NodeEditor.selectNodes(NodeEditor.getSelectedNodes());
 		},
 		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
 	};
@@ -254,12 +228,19 @@ static createSurfelPanel = fn(gui) {
 	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Recreate surfels for all nodes",
-		GUI.ON_CLICK : [generatorFactory] => fn(generatorFactory) {
-			var generator = generatorFactory();
-			generator.recreateSurfelsForAllNodes(NodeEditor.getSelectedNodes());
+		GUI.ON_CLICK : [samplerConfig] => fn(config) {
+			var statistics = SurfelGenerator.recreateSurfelsForAllNodes(NodeEditor.getSelectedNodes(), config.currentSampler);
+			outln("\nSurfel Statistics (saved to ./surfel_stats.json): ");
+			print_r(SurfelGenerator.accumulateStatistics(statistics));
+			Util.saveFile("./surfel_stats.json", toJSON(statistics));
+			// reselect nodes to trigger info update
+			NodeEditor.selectNodes(NodeEditor.getSelectedNodes());
 		},
 		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
 	};
+	panel++;
+	
+	panel += "----";
 	panel++;
 		
 	panel += {
@@ -271,6 +252,8 @@ static createSurfelPanel = fn(gui) {
 				if(Utils.removeSurfels(node)) ++count;
 			}
 			PADrend.message(""+count+" Surfels removed.");
+			// reselect nodes to trigger info update
+			NodeEditor.selectNodes(NodeEditor.getSelectedNodes());
 		},
 		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
 	};
@@ -285,9 +268,14 @@ static createSurfelPanel = fn(gui) {
 				node.traverse(count->fn(node){if(Utils.removeSurfels(node))++this[0];} );
 			}
 			PADrend.message(""+count[0]+" Surfels removed.");
+			// reselect nodes to trigger info update
+			NodeEditor.selectNodes(NodeEditor.getSelectedNodes());
 		},
 		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
 	};
+	panel++;
+	
+	panel += "----";
 	panel++;
 	
 	panel += {
@@ -339,7 +327,7 @@ static createInfoPanel = fn(gui) {
 			}
 			if(surfels){
 				t += "Num surfels: "+surfels.getVertexCount()+"\n";
-				t += "Surface: "+node.findNodeAttribute('surfelPacking')+"\n";
+				t += "Packing: "+node.findNodeAttribute('surfelPacking')+"\n";
 			}
 			t += "----\n";
 		}
@@ -360,7 +348,7 @@ static createInfoPanel = fn(gui) {
 
 // -------------------------------------------------------------------
 
-static createTestPanel = fn(gui) {
+static createUtilPanel = fn(gui) {
 	var panel = gui.create({
 		GUI.TYPE : GUI.TYPE_CONTAINER,
 		GUI.SIZE : GUI.SIZE_MAXIMIZE,
@@ -380,42 +368,8 @@ static createTestPanel = fn(gui) {
 		};
 		panel++;
 	}	
-	
-	panel += "*Test Sampling*";
-	panel++;
-	
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_BUTTON,
-		GUI.LABEL				:	"Compute Surface Area",
-		GUI.ON_CLICK : fn() {
-			var node = NodeEditor.getSelectedNode();
-			if(!node) return;
-			var surface = 0;
-			foreach(MinSG.collectGeoNodes(node) as var n) {
-				var s = n.getWorldTransformationSRT().getScale();
-				surface += Rendering.computeSurfaceArea(n.getMesh()) * s;
-			}
-			PADrend.message("Total Surface Area: " + surface);
-		},
-		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
-	};
-	panel++;
-	
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_BUTTON,
-		GUI.LABEL				:	"Scan Visible Surface",
-		GUI.ON_CLICK : fn() {
-			var scanner = new (Std.module("BlueSurfels/Scanners/RasterScanner"));
-			scanner.setDebug(true);
-			//scanner.setResolution(16);
-			scanner.scanSurface(NodeEditor.getSelectedNode());
-			print_r(scanner.getStatistics());
-		},
-		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
-	};
-	panel++;
-	
-	panel += "*Other*";
+		
+	panel += "*Utils*";
 	panel++;
 	
 	panel += {

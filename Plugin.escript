@@ -12,7 +12,7 @@
 var plugin = new Plugin({
 	Plugin.NAME				:	'BlueSurfels',
 	Plugin.DESCRIPTION		:	"Progressive Blue Surfels",
-	Plugin.VERSION			:	0.3,
+	Plugin.VERSION			:	0.4,
 	Plugin.AUTHORS			:	"Sascha Brandt, Claudius Jaehn",
 	Plugin.OWNER			:	"Sascha Brandt",
 	Plugin.LICENSE			:	"Proprietary",
@@ -20,16 +20,19 @@ var plugin = new Plugin({
 	Plugin.EXTENSION_POINTS	:	[]
 });
 
-plugin.init:=fn() {
+plugin.init := fn() {
 	PADrend.SceneManagement.addSearchPath(__DIR__ + "/resources/shader/");
 	
 	module.on('PADrend/gui', fn(gui) {
-		Std.module('BlueSurfels/GUI/SurfelWindow').initGUI(gui);
+		Std.module('BlueSurfels/GUI/SurfelGUI').initGUI(gui);
 		Std.module('BlueSurfels/GUI/SurfelRendererGUI').initGUI(gui);
 	});
 
-  Util.registerExtension('PADrend_Init',this->fn(){      
-		loadOnce(__DIR__+"/SurfelDebugRenderer.escript");
+  Util.registerExtension('PADrend_Init',this->fn() {
+		Std.module('BlueSurfels/Tools/SurfelDebugRenderer');
+		Std.module('BlueSurfels/Sampler/GreedyCluster');
+		Std.module('BlueSurfels/Sampler/ProgressiveBlueSurfels');
+		Std.module('BlueSurfels/Sampler/RandomSampler');
   });
 	
 	return true;
