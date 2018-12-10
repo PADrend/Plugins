@@ -7,14 +7,16 @@
  * PADrend consists of an open source part and a proprietary part.
  * For the proprietary part of PADrend all rights are reserved.
  */
-static BS_GUI = new Namespace;
+static NS = new Namespace;
 static SurfelGenerator = Std.module("BlueSurfels/SurfelGenerator");
-static SamplerRegistry = Std.module("BlueSurfels/Config/SurfelSamplerConfig");
+static SamplerRegistry = Std.module("BlueSurfels/GUI/SamplerRegistry");
 static ScannerRegistry = Std.module("BlueSurfels/Config/SurfaceScannerConfig");
 static Utils = Std.module("BlueSurfels/Utils");
 static progressBar = new (Std.module('Tools/ProgressBar'));
 
-BS_GUI.initGUI := fn(fui) {
+// -------------------------------------------------------------------
+
+NS.initGUI := fn(fui) {
 	gui.register('BlueSurfels_Tabs.10_Blue_Surfels',[gui] => fn(gui){
 		return [{
 				GUI.TYPE : GUI.TYPE_TAB,
@@ -36,10 +38,23 @@ BS_GUI.initGUI := fn(fui) {
 				GUI.LABEL : "Tests"
 		}];
 	});
+	gui.register('PADrend_PluginsMenu.blueSurfels', {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Blue Surfels...",
+		GUI.ON_CLICK : [gui] => blueSurfelsGUI.toggleWindow
+	});
+	Util.registerExtension('PADrend_KeyPressed' , fn(evt) {
+		if(evt.key == Util.UI.KEY_F6) {
+			blueSurfelsGUI.toggleWindow(gui);
+			return true;
+		}
+		return false;
+	});
 };
 
+// -------------------------------------------------------------------
 
-BS_GUI.toggleWindow := fn(gui) {
+NS.toggleWindow := fn(gui) {
 	@(once) static surfelWindow;
 	
 	if(surfelWindow) {
@@ -424,4 +439,4 @@ static createTestPanel = fn(gui) {
 	return panel;
 };
 
-return BS_GUI;
+return NS;

@@ -9,7 +9,6 @@
  */
 static samplerRegistry = new Map;  // samplerName -> sampler
 static samplerGUIRegistry = new Map; // samplerName -> guiProvider(obj)
-static samplerConfigRegistry = new Map; // samplerName -> applyConfig(obj)
 
 static registry = new Namespace;
 
@@ -19,19 +18,16 @@ registry.registerSampler := fn(sampler, String displayableName=""){
 	samplerRegistry[displayableName] = sampler;
 };
 
-registry.registerSamplerConfigGUI := fn(sampler, provider) {
+registry.registerSamplerGUI := fn(sampler, provider) {
 	Std.Traits.requireTrait(provider, Std.Traits.CallableTrait);
 	samplerGUIRegistry[sampler._printableName] = provider;
-};
-
-registry.registerSamplerConfig := fn(sampler, applyConfig) {
-	Std.Traits.requireTrait(applyConfig, Std.Traits.CallableTrait);
-	samplerConfigRegistry[sampler._printableName] = applyConfig;
 };
 
 registry.getSamplers := fn() { return samplerRegistry.clone(); };
 registry.getSampler := fn(samplerName){ return samplerRegistry[samplerName]; };
 registry.getGUIProvider := fn(samplerName){ return samplerGUIRegistry[samplerName]; };
+
+
 registry.applyConfig := fn(sampler, config) {
 	applyCommonConfig(sampler, config);
 	samplerConfigRegistry[sampler._printableName](sampler, config);
@@ -83,7 +79,7 @@ registry.registerSampler(new MinSG.BlueSurfels.ProgressiveSampler);
 registry.registerSamplerConfig(MinSG.BlueSurfels.ProgressiveSampler, fn(sampler, config) {
 	sampler.setSamplesPerRound(config.samplesPerRound());
 });
-registry.registerSamplerConfigGUI(MinSG.BlueSurfels.ProgressiveSampler, fn(config) {
+registry.registerSamplerGUI(MinSG.BlueSurfels.ProgressiveSampler, fn(config) {
 	var entries = registry.getCommonConfigGUI(config);
 	entries += {
 		GUI.TYPE : GUI.TYPE_RANGE,
@@ -101,7 +97,7 @@ registry.registerSamplerConfigGUI(MinSG.BlueSurfels.ProgressiveSampler, fn(confi
 
 registry.registerSampler(new MinSG.BlueSurfels.RandomSampler);
 registry.registerSamplerConfig(MinSG.BlueSurfels.RandomSampler, fn(sampler, config) { });
-registry.registerSamplerConfigGUI(MinSG.BlueSurfels.RandomSampler, fn(config) {
+registry.registerSamplerGUI(MinSG.BlueSurfels.RandomSampler, fn(config) {
 	return registry.getCommonConfigGUI(config);
 });
 
@@ -110,17 +106,8 @@ registry.registerSamplerConfigGUI(MinSG.BlueSurfels.RandomSampler, fn(config) {
 
 registry.registerSampler(new MinSG.BlueSurfels.GreedyCluster);
 registry.registerSamplerConfig(MinSG.BlueSurfels.GreedyCluster, fn(sampler, config) { });
-registry.registerSamplerConfigGUI(MinSG.BlueSurfels.GreedyCluster, fn(config) {
+registry.registerSamplerGUI(MinSG.BlueSurfels.GreedyCluster, fn(config) {
 	return registry.getCommonConfigGUI(config);
 });
 
-
-// -----------------------------------------------------------------------
-// PassThroughSampler
-var PassThroughSampler = new Type(MinSG.BlueSurfels.ScriptedSampler);
-PassThroughSampler._printableName := $PassThroughSampler;
-PassThroughSampler.doSampleSurfels @(override) ::= fn(mesh) { return mesh; };
-registry.registerSampler(new PassThroughSampler);
-registry.registerSamplerConfig(PassThroughSampler, fn(sampler, config) { });
-registry.registerSamplerConfigGUI(PassThroughSampler, fn(config) { return []; });
 return registry;
