@@ -13,8 +13,8 @@ static SurfelGenerator = Std.module("BlueSurfels/SurfelGenerator");
 static sampler = new (Std.module("BlueSurfels/Sampler/GreedyCluster"));
 sampler.setTargetCount(10000);
 
-static surfelRenderer = new MinSG.SurfelRenderer;
-surfelRenderer.addSurfelStrategy(new MinSG.BlueSurfels.FixedSizeStrategy);
+//static surfelRenderer = new MinSG.SurfelRenderer;
+//surfelRenderer.addSurfelStrategy(new MinSG.BlueSurfels.FixedSizeStrategy);
 
 static TS = new Namespace;
 TS.scenes := [];
@@ -30,7 +30,7 @@ TS.addScene("Unit Sphere", fn() {
   var origNode = new MinSG.GeometryNode(mesh_sphere);
   SurfelGenerator.createSurfelsForNode(origNode, sampler);
   PADrend.getCurrentScene() += origNode;
-  PADrend.getCurrentScene() += surfelRenderer;
+  //PADrend.getCurrentScene() += surfelRenderer;
 });
 
 TS.addScene("Line of Spheres", fn() {
@@ -43,7 +43,7 @@ TS.addScene("Line of Spheres", fn() {
     PADrend.getCurrentScene() += node;
   }
   
-  PADrend.getCurrentScene() += surfelRenderer;
+  //PADrend.getCurrentScene() += surfelRenderer;
 });
 
 TS.addScene("Row of Spheres", fn() {
@@ -56,7 +56,7 @@ TS.addScene("Row of Spheres", fn() {
     PADrend.getCurrentScene() += node;
   }
   
-  PADrend.getCurrentScene() += surfelRenderer;
+  //PADrend.getCurrentScene() += surfelRenderer;
 });
 
 TS.addScene("Cluster of Spheres", fn() {
@@ -72,7 +72,7 @@ TS.addScene("Cluster of Spheres", fn() {
     PADrend.getCurrentScene() += node;
   }
   
-  PADrend.getCurrentScene() += surfelRenderer;
+  //PADrend.getCurrentScene() += surfelRenderer;
 });
 
 TS.addScene("Sphere in Sphere", fn() {
@@ -86,7 +86,7 @@ TS.addScene("Sphere in Sphere", fn() {
     PADrend.getCurrentScene() += node;
   }
   
-  PADrend.getCurrentScene() += surfelRenderer;
+  //PADrend.getCurrentScene() += surfelRenderer;
 });
 
 TS.addScene("Sphere in Sphere^12", fn() {
@@ -100,7 +100,7 @@ TS.addScene("Sphere in Sphere^12", fn() {
     PADrend.getCurrentScene() += node;
   }
   
-  PADrend.getCurrentScene() += surfelRenderer;
+  //PADrend.getCurrentScene() += surfelRenderer;
 });
 
 TS.addScene("Random Spheres in Plane", fn() {
@@ -115,7 +115,7 @@ TS.addScene("Random Spheres in Plane", fn() {
     PADrend.getCurrentScene() += node;
   }
   
-  PADrend.getCurrentScene() += surfelRenderer;
+  //PADrend.getCurrentScene() += surfelRenderer;
 });
 
 return TS;

@@ -125,18 +125,20 @@ NS.placeCamerasAroundNode := fn(MinSG.Node node, resolution, Array directions) {
  */
 NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
 	// TODO: check if resolution is power of two
-	var blockSize = [resolution, 8].min();
+	var blockSize = 8;
 	var workGroups = resolution / blockSize;
 	
 	// set up shader
-	var shaderFile = __DIR__ + "/resources/shader/CountAndPackShader.sfn";
-	var shader = Rendering.Shader.createShader(Rendering.Shader.USE_UNIFORMS);	
-	shader.attachCSFile(shaderFile, {'BLOCK_SIZE' : blockSize});
-		
+	static shader;
+	@ (once) {
+		var shaderFile = __DIR__ + "/resources/shader/CountAndPackShader.sfn";
+		shader = Rendering.Shader.createShader(Rendering.Shader.USE_UNIFORMS);	
+		shader.attachCSFile(shaderFile, {'BLOCK_SIZE' : blockSize});
+	}
+	
 	// set up atomic buffer
-	var atomicBuffer = new Rendering.BufferObject;
-	atomicBuffer.uploadData(Rendering.TARGET_SHADER_STORAGE_BUFFER, [0], Rendering.USAGE_DYNAMIC_COPY, Util.TypeConstant.UINT32);
-	atomicBuffer._bind(Rendering.TARGET_SHADER_STORAGE_BUFFER, 0);
+	var counterBuffer = (new Rendering.BufferObject).allocate(4).clear();
+	renderingContext.bindBuffer(counterBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, 0);
 	
 	// set up rendering context	
 	renderingContext.pushAndSetTexture(0, t_color);
@@ -149,8 +151,8 @@ NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
   renderingContext.dispatchCompute(workGroups, workGroups, layers);
 		
 	// get pixel count & reset atomic buffer
-	var pixelCount = atomicBuffer.downloadData(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1, Util.TypeConstant.UINT32).front();
-	atomicBuffer.uploadSubData(Rendering.TARGET_SHADER_STORAGE_BUFFER, [0], 0, Util.TypeConstant.UINT32);
+	var pixelCount = counterBuffer.download(1, Util.TypeConstant.UINT32).front();
+	counterBuffer.clear();
 	//outln("pixel: ",pixelCount);
 
 	// create & upload mesh
@@ -161,29 +163,14 @@ NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
 	var mesh = new Rendering.Mesh(vd, pixelCount, 0);
 	mesh._upload();
 	mesh.releaseLocalData();
-	var surfelBuffer;
 	
-	if(mesh.isSet($bindVertexBuffer)) {
-		mesh.bindVertexBuffer(renderingContext, Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
-	} else {		
-		surfelBuffer = new Rendering.BufferObject;
-		mesh._swapVertexBuffer(surfelBuffer);		
-		surfelBuffer._bind(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
-	}
+	renderingContext.bindBuffer(mesh, Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
 	
 	// copy pixels to mesh
   renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["packMesh"]);
   renderingContext.dispatchCompute(workGroups, workGroups, layers);
-	
+		
 	// download mesh
-	if(mesh.isSet($bindVertexBuffer)) {
-		renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
-	} else {		
-		surfelBuffer._unbind(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
-		mesh._swapVertexBuffer(surfelBuffer);
-	}
-	
-	//mesh.assureLocalData();
 	mesh._markAsChanged();
 	mesh.setUseIndexData(false);
 	mesh.setDrawPoints();
@@ -194,7 +181,8 @@ NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
 	renderingContext.popTexture(2);	
 	renderingContext.popShader();
 	
-	atomicBuffer._unbind(Rendering.TARGET_SHADER_STORAGE_BUFFER, 0);	
+	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, 0);
+	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
 	
 	return mesh;
 };

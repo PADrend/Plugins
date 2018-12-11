@@ -9,7 +9,11 @@
  * PADrend consists of an open source part and a proprietary part.
  * For the proprietary part of PADrend all rights are reserved.
  */
-  
+
+#ifndef SURFEL_CULLING
+#define SURFEL_CULLING 1
+#endif
+
 // ------------------
 // vs
 #ifdef SG_VERTEX_SHADER
@@ -82,7 +86,7 @@ const int SPOT = 3;
 #endif
 
 // uniform
-uniform float sg_surfelPacking;
+uniform float sg_surfelPacking = 0.0;
 uniform float sg_sizeFactor = 1.0;
 
 // in
@@ -190,15 +194,18 @@ void main() {
   // compute surfel count
   float dist = max(0, -vOut.position_cs.z);
   const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
-
-  const float ppm = float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
-  const float r_inv = 2 * ppm / pointSize;
-  uint count = uint(sg_surfelPacking * r_inv * r_inv);
+  
+  #if SURFEL_CULLING > 0
+    const float ppm = float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
+    const float r_inv = 2 * ppm / pointSize;
+    uint count = uint(sg_surfelPacking * r_inv * r_inv);
+    gl_CullDistance[0] = mix(-1, 1, count > gl_VertexID && vOut.nDotV < 0);
+  #else
+    gl_CullDistance[0] = mix(-1, 1, vOut.nDotV < 0);
+  #endif
   
 	gl_PointSize = pointSize * sg_sizeFactor;
 	gl_Position = sg_matrix_cameraToClipping * vOut.position_cs;
-  gl_CullDistance[0] = mix(-1, 1, count > gl_VertexID && vOut.nDotV < 0);
-  //gl_CullDistance[0] = mix(-1, 1, vOut.nDotV < 0);
 }
 
 #endif

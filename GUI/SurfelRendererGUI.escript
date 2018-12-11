@@ -14,27 +14,27 @@
 static surfelStrategyRegistry = new Map;  // displayableName -> strategy
 static surfelStrategyGUIRegistry = new Map; // strategyName -> guiProvider(obj)
 
-var GUI = new Namespace;
+static NS = new Namespace;
 
-GUI.registerStrategy := fn(strategy, String displayableName=""){
+NS.registerStrategy := fn(strategy, String displayableName=""){
 	if(displayableName.empty())
 		displayableName = strategy._printableName;
 	surfelStrategyRegistry[displayableName] = strategy;
 };
 
-GUI.registerStrategyGUI := fn(strategy, provider) {
+NS.registerStrategyGUI := fn(strategy, provider) {
 	Std.Traits.requireTrait(provider, Std.Traits.CallableTrait);
 	surfelStrategyGUIRegistry[strategy._printableName] = provider;
 };
 
-GUI.getStrategies := fn() { return surfelStrategyRegistry.clone(); };
-GUI.getStrategy := fn(strategyName){ return surfelStrategyRegistry[strategyName]; };
-GUI.getGUIProvider := fn(strategy){ return surfelStrategyGUIRegistry[strategy._printableName]; };
+NS.getStrategies := fn() { return surfelStrategyRegistry.clone(); };
+NS.getStrategy := fn(strategyName){ return surfelStrategyRegistry[strategyName]; };
+NS.getGUIProvider := fn(strategy){ return surfelStrategyGUIRegistry[strategy._printableName]; };
 
 // -----------------------------------------------------------------------
 // Basic GUI
 
-GUI.initGUI := fn(gui) {
+NS.initGUI := fn(gui) {
 	
 	Util.registerExtension('NodeEditor_QueryAvailableStates',fn(m) {
 		m["[ext] SurfelRenderer"] = fn(){
@@ -72,7 +72,7 @@ GUI.initGUI := fn(gui) {
 	gui.register('NodeEditor_SurfelStrategy.2_strategies', fn(state, refreshCallback) {
 		var entries = [];
 		foreach(state.getSurfelStrategies() as var strategy) {
-			var provider = getGUIProvider(strategy);
+			var provider = NS.getGUIProvider(strategy);
 			if(provider) {
 				entries += { GUI.TYPE : GUI.TYPE_NEXT_ROW };
 				entries += '----';
@@ -144,8 +144,8 @@ GUI.initGUI := fn(gui) {
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.FixedSizeStrategy
 
-GUI.registerStrategy(MinSG.BlueSurfels.FixedSizeStrategy);
-GUI.registerStrategyGUI(MinSG.BlueSurfels.FixedSizeStrategy, fn(strategy, refreshCallback) {
+NS.registerStrategy(MinSG.BlueSurfels.FixedSizeStrategy);
+NS.registerStrategyGUI(MinSG.BlueSurfels.FixedSizeStrategy, fn(strategy, refreshCallback) {
 	return [
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
@@ -161,8 +161,8 @@ GUI.registerStrategyGUI(MinSG.BlueSurfels.FixedSizeStrategy, fn(strategy, refres
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.FixedCountStrategy
 
-GUI.registerStrategy(MinSG.BlueSurfels.FixedCountStrategy);
-GUI.registerStrategyGUI(MinSG.BlueSurfels.FixedCountStrategy, fn(strategy, refreshCallback) {
+NS.registerStrategy(MinSG.BlueSurfels.FixedCountStrategy);
+NS.registerStrategyGUI(MinSG.BlueSurfels.FixedCountStrategy, fn(strategy, refreshCallback) {
 	return [
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
@@ -178,8 +178,8 @@ GUI.registerStrategyGUI(MinSG.BlueSurfels.FixedCountStrategy, fn(strategy, refre
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.FactorStrategy
 
-GUI.registerStrategy(MinSG.BlueSurfels.FactorStrategy);
-GUI.registerStrategyGUI(MinSG.BlueSurfels.FactorStrategy, fn(strategy, refreshCallback) {
+NS.registerStrategy(MinSG.BlueSurfels.FactorStrategy);
+NS.registerStrategyGUI(MinSG.BlueSurfels.FactorStrategy, fn(strategy, refreshCallback) {
 	return [
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
@@ -204,8 +204,8 @@ GUI.registerStrategyGUI(MinSG.BlueSurfels.FactorStrategy, fn(strategy, refreshCa
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.BlendStrategy
 
-GUI.registerStrategy(MinSG.BlueSurfels.BlendStrategy);
-GUI.registerStrategyGUI(MinSG.BlueSurfels.BlendStrategy, fn(strategy, refreshCallback) {
+NS.registerStrategy(MinSG.BlueSurfels.BlendStrategy);
+NS.registerStrategyGUI(MinSG.BlueSurfels.BlendStrategy, fn(strategy, refreshCallback) {
 	return [
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
@@ -221,8 +221,8 @@ GUI.registerStrategyGUI(MinSG.BlueSurfels.BlendStrategy, fn(strategy, refreshCal
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.DebugStrategy
 
-GUI.registerStrategy(MinSG.BlueSurfels.DebugStrategy);
-GUI.registerStrategyGUI(MinSG.BlueSurfels.DebugStrategy, fn(strategy, refreshCallback) {
+NS.registerStrategy(MinSG.BlueSurfels.DebugStrategy);
+NS.registerStrategyGUI(MinSG.BlueSurfels.DebugStrategy, fn(strategy, refreshCallback) {
 	return [
 		{
 			GUI.TYPE : GUI.TYPE_BOOL,
@@ -243,8 +243,8 @@ GUI.registerStrategyGUI(MinSG.BlueSurfels.DebugStrategy, fn(strategy, refreshCal
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.AdaptiveStrategy
 
-GUI.registerStrategy(MinSG.BlueSurfels.AdaptiveStrategy);
-GUI.registerStrategyGUI(MinSG.BlueSurfels.AdaptiveStrategy, fn(strategy, refreshCallback) {
+NS.registerStrategy(MinSG.BlueSurfels.AdaptiveStrategy);
+NS.registerStrategyGUI(MinSG.BlueSurfels.AdaptiveStrategy, fn(strategy, refreshCallback) {
 	return [
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
@@ -269,8 +269,8 @@ GUI.registerStrategyGUI(MinSG.BlueSurfels.AdaptiveStrategy, fn(strategy, refresh
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.FoveatedStrategy
 
-GUI.registerStrategy(MinSG.BlueSurfels.FoveatedStrategy);
-GUI.registerStrategyGUI(MinSG.BlueSurfels.FoveatedStrategy, fn(strategy, refreshCallback) {
+NS.registerStrategy(MinSG.BlueSurfels.FoveatedStrategy);
+NS.registerStrategyGUI(MinSG.BlueSurfels.FoveatedStrategy, fn(strategy, refreshCallback) {
 	return [
 		{
 			GUI.TYPE : GUI.TYPE_TEXT,
@@ -311,13 +311,14 @@ GUI.registerStrategyGUI(MinSG.BlueSurfels.FoveatedStrategy, fn(strategy, refresh
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.ShaderStrategy
 
-GUI.registerStrategy(MinSG.BlueSurfels.ShaderStrategy);
-GUI.registerStrategyGUI(MinSG.BlueSurfels.ShaderStrategy, fn(strategy, refreshCallback) {	
+NS.registerStrategy(MinSG.BlueSurfels.ShaderStrategy);
+NS.registerStrategyGUI(MinSG.BlueSurfels.ShaderStrategy, fn(strategy, refreshCallback) {	
 	
 	var config = new ExtObject({
 		$shaderVS : DataWrapper.createFromFunctions(strategy->strategy.getShaderVS, strategy->strategy.setShaderVS),
 		$shaderFS : DataWrapper.createFromFunctions(strategy->strategy.getShaderFS, strategy->strategy.setShaderFS),
 		$shaderGS : DataWrapper.createFromFunctions(strategy->strategy.getShaderGS, strategy->strategy.setShaderGS),
+		$culling : DataWrapper.createFromFunctions(strategy->strategy.getSurfelCulling, strategy->strategy.setSurfelCulling),
 		$preset : new Std.DataWrapper(""),
 	});
 	
@@ -405,6 +406,13 @@ GUI.registerStrategyGUI(MinSG.BlueSurfels.ShaderStrategy, fn(strategy, refreshCa
     },
     { GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
+			GUI.TYPE : GUI.TYPE_BOOL,
+			GUI.LABEL : "Surfel Culling",
+			GUI.DATA_WRAPPER : config.culling,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
+		},
+    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Refresh",
       GUI.ON_CLICK : strategy->strategy.refreshShader,
@@ -413,4 +421,4 @@ GUI.registerStrategyGUI(MinSG.BlueSurfels.ShaderStrategy, fn(strategy, refreshCa
 	];
 });
 
-return GUI;
+return NS;

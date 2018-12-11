@@ -21,11 +21,19 @@ registerExtension( 'NodeEditor_QueryAvailableStates' , Renderer->fn(states){
 	states[ "[scripted] "+_printableName ] = this->fn(){return new this();};
 });
 
-Renderer.start @(init) :=  fn(){	return new Std.DataWrapper(0);	};
-Renderer.end @(init) := fn(){	return new Std.DataWrapper(1);	};
-Renderer.pointSize @(init) := fn(){	return new Std.DataWrapper(1.0);	};
+Renderer.start @(init) :=  fn(){ return new Std.DataWrapper(0); };
+Renderer.end @(init) := fn(){ return new Std.DataWrapper(1); };
+Renderer.pointSize @(init) := fn(){ return new Std.DataWrapper(1.0); };
+Renderer.showMesh @(init) := fn(){ return new Std.DataWrapper(false); };
+Renderer.highlight @(init) := fn(){ return new Std.DataWrapper(false); };
+Renderer.offset @(init) := fn(){ return new Std.DataWrapper(0.0); };
 Renderer.sizeToCover := false;
 Renderer.prefixToCover := false;
+
+Renderer._constructor ::= fn() {
+	var file = __DIR__ + "/../resources/shader/BlueSurfelShaderGS.sfn";
+	this.shader := Rendering.Shader.createGeometryFromFile(file, {'SURFEL_CULLING' : 0});
+};
 
 Renderer.doEnableState @(override) ::= fn(node,params){
 	
@@ -67,25 +75,32 @@ Renderer.doEnableState @(override) ::= fn(node,params){
 		var count = [[end()-start(),0.0].max(),1.0].min() * maxCount;		
 				
 		renderingContext.pushAndSetPointParameters(new Rendering.PointParameters(pointSize()));
-		renderingContext.setGlobalUniform(new Rendering.Uniform('renderSurfels',  Rendering.Uniform.BOOL,[true]));
-		renderingContext.pushAndSetColorMaterial(new Util.Color4f(1,0,0));
+		renderingContext.pushAndSetShader(shader);
+		shader.setUniform(renderingContext, 'debugOffset', Rendering.Uniform.FLOAT, [offset()]);
+		if(highlight()) 
+			renderingContext.pushAndSetColorMaterial(new Util.Color4f(1,0,0));
 		
 		frameContext.displayMesh(surfels, first, count);
+		
+		renderingContext.popShader();
 		renderingContext.popPointParameters();
 		
-		renderingContext.popMaterial();
-		renderingContext.setGlobalUniform(new Rendering.Uniform('renderSurfels',  Rendering.Uniform.BOOL,[false]));
-		//return MinSG.STATE_SKIP_RENDERING;	
+		if(highlight())
+			renderingContext.popMaterial();
+		if(!showMesh())
+			return MinSG.STATE_SKIP_RENDERING;	
 	}
 	
-	renderingContext.pushAndSetColorMaterial(new Util.Color4f(0.4,0.4,0.4));
-	renderingContext.pushAndSetPolygonOffset(0.9, 0);
+	if(showMesh()) {
+		renderingContext.pushAndSetColorMaterial(new Util.Color4f(0.4,0.4,0.4));
+	}
 	return MinSG.STATE_OK;
 };
 
-Renderer.doDisableState @(override) ::= fn(node,params){
-	renderingContext.popMaterial();
-	renderingContext.popPolygonOffset();
+Renderer.doDisableState @(override) ::= fn(node,params){	
+	if(showMesh()) {
+		renderingContext.popMaterial();
+	}
 };
 
 NodeEditor.registerConfigPanelProvider( Renderer, fn(renderer, panel) {
@@ -116,7 +131,8 @@ NodeEditor.registerConfigPanelProvider( Renderer, fn(renderer, panel) {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "PointSize",
 		GUI.DATA_WRAPPER : renderer.pointSize,
-		GUI.RANGE : [1,128]
+		GUI.RANGE : [1,128],
+		GUI.RANGE_STEP_SIZE : 1,
     };
     panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
@@ -126,7 +142,18 @@ NodeEditor.registerConfigPanelProvider( Renderer, fn(renderer, panel) {
 			},
     };
     panel++;
-
+    panel += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "Show Mesh",
+		GUI.DATA_WRAPPER : renderer.showMesh,
+    };
+    panel++;
+    panel += {
+		GUI.TYPE : GUI.TYPE_RANGE,
+		GUI.LABEL : "offset",
+		GUI.DATA_WRAPPER : renderer.offset,
+		GUI.RANGE : [-1,1],
+    };
 });
 
 Std.module.on( 'LibMinSGExt/ScriptedStateImportersRegistry',fn(registry){

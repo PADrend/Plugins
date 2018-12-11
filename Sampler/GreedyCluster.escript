@@ -52,6 +52,7 @@ T.sample @(override) ::= fn(MinSG.Node node) {
 		return void;
 	
 	var samples = sampler.sampleSurfels(initialSamples);
+  
   statistics.merge(sampler.getStatistics());
 	statistics["t_total"] = totalTimer.getSeconds();
   return samples;

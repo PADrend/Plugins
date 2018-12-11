@@ -30,6 +30,7 @@ NS.accumulateStatistics @(public) := fn(statistics) {
     }
   }
   accStats['processed'] = statistics.count();
+  return accStats;
 };
 
 // ------------------------------------------------------------

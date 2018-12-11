@@ -9,7 +9,11 @@
  * PADrend consists of an open source part and a proprietary part.
  * For the proprietary part of PADrend all rights are reserved.
  */
-  
+ 
+#ifndef SURFEL_CULLING
+#define SURFEL_CULLING 1
+#endif
+
 // ------------------
 // vs
 #ifdef SG_VERTEX_SHADER
@@ -80,6 +84,7 @@ const int SPOT = 3;
 	uniform float	sg_pointSize;
 	uniform int sg_lightCount;
 #endif
+uniform float debugOffset = 0.0;
 
 layout(location = 0) in vec3 sg_Position;
 layout(location = 1) in vec3 sg_Normal;
@@ -167,6 +172,8 @@ void main() {
   vOut.color = sg_Color;
   vec3 viewDir = normalize(vOut.position_cs.xyz);
   vOut.nDotV = dot(vOut.normal_cs, viewDir);
+  
+  vOut.position_cs.xyz += vOut.normal_cs * debugOffset;
     
   // Compute lighting
 	CompositeColor lightSum;
@@ -211,7 +218,7 @@ void main() {
 #else
   uniform mat4 sg_matrix_cameraToClipping;
 #endif
-uniform float sg_surfelPacking;
+uniform float sg_surfelPacking = 0.0;
 uniform float sg_sizeFactor = 1.0;
 
 // in
@@ -240,8 +247,13 @@ void main() {
 	vec4 cotangent = vec4(vIn[0].cotangent_cs,0);
 	float r = vIn[0].surfelRadius;
   uint count = uint(sg_surfelPacking / (r * r));
-  if(count <= vIn[0].vertexID || vIn[0].nDotV >= 0)
-    return;
+  #if SURFEL_CULLING > 0
+    if(count <= vIn[0].vertexID || vIn[0].nDotV >= 0)
+      return;
+  #else
+    if(vIn[0].nDotV >= 0)
+      return;
+  #endif
   r *= 2 * sg_sizeFactor; // ???
 		
 	vec4 position_cs = pos + tangent * r * 2.0;

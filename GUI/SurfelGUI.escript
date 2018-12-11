@@ -358,7 +358,7 @@ static createUtilPanel = fn(gui) {
 	panel += "*Test Scenes*";
 	panel++;
 	
-	var TestScenes = Std.module("BlueSurfels/Config/TestScenes");
+	var TestScenes = Std.module("BlueSurfels/Tools/TestScenes");
 	foreach(TestScenes.getScenes() as var scene) {
 		panel += {
 			GUI.TYPE				:	GUI.TYPE_BUTTON,

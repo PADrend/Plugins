@@ -39,7 +39,7 @@ T.initialize ::= fn() {
 	this.t_normal := Rendering.createDataTexture(Rendering.Texture.TEXTURE_2D_ARRAY, resolution, resolution, layers, Util.TypeConstant.FLOAT, 3);
 
 	// shader
-	var file = __DIR__ + "/../resources/shader/RasterScanShader.sfn";
+	var file = __DIR__ + "/../resources/shader/RasterizeShader.sfn";
 	this.shader := Rendering.Shader.loadShader(file, file);	
 	
 	// fbo
@@ -64,9 +64,9 @@ T.rasterize @(public) ::= fn(MinSG.Node node) {
 		
 	// initialize FBO
 	renderingContext.pushAndSetFBO(fbo);
-	t_position.clear();
-	t_normal.clear();
-	t_color.clear();
+	t_position.clear(new Util.Color4f(0,0,0,0));
+	t_normal.clear(new Util.Color4f(0,0,0,0));
+	t_color.clear(new Util.Color4f(0,0,0,0));
 	
 	// render scene from multiple directions 	
 	renderingContext.pushAndSetShader(shader);
@@ -103,8 +103,11 @@ T.showDebugTextures ::= fn() {
 		t.download(renderingContext);
 		debugTextures += Rendering.createTextureFromBitmap(Rendering.createBitmapFromTexture(renderingContext, t));
 	}
-	var scale = renderingContext.getWindowHeight() / (t_color.getHeight() * t_color.getNumLayers());
-	var vp = new Geometry.Rect(0,0,debugTextures[0].getWidth()*scale,debugTextures[0].getHeight()*scale);
+	var width = debugTextures[0].getWidth();
+	var height = debugTextures[0].getHeight();
+	var screen = renderingContext.getWindowClientArea();
+	var scale = height <= screen.getHeight() ? (screen.getWidth() / (3*width)) : (screen.getHeight() / height);
+	var vp = new Geometry.Rect(0,0,width*scale,height*scale);
 	
 	var drawTextures = [debugTextures, new Util.Timer, vp] => fn(textures, timer, texRect, ...) {
 		if(timer.getSeconds() > 1)
