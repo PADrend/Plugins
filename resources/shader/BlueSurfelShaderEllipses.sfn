@@ -161,14 +161,14 @@ void main() {
   
 	#ifdef USE_UNIFORM_BUFFERS
 	  const int drawId = gl_BaseInstanceARB;
-		vOut.position_cs = objects[drawId].sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
-		vOut.normal_cs = (objects[drawId].sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+		mat4 matrix_modelToCamera = objects[drawId].sg_matrix_modelToCamera;
 		float pointSize = objects[drawId].sg_pointSize;
 	#else	
-    vOut.position_cs = sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
-    vOut.normal_cs = normalize(sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+		mat4 matrix_modelToCamera = sg_matrix_modelToCamera;
 		float pointSize = sg_pointSize;
 	#endif
+	vOut.position_cs = matrix_modelToCamera * vec4(sg_Position, 1.0);
+	vOut.normal_cs = normalize(matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
   
   vOut.color = sg_Color;
   vOut.viewDir = normalize(vOut.position_cs.xyz);
@@ -190,13 +190,13 @@ void main() {
   }
   
   vOut.color.xyz *= lightSum.ambient.xyz + lightSum.diffuse.xyz;
-    
-  // compute surfel count
-  float dist = max(0, -vOut.position_cs.z);
-  const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
-  
+      
   #if SURFEL_CULLING > 0
-    const float ppm = float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
+		// compute surfel count
+		float dist = max(0, -vOut.position_cs.z);
+		const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
+		float scale = length(matrix_modelToCamera[0]);
+    const float ppm = scale * float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
     const float r_inv = 2 * ppm / pointSize;
     uint count = uint(sg_surfelPacking * r_inv * r_inv);
     gl_CullDistance[0] = mix(-1, 1, count > gl_VertexID && vOut.nDotV < 0);

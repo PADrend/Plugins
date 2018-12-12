@@ -83,7 +83,7 @@ const int SPOT = 3;
 	uniform int sg_lightCount;
 #endif
 
-uniform float sg_surfelPacking;
+uniform float sg_surfelPacking = 0.0;
 uniform float sg_sizeFactor = 1.0;
 
 layout(location = 0) in vec3 sg_Position;
@@ -95,7 +95,7 @@ out VertexData {
 	vec3 normal_cs;
 	vec4 color;
   float pointSize;
-} v_out;
+} vOut;
 
 void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result){
   
@@ -150,13 +150,13 @@ void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3
 void main() {
 	#ifdef USE_UNIFORM_BUFFERS
 	  const int drawId = gl_BaseInstanceARB;
-		v_out.position_hcs = objects[drawId].sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
-		v_out.normal_cs = (objects[drawId].sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
-		v_out.pointSize = objects[drawId].sg_pointSize;
+		vOut.position_hcs = objects[drawId].sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
+		vOut.normal_cs = (objects[drawId].sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+		vOut.pointSize = objects[drawId].sg_pointSize;
 	#else	
-	  v_out.position_hcs = sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
-	  v_out.normal_cs = normalize(sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
-		v_out.pointSize = sg_pointSize;
+	  vOut.position_hcs = sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
+	  vOut.normal_cs = normalize(sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+		vOut.pointSize = sg_pointSize;
 	#endif
   
   // Compute lighting
@@ -170,31 +170,31 @@ void main() {
 	}  
 	for(int i = 0; i < sg_lightCount; ++i){
 		#ifdef USE_UNIFORM_BUFFERS
-			addLighting(sg_LightSource[sg_enabledLights[i]],v_out.position_hcs.xyz,v_out.normal_cs,0.0,lightSum);
+			addLighting(sg_LightSource[sg_enabledLights[i]],vOut.position_hcs.xyz,vOut.normal_cs,0.0,lightSum);
 		#else
-  		addLighting(sg_LightSource[i],v_out.position_hcs.xyz,v_out.normal_cs,0.0,lightSum);
+  		addLighting(sg_LightSource[i],vOut.position_hcs.xyz,vOut.normal_cs,0.0,lightSum);
 		#endif
   }
-  v_out.color = sg_Color;
-  v_out.color.xyz *= lightSum.ambient.xyz + lightSum.diffuse.xyz;
+  vOut.color = sg_Color;
+  vOut.color.xyz *= lightSum.ambient.xyz + lightSum.diffuse.xyz;
 	
-	float nDotV = dot( normalize(v_out.normal_cs.xyz),  normalize(v_out.position_hcs.xyz) );
+	float nDotV = dot( normalize(vOut.normal_cs.xyz),  normalize(vOut.position_hcs.xyz) );
 	  
 	// compute surfel count
-	float dist = max(0, -v_out.position_hcs.z);
+	float dist = max(0, -vOut.position_hcs.z);
 	const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
 	
 	#if SURFEL_CULLING > 0
 		const float ppm = float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
-		const float r_inv = 2 * ppm / pointSize;
+		const float r_inv = 2 * ppm / vOut.pointSize;
 		uint count = uint(sg_surfelPacking * r_inv * r_inv);
-		gl_CullDistance[0] = mix(-1, 1, count > gl_VertexID && vOut.nDotV < 0);
+		gl_CullDistance[0] = mix(-1, 1, count > gl_VertexID && nDotV < 0);
 	#else
-		gl_CullDistance[0] = mix(-1, 1, vOut.nDotV < 0);
+		gl_CullDistance[0] = mix(-1, 1, nDotV < 0);
 	#endif
 	
-	gl_PointSize = v_out.pointSize * sg_sizeFactor;
-	gl_Position = sg_matrix_cameraToClipping * v_out.position_hcs;
+	gl_PointSize = vOut.pointSize * sg_sizeFactor;
+	gl_Position = sg_matrix_cameraToClipping * vOut.position_hcs;
 }
 
 #endif
@@ -207,14 +207,14 @@ in VertexData {
 	vec3 normal_cs;
 	vec4 color;
   float pointSize;
-} v_in;
+} fIn;
 
 layout(location = 0) out vec4 fragColor;
 
 void main() {
-  vec3 position_cs = v_in.position_hcs.xyz / v_in.position_hcs.w;
-  vec3 normal_cs = normalize(v_in.normal_cs);
-  vec4 color = v_in.color;
+  vec3 position_cs = fIn.position_hcs.xyz / fIn.position_hcs.w;
+  vec3 normal_cs = normalize(fIn.normal_cs);
+  vec4 color = fIn.color;
   
 	fragColor = color;
 }

@@ -187,6 +187,21 @@ NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
 	return mesh;
 };
 
+
+/**
+ * compute the combined surface area of all meshes below the given node 
+ */
+NS.computeTotalSurface := fn(MinSG.Node node) {
+	var geoNodes = MinSG.collectGeoNodes(node);
+	var surface = 0;
+	var scale = node.getWorldTransformationSRT().getScale();
+	foreach(geoNodes as var n) {
+		var relScale = n.getWorldTransformationSRT().getScale() / scale;
+		surface += Rendering.computeSurfaceArea(n.getMesh()) * relScale*relScale;
+	}
+	return surface;
+};
+
 //! @return true iff a surfel was removed.
 NS.removeSurfels := fn(MinSG.Node node){
 	if(node.isInstance())

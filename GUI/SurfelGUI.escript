@@ -61,6 +61,13 @@ NS.initGUI := fn(fui) {
 	gui.register('BlueSurfels_Tabs.30_Utils',[gui] => fn(gui){
 		return [{
 				GUI.TYPE : GUI.TYPE_TAB,
+				GUI.TAB_CONTENT : createAnalysisPanel(gui),
+				GUI.LABEL : "Analysis"
+		}];
+	});
+	gui.register('BlueSurfels_Tabs.40_Utils',[gui] => fn(gui){
+		return [{
+				GUI.TYPE : GUI.TYPE_TAB,
 				GUI.TAB_CONTENT : createUtilPanel(gui),
 				GUI.LABEL : "Utils"
 		}];
@@ -343,6 +350,109 @@ static createInfoPanel = fn(gui) {
 	Util.registerExtension('NodeEditor_OnNodesSelected', updateInfo);
 	updateInfo();	
 	
+	return panel;
+};
+
+// -------------------------------------------------------------------
+
+static createAnalysisPanel = fn(gui) {
+	var panel = gui.create({
+		GUI.TYPE : GUI.TYPE_CONTAINER,
+		GUI.SIZE : GUI.SIZE_MAXIMIZE,
+		GUI.LAYOUT : GUI.LAYOUT_FLOW
+	});
+	
+	var config = new ExtObject({
+		$resolution : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.resolution', 1024),
+		$directionPresetName : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.directions', "cube"),
+		$infoWrapper : new Std.DataWrapper(""),
+		$samples : new Std.DataWrapper(1000),
+		$image : gui.createImage(new Util.Bitmap(256,256,Util.Bitmap.RGB)),
+	});
+		
+	panel += "*Sampling Analysis*";
+	panel++;
+		
+	panel += {
+		GUI.TYPE : GUI.TYPE_RANGE,
+		GUI.LABEL : "Samples",
+		GUI.RANGE : [1,5],
+		GUI.RANGE_STEP_SIZE : 1,
+    GUI.RANGE_FN_BASE : 10,
+		GUI.DATA_WRAPPER : config.samples,
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
+	};
+	panel++;
+	panel += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "compute",
+		GUI.ON_CLICK : [config] => fn(config) {
+			var node = NodeEditor.getSelectedNode();
+			if(!node) return;
+			var surfels = Utils.locateSurfels(node);
+			if(!surfels) return;
+			var count = config.samples();
+			var directions = Utils.getDirectionPresets()[config.directionPresetName()];		
+			var surface = Utils.computeTotalSurface(node);			
+			
+			var sampler = new (Std.module('BlueSurfels/Sampler/GreedyCluster'));
+			sampler.setResolution(config.resolution());
+			sampler.setDirections(directions);
+			sampler.setTargetCount(count);
+			sampler.setSeed(42);
+	  	var optSurfels = sampler.sample(node);
+			
+			var r = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
+			var r_opt = MinSG.BlueSurfels.getMinimalVertexDistances(optSurfels, count).min() * 0.5;
+			var r_max = (surface/(2*3.sqrt()*count)).sqrt();
+			var quality = r/r_max;
+			var relQuality = r/r_opt;
+			
+			var diff_max = 10 * r_max;
+			var bitmap = MinSG.BlueSurfels.differentialDomainAnalysis(surfels,diff_max,256,count,true);
+			var avgBmp = Util.blendTogether(Util.Bitmap.RGB,[bitmap]);
+			config.image.updateData(avgBmp);
+			
+			var info = "";
+			info += "Surface: " + surface + "\n";
+			info += "Max. Radius: " + r_max + "\n";
+			info += "Opt. Radius: " + r_opt + "\n";
+			info += "Radius: " + r + "\n";
+			info += "Quality: " + quality + "\n";
+			info += "Rel. Quality: " + relQuality + "\n";
+			config.infoWrapper(info);
+		},
+		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
+	};
+	panel++;
+	panel+="----";
+	panel++;
+	panel += config.image;
+	//panel++;	
+	panel += {
+		GUI.TYPE : GUI.TYPE_LABEL,
+		GUI.DATA_WRAPPER : config.infoWrapper,
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
+	};
+	panel++;
+	
+	Std.Traits.addTrait(config.image, Std.module('LibGUIExt/Traits/ContextMenuTrait'),300);	
+	config.image.contextMenuProvider += [{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Save image",
+		GUI.ON_CLICK : [config.image] => fn(image) {
+			gui.openDialog({
+				GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+				GUI.LABEL : "Save image",
+				GUI.ENDINGS : [".png"],
+				GUI.ON_ACCEPT : [image] => fn(image, filename) { 
+    			Util.saveBitmap(image.getImageData().getBitmap(), filename);
+				}
+			});
+		},
+		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
+	}];
+
 	return panel;
 };
 

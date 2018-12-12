@@ -85,6 +85,8 @@ const int SPOT = 3;
 	uniform int sg_lightCount;
 #endif
 uniform float debugOffset = 0.0;
+uniform float sg_surfelPacking = 0.0;
+uniform float sg_sizeFactor = 1.0;
 
 layout(location = 0) in vec3 sg_Position;
 layout(location = 1) in vec3 sg_Normal;
@@ -100,6 +102,7 @@ out VertexData {
   float nDotV;
   float surfelRadius;
   uint vertexID;
+  uint count;
 } vOut;
 
 // ---------------------------------------------------
@@ -159,15 +162,20 @@ void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3
 void main() {
 	#ifdef USE_UNIFORM_BUFFERS
 	  const int drawId = gl_BaseInstanceARB;
-		vOut.position_cs = objects[drawId].sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
-		vOut.normal_cs = (objects[drawId].sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+    mat4 matrix_modelToCamera = objects[drawId].sg_matrix_modelToCamera;
 		float pointSize = objects[drawId].sg_pointSize;
-	#else	
-    vOut.position_cs = sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
-    vOut.normal_cs = normalize(sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+	#else
+    mat4 matrix_modelToCamera = sg_matrix_modelToCamera;
 		float pointSize = sg_pointSize;
 	#endif
-	vOut.tangent_cs = normalize(dot(vOut.normal_cs,vec3(0,1,0)) > 0 ? cross(vOut.normal_cs,vec3(0,1,0)) : cross(vOut.normal_cs,vec3(1,0,0)));
+  vOut.position_cs = matrix_modelToCamera * vec4(sg_Position, 1.0);
+  vOut.normal_cs = normalize(matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+  vOut.tangent_cs = cross(vOut.normal_cs,vec3(1,0,0));
+  if(length(vOut.tangent_cs) == 0)
+    vOut.tangent_cs = cross(vOut.normal_cs,vec3(0,1,0));
+  if(length(vOut.tangent_cs) == 0)
+    vOut.tangent_cs = cross(vOut.normal_cs,vec3(0,0,1));
+	vOut.tangent_cs = normalize(vOut.tangent_cs);
 	vOut.cotangent_cs = normalize(cross(vOut.normal_cs, vOut.tangent_cs));  
   vOut.color = sg_Color;
   vec3 viewDir = normalize(vOut.position_cs.xyz);
@@ -192,12 +200,15 @@ void main() {
   
   vOut.color.xyz *= lightSum.ambient.xyz + lightSum.diffuse.xyz;
     
-  // compute surfel count
-  float dist = max(0, -vOut.position_cs.z);
-  const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
-
-  const float ppm = float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
-  vOut.surfelRadius = 0.5 * pointSize / ppm;
+	// compute surfel count
+	float dist = max(0, -vOut.position_cs.z);
+	const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
+	float scale = length(matrix_modelToCamera[0]);
+  const float ppm = scale * float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
+  const float r_inv = 2 * ppm / pointSize;
+  vOut.count = uint(sg_surfelPacking * r_inv * r_inv);
+  
+  vOut.surfelRadius = scale * 2.0*sg_sizeFactor/r_inv;
   vOut.vertexID = gl_VertexID;
 }
 
@@ -218,8 +229,6 @@ void main() {
 #else
   uniform mat4 sg_matrix_cameraToClipping;
 #endif
-uniform float sg_surfelPacking = 0.0;
-uniform float sg_sizeFactor = 1.0;
 
 // in
 layout(points) in;
@@ -232,6 +241,7 @@ in VertexData {
   float nDotV;
   float surfelRadius;
   uint vertexID;
+  uint count;
 } vIn[];
 
 // out
@@ -246,15 +256,13 @@ void main() {
 	vec4 tangent = vec4(vIn[0].tangent_cs,0);
 	vec4 cotangent = vec4(vIn[0].cotangent_cs,0);
 	float r = vIn[0].surfelRadius;
-  uint count = uint(sg_surfelPacking / (r * r));
   #if SURFEL_CULLING > 0
-    if(count <= vIn[0].vertexID || vIn[0].nDotV >= 0)
+    if(vIn[0].count <= vIn[0].vertexID || vIn[0].nDotV >= 0)
       return;
   #else
     if(vIn[0].nDotV >= 0)
       return;
   #endif
-  r *= 2 * sg_sizeFactor; // ???
 		
 	vec4 position_cs = pos + tangent * r * 2.0;
 	vOut.color = vIn[0].color;
