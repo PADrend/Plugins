@@ -122,7 +122,7 @@ NS.initGUI := fn(gui) {
 				GUI.LABEL : "Add strategy",
 				GUI.MENU : [state, refreshCallback] => fn(state, refreshCallback){
 					var entries = [];
-					foreach(getStrategies() as var name, var Strategy) {						
+					foreach(NS.getStrategies() as var name, var Strategy) {						
 						entries += {
 							GUI.TYPE : GUI.TYPE_BUTTON,
 							GUI.LABEL : name,
@@ -217,7 +217,28 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.BlendStrategy, fn(strategy, refreshCall
 		},
 	];
 });
-  
+
+// -----------------------------------------------------------------------
+// MinSG.BlueSurfels.ReferencePointStrategy
+
+NS.registerStrategy(MinSG.BlueSurfels.ReferencePointStrategy);
+NS.registerStrategyGUI(MinSG.BlueSurfels.ReferencePointStrategy, fn(strategy, refreshCallback) {
+	return [
+		{
+			GUI.TYPE : GUI.TYPE_SELECT,
+			GUI.LABEL : "Reference Point",
+			GUI.OPTIONS : [
+				[MinSG.BlueSurfels.CLOSEST_SURFEL, "Closest Surfel"],
+				[MinSG.BlueSurfels.CLOSEST_BB, "Closest BB"],
+				[MinSG.BlueSurfels.FARTHEST_BB, "Farthest BB"],
+				[MinSG.BlueSurfels.CENTER_BB, "Center BB"],
+			],
+			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(strategy->strategy.getReferencePoint, strategy->strategy.setReferencePoint),
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
+		},
+	];
+});
+
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.DebugStrategy
 
