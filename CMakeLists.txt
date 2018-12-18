@@ -10,8 +10,8 @@
 # with this library; see the file LICENSE. If not, you can obtain one at
 # http://mozilla.org/MPL/2.0/.
 #
-cmake_minimum_required(VERSION 2.8.11)
-project(PADrendPlugins)
+cmake_minimum_required(VERSION 3.1.0)
+project(PADrendPlugins VERSION 0.3.0)
 
 # Set up install directories
 include(GNUInstallDirs)
