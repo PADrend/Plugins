@@ -340,6 +340,7 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.ShaderStrategy, fn(strategy, refreshCal
 		$shaderFS : DataWrapper.createFromFunctions(strategy->strategy.getShaderFS, strategy->strategy.setShaderFS),
 		$shaderGS : DataWrapper.createFromFunctions(strategy->strategy.getShaderGS, strategy->strategy.setShaderGS),
 		$culling : DataWrapper.createFromFunctions(strategy->strategy.getSurfelCulling, strategy->strategy.setSurfelCulling),
+		$dynSize : DataWrapper.createFromFunctions(strategy->strategy.getSurfelDynSize, strategy->strategy.setSurfelDynSize),
 		$preset : new Std.DataWrapper(""),
 	});
 	
@@ -430,6 +431,13 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.ShaderStrategy, fn(strategy, refreshCal
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Surfel Culling",
 			GUI.DATA_WRAPPER : config.culling,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
+		},
+    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{
+			GUI.TYPE : GUI.TYPE_BOOL,
+			GUI.LABEL : "Dynamic Size",
+			GUI.DATA_WRAPPER : config.dynSize,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
 		},
     { GUI.TYPE : GUI.TYPE_NEXT_ROW },
