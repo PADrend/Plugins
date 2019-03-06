@@ -44,7 +44,7 @@ Renderer.doEnableState @(override) ::= fn(node,params){
 	
 		if(sizeToCover) {
 			sizeToCover = false;
-	    var packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
+			var packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
 			var dp = MinSG.BlueSurfels.computeRelPixelSize(PADrend.getActiveCamera(), node);
 			var prefix = end() * maxCount;
 			var radius = MinSG.BlueSurfels.getRadiusForPrefix(prefix, packing);
@@ -58,7 +58,7 @@ Renderer.doEnableState @(override) ::= fn(node,params){
 		
 		if(prefixToCover) {
 			prefixToCover = false;
-	    var packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
+			var packing = MinSG.BlueSurfels.computeSurfelPacking(surfels);
 			var dp = MinSG.BlueSurfels.computeRelPixelSize(PADrend.getActiveCamera(), node);
 			var radius = MinSG.BlueSurfels.sizeToRadius(pointSize(), dp);
 			var prefix = [maxCount, MinSG.BlueSurfels.getPrefixForRadius(radius, packing)].min();
@@ -104,56 +104,56 @@ Renderer.doDisableState @(override) ::= fn(node,params){
 };
 
 NodeEditor.registerConfigPanelProvider( Renderer, fn(renderer, panel) {
-    panel += {
+		panel += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "Start",
 		GUI.DATA_WRAPPER : renderer.start,
 		GUI.RANGE : [0,1],
 		GUI.RANGE_STEP_SIZE : 0.01,
-    };
-    panel++;
-    panel += {
+		};
+		panel++;
+		panel += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "End",
 		GUI.DATA_WRAPPER : renderer.end,
 		GUI.RANGE : [0,1],
 		GUI.RANGE_STEP_SIZE : 0.01,
-    };
-    panel += {
+		};
+		panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Cover",
 		GUI.ON_CLICK : renderer->fn() {
 				this.prefixToCover = true;
 			},
-    };
-    panel++;
-    panel += {
+		};
+		panel++;
+		panel += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "PointSize",
 		GUI.DATA_WRAPPER : renderer.pointSize,
 		GUI.RANGE : [1,128],
 		GUI.RANGE_STEP_SIZE : 1,
-    };
-    panel += {
+		};
+		panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Cover",
 		GUI.ON_CLICK : renderer->fn() {
 				this.sizeToCover = true;
 			},
-    };
-    panel++;
-    panel += {
+		};
+		panel++;
+		panel += {
 		GUI.TYPE : GUI.TYPE_BOOL,
 		GUI.LABEL : "Show Mesh",
 		GUI.DATA_WRAPPER : renderer.showMesh,
-    };
-    panel++;
-    panel += {
+		};
+		panel++;
+		panel += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "offset",
 		GUI.DATA_WRAPPER : renderer.offset,
 		GUI.RANGE : [-1,1],
-    };
+		};
 });
 
 Std.module.on( 'LibMinSGExt/ScriptedStateImportersRegistry',fn(registry){

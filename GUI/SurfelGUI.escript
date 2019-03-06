@@ -152,12 +152,12 @@ static createSurfelPanel = fn(gui) {
 		GUI.LABEL : "Sampler",
 		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
 		GUI.OPTIONS : {
-      var options = [];
-      foreach(NS.getSamplers() as var key, var value)
-        options += [key];
-      options;
+			var options = [];
+			foreach(NS.getSamplers() as var key, var value)
+				options += [key];
+			options;
 		},
-    GUI.DATA_WRAPPER : samplerConfig.samplerName,
+		GUI.DATA_WRAPPER : samplerConfig.samplerName,
 	};	
 	panel++;	
 		
@@ -378,7 +378,7 @@ static createAnalysisPanel = fn(gui) {
 		GUI.LABEL : "Samples",
 		GUI.RANGE : [1,5],
 		GUI.RANGE_STEP_SIZE : 1,
-    GUI.RANGE_FN_BASE : 10,
+		GUI.RANGE_FN_BASE : 10,
 		GUI.DATA_WRAPPER : config.samples,
 		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 	};
@@ -400,7 +400,7 @@ static createAnalysisPanel = fn(gui) {
 			sampler.setDirections(directions);
 			sampler.setTargetCount(count);
 			sampler.setSeed(42);
-	  	var optSurfels = sampler.sample(node);
+			var optSurfels = sampler.sample(node);
 			
 			var r = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
 			var r_opt = MinSG.BlueSurfels.getMinimalVertexDistances(optSurfels, count).min() * 0.5;
@@ -446,7 +446,7 @@ static createAnalysisPanel = fn(gui) {
 				GUI.LABEL : "Save image",
 				GUI.ENDINGS : [".png"],
 				GUI.ON_ACCEPT : [image] => fn(image, filename) { 
-    			Util.saveBitmap(image.getImageData().getBitmap(), filename);
+					Util.saveBitmap(image.getImageData().getBitmap(), filename);
 				}
 			});
 		},
@@ -489,11 +489,11 @@ static createUtilPanel = fn(gui) {
 			var surfelNodes = MinSG.collectNodesReferencingAttribute(NodeEditor.getSelectedNode(), 'surfels');
 			var set = new Std.Set;
 			foreach(surfelNodes as var n) 
-			  set += n.findNodeAttribute('surfels');
+				set += n.findNodeAttribute('surfels');
 			var i=0;
 			foreach(set as var s) {
-			  Rendering.shrinkMesh(s, true);
-			  out("\r", ++i ,"/", set.count());
+				Rendering.shrinkMesh(s, true);
+				out("\r", ++i ,"/", set.count());
 			}
 		},
 		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],

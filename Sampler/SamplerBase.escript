@@ -31,7 +31,7 @@ T.setDebug @(public) ::= fn(Bool v) {	debug = v; return this; };
 T.getDebug @(public) ::= fn() { return debug; };
 
 T.sample ::= fn(MinSG.Node node) {
-  return void;
+	return void;
 };
 
 // -----------------------------------------------------------------------
@@ -54,11 +54,11 @@ T.getCommonGUI := fn(sampler) {
 			GUI.RANGE_STEP_SIZE : 1,
 			GUI.RANGE : [1,6],
 			GUI.RANGE_STEP_SIZE : 1,
-      GUI.RANGE_FN_BASE : 10,
+			GUI.RANGE_FN_BASE : 10,
 			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('targetCount', 10000, sampler->sampler.setTargetCount),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.LABEL : "Seed",
@@ -67,9 +67,9 @@ T.getCommonGUI := fn(sampler) {
 			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('seed', 0, sampler->sampler.setSeed),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		"----",
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 	];
 };
 

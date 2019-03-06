@@ -38,9 +38,9 @@ NS.getDirectionPresets := fn() {
 				if(!name.endsWith("(upper)") || dir.y() <= 0 )
 					arr += dir;
 			}
-      if(name.endsWith("+top")) {
-        arr += new Geometry.Vec3(0,-1,0);
-      }
+			if(name.endsWith("+top")) {
+				arr += new Geometry.Vec3(0,-1,0);
+			}
 			presets[name] = arr;
 		}
 		presets["top"] = [new Geometry.Vec3(0,-1,0)];
@@ -147,8 +147,8 @@ NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
 	renderingContext.pushAndSetShader(shader);
 		
 	// count pixels
-  renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["countPixel"]);
-  renderingContext.dispatchCompute(workGroups, workGroups, layers);
+	renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["countPixel"]);
+	renderingContext.dispatchCompute(workGroups, workGroups, layers);
 		
 	// get pixel count & reset atomic buffer
 	var pixelCount = counterBuffer.download(1, Util.TypeConstant.UINT32).front();
@@ -167,8 +167,8 @@ NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
 	renderingContext.bindBuffer(mesh, Rendering.TARGET_SHADER_STORAGE_BUFFER, 1);
 	
 	// copy pixels to mesh
-  renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["packMesh"]);
-  renderingContext.dispatchCompute(workGroups, workGroups, layers);
+	renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["packMesh"]);
+	renderingContext.dispatchCompute(workGroups, workGroups, layers);
 		
 	// download mesh
 	mesh._markAsChanged();
@@ -224,8 +224,8 @@ NS.attachSurfels := fn(MinSG.Node node, surfelMesh, surfelPacking=void) {
 	if(node.isInstance())
 		node = node.getPrototype();
 	node.setNodeAttribute('surfels', surfelMesh);
-  if(!surfelPacking)
-    surfelPacking = MinSG.BlueSurfels.computeSurfelPacking(surfelMesh);
+	if(!surfelPacking)
+		surfelPacking = MinSG.BlueSurfels.computeSurfelPacking(surfelMesh);
 	node.setNodeAttribute('surfelPacking', surfelPacking);
 };
 

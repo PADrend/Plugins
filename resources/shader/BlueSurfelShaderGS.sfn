@@ -30,56 +30,56 @@ const int SPOT = 3;
 
 #ifdef USE_UNIFORM_BUFFERS
 	layout(std140, binding=0, row_major) uniform FrameData {
-	  mat4 sg_matrix_worldToCamera;
-	  mat4 sg_matrix_cameraToWorld;
-	  mat4 sg_matrix_cameraToClipping;
-	  mat4 sg_matrix_clippingToCamera;
-	  vec4 sg_viewport;
+		mat4 sg_matrix_worldToCamera;
+		mat4 sg_matrix_cameraToWorld;
+		mat4 sg_matrix_cameraToClipping;
+		mat4 sg_matrix_clippingToCamera;
+		vec4 sg_viewport;
 	};
 	
 	layout(std140, binding=3) uniform LightSetData {
-	  int sg_lightCount;
-	  uint sg_enabledLights[MAX_LIGHTSETS];
+		int sg_lightCount;
+		uint sg_enabledLights[MAX_LIGHTSETS];
 	};
 
 	struct Object {
-	  mat4 sg_matrix_modelToCamera;
-	  float sg_pointSize;
-	  uint materialId;
-	  uint lightSetId;
-	  uint drawId;
+		mat4 sg_matrix_modelToCamera;
+		float sg_pointSize;
+		uint materialId;
+		uint lightSetId;
+		uint drawId;
 	};
 
 	layout(std140, binding=4, row_major) uniform ObjectData {
-	  Object objects[MAX_OBJECTDATA];
+		Object objects[MAX_OBJECTDATA];
 	};
 	
 	struct sg_LightSourceParameters {
 		vec4 position;
 		vec4 direction;
 		vec4 ambient, diffuse, specular;
-	  float constant, linear, quadratic, cutoff;
-	  float exponent, cosCutoff;
-	  int type;
-	  int _pad;
+		float constant, linear, quadratic, cutoff;
+		float exponent, cosCutoff;
+		int type;
+		int _pad;
 	};
 
 	layout(std430, binding=1) readonly buffer LightData {
-	  sg_LightSourceParameters sg_LightSource[];
+		sg_LightSourceParameters sg_LightSource[];
 	};
 #else
-  uniform mat4 sg_matrix_modelToCamera;
-  uniform mat4 sg_matrix_cameraToClipping;
+	uniform mat4 sg_matrix_modelToCamera;
+	uniform mat4 sg_matrix_cameraToClipping;
 	uniform mat4 sg_matrix_clippingToCamera;
-  struct sg_LightSourceParameters {
-  	int type; 							// has to be DIRECTIONAL, POINT or SPOT
-  	vec3 position; 						// position of the light  ????????????????????????????????
-  	vec3 direction; 					// direction of the light, has to be normalized ????????????????????????????????
-  	vec4 ambient, diffuse, specular;	// light colors for all lights
-  	float constant, linear, quadratic;	// attenuations for point & spot lights
-  	float exponent, cosCutoff;			// spot light parameters
-  };
-  uniform sg_LightSourceParameters sg_LightSource[8];
+	struct sg_LightSourceParameters {
+		int type; 							// has to be DIRECTIONAL, POINT or SPOT
+		vec3 position; 						// position of the light  ????????????????????????????????
+		vec3 direction; 					// direction of the light, has to be normalized ????????????????????????????????
+		vec4 ambient, diffuse, specular;	// light colors for all lights
+		float constant, linear, quadratic;	// attenuations for point & spot lights
+		float exponent, cosCutoff;			// spot light parameters
+	};
+	uniform sg_LightSourceParameters sg_LightSource[8];
 	uniform int[4] sg_viewport;
 	uniform float	sg_pointSize;
 	uniform int sg_lightCount;
@@ -100,24 +100,24 @@ out VertexData {
 	vec3 tangent_cs;
 	vec3 cotangent_cs;
 	vec4 color;
-  float nDotV;
-  float surfelRadius;
-  uint vertexID;
-  uint count;
+	float nDotV;
+	float surfelRadius;
+	uint vertexID;
+	uint count;
 } vOut;
 
 // ---------------------------------------------------
 
 void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result){
-  
+	
 #ifdef USE_UNIFORM_BUFFERS
-  vec3 light_direction = (sg_matrix_worldToCamera * light.direction).xyz;
-  vec3 light_position = (sg_matrix_worldToCamera * light.position).xyz;
+	vec3 light_direction = (sg_matrix_worldToCamera * light.direction).xyz;
+	vec3 light_position = (sg_matrix_worldToCamera * light.position).xyz;
 #else
-  vec3 light_direction = light.direction;
-  vec3 light_position = light.position;
+	vec3 light_direction = light.direction;
+	vec3 light_position = light.position;
 #endif
-  
+	
 	// for DIRECTIONAL lights
 	float distPixToLight = 0.0; 
 	float attenuation = 1.0;
@@ -162,59 +162,59 @@ void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3
 
 void main() {
 	#ifdef USE_UNIFORM_BUFFERS
-	  const int drawId = gl_BaseInstanceARB;
-    mat4 matrix_modelToCamera = objects[drawId].sg_matrix_modelToCamera;
+		const int drawId = gl_BaseInstanceARB;
+		mat4 matrix_modelToCamera = objects[drawId].sg_matrix_modelToCamera;
 		float pointSize = objects[drawId].sg_pointSize;
 	#else
-    mat4 matrix_modelToCamera = sg_matrix_modelToCamera;
+		mat4 matrix_modelToCamera = sg_matrix_modelToCamera;
 		float pointSize = sg_pointSize;
 	#endif
-  vOut.position_cs = matrix_modelToCamera * vec4(sg_Position, 1.0);
-  vOut.normal_cs = normalize(matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
-  vOut.tangent_cs = cross(vOut.normal_cs,vec3(1,0,0));
-  if(length(vOut.tangent_cs) == 0)
-    vOut.tangent_cs = cross(vOut.normal_cs,vec3(0,1,0));
-  if(length(vOut.tangent_cs) == 0)
-    vOut.tangent_cs = cross(vOut.normal_cs,vec3(0,0,1));
+	vOut.position_cs = matrix_modelToCamera * vec4(sg_Position, 1.0);
+	vOut.normal_cs = normalize(matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+	vOut.tangent_cs = cross(vOut.normal_cs,vec3(1,0,0));
+	if(length(vOut.tangent_cs) == 0)
+		vOut.tangent_cs = cross(vOut.normal_cs,vec3(0,1,0));
+	if(length(vOut.tangent_cs) == 0)
+		vOut.tangent_cs = cross(vOut.normal_cs,vec3(0,0,1));
 	vOut.tangent_cs = normalize(vOut.tangent_cs);
 	vOut.cotangent_cs = normalize(cross(vOut.normal_cs, vOut.tangent_cs));  
-  vOut.color = sg_Color;
-  vec3 viewDir = normalize(vOut.position_cs.xyz);
-  vOut.nDotV = dot(vOut.normal_cs, viewDir);
-  
-  vOut.position_cs.xyz += vOut.normal_cs * debugOffset;
-    
-  // Compute lighting
+	vOut.color = sg_Color;
+	vec3 viewDir = normalize(vOut.position_cs.xyz);
+	vOut.nDotV = dot(vOut.normal_cs, viewDir);
+	
+	vOut.position_cs.xyz += vOut.normal_cs * debugOffset;
+		
+	// Compute lighting
 	CompositeColor lightSum;
 	lightSum.ambient = vec4(0.0);
 	lightSum.diffuse = vec4(0.0);
 	lightSum.specular = vec4(0.0);
-  
-  
+	
+	
 	if(sg_lightCount==0){ // default lighting
 		lightSum.ambient = vec4(0.3);
 		lightSum.diffuse = vec4(0.7);
 	}  
 	for(int i = 0; i < sg_lightCount; ++i){
-  	addLighting(sg_LightSource[i],vOut.position_cs.xyz,vOut.normal_cs.xyz,0.0,lightSum);
-  }
-  
-  vOut.color.xyz *= lightSum.ambient.xyz + lightSum.diffuse.xyz;
-    
+		addLighting(sg_LightSource[i],vOut.position_cs.xyz,vOut.normal_cs.xyz,0.0,lightSum);
+	}
+	
+	vOut.color.xyz *= lightSum.ambient.xyz + lightSum.diffuse.xyz;
+		
 	// compute surfel count
 	float dist = max(0, -vOut.position_cs.z);
 	const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
 	float scale = length(matrix_modelToCamera[0]);
-  const float ppm = scale * float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
-  const float r_inv = 2 * ppm / pointSize;
-  
-  vOut.count = uint(sg_surfelPacking * r_inv * r_inv);
-  #if SURFEL_CULLING > 0
-    vOut.surfelRadius = scale * 2 * sg_sizeFactor * sqrt(sg_surfelPacking / float(sg_surfelCount));
-  #else
-    vOut.surfelRadius = scale * 2.0*sg_sizeFactor/r_inv;
-  #endif
-  vOut.vertexID = gl_VertexID;
+	const float ppm = scale * float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
+	const float r_inv = 2 * ppm / pointSize;
+	
+	vOut.count = uint(sg_surfelPacking * r_inv * r_inv);
+	#if SURFEL_CULLING > 0
+		vOut.surfelRadius = scale * 2 * sg_sizeFactor * sqrt(sg_surfelPacking / float(sg_surfelCount));
+	#else
+		vOut.surfelRadius = scale * 2.0*sg_sizeFactor/r_inv;
+	#endif
+	vOut.vertexID = gl_VertexID;
 }
 
 #endif
@@ -225,14 +225,14 @@ void main() {
 
 #ifdef USE_UNIFORM_BUFFERS
 	layout(std140, binding=0, row_major) uniform FrameData {
-	  mat4 sg_matrix_worldToCamera;
-	  mat4 sg_matrix_cameraToWorld;
-	  mat4 sg_matrix_cameraToClipping;
-	  mat4 sg_matrix_clippingToCamera;
-	  vec4 sg_viewport;
+		mat4 sg_matrix_worldToCamera;
+		mat4 sg_matrix_cameraToWorld;
+		mat4 sg_matrix_cameraToClipping;
+		mat4 sg_matrix_clippingToCamera;
+		vec4 sg_viewport;
 	};
 #else
-  uniform mat4 sg_matrix_cameraToClipping;
+	uniform mat4 sg_matrix_cameraToClipping;
 #endif
 
 // in
@@ -243,10 +243,10 @@ in VertexData {
 	vec3 tangent_cs;
 	vec3 cotangent_cs;
 	vec4 color;
-  float nDotV;
-  float surfelRadius;
-  uint vertexID;
-  uint count;
+	float nDotV;
+	float surfelRadius;
+	uint vertexID;
+	uint count;
 } vIn[];
 
 // out
@@ -261,13 +261,13 @@ void main() {
 	vec4 tangent = vec4(vIn[0].tangent_cs,0);
 	vec4 cotangent = vec4(vIn[0].cotangent_cs,0);
 	float r = vIn[0].surfelRadius;
-  #if SURFEL_CULLING > 0
-    if(vIn[0].count <= vIn[0].vertexID || vIn[0].nDotV >= 0)
-      return;
-  #else
-    if(vIn[0].nDotV >= 0)
-      return;
-  #endif
+	#if SURFEL_CULLING > 0
+		if(vIn[0].count <= vIn[0].vertexID || vIn[0].nDotV >= 0)
+			return;
+	#else
+		if(vIn[0].nDotV >= 0)
+			return;
+	#endif
 		
 	vec4 position_cs = pos + tangent * r * 2.0;
 	vOut.color = vIn[0].color;
@@ -286,7 +286,7 @@ void main() {
 	vOut.triCoord = vec2(-1,-2);
 	gl_Position = sg_matrix_cameraToClipping * position_cs;
 	EmitVertex();
-  EndPrimitive();
+	EndPrimitive();
 }
 
 #endif
@@ -302,8 +302,8 @@ in VertexData {
 layout(location = 0) out vec4 fragColor;
 
 void main() {
-  //vec3 position_cs = vIn.position_cs.xyz / vIn.position_cs.w;
-  //vec3 normal_cs = normalize(vIn.normal_cs.xyz);
+	//vec3 position_cs = vIn.position_cs.xyz / vIn.position_cs.w;
+	//vec3 normal_cs = normalize(vIn.normal_cs.xyz);
 	if(length(vIn.triCoord) > 1.0)
 		discard;    
 	fragColor = vIn.color;

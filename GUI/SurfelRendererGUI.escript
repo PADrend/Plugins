@@ -91,7 +91,7 @@ NS.initGUI := fn(gui) {
 					GUI.LABEL : "",
 					GUI.SIZE : [GUI.WIDTH_ABS | GUI.HEIGHT_ABS, 16, 16],
 					GUI.PROPERTIES : strategyTitleProperties,
-	  			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(strategy->strategy.isEnabled, strategy->strategy.setEnabled),
+					GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(strategy->strategy.isEnabled, strategy->strategy.setEnabled),
 				};
 				entries += {
 					GUI.TYPE : GUI.TYPE_CRITICAL_BUTTON,
@@ -189,7 +189,7 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.FactorStrategy, fn(strategy, refreshCal
 			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(strategy->strategy.getCountFactor, strategy->strategy.setCountFactor),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
 		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.LABEL : "Size Factor",
@@ -200,7 +200,7 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.FactorStrategy, fn(strategy, refreshCal
 		},
 	];
 });
-  
+	
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.BlendStrategy
 
@@ -251,7 +251,7 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.DebugStrategy, fn(strategy, refreshCall
 			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(strategy->strategy.getHideSurfels, strategy->strategy.setHideSurfels),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
 		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Fix Surfels",
@@ -260,7 +260,7 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.DebugStrategy, fn(strategy, refreshCall
 		},
 	];
 });
-  
+	
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.AdaptiveStrategy
 
@@ -275,7 +275,7 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.AdaptiveStrategy, fn(strategy, refreshC
 			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(strategy->strategy.getMaxSize, strategy->strategy.setMaxSize),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
 		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.LABEL : "Target Frame Time (ms)",
@@ -286,7 +286,7 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.AdaptiveStrategy, fn(strategy, refreshC
 		},
 	];
 });
-  
+	
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.FoveatedStrategy
 
@@ -299,27 +299,27 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.FoveatedStrategy, fn(strategy, refreshC
 			GUI.OPTIONS : ["0, 0"],
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
 			GUI.DATA_PROVIDER : [strategy] => fn(strategy){
-        var vec = strategy.getOffset();
-        return "" + vec.x() + ", " + vec.y();
+				var vec = strategy.getOffset();
+				return "" + vec.x() + ", " + vec.y();
 			},
 			GUI.ON_DATA_CHANGED : [strategy] => fn(strategy,data) {
-        strategy.setOffset(eval("new Geometry.Vec2("+data+");"));
+				strategy.setOffset(eval("new Geometry.Vec2("+data+");"));
 			}
 		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
 			GUI.TYPE : GUI.TYPE_TEXT,
 			GUI.LABEL : "Zones",
 			GUI.OPTIONS : ["0.5, 2.0"],
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
 			GUI.DATA_PROVIDER : [strategy] => fn(strategy){
-        return strategy.getFoveaZones().implode(",");
+				return strategy.getFoveaZones().implode(",");
 			},
 			GUI.ON_DATA_CHANGED : [strategy] => fn(strategy,data) {
-        strategy.setFoveaZones(parseJSON("["+data+"]"));
+				strategy.setFoveaZones(parseJSON("["+data+"]"));
 			}
 		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Debug",
@@ -328,7 +328,7 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.FoveatedStrategy, fn(strategy, refreshC
 		},
 	];
 });
-  
+	
 // -----------------------------------------------------------------------
 // MinSG.BlueSurfels.ShaderStrategy
 
@@ -396,55 +396,55 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.ShaderStrategy, fn(strategy, refreshCal
 	};
 	
 	return [
-    {
-      GUI.LABEL : "Set from preset",
-      GUI.TYPE : GUI.TYPE_BUTTON,
+		{
+			GUI.LABEL : "Set from preset",
+			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.ON_CLICK : setFromPreset,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
-    },
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-    {
-      GUI.LABEL : "VS",
-      GUI.TYPE : GUI.TYPE_FILE,
-      GUI.ENDINGS : [".sfn", ".vs", ".glsl"],
+		},
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{
+			GUI.LABEL : "VS",
+			GUI.TYPE : GUI.TYPE_FILE,
+			GUI.ENDINGS : [".sfn", ".vs", ".glsl"],
 			GUI.DATA_WRAPPER : config.shaderVS,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
-    },
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-    {
-      GUI.LABEL : "FS",
-      GUI.TYPE : GUI.TYPE_FILE,
-      GUI.ENDINGS : [".sfn", ".fs", ".glsl"],
+		},
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{
+			GUI.LABEL : "FS",
+			GUI.TYPE : GUI.TYPE_FILE,
+			GUI.ENDINGS : [".sfn", ".fs", ".glsl"],
 			GUI.DATA_WRAPPER : config.shaderFS,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
-    },
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
-    {
-      GUI.LABEL : "GS",
-      GUI.TYPE : GUI.TYPE_FILE,
-      GUI.ENDINGS : [".sfn", ".gs", ".glsl"],
+		},
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{
+			GUI.LABEL : "GS",
+			GUI.TYPE : GUI.TYPE_FILE,
+			GUI.ENDINGS : [".sfn", ".gs", ".glsl"],
 			GUI.DATA_WRAPPER : config.shaderGS,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
-    },
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		},
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Surfel Culling",
 			GUI.DATA_WRAPPER : config.culling,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
 		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Dynamic Size",
 			GUI.DATA_WRAPPER : config.dynSize,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
 		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
 			GUI.TYPE : GUI.TYPE_BUTTON,
 			GUI.LABEL : "Refresh",
-      GUI.ON_CLICK : strategy->strategy.refreshShader,
+			GUI.ON_CLICK : strategy->strategy.refreshShader,
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
 		},
 	];

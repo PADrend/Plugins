@@ -16,80 +16,80 @@ static NS = new Namespace;
 // ------------------------------------------------------------
 
 NS.accumulateStatistics @(public) := fn(statistics) {
-  if(statistics.count() <= 1)
-    return statistics.front();
-  var accStats = new Map;
-  foreach(statistics as var stat) {
-    foreach(stat as var key, var value) {
-      var aKey = key + ' (sum)';
-      if(value.isA(Number)) {
-        if(!accStats.containsKey(aKey))
-          accStats[aKey] = 0;
-        accStats[aKey] += value;
-      }
-    }
-  }
-  accStats['processed'] = statistics.count();
-  return accStats;
+	if(statistics.count() <= 1)
+		return statistics.front();
+	var accStats = new Map;
+	foreach(statistics as var stat) {
+		foreach(stat as var key, var value) {
+			var aKey = key + ' (sum)';
+			if(value.isA(Number)) {
+				if(!accStats.containsKey(aKey))
+					accStats[aKey] = 0;
+				accStats[aKey] += value;
+			}
+		}
+	}
+	accStats['processed'] = statistics.count();
+	return accStats;
 };
 
 // ------------------------------------------------------------
 
 NS.createSurfelsForNode @(public) := fn(node, sampler) {
-  var statistics = new Map;
-  var timer = new Util.Timer;
-  Utils.removeSurfels(node);
-  if(!sampler) {
-    statistics['status'] = "failed";
-    return statistics;
-  }
-  
-  var surfels = sampler.sample(node);
-  statistics.merge(sampler.getStatistics());
-  
-  if(!surfels) {
-    statistics['status'] = "failed";
-    return statistics;
-  }
-    
-  // attach surfels to node
-  var finalTimer = new Util.Timer;
+	var statistics = new Map;
+	var timer = new Util.Timer;
+	Utils.removeSurfels(node);
+	if(!sampler) {
+		statistics['status'] = "failed";
+		return statistics;
+	}
+	
+	var surfels = sampler.sample(node);
+	statistics.merge(sampler.getStatistics());
+	
+	if(!surfels) {
+		statistics['status'] = "failed";
+		return statistics;
+	}
+		
+	// attach surfels to node
+	var finalTimer = new Util.Timer;
 	Utils.attachSurfels(node, surfels, statistics['packing']);  
-  statistics['t_finalize'] = finalTimer.getSeconds();
-  
-  statistics['t_total'] = timer.getSeconds();
-  statistics['status'] = "success";
-  return statistics;
+	statistics['t_finalize'] = finalTimer.getSeconds();
+	
+	statistics['t_total'] = timer.getSeconds();
+	statistics['status'] = "success";
+	return statistics;
 };
 
 // ------------------------------------------------------------
 
 NS.createSurfelsForNodes @(public) := fn(nodes, sampler) {
-  progressBar.setDescription("Blue Surfels");
-  progressBar.setSize(500, 32);
-  progressBar.setToScreenCenter();
-  progressBar.setMaxValue(nodes.count());
-  progressBar.update(0);
-  var statistics = [];
+	progressBar.setDescription("Blue Surfels");
+	progressBar.setSize(500, 32);
+	progressBar.setToScreenCenter();
+	progressBar.setMaxValue(nodes.count());
+	progressBar.update(0);
+	var statistics = [];
 
-  foreach(nodes as var index, var node) {    
+	foreach(nodes as var index, var node) {    
 		progressBar.setDescription("Blue Surfels: Processing " + (index+1) + "/" + nodes.count());
-    
-    statistics += createSurfelsForNode(node, sampler);
-    
-    if(Utils.handleUserEvents())
-      break;
-      
-    progressBar.update(index+1);
-  }
-  
-  return statistics;
+		
+		statistics += createSurfelsForNode(node, sampler);
+		
+		if(Utils.handleUserEvents())
+			break;
+			
+		progressBar.update(index+1);
+	}
+	
+	return statistics;
 };
 
 // ------------------------------------------------------------
 
 NS.createSurfelsForLeafNodes @(public) := fn(Array rootNodes, sampler) {
-  // Collect nodes
+	// Collect nodes
 	var nodeSet = new Set;
 	foreach(rootNodes as var root) {
 		root.traverse([nodeSet] => this->fn(todo, node) {
@@ -106,13 +106,13 @@ NS.createSurfelsForLeafNodes @(public) := fn(Array rootNodes, sampler) {
 				todo += proto;
 		});
 	}
-  return createSurfelsForNodes(nodeSet.toArray(), sampler);
+	return createSurfelsForNodes(nodeSet.toArray(), sampler);
 };
 
 // ------------------------------------------------------------
 
 NS.createSurfelHierarchy @(public) := fn(Array rootNodes, sampler) {
-  // Collect nodes
+	// Collect nodes
 	var nodeSet = new Set;
 	foreach(rootNodes as var root) {
 		root.traverse([nodeSet] => this->fn(todo, node) {
@@ -128,13 +128,13 @@ NS.createSurfelHierarchy @(public) := fn(Array rootNodes, sampler) {
 			todo += proto;
 		});
 	}
-  return createSurfelsForNodes(nodeSet.toArray(), sampler);
+	return createSurfelsForNodes(nodeSet.toArray(), sampler);
 };
 
 // ------------------------------------------------------------
 
 NS.recreateSurfelsForAllNodes @(public) := fn(Array rootNodes, sampler) {
-  // Collect nodes
+	// Collect nodes
 	var nodeSet = new Set;
 	foreach(rootNodes as var root) {
 		root.traverse([nodeSet] => this->fn(todo, node) {
@@ -149,29 +149,29 @@ NS.recreateSurfelsForAllNodes @(public) := fn(Array rootNodes, sampler) {
 	}
 	var nodes = nodeSet.toArray();
 
-  progressBar.setDescription("Blue Surfels");
-  progressBar.setSize(500, 32);
-  progressBar.setToScreenCenter();
-  progressBar.setMaxValue(nodes.count());
-  progressBar.update(0);
-  var statistics = [];
-  
-  var oldTargetCount = sampler.getTargetCount();
-  foreach(nodes as var index, var node) {    
+	progressBar.setDescription("Blue Surfels");
+	progressBar.setSize(500, 32);
+	progressBar.setToScreenCenter();
+	progressBar.setMaxValue(nodes.count());
+	progressBar.update(0);
+	var statistics = [];
+	
+	var oldTargetCount = sampler.getTargetCount();
+	foreach(nodes as var index, var node) {    
 		progressBar.setDescription("Blue Surfels: Processing " + (index+1) + "/" + nodes.count());
-    
+		
 		var oldSurfels = Utils.locateSurfels(node);
 		sampler.setTargetCount(oldSurfels.getVertexCount());
-    statistics += createSurfelsForNode(node, sampler);
-    
-    if(Utils.handleUserEvents())
-      break;
-      
-    progressBar.update(index+1);
-  }
-  sampler.setTargetCount(oldTargetCount);
-  
-  return statistics;
+		statistics += createSurfelsForNode(node, sampler);
+		
+		if(Utils.handleUserEvents())
+			break;
+			
+		progressBar.update(index+1);
+	}
+	sampler.setTargetCount(oldTargetCount);
+	
+	return statistics;
 };
 
 return NS;

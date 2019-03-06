@@ -28,56 +28,56 @@ const int SPOT = 3;
 
 #ifdef USE_UNIFORM_BUFFERS
 	layout(std140, binding=0, row_major) uniform FrameData {
-	  mat4 sg_matrix_worldToCamera;
-	  mat4 sg_matrix_cameraToWorld;
-	  mat4 sg_matrix_cameraToClipping;
-	  mat4 sg_matrix_clippingToCamera;
-	  vec4 sg_viewport;
+		mat4 sg_matrix_worldToCamera;
+		mat4 sg_matrix_cameraToWorld;
+		mat4 sg_matrix_cameraToClipping;
+		mat4 sg_matrix_clippingToCamera;
+		vec4 sg_viewport;
 	};
 	
 	layout(std140, binding=3) uniform LightSetData {
-	  int sg_lightCount;
-	  uint sg_enabledLights[MAX_LIGHTSETS];
+		int sg_lightCount;
+		uint sg_enabledLights[MAX_LIGHTSETS];
 	};
 
 	struct Object {
-	  mat4 sg_matrix_modelToCamera;
-	  float sg_pointSize;
-	  uint materialId;
-	  uint lightSetId;
-	  uint drawId;
+		mat4 sg_matrix_modelToCamera;
+		float sg_pointSize;
+		uint materialId;
+		uint lightSetId;
+		uint drawId;
 	};
 
 	layout(std140, binding=4, row_major) uniform ObjectData {
-	  Object objects[MAX_OBJECTDATA];
+		Object objects[MAX_OBJECTDATA];
 	};
 	
 	struct sg_LightSourceParameters {
 		vec4 position;
 		vec4 direction;
 		vec4 ambient, diffuse, specular;
-	  float constant, linear, quadratic, cutoff;
-	  float exponent, cosCutoff;
-	  int type;
-	  int _pad;
+		float constant, linear, quadratic, cutoff;
+		float exponent, cosCutoff;
+		int type;
+		int _pad;
 	};
 
 	layout(std430, binding=1) readonly buffer LightData {
-	  sg_LightSourceParameters sg_LightSource[];
+		sg_LightSourceParameters sg_LightSource[];
 	};
 #else
-  uniform mat4 sg_matrix_modelToCamera;
-  uniform mat4 sg_matrix_cameraToClipping;
+	uniform mat4 sg_matrix_modelToCamera;
+	uniform mat4 sg_matrix_cameraToClipping;
 	uniform mat4 sg_matrix_clippingToCamera;
-  struct sg_LightSourceParameters {
-  	int type; 							// has to be DIRECTIONAL, POINT or SPOT
-  	vec3 position; 						// position of the light  ????????????????????????????????
-  	vec3 direction; 					// direction of the light, has to be normalized ????????????????????????????????
-  	vec4 ambient, diffuse, specular;	// light colors for all lights
-  	float constant, linear, quadratic;	// attenuations for point & spot lights
-  	float exponent, cosCutoff;			// spot light parameters
-  };
-  uniform sg_LightSourceParameters sg_LightSource[8];
+	struct sg_LightSourceParameters {
+		int type; 							// has to be DIRECTIONAL, POINT or SPOT
+		vec3 position; 						// position of the light  ????????????????????????????????
+		vec3 direction; 					// direction of the light, has to be normalized ????????????????????????????????
+		vec4 ambient, diffuse, specular;	// light colors for all lights
+		float constant, linear, quadratic;	// attenuations for point & spot lights
+		float exponent, cosCutoff;			// spot light parameters
+	};
+	uniform sg_LightSourceParameters sg_LightSource[8];
 	uniform int[4] sg_viewport;
 	uniform float	sg_pointSize;
 	uniform int sg_lightCount;
@@ -94,19 +94,19 @@ out VertexData {
 	vec4 position_hcs;
 	vec3 normal_cs;
 	vec4 color;
-  float pointSize;
+	float pointSize;
 } vOut;
 
 void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result){
-  
+	
 #ifdef USE_UNIFORM_BUFFERS
-  vec3 light_direction = (sg_matrix_worldToCamera * light.direction).xyz;
-  vec3 light_position = (sg_matrix_worldToCamera * light.position).xyz;
+	vec3 light_direction = (sg_matrix_worldToCamera * light.direction).xyz;
+	vec3 light_position = (sg_matrix_worldToCamera * light.position).xyz;
 #else
-  vec3 light_direction = light.direction.xyz;
-  vec3 light_position = light.position;
+	vec3 light_direction = light.direction.xyz;
+	vec3 light_position = light.position;
 #endif
-  
+	
 	// for DIRECTIONAL lights
 	float distPixToLight = 0.0; 
 	float attenuation = 1.0;
@@ -149,21 +149,21 @@ void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3
 
 void main() {
 	#ifdef USE_UNIFORM_BUFFERS
-	  const int drawId = gl_BaseInstanceARB;
+		const int drawId = gl_BaseInstanceARB;
 		vOut.position_hcs = objects[drawId].sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
 		vOut.normal_cs = (objects[drawId].sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
 		vOut.pointSize = objects[drawId].sg_pointSize;
 	#else	
-	  vOut.position_hcs = sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
-	  vOut.normal_cs = normalize(sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+		vOut.position_hcs = sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
+		vOut.normal_cs = normalize(sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
 		vOut.pointSize = sg_pointSize;
 	#endif
-  
-  // Compute lighting
-  CompositeColor lightSum;
-  lightSum.ambient = vec4(0.0);
-  lightSum.diffuse = vec4(0.0);
-  lightSum.specular = vec4(0.0);
+	
+	// Compute lighting
+	CompositeColor lightSum;
+	lightSum.ambient = vec4(0.0);
+	lightSum.diffuse = vec4(0.0);
+	lightSum.specular = vec4(0.0);
 	if(sg_lightCount==0) { // default lighting
 		lightSum.ambient = vec4(0.3);
 		lightSum.diffuse = vec4(0.7);
@@ -172,14 +172,14 @@ void main() {
 		#ifdef USE_UNIFORM_BUFFERS
 			addLighting(sg_LightSource[sg_enabledLights[i]],vOut.position_hcs.xyz,vOut.normal_cs,0.0,lightSum);
 		#else
-  		addLighting(sg_LightSource[i],vOut.position_hcs.xyz,vOut.normal_cs,0.0,lightSum);
+			addLighting(sg_LightSource[i],vOut.position_hcs.xyz,vOut.normal_cs,0.0,lightSum);
 		#endif
-  }
-  vOut.color = sg_Color;
-  vOut.color.xyz *= lightSum.ambient.xyz + lightSum.diffuse.xyz;
+	}
+	vOut.color = sg_Color;
+	vOut.color.xyz *= lightSum.ambient.xyz + lightSum.diffuse.xyz;
 	
 	float nDotV = dot( normalize(vOut.normal_cs.xyz),  normalize(vOut.position_hcs.xyz) );
-	  
+		
 	// compute surfel count
 	float dist = max(0, -vOut.position_hcs.z);
 	const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
@@ -206,16 +206,16 @@ in VertexData {
 	vec4 position_hcs;
 	vec3 normal_cs;
 	vec4 color;
-  float pointSize;
+	float pointSize;
 } fIn;
 
 layout(location = 0) out vec4 fragColor;
 
 void main() {
-  vec3 position_cs = fIn.position_hcs.xyz / fIn.position_hcs.w;
-  vec3 normal_cs = normalize(fIn.normal_cs);
-  vec4 color = fIn.color;
-  
+	vec3 position_cs = fIn.position_hcs.xyz / fIn.position_hcs.w;
+	vec3 normal_cs = normalize(fIn.normal_cs);
+	vec4 color = fIn.color;
+	
 	fragColor = color;
 }
 

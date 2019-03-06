@@ -25,7 +25,7 @@ T.getDirections @(public) ::= fn() { return rasterizer.getDirections(); };
 // ----------------------------
 
 T._constructor ::= fn() {
-  this.sampler = new MinSG.BlueSurfels.RandomSampler;
+	this.sampler = new MinSG.BlueSurfels.RandomSampler;
 	this.rasterizer := new Rasterizer;
 };
 
@@ -52,9 +52,9 @@ T.sample @(override) ::= fn(MinSG.Node node) {
 		return void;
 	
 	var samples = sampler.sampleSurfels(initialSamples);
-  statistics.merge(sampler.getStatistics());
+	statistics.merge(sampler.getStatistics());
 	statistics["t_total"] = totalTimer.getSeconds();
-  return samples;
+	return samples;
 };
 
 // --------------------------------------------------------------
@@ -66,30 +66,30 @@ SurfelGUI.registerSamplerGUI(T, fn(sampler) {
 	var elements = SamplerBase.getCommonGUI(sampler);
 	return elements.append([
 		{
-	    GUI.TYPE :	GUI.TYPE_SELECT,
-	    GUI.LABEL :	"Directions",
-	    GUI.OPTIONS :	{
-	      var dirOptions = [];
-	      foreach(Utils.getDirectionPresets() as var name, var dirs)
-	        dirOptions += [name, name + " ("+dirs.count()+")"];
-	      dirOptions;
-	    },	
-	    GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('directions', 'cube', [sampler] => fn(sampler, name) {
+			GUI.TYPE :	GUI.TYPE_SELECT,
+			GUI.LABEL :	"Directions",
+			GUI.OPTIONS :	{
+				var dirOptions = [];
+				foreach(Utils.getDirectionPresets() as var name, var dirs)
+					dirOptions += [name, name + " ("+dirs.count()+")"];
+				dirOptions;
+			},	
+			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('directions', 'cube', [sampler] => fn(sampler, name) {
 				sampler.setDirections(Utils.getDirectionPresets()[name]);
 			}),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-	  },
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		},
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 		{
 			GUI.TYPE : GUI.TYPE_RANGE,
 			GUI.LABEL : "Resolution",
 			GUI.RANGE : [0,10],
 			GUI.RANGE_STEP_SIZE : 1,
-      GUI.RANGE_FN_BASE : 2,
+			GUI.RANGE_FN_BASE : 2,
 			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('resolution', 512, sampler->sampler.setResolution),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 		},
-    { GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
 	]);
 });
 

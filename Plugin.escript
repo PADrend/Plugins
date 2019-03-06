@@ -28,12 +28,12 @@ plugin.init := fn() {
 		Std.module('BlueSurfels/GUI/SurfelRendererGUI').initGUI(gui);
 	});
 
-  Util.registerExtension('PADrend_Init',this->fn() {
+	Util.registerExtension('PADrend_Init',this->fn() {
 		Std.module('BlueSurfels/Tools/SurfelDebugRenderer');
 		Std.module('BlueSurfels/Sampler/GreedyCluster');
 		Std.module('BlueSurfels/Sampler/ProgressiveBlueSurfels');
 		Std.module('BlueSurfels/Sampler/RandomSampler');
-  });
+	});
 	
 	return true;
 };
