@@ -22,6 +22,8 @@ T.getResolution @(public) ::= fn() { return rasterizer.getResolution(); };
 T.setDirections @(public) ::= fn(Array dir) { rasterizer.setDirections(dir); return this; };
 T.getDirections @(public) ::= fn() { return rasterizer.getDirections(); };
 
+T.setRasterizer @(public) ::= fn(v) { this.rasterizer = v; };
+
 // ----------------------------
 
 T._constructor ::= fn() {
@@ -46,7 +48,7 @@ T.sample @(override) ::= fn(MinSG.Node node) {
 		rasterizer.showDebugTextures();
 	
 	timer.reset();
-	var initialSamples = Utils.packMesh(t_depth, t_color, t_position, t_normal, getResolution(), layers);
+	var initialSamples = Utils.packMesh(t_color, t_position, t_normal, getResolution(), layers);
 	statistics["t_downloadMesh"] = timer.getSeconds();
 	if(!initialSamples)
 		return void;

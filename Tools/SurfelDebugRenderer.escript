@@ -29,17 +29,53 @@ Renderer.highlight @(init) := fn(){ return new Std.DataWrapper(false); };
 Renderer.offset @(init) := fn(){ return new Std.DataWrapper(0.0); };
 Renderer.sizeToCover := false;
 Renderer.prefixToCover := false;
+Renderer.surfelShader := void;
+Renderer.splatShader := void;
+Renderer.fbo := void;
+Renderer.depthTexture := void;
+//Renderer.colorTexture := void;
+Renderer.needsRefresh := true;
 
-Renderer._constructor ::= fn() {
-	var file = __DIR__ + "/../resources/shader/BlueSurfelShaderGS.sfn";
-	this.shader := Rendering.Shader.createGeometryFromFile(file, {'SURFEL_CULLING' : 0});
+Renderer.init ::= fn() {
+	// renders 3d discs
+	this.surfelShader = Rendering.Shader.createGeometryFromFile(__DIR__ + "/../resources/shader/BlueSurfelShaderGS.sfn", {"SURFEL_CULLING" : 0});
+	// simply colors the underlying object
+	this.splatShader = Rendering.Shader.createGeometryFromFile(__DIR__ + "/../resources/shader/DebugSplatShader.sfn");
+	
+	this.fbo = new Rendering.FBO;
+	var vp = frameContext.getCamera().getViewport();
+	this.depthTexture = Rendering.createDepthTexture(vp.width(), vp.height());
+	//this.colorTexture = Rendering.createStdTexture(vp.width(), vp.height(), false);
+	fbo.attachDepthTexture(renderingContext, depthTexture);
+	//fbo.attachColorTexture(renderingContext, colorTexture);
+	needsRefresh = false;
 };
 
-Renderer.doEnableState @(override) ::= fn(node,params){
+Renderer.doEnableState @(override) ::= fn(node,params) {
+	if(needsRefresh)
+		init();
+	if(showMesh()) {
+		renderingContext.pushAndSetColorMaterial(new Util.Color4f(0.4,0.4,0.4));
+		return MinSG.STATE_OK;
+	} else {
+		doDisableState(node,params);
+		return MinSG.STATE_SKIP_RENDERING;
+	}
+};
+
+Renderer.doDisableState @(override) ::= fn(node,params) {
+	if(showMesh()) {
+		renderingContext.popMaterial();
+		
+		renderingContext.pushAndSetFBO(fbo);
+		renderingContext.clearScreen(new Util.Color4f(0,0,0));
+		var rp = (new MinSG.RenderParam).setFlags(MinSG.USE_WORLD_MATRIX | MinSG.NO_STATES).setRenderingLayers(PADrend.getRenderingLayers());
+		frameContext.displayNode(node, rp);
+		renderingContext.popFBO();
+	}
 	
 	var surfels = Utils.locateSurfels(node);
-	
-	if( surfels ){
+	if(surfels) {
 		var maxCount = surfels.isUsingIndexData() ?  surfels.getIndexCount() : surfels.getVertexCount();
 	
 		if(sizeToCover) {
@@ -54,7 +90,7 @@ Renderer.doEnableState @(override) ::= fn(node,params){
 			outln("Prefix: ", prefix);
 			outln("Radius: ", radius);
 			outln("Point Size: ", pointSize());
-		}		
+		}
 		
 		if(prefixToCover) {
 			prefixToCover = false;
@@ -72,88 +108,90 @@ Renderer.doEnableState @(override) ::= fn(node,params){
 		
 		var first = [start(),0.0].max() * maxCount;
 		first = [first,maxCount].min();
-		var count = [[end()-start(),0.0].max(),1.0].min() * maxCount;		
-				
+		var count = [[end()-start(),0.0].max(),1.0].min() * maxCount;
+		
 		renderingContext.pushAndSetPointParameters(new Rendering.PointParameters(pointSize()));
-		renderingContext.pushAndSetShader(shader);
-		shader.setUniform(renderingContext, 'debugOffset', Rendering.Uniform.FLOAT, [offset()]);
-		if(highlight()) 
-			renderingContext.pushAndSetColorMaterial(new Util.Color4f(1,0,0));
-		
-		frameContext.displayMesh(surfels, first, count);
-		
-		renderingContext.popShader();
+		if(showMesh()) {
+			renderingContext.pushAndSetShader(splatShader);
+			renderingContext.pushAndSetTexture(0, depthTexture);
+			renderingContext.pushAndSetDepthBuffer(false, false, Rendering.Comparison.ALWAYS);
+			splatShader.setUniform(renderingContext, 'debugColor', Rendering.Uniform.VEC4F, [highlight() ? new Geometry.Vec4(1,0,0,1) : new Geometry.Vec4(1,0,0,0)]);			
+			frameContext.displayMesh(surfels, first, count);
+			renderingContext.popDepthBuffer();
+			renderingContext.popTexture(0);
+			renderingContext.popShader();
+		} else {
+			renderingContext.pushAndSetShader(surfelShader);
+			surfelShader.setUniform(renderingContext, 'debugColor', Rendering.Uniform.VEC4F, [highlight() ? new Geometry.Vec4(1,0,0,1) : new Geometry.Vec4(1,0,0,0)]);			
+			frameContext.displayMesh(surfels, first, count);
+			renderingContext.popShader();
+		}
 		renderingContext.popPointParameters();
-		
-		if(highlight())
-			renderingContext.popMaterial();
-		if(!showMesh())
-			return MinSG.STATE_SKIP_RENDERING;	
-	}
-	
-	if(showMesh()) {
-		renderingContext.pushAndSetColorMaterial(new Util.Color4f(0.4,0.4,0.4));
-	}
-	return MinSG.STATE_OK;
-};
-
-Renderer.doDisableState @(override) ::= fn(node,params){	
-	if(showMesh()) {
-		renderingContext.popMaterial();
 	}
 };
 
 NodeEditor.registerConfigPanelProvider( Renderer, fn(renderer, panel) {
-		panel += {
+	panel += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "Start",
 		GUI.DATA_WRAPPER : renderer.start,
 		GUI.RANGE : [0,1],
 		GUI.RANGE_STEP_SIZE : 0.01,
-		};
-		panel++;
-		panel += {
+	};
+	panel++;
+	panel += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "End",
 		GUI.DATA_WRAPPER : renderer.end,
 		GUI.RANGE : [0,1],
 		GUI.RANGE_STEP_SIZE : 0.01,
-		};
-		panel += {
+	};
+	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Cover",
 		GUI.ON_CLICK : renderer->fn() {
 				this.prefixToCover = true;
 			},
-		};
-		panel++;
-		panel += {
+	};
+	panel++;
+	panel += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "PointSize",
 		GUI.DATA_WRAPPER : renderer.pointSize,
 		GUI.RANGE : [1,128],
 		GUI.RANGE_STEP_SIZE : 1,
-		};
-		panel += {
+	};
+	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Cover",
 		GUI.ON_CLICK : renderer->fn() {
-				this.sizeToCover = true;
-			},
-		};
-		panel++;
-		panel += {
+			this.sizeToCover = true;
+		},
+	};
+	panel++;
+	panel += {
 		GUI.TYPE : GUI.TYPE_BOOL,
 		GUI.LABEL : "Show Mesh",
 		GUI.DATA_WRAPPER : renderer.showMesh,
-		};
-		panel++;
-		panel += {
+	};
+	panel++;
+	panel += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "Highlight",
+		GUI.DATA_WRAPPER : renderer.highlight,
+	};
+	panel++;
+	panel += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "offset",
 		GUI.DATA_WRAPPER : renderer.offset,
 		GUI.RANGE : [-1,1],
-		};
+	};
+	panel += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Refresh",
+		GUI.ON_CLICK : renderer->fn() { this.needsRefresh = true; },
+	};
 });
 
 Std.module.on( 'LibMinSGExt/ScriptedStateImportersRegistry',fn(registry){
@@ -163,6 +201,8 @@ Std.module.on( 'LibMinSGExt/ScriptedStateImportersRegistry',fn(registry){
 		if(	description['start'] )	state.start(0+description['start']);
 		if(	description['end'] )	state.end(0+description['end']);
 		if(	description['pointSize'] )	state.pointSize(0+description['pointSize']);
+		if(	description['highlight'] )	state.highlight(0+description['highlight']);
+		if(	description['showMesh'] )	state.showMesh(0+description['showMesh']);
 		return state;
 	};
 });
@@ -173,5 +213,7 @@ Std.module.on( 'LibMinSGExt/ScriptedStateExportersRegistry',fn(registry){
 		description['start'] = state.start();
 		description['end'] = state.end();
 		description['pointSize'] = state.pointSize();
+		description['highlight'] = state.highlight().toNumber();
+		description['showMesh'] = state.showMesh().toNumber();
 	};
 });

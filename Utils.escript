@@ -123,7 +123,7 @@ NS.placeCamerasAroundNode := fn(MinSG.Node node, resolution, Array directions) {
  * copy & combine the pixels of MRT array textures (color, position, normal) into a single mesh where the color-alpha value is > 0.
  * \note The depth texture is only needed to have a depth attachment for the frame buffer that matches the array textures. Depth writing is disabled.
  */
-NS.packMesh := fn(t_depth, t_color, t_position, t_normal, resolution, layers) {
+NS.packMesh := fn(t_color, t_position, t_normal, resolution, layers) {
 	// TODO: check if resolution is power of two
 	var blockSize = 8;
 	var workGroups = resolution / blockSize;

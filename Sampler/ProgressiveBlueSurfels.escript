@@ -49,7 +49,7 @@ T.sample @(override) ::= fn(MinSG.Node node) {
 		rasterizer.showDebugTextures();
 	
 	timer.reset();
-	var initialSamples = Utils.packMesh(t_depth, t_color, t_position, t_normal, getResolution(), layers);
+	var initialSamples = Utils.packMesh(t_color, t_position, t_normal, getResolution(), layers);
 	statistics["t_downloadMesh"] = timer.getSeconds();
 	if(!initialSamples)
 		return void;
