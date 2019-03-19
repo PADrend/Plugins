@@ -367,7 +367,9 @@ static createAnalysisPanel = fn(gui) {
 		$directionPresetName : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.directions', "cube"),
 		$infoWrapper : new Std.DataWrapper(""),
 		$samples : new Std.DataWrapper(1000),
+		$bitmaps : [],
 		$image : gui.createImage(new Util.Bitmap(256,256,Util.Bitmap.RGB)),
+		$diffFactor : new Std.DataWrapper(10),
 	});
 		
 	panel += "*Sampling Analysis*";
@@ -383,6 +385,15 @@ static createAnalysisPanel = fn(gui) {
 		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 	};
 	panel++;
+panel += {
+	GUI.TYPE : GUI.TYPE_RANGE,
+	GUI.LABEL : "Diff. Factor",
+	GUI.RANGE : [1,100],
+	GUI.RANGE_STEP_SIZE : 1,
+	GUI.DATA_WRAPPER : config.diffFactor,
+	GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
+};
+panel++;
 	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "compute",
@@ -408,9 +419,10 @@ static createAnalysisPanel = fn(gui) {
 			var quality = r/r_max;
 			var relQuality = r/r_opt;
 			
-			var diff_max = 10 * r_max;
+			var diff_max = config.diffFactor() * r_max;
 			var bitmap = MinSG.BlueSurfels.differentialDomainAnalysis(surfels,diff_max,256,count,true);
-			var avgBmp = Util.blendTogether(Util.Bitmap.RGB,[bitmap]);
+			config.bitmaps = [bitmap];
+			var avgBmp = Util.blendTogether(Util.Bitmap.RGB,config.bitmaps);
 			config.image.updateData(avgBmp);
 			
 			var info = "";
@@ -421,6 +433,47 @@ static createAnalysisPanel = fn(gui) {
 			info += "Quality: " + quality + "\n";
 			info += "Rel. Quality: " + relQuality + "\n";
 			config.infoWrapper(info);
+		},
+		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
+	};
+	panel += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Average",
+		GUI.ON_CLICK : [config] => fn(config) {
+			var node = NodeEditor.getSelectedNode();
+			if(!node) return;
+			var surfels = Utils.locateSurfels(node);
+			if(!surfels) return;
+			var count = config.samples();
+			var surface = Utils.computeTotalSurface(node);
+						
+			var r = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
+			var r_max = (surface/(2*3.sqrt()*count)).sqrt();
+			var quality = r/r_max;
+			
+			var diff_max = config.diffFactor() * r_max;
+			var bitmap = MinSG.BlueSurfels.differentialDomainAnalysis(surfels,diff_max,256,count,true);
+			config.bitmaps += bitmap;
+			var avgBmp = Util.blendTogether(Util.Bitmap.RGB, config.bitmaps);
+			config.image.updateData(avgBmp);
+			
+			var info = "";
+			info += "Runs: " + config.bitmaps.count() + "\n";
+			info += "Surface: " + surface + "\n";
+			info += "Max. Radius: " + r_max + "\n";
+			info += "Radius: " + r + "\n";
+			info += "Quality: " + quality + "\n";
+			config.infoWrapper(info);
+		},
+		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
+	};
+	panel += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Clear",
+		GUI.ON_CLICK : [config] => fn(config) {
+			config.bitmaps.clear();
+			config.image.updateData(new Util.Bitmap(256,256,Util.Bitmap.RGB));
+			config.infoWrapper("");
 		},
 		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
 	};

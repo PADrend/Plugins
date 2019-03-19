@@ -24,8 +24,17 @@ T.directions @(private,init) := fn() {
 };
 T.setDirections @(public) ::= fn(Array dir) { if(dir.count() != directions.count()) dirty = true;  directions = dir; return this; };
 T.getDirections @(public) ::= fn() { return directions; };
+T.getTextureLayers @(public) ::= fn() { return directions.count(); };
+
+T.mipmapping @(private) := false;
+T.setMipMapping @(public) ::= fn(Bool v) { if(mipmapping != v) dirty = true; mipmapping = v; return this; };
+T.getMipMapping @(public) ::= fn() { return mipmapping; };
 
 T.dirty @(private) := true;
+
+T.placeCameras @(public) ::= fn(MinSG.Node node) {
+	return Utils.placeCamerasAroundNode(node, resolution, directions);
+};
 
 T.initialize ::= fn() {
 	if(!dirty) return;
@@ -35,12 +44,21 @@ T.initialize ::= fn() {
 	var layers = directions.count();
 	this.t_depth := Rendering.createDepthTexture(resolution, resolution, layers);
 	this.t_color := Rendering.createDataTexture(Rendering.Texture.TEXTURE_2D_ARRAY, resolution, resolution, layers, Util.TypeConstant.UINT8, 4);	
-	this.t_position := Rendering.createDataTexture(Rendering.Texture.TEXTURE_2D_ARRAY, resolution, resolution, layers, Util.TypeConstant.FLOAT, 3);	
+	this.t_position := Rendering.createDataTexture(Rendering.Texture.TEXTURE_2D_ARRAY, resolution, resolution, layers, Util.TypeConstant.FLOAT, 4);	
 	this.t_normal := Rendering.createDataTexture(Rendering.Texture.TEXTURE_2D_ARRAY, resolution, resolution, layers, Util.TypeConstant.FLOAT, 3);
+
+	if(mipmapping) {
+		t_depth.createMipmaps(renderingContext);
+		t_color.createMipmaps(renderingContext);
+		t_position.createMipmaps(renderingContext);
+		t_normal.createMipmaps(renderingContext);
+	}
 
 	// shader
 	var file = __DIR__ + "/../resources/shader/RasterizeShader.sfn";
 	this.shader := Rendering.Shader.loadShader(file, file);	
+	renderingContext.pushAndSetShader(shader);
+	renderingContext.popShader();
 	
 	// fbo
 	this.fbo := new Rendering.FBO;	
@@ -58,17 +76,19 @@ T.rasterize @(public) ::= fn(MinSG.Node node) {
 	initialize();
 	
 	// set up cameras	
-	var cameras = Utils.placeCamerasAroundNode(node, resolution, directions);
+	var cameras = placeCameras(node);
 	frameContext.pushCamera();
 	var matrix_worldToImpostorRel = node.getWorldTransformationMatrix().inverse();
 		
 	// initialize FBO
 	renderingContext.pushAndSetFBO(fbo);
+	renderingContext.pushViewport();
+	renderingContext.pushScissor();
 	t_position.clear(new Util.Color4f(0,0,0,0));
 	t_normal.clear(new Util.Color4f(0,0,0,0));
 	t_color.clear(new Util.Color4f(0,0,0,0));
 	
-	// render scene from multiple directions 	
+	// render scene from multiple directions
 	renderingContext.pushAndSetShader(shader);
 	foreach(cameras as var layer, var camera) {
 		frameContext.setCamera(camera);
@@ -78,9 +98,9 @@ T.rasterize @(public) ::= fn(MinSG.Node node) {
 		fbo.attachColorTexture(renderingContext,t_color,4,0,layer);
 		
 		// clear screen
-		//renderingContext.pushAndSetViewport(0,0,resolution,resolution);
+		renderingContext.setViewport(0,0,resolution,resolution);
+		renderingContext.setScissor(new Rendering.ScissorParameters);	
 		renderingContext.clearScreen(new Util.Color4f(0,0,0,0));
-		//renderingContext.popViewport();
 		
 		// set up transformation matrix
 		var matrix_cameraToImpostorRel = matrix_worldToImpostorRel * camera.getWorldTransformationMatrix();
@@ -89,8 +109,9 @@ T.rasterize @(public) ::= fn(MinSG.Node node) {
 		// render scene from the current camera
 		frameContext.displayNode(node, (new MinSG.RenderParam).setFlags(MinSG.USE_WORLD_MATRIX).setRenderingLayers(PADrend.getRenderingLayers()));
 	}
-	renderingContext.popShader();	
-	
+	renderingContext.popShader();
+	renderingContext.popViewport();
+	renderingContext.popScissor();
 	renderingContext.popFBO();
 	frameContext.popCamera();
 	

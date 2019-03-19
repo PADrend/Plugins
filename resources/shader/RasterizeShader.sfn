@@ -127,8 +127,7 @@ layout(location = 1) out vec4 fPosition;
 layout(location = 2) out vec4 fNormal;
 layout(location = 4) out vec4 fColor;
 
-void main() {
-	
+void main() {	
 	vec4 position_is = vIn.position_is / vIn.position_is.w;
 	vec4 normal_is = normalize(vIn.normal_is);
 	vec4 color = vIn.color;
@@ -137,8 +136,8 @@ void main() {
 	if(sg_textureEnabled[0])
 		color *= texture(sg_Diffuse, texCoord);
 			
-	if(color.a <= 0.1)
-		discard;
+	//if(color.a <= 0.1)
+	//	discard;
 	
 	fColor = color;
 	fPosition = position_is;
