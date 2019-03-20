@@ -43,6 +43,7 @@
 #endif
 uniform float debugOffset = 0.0;
 uniform vec4 debugColor = vec4(0,0,0,0);
+uniform bool cameraOrientated = false;
 
 layout(location = 0) in vec3 sg_Position;
 layout(location = 1) in vec3 sg_Normal;
@@ -71,13 +72,18 @@ void main() {
 		float pointSize = sg_pointSize;
 	#endif
 	vOut.position_cs = matrix_modelToCamera * vec4(sg_Position, 1.0);
-	vOut.normal_cs = normalize(matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
-	vOut.tangent_cs = cross(vOut.normal_cs,vec3(1,0,0));
-	if(length(vOut.tangent_cs) == 0)
-		vOut.tangent_cs = cross(vOut.normal_cs,vec3(0,1,0));
-	if(length(vOut.tangent_cs) == 0)
-		vOut.tangent_cs = cross(vOut.normal_cs,vec3(0,0,1));
-	vOut.tangent_cs = normalize(vOut.tangent_cs);
+	if(cameraOrientated) {
+		vOut.normal_cs = vec3(0,0,1);
+		vOut.tangent_cs = vec3(1,0,0);
+	} else {
+		vOut.normal_cs = normalize(matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+		vOut.tangent_cs = cross(vOut.normal_cs,vec3(1,0,0));
+		if(length(vOut.tangent_cs) == 0)
+			vOut.tangent_cs = cross(vOut.normal_cs,vec3(0,1,0));
+		if(length(vOut.tangent_cs) == 0)
+			vOut.tangent_cs = cross(vOut.normal_cs,vec3(0,0,1));
+		vOut.tangent_cs = normalize(vOut.tangent_cs);
+	}
 	vOut.cotangent_cs = normalize(cross(vOut.normal_cs, vOut.tangent_cs));  
 	vOut.color = debugColor.a > 0 ? debugColor : sg_Color;
 	vec3 viewDir = normalize(vOut.position_cs.xyz);
@@ -111,6 +117,7 @@ void main() {
 	};
 #else
 	uniform mat4 sg_matrix_cameraToClipping;
+	uniform mat4 sg_matrix_clippingToCamera;
 #endif
 
 // in
@@ -128,6 +135,7 @@ in VertexData {
 // out
 layout(triangle_strip, max_vertices = 3) out;
 out VertexData {
+	vec4 position_cs;
 	vec4 color;
 	vec2 triCoord;
 	float radius;
@@ -141,23 +149,24 @@ void main() {
 	if(vIn[0].nDotV >= 0)
 		return;
 	
-	vec4 position_cs = pos + tangent * r * 2.0;
+	
+	vOut.position_cs = pos + tangent * r * 2.0;
 	vOut.radius = r;
 	vOut.color = vIn[0].color;
 	vOut.triCoord = vec2(2,0);
-	gl_Position = sg_matrix_cameraToClipping * position_cs;
+	gl_Position = sg_matrix_cameraToClipping * vOut.position_cs;
 	EmitVertex();
 	
-	position_cs = pos - tangent * r + cotangent * r * 2.0;
+	vOut.position_cs = pos - tangent * r + cotangent * r * 2.0;
 	//vOut.color = vIn[0].color;
 	vOut.triCoord = vec2(-1,2);
-	gl_Position = sg_matrix_cameraToClipping * position_cs;
+	gl_Position = sg_matrix_cameraToClipping * vOut.position_cs;
 	EmitVertex();
 	
-	position_cs = pos - tangent * r - cotangent * r * 2.0;
+	vOut.position_cs = pos - tangent * r - cotangent * r * 2.0;
 	//vOut.color = vIn[0].color;
 	vOut.triCoord = vec2(-1,-2);
-	gl_Position = sg_matrix_cameraToClipping * position_cs;
+	gl_Position = sg_matrix_cameraToClipping * vOut.position_cs;
 	EmitVertex();
 	EndPrimitive();
 }
@@ -167,9 +176,25 @@ void main() {
 // fs
 #ifdef SG_FRAGMENT_SHADER
 
+#ifdef USE_UNIFORM_BUFFERS
+	layout(std140, binding=0, row_major) uniform FrameData {
+		mat4 sg_matrix_worldToCamera;
+		mat4 sg_matrix_cameraToWorld;
+		mat4 sg_matrix_cameraToClipping;
+		mat4 sg_matrix_clippingToCamera;
+		vec4 sg_viewport;
+	};
+#else
+	uniform mat4 sg_matrix_cameraToClipping;
+	uniform mat4 sg_matrix_clippingToCamera;
+	uniform int[4] sg_viewport;
+#endif
+
+
 layout(location = 0) uniform sampler2D sg_depth;
 
 in VertexData {
+	vec4 position_cs;
 	vec4 color;
 	vec2 triCoord;
 	float radius;
@@ -178,10 +203,22 @@ in VertexData {
 layout(location = 0) out vec4 fragColor;
 
 void main() {
-	float depth = texelFetch(sg_depth, ivec2(gl_FragCoord.xy), 0).x;
+	if(length(vIn.triCoord) > 1.0)
+		discard;
 		
-	if(length(vIn.triCoord) > 1.0 || depth < gl_FragCoord.z - 0.001)
-		discard;    
+	float depth = 2.0 * texelFetch(sg_depth, ivec2(gl_FragCoord.xy), 0).x - 1.0;
+		
+	vec4 vp = vec4(sg_viewport[0], sg_viewport[1], sg_viewport[2], sg_viewport[3]);
+	// transform fragment coordinates to clipping space [-1,1]x[-1,1]x[-1,1]
+	vec4 frag_clip = vec4((gl_FragCoord.xy - vp.xy) / vp.zw * 2.0 - 1.0, depth, 1.0);
+	// transform fragment to camera space
+	vec4 frag_cs = sg_matrix_clippingToCamera * frag_clip;
+	// correction of homogeneous coordinates
+	frag_cs /= frag_cs.w;
+	
+	if(distance(vIn.position_cs, frag_cs) > vIn.radius)
+		discard;
+		
 	fragColor = vIn.color;
 }
 

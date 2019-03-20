@@ -114,7 +114,7 @@ Renderer.doDisableState @(override) ::= fn(node,params) {
 		if(showMesh()) {
 			renderingContext.pushAndSetShader(splatShader);
 			renderingContext.pushAndSetTexture(0, depthTexture);
-			renderingContext.pushAndSetDepthBuffer(false, false, Rendering.Comparison.ALWAYS);
+			renderingContext.pushAndSetDepthBuffer(true, false, Rendering.Comparison.ALWAYS);
 			splatShader.setUniform(renderingContext, 'debugColor', Rendering.Uniform.VEC4F, [highlight() ? new Geometry.Vec4(1,0,0,1) : new Geometry.Vec4(1,0,0,0)]);			
 			frameContext.displayMesh(surfels, first, count);
 			renderingContext.popDepthBuffer();
