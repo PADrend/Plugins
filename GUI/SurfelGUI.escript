@@ -382,18 +382,30 @@ static createAnalysisPanel = fn(gui) {
 		GUI.RANGE_STEP_SIZE : 1,
 		GUI.RANGE_FN_BASE : 10,
 		GUI.DATA_WRAPPER : config.samples,
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 40, 0],
+	};
+	panel += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Max",
+		GUI.ON_CLICK : [config] => fn(config) {
+			var node = NodeEditor.getSelectedNode();
+			if(!node) return;
+			var surfels = Utils.locateSurfels(node);
+			if(!surfels) return;
+			config.samples(surfels.getVertexCount());
+		},
+		GUI.SIZE : [GUI.WIDTH_ABS, 30, 0],
+	};
+	panel++;
+	panel += {
+		GUI.TYPE : GUI.TYPE_RANGE,
+		GUI.LABEL : "Diff. Factor",
+		GUI.RANGE : [1,100],
+		GUI.RANGE_STEP_SIZE : 1,
+		GUI.DATA_WRAPPER : config.diffFactor,
 		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 	};
 	panel++;
-panel += {
-	GUI.TYPE : GUI.TYPE_RANGE,
-	GUI.LABEL : "Diff. Factor",
-	GUI.RANGE : [1,100],
-	GUI.RANGE_STEP_SIZE : 1,
-	GUI.DATA_WRAPPER : config.diffFactor,
-	GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
-};
-panel++;
 	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "compute",
