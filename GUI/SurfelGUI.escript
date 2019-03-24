@@ -10,6 +10,9 @@
 static NS = new Namespace;
 static SurfelGenerator = Std.module("BlueSurfels/SurfelGenerator");
 static Utils = Std.module("BlueSurfels/Utils");
+static Plotter = Std.module("Tools/Plotter");
+static NodePreviewImage = Std.module("Tools/NodePreviewImage");
+static DataTable = Std.module("LibUtilExt/DataTable");
 
 // -------------------------------------------------------------------
 
@@ -369,6 +372,9 @@ static createAnalysisPanel = fn(gui) {
 		$samples : new Std.DataWrapper(1000),
 		$bitmaps : [],
 		$image : gui.createImage(new Util.Bitmap(256,256,Util.Bitmap.RGB)),
+		$meanImg : new NodePreviewImage(256, 128),
+		$varImg : new NodePreviewImage(256, 128),
+		$radData : void,
 		$diffFactor : new Std.DataWrapper(10),
 	});
 		
@@ -416,7 +422,7 @@ static createAnalysisPanel = fn(gui) {
 			if(!surfels) return;
 			var count = config.samples();
 			var directions = Utils.getDirectionPresets()[config.directionPresetName()];		
-			var surface = Utils.computeTotalSurface(node);			
+			var surface = Utils.computeTotalSurface(node);
 			
 			var sampler = new (Std.module('BlueSurfels/Sampler/GreedyCluster'));
 			sampler.setResolution(config.resolution());
@@ -425,23 +431,45 @@ static createAnalysisPanel = fn(gui) {
 			sampler.setSeed(42);
 			var optSurfels = sampler.sample(node);
 			
-			var r = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
+			var r_min = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
 			var r_opt = MinSG.BlueSurfels.getMinimalVertexDistances(optSurfels, count).min() * 0.5;
 			var r_max = (surface/(2*3.sqrt()*count)).sqrt();
-			var quality = r/r_max;
-			var relQuality = r/r_opt;
+			var quality = r_min/r_max;
+			var relQuality = r_min/r_opt;
 			
 			var diff_max = config.diffFactor() * r_max;
 			var bitmap = MinSG.BlueSurfels.differentialDomainAnalysis(surfels,diff_max,256,count,true);
+			var radial = MinSG.BlueSurfels.getRadialMeanVariance(bitmap);
+			Util.normalizeBitmap(bitmap);
 			config.bitmaps = [bitmap];
 			var avgBmp = Util.blendTogether(Util.Bitmap.RGB,config.bitmaps);
 			config.image.updateData(avgBmp);
+			
+			var radialMean = new Map;
+			var variance = new Map;
+			foreach(radial as var i, var r) {
+				var d = i / 256 * diff_max;
+				radialMean[d] = r.mean;
+				if(d >= r_min)
+				variance[d] = (r.variance > 0) ? (10 * r.variance.log(10)) : 0;
+			}
+			
+			var tmpData = new DataTable("d");
+			tmpData.addDataRow("mean","",radialMean,"#00ff00");
+			config.meanImg.setNode(Plotter.plot(tmpData));
+			tmpData = new DataTable("d");
+			tmpData.addDataRow("mean","",variance,"#ff0000");
+			config.varImg.setNode(Plotter.plot(tmpData));
+			
+			config.radData = new DataTable("d");
+			config.radData.addDataRow("mean","",radialMean,"#00ff00");
+			config.radData.addDataRow("variance","",variance,"#ff0000");
 			
 			var info = "";
 			info += "Surface: " + surface + "\n";
 			info += "Max. Radius: " + r_max + "\n";
 			info += "Opt. Radius: " + r_opt + "\n";
-			info += "Radius: " + r + "\n";
+			info += "Radius: " + r_min + "\n";
 			info += "Quality: " + quality + "\n";
 			info += "Rel. Quality: " + relQuality + "\n";
 			config.infoWrapper(info);
@@ -465,6 +493,7 @@ static createAnalysisPanel = fn(gui) {
 			
 			var diff_max = config.diffFactor() * r_max;
 			var bitmap = MinSG.BlueSurfels.differentialDomainAnalysis(surfels,diff_max,256,count,true);
+			Util.normalizeBitmap(bitmap);
 			config.bitmaps += bitmap;
 			var avgBmp = Util.blendTogether(Util.Bitmap.RGB, config.bitmaps);
 			config.image.updateData(avgBmp);
@@ -485,6 +514,9 @@ static createAnalysisPanel = fn(gui) {
 		GUI.ON_CLICK : [config] => fn(config) {
 			config.bitmaps.clear();
 			config.image.updateData(new Util.Bitmap(256,256,Util.Bitmap.RGB));
+			config.meanImg.clear();
+			config.varImg.clear();
+			config.radData = void;
 			config.infoWrapper("");
 		},
 		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
@@ -500,8 +532,12 @@ static createAnalysisPanel = fn(gui) {
 		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 	};
 	panel++;
+	panel += config.meanImg.getImage();
+	panel++;
+	panel += config.varImg.getImage();
+	panel++;
 	
-	Std.Traits.addTrait(config.image, Std.module('LibGUIExt/Traits/ContextMenuTrait'),300);	
+	Std.Traits.addTrait(config.image, Std.module('LibGUIExt/Traits/ContextMenuTrait'),300);
 	config.image.contextMenuProvider += [{
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Save image",
@@ -516,8 +552,24 @@ static createAnalysisPanel = fn(gui) {
 			});
 		},
 		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
+	},{
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Save Data",
+		GUI.ON_CLICK : [config] => fn(config) {
+			if(!config.radData)
+				return;
+			gui.openDialog({
+				GUI.TYPE : GUI.TYPE_FILE_DIALOG,
+				GUI.LABEL : "Save Data",
+				GUI.ENDINGS : [".csv"],
+				GUI.ON_ACCEPT : [config] => fn(config, filename) {
+					config.radData.exportCSV(filename, ",");
+				}
+			});
+		},
+		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
 	}];
-
+	
 	return panel;
 };
 
