@@ -43,7 +43,7 @@
 #endif
 uniform float debugOffset = 0.0;
 uniform vec4 debugColor = vec4(0,0,0,0);
-uniform bool cameraOrientated = false;
+uniform bool cameraOriented = false;
 
 layout(location = 0) in vec3 sg_Position;
 layout(location = 1) in vec3 sg_Normal;
@@ -72,7 +72,7 @@ void main() {
 		float pointSize = sg_pointSize;
 	#endif
 	vOut.position_cs = matrix_modelToCamera * vec4(sg_Position, 1.0);
-	if(cameraOrientated) {
+	if(cameraOriented) {
 		vOut.normal_cs = vec3(0,0,1);
 		vOut.tangent_cs = vec3(1,0,0);
 	} else {

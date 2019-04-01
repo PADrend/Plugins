@@ -13,6 +13,25 @@
 static NS = new Namespace;
 static defaultRenderParam = (new MinSG.RenderParam).setFlags(MinSG.USE_WORLD_MATRIX | MinSG.NO_STATES).setRenderingLayers(PADrend.getRenderingLayers());
 
+// generate progressive samples on a sphere
+static sampleMesh;
+{
+	var count = 1000;
+	var vd = (new Rendering.VertexDescription).appendPosition3D();
+	var mesh = (new Rendering.Mesh(vd, count, 0)).setDrawPoints().setUseIndexData(false);
+	var acc = Rendering.PositionAttributeAccessor.create(mesh);
+	for(var i=0; i<count; ++i) {
+		var s = new Geometry.Vec2(Rand.uniform(0,1), Rand.uniform(0,1));
+		var lm = (2*s.x()-1).asin();
+		var phi = 2*Math.PI*s.y();
+		acc.setPosition(i, new Geometry.Vec3(lm.cos()*phi.cos(), lm.cos()*phi.sin(), lm.sin()));
+	}
+	mesh._markAsChanged();
+	var sampler = new MinSG.BlueSurfels.GreedyCluster;
+	sampler.setTargetCount(count);
+	sampleMesh = sampler.sampleSurfels(mesh);
+}
+
 NS.nextPowOfTwo := fn(value) { return 2.pow(value.log(2).ceil()); };
 
 NS.getDirectionPresets := fn() {
@@ -51,6 +70,15 @@ NS.getDirectionPresets := fn() {
 
 NS.getDirectionsFromPreset := fn(name) {
 	return getDirectionPresets()[name];
+};
+
+NS.createDirections := fn(count) {	
+	var posAcc = Rendering.PositionAttributeAccessor.create(sampleMesh);
+	var directions = [];
+	for(var i=0; i<count; ++i) {
+		directions += posAcc.getPosition(i).normalize();
+	}
+	return directions;
 };
 
 NS.handleUserEvents := fn() {	

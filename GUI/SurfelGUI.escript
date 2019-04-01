@@ -370,7 +370,6 @@ static createAnalysisPanel = fn(gui) {
 		$directionPresetName : Std.DataWrapper.createFromEntry(PADrend.configCache,'BlueSurfels.directions', "cube"),
 		$infoWrapper : new Std.DataWrapper(""),
 		$samples : new Std.DataWrapper(1000),
-		$bitmaps : [],
 		$image : gui.createImage(new Util.Bitmap(256,256,Util.Bitmap.RGB)),
 		$meanImg : new NodePreviewImage(256, 128),
 		$varImg : new NodePreviewImage(256, 128),
@@ -414,36 +413,25 @@ static createAnalysisPanel = fn(gui) {
 	panel++;
 	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL : "compute",
+		GUI.LABEL : "DDA",
 		GUI.ON_CLICK : [config] => fn(config) {
 			var node = NodeEditor.getSelectedNode();
 			if(!node) return;
 			var surfels = Utils.locateSurfels(node);
 			if(!surfels) return;
 			var count = config.samples();
-			var directions = Utils.getDirectionPresets()[config.directionPresetName()];		
 			var surface = Utils.computeTotalSurface(node);
-			
-			var sampler = new (Std.module('BlueSurfels/Sampler/GreedyCluster'));
-			sampler.setResolution(config.resolution());
-			sampler.setDirections(directions);
-			sampler.setTargetCount(count);
-			sampler.setSeed(42);
-			var optSurfels = sampler.sample(node);
-			
+						
 			var r_min = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
-			var r_opt = MinSG.BlueSurfels.getMinimalVertexDistances(optSurfels, count).min() * 0.5;
 			var r_max = (surface/(2*3.sqrt()*count)).sqrt();
 			var quality = r_min/r_max;
-			var relQuality = r_min/r_opt;
 			
 			var diff_max = config.diffFactor() * r_max;
 			var bitmap = MinSG.BlueSurfels.differentialDomainAnalysis(surfels,diff_max,256,count,true);
 			var radial = MinSG.BlueSurfels.getRadialMeanVariance(bitmap);
 			Util.normalizeBitmap(bitmap);
-			config.bitmaps = [bitmap];
-			var avgBmp = Util.blendTogether(Util.Bitmap.RGB,config.bitmaps);
-			config.image.updateData(avgBmp);
+			bitmap = Util.blendTogether(Util.Bitmap.RGB,[bitmap]);
+			config.image.updateData(bitmap);
 			
 			var radialMean = new Map;
 			var variance = new Map;
@@ -468,8 +456,44 @@ static createAnalysisPanel = fn(gui) {
 			var info = "";
 			info += "Surface: " + surface + "\n";
 			info += "Max. Radius: " + r_max + "\n";
+			info += "Radius: " + r_min + "\n";
+			info += "Quality: " + quality + "\n";
+			config.infoWrapper(info);
+		},
+		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
+	};
+	panel += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Radius Stats",
+		GUI.ON_CLICK : [config] => fn(config) {
+			var node = NodeEditor.getSelectedNode();
+			if(!node) return;
+			var surfels = Utils.locateSurfels(node);
+			if(!surfels) return;
+			var count = config.samples();
+			var directions = Utils.getDirectionPresets()[config.directionPresetName()];
+			var surface = Utils.computeTotalSurface(node);
+			
+			var sampler = new (Std.module('BlueSurfels/Sampler/GreedyCluster'));
+			sampler.setResolution(config.resolution());
+			sampler.setDirections(directions);
+			sampler.setTargetCount(count);
+			sampler.setSeed(42);
+			var optSurfels = sampler.sample(node);
+			
+			var r_min = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
+			var r_opt = MinSG.BlueSurfels.getMinimalVertexDistances(optSurfels, count).min() * 0.5;
+			var r_max = (surface/(2*3.sqrt()*count)).sqrt();
+			var quality = r_min/r_max;
+			var optQuality = r_opt/r_max;
+			var relQuality = r_min/r_opt;
+						
+			var info = "";
+			info += "Surface: " + surface + "\n";
+			info += "Max. Radius: " + r_max + "\n";
 			info += "Opt. Radius: " + r_opt + "\n";
 			info += "Radius: " + r_min + "\n";
+			info += "Opt. Quality: " + optQuality + "\n";
 			info += "Quality: " + quality + "\n";
 			info += "Rel. Quality: " + relQuality + "\n";
 			config.infoWrapper(info);
@@ -478,41 +502,8 @@ static createAnalysisPanel = fn(gui) {
 	};
 	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL : "Average",
-		GUI.ON_CLICK : [config] => fn(config) {
-			var node = NodeEditor.getSelectedNode();
-			if(!node) return;
-			var surfels = Utils.locateSurfels(node);
-			if(!surfels) return;
-			var count = config.samples();
-			var surface = Utils.computeTotalSurface(node);
-						
-			var r = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
-			var r_max = (surface/(2*3.sqrt()*count)).sqrt();
-			var quality = r/r_max;
-			
-			var diff_max = config.diffFactor() * r_max;
-			var bitmap = MinSG.BlueSurfels.differentialDomainAnalysis(surfels,diff_max,256,count,true);
-			Util.normalizeBitmap(bitmap);
-			config.bitmaps += bitmap;
-			var avgBmp = Util.blendTogether(Util.Bitmap.RGB, config.bitmaps);
-			config.image.updateData(avgBmp);
-			
-			var info = "";
-			info += "Runs: " + config.bitmaps.count() + "\n";
-			info += "Surface: " + surface + "\n";
-			info += "Max. Radius: " + r_max + "\n";
-			info += "Radius: " + r + "\n";
-			info += "Quality: " + quality + "\n";
-			config.infoWrapper(info);
-		},
-		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
-	};
-	panel += {
-		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "Clear",
 		GUI.ON_CLICK : [config] => fn(config) {
-			config.bitmaps.clear();
 			config.image.updateData(new Util.Bitmap(256,256,Util.Bitmap.RGB));
 			config.meanImg.clear();
 			config.varImg.clear();

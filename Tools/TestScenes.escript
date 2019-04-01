@@ -10,6 +10,8 @@
 static mesh_sphere = Rendering.loadMesh(__DIR__ + "/../resources/meshes/sphere_10k.mmf");
 
 static SurfelGenerator = Std.module("BlueSurfels/SurfelGenerator");
+static Utils = Std.module("BlueSurfels/Utils");
+static SurfelDebugRenderer = Std.module("BlueSurfels/Tools/SurfelDebugRenderer");
 static sampler = new (Std.module("BlueSurfels/Sampler/GreedyCluster"));
 sampler.setTargetCount(10000);
 
@@ -116,6 +118,29 @@ TS.addScene("Random Spheres in Plane", fn() {
 	}
 	
 	//PADrend.getCurrentScene() += surfelRenderer;
+});
+
+TS.addScene("Low-Discrepancy Sphere", fn() {
+	var count = 1000;
+	var origNode = new MinSG.GeometryNode(mesh_sphere);	
+	var vd = (new Rendering.VertexDescription).appendPosition3D().appendNormalByte().appendColorRGBAByte();
+	var mesh = (new Rendering.Mesh(vd, count, 0)).setDrawPoints().setUseIndexData(false);
+	var acc = new Rendering.VertexAccessor(mesh);
+	var pacc = Rendering.PositionAttributeAccessor.create(mesh);
+	var nacc = Rendering.NormalAttributeAccessor.create(mesh);
+	var cacc = Rendering.ColorAttributeAccessor.create(mesh);
+	var pos = Utils.createDirections(count);
+	for(var i=0; i<count; ++i) {
+		acc.setPosition(i, pos[i]);
+		nacc.setNormal(i, pos[i]);
+		cacc.setColor(i, new Util.Color4f(1,0,0,1));
+	}
+	mesh._markAsChanged();
+	Utils.attachSurfels(origNode, mesh);
+	var state = new SurfelDebugRenderer;
+	state.pointSize(6);
+	origNode += state;
+	PADrend.getCurrentScene() += origNode;
 });
 
 return TS;
