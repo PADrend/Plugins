@@ -421,10 +421,13 @@ static createAnalysisPanel = fn(gui) {
 			if(!surfels) return;
 			var count = config.samples();
 			var surface = Utils.computeTotalSurface(node);
-						
-			var r_min = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
+			
+			var minDistances = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count);
+			var r_min = minDistances.min() * 0.5;
+			var r_mean = minDistances.reduce(fn(sum,k,v){ return sum+v;},0) / count * 0.5;
 			var r_max = (surface/(2*3.sqrt()*count)).sqrt();
 			var quality = r_min/r_max;
+			var quality_mean = r_mean/r_max;
 			
 			var diff_max = config.diffFactor() * r_max;
 			var bitmap = MinSG.BlueSurfels.differentialDomainAnalysis(surfels,diff_max,256,count,true);
@@ -455,9 +458,11 @@ static createAnalysisPanel = fn(gui) {
 			
 			var info = "";
 			info += "Surface: " + surface + "\n";
-			info += "Max. Radius: " + r_max + "\n";
+			info += "Opt. Radius: " + r_max + "\n";
 			info += "Radius: " + r_min + "\n";
+			info += "Mean Radius: " + r_mean + "\n";
 			info += "Quality: " + quality + "\n";
+			info += "Mean Quality: " + quality_mean + "\n";
 			config.infoWrapper(info);
 		},
 		GUI.SIZE :	[GUI.WIDTH_ABS, 100, 0],
@@ -482,18 +487,18 @@ static createAnalysisPanel = fn(gui) {
 			var optSurfels = sampler.sample(node);
 			
 			var r_min = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
-			var r_opt = MinSG.BlueSurfels.getMinimalVertexDistances(optSurfels, count).min() * 0.5;
+			var r_ref = MinSG.BlueSurfels.getMinimalVertexDistances(optSurfels, count).min() * 0.5;
 			var r_max = (surface/(2*3.sqrt()*count)).sqrt();
 			var quality = r_min/r_max;
-			var optQuality = r_opt/r_max;
-			var relQuality = r_min/r_opt;
+			var optQuality = r_ref/r_max;
+			var relQuality = r_min/r_ref;
 						
 			var info = "";
 			info += "Surface: " + surface + "\n";
-			info += "Max. Radius: " + r_max + "\n";
-			info += "Opt. Radius: " + r_opt + "\n";
+			info += "Opt. Radius: " + r_max + "\n";
+			info += "Ref. Radius: " + r_ref + "\n";
 			info += "Radius: " + r_min + "\n";
-			info += "Opt. Quality: " + optQuality + "\n";
+			info += "Ref. Quality: " + optQuality + "\n";
 			info += "Quality: " + quality + "\n";
 			info += "Rel. Quality: " + relQuality + "\n";
 			config.infoWrapper(info);
