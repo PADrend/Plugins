@@ -22,6 +22,8 @@ T.getResolution @(public) ::= fn() { return rasterizer.getResolution(); };
 T.setDirections @(public) ::= fn(Array dir) { rasterizer.setDirections(dir); return this; };
 T.getDirections @(public) ::= fn() { return rasterizer.getDirections(); };
 
+T.getSampleTimes ::= fn() { return sampler.getSampleTimes(); };
+
 // ----------------------------
 
 T._constructor ::= fn() {
