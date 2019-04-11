@@ -15,13 +15,16 @@ static defaultRenderParam = (new MinSG.RenderParam).setFlags(MinSG.USE_WORLD_MAT
 
 // generate progressive samples on a sphere
 static sampleMesh;
-{
+static sampleMeshSeed;
+static computeSampleMesh = fn(seed) {
+	//outln("Recompute direction mesh.");
 	var count = 1000;
+	var rng = new Math.RandomNumberGenerator(seed);
 	var vd = (new Rendering.VertexDescription).appendPosition3D();
 	var mesh = (new Rendering.Mesh(vd, count, 0)).setDrawPoints().setUseIndexData(false);
 	var acc = Rendering.PositionAttributeAccessor.create(mesh);
 	for(var i=0; i<count; ++i) {
-		var s = new Geometry.Vec2(Rand.uniform(0,1), Rand.uniform(0,1));
+		var s = new Geometry.Vec2(rng.uniform(0,1), rng.uniform(0,1));
 		var lm = (2*s.x()-1).asin();
 		var phi = 2*Math.PI*s.y();
 		acc.setPosition(i, new Geometry.Vec3(lm.cos()*phi.cos(), lm.cos()*phi.sin(), lm.sin()));
@@ -29,8 +32,11 @@ static sampleMesh;
 	mesh._markAsChanged();
 	var sampler = new MinSG.BlueSurfels.GreedyCluster;
 	sampler.setTargetCount(count);
+	sampler.setSeed(seed);
 	sampleMesh = sampler.sampleSurfels(mesh);
-}
+	sampleMeshSeed = clock();
+};
+computeSampleMesh(clock());
 
 NS.nextPowOfTwo := fn(value) { return 2.pow(value.log(2).ceil()); };
 
@@ -72,7 +78,9 @@ NS.getDirectionsFromPreset := fn(name) {
 	return getDirectionPresets()[name];
 };
 
-NS.createDirections := fn(count) {	
+NS.createDirections := fn(count, seed=clock()) {
+	if(seed != sampleMeshSeed)
+		computeSampleMesh(seed);
 	var posAcc = Rendering.PositionAttributeAccessor.create(sampleMesh);
 	var directions = [];
 	for(var i=0; i<count; ++i) {
