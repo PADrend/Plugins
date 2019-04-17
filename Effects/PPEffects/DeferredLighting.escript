@@ -52,13 +52,13 @@ Effect._constructor ::= fn() {
 //! ---|> PPEffect
 Effect.begin @(override) ::= fn() {
 	renderingContext.pushAndSetFBO(fbo);
-	fbo.setDrawBuffers(5);
+	fbo.setDrawBuffers(renderingContext,5);
 	renderingContext.pushAndSetShader(packShader);
 };
 
 //! ---|> PPEffect
 Effect.end @(override) ::= fn() {
-	fbo.setDrawBuffers(1);
+	fbo.setDrawBuffers(renderingContext,1);
 	renderingContext.popFBO();
 	renderingContext.popShader();
 

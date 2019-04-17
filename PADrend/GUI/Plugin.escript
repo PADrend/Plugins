@@ -126,17 +126,24 @@ static initGUI_FBO = fn(){
     renderingContext.popFBO();
 };
 
+static doDisplayGUI = fn() {
+	gui.display();
+	// gui might mess with current state, so we need to reapply all state
+	renderingContext.pushShader();
+	renderingContext.popShader();
+	renderingContext.applyChanges(true);
+};
 
 static renderGUI = fn(){
 	switch(guiMode()){
 		case MODE_NORMAL:
-			gui.display();
+			doDisplayGUI();
 			break;
 		case MODE_LAZY:{
 			@(once) initGUI_FBO();
 			gui.enableLazyRendering();
 			renderingContext.pushAndSetFBO(gui_FBO);
-			gui.display();
+			doDisplayGUI();
 			renderingContext.popFBO();
 			
 			var blending=new Rendering.BlendingParameters;
@@ -158,7 +165,7 @@ static renderGUI = fn(){
 			renderingContext.clearScreen(new Util.Color4f(0,0,0,0));
 			renderingContext.pushViewport();
 			renderingContext.setViewport(0,0,renderingContext.getWindowWidth()*0.5,renderingContext.getWindowHeight());
-			gui.display();
+			doDisplayGUI();
 			renderingContext.popViewport();
 			renderingContext.popFBO();
 			
@@ -182,7 +189,7 @@ static renderGUI = fn(){
 			@(once) initGUI_FBO();
 			renderingContext.pushAndSetFBO(gui_FBO);
 			renderingContext.clearScreen(new Util.Color4f(0,0,0,0));
-			gui.display();
+			doDisplayGUI();
 			renderingContext.popFBO();
 			
 			var blending=new Rendering.BlendingParameters;
@@ -207,8 +214,6 @@ static renderGUI = fn(){
 		default:
 			@(once) Runtime.warn("@(once) Invalid gui mode:"+guiMode());
 	}
-	// gui might mess with current state, so we need to reapply all
-	renderingContext.applyChanges(true);	
 };
 //Util.requirePlugin('PADrend/GUI').guiMode(2);
 

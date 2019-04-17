@@ -4,7 +4,7 @@
  * Web page: http://www.padrend.de/
  * Copyright (C) 2011-2013 Benjamin Eikel <benjamin@eikel.org>
  * Copyright (C) 2012-2014 Claudius Jähn <claudius@uni-paderborn.de>
- * 
+ *
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
  * Public License, v. 2.0. You should have received a copy of the MPL along
@@ -37,7 +37,7 @@ plugin.init @(override) := fn() {
 		out(__FILE__,__LINE__," MinSG::ImageCompare not supported. Did you compile with MINSG_EXT_IMAGECOMPARE defined?\n");
 		return false;
 	}
-	
+
 	static revoceExtensions = new Std.MultiProcedure;
 	displayTexturesEnabled.onDataChanged += fn(enable){
 		revoceExtensions();
@@ -46,7 +46,7 @@ plugin.init @(override) := fn() {
 			revoceExtensions += Util.registerExtensionRevocably('PADrend_AfterRendering', ex_AfterRendering);
 		}
 	};
-	
+
 	{ // init shader file locator
 		var shaderLocator = new Util.FileLocator;
 		var storedLocation = systemConfig.getValue('ImageCompare.shaderLocation',false);
@@ -58,6 +58,8 @@ plugin.init @(override) := fn() {
 			shaderLocator.addSearchPath( "../share/MinSG/data/" );
 			shaderLocator.addSearchPath( "modules/MinSG/data/" );
 			shaderLocator.addSearchPath( "../modules/MinSG/data/" );
+			shaderLocator.addSearchPath( "modules/MinSG/" );
+			shaderLocator.addSearchPath( "MinSG/" );
 		}
 		MinSG.AbstractOnGpuComparator.initShaderFileLocator( shaderLocator );
 		if( !shaderLocator.locateFile( new Util.FileName("shader/ImageCompare/ImageCompare.vs")) ){
@@ -81,38 +83,38 @@ static ex_BeforeRendering = fn(...) {
 		displayTexturesEnabled(false);
 		return;
 	}
-	
+
 	tempScene = PADrend.getCurrentScene();
 	PADrend.selectScene(void);
 };
 
 static ex_AfterRendering = fn(...) {
-	if(!displayTexturesEnabled()) 
+	if(!displayTexturesEnabled())
 		return;
-	
+
 	PADrend.selectScene(tempScene);
-	
+
 	var evaluator = Std.module('Evaluator/EvaluatorManager').getSelectedEvaluator();
 	var angle = evaluator.getCameraAngle();
 	var rect = evaluator.measurementResolution;
 	if(rect.isA(Geometry.Vec2))
 		rect = new Geometry.Rect(0,0,rect.x(),rect.y());
-	
+
 	var measurementCamera = PADrend.getActiveCamera().clone();
 	measurementCamera.setRelTransformation(PADrend.getActiveCamera().getWorldTransformationMatrix());
 	measurementCamera.applyVerticalAngle(angle);
 	measurementCamera.setViewport(rect);
 	frameContext.pushAndSetCamera(measurementCamera);
-	
+
 	evaluator.beginMeasure();
 	evaluator.measure(frameContext, PADrend.getCurrentScene(), rect);
 	evaluator.endMeasure(frameContext);
-	
+
 	frameContext.popCamera();
-	
+
 	// Update GUI
 	currentQuality(evaluator.getResults()[0]);
-	
+
 	var halfW = renderingContext.getWindowWidth() / 2;
 	var halfH = renderingContext.getWindowHeight() / 2;
 	var width = rect.getWidth();

@@ -70,6 +70,33 @@ Rendering.RenderingContext.setGlobalUniform ::= fn(params...){
 	return this._setGlobalUniform(new Rendering.Uniform(params...));
 };
 
+// --------------------------------------
+
+Rendering.Shader.createVertexFromFile := fn(file, defines=new Map) {
+	return Rendering.Shader.createShader().attachVSFile(file, defines);
+};
+
+// --------------------------------------
+
+Rendering.Shader.createFromFile := fn(file, defines=new Map) {
+	return Rendering.Shader.createShader().attachVSFile(file, defines).attachFSFile(file, defines);
+};
+
+// --------------------------------------
+
+Rendering.Shader.createComputeFromFile := fn(file, defines=new Map) {
+	return Rendering.Shader.createShader().attachCSFile(file, defines);
+};
+
+// --------------------------------------
+
+Rendering.Shader.createGeometryFromFile := fn(file, defines=new Map) {
+	return Rendering.Shader.createShader()
+												 .attachVSFile(file, defines)
+												 .attachGSFile(file, defines)
+												 .attachFSFile(file, defines);
+};
+
 //-------------------------------------
 
 static getCubeSmoothShader = fn(){
@@ -145,4 +172,81 @@ Rendering.createSmoothedCubeMap := fn(Rendering.Texture sourceMap, Number iterat
 	}
 	return t_output;
 };
+
+
+
+// --------------------------------------
+
+Rendering.RenderingContext.bindBuffer ::= fn(buffer, target, location=-1){
+	if(buffer ---|> Rendering.Mesh)
+		return buffer.bindVertexBuffer(this, target, location);
+	if(location >= 0)
+		buffer._bind(target, location);
+	else
+		buffer._bind(target);
+	return this;
+};
+
+static dummyBuffer = new Rendering.BufferObject;
+Rendering.RenderingContext.unbindBuffer ::= fn(target, location=-1){
+	if(location >= 0)
+		dummyBuffer._unbind(target, location);
+	else
+		dummyBuffer._unbind(target);
+	return this;
+};
+
+Rendering.Mesh.bindVertexBuffer ::= fn(rc, target, location=-1) {
+	this._swapVertexBuffer(dummyBuffer);
+	rc.bindBuffer(dummyBuffer, target, location);
+	this._swapVertexBuffer(dummyBuffer);
+	return this;
+};
+
+Rendering.Mesh.bindIndexBuffer ::= fn(rc, target, location=-1) {
+	this._swapIndexBuffer(dummyBuffer);
+	rc.bindBuffer(dummyBuffer, target, location);
+	this._swapIndexBuffer(dummyBuffer);
+	return this;
+};
+
+Rendering.Mesh.allocateGLData ::= fn() {
+	var tmpBuffer = new Rendering.BufferObject;
+	this._swapVertexBuffer(tmpBuffer);
+	var valid = tmpBuffer.isValid();
+	this._swapVertexBuffer(tmpBuffer);	
+	if(!valid) {
+		tmpBuffer.allocate(getVertexCount() * getVertexDescription().getVertexSize());
+		tmpBuffer.clear();
+		this._swapVertexBuffer(tmpBuffer);
+	}
+	return this;
+};
+
+Rendering.Mesh.clear ::= fn(param...) {
+	this._swapVertexBuffer(dummyBuffer);
+	dummyBuffer.clear(param...);
+	this._swapVertexBuffer(dummyBuffer);
+	return this;
+};
+
+Rendering.BufferObject.allocate ::= fn(size, hint=Rendering.USAGE_DYNAMIC_DRAW) {
+	return this.allocateData(Rendering.TARGET_COPY_WRITE_BUFFER, size, hint);
+};
+
+Rendering.BufferObject.upload ::= fn(data, offset=0, type=void) {
+	return this.uploadSubData(Rendering.TARGET_COPY_WRITE_BUFFER, data, offset, type);
+};
+
+Rendering.BufferObject.download ::= fn(count, type, offset=0) {
+	return this.downloadData(Rendering.TARGET_COPY_READ_BUFFER, count, type, offset);
+};
+
+Rendering.BufferObject._clear ::= Rendering.BufferObject.clear;
+Rendering.BufferObject.clear ::= fn(param...) {
+	return this._clear(Rendering.TARGET_COPY_WRITE_BUFFER, param...);
+};
+
+// --------------------------------------
+
 return Rendering;

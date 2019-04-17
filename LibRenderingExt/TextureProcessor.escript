@@ -101,7 +101,7 @@ T.begin ::= fn(){
 	if(this.outputDepthTexture)
 		this.fbo.attachDepthTexture(GLOBALS.renderingContext,this.outputDepthTexture);
 
-	this.fbo.setDrawBuffers(outputTextures.count());
+	this.fbo.setDrawBuffers(renderingContext,outputTextures.count());
 // 	out(fbo.getStatusMessage(GLOBALS.renderingContext),"\n");
 	if(this.shader){
 		try{

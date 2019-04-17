@@ -5,6 +5,7 @@
  * Copyright (C) 2011-2012 Benjamin Eikel <benjamin@eikel.org>
  * Copyright (C) 2011-2013 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2011 Ralf Petring <ralf@petring.net>
+ * Copyright (C) 2018 Sascha Brandt <sascha@brandt.graphics>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -184,8 +185,15 @@ plugin.init @(override) := fn(){
 	});
 	
 	// initialize fallback shader
-	var shaderFile = Util.requirePlugin('LibRenderingExt').getBaseFolder() + "/resources/shader/defaultShader.sfn";
-	defaultShader = Rendering.Shader.loadShader(shaderFile, shaderFile);
+	Util.registerExtension('PADrend_Init', fn(...) {
+		if(!systemConfig.getValue('PADrend.Rendering.GLCompabilityProfile', false)) {
+			// add default shader to root node if compability mode is disabled
+			var shaderState = new MinSG.ShaderState;
+			shaderState.getStateAttributeWrapper(MinSG.ShaderState.STATE_ATTR_SHADER_NAME)("universal3_default.shader");
+			shaderState.recreateShader( PADrend.SceneManagement.getDefaultSceneManager() );
+			defaultShader = shaderState.getShader();
+		}
+	}, Extension.LOW_PRIORITY-10000);
 	return true;
 };
 // ------------------
@@ -216,7 +224,8 @@ plugin.planTask := fn(mixed_TimeOrCallback,callback=void){
 
 plugin.singleFrame := fn() {
 
-	renderingContext.setShader(defaultShader);
+	if(defaultShader)
+		renderingContext.setShader(defaultShader);
 
 	// create "default" rendering pass
 	var renderingPasses = [ 
