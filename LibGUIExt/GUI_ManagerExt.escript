@@ -60,6 +60,21 @@ GUI.GUI_Manager.getPreset ::= fn(String id){
 	return preset;
 };
 
+GUI.GUI_Manager._display ::= GUI.GUI_Manager.display;
+if(GUI.GUI_Manager.display.getMinParamCount() > 0) {
+	// The GUI library uses the Rendering library as backend
+	GUI.GUI_Manager.display ::= fn() {
+		this._display(renderingContext);
+	};
+} else {
+	GUI.GUI_Manager.display ::= fn() {
+		this._display();
+		// gui might mess with current state, so we need to reapply all state
+		renderingContext.pushShader();
+		renderingContext.popShader();
+		renderingContext.applyChanges(true);
+	};
+}
 
 module('./GUIManagerExtensions/initComponentFactories');
 module('./GUIManagerExtensions/initComponentGroupFactories');

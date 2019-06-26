@@ -118,32 +118,24 @@ static gui_Texture;
 static initGUI_FBO = fn(){
 	gui_FBO = new Rendering.FBO;
 
-    renderingContext.pushAndSetFBO(gui_FBO);
-    gui_Texture = Rendering.createStdTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
-    gui_FBO.attachColorTexture(renderingContext,gui_Texture);
-    outln(gui_FBO.getStatusMessage(renderingContext));
+		renderingContext.pushAndSetFBO(gui_FBO);
+		gui_Texture = Rendering.createStdTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
+		gui_FBO.attachColorTexture(renderingContext,gui_Texture);
+		outln(gui_FBO.getStatusMessage(renderingContext));
 
-    renderingContext.popFBO();
-};
-
-static doDisplayGUI = fn() {
-	gui.display();
-	// gui might mess with current state, so we need to reapply all state
-	renderingContext.pushShader();
-	renderingContext.popShader();
-	renderingContext.applyChanges(true);
+		renderingContext.popFBO();
 };
 
 static renderGUI = fn(){
 	switch(guiMode()){
 		case MODE_NORMAL:
-			doDisplayGUI();
+			gui.display();
 			break;
 		case MODE_LAZY:{
 			@(once) initGUI_FBO();
 			gui.enableLazyRendering();
 			renderingContext.pushAndSetFBO(gui_FBO);
-			doDisplayGUI();
+			gui.display();
 			renderingContext.popFBO();
 			
 			var blending=new Rendering.BlendingParameters;
@@ -165,7 +157,7 @@ static renderGUI = fn(){
 			renderingContext.clearScreen(new Util.Color4f(0,0,0,0));
 			renderingContext.pushViewport();
 			renderingContext.setViewport(0,0,renderingContext.getWindowWidth()*0.5,renderingContext.getWindowHeight());
-			doDisplayGUI();
+			gui.display();
 			renderingContext.popViewport();
 			renderingContext.popFBO();
 			
@@ -189,7 +181,7 @@ static renderGUI = fn(){
 			@(once) initGUI_FBO();
 			renderingContext.pushAndSetFBO(gui_FBO);
 			renderingContext.clearScreen(new Util.Color4f(0,0,0,0));
-			doDisplayGUI();
+			gui.display();
 			renderingContext.popFBO();
 			
 			var blending=new Rendering.BlendingParameters;
