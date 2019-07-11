@@ -34,7 +34,7 @@ static computeSampleMesh = fn(seed) {
 	sampler.setTargetCount(count);
 	sampler.setSeed(seed);
 	sampleMesh = sampler.sampleSurfels(mesh);
-	sampleMeshSeed = clock();
+	sampleMeshSeed = seed;
 };
 computeSampleMesh(clock());
 
@@ -193,7 +193,8 @@ NS.packMesh := fn(t_color, t_position, t_normal, resolution, layers) {
 
 	// create & upload mesh
 	var vd = new Rendering.VertexDescription;
-	vd.appendPosition4DHalf();
+	//vd.appendPosition4DHalf();
+	vd.appendPosition3D();
 	vd.appendNormalByte();
 	vd.appendColorRGBAByte();
 	var mesh = new Rendering.Mesh(vd, pixelCount, 0);

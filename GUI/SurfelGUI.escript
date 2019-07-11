@@ -375,6 +375,8 @@ static createAnalysisPanel = fn(gui) {
 		$varImg : new NodePreviewImage(256, 128),
 		$radData : void,
 		$diffFactor : new Std.DataWrapper(10),
+		$adaptive : new Std.DataWrapper(false),
+		$geodesic : new Std.DataWrapper(true),
 	});
 		
 	panel += "*Sampling Analysis*";
@@ -412,6 +414,20 @@ static createAnalysisPanel = fn(gui) {
 	};
 	panel++;
 	panel += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "Adaptive",
+		GUI.DATA_WRAPPER : config.adaptive,
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
+	};
+	panel++;
+	panel += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "Geodesic",
+		GUI.DATA_WRAPPER : config.geodesic,
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
+	};
+	panel++;
+	panel += {
 		GUI.TYPE : GUI.TYPE_BUTTON,
 		GUI.LABEL : "DDA",
 		GUI.ON_CLICK : [config] => fn(config) {
@@ -422,7 +438,7 @@ static createAnalysisPanel = fn(gui) {
 			var count = config.samples();
 			var surface = Utils.computeTotalSurface(node);
 			
-			var minDistances = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count);
+			var minDistances = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count, config.geodesic());
 			var r_min = minDistances.min() * 0.5;
 			var r_mean = minDistances.reduce(fn(sum,k,v){ return sum+v;},0) / count * 0.5;
 			var r_max = (surface/(2*3.sqrt()*count)).sqrt();
@@ -430,7 +446,7 @@ static createAnalysisPanel = fn(gui) {
 			var quality_mean = r_mean/r_max;
 			
 			var diff_max = config.diffFactor() * r_max;
-			var bitmap = MinSG.BlueSurfels.differentialDomainAnalysis(surfels,diff_max,256,count,true);
+			var bitmap = MinSG.BlueSurfels.differentialDomainAnalysis(surfels,diff_max,256,count,config.geodesic(),config.adaptive());
 			var radial = MinSG.BlueSurfels.getRadialMeanVariance(bitmap);
 			Util.normalizeBitmap(bitmap);
 			bitmap = Util.blendTogether(Util.Bitmap.RGB,[bitmap]);
@@ -486,8 +502,8 @@ static createAnalysisPanel = fn(gui) {
 			sampler.setSeed(42);
 			var optSurfels = sampler.sample(node);
 			
-			var r_min = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count).min() * 0.5;
-			var r_ref = MinSG.BlueSurfels.getMinimalVertexDistances(optSurfels, count).min() * 0.5;
+			var r_min = MinSG.BlueSurfels.getMinimalVertexDistances(surfels, count, config.geodesic()).min() * 0.5;
+			var r_ref = MinSG.BlueSurfels.getMinimalVertexDistances(optSurfels, count, config.geodesic()).min() * 0.5;
 			var r_max = (surface/(2*3.sqrt()*count)).sqrt();
 			var quality = r_min/r_max;
 			var optQuality = r_ref/r_max;
@@ -593,6 +609,24 @@ static createUtilPanel = fn(gui) {
 	}	
 		
 	panel += "*Utils*";
+	panel++;
+	
+	panel += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Recompute packing value",
+		GUI.ON_CLICK : fn() {
+			var surfelNodes = MinSG.collectNodesReferencingAttribute(NodeEditor.getSelectedNode(), 'surfels');
+			foreach(surfelNodes as var node) {
+				if(node.isInstance())
+					node = node.getPrototype();
+				var surfelMesh = Utils.locateSurfels(node);
+				node.setNodeAttribute('surfelPacking', MinSG.BlueSurfels.computeSurfelPacking(surfelMesh));
+			}				
+			// reselect nodes to trigger info update
+			NodeEditor.selectNodes(NodeEditor.getSelectedNodes());
+		},
+		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
+	};
 	panel++;
 	
 	panel += {
