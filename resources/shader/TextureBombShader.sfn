@@ -1,0 +1,179 @@
+#version 450
+/*
+ * This file is part of the proprietary part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2017-2018 Sascha Brandt <sascha@brandt.graphics>
+ *
+ * PADrend consists of an open source part and a proprietary part.
+ * For the proprietary part of PADrend all rights are reserved.
+ */
+
+// ------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+uniform mat4 sg_matrix_modelToCamera;
+uniform mat4 sg_matrix_cameraToClipping;
+uniform mat4 sg_matrix_clippingToCamera;
+uniform int[4] sg_viewport;
+uniform float	sg_pointSize;
+
+uniform vec4 tileOffsets;
+uniform vec4 tileSizes;
+
+layout(location = 0) in vec3 sg_Position;
+layout(location = 1) in vec3 sg_Normal;
+layout(location = 2) in vec4 sg_Color;
+
+out VertexData {
+	vec4 position_cs;
+	vec3 normal_cs;
+	vec3 tangent_cs;
+	vec3 cotangent_cs;
+	float nDotV;
+	flat uint tile;
+	flat float tileSize;
+} vOut;
+
+// ---------------------------------------------------
+
+void main() {
+	mat4 matrix_modelToCamera = sg_matrix_modelToCamera;
+	float pointSize = sg_pointSize;
+	vOut.position_cs = matrix_modelToCamera * vec4(sg_Position, 1.0);
+	vOut.normal_cs = normalize(matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+	vec3 tangent = cross(sg_Normal,vec3(1,0,0));
+	if(length(tangent) == 0)
+		tangent = cross(sg_Normal,vec3(0,1,0));
+	if(length(tangent) == 0)
+		tangent = cross(sg_Normal,vec3(0,0,1));
+	vOut.tangent_cs = normalize(matrix_modelToCamera * vec4(normalize(tangent), 0.0)).xyz;
+	
+	vOut.cotangent_cs = normalize(cross(vOut.normal_cs, vOut.tangent_cs));  
+	vec3 viewDir = normalize(vOut.position_cs.xyz);
+	vOut.nDotV = dot(vOut.normal_cs, viewDir);
+	uint index = gl_VertexID;
+	
+	if(index < tileOffsets.x) {
+		vOut.tile = 0;
+		vOut.tileSize = tileSizes.x;
+	} else if(index < tileOffsets.x+tileOffsets.y) {
+		vOut.tile = 1;
+		vOut.tileSize = tileSizes.y;
+	} else if(index < tileOffsets.x+tileOffsets.y+tileOffsets.z) {
+		vOut.tile = 2;
+		vOut.tileSize = tileSizes.z;
+	} else {
+		vOut.tile = 3;
+		vOut.tileSize = tileSizes.w;
+	}
+}
+
+#endif
+
+// ------------------
+// gs
+#ifdef SG_GEOMETRY_SHADER
+
+uniform mat4 sg_matrix_cameraToClipping;
+uniform mat4 sg_matrix_clippingToCamera;
+
+// in
+layout(points) in;
+in VertexData {
+	vec4 position_cs;
+	vec3 normal_cs;
+	vec3 tangent_cs;
+	vec3 cotangent_cs;
+	float nDotV;
+	flat uint tile;
+	flat float tileSize;
+} vIn[];
+
+// out
+layout(triangle_strip, max_vertices = 3) out;
+out VertexData {
+	vec4 position_cs;
+	vec2 triCoord;
+	float radius;
+	flat uint tile;
+	flat float tileSize;
+} vOut;
+
+void main() {
+	vec4 pos = vIn[0].position_cs;
+	vec4 tangent = vec4(vIn[0].tangent_cs,0);
+	vec4 cotangent = vec4(vIn[0].cotangent_cs,0);
+	float r = vIn[0].tileSize;
+	if(vIn[0].nDotV >= 0)
+		return;
+		
+	vOut.tile = vIn[0].tile;
+	vOut.tileSize = vIn[0].tileSize;
+	
+	vOut.position_cs = pos + tangent * r * 2.0;
+	vOut.radius = r;
+	vOut.triCoord = vec2(2,0);
+	gl_Position = sg_matrix_cameraToClipping * vOut.position_cs;
+	EmitVertex();
+	
+	vOut.position_cs = pos - tangent * r + cotangent * r * 2.0;
+	vOut.triCoord = vec2(-1,2);
+	gl_Position = sg_matrix_cameraToClipping * vOut.position_cs;
+	EmitVertex();
+	
+	vOut.position_cs = pos - tangent * r - cotangent * r * 2.0;
+	vOut.triCoord = vec2(-1,-2);
+	gl_Position = sg_matrix_cameraToClipping * vOut.position_cs;
+	EmitVertex();
+	EndPrimitive();
+}
+
+#endif
+// ------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+uniform mat4 sg_matrix_cameraToClipping;
+uniform mat4 sg_matrix_clippingToCamera;
+uniform int[4] sg_viewport;
+
+layout(binding = 0) uniform sampler2D sg_depth;
+layout(binding = 1) uniform sampler2D sg_tiles;
+
+in VertexData {
+	vec4 position_cs;
+	vec2 triCoord;
+	float radius;
+	flat uint tile;
+	flat float tileSize;
+} vIn;
+
+layout(location = 0) out vec4 fragColor;
+
+void main() {
+	if(length(vIn.triCoord) > 1.0)
+		discard;
+		
+	float depth = 2.0 * texelFetch(sg_depth, ivec2(gl_FragCoord.xy), 0).x - 1.0;
+		
+	vec4 vp = vec4(sg_viewport[0], sg_viewport[1], sg_viewport[2], sg_viewport[3]);
+	// transform fragment coordinates to clipping space [-1,1]x[-1,1]x[-1,1]
+	vec4 frag_clip = vec4((gl_FragCoord.xy - vp.xy) / vp.zw * 2.0 - 1.0, depth, 1.0);
+	// transform fragment to camera space
+	vec4 frag_cs = sg_matrix_clippingToCamera * frag_clip;
+	// correction of homogeneous coordinates
+	frag_cs /= frag_cs.w;
+	
+	if(distance(vIn.position_cs, frag_cs) > vIn.radius)
+		discard;
+	
+	vec2 texCoord = ((vIn.triCoord * 0.5) + vec2(0.5)) * vec2(0.25, 1) + vec2(float(vIn.tile) * 0.25,0);
+	vec4 color = texture(sg_tiles, texCoord);
+	
+	fragColor = color;
+}
+
+#endif
+// ------------------

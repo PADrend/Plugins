@@ -1,0 +1,477 @@
+#version 450 core
+#extension GL_ARB_gpu_shader_int64 : require
+#extension GL_NV_shader_atomic_int64 : require
+#extension GL_NV_gpu_shader5 : require
+/*
+ * This file is part of the proprietary part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2017-2018 Sascha Brandt <sascha@brandt.graphics>
+ *
+ * PADrend consists of an open source part and a proprietary part.
+ * For the proprietary part of PADrend all rights are reserved.
+ */
+
+// helper functions
+
+// (x,y,layer,level) packed into 12:12:5:3
+#define unpackCoord(v) ivec4(v & 0xfffu, (v >> 12) & 0xfffu, (v >> 24) & 0x1fu, (v >> 29) & 0x7u)
+#define packCoord(v) uint((v.x & 0xfffu) | (v.y & 0xfffu) << 12 | (v.z & 0x1fu) << 24 | (v.w & 0x7u) << 29)
+
+struct Vertex {
+	//uint posXY;
+	//uint posZW;
+	//f16vec4 pos;
+	float x;
+	float y;
+	float z;
+	uint normal;
+	uint color;
+};
+
+// buffers
+layout(std430, binding = 0) buffer _1SampleBuffer {
+	uint64_t samples[]; // (src, distance)
+};
+
+layout(std430, binding = 1) buffer _2ValidBuffer {
+	uint block[];
+};
+
+layout(std430, binding = 2) buffer _3VertexBuffer {
+	Vertex vertices[];
+};
+
+//layout(std140, binding = 0) uniform Parameters {
+layout(std430, binding = 3) buffer _4Parameters {
+	int sampleCount;
+	int level;
+	int resolution;
+	int insertCount;
+	float minRadius;
+	float maxRadius;
+	float minDist;
+	float maxDist;
+	mat4 localToCamera[LAYER_COUNT];
+	mat4 cameraToClipping[LAYER_COUNT];
+};
+
+// textures
+layout(binding = 0) uniform sampler2DArray t_position;
+layout(binding = 1) uniform sampler2DArray t_normal;
+layout(binding = 2) uniform sampler2DArray t_color;
+layout(binding = 3) uniform usampler2DArray t_voronoiSite;
+layout(binding = 4) uniform sampler2DArray t_distance;
+layout(binding = 5) uniform usampler2DArray t_poisson;
+
+// =====================================================================
+#ifndef EXTRACT_MAX
+// =====================================================================
+
+// =====================================================================
+// vs
+#ifdef SG_VERTEX_SHADER
+
+// in
+layout(location = 0) in uint source;
+layout(location = 1) in float dist;
+
+// out
+layout(location = 0) out VertexData {
+	flat vec4 position;
+	#ifdef GEODESIC
+		flat vec4 normal;
+	#endif
+	flat float radius;
+	flat uint index;
+	#ifdef WEIGHTED
+		flat float weight;
+	#endif
+} vsOut;
+
+void main() {
+	ivec4 coord = unpackCoord(source);
+	vsOut.position = texelFetch(t_position, coord.xyz, coord.w);	
+	#ifdef GEODESIC
+		vsOut.normal = texelFetch(t_normal, coord.xyz, coord.w);	
+	#endif
+	vsOut.radius = min(dist, minRadius);
+	vsOut.index = gl_VertexID;
+	#ifdef WEIGHTED
+		vsOut.weight = texelFetch(t_color, coord.xyz, coord.w).x;
+	#endif
+}
+#endif // SG_VERTEX_SHADER
+
+// =====================================================================
+// gs
+#ifdef SG_GEOMETRY_SHADER
+
+// in
+layout(points, invocations = LAYER_COUNT) in;
+layout(location = 0) in VertexData {
+	flat vec4 position;
+	#ifdef GEODESIC
+		flat vec4 normal;
+	#endif
+	flat float radius;
+	flat uint index;
+	#ifdef WEIGHTED
+		flat float weight;
+	#endif
+} gsIn[];
+
+// out
+layout(triangle_strip, max_vertices = 3) out;
+layout(location = 0) out VertexData {
+	flat vec4 position;
+	#ifdef GEODESIC
+		flat vec4 normal;
+	#endif
+	vec2 triCoord;
+	flat float radius;
+	flat uint index;	
+	#ifdef WEIGHTED
+		flat float weight;
+	#endif
+} gsOut;
+
+void main() {
+	gsOut.position = gsIn[0].position;
+	#ifdef GEODESIC
+		gsOut.normal = gsIn[0].normal;
+	#endif
+	gsOut.radius = gsIn[0].radius;
+	gsOut.index = gsIn[0].index;
+	#ifdef WEIGHTED
+		gsOut.weight = gsIn[0].weight;
+	#endif
+	
+	//if(gsIn[0].radius <= 0)
+	//	return;
+	
+	vec4 pos = localToCamera[gl_InvocationID] * gsIn[0].position;
+	//vec3 nrm = (localToCamera[gl_InvocationID] * vec4(gsIn[0].normal,0)).xyz;
+	float r = gsIn[0].radius;//length(localToCamera[gl_InvocationID] * vec4(gsIn[0].radius,0,0,0));
+	
+	//if(dot(nrm, vec3(0,0,1)) < 0) return;
+	
+	vec4 tangent = vec4(1,0,0,0);
+	vec4 cotangent = vec4(0,1,0,0);
+	vec4 position_cs = pos + tangent * r * 2.0;
+	gsOut.triCoord = vec2(2,0);
+	gl_Position = cameraToClipping[gl_InvocationID] * position_cs;
+	gl_Layer = gl_InvocationID;
+	EmitVertex();
+
+	position_cs = pos - tangent * r + cotangent * r * 2.0;
+	gsOut.triCoord = vec2(-1,2);
+	gl_Position = cameraToClipping[gl_InvocationID] * position_cs;
+	gl_Layer = gl_InvocationID;
+	EmitVertex();
+
+	position_cs = pos - tangent * r - cotangent * r * 2.0;
+	gsOut.triCoord = vec2(-1,-2);
+	gl_Position = cameraToClipping[gl_InvocationID] * position_cs;
+	gl_Layer = gl_InvocationID;
+	EmitVertex();
+	EndPrimitive();
+}
+#endif // SG_GEOMETRY_SHADER
+
+// =====================================================================
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+// in
+layout(location = 0) in VertexData {
+	flat vec4 position;
+	#ifdef GEODESIC
+		flat vec4 normal;
+	#endif
+	//flat vec4 color;
+	vec2 triCoord;
+	flat float radius;
+	flat uint index;
+	#ifdef WEIGHTED
+		flat float weight;
+	#endif
+} fsIn;
+
+// out
+layout(location = 0) out uint site;
+
+// ------------------
+
+void main() {
+	if(length(fsIn.triCoord) > 1.0)
+		discard;
+	ivec4 coord = ivec4(gl_FragCoord.xy, gl_Layer, level);
+	vec4 pos = texelFetch(t_position, coord.xyz, coord.w);
+	if(pos.w <= 0) {
+		site = TARGET_COUNT;
+		gl_FragDepth = 0;
+		return;
+	}
+	
+	
+	#ifdef WEIGHTED
+		float weight = texelFetch(t_color, coord.xyz, coord.w).x;
+		float i1 = 1/sqrt(fsIn.weight);
+		float i2 = 1/sqrt(weight);
+		vec3 diff = 2*(fsIn.position.xyz - pos.xyz) / (fsIn.weight+weight);
+		//float dist = distance(fsIn.position.xyz, pos.xyz) - (1-fsIn.weight)*minRadius;
+		float dist = length(diff);
+	#else
+		float dist = distance(fsIn.position.xyz, pos.xyz);
+	#endif
+	
+	if(dist > fsIn.radius)
+		discard;
+	
+	#ifdef GEODESIC
+		vec3 nrm = normalize(texelFetch(t_normal, coord.xyz, coord.w).xyz);
+		vec3 v = normalize(pos.xyz - fsIn.position.xyz);
+		float c1 = dot(v, fsIn.normal.xyz);
+		float c2 = dot(v, nrm);
+		dist = dist * mix(1.0 / sqrt(1.0-c1*c1), (asin(c1) - asin(c2)) / (c1-c2), c1 != c2);
+	#endif
+	
+	#ifdef VORONOI_MODE
+		gl_FragDepth = dist/maxDist;
+	#else
+		gl_FragDepth = fsIn.radius/maxDist;
+	#endif
+	site = fsIn.index;
+}
+
+#endif // SG_FRAGMENT_SHADER
+
+// =====================================================================
+#else // EXTRACT_MAX
+// =====================================================================
+
+// =====================================================================
+// vs
+#ifdef SG_VERTEX_SHADER
+	layout(location = 0) in vec3 sg_Position;
+	out vec4 position;
+	void main() { 
+		position = vec4(sg_Position, 1.0); 
+		position.z = -1 + 2 * (minRadius*0.6/maxDist); 
+	}
+#endif // SG_VERTEX_SHADER
+
+// =====================================================================
+// gs
+#ifdef SG_GEOMETRY_SHADER
+layout(triangles, invocations = LAYER_COUNT) in;
+flat in vec4 position[];
+layout(triangle_strip, max_vertices = 3) out;
+flat out int layer;
+void main() {
+	layer = gl_InvocationID;
+	for(int i=0; i<3; ++i) {
+		gl_Position = position[i];
+		gl_Layer = gl_InvocationID;
+		EmitVertex();
+	}
+	EndPrimitive();
+}
+#endif // SG_GEOMETRY_SHADER
+
+// =====================================================================
+// fs
+#ifdef SG_FRAGMENT_SHADER
+	layout(early_fragment_tests) in;
+	flat in int layer;
+	layout(location = 0) out uint mask;
+	void main() {
+		ivec4 coord = ivec4(gl_FragCoord.xy, layer, level);
+		float dist = texelFetch(t_distance, coord.xyz, coord.w).x * maxDist;
+		uint site = texelFetch(t_voronoiSite, coord.xyz, coord.w).x;
+		if(site >= sampleCount)
+			return;
+		atomicMax(samples[sampleCount+site], packUint2x32(uvec2(packCoord(coord), floatBitsToUint(dist))));
+		mask = 1;
+	}
+#endif // SG_FRAGMENT_SHADER
+// =====================================================================
+#endif // EXTRACT_MAX
+// =====================================================================
+
+// =====================================================================
+// cs
+#ifdef SG_COMPUTE_SHADER
+
+layout(local_size_x = GROUP_SIZE) in;
+
+// simulate OpenCL-like kernels
+#define KERNEL(i) layout(index = i) subroutine(kernel)
+subroutine void kernel();
+layout(location = 0) subroutine uniform kernel executeKernel;
+void main() { executeKernel(); }
+
+// helper functions
+#define sharedBarrier() memoryBarrierShared(); barrier()
+
+// constants
+const uint gId = gl_GlobalInvocationID.x;
+const uint lIdx = gl_LocalInvocationIndex;
+const int grpId = int(gl_WorkGroupID.x);
+
+// ---------------------------------------------------
+
+shared ivec4 blockOffset;
+shared uint sampleCoord;
+KERNEL(0) void markValid() {
+	if(lIdx == 0) {
+		const int blockCount = resolution/BLOCK_SIZE;
+		blockOffset.x = (grpId % blockCount) * BLOCK_SIZE;
+		blockOffset.y = ((grpId / blockCount) % blockCount) * BLOCK_SIZE;
+		blockOffset.z = grpId / (blockCount*blockCount);
+		blockOffset.w = level;
+		sampleCoord = 0;
+	}
+	sharedBarrier();
+	ivec4 coord = blockOffset + ivec4(lIdx % BLOCK_SIZE, lIdx / BLOCK_SIZE, 0, 0);
+	// test if pixel is valid
+	vec4 pos = texelFetch(t_position, coord.xyz, level);
+	if(pos.w > 0) {
+		atomicExchange(sampleCoord, 1);
+	}
+	sharedBarrier();
+	
+	// set initial sample
+	if(lIdx == 0 && sampleCoord > 0) {
+		block[grpId] = packCoord(blockOffset);
+	}
+}
+
+// ---------------------------------------------------
+
+uniform int initBlock=0;
+KERNEL(1) void chooseFirstSample() {
+	if(lIdx == 0) {
+		blockOffset = unpackCoord(block[initBlock]);
+		sampleCoord = 0;
+	}
+	sharedBarrier();
+	ivec4 coord = blockOffset + ivec4(lIdx % BLOCK_SIZE, lIdx / BLOCK_SIZE, 0, 0);
+	// test if pixel is valid
+	vec4 pos = texelFetch(t_position, coord.xyz, level);
+	if(pos.w > 0) {
+		atomicMax(sampleCoord, packCoord(coord)); // more reproducible
+		//atomicExchange(sampleCoord, packCoord(coord));
+	}
+	sharedBarrier();  
+	// set initial sample
+	if(lIdx == 0 && sampleCoord > 0) {
+		//atomicExchange(samples[0], packUint2x32(uvec2(sampleCoord, floatBitsToUint(maxDist))));
+		atomicMax(samples[0], packUint2x32(uvec2(sampleCoord, floatBitsToUint(maxDist))));
+	}
+}
+
+// ---------------------------------------------------
+
+KERNEL(2) void updateMax() {
+	if(lIdx == 0)
+		blockOffset = unpackCoord(block[grpId]);
+	sharedBarrier();
+	ivec4 coord = blockOffset + ivec4(lIdx % BLOCK_SIZE, lIdx / BLOCK_SIZE, 0, 0);
+	float dist = texelFetch(t_distance, coord.xyz, coord.w).x * maxDist;
+		
+	uint site = texelFetch(t_voronoiSite, coord.xyz, coord.w).x;
+	if(site >= sampleCount)
+		return;
+
+	uvec4 neighborSites = uvec4(
+		texelFetch(t_voronoiSite, coord.xyz + ivec3( 1, 0, 0), coord.w).x,
+		texelFetch(t_voronoiSite, coord.xyz + ivec3(-1, 0, 0), coord.w).x,
+		texelFetch(t_voronoiSite, coord.xyz + ivec3( 0, 1, 0), coord.w).x,
+		texelFetch(t_voronoiSite, coord.xyz + ivec3( 0,-1, 0), coord.w).x
+	);
+	
+	// read distances of the 4 neighbors
+	float maxNeighborDist = max(
+		max(
+			mix(0u,texelFetch(t_distance, coord.xyz + ivec3( 1, 0, 0), coord.w).x, neighborSites.x == site),
+			mix(0u,texelFetch(t_distance, coord.xyz + ivec3(-1, 0, 0), coord.w).x, neighborSites.y == site)
+		), 
+		max(
+			mix(0u,texelFetch(t_distance, coord.xyz + ivec3( 0, 1, 0), coord.w).x, neighborSites.z == site),
+			mix(0u,texelFetch(t_distance, coord.xyz + ivec3( 0,-1, 0), coord.w).x, neighborSites.w == site)
+		)
+	) * maxDist;
+		
+	// only update if this fragment is a local maximum
+	if(dist > maxNeighborDist) {
+		atomicMax(samples[sampleCount+site], packUint2x32(uvec2(packCoord(coord), floatBitsToUint(dist))));
+	}
+}
+
+// ---------------------------------------------------
+
+KERNEL(3) void testRadius() {
+	if(gId >= sampleCount)
+		return;
+	uvec2 src = unpackUint2x32(samples[sampleCount+gId]);
+	float radius = uintBitsToFloat(src.y);
+	if(radius < minDist) {
+		samples[sampleCount+gId] = 0;
+	}
+}
+
+// ---------------------------------------------------
+
+KERNEL(4) void testSamples() {
+	if(gId >= sampleCount)
+		return;
+	uvec2 src = unpackUint2x32(samples[sampleCount+gId]);
+	ivec4 coord = unpackCoord(src.x);
+	uvec4 poisson = texelFetch(t_poisson, coord.xyz, coord.w);
+	if(sampleCount+gId != poisson.x) {
+		samples[sampleCount+gId] = 0;
+	}
+}
+
+// ---------------------------------------------------
+
+KERNEL(5) void findInsertCount() {
+	if(gId >= sampleCount)
+		return;
+	uint64_t s1 = samples[sampleCount+gId];
+	uint64_t s2 = mix(samples[sampleCount+gId+1], 0ul, gId==sampleCount-1);
+	if(s1 > 0 && s2 == 0) {
+		insertCount = int(gId+1);
+		minRadius = uintBitsToFloat(unpackUint2x32(s1).y);
+	}
+}
+
+// ---------------------------------------------------
+
+KERNEL(6) void copyMesh() {
+	if(gId >= sampleCount)
+		return;
+		
+	uvec2 src = unpackUint2x32(samples[gId]);
+	ivec4 coord = unpackCoord(src.x);
+	
+	vec4 position = texelFetch(t_position,coord.xyz, coord.w);
+	vec4 normal = vec4(texelFetch(t_normal,coord.xyz, coord.w).xyz,0);
+	vec4 color = texelFetch(t_color,coord.xyz, coord.w);
+	//color /= color.a;
+	
+	//vertices[gId].posXY = packHalf2x16(position.xy);
+	//vertices[gId].posZW = packHalf2x16(position.zw);
+	//vertices[gId].pos = f16vec4(position);
+	vertices[gId].x = position.x;
+	vertices[gId].y = position.y;
+	vertices[gId].z = position.z;
+	vertices[gId].normal = packSnorm4x8(normal);    
+	vertices[gId].color = packUnorm4x8(color);
+}
+
+// ---------------------------------------------------
+
+#endif // SG_COMPUTE_SHADER

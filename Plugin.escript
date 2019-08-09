@@ -4,7 +4,7 @@
  * Web page: http://www.padrend.de/
  * Copyright (C) 2012-2013 Claudius Jähn <claudius@uni-paderborn.de>
  * Copyright (C) 2012-2013 Ralf Petring <ralf@petring.net>
- * Copyright (C) 2014-2018 Sascha Brandt <sascha@brandt.graphics>
+ * Copyright (C) 2014-2019 Sascha Brandt <sascha@brandt.graphics>
  *
  * PADrend consists of an open source part and a proprietary part.
  * For the proprietary part of PADrend all rights are reserved.
@@ -12,7 +12,7 @@
 var plugin = new Plugin({
 	Plugin.NAME				:	'BlueSurfels',
 	Plugin.DESCRIPTION		:	"Progressive Blue Surfels",
-	Plugin.VERSION			:	0.4,
+	Plugin.VERSION			:	1.0,
 	Plugin.AUTHORS			:	"Sascha Brandt, Claudius Jaehn",
 	Plugin.OWNER			:	"Sascha Brandt",
 	Plugin.LICENSE			:	"Proprietary",
@@ -30,9 +30,13 @@ plugin.init := fn() {
 
 	Util.registerExtension('PADrend_Init',this->fn() {
 		Std.module('BlueSurfels/Tools/SurfelDebugRenderer');
+		Std.module('BlueSurfels/Tools/TextureBombRenderer');
 		Std.module('BlueSurfels/Sampler/GreedyCluster');
 		Std.module('BlueSurfels/Sampler/ProgressiveBlueSurfels');
 		Std.module('BlueSurfels/Sampler/RandomSampler');
+		Std.module('BlueSurfels/Sampler/GPUSampler');
+		Std.module('BlueSurfels/Sampler/ProgressiveSampleProjection');
+		//Std.module('BlueSurfels/Sampler/SampleElimination');
 	});
 	
 	return true;
