@@ -1,0 +1,123 @@
+#version 450 core
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2019 Sascha Brandt <sascha@brandt.graphics>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+ 
+#ifndef SG_COMPUTE_SHADER
+#error "scan can only be used in compute shader."
+#endif
+
+#ifndef WORK_GROUP_SIZE
+#define WORK_GROUP_SIZE 256
+#endif 
+
+#ifndef SCAN_FN
+#define SCAN_FN(a, b) a + b
+#endif
+
+#ifndef TYPE
+#define TYPE uint
+#endif
+
+#ifndef VALUE_BINDING
+#define VALUE_BINDING 0
+#endif
+
+#ifndef BLOCK_BINDING
+#define BLOCK_BINDING 1
+#endif
+
+const uint n = 2 * WORK_GROUP_SIZE;
+shared TYPE localData[2*WORK_GROUP_SIZE];
+
+void scan(inout TYPE value1, inout TYPE value2) {
+	const uint lid = gl_LocalInvocationIndex;
+	uint offset = 1;
+	
+	// initialize
+	localData[2*lid] = value1;
+	localData[2*lid+1] = value2;
+	
+	// up-sweep
+	for(uint d = n >> 1; d > 0; d >>= 1) {
+		memoryBarrierShared();
+		barrier();
+		if(lid < d) {
+			uint ai = offset * (2*lid+1) - 1;
+			uint bi = offset * (2*lid+2) - 1;
+			localData[bi] = SCAN_FN(localData[ai], localData[bi]);      
+		}
+		offset <<= 1;
+	}
+	
+	// clear last element
+	if(lid == 0) localData[n-1] = 0;
+	
+	// down-sweep
+	for(uint d = 1; d < n; d <<= 1) {
+		offset >>= 1;
+		memoryBarrierShared();
+		barrier();
+		if(lid < d) {  
+			uint ai = offset * (2*lid+1) - 1;
+			uint bi = offset * (2*lid+2) - 1;
+			
+			TYPE tmp = localData[ai];
+			localData[ai] = localData[bi];
+			localData[bi] = SCAN_FN(tmp, localData[bi]);
+		}
+	}
+	
+	memoryBarrierShared();
+	barrier();
+	value1 = localData[2*lid];
+	value2 = localData[2*lid+1];
+}
+
+#ifdef STANDALONE
+
+layout(local_size_x = WORK_GROUP_SIZE) in;
+
+subroutine void phase();
+layout(location = 0) subroutine uniform phase executePhase;
+void main() { executePhase(); }
+
+layout(std430, binding = VALUE_BINDING) buffer ValueBuffer {
+	TYPE values[];
+};
+
+layout(std430, binding = BLOCK_BINDING) buffer BlockBuffer {
+	TYPE block[];
+};
+
+layout(index = 0) subroutine(phase)
+void preScan() {
+	const uint id = gl_GlobalInvocationID.x;
+	TYPE value1 = values[2*id];
+	TYPE value2 = values[2*id+1];
+	TYPE lastValue = value2;
+	scan(value1, value2);
+	values[2*id] = value1;
+	values[2*id+1] = value2;
+	if(gl_LocalInvocationIndex == gl_WorkGroupSize.x-1)
+		block[gl_WorkGroupID.x] = SCAN_FN(value2, lastValue);
+}
+
+layout(index = 1) subroutine(phase)
+void sumBlocks() {
+	const uint id = gl_GlobalInvocationID.x;
+	uint sum = block[gl_WorkGroupID.x];
+	values[2*id] += sum;
+	values[2*id+1] += sum;
+}
+
+#endif

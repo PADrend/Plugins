@@ -1,0 +1,227 @@
+#version 450 core
+#extension GL_NV_gpu_shader5 : require
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2019 Sascha Brandt <sascha@brandt.graphics>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+// structs
+struct Vertex {
+	f16vec4 pos;
+	uint normal;
+	uint color;
+};
+
+// buffers
+layout(std430, binding = 0) buffer _0Parameters {
+	uint pixelCount;
+	uint sampleCount;
+};
+
+layout(std430, binding = 1) buffer _1EmptyPixelList {
+	uint pixels[];
+};
+
+layout(std430, binding = 2) buffer _2SampleBuffer {
+	uint samples[];
+};
+
+layout(std430, binding = 3) buffer _3ResultBuffer {
+	Vertex result[];
+};
+
+// =====================================================================
+// vs
+#ifdef SG_VERTEX_SHADER
+
+// in
+layout(location = 0) in uint dart;
+
+// out
+layout(location = 0) out VertexData {
+	flat uint dart;
+	flat uint index;
+} vsOut;
+
+void main() {
+	vsOut.dart = dart;
+	vsOut.index = gl_VertexID;
+}
+#endif
+
+// =====================================================================
+// gs
+#ifdef SG_GEOMETRY_SHADER
+
+// uniform
+uniform float radius;
+
+#ifdef CONFLICT_REMOVAL
+layout(binding = 0) uniform sampler2DShadow t_depth;
+#endif
+
+// in
+layout(points) in;
+layout(location = 0) in VertexData {
+	flat uint dart;
+	flat uint index;
+} gsIn[];
+
+// out
+layout(triangle_strip, max_vertices = 3) out;
+layout(location = 0) out VertexData {
+	vec2 triCoord;
+	flat uint index;
+} gsOut;
+
+void main() {
+	gsOut.index = gsIn[0].index;
+	if(gsIn[0].dart == 0)
+		return;
+	vec4 pos = vec4(unpackUnorm2x16(gsIn[0].dart),float(gsIn[0].index)/float(0x00ffffff),1);
+	
+	#ifdef CONFLICT_REMOVAL
+	
+	if(texture(t_depth, pos.xyz) == 1.0f)
+		return;
+	
+	uint offset = atomicAdd(sampleCount, 1);
+	result[offset].pos = f16vec4(pos.xy,0,1);
+	result[offset].normal = packSnorm4x8(vec4(0,0,1,0));
+	result[offset].color = gsIn[0].dart;
+	
+	#endif
+	
+	pos.xyz = pos.xyz * 2.0 - vec3(1.0);
+	float r = 2.0 * radius;
+	
+	vec4 tangent = vec4(1,0,0,0);
+	vec4 cotangent = vec4(0,1,0,0);
+	gsOut.triCoord = vec2(2,0);
+	gl_Position = pos + tangent * r * 2.0;
+	EmitVertex();
+
+	gsOut.triCoord = vec2(-1,2);
+	gl_Position = pos - tangent * r + cotangent * r * 2.0;
+	EmitVertex();
+
+	gsOut.triCoord = vec2(-1,-2);
+	gl_Position = pos - tangent * r - cotangent * r * 2.0;
+	EmitVertex();
+	EndPrimitive();
+}
+#endif
+
+// =====================================================================
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+// in
+layout(location = 0) in VertexData {
+	vec2 triCoord;
+	flat uint index;
+} fsIn;
+
+// out
+layout(location = 0) out uint coverage;
+
+// ------------------
+void main() {
+	if(length(fsIn.triCoord) > 1.0)
+		discard;
+	coverage = fsIn.index + 1;
+}
+
+#endif
+
+// =====================================================================
+// cs
+#ifdef SG_COMPUTE_SHADER
+
+layout(local_size_x = GROUP_SIZE) in;
+
+// simulate OpenCL-like kernels
+#define KERNEL(i) layout(index = i) subroutine(kernel)
+subroutine void kernel();
+layout(location = 0) subroutine uniform kernel executeKernel;
+void main() { executeKernel(); }
+
+#define sharedBarrier() memoryBarrierShared(); barrier()
+
+// constants
+const uint gId = gl_GlobalInvocationID.x;
+
+// uniform
+uniform int sg_seed;
+layout(binding = 1) uniform usampler2D t_coverage;
+
+// ---------------------------------------------------
+
+uint hash( uint x ) {
+	x += ( x << 10u );
+	x ^= ( x >>  6u );
+	x += ( x <<  3u );
+	x ^= ( x >> 11u );
+	x += ( x << 15u );
+	return x;
+}
+
+uint hash( uvec2 seed ) {
+	return hash(seed.x ^ hash(seed.y));
+}
+
+float uintToFloat( uint m ) {
+	const uint ieeeMantissa = 0x007FFFFFu; // binary32 mantissa bitmask
+	const uint ieeeOne      = 0x3F800000u; // 1.0 in IEEE binary32
+	m &= ieeeMantissa;                     // Keep only mantissa bits (fractional part)
+	m |= ieeeOne;                          // Add fractional part to 1.0
+	float  f = uintBitsToFloat( m );       // Range [1:2]
+	return f - 1.0;                        // Range [0:1]
+}
+
+vec2 random(uvec2 seed) {
+	uint h1 = hash(seed.y);
+	return vec2(uintToFloat(h1), uintToFloat(hash(h1)));
+}
+
+// ---------------------------------------------------
+
+KERNEL(0) void initPixelList() {
+	ivec2 coord = ivec2(gId%RESOLUTION, gId/RESOLUTION);
+	vec2 nrmCoord = (vec2(coord) + vec2(0.5)) / RESOLUTION;
+	pixels[gId] = packUnorm2x16(nrmCoord);
+	if(gId == 0)
+		pixelCount = RESOLUTION*RESOLUTION;
+}
+
+// ---------------------------------------------------
+
+KERNEL(1) void randomSample() {
+	if(gId >= min(MAX_SAMPLES, pixelCount))
+		return;
+	uint rnd = hash(uvec2(gId, sg_seed)) % pixelCount;
+	samples[gId] = pixels[rnd];
+}
+
+// ---------------------------------------------------
+
+KERNEL(2) void updatePixels() {
+	// TODO: read from pixel buffer
+	ivec2 coord = ivec2(gId%RESOLUTION, gId/RESOLUTION);
+	vec2 nrmCoord = (vec2(coord) + vec2(0.5)) / RESOLUTION;
+	uint covered = texelFetch(t_coverage, coord, 0).x;
+	if(covered.x < 1) {
+		uint offset = atomicAdd(pixelCount, 1);
+		pixels[offset] = packUnorm2x16(nrmCoord);
+	}
+}
+
+#endif

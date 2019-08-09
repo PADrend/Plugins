@@ -1,0 +1,421 @@
+#version 450 core
+#extension GL_ARB_gpu_shader_int64 : enable
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2019 Sascha Brandt <sascha@brandt.graphics>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+ 
+/*
+ * Based on:
+ * Satish, N.; Harris, M. J. & Garland, M. 
+ * Designing efficient sorting algorithms for manycore GPUs 
+ * 23rd IEEE International Symposium on Parallel and Distributed Processing, IPDPS 2009, Rome, Italy, May 23-29, 2009, IEEE, 2009, 1-10
+ */ 
+#ifndef SG_COMPUTE_SHADER
+#error "sort can only be used in compute shader."
+#endif
+
+#ifndef WORK_GROUP_SIZE
+#define WORK_GROUP_SIZE 256
+#endif
+
+#define KEYS_PER_THREAD 4
+#define RADIX_BITS 4
+#define BUCKETS 16
+
+#define BLOCK_SIZE (KEYS_PER_THREAD * WORK_GROUP_SIZE)
+
+#ifndef SORT_ASCENDING
+#define SORT_ASCENDING 1
+#endif
+
+#ifndef INVALID_KEY
+#if SORT_ASCENDING == 1
+#define INVALID_KEY 0xffffffffu
+#else
+#define INVALID_KEY 0
+#endif
+#endif
+
+#ifndef KEY_TYPE
+#define KEY_TYPE uint
+#endif
+
+#ifndef VALUE_TYPE
+#define VALUE_TYPE uint
+#endif
+
+#ifndef IN_KEY_BINDING
+#define IN_KEY_BINDING 0
+#endif
+
+#ifndef OUT_KEY_BINDING
+#define OUT_KEY_BINDING 1
+#endif
+
+#ifndef HISTOGRAM_BINDING
+#define HISTOGRAM_BINDING 2
+#endif
+
+#ifndef BLOCK_SUM_BINDING
+#define BLOCK_SUM_BINDING 3
+#endif
+
+#ifndef IN_VALUE_BINDING
+#define IN_VALUE_BINDING 4
+#endif
+
+#ifndef OUT_VALUE_BINDING
+#define OUT_VALUE_BINDING 5
+#endif
+
+// helper functions
+#define copy4(src, tgt, srcOff, tgtOff) {\
+	tgt[(tgtOff).x] = src[(srcOff).x];\
+	tgt[(tgtOff).y] = src[(srcOff).y];\
+	tgt[(tgtOff).z] = src[(srcOff).z];\
+	tgt[(tgtOff).w] = src[(srcOff).w];\
+}
+#define copy4Valid(src, tgt, srcOff, tgtOff, maxOff) {\
+	if(max(srcOff,tgtOff).x < (maxOff).x) tgt[(tgtOff).x] = src[(srcOff).x];\
+	if(max(srcOff,tgtOff).y < (maxOff).y) tgt[(tgtOff).y] = src[(srcOff).y];\
+	if(max(srcOff,tgtOff).z < (maxOff).z) tgt[(tgtOff).z] = src[(srcOff).z];\
+	if(max(srcOff,tgtOff).w < (maxOff).w) tgt[(tgtOff).w] = src[(srcOff).w];\
+}
+#define readUVec4(src, off) uvec4(src[(off).x], src[(off).y], src[(off).z], src[(off).w])
+#define writeUVec4(tgt, off, val) {tgt[(off).x] = val.x; tgt[(off).y] = val.y; tgt[(off).z] = val.z; tgt[(off).w] = val.w;}
+#define read4(src, off) {src[(off).x], src[(off).y], src[(off).z], src[(off).w]}
+
+#if SORT_ASCENDING == 1
+//#define getRadix(v, r, b) bitfieldExtract(v, r, b)
+#define getRadix(v, r, b) ((v >> r) & ((1 << b)-1))
+#else
+#define getRadix(v, r, b) ((~v >> r) & ((1 << b)-1))
+#endif
+
+#define getRadix4(v, off, r, b) uvec4(\
+	getRadix(v[(off).x], r, b),\
+	getRadix(v[(off).y], r, b),\
+	getRadix(v[(off).z], r, b),\
+	getRadix(v[(off).w], r, b)\
+)
+#define syncThreads() {memoryBarrierShared(); barrier();}
+
+layout(local_size_x = WORK_GROUP_SIZE) in;
+
+// simulate OpenCL-like kernels
+#define PHASE(i) layout(index = i) subroutine(phase)
+subroutine void phase();
+layout(location = 0) subroutine uniform phase executePhase;
+void main() { executePhase(); }
+
+// buffers
+layout(std430, binding = IN_KEY_BINDING) buffer _0InKeyBuffer {
+	KEY_TYPE inKeys[];
+};
+
+layout(std430, binding = OUT_KEY_BINDING) buffer _1OutKeyBuffer {
+	KEY_TYPE outKeys[];
+};
+
+layout(std430, binding = HISTOGRAM_BINDING) buffer _2HistogramBuffer {
+	uint histogram[];
+};
+
+layout(std430, binding = BLOCK_SUM_BINDING) buffer _3BlockSumBuffer {
+	uint elementsNotOrdered;
+	uint histBlockSum[];
+};
+
+#ifdef USE_VALUE_BUFFER
+layout(std430, binding = IN_VALUE_BINDING) buffer _4InValueBuffer {
+	VALUE_TYPE inValues[];
+};
+
+layout(std430, binding = OUT_VALUE_BINDING) buffer _5OutValueBuffer {
+	VALUE_TYPE outValues[];
+};
+shared VALUE_TYPE localValues[BLOCK_SIZE];
+#endif
+
+// consts
+const uvec4 off0 = uvec4(0,1,2,3);
+const uvec4 gId = uvec4(4*gl_GlobalInvocationID.x) + off0;
+const uvec4 lId = uvec4(4*gl_LocalInvocationIndex) + off0;
+const uint threadId = gl_LocalInvocationIndex;
+const uint grpId = gl_WorkGroupID.x;
+	
+// uniforms
+uniform ivec2 elementRange;
+uniform ivec2 radixRange;
+uniform int blockCount;
+uniform int histBlockCount;
+
+// shared
+shared KEY_TYPE localKeys[BLOCK_SIZE];
+shared uint localScanBuffer[WORK_GROUP_SIZE];
+shared uint localHistogram[BUCKETS];
+shared uint localOffsets[BUCKETS];
+shared uvec4 false_total;
+shared uint blockSum;
+
+// ---------------------------------------------------
+
+uvec4 scan4(uvec4 value, uint size) {
+	uint offset = 1;
+	
+	// reduce vec4
+	value.yw += value.xz;
+	value.w += value.y;
+	
+	localScanBuffer[threadId] = value.w;
+	  
+  // up-sweep
+  for(uint d = size >> 1; d > 0; d >>= 1) {
+    syncThreads();
+    if(threadId < d) {
+      uint ai = offset * (2*threadId+1) - 1;
+      uint bi = offset * (2*threadId+2) - 1;
+      localScanBuffer[bi] += localScanBuffer[ai];      
+    }
+    offset <<= 1;
+  }
+	
+  // clear last element
+  if(threadId == 0) localScanBuffer[size-1] = 0;
+	  
+  // down-sweep
+  for(uint d = 1; d < size; d <<= 1) {
+    offset >>= 1;
+    syncThreads();
+    if(threadId < d) {  
+      uint ai = offset * (2*threadId+1) - 1;
+      uint bi = offset * (2*threadId+2) - 1;
+      
+      uint tmp = localScanBuffer[ai];
+      localScanBuffer[ai] = localScanBuffer[bi];
+      localScanBuffer[bi] += tmp;
+    }
+  }
+  
+  syncThreads();
+	
+	// scan vec4
+	value.w = localScanBuffer[threadId];
+	value.yw = uvec2(value.w, value.y + value.w);
+	value = uvec4(value.y, value.x + value.y, value.w, value.z + value.w);
+	
+	return value;
+}
+
+// ---------------------------------------------------
+
+void sortBlock(uint startBit, uint endBit) {
+	// 1 pass for each radix bit to locally sort block
+  for(uint b=startBit; b<endBit; ++b) {
+		// read
+		const KEY_TYPE key[KEYS_PER_THREAD] = read4(localKeys, lId);		
+		#ifdef USE_VALUE_BUFFER
+			const VALUE_TYPE value[KEYS_PER_THREAD] = read4(localValues, lId);
+		#endif
+		
+		// split
+	  uvec4 pred = getRadix4(key, off0, b, 1);
+		uvec4 true_before = scan4(pred, WORK_GROUP_SIZE);
+		if(threadId == WORK_GROUP_SIZE-1) {
+			false_total = uvec4(BLOCK_SIZE - (true_before.w + pred.w));
+		}
+    syncThreads();
+		
+		// compute rank
+		uvec4 rank = uvec4(mix(lId - true_before, true_before + false_total, pred));
+		
+		// scatter local
+		copy4(key, localKeys, off0, rank);		
+		#ifdef USE_VALUE_BUFFER
+			copy4(value, localValues, off0, rank);
+		#endif
+	
+		syncThreads();
+	}
+}
+
+// ---------------------------------------------------
+
+//! Sort each block in on-chip memory according to the i-th digit using the split primitive
+PHASE(0) void localSort() {
+	const uvec4 gOff = gId + uvec4(elementRange.x);
+	writeUVec4(localKeys, lId, uvec4(INVALID_KEY));
+	copy4Valid(inKeys, localKeys, gOff, lId, uvec4(elementRange.y));
+	#ifdef USE_VALUE_BUFFER
+		copy4Valid(inValues, localValues, gOff, lId, uvec4(elementRange.y));
+	#endif
+	sortBlock(radixRange.x, radixRange.y);
+	// scatter global
+	copy4Valid(localKeys, inKeys, lId, gOff, uvec4(elementRange.y));	
+	#ifdef USE_VALUE_BUFFER
+		copy4Valid(localValues, inValues, lId, gOff, uvec4(elementRange.y));
+	#endif
+}
+
+// ---------------------------------------------------
+
+//! Compute offsets for each of the r buckets, storing them to global memory in column-major order
+PHASE(1) void computeHistogramAndOffsets() {
+	const uvec4 gOff = gId + uvec4(elementRange.x);
+	writeUVec4(localKeys, lId, uvec4(INVALID_KEY));
+	copy4Valid(inKeys, localKeys, gOff, lId, uvec4(elementRange.y));
+	
+	// add auxiliary key to end of array that always differs
+	if(threadId < BUCKETS) {
+		localOffsets[threadId] = 0;
+		localHistogram[threadId] = 0;
+	}
+	syncThreads();
+	
+	// compute current radix and radix of left key 
+	const uvec4 radix = getRadix4(localKeys, lId, radixRange.x, RADIX_BITS);
+	const uvec4 left_radix = uvec4(lId.x > 0 ? getRadix(localKeys[lId.x-1], radixRange.x, RADIX_BITS) : radix.x, radix.xyz);
+	bvec4 diff = notEqual(radix, left_radix);
+	
+	// local offset
+	if(diff.x) localOffsets[radix.x] = lId.x;
+	if(diff.y) localOffsets[radix.y] = lId.y;
+	if(diff.z) localOffsets[radix.z] = lId.z;
+	if(diff.w) localOffsets[radix.w] = lId.w;
+	syncThreads();
+	
+	// compute histogram
+	if(diff.x) localHistogram[left_radix.x] = localOffsets[radix.x] - localOffsets[left_radix.x];
+	if(diff.y) localHistogram[left_radix.y] = localOffsets[radix.y] - localOffsets[left_radix.y];
+	if(diff.z) localHistogram[left_radix.z] = localOffsets[radix.z] - localOffsets[left_radix.z];
+	if(diff.w) localHistogram[left_radix.w] = localOffsets[radix.w] - localOffsets[left_radix.w];
+	if(threadId == WORK_GROUP_SIZE-1) 
+		localHistogram[radix.w] = BLOCK_SIZE - localOffsets[radix.w];
+	syncThreads();
+		
+	if(threadId < BUCKETS) {
+		const uint histId = grpId + threadId * gl_NumWorkGroups.x;
+		histogram[histId] = localHistogram[threadId];
+	}
+}
+
+// ---------------------------------------------------
+
+//! Perform a prefix sum over the offset table.
+PHASE(2) void scanHistogram() {
+	if(gId.x >= blockCount*BUCKETS)
+		return;
+	const uvec4 count = readUVec4(histogram, gId);
+	uvec4 globalOffset = scan4(count, WORK_GROUP_SIZE);
+	writeUVec4(histogram, gId, globalOffset);
+	syncThreads();
+	if(threadId == WORK_GROUP_SIZE-1 || gId.w == blockCount*BUCKETS-1)
+		histBlockSum[grpId] = globalOffset.w + count.w;
+}
+
+// ---------------------------------------------------
+
+//! Finalize prefix sum over the offset table.
+PHASE(3) void scanBlock() {
+	if(threadId == 0) blockSum = 0;
+	uvec4 block, count, sum;
+	for(uint i=threadId*4; i<histBlockCount; i+=BLOCK_SIZE) {
+		syncThreads();
+		block = uvec4(i) + off0;
+		count = readUVec4(histBlockSum, block);
+		sum = scan4(count, WORK_GROUP_SIZE) + uvec4(blockSum);
+		writeUVec4(histBlockSum, block, sum);
+		syncThreads();
+		if(threadId == WORK_GROUP_SIZE-1)
+			blockSum += sum.w + count.w;
+	}
+}
+
+// ---------------------------------------------------
+
+//! Compute the output location for each element using the 
+//! prefix sum results and scatter the elements to their computed locations
+PHASE(4) void scatter() {
+	const uvec4 gOff = gId + uvec4(elementRange.x);
+	writeUVec4(localKeys, lId, uvec4(INVALID_KEY));
+	copy4Valid(inKeys, localKeys, gOff, lId, uvec4(elementRange.y));
+	#ifdef USE_VALUE_BUFFER
+		const VALUE_TYPE value[KEYS_PER_THREAD] = read4(inValues, gOff);
+	#endif
+	
+	if(threadId < BUCKETS) {
+		const uint histId = grpId + threadId * gl_NumWorkGroups.x;
+		const uint histBlock = histId / BLOCK_SIZE;
+	  localHistogram[threadId] = histogram[histId] + histBlockSum[histBlock];
+		localOffsets[threadId] = 0;
+	}
+	syncThreads();
+	
+	// compute current radix and radix of right key 
+	const uvec4 radix = getRadix4(localKeys, lId, radixRange.x, RADIX_BITS);
+	const uvec4 left_radix = uvec4(lId.x > 0 ? getRadix(localKeys[lId.x-1], radixRange.x, RADIX_BITS) : radix.x, radix.xyz);
+	bvec4 diff = notEqual(radix, left_radix);
+	
+	// local offset
+	if(diff.x) localOffsets[radix.x] = lId.x;
+	if(diff.y) localOffsets[radix.y] = lId.y;
+	if(diff.z) localOffsets[radix.z] = lId.z;
+	if(diff.w) localOffsets[radix.w] = lId.w;
+	syncThreads();
+		
+	const uvec4 localOffset = lId - readUVec4(localOffsets, radix);
+	const uvec4 globalOffset = readUVec4(localHistogram, radix);
+	const uvec4 offset = uvec4(elementRange.x) + globalOffset + localOffset;
+	
+	copy4Valid(localKeys, outKeys, lId, offset, uvec4(elementRange.y));
+	#ifdef USE_VALUE_BUFFER
+		copy4Valid(value, outValues, off0, offset, uvec4(elementRange.y));
+	#endif
+}
+
+// ---------------------------------------------------
+
+shared uint blockOrdered;
+PHASE(5) void testOrder() {
+	const uvec4 gOff = gId + uvec4(elementRange.x);
+	if(gOff.x >= elementRange.y)
+		return;
+	if(lId.x == 0)
+		blockOrdered = 1 - atomicCompSwap(elementsNotOrdered, 1, 1);
+	syncThreads();
+	if(blockOrdered == 0)
+		return;
+	
+	KEY_TYPE keys[6] = {
+		gOff.x > 0 ? inKeys[gOff.x-1] : INVALID_KEY,
+		inKeys[gOff.x], // should always exist
+		gOff.y < elementRange.y ? inKeys[gOff.y] : INVALID_KEY,
+		gOff.z < elementRange.y ? inKeys[gOff.z] : INVALID_KEY,
+		gOff.w < elementRange.y ? inKeys[gOff.w] : INVALID_KEY,
+		gOff.w < elementRange.y-1 ? inKeys[gOff.w+1] : INVALID_KEY
+	};
+	// test order
+	uint ordered = 1;
+	for(uint i=mix(0,1,gOff.x == 0); i<5; ++i) {
+		#if SORT_ASCENDING == 1
+			ordered *= mix(0,1,keys[i] <= keys[i+1]);
+		#else
+			ordered *= mix(0,1,keys[i] >= keys[i+1]);
+		#endif
+	}
+	
+	atomicMin(blockOrdered, ordered);
+	syncThreads();
+	if(lId.x == 0)
+		atomicMax(elementsNotOrdered, 1-blockOrdered);
+}
+// ---------------------------------------------------

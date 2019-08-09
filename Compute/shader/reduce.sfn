@@ -1,0 +1,116 @@
+#version 450 core
+#extension GL_ARB_gpu_shader_int64 : enable
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2019 Sascha Brandt <sascha@brandt.graphics>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+ 
+#ifndef SG_COMPUTE_SHADER
+#error "reduce can only be used in compute shader."
+#endif
+
+#ifndef REDUCE_WORK_GROUP_SIZE
+#define REDUCE_WORK_GROUP_SIZE 1024
+#endif
+
+#ifndef REDUCE_T
+#define REDUCE_T uint
+#endif
+
+#ifndef REDUCE_FN
+#define REDUCE_FN(a, b) max(a, b)
+#endif
+
+#ifndef REDUCE_IDENTITY
+#define REDUCE_IDENTITY 0
+#endif
+
+#ifndef VALUE_BINDING
+#define VALUE_BINDING 0
+#endif
+
+#ifndef BLOCK_BINDING
+#define BLOCK_BINDING 1
+#endif
+
+// const
+const uint grpId = gl_WorkGroupID.x;
+const uint threadId = gl_LocalInvocationIndex;
+
+// shared
+shared REDUCE_T localData[REDUCE_WORK_GROUP_SIZE];
+
+// ---------------------------------------------------
+
+REDUCE_T reduce(REDUCE_T value) {
+  const uint threadId = gl_LocalInvocationIndex;
+  uint offset = 1;
+  
+  // initialize
+  localData[threadId] = value;
+  
+  // reduce
+  for(uint d = REDUCE_WORK_GROUP_SIZE >> 1; d > 0; d >>= 1) {
+    memoryBarrierShared();
+    barrier();
+    if(threadId < d) {
+      uint ai = offset * (2*threadId+1) - 1;
+      uint bi = offset * (2*threadId+2) - 1;
+      localData[bi] = REDUCE_FN(localData[ai], localData[bi]);      
+    }
+    offset <<= 1;
+  }
+  
+  memoryBarrierShared();
+  barrier();
+  
+  return localData[threadId];
+}
+
+// ---------------------------------------------------
+
+#ifdef STANDALONE
+
+// layout
+layout(local_size_x = REDUCE_WORK_GROUP_SIZE) in;
+
+// buffer
+layout(std430, binding = VALUE_BINDING) buffer ValueBuffer {
+	REDUCE_T values[];
+};
+
+layout(std430, binding = BLOCK_BINDING) buffer BlockBuffer {
+	REDUCE_T block[];
+};
+
+// uniforms
+uniform ivec2 elementRange;
+uniform int blockSize;
+
+// ---------------------------------------------------
+
+void main() {
+  const uint first = elementRange.x + grpId * blockSize;
+  const uint last = min(first + blockSize, elementRange.y);
+    
+  REDUCE_T accum = REDUCE_IDENTITY;  
+  for (uint i = first; i < last; i += REDUCE_WORK_GROUP_SIZE)
+      if (i + threadId < last)
+          accum = REDUCE_FN(accum, values[i + threadId]);
+  
+	accum = reduce(accum);
+  
+	if(threadId == REDUCE_WORK_GROUP_SIZE-1) {
+		block[grpId] = accum;
+  }
+}
+
+#endif

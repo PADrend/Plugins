@@ -1,0 +1,228 @@
+#version 450 core
+#extension GL_ARB_gpu_shader_int64 : enable
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2019 Sascha Brandt <sascha@brandt.graphics>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+ 
+#ifndef SG_COMPUTE_SHADER
+#error "compact can only be used in compute shader."
+#endif
+
+#ifndef WORK_GROUP_SIZE
+#define WORK_GROUP_SIZE 256
+#endif
+
+#define KEYS_PER_THREAD 4
+#define BLOCK_SIZE (KEYS_PER_THREAD * WORK_GROUP_SIZE)
+
+#ifndef KEY_TYPE
+#define KEY_TYPE uint
+#endif
+
+#ifndef IN_KEY_BINDING
+#define IN_KEY_BINDING 0
+#endif
+
+#ifndef OUT_KEY_BINDING
+#define OUT_KEY_BINDING 1
+#endif
+
+#ifndef HISTOGRAM_BINDING
+#define HISTOGRAM_BINDING 2
+#endif
+
+// helper functions
+#define copy4(src, tgt, srcOff, tgtOff) {\
+	tgt[(tgtOff).x] = src[(srcOff).x];\
+	tgt[(tgtOff).y] = src[(srcOff).y];\
+	tgt[(tgtOff).z] = src[(srcOff).z];\
+	tgt[(tgtOff).w] = src[(srcOff).w];\
+}
+#define copy4Valid(src, tgt, srcOff, tgtOff, maxOff) {\
+	if(max(srcOff,tgtOff).x < (maxOff).x) tgt[(tgtOff).x] = src[(srcOff).x];\
+	if(max(srcOff,tgtOff).y < (maxOff).y) tgt[(tgtOff).y] = src[(srcOff).y];\
+	if(max(srcOff,tgtOff).z < (maxOff).z) tgt[(tgtOff).z] = src[(srcOff).z];\
+	if(max(srcOff,tgtOff).w < (maxOff).w) tgt[(tgtOff).w] = src[(srcOff).w];\
+}
+#define readUVec4(src, off) uvec4(src[(off).x], src[(off).y], src[(off).z], src[(off).w])
+#define writeUVec4(tgt, off, val) {tgt[(off).x] = val.x; tgt[(off).y] = val.y; tgt[(off).z] = val.z; tgt[(off).w] = val.w;}
+#define read4(src, off) {src[(off).x], src[(off).y], src[(off).z], src[(off).w]}
+#define read4Valid(src, off, maxOff) {\
+	(off).x < (maxOff).x ? src[(off).x] : 0,\
+	(off).y < (maxOff).y ? src[(off).y] : 0,\
+	(off).z < (maxOff).z ? src[(off).z] : 0,\
+	(off).w < (maxOff).w ? src[(off).w] : 0\
+}
+#define isValid4(v) uvec4(mix(0,1,v[0]>0), mix(0,1,v[1]>0), mix(0,1,v[2]>0), mix(0,1,v[3]>0))
+
+#define syncThreads() {memoryBarrierShared(); barrier();}
+
+layout(local_size_x = WORK_GROUP_SIZE) in;
+
+// simulate OpenCL-like kernels
+#define KERNEL(i) layout(index = i) subroutine(kernel)
+subroutine void kernel();
+layout(location = 0) subroutine uniform kernel executeKernel;
+void main() { executeKernel(); }
+
+// buffers
+layout(std430, binding = IN_KEY_BINDING) buffer _0InKeyBuffer {
+	KEY_TYPE inKeys[];
+};
+
+layout(std430, binding = OUT_KEY_BINDING) buffer _1OutKeyBuffer {
+	KEY_TYPE tmpKeys[];
+};
+
+layout(std430, binding = HISTOGRAM_BINDING) buffer _2HistogramBuffer {
+	uint histogram[];
+};
+
+layout(std430, binding = BLOCK_SUM_BINDING) buffer _3BlockSumBuffer {
+	uint totalCount;
+	uint histBlockSum[];
+};
+
+// consts
+const uvec4 off0 = uvec4(0,1,2,3);
+const uvec4 gId = uvec4(4*gl_GlobalInvocationID.x) + off0;
+const uvec4 lId = uvec4(4*gl_LocalInvocationIndex) + off0;
+const uint threadId = gl_LocalInvocationIndex;
+const uint grpId = gl_WorkGroupID.x;
+
+// uniforms
+uniform ivec2 elementRange;
+uniform int blockCount;
+
+// shared
+shared KEY_TYPE localKeys[BLOCK_SIZE];
+shared uint localScanBuffer[WORK_GROUP_SIZE];
+shared uint true_total;
+shared uint globalOffset;
+shared uint blockSum;
+
+// ---------------------------------------------------
+
+uvec4 scan4(uvec4 value, uint size) {
+	uint offset = 1;
+	
+	// reduce vec4
+	value.yw += value.xz;
+	value.w += value.y;
+	
+	localScanBuffer[threadId] = value.w;
+	  
+  // up-sweep
+  for(uint d = size >> 1; d > 0; d >>= 1) {
+    syncThreads();
+    if(threadId < d) {
+      uint ai = offset * (2*threadId+1) - 1;
+      uint bi = offset * (2*threadId+2) - 1;
+      localScanBuffer[bi] += localScanBuffer[ai];      
+    }
+    offset <<= 1;
+  }
+	
+  // clear last element
+  if(threadId == 0) localScanBuffer[size-1] = 0;
+	  
+  // down-sweep
+  for(uint d = 1; d < size; d <<= 1) {
+    offset >>= 1;
+    syncThreads();
+    if(threadId < d) {  
+      uint ai = offset * (2*threadId+1) - 1;
+      uint bi = offset * (2*threadId+2) - 1;
+      
+      uint tmp = localScanBuffer[ai];
+      localScanBuffer[ai] = localScanBuffer[bi];
+      localScanBuffer[bi] += tmp;
+    }
+  }
+  
+  syncThreads();
+	
+	// scan vec4
+	value.w = localScanBuffer[threadId];
+	value.yw = uvec2(value.w, value.y + value.w);
+	value = uvec4(value.y, value.x + value.y, value.w, value.z + value.w);
+	
+	return value;
+}
+
+// ---------------------------------------------------
+
+//! Compact each block in on-chip memory
+KERNEL(0) void localCompact() {
+	// read
+	const uvec4 gOff = gId + uvec4(elementRange.x);
+	KEY_TYPE key[KEYS_PER_THREAD] = read4Valid(inKeys, gOff, uvec4(elementRange.y));
+	
+	// split
+  uvec4 pred = isValid4(key);
+	uvec4 true_before = scan4(pred, WORK_GROUP_SIZE);
+	if(threadId == WORK_GROUP_SIZE-1) {
+		true_total = true_before.w + pred.w;
+	}
+  syncThreads();
+	
+	// compute rank
+	uvec4 rank = uvec4(mix(uvec4(BLOCK_SIZE), true_before, pred));
+	
+	// scatter local
+	copy4Valid(key, localKeys, off0, rank, uvec4(BLOCK_SIZE));
+	syncThreads();
+	
+	// write count
+	histogram[grpId] = true_total;
+	
+	// compact into global memory
+	copy4Valid(localKeys, tmpKeys, lId, gId, uvec4(elementRange.y-elementRange.x));
+	writeUVec4(inKeys, gOff, uvec4(0));
+}
+
+// ---------------------------------------------------
+
+//! Perform a prefix sum over the histogram.
+KERNEL(1) void scanHistogram() {
+	if(threadId == 0) blockSum = 0;
+	uvec4 block, count, sum;
+	for(uint i=threadId*4; i<blockCount; i+=BLOCK_SIZE) {
+		syncThreads();
+		block = uvec4(i) + off0;
+		count = readUVec4(histogram, block);
+		sum = scan4(count, WORK_GROUP_SIZE) + uvec4(blockSum);
+		writeUVec4(histBlockSum, block, sum);
+		syncThreads();
+		if(threadId == WORK_GROUP_SIZE-1)
+			blockSum += sum.w + count.w;
+	}
+	syncThreads();
+	if(threadId == 0)
+		totalCount = histBlockSum[blockCount-1] + histogram[blockCount-1];
+}
+
+// ---------------------------------------------------
+
+//! Compact global memory
+KERNEL(2) void compact() {
+	if(threadId == 0) {
+		true_total = histogram[grpId];
+		globalOffset = histBlockSum[grpId];
+	}
+	syncThreads();
+	KEY_TYPE key[KEYS_PER_THREAD] = read4Valid(tmpKeys, gId, uvec4(grpId*BLOCK_SIZE+true_total));
+	uvec4 offset = uvec4(elementRange.x+globalOffset+threadId*4) + off0;
+	uvec4 maxOffset = uvec4(elementRange.x+globalOffset+true_total);
+	copy4Valid(key, inKeys, off0, offset, maxOffset);
+}
+// ---------------------------------------------------
