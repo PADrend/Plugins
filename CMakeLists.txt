@@ -3,6 +3,7 @@
 # Platform for Algorithm Development and Rendering (PADrend).
 # Web page: http://www.padrend.de/
 # Copyright (C) 2013 Benjamin Eikel <benjamin@eikel.org>
+# Copyright (C) 2015-2019 Sascha Brandt <sascha@brandt.graphics>
 # 
 # PADrend consists of an open source part and a proprietary part.
 # The open source part of PADrend is subject to the terms of the Mozilla
@@ -11,7 +12,7 @@
 # http://mozilla.org/MPL/2.0/.
 #
 cmake_minimum_required(VERSION 3.1.0)
-project(PADrendPlugins VERSION 0.3.0)
+project(PADrendPlugins VERSION 1.1.0)
 
 # Set up install directories
 include(GNUInstallDirs)

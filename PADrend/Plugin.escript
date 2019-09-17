@@ -22,7 +22,7 @@
 GLOBALS.PADrend := new Plugin({
 		Plugin.NAME : 'PADrend',
 		Plugin.DESCRIPTION : 'Main application',
-		Plugin.VERSION : 1.0,
+		Plugin.VERSION : 1.1,
 		Plugin.AUTHORS : "Claudius, Ralf & Benjamin",
 		Plugin.OWNER : "All",
 		Plugin.REQUIRES : [],
