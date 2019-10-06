@@ -95,6 +95,7 @@ uniform float sg_sizeFactor = 1.0;
 
 uniform float sg_surfelRadius = 1.0;
 uniform int sg_surfelCount = 0;
+uniform vec4 debugColor = vec4(0,0,0,0);
 
 // in
 layout(location = 0) in vec3 sg_Position;
@@ -177,7 +178,7 @@ void main() {
 	vOut.position_cs = matrix_modelToCamera * vec4(sg_Position, 1.0);
 	vOut.normal_cs = normalize(matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
 	
-	vOut.color = sg_Color;
+	vOut.color = debugColor.a > 0 ? debugColor : sg_Color;
 	vOut.viewDir = normalize(vOut.position_cs.xyz);
 	vOut.nDotV = dot(vOut.normal_cs, vOut.viewDir);
 		

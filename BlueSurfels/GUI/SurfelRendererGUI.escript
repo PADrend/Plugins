@@ -261,6 +261,13 @@ NS.registerStrategyGUI(MinSG.BlueSurfels.DebugStrategy, fn(strategy, refreshCall
 			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(strategy->strategy.getFixSurfels, strategy->strategy.setFixSurfels),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
 		},
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{
+			GUI.TYPE : GUI.TYPE_BOOL,
+			GUI.LABEL : "Colorize Surfels",
+			GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(strategy->strategy.getDebugColor, strategy->strategy.setDebugColor),
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 20, 0],
+		},
 	];
 });
 	
