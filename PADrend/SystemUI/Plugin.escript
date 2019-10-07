@@ -48,11 +48,14 @@ PADrend.SystemUI.init @(override) := fn(){
 		//! Create a rendering context with debugging support.
 		properties.debug					= systemConfig.getValue('PADrend.Rendering.GLDebugOutput', false);
 		//! Create a rendering context with a compatibility profile.
-		properties.compatibilityProfile 	= systemConfig.getValue('PADrend.Rendering.GLCompabilityProfile', false); 
+		properties.compatibilityProfile 	= systemConfig.getValue('PADrend.Rendering.GLCompabilityProfile', true); 
+		//! Set the requested OpenGL Version.
+		properties.contextVersionMajor 	= systemConfig.getValue('PADrend.Rendering.contextVersionMajor', 1);
+		properties.contextVersionMinor 	= systemConfig.getValue('PADrend.Rendering.contextVersionMinor', 0);
 		//! Create a fullscreen window.
 		properties.fullscreen				= systemConfig.getValue('PADrend.window.fullscreen', false);
 		//! Should the window should be resizable?
-		properties.resizable				= false;
+		properties.resizable				= systemConfig.getValue('PADrend.window.resizable', false);
 
 		//! if config:window_multisampling is not false, multisampling is enabled with given number samples
 		//! value: false,2,3,4,5,6..
