@@ -95,7 +95,8 @@ uniform float sg_sizeFactor = 1.0;
 
 uniform float sg_surfelRadius = 1.0;
 uniform int sg_surfelCount = 0;
-uniform vec4 debugColor = vec4(0,0,0,0);
+uniform float debugColorScreen = 0;
+uniform sampler1D debugColor;
 
 // in
 layout(location = 0) in vec3 sg_Position;
@@ -112,31 +113,6 @@ out VertexData {
 } vOut;
 
 // ---------------------------------------------------
-
-
-float fade(float low, float high, float value){
-	float mid = (low+high)*0.5;
-	float range = (high-low)*0.5;
-	float x = 1.0 - clamp(abs(mid-value)/range, 0.0, 1.0);
-	return smoothstep(0.0, 1.0, x);
-}
-
-vec4 getColor(float intensity){
-	vec4 blue = vec4(0.0, 0.0, 1.0, 1.0);
-	vec4 cyan = vec4(0.0, 1.0, 1.0, 1.0);
-	vec4 green = vec4(0.0, 1.0, 0.0, 1.0);
-	vec4 yellow = vec4(1.0, 1.0, 0.0, 1.0);
-	vec4 red = vec4(1.0, 0.0, 0.0, 1.0);
-
-	vec4 color = (
-		fade(-0.25, 0.25, intensity)*blue +
-		fade(0.0, 0.5, intensity)*cyan +
-		fade(0.25, 0.75, intensity)*green +
-		fade(0.5, 1.0, intensity)*yellow +
-		smoothstep(0.75, 1.0, intensity)*red
-	);
-	return color;
-}
 
 void addLighting(in sg_LightSourceParameters light, in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor result){
 	
@@ -201,9 +177,10 @@ void main() {
 	#endif
 	vOut.position_cs = matrix_modelToCamera * vec4(sg_Position, 1.0);
 	vOut.normal_cs = normalize(matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+	vec4 position_clipspace = sg_matrix_cameraToClipping * vOut.position_cs;
 	
 	float intensity = float(sg_surfelCount) / 100000.0;
-	vOut.color = debugColor.a > 0 ? getColor(intensity) : sg_Color;
+	vOut.color = (-position_clipspace.x/position_clipspace.w) < (debugColorScreen*2.0-1.0) ? texture(debugColor, intensity) : sg_Color;
 	vOut.viewDir = normalize(vOut.position_cs.xyz);
 	vOut.nDotV = dot(vOut.normal_cs, vOut.viewDir);
 		
@@ -244,7 +221,7 @@ void main() {
 	#endif
 	
 	gl_PointSize = pointSize * sg_sizeFactor;
-	gl_Position = sg_matrix_cameraToClipping * vOut.position_cs;
+	gl_Position = position_clipspace;
 }
 
 #endif
@@ -262,7 +239,6 @@ in VertexData {
 	vec3 viewDir;
 	flat float nDotV;
 } vIn;
-
 
 layout(location = 0) out vec4 fragColor;
 
