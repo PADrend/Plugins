@@ -109,7 +109,7 @@ T.beginProfile @(private) ::= fn(name, level=0) {
 		return;
 	//if(!profiler)
 	//	profiler = new Experiments.GPUProfiler;
-	//if(debugLevel >= 4) Experiments.pushDebugGroup(name);
+	if(debugLevel >= 4) Experiments.pushDebugGroup(name);
 	//profiler.begin(name);
 	//renderingContext.flush();
 };
@@ -121,7 +121,7 @@ T.endProfile @(private) ::= fn(level=0) {
 		return;
 	//profiler.end();
 	//renderingContext.flush();
-	//if(debugLevel >= 4) Experiments.popDebugGroup();
+	if(debugLevel >= 4) Rendering.popDebugGroup();
 };
 
 // ----------------------------
@@ -145,7 +145,7 @@ T.pushState @(private) ::= fn() {
 	renderingContext.pushDepthBuffer();
 	renderingContext.pushColorBuffer();
 	for(var i=0; i<6; ++i) renderingContext.pushTexture(i);
-	//if(debugLevel >= 4) Experiments.startCapture();
+	if(debugLevel >= 4) Rendering.startCapture();
 	beginProfile('Total', 1);
 };
 
@@ -165,7 +165,7 @@ T.popState @(private) ::= fn() {
 	for(var i=0; i<6; ++i) renderingContext.popTexture(i);
 	for(var i=0; i<BINDING_OFFSET; ++i) renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, i);
 	renderingContext.unbindBuffer(Rendering.TARGET_UNIFORM_BUFFER, 0);
-	//if(debugLevel >= 4) Experiments.endCapture();
+	if(debugLevel >= 4) Rendering.endCapture();
 };
 
 // ----------------------------

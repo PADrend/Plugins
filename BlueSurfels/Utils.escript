@@ -82,6 +82,9 @@ NS.getDirectionsFromPreset := fn(name) {
 };
 
 NS.createDirections := fn(count, seed=clock()) {
+	if(count <= 1)
+		return getDirectionsFromPreset("top");
+	
 	if(seed != sampleMeshSeed)
 		computeSampleMesh(seed);
 	var posAcc = Rendering.PositionAttributeAccessor.create(sampleMesh);
