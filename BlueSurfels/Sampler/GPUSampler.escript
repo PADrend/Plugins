@@ -109,7 +109,7 @@ T.beginProfile @(private) ::= fn(name, level=0) {
 		return;
 	//if(!profiler)
 	//	profiler = new Experiments.GPUProfiler;
-	if(debugLevel >= 4) Experiments.pushDebugGroup(name);
+	if(debugLevel >= 4) Rendering.pushDebugGroup(name);
 	//profiler.begin(name);
 	//renderingContext.flush();
 };
