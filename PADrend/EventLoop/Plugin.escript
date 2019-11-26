@@ -186,13 +186,13 @@ plugin.init @(override) := fn(){
 	// initialize fallback shader
 	
 	Util.registerExtension('PADrend_Init', fn(...) {
-		if(!renderingContext.getCompabilityMode()) {
+		//if(!systemConfig.getValue('PADrend.Rendering.GLCompabilityProfile', false)) {
 			// add default shader to root node if compability mode is disabled
 			var shaderState = new MinSG.ShaderState;
 			shaderState.getStateAttributeWrapper(MinSG.ShaderState.STATE_ATTR_SHADER_NAME)("universal3_default.shader");
 			shaderState.recreateShader( PADrend.SceneManagement.getDefaultSceneManager() );
 			defaultShader = shaderState.getShader();
-		}
+		//}
 	}, Extension.LOW_PRIORITY-10000);
 	return true;
 };
