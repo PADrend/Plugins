@@ -291,7 +291,7 @@ gui.register(CONFIG_PREFIX + MinSG.GeometryNode, fn(node){
 									{	GUI.TYPE		:	GUI.TYPE_NEXT_COLUMN	},
 									{
 										GUI.TYPE		:	GUI.TYPE_LABEL,
-										GUI.LABEL		:	Rendering.getGLTypeString(attribute.getDataType())
+										GUI.LABEL		:	Rendering.getGLTypeString(Rendering.getGLType(attribute.getDataType()))
 									},
 									{	GUI.TYPE		:	GUI.TYPE_NEXT_COLUMN	},
 									{
@@ -308,7 +308,7 @@ gui.register(CONFIG_PREFIX + MinSG.GeometryNode, fn(node){
 																foreach(this[0].getVertexDescription().getAttributes() as var attribute) {
 																	// Omit the attribute that is to be deleted.
 																	if(attribute.getName() != this[1].getName()) {
-																		newVertexDesc.appendAttribute(attribute.getName(), attribute.getNumValues(), attribute.getDataType(),attribute.getNormalize());
+																		newVertexDesc.appendAttribute(attribute.getName(), attribute.getDataType(), attribute.getNumValues(), attribute.isNormalized());
 																	}
 																}
 																Rendering.convertVertices(this[0], newVertexDesc);
