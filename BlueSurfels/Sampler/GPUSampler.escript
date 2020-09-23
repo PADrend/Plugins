@@ -231,16 +231,19 @@ T.initialize @(public) ::= fn() {
 	
 	// create textures
 	// TODO: only use depth & color texture (& optionally normals) to reduce resources
-	this.t_poissonRad := void;
+	
+	this.t_depth := void;
 	this.t_color := void;
 	this.t_position := void;
 	this.t_normal := void;
 		
 	this.t_voronoiDist := Rendering.createDepthTexture(maxResolution, maxResolution, layers);
+	this.t_poissonRad := Rendering.createDepthTexture(maxResolution, maxResolution, layers);
 	this.t_voronoi := Rendering.createDataTexture(Rendering.Texture.TEXTURE_2D_ARRAY, maxResolution, maxResolution, layers, Util.TypeConstant.UINT32, 1);
 	this.t_poisson := Rendering.createDataTexture(Rendering.Texture.TEXTURE_2D_ARRAY, maxResolution, maxResolution, layers, Util.TypeConstant.UINT32, 1);
 	
 	// allocate mipmaps	
+	t_poissonRad.createMipmaps(renderingContext);
 	t_voronoiDist.createMipmaps(renderingContext);
 	t_voronoi.createMipmaps(renderingContext);
 	t_poisson.createMipmaps(renderingContext);
@@ -381,7 +384,7 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 			
 	// render scene from multiple directions
 	beginProfile('Render', 1);
-	[t_poissonRad, t_color, t_position, t_normal] = rasterizer.rasterize(node);
+	[t_depth, t_color, t_position, t_normal] = rasterizer.rasterize(node);
 	mipmapper.generate(minLevel, maxLevel, t_position, t_normal, t_color);
 	
 	// bind textures
@@ -515,7 +518,7 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 		endProfile(3);
 		
 		beginProfile('Sort', 3);
-		sorter.sort(sampleMesh, sampleCount, sampleCount);
+		sorter.sort(sampleMesh, void, sampleCount, sampleCount);
 		dispatchCompute(compute_shader, 'findInsertCount', sampleCount);
 		insertCount = paramBuffer.download(1, Util.TypeConstant.INT32, 3).front();
 		minRadius = paramBuffer.download(1, Util.TypeConstant.FLOAT, 4).front();
@@ -558,7 +561,7 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 	// optional final sort 
 	if(globalSort) {
 		beginProfile('Final Sort', 3);
-		sorter.sort(sampleMesh, sampleCount);
+		sorter.sort(sampleMesh, void, sampleCount);
 		endProfile(3);
 	}
 	endProfile(1);
@@ -576,7 +579,7 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 	
 	// download surfelMesh
 	surfelMesh._markAsChanged();
-	surfelMesh._swapVertexBuffer(new Rendering.BufferObject);
+	//surfelMesh._swapVertexBuffer(new Rendering.BufferObject);
 	endProfile(1);
 		
 	// restore state

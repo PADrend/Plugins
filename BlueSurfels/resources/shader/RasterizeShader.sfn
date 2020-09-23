@@ -18,87 +18,63 @@
 #ifdef SG_VERTEX_SHADER
 
 // uniform
-#ifdef USE_UNIFORM_BUFFERS
-	layout(std140, binding=0, row_major) uniform FrameData {
-		mat4 sg_matrix_worldToCamera;
-		mat4 sg_matrix_cameraToWorld;
-		mat4 sg_matrix_cameraToClipping;
-		mat4 sg_matrix_clippingToCamera;
-		vec4 sg_viewport;
-	};
-
-	struct Object {
-		mat4 sg_matrix_modelToCamera;
-		float sg_pointSize;
-		uint materialId;
-		uint lightSetId;
-		uint drawId;
-	};
-	layout(std140, binding=4, row_major) uniform ObjectData {
-		Object objects[512];
-	};
-	
-	struct sg_MaterialParameters {
-		vec4 ambient;
-		vec4 diffuse;
-		vec4 specular;
-		vec4 emission;
-		float shininess;
-		bool enabled;
-		uint _pad0;
-		uint _pad1;
-	};
-
-	layout(std140, binding=1) uniform MaterialData {
-		sg_MaterialParameters sg_Material[256];
-	};
-#else
-
-	struct sg_MaterialParameters {
-		vec4 ambient, diffuse, specular, emission;
-		float shininess;
-	};
-	uniform sg_MaterialParameters	sg_Material;
-	uniform bool sg_useMaterials;
-	
-	uniform mat4 sg_matrix_modelToCamera;
-	uniform mat4 sg_matrix_cameraToClipping;
+#if defined(COLOR_LOCATION) || defined(ALPHA_MASK)
+struct sg_MaterialParameters {
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+uniform sg_MaterialParameters	sg_Material;
+uniform bool sg_useMaterials;
 #endif
+
+uniform mat4 sg_matrix_modelToCamera;
+uniform mat4 sg_matrix_cameraToClipping;
 uniform mat4 sg_mrt_matrix_cameraToCustom;
 
 // in
 layout(location = 0) in vec3 sg_Position;
+#ifdef NORMAL_LOCATION
 layout(location = 1) in vec3 sg_Normal;
+#endif
+#if defined(COLOR_LOCATION) || defined(ALPHA_MASK)
 layout(location = 2) in vec4 sg_Color;
 layout(location = 3) in vec2 sg_TexCoord0;
+#endif
 
 // out
 out VertexData {
+#ifdef POSITION_LOCATION
 	vec4 position_is;
+#endif
+#ifdef NORMAL_LOCATION
 	vec4 normal_is;
+#endif
+#if defined(COLOR_LOCATION) || defined(ALPHA_MASK)
 	vec4 color;
 	vec2 texCoord;
+#endif
 } vOut;
 
 void main() {
 	
-	#ifdef USE_UNIFORM_BUFFERS
-		const mat4 modelToCamera = objects[gl_BaseInstanceARB].sg_matrix_modelToCamera;
-		const sg_MaterialParameters material = sg_Material[objects[gl_BaseInstanceARB].materialId];
-		const bool materialEnabled = objects[gl_BaseInstanceARB].materialId > 0;
-	#else	
-		const mat4 modelToCamera = sg_matrix_modelToCamera;
-		const sg_MaterialParameters material = sg_Material;
-		const bool materialEnabled = sg_useMaterials;
-	#endif
-	
-	mat4 modelToImpostor = sg_mrt_matrix_cameraToCustom * modelToCamera;
+#if defined(POSITION_LOCATION) || defined(NORMAL_LOCATION)
+	mat4 modelToImpostor = sg_mrt_matrix_cameraToCustom * sg_matrix_modelToCamera;
+#endif
+
+#ifdef POSITION_LOCATION
 	vOut.position_is = modelToImpostor * vec4(sg_Position, 1.0);
+#endif
+
+#ifdef NORMAL_LOCATION
 	vOut.normal_is = normalize(modelToImpostor * vec4(sg_Normal, 0.0));
-	vOut.color = mix(sg_Color, material.diffuse + material.emission, materialEnabled);
-	
+#endif
+
+#if defined(COLOR_LOCATION) || defined(ALPHA_MASK)
+	vOut.color = mix(sg_Color, sg_Material.diffuse + sg_Material.emission, sg_useMaterials);	
 	vOut.texCoord = sg_TexCoord0;
-	gl_Position = sg_matrix_cameraToClipping * modelToCamera * vec4(sg_Position, 1.0);
+#endif
+
+	gl_Position = sg_matrix_cameraToClipping * sg_matrix_modelToCamera * vec4(sg_Position, 1.0);
 }
 #endif
 
@@ -106,49 +82,72 @@ void main() {
 // fs
 #ifdef SG_FRAGMENT_SHADER
 
-#ifdef USE_UNIFORM_BUFFERS
-	layout(std140, binding=5) uniform TextureSetData {
-		bool sg_textureEnabled[16];
-	};
-#else
-uniform bool sg_textureEnabled[8];
-#endif
-
 // uniform
+#if defined(COLOR_LOCATION) || defined(ALPHA_MASK)
+uniform bool sg_textureEnabled[8];
 layout(binding = 0) uniform sampler2D sg_Diffuse;
 layout(binding = 4) uniform sampler2D sg_Alpha;
+#endif
 
 // in
 in VertexData {
+#ifdef POSITION_LOCATION
 	vec4 position_is;
+#endif
+#ifdef NORMAL_LOCATION
 	vec4 normal_is;
+#endif
+#if defined(COLOR_LOCATION) || defined(ALPHA_MASK)
 	vec4 color;
 	vec2 texCoord;
+#endif
 } vIn;
 
 // out
-layout(location = 1) out vec4 fPosition;
-layout(location = 2) out vec4 fNormal;
-layout(location = 4) out vec4 fColor;
+#ifdef COLOR_LOCATION
+layout(location = COLOR_LOCATION) out vec4 fColor;
+#endif
+#ifdef POSITION_LOCATION
+layout(location = POSITION_LOCATION) out vec4 fPosition;
+#endif
+#ifdef NORMAL_LOCATION
+layout(location = NORMAL_LOCATION) out vec4 fNormal;
+#endif
+#ifdef PRIMITIVE_ID_LOCATION
+layout(location = PRIMITIVE_ID_LOCATION) out uint fPrimitiveId;
+#endif
 
 void main() {
-	vec4 position_is = vIn.position_is / vIn.position_is.w;
-	vec4 normal_is = normalize(vIn.normal_is);
+		
+#if defined(COLOR_LOCATION) || defined(ALPHA_MASK)
 	vec4 color = vIn.color;
 	vec2 texCoord = vIn.texCoord;
-		
 	if(sg_textureEnabled[0])
 		color *= texture(sg_Diffuse, texCoord);
 	
 	if(sg_textureEnabled[4])
 		color.a = texture(sg_Alpha, texCoord).r;
 		
-	if(color.a <= 0.1)
-		discard;
-	
-	fColor = color;
-	fPosition = position_is;
-	fNormal = normal_is;
+	#ifdef ALPHA_MASK
+		if(color.a <= ALPHA_MASK)
+			discard;
+	#endif
+	#ifdef COLOR_LOCATION
+		fColor = color;
+	#endif
+#endif
+
+#ifdef POSITION_LOCATION
+	fPosition = vIn.position_is / vIn.position_is.w;
+#endif
+
+#ifdef NORMAL_LOCATION
+	fNormal = normalize(vIn.normal_is);
+#endif
+
+#ifdef PRIMITIVE_ID_LOCATION
+	fPrimitiveId = gl_PrimitiveID;
+#endif
 }
 
 #endif

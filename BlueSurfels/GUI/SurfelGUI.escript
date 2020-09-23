@@ -612,43 +612,9 @@ static createUtilPanel = fn(gui) {
 	}	
 		
 	panel += "*Utils*";
-	panel++;
+	panel++;	
 	
-	panel += {
-		GUI.TYPE : GUI.TYPE_BUTTON,
-		GUI.LABEL : "Recompute packing value",
-		GUI.ON_CLICK : fn() {
-			var surfelNodes = MinSG.collectNodesReferencingAttribute(NodeEditor.getSelectedNode(), 'surfels');
-			foreach(surfelNodes as var node) {
-				if(node.isInstance())
-					node = node.getPrototype();
-				var surfelMesh = Utils.locateSurfels(node);
-				node.setNodeAttribute('surfelPacking', MinSG.BlueSurfels.computeSurfelPacking(surfelMesh));
-			}				
-			// reselect nodes to trigger info update
-			NodeEditor.selectNodes(NodeEditor.getSelectedNodes());
-		},
-		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
-	};
-	panel++;
-	
-	panel += {
-		GUI.TYPE				:	GUI.TYPE_BUTTON,
-		GUI.LABEL				:	"Shrink surfel meshes",
-		GUI.ON_CLICK : fn() {			
-			var surfelNodes = MinSG.collectNodesReferencingAttribute(NodeEditor.getSelectedNode(), 'surfels');
-			var set = new Std.Set;
-			foreach(surfelNodes as var n) 
-				set += n.findNodeAttribute('surfels');
-			var i=0;
-			foreach(set as var s) {
-				Rendering.shrinkMesh(s, true);
-				out("\r", ++i ,"/", set.count());
-			}
-		},
-		GUI.SIZE :	[GUI.WIDTH_FILL_ABS, 10, 0],
-	};
-	panel++;
+	Util.executeExtensions('BlueSurfels_SurfelUtils', panel);
 	
 	return panel;
 };
