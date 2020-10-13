@@ -32,11 +32,16 @@ T.fbo @(private) := void;
 T.shader @(private) := void;
 T.renderingLayers @(public,init) := Std.module('Std/DataWrapper');
 
-static shader_src = "#version 130
-in vec3 sg_Position;
-uniform mat4 sg_matrix_modelToClipping;
+static shader_src = "#version 450
+layout(location = 0) in vec3 sg_Position;
+
+layout(push_constant) uniform ObjectBuffer {
+	mat4 sg_matrix_modelToClipping;
+};
+
 void main() {
 	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position, 1.0);
+	gl_Position.y = -gl_Position.y; // Vulkan uses right hand NDC
 }
 ";
 
