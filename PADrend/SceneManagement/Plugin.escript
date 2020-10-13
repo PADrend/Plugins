@@ -175,8 +175,9 @@ SceneManagement.initDefaultLightParameters := fn(){
 	_defaultLight.setRelPosition(new Geometry.Vec3(systemConfig.getValue('PADrend.sun.position',[100,100,100])));
 	_defaultLight.rotateToWorldDir(new Geometry.Vec3(systemConfig.getValue('PADrend.sun.direction',[0,1,0.6])));
 	_defaultLight.setAmbientLightColor(new Util.Color4f(systemConfig.getValue('PADrend.sun.ambient',[0.5,0.5,0.5,1.0])));
-	_defaultLight.setDiffuseLightColor(new Util.Color4f(systemConfig.getValue('PADrend.sun.diffuse',[0.8,0.8,0.8,1.0])));
+	_defaultLight.setDiffuseLightColor(new Util.Color4f(systemConfig.getValue('PADrend.sun.diffuse',[2,2,2,1.0])));
 	_defaultLight.setSpecularLightColor(new Util.Color4f(systemConfig.getValue('PADrend.sun.specular',[1.0,1.0,1.0,1.0])));
+	_defaultLight.setLightType(MinSG.LightNode.DIRECTIONAL);
 };
 
 // -------------------------------------------------------------
