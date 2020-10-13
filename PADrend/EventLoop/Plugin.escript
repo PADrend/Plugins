@@ -105,14 +105,13 @@ static setting_doClearScreen = new Std.DataWrapper(true);
 static setting_glErrorChecking = Std.DataWrapper.createFromEntry(config,'GLErrorChecking',false);
 static setting_renderingFlags =  Std.DataWrapper.createFromEntry(config,'flags',MinSG.FRUSTUM_CULLING);
 static setting_waitForGlFinish = Std.DataWrapper.createFromEntry(config,'waitForGlFinish',true);
-static setting_glDebugOutput = Std.DataWrapper.createFromEntry(config,'GLDebugOutput',false);
+static setting_glDebugOutput = Std.DataWrapper.createFromEntry(config,'debugMode',false);
 static setting_renderingLayers = Std.DataWrapper.createFromEntry(config,'renderingLayers',1);
 
 static active = true;
 static activeCamera; 
 static taskScheduler;
 static camerasUsedForLastFrame = [];
-static defaultShader;
 
 plugin.init @(override) := fn(){
 	PADrend.RenderingPass := Std.module( 'PADrend/EventLoop/RenderingPass' ); //alias
@@ -183,17 +182,6 @@ plugin.init @(override) := fn(){
 		}
 	});
 	
-	// initialize fallback shader
-	
-	Util.registerExtension('PADrend_Init', fn(...) {
-		//if(!systemConfig.getValue('PADrend.Rendering.GLCompabilityProfile', false)) {
-			// add default shader to root node if compability mode is disabled
-			var shaderState = new MinSG.ShaderState;
-			shaderState.getStateAttributeWrapper(MinSG.ShaderState.STATE_ATTR_SHADER_NAME)("universal3_default.shader");
-			shaderState.recreateShader( PADrend.SceneManagement.getDefaultSceneManager() );
-			defaultShader = shaderState.getShader();
-		//}
-	}, Extension.LOW_PRIORITY-10000);
 	return true;
 };
 // ------------------
@@ -223,9 +211,6 @@ plugin.planTask := fn(mixed_TimeOrCallback,callback=void){
 };
 
 plugin.singleFrame := fn() {
-
-	if(defaultShader)
-		renderingContext.setShader(defaultShader);
 
 	// create "default" rendering pass
 	var renderingPasses = [ 
@@ -291,7 +276,8 @@ plugin.singleFrame := fn() {
 	
 	// -------------------
 	// ---- Swap Buffers
-	PADrend.SystemUI.swapBuffers();
+	renderingContext.present();
+	//PADrend.SystemUI.swapBuffers();
 	
 	// -------------------
 	// ---- Check for GL error

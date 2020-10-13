@@ -48,6 +48,7 @@ if(EScript.VERSION<607)
 	GLOBALS.Network:=void; // alias for Util.Network, if network support is available
 
 	// PADrend dependent variables (\todo move to PADrend members)
+	GLOBALS.device := void;
 	GLOBALS.frameContext := void;
 	GLOBALS.renderingContext := void;
 	GLOBALS.camera := void;

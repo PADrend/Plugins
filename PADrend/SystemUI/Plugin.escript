@@ -46,9 +46,7 @@ PADrend.SystemUI.init @(override) := fn(){
 		//! The window should not have a border.
 		properties.borderless				= systemConfig.getValue('PADrend.window.noFrame', false);
 		//! Create a rendering context with debugging support.
-		properties.debug					= systemConfig.getValue('PADrend.Rendering.GLDebugOutput', false);
-		//! Create a rendering context with a compatibility profile.
-		properties.compatibilityProfile 	= systemConfig.getValue('PADrend.Rendering.GLCompabilityProfile', true); 
+		properties.debug					= systemConfig.getValue('PADrend.Rendering.debugMode', false);
 		//! Set the requested OpenGL Version.
 		properties.contextVersionMajor 	= systemConfig.getValue('PADrend.Rendering.contextVersionMajor', 1);
 		properties.contextVersionMinor 	= systemConfig.getValue('PADrend.Rendering.contextVersionMinor', 0);
@@ -103,7 +101,9 @@ PADrend.SystemUI.init @(override) := fn(){
 	// ------------------
 	{
 		out("Creating Rendering Context".fillUp(40));
-		Rendering.RenderingContext.initGLState();
+
+		var validationLayers = systemConfig.getValue('PADrend.Rendering.validationLayers',[]);
+		GLOBALS.device = new Rendering.Device(window, validationLayers);
 		
 		GLOBALS.frameContext = new MinSG.FrameContext();
 		
@@ -120,10 +120,7 @@ PADrend.SystemUI.init @(override) := fn(){
 		outln("ok.");
 		
 	}
-	Rendering.outputGLInformation();
-	if(systemConfig.getValue('PADrend.Rendering.GLDebugOutput', false)) {
-		Rendering.enableDebugOutput();
-	}
+	//Rendering.outputGLInformation();
 
 	{ // Replace default font
 		var fontFile = Std.DataWrapper.createFromEntry(systemConfig, 'PADrend.renderingFont.fileName', "");
