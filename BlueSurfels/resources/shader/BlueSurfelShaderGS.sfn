@@ -90,6 +90,7 @@ const int SPOT = 3;
 uniform float debugOffset = 0.0;
 uniform float sg_surfelPacking = 0.0;
 uniform float sg_sizeFactor = 1.0;
+uniform float sg_fov_tan = 0.0;
 uniform int sg_surfelCount;
 uniform vec4 debugColor = vec4(0,0,0,0);
 
@@ -204,19 +205,17 @@ void main() {
 	}
 	
 	vOut.color.xyz *= lightSum.ambient.xyz + lightSum.diffuse.xyz;
-		
+	
 	// compute surfel count
 	float dist = max(0, -vOut.position_cs.z);
-	const vec4 one_meter_vector_ss = sg_matrix_cameraToClipping * vec4(1, 0, -dist, 1);
 	float scale = length(matrix_modelToCamera[0]);
-	const float ppm = scale * float(sg_viewport[2]) * one_meter_vector_ss.x / one_meter_vector_ss.w;
-	const float r_inv = 2 * ppm / pointSize;
+	const float r = (sg_pointSize * dist * sg_fov_tan) / float(sg_viewport[2]);
 	
-	vOut.count = uint(sg_surfelPacking * r_inv * r_inv);
+	vOut.count = uint(sg_surfelPacking / (r * r));
 	#if SURFEL_CULLING > 0
 		vOut.surfelRadius = scale * 2 * sg_sizeFactor * sqrt(sg_surfelPacking / float(sg_surfelCount));
 	#else
-		vOut.surfelRadius = scale * 2.0*sg_sizeFactor/r_inv;
+		vOut.surfelRadius = r;
 	#endif
 	vOut.vertexID = gl_VertexID;
 }

@@ -11,6 +11,7 @@
  * http://mozilla.org/MPL/2.0/.
  */
 static mesh_sphere = Rendering.loadMesh(__DIR__ + "/../resources/meshes/sphere_10k.mmf");
+static mesh_bunny = Rendering.loadMesh("./data/mesh/bunny_hq.mmf");
 
 static SurfelGenerator = Std.module("BlueSurfels/SurfelGenerator");
 static Utils = Std.module("BlueSurfels/Utils");
@@ -112,8 +113,23 @@ TS.addScene("Random Spheres in Plane", fn() {
 	var origNode = new MinSG.GeometryNode(mesh_sphere);
 	SurfelGenerator.createSurfelsForNode(origNode, sampler);
 	
-	var scale = 1000;
-	for(var i=0; i<10000; ++i) {
+	var scale = 200;
+	for(var i=0; i<2000; ++i) {
+		var node = MinSG.Node.createInstance(origNode);
+		var pos = new Geometry.Vec3(Rand.uniform(0,1), 0, Rand.uniform(0,1));
+		node.setWorldOrigin(pos * scale);
+		PADrend.getCurrentScene() += node;
+	}
+	
+	//PADrend.getCurrentScene() += surfelRenderer;
+});
+
+TS.addScene("Random Bunnies in Plane", fn() {
+	var origNode = new MinSG.GeometryNode(mesh_bunny);
+	SurfelGenerator.createSurfelsForNode(origNode, sampler);
+	
+	var scale = 200;
+	for(var i=0; i<2000; ++i) {
 		var node = MinSG.Node.createInstance(origNode);
 		var pos = new Geometry.Vec3(Rand.uniform(0,1), 0, Rand.uniform(0,1));
 		node.setWorldOrigin(pos * scale);

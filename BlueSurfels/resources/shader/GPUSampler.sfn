@@ -212,7 +212,7 @@ void main() {
 	ivec4 coord = ivec4(gl_FragCoord.xy, gl_Layer, level);
 	vec4 pos = texelFetch(t_position, coord.xyz, coord.w);
 	if(pos.w <= 0) {
-		site = TARGET_COUNT;
+		site = 2*TARGET_COUNT;
 		gl_FragDepth = 0;
 		return;
 	}

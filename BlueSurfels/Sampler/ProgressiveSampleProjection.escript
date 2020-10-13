@@ -379,7 +379,7 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 			
 		beginProfile('Resolve Conflicts', 3);
 		beginProfile('Sort', 4);
-		sorter.sort(offsetBuffer, maxCount);
+		sorter.sort(offsetBuffer, void, maxCount);
 		endProfile(4);
 		dispatchCompute(compute_shader, 'writeGrid', maxCount);
 		dispatchCompute(compute_shader, 'resolveRestartConflicts', maxCount);
@@ -391,7 +391,7 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 		gridBuffer.clear(0xffffffff);
 		dispatchCompute(compute_shader, 'buildResultOffsets', resultCount);
 		beginProfile('Sort', 4);
-		sorter.sort(offsetBuffer, resultCount);
+		sorter.sort(offsetBuffer, void, resultCount);
 		endProfile(4);
 		dispatchCompute(compute_shader, 'writeGrid', resultCount);
 		dispatchCompute(compute_shader, 'merge', maxCount);

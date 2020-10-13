@@ -36,15 +36,36 @@ T.keySize @(private) := Util.getNumBytes(Util.TypeConstant.UINT32);
 T.setKeyType ::= fn(type, size=0) {
 	reset();
 	this.keyType = typeMap[type];
-	if(this.keyType) {
-		this.keySize = Util.getNumBytes(type);
-	} else if(size>0) {		
+	if(size>0) {
 		this.keyType = type;
 		this.keySize = size;
+	} else if(this.keyType) {
+		this.keySize = Util.getNumBytes(type);
 	} else {
 		Runtime.exception("key type has size 0!");
 	}
 	this.setRadixRange(0,this.keySize*8);
+};
+
+T.valueType @(private) := "uint";
+T.valueSize @(private) := Util.getNumBytes(Util.TypeConstant.UINT32);
+T.useValueBuffer @(private) := false;
+T.setValueType ::= fn(type, size=0) {
+	reset();
+	this.valueType = typeMap[type];
+	this.useValueBuffer = true;
+	if(size>0) {
+		this.valueType = type;
+		this.valueSize = size;
+	} else if(this.valueType) {
+		this.valueSize = Util.getNumBytes(type);
+	} else {
+		this.useValueBuffer = false;
+	}
+};
+T.setUseValueBuffer ::= fn(value) {
+	reset();
+	this.useValueBuffer = value;
 };
 
 T.bucketSize @(private) := 16;
@@ -67,6 +88,7 @@ T.setSortAscending ::= fn(value) { reset(); this.sortAscending = value; };
 T.bindingOffset @(private) := 0;
 T.setBindingOffset ::= fn(value) { reset(); this.bindingOffset = value; };
 T.tmpKeyBuffer @(private) := void;
+T.tmpValueBuffer @(private) := void;
 T.histogramBuffer @(private) := void;
 T.blockSumBuffer @(private) := void;
 
@@ -80,42 +102,50 @@ T.build ::= fn() {
 	var blockCount = (maxElements/blockSize).ceil();
 	var histogramBlocks = (blockCount * bucketSize / blockSize).ceil();
 
-  var defines = {
-    "WORK_GROUP_SIZE": workGroupSize,
-    "KEY_TYPE": keyType,
-	  "BLOCK_COUNT": blockCount,
-	  "HIST_BLOCK_COUNT": histogramBlocks,
+	var defines = {
+		"WORK_GROUP_SIZE": workGroupSize,
+		"KEY_TYPE": keyType,
+		"BLOCK_COUNT": blockCount,
+		"HIST_BLOCK_COUNT": histogramBlocks,
 		"SORT_ASCENDING" : sortAscending ? 1 : 0,
-    "IN_KEY_BINDING": this.bindingOffset + 0,
-    "OUT_KEY_BINDING": this.bindingOffset + 1,
-    "HISTOGRAM_BINDING": this.bindingOffset + 2,
-    "BLOCK_SUM_BINDING": this.bindingOffset + 3,
-    "IN_VALUE_BINDING": this.bindingOffset + 4,
-    "OUT_VALUE_BINDING": this.bindingOffset + 5,
-  };	
-  program = Rendering.Shader.createComputeFromFile(__DIR__ + "/shader/radix_sort.sfn", defines);
-  // compile program
-  renderingContext.pushAndSetShader(program);
+		"USE_VALUE_BUFFER" : useValueBuffer ? 1 : 0,
+		"VALUE_TYPE": valueType,
+		"IN_KEY_BINDING": this.bindingOffset + 0,
+		"OUT_KEY_BINDING": this.bindingOffset + 1,
+		"HISTOGRAM_BINDING": this.bindingOffset + 2,
+		"BLOCK_SUM_BINDING": this.bindingOffset + 3,
+		"IN_VALUE_BINDING": this.bindingOffset + 4,
+		"OUT_VALUE_BINDING": this.bindingOffset + 5,
+	};
+	program = Rendering.Shader.createComputeFromFile(__DIR__ + "/shader/radix_sort.sfn", defines);
+	// compile program
+	renderingContext.pushAndSetShader(program);
 	renderingContext.popShader();
-  	
+		
 	this.tmpKeyBuffer = (new Rendering.BufferObject).allocate(keySize * maxElements).clear();
 	this.histogramBuffer = (new Rendering.BufferObject).allocate(4 * blockCount * bucketSize).clear();
 	this.blockSumBuffer = (new Rendering.BufferObject).allocate(4 + 4 * roundUp(histogramBlocks,4)).clear();
+	if(useValueBuffer)
+		this.tmpValueBuffer = (new Rendering.BufferObject).allocate(valueSize * maxElements).clear();
 		
-  initialized = true;
+	initialized = true;
 };
 
 T.reset ::= fn() {
 	if(initialized)
 		unbind();
-  initialized = false;
+	initialized = false;
 };
 
-T.bind @(private) ::= fn(keyBuffer) {
+T.bind @(private) ::= fn(keyBuffer, valueBuffer=void) {
 	renderingContext.bindBuffer(keyBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+0);
 	renderingContext.bindBuffer(tmpKeyBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+1);
 	renderingContext.bindBuffer(histogramBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+2);
 	renderingContext.bindBuffer(blockSumBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+3);
+	if(useValueBuffer) {
+		renderingContext.bindBuffer(valueBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+4);
+		renderingContext.bindBuffer(tmpValueBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+5);
+	}
 };
 
 T.unbind @(private) ::= fn() {
@@ -123,15 +153,19 @@ T.unbind @(private) ::= fn() {
 	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset + 1);
 	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset + 2);
 	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset + 3);
+	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset + 4);
+	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset + 5);
 };
 
-T.sort ::= fn(keyBuffer, elements, offset=0, profiling=false) {
+T.sort ::= fn(keyBuffer, valueBuffer, elements, offset=0, profiling=false) {
 	if(elements <= 0)
 		return;
 	if(elements+offset > maxElements)
 		setMaxElements(elements+offset);
+	if(useValueBuffer && !valueBuffer)
+		setUseValueBuffer(false);
 	if(!initialized)
-    build();
+		build();
 		
 	var timer = new Util.Timer();
 	var range = new Geometry.Vec2(radixRange.x(), radixRange.x()+4);
@@ -139,8 +173,8 @@ T.sort ::= fn(keyBuffer, elements, offset=0, profiling=false) {
 	var blockCount = (elements/blockSize).ceil();
 	var histogramBlocks = (blockCount * bucketSize / blockSize).ceil();
 	
-  renderingContext.pushAndSetShader(program);
-	bind(keyBuffer);
+	renderingContext.pushAndSetShader(program);
+	bind(keyBuffer, valueBuffer);
 	
 	program.setUniform(renderingContext,'elementRange', Rendering.Uniform.VEC2I, [new Geometry.Vec2(offset, offset+elements)]);
 	program.setUniform(renderingContext,'blockCount', Rendering.Uniform.INT, [blockCount]);
@@ -159,6 +193,10 @@ T.sort ::= fn(keyBuffer, elements, offset=0, profiling=false) {
 			program.setUniform(renderingContext,'radixRange', Rendering.Uniform.VEC2I, [range]);
 			renderingContext.bindBuffer(keyBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+round%2);
 			renderingContext.bindBuffer(tmpKeyBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+1-round%2);
+			if(useValueBuffer) {
+				renderingContext.bindBuffer(valueBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+4+round%2);
+				renderingContext.bindBuffer(tmpValueBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+5-round%2);
+			}
 			blockSumBuffer.clear();
 			
 			// local pre-sort
@@ -191,6 +229,9 @@ T.sort ::= fn(keyBuffer, elements, offset=0, profiling=false) {
 
 		if(round%2 == 1) {
 			keyBuffer.copy(tmpKeyBuffer, offset*keySize, offset*keySize, elements*keySize);
+			if(useValueBuffer) {
+				valueBuffer.copy(tmpValueBuffer, offset*valueSize, offset*valueSize, elements*valueSize);
+			}
 		}
 	}
 	
@@ -198,7 +239,7 @@ T.sort ::= fn(keyBuffer, elements, offset=0, profiling=false) {
 	renderingContext.popShader();
 		
 	if(profiling) {
-    renderingContext.finish();
+		renderingContext.finish();
 		stats["t_reduce"] = timer.getMilliseconds();
 	}
 	return this;
@@ -206,7 +247,7 @@ T.sort ::= fn(keyBuffer, elements, offset=0, profiling=false) {
 
 T.testOrder ::= fn(keyBuffer, elements, offset=0) {
 	var blockCount = (elements/blockSize).ceil();
-  renderingContext.pushAndSetShader(program);
+	renderingContext.pushAndSetShader(program);
 	bind(keyBuffer);
 	blockSumBuffer.clear();
 	program.setUniform(renderingContext,'elementRange', Rendering.Uniform.VEC2I, [new Geometry.Vec2(offset, offset+elements)]);

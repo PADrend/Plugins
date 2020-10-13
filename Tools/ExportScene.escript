@@ -50,7 +50,6 @@ plugin.init @(override) := fn(){
 plugin.popup := void;
 
 
-plugin.D3FACT := 0;
 plugin.ALL_IN_ONE := 1;
 plugin.LARGE_SCENE := 2;
 plugin.HANDY := 3;
@@ -93,7 +92,6 @@ plugin.createWindow:=fn(){
         GUI.TYPE : GUI.TYPE_SELECT,
         GUI.LABEL : "export type",
         GUI.OPTIONS : [
-            [this.D3FACT, "d3fact", void, "stores all meshes and textures \nwith the minsg file in one folder"],
             [this.ALL_IN_ONE, "all in one", void, "all textures and meshes are \nembedded into the minsg file"],
             [this.LARGE_SCENE, "multiple zips", void, "creates a minsg file and \nstores textures and meshes in a \nsmall number of zip files"],
             [this.HANDY,"multiple folders", void, "creates a minsg file and \nstores all meshes and textures in a \nsmall number of folders"]
@@ -201,38 +199,6 @@ plugin.exporter[plugin.ALL_IN_ONE] = fn(Util.FileName folder, String name, Set m
     }
     return folder.toString()+name+".minsg";
 };
-
-plugin.exporter[plugin.D3FACT] = fn(Util.FileName folder, String name, Set meshes, Set textures){
-
-    var prefix = folder.toString() + name + "/";
-    Util.createDir(prefix);
-
-    var index = 0;
-    foreach(meshes as var mesh){
-        var filename = new Util.FileName(prefix + "mesh_" + fillLeft(++index) + ".mmf");
-        mesh.setFileName(filename);
-        Rendering.saveMesh(mesh, filename);
-    }
-
-    index = 0;
-    foreach(textures as var texture){
-        var filename = new Util.FileName(prefix + "texture_" + fillLeft(++index) + ".png");
-        texture.setFileName(filename);
-        Rendering.saveTexture(renderingContext, texture, filename);
-    }
-    
-    {
-    	// create a screenshot of the scene with the current camera and save it together with the scene
-		PADrend.renderScene( PADrend.getRootNode(), PADrend.getActiveCamera(), PADrend.getRenderingFlags(), PADrend.getBGColor(), PADrend.getRenderingLayers() );
-	    var filename = new Util.FileName(prefix + name + ".png");
-		var texture = Rendering.createTextureFromScreen();
-		Rendering.saveTexture(renderingContext, texture, filename);
-	}
-	
-	Util.flush("file://");
-    return prefix + name + ".minsg";
-};
-
 
 plugin.exporter[plugin.LARGE_SCENE] = fn(Util.FileName folder, String name, Set meshes, Set textures){
 
