@@ -104,6 +104,10 @@ PADrend.SystemUI.init @(override) := fn(){
 
 		var validationLayers = systemConfig.getValue('PADrend.Rendering.validationLayers',[]);
 		GLOBALS.device = new Rendering.Device(window, validationLayers);
+
+		registerExtension('PADrend_Exit', fn(){
+			GLOBALS.device.waitIdle();
+		});
 		
 		GLOBALS.frameContext = new MinSG.FrameContext();
 		
