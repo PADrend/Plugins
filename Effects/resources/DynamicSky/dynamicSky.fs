@@ -1,4 +1,4 @@
-#version 330
+#version 450
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -20,21 +20,25 @@
  * Inspired by skyFP.glsl (based on the work of Michael Horsch)
  * \see http://www.bonzaisoftware.com/volsmoke.html
  */
-uniform sampler2D ColorMap;
-uniform sampler2D BumpMap;
-uniform vec4 skyColor_1, skyColor_2, skyColor_3; // azimuth, middle, horizon
-uniform vec4 cloudColor;
-uniform float cloudDensity;// = 0.6;
-uniform vec3 sunPosition;
-uniform bool starsEnabled;// = false;
 
-uniform float maxSunBrightness = 100.0; // to get values beyond 1.0 for hdr
+layout(set=0, binding=0) uniform sampler2D sg_Textures[2];
+
+layout(set=1, binding=0) uniform UniformBuffer {
+	mat4 sg_matrix_worldToCamera; // used for mrt
+	int ColorMap;
+	int BumpMap;
+	vec4 skyColor_1, skyColor_2, skyColor_3; // azimuth, middle, horizon
+	vec4 cloudColor;
+	float cloudDensity;// = 0.6;
+	vec3 sunPosition;
+	bool starsEnabled;// = false;
+	float maxSunBrightness; // to get values beyond 1.0 for hdr
+};
+
 const float bloomingExponent = 4.0;
 const float bloomingScale = 1.0;
 const float wobble = 0.4;
 const float cloudCutLine = 0.08; // 0.05-0.015
-
-uniform mat4 sg_matrix_worldToCamera; // used for mrt
 
 in VertexData {
 	vec3 position;
@@ -45,11 +49,11 @@ in VertexData {
 } v_in;
 
 layout(location=0) out vec4 outColor;
-layout(location=1) out vec4 outPosition;
-layout(location=2) out vec4 outNormal;
-layout(location=3) out vec4 outAmbient;
-layout(location=4) out vec4 outDiffuse;
-layout(location=5) out vec4 outSpecular;
+//layout(location=1) out vec4 outPosition;
+//layout(location=2) out vec4 outNormal;
+//layout(location=3) out vec4 outAmbient;
+//layout(location=4) out vec4 outDiffuse;
+//layout(location=5) out vec4 outSpecular;
 
 void main(void) {
 
@@ -68,7 +72,7 @@ void main(void) {
 	
 	// stars (experimental)
 	if(starsEnabled){
-		vec3 t = texture2D(BumpMap, v_in.skyPos_ws*10.0).xyz;
+		vec3 t = texture(sg_Textures[BumpMap], v_in.skyPos_ws*10.0).xyz;
 		if( t.x < 0.02  )
 			skyColor += vec3( max(  t.y * (t.y - (skyColor.x+skyColor.y+skyColor.z)*0.33 ) *3.0 ,0.0 ) );
 		
@@ -84,11 +88,11 @@ void main(void) {
 	if(noCloudsNearHorizon>0.20){
 		// ---------------------------
 		// -- calculate cloud depth
-		vec2 t1 = texture2D(ColorMap, v_in.texCoord_1).xy;
+		vec2 t1 = texture(sg_Textures[ColorMap], v_in.texCoord_1).xy;
 		float cloudDepth_1 = t1.x;
-		float cloudDepth_2 = 0.5*texture2D(ColorMap, v_in.texCoord_2).x;
+		float cloudDepth_2 = 0.5*texture(sg_Textures[ColorMap], v_in.texCoord_2).x;
 		vec2 texCoord_3b = v_in.texCoord_3 - wobble*(1.0+norm.y)*vec2(cloudDepth_1,cloudDepth_2); // add wobbel
-		float cloudDepth_3 = 0.25*texture2D(ColorMap, texCoord_3b ).x;
+		float cloudDepth_3 = 0.25*texture(sg_Textures[ColorMap], texCoord_3b ).x;
 
 		float cloudDepth = (cloudDepth_1 + cloudDepth_2 + cloudDepth_3)/1.75;
 		cloudDepth = pow( cloudDepth+0.5, 0.5+t1.y*3.0 ) - 0.5; // add some sharper cloud edges
@@ -96,9 +100,9 @@ void main(void) {
 
 		// ---------------------------
 		// -- calculate cloud normal
-		vec3 cNorm = normalize(texture2D(BumpMap, v_in.texCoord_1).xyz +
-							   0.5*texture2D(BumpMap, v_in.texCoord_2).xyz +
-							   0.25*texture2D(BumpMap, texCoord_3b).xyz);
+		vec3 cNorm = normalize(texture(sg_Textures[BumpMap], v_in.texCoord_1).xyz +
+							   0.5*texture(sg_Textures[BumpMap], v_in.texCoord_2).xyz +
+							   0.25*texture(sg_Textures[BumpMap], texCoord_3b).xyz);
 		// ---------------------------
 		// -- add clouds to skyColor
 		// \note if cloudDensity is high, the blooming is reduced
@@ -135,10 +139,10 @@ void main(void) {
 	{
 		outColor = vec4( skyColor,1.0);		// "normal" color
 		vec4 pos_hcs = sg_matrix_worldToCamera * vec4(v_in.position,1.0);
-		outPosition = vec4( pos_hcs.xyz/pos_hcs.w,0.0); 									// pos_cs
-		outNormal = vec4( (sg_matrix_worldToCamera * vec4(normal_ws,0.0)).xyz,0.0); 	// normal_cs
-		outAmbient = vec4( skyColor,1.0); 												// ambient (emission)
-		outDiffuse = vec4( 0.0); 														// diffuse
-		outSpecular = vec4( 0.0); 														// specular
+		//outPosition = vec4( pos_hcs.xyz/pos_hcs.w,0.0); 									// pos_cs
+		//outNormal = vec4( (sg_matrix_worldToCamera * vec4(normal_ws,0.0)).xyz,0.0); 	// normal_cs
+		//outAmbient = vec4( skyColor,1.0); 												// ambient (emission)
+		//outDiffuse = vec4( 0.0); 														// diffuse
+		//outSpecular = vec4( 0.0); 														// specular
 	}
 }

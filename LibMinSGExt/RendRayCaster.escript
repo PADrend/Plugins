@@ -32,19 +32,6 @@ T.fbo @(private) := void;
 T.shader @(private) := void;
 T.renderingLayers @(public,init) := Std.module('Std/DataWrapper');
 
-static shader_src = "#version 450
-layout(location = 0) in vec3 sg_Position;
-
-layout(push_constant) uniform ObjectBuffer {
-	mat4 sg_matrix_modelToClipping;
-};
-
-void main() {
-	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position, 1.0);
-	gl_Position.y = -gl_Position.y; // Vulkan uses right hand NDC
-}
-";
-
 T._constructor ::= fn(Number _resolution=10){
 	this.renderingLayers( 1 );
 	this.resolution = _resolution;
@@ -52,8 +39,7 @@ T._constructor ::= fn(Number _resolution=10){
 	this.castCam.setViewport( new Geometry.Rect(0,0,resolution,resolution));
 	this.castCam.setFrustumFromScaledViewport(0.001);
 	
-	this.shader = Rendering.Shader.createShader(Rendering.Shader.USE_UNIFORMS);	
-	this.shader.attachVS(shader_src);
+	this.shader = Rendering.Shader.createPassThroughShader();	
 
 	// create FBO
 	this.fbo = new Rendering.FBO;

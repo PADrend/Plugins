@@ -1,4 +1,4 @@
-#version 330
+#version 450
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -45,33 +45,38 @@
 
 const float noiseScale = 50.0;  // scalefactor of noise texture for alpha blending
 
-uniform sampler2D noise;
+layout(set=0, binding=0) uniform sampler2D sg_Textures[5];
 
-uniform sampler2D texture_1;
-uniform sampler2D texture_2;
+layout(set=1, binding=0) uniform UniformBuffer {
+	int noise;
+	int texture_1;
+	int texture_2;
 
-uniform int type;
-uniform float scale;
-uniform vec3 viewerPos;
-uniform mat3 worldRot;
-uniform mat4 sg_matrix_worldToCamera;
-uniform mat4 sg_matrix_cameraToClipping; 
-uniform float groundLevel;  // y-coordinate of the ground
+	int type;
+	float scale;
+	vec3 viewerPos;
+	mat3 worldRot;
+	mat4 sg_matrix_worldToCamera;
+	mat4 sg_matrix_cameraToClipping; 
+	float groundLevel;  // y-coordinate of the ground
 
-uniform bool useHaze;
-uniform float hazeNear;
-uniform float hazeFar;
-uniform vec3 hazeColor;
-uniform vec3 groundColor;
+	bool useHaze;
+	float hazeNear;
+	float hazeFar;
+	vec3 hazeColor;
+	vec3 groundColor;
 
-uniform vec3 sunPosition;
-uniform vec3 sunAmbient;
-uniform vec3 sunDiffuse;
+	vec3 sunPosition;
+	vec3 sunAmbient;
+	vec3 sunDiffuse;
 
-// used for type == TYPE_WATER
-uniform float reflection;
-uniform float refraction;
-uniform float screenRatio;
+	// used for type == TYPE_WATER
+	float reflection;
+	float refraction;
+	float screenRatio;
+
+	int sg_viewport[4];
+};
 
 in vec3 worldDir;  // interpolated negative normal of vertex of the dome
 
@@ -80,16 +85,11 @@ in vec4 wave0;
 in vec4 wave1;
 
 layout(location=0) out vec4 outColor;
-layout(location=1) out vec4 outPosition;
-layout(location=2) out vec4 outNormal;
-layout(location=3) out vec4 outAmbient;
-layout(location=4) out vec4 outDiffuse;
-layout(location=5) out vec4 outSpecular;
-
-// ---------------------------------------------------
-// default uniforms
-
-uniform int sg_viewport[4];
+//layout(location=1) out vec4 outPosition;
+//layout(location=2) out vec4 outNormal;
+//layout(location=3) out vec4 outAmbient;
+//layout(location=4) out vec4 outDiffuse;
+//layout(location=5) out vec4 outSpecular;
 
 // ----------------------------------------------------------------
 // general helper
@@ -103,7 +103,7 @@ float sunGlow(const in vec3 worldLightDir) {
 //	if(sunDistance < 0.9)
 //		return 0;
 	float hazeFactor =  clamp( pow(1.0 + worldDir.y, 6.0), 0.0, 1.0) ; //
-	float sunGlowExponent =  1024.0 * (1.0 - hazeFactor * 0.95) ;
+	float sunGlowExponent =  (1.0 - hazeFactor * 0.95) ;
 
 	return  pow( sunDistance, sunGlowExponent ) * pow(1.0 - worldDir.y, 80.0);
 }
@@ -111,15 +111,15 @@ float sunGlow(const in vec3 worldLightDir) {
 // ----------------------------------------------------------------
 // Meadow
 void calculateMeadow(const in vec2 groundPos, out vec3 color) {
-	float f0 = texture2D(noise, (groundPos * 4.537) / noiseScale).x;
-	float f1 = texture2D(noise, groundPos / noiseScale).x;
-	float f2 = texture2D(noise, (groundPos.yx * 0.537) / noiseScale).x;
+	float f0 = texture(sg_Textures[noise], (groundPos * 4.537) / noiseScale).x;
+	float f1 = texture(sg_Textures[noise], groundPos / noiseScale).x;
+	float f2 = texture(sg_Textures[noise], (groundPos.yx * 0.537) / noiseScale).x;
 	float f = clamp( pow( (f1 + f2 + f0) * 0.5 , 10.0) , 0.0, 1.0);
 	float disortion = 1.0; // f
 
-	vec3 c1 = vec3(( texture2D(texture_1,
+	vec3 c1 = vec3(( texture(sg_Textures[texture_1],
 							   vec2( groundPos) + vec2( (f2 * 1.42) + f, f2 * 1.4431 - f ) * disortion) +
-					 texture2D(texture_1,
+					 texture(sg_Textures[texture_1],
 							   vec2( groundPos.y * 0.723, groundPos.x * 0.623) + vec2( f1 * 4.271, f1 * 4.3331) * disortion ))) * 0.5 ;
 
 	float brightness = (c1.x + c1.y + c1.z) * 0.3333;
@@ -148,16 +148,16 @@ float fresnel(float NdotL, float fresnelBias, float fresnelPow) {
 void calculateWater(const in vec2 groundPos, const in vec3 worldLightDir,  out vec3 groundPos_cam,
 					out vec3 color, out vec3 worldNormal , const in vec3 worldGroundIntersection) {
 
-	vec3 f0 = texture2D(texture_1, (groundPos * 2.0) / noiseScale + wave0.xy).rgb;
-	vec3 f1 = texture2D(texture_1, (groundPos * 4.0) / noiseScale + wave0.zw).rgb;
-	vec3 f2 = texture2D(texture_1, (groundPos * 6.0) / noiseScale + wave1.xy).rgb;
-	vec3 f3 = texture2D(texture_1, (groundPos * 8.0) / noiseScale + wave1.zw).rgb;
+	vec3 f0 = texture(sg_Textures[texture_1], (groundPos * 2.0) / noiseScale + wave0.xy).rgb;
+	vec3 f1 = texture(sg_Textures[texture_1], (groundPos * 4.0) / noiseScale + wave0.zw).rgb;
+	vec3 f2 = texture(sg_Textures[texture_1], (groundPos * 6.0) / noiseScale + wave1.xy).rgb;
+	vec3 f3 = texture(sg_Textures[texture_1], (groundPos * 8.0) / noiseScale + wave1.zw).rgb;
 
 	worldNormal = normalize(2.0 * (f0 + f1 + f2 + f3) - 4.0);
 	
 	vec2 mirrorCoord = vec2( gl_FragCoord.x / float(sg_viewport[2]) , 1.0-gl_FragCoord.y / float(sg_viewport[3]) );
 
-	vec3 refl = texture2D(texture_2, mirrorCoord + (worldNormal.xy * refraction)).rgb;
+	vec3 refl = texture(sg_Textures[texture_2], mirrorCoord + (worldNormal.xy * refraction)).rgb;
 	float NdotL = max(dot(worldLightDir, worldNormal), 0.0);
 	float fres = fresnel(NdotL, 0.5, 5.0);
 	vec3 waterColor = vec3(0, 0.115, 0.15);
@@ -171,7 +171,7 @@ void calculateWater(const in vec2 groundPos, const in vec3 worldLightDir,  out v
 float calcFragmentDepth(const in vec3 groundPos_cam){
 	vec4 windowCoord = sg_matrix_cameraToClipping * vec4(groundPos_cam, 1.0);
 	// Clamp here to prevent clipping.
-	return  clamp(0.5 + 0.5 * windowCoord.z / windowCoord.w, 0.0, 0.99999);
+	return clamp(0.5 + 0.5 * windowCoord.z / windowCoord.w, 0.0, 0.99999);
 }
 
 
@@ -182,7 +182,6 @@ void main(void) {
 	if(viewerPos.y < groundLevel) {
 		discard;
 	}
-
 	vec3 nWorldDir = normalize(worldDir);
 
 	// distance from the viewer to the groundIntersection
@@ -193,16 +192,17 @@ void main(void) {
 	// ground intersection
 	vec3 worldGroundIntersection = viewerPos - worldDistance * nWorldDir;
 	vec3 groundPos_cam = worldPosToCamPos(worldGroundIntersection);
-	outPosition = vec4( groundPos_cam,0.0); 											// pos_cs
-	outNormal = vec4( (sg_matrix_worldToCamera * vec4(0.0,1.0,0.0,0.0)).xyz,0.0); 	// normal_cs
-	outDiffuse = vec4( 0.0); 														// diffuse
-	outSpecular = vec4( 0.0); 														// specular
+	//outPosition = vec4( groundPos_cam,0.0); 											// pos_cs
+	//outNormal = vec4( (sg_matrix_worldToCamera * vec4(0.0,1.0,0.0,0.0)).xyz,0.0); 	// normal_cs
+	//outDiffuse = vec4( 0.0); 														// diffuse
+	//outSpecular = vec4( 0.0); 														// specular
 
 	vec3 worldLightDir = normalize(sunPosition.xyz);
 
 	// fragment completely in haze?
 	if(useHaze && worldDistance >= hazeFar) {
-		outColor = outAmbient = vec4( hazeColor + vec3(sunGlow(worldLightDir)) , 1.0);
+		//outColor = outAmbient = vec4( hazeColor + vec3(sunGlow(worldLightDir)) , 1.0);
+		outColor = vec4( hazeColor + vec3(sunGlow(worldLightDir)) , 1.0);
 		gl_FragDepth = calcFragmentDepth(groundPos_cam);
 		return;
 	}
@@ -215,7 +215,7 @@ void main(void) {
 	if(type == TYPE_MEADOW) {
 		calculateMeadow(groundPos, color);
 	} else if(type == TYPE_SIMPLE_TEXTURE) {
-		color = vec3(texture2D(texture_1, groundPos) + texture2D(texture_1, groundPos * 1.743) + texture2D(texture_1, groundPos * 4.13)) * 0.3333;
+		color = vec3(texture(sg_Textures[texture_1], groundPos) + texture(sg_Textures[texture_1], groundPos * 1.743) + texture(sg_Textures[texture_1], groundPos * 4.13)) * 0.3333;
 	} else if(type == TYPE_CHESSBOARD) {
 		calculateChessboard(groundPos, color);
 	} else if(type == TYPE_WATER) {
@@ -252,7 +252,7 @@ void main(void) {
 	// multiple render targets \see universal3/main_mrt.sfn
 	{
 		outColor = vec4( color,1.0);											// "normal" color
-		outAmbient = vec4( color,1.0); 											// ambient (emission)
+		//outAmbient = vec4( color,1.0); 											// ambient (emission)
 	}
 
 }

@@ -1,4 +1,4 @@
-#version 330
+#version 450
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -21,9 +21,11 @@
  
 layout(location=0) in vec3 sg_Position;
 
-uniform mat4 sg_matrix_modelToClipping; 
-
-uniform float cloudTime;
+layout(push_constant) uniform ObjectBuffer {
+	mat4 sg_matrix_modelToClipping;
+	float cloudTime;
+	int type;
+};
 
 out VertexData {
 	vec3 position;

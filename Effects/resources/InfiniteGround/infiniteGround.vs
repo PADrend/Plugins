@@ -1,4 +1,4 @@
-#version 330
+#version 450
 /*
  * This file is part of the open source part of the
  * Platform for Algorithm Development and Rendering (PADrend).
@@ -25,10 +25,11 @@
 
 layout(location=0) in vec3 sg_Position;
 
-uniform mat4 sg_matrix_modelToClipping; 
-
-uniform float time;
-uniform int type;
+layout(push_constant) uniform ObjectBuffer {
+	mat4 sg_matrix_modelToClipping;
+	float time;
+	int type;
+};
 
 out vec3 worldDir;  // negative normal of vertex of the dome
 out vec4 wave0;
