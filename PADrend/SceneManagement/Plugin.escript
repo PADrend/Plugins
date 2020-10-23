@@ -104,9 +104,8 @@ SceneManagement.ex_Init := fn(...){
 			// update viewport only when it has not been fixed in the config
 			if(! systemConfig.getValue('PADrend.Camera.viewport',false))
 				camera.setViewport( new Geometry.Rect( 0,0,width,height));
-			// if no observer position is set, this is a normal angle based camera and the angle should be updated
-			if(!PADrend.getDolly().observerPosition)
-				camera.applyVerticalAngle(systemConfig.getValue('PADrend.Camera.vAngle'));
+			// update angle
+			camera.applyVerticalAngle(systemConfig.getValue('PADrend.Camera.vAngle'));
 		};
 
 		frameContext.setCamera( camera );
