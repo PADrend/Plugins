@@ -15,13 +15,13 @@
 // =====================================================================
 // vs
 #ifdef SG_VERTEX_SHADER
-  layout(location = 0) in vec3 sg_Position;
-  out vec4 position;
-  #ifdef LAYER_COUNT
-    void main() { position = vec4(sg_Position, 1.0); }
-  #else
-    void main() { position = vec4(sg_Position, 1.0); }
-  #endif
+	layout(location = 0) in vec3 sg_Position;
+	out vec4 position;
+	#ifdef LAYER_COUNT
+		void main() { position = vec4(sg_Position, 1.0); }
+	#else
+		void main() { position = vec4(sg_Position, 1.0); }
+	#endif
 #endif
 
 // =====================================================================
@@ -32,17 +32,17 @@ flat in vec4 position[];
 layout(triangle_strip, max_vertices = 3) out;
 flat out int layer;
 void main() {
-  layer = gl_InvocationID;
-  gl_Position = position[0];
-  gl_Layer = gl_InvocationID;
-  EmitVertex();
-  gl_Position = position[1];
-  gl_Layer = gl_InvocationID;
-  EmitVertex();
-  gl_Position = position[2];
-  gl_Layer = gl_InvocationID;
-  EmitVertex();
-  EndPrimitive();
+	layer = gl_InvocationID;
+	gl_Position = position[0];
+	gl_Layer = gl_InvocationID;
+	EmitVertex();
+	gl_Position = position[1];
+	gl_Layer = gl_InvocationID;
+	EmitVertex();
+	gl_Position = position[2];
+	gl_Layer = gl_InvocationID;
+	EmitVertex();
+	EndPrimitive();
 }
 #endif
 
@@ -50,87 +50,108 @@ void main() {
 // fs
 #ifdef SG_FRAGMENT_SHADER
 	#ifdef LAYER_COUNT
-	  flat in int layer;
+		flat in int layer;
 		#define TEXTURE_TYPE sampler2DArray
+		#define TEXTURE_TYPE_U usampler2DArray
 		#define getPixel(tex,x,y) texelFetch(tex, (ivec3(gl_FragCoord.xy, 0) << 1) + ivec3(x,y,layer), level-1)
 	#else
 		#define TEXTURE_TYPE sampler2D
+		#define TEXTURE_TYPE_U usampler2D
 		#define getPixel(tex,x,y) texelFetch(tex, (ivec2(gl_FragCoord.xy) << 1) + ivec2(x,y), level-1)
 	#endif
 	
-  uniform int level;
+	uniform int level;
 	
-	layout(binding = 0) uniform TEXTURE_TYPE texture;
-  layout(location = 0) out vec4 result;
+	layout(binding = 0) uniform TEXTURE_TYPE t_position;
+	layout(location = 0) out vec4 outPosition;
 	
 	#if TEXTURES > 0
-		layout(binding = 1) uniform TEXTURE_TYPE texture1;
-	  layout(location = 1) out vec4 result1;
-	#endif
-  
-	#if TEXTURES > 1
-		layout(binding = 2) uniform TEXTURE_TYPE texture2;
-	  layout(location = 2) out vec4 result2;
+		layout(binding = 1) uniform TEXTURE_TYPE t_normal;
+		layout(location = 1) out vec4 outNormal;
 	#endif
 	
-  void main() {		
-    // fetch points
-    vec4 x0 = getPixel(texture, 0, 0);
-    vec4 x1 = getPixel(texture, 0, 1);
-    vec4 x2 = getPixel(texture, 1, 1);
-    vec4 x3 = getPixel(texture, 1, 0);
+	#if TEXTURES > 1
+		layout(binding = 2) uniform TEXTURE_TYPE t_color;
+		layout(location = 2) out vec4 outColor;
+	#endif
+
+	#if TEXTURES > 2
+		layout(binding = 3) uniform TEXTURE_TYPE_U t_primitiveId;
+		layout(location = 3) out uint outPrimitiveId;
+	#endif
+	
+	void main() {
+		// fetch points
+
+		// position
+		vec4 p0 = getPixel(t_position, 0, 0);
+		vec4 p1 = getPixel(t_position, 0, 1);
+		vec4 p2 = getPixel(t_position, 1, 1);
+		vec4 p3 = getPixel(t_position, 1, 0);
 		#if TEXTURES > 0
-	    vec4 y0 = getPixel(texture1, 0, 0);
-	    vec4 y1 = getPixel(texture1, 0, 1);
-	    vec4 y2 = getPixel(texture1, 1, 1);
-	    vec4 y3 = getPixel(texture1, 1, 0);
+			// normal
+			vec4 n0 = getPixel(t_normal, 0, 0);
+			vec4 n1 = getPixel(t_normal, 0, 1);
+			vec4 n2 = getPixel(t_normal, 1, 1);
+			vec4 n3 = getPixel(t_normal, 1, 0);
 		#endif
 		#if TEXTURES > 1
-	    vec4 z0 = getPixel(texture2, 0, 0);
-	    vec4 z1 = getPixel(texture2, 0, 1);
-	    vec4 z2 = getPixel(texture2, 1, 1);
-	    vec4 z3 = getPixel(texture2, 1, 0);
+			// color
+			vec4 c0 = getPixel(t_color, 0, 0);
+			vec4 c1 = getPixel(t_color, 0, 1);
+			vec4 c2 = getPixel(t_color, 1, 1);
+			vec4 c3 = getPixel(t_color, 1, 0);
+		#endif
+		#if TEXTURES > 2
+			// primitiveId
+			uint i0 = getPixel(t_primitiveId, 0, 0).x;
+			uint i1 = getPixel(t_primitiveId, 0, 1).x;
+			uint i2 = getPixel(t_primitiveId, 1, 1).x;
+			uint i3 = getPixel(t_primitiveId, 1, 0).x;
 		#endif
 
-    //  build distance matrix
-    mat4 D; 
-    D[0] = vec4(0, distance(x0*x1.w, x1*x0.w), distance(x0*x2.w, x2*x0.w), distance(x0*x3.w, x3*x0.w));
-    D[1] = vec4(0, 0, distance(x1*x2.w, x2*x1.w), distance(x1*x3.w, x3*x1.w));
-    D[2] = vec4(0, 0, 0, distance(x2*x3.w, x3*x2.w));
-    //D[0] = vec4(0, distance(x0, x1), distance(x0, x2), distance(x0, x3));
-    //D[1] = vec4(0, 0, distance(x1, x2), distance(x1, x3));
-    //D[2] = vec4(0, 0, 0, distance(x2, x3));
-    D[3] = vec4(0);
+		// build distance matrix
+		mat4 D; 
+		D[0] = vec4(0, distance(p0*p1.w, p1*p0.w), distance(p0*p2.w, p2*p0.w), distance(p0*p3.w, p3*p0.w));
+		D[1] = vec4(0, 0, distance(p1*p2.w, p2*p1.w), distance(p1*p3.w, p3*p1.w));
+		D[2] = vec4(0, 0, 0, distance(p2*p3.w, p3*p2.w));
+		D[3] = vec4(0);
 
-    // sum up distances
-    vec4 d = (D + transpose(D)) * vec4(1);
-    
-    // invalidate 0-points
-    d = mix(vec4(3.402823466e+38), d, vec4(x0.w,x1.w,x2.w,x3.w));
+		// sum up distances
+		vec4 d = (D + transpose(D)) * vec4(1);
+		
+		// invalidate 0-points
+		d = mix(vec4(3.402823466e+38), d, vec4(p0.w,p1.w,p2.w,p3.w));
 
-    // take the medoid of the 4 points
-    vec4 m01 = mix(x1, x0, d.x < d.y);
-    vec4 m23 = mix(x3, x2, d.z < d.w);
-    result = mix(m23, m01, min(d.x,d.y) < min(d.z,d.w));
+		// take the medoid of the 4 points
+		{
+			vec4 m01 = mix(p1, p0, d.x < d.y);
+			vec4 m23 = mix(p3, p2, d.z < d.w);
+			outPosition = mix(m23, m01, min(d.x,d.y) < min(d.z,d.w));
+		}
 		
 		#if TEXTURES > 0
-	    vec4 m1_01 = mix(y1, y0, d.x < d.y);
-	    vec4 m1_23 = mix(y3, y2, d.z < d.w);
-	    result1 = mix(m1_23, m1_01, min(d.x,d.y) < min(d.z,d.w));
+		{
+			vec4 m01 = mix(n1, n0, d.x < d.y);
+			vec4 m23 = mix(n3, n2, d.z < d.w);
+			outNormal = mix(m23, m01, min(d.x,d.y) < min(d.z,d.w));
+		}
 		#endif
-    
+		
 		#if TEXTURES > 1
-	    //vec4 m2_01 = mix(z1, z0, d.x < d.y);
-	    //vec4 m2_23 = mix(z3, z2, d.z < d.w);
-	    //result2 = mix(m2_23, m2_01, min(d.x,d.y) < min(d.z,d.w));
-      float w2 = z0.w + z1.w + z2.w + z3.w;
-      result2 = (z0*z0.a + z1*z1.a + z2*z2.a + z3*z3.a) / mix(1, w2, w2 > 0);
+		{
+			float w2 = c0.w + c1.w + c2.w + c3.w;
+			outColor = (c0*c0.a + c1*c1.a + c2*c2.a + c3*c3.a) / mix(1, w2, w2 > 0);
+		}
 		#endif
-    // Take the point closest to the average
-    //vec4 avg = x0*x0.w + x1*x1.w + x2*x2.w + x3*x3.w;
-    //avg /= mix(1,avg.w,avg.w>0);
-    //vec4 closestA = mix(x1, x0, distance(x0,avg) < distance(x1,avg));
-    //vec4 closestB = mix(x3, x2, distance(x2,avg) < distance(x3,avg));
-    //result = mix(closestB, closestA, distance(closestA,avg) < distance(closestB,avg));
-  }
+		
+		#if TEXTURES > 2
+		{
+			uint m01 = mix(i1, i0, d.x < d.y);
+			uint m23 = mix(i3, i2, d.z < d.w);
+			outPrimitiveId = mix(m23, m01, min(d.x,d.y) < min(d.z,d.w));
+		}
+		#endif
+		
+	}
 #endif

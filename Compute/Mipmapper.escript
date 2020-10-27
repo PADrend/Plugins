@@ -46,6 +46,7 @@ T.build ::= fn() {
 
 // ----------------------------------------
 
+// textures must be in this order: position, normal, color, primitiveId
 T.generate ::= fn(minLevel, maxLevel, textures...) {
 	build();
 	var vp = new Geometry.Rect(0,0,textures[0].getWidth()/2.pow(minLevel), textures[0].getHeight()/2.pow(minLevel));
