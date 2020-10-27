@@ -24,6 +24,24 @@ static typeMap = {
 	Util.TypeConstant.DOUBLE  : "double",
 };
 
+static invalidMaxMap = {
+	"uint"			: "0xffffffffu",
+	"uint64_t"	: "0xfffffffffffffffful",
+	"int"				: "0x7fffffffu",
+	"int64_t"		: "0x7fffffffffffffffl",
+	"float"			: "3.402823466e+38",
+	"double"		: "1.7976931348623158e+308",
+};
+
+static invalidMinMap = {
+	"uint"			: "0",
+	"uint64_t"	: "0",
+	"int"				: "0xffffffff",
+	"int64_t"		: "0xffffffffffffffffl",
+	"float"			: "-3.402823466e+38",
+	"double"		: "-1.7976931348623158e+308",
+};
+
 var T = new Type();
 T._printableName @(override) := $Sorter;
 
@@ -117,6 +135,11 @@ T.build ::= fn() {
 		"IN_VALUE_BINDING": this.bindingOffset + 4,
 		"OUT_VALUE_BINDING": this.bindingOffset + 5,
 	};
+	var invalidKey = sortAscending ? invalidMaxMap[keyType] : invalidMinMap[keyType];
+	if(invalidKey) {
+		defines["INVALID_KEY"] = invalidKey;
+	}
+	
 	program = Rendering.Shader.createComputeFromFile(__DIR__ + "/shader/radix_sort.sfn", defines);
 	// compile program
 	renderingContext.pushAndSetShader(program);

@@ -92,6 +92,7 @@
 }
 #define readUVec4(src, off) uvec4(src[(off).x], src[(off).y], src[(off).z], src[(off).w])
 #define writeUVec4(tgt, off, val) {tgt[(off).x] = val.x; tgt[(off).y] = val.y; tgt[(off).z] = val.z; tgt[(off).w] = val.w;}
+#define invalidateUVec4(tgt, off) {tgt[(off).x] = INVALID_KEY; tgt[(off).y] = INVALID_KEY; tgt[(off).z] = INVALID_KEY; tgt[(off).w] = INVALID_KEY;}
 #define read4(src, off) {src[(off).x], src[(off).y], src[(off).z], src[(off).w]}
 
 #if SORT_ASCENDING == 1
@@ -253,7 +254,7 @@ void sortBlock(uint startBit, uint endBit) {
 //! Sort each block in on-chip memory according to the i-th digit using the split primitive
 PHASE(0) void localSort() {
 	const uvec4 gOff = gId + uvec4(elementRange.x);
-	writeUVec4(localKeys, lId, uvec4(INVALID_KEY));
+	invalidateUVec4(localKeys, lId);
 	copy4Valid(inKeys, localKeys, gOff, lId, uvec4(elementRange.y));
 	#ifdef USE_VALUE_BUFFER
 		copy4Valid(inValues, localValues, gOff, lId, uvec4(elementRange.y));
@@ -271,7 +272,7 @@ PHASE(0) void localSort() {
 //! Compute offsets for each of the r buckets, storing them to global memory in column-major order
 PHASE(1) void computeHistogramAndOffsets() {
 	const uvec4 gOff = gId + uvec4(elementRange.x);
-	writeUVec4(localKeys, lId, uvec4(INVALID_KEY));
+	invalidateUVec4(localKeys, lId);
 	copy4Valid(inKeys, localKeys, gOff, lId, uvec4(elementRange.y));
 	
 	// add auxiliary key to end of array that always differs
@@ -346,7 +347,7 @@ PHASE(3) void scanBlock() {
 //! prefix sum results and scatter the elements to their computed locations
 PHASE(4) void scatter() {
 	const uvec4 gOff = gId + uvec4(elementRange.x);
-	writeUVec4(localKeys, lId, uvec4(INVALID_KEY));
+	invalidateUVec4(localKeys, lId);
 	copy4Valid(inKeys, localKeys, gOff, lId, uvec4(elementRange.y));
 	#ifdef USE_VALUE_BUFFER
 		const VALUE_TYPE value[KEYS_PER_THREAD] = read4(inValues, gOff);
