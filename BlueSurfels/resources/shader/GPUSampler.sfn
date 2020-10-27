@@ -30,6 +30,9 @@ struct Vertex {
 	float z;
 	uint normal;
 	uint color;
+#ifdef PRIMITIVE_IDS
+	uint primitiveId;
+#endif
 };
 
 // buffers
@@ -66,6 +69,9 @@ layout(binding = 2) uniform sampler2DArray t_color;
 layout(binding = 3) uniform usampler2DArray t_voronoiSite;
 layout(binding = 4) uniform sampler2DArray t_distance;
 layout(binding = 5) uniform usampler2DArray t_poisson;
+#ifdef PRIMITIVE_IDS
+layout(binding = 6) uniform usampler2DArray t_primitiveId;
+#endif
 
 // =====================================================================
 #ifndef EXTRACT_MAX
@@ -473,6 +479,10 @@ KERNEL(6) void copyMesh() {
 	vertices[gId].z = position.z;
 	vertices[gId].normal = packSnorm4x8(normal);    
 	vertices[gId].color = packUnorm4x8(color);
+	
+	#ifdef PRIMITIVE_IDS
+	vertices[gId].primitiveId = texelFetch(t_primitiveId, coord.xyz, coord.w).x;
+	#endif
 }
 
 // ---------------------------------------------------

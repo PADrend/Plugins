@@ -78,7 +78,7 @@ T.setAdaptiveSamples @(public) ::= fn(Bool v) {  if(adaptiveSamples != v) dirty 
 T.getAdaptiveSamples @(public) ::= fn() { return adaptiveSamples; };
 
 T.geodesic @(private) := false;
-T.setGeodesic @(public) ::= fn(Bool v) {  if(geodesic != v) dirty = true; geodesic = v; return this; };
+T.setGeodesic @(public) ::= fn(Bool v) { if(geodesic != v) dirty = true; geodesic = v; return this; };
 T.getGeodesic @(public) ::= fn() { return geodesic; };
 
 T.peelingLayers @(private) := 1;
@@ -92,6 +92,10 @@ T.getRadiusFactor @(public) ::= fn() { return radiusFactor; };
 T.autodetect @(private) := false;
 T.setAutodetect @(public) ::= fn(Bool v) { autodetect = v; return this; };
 T.getAutodetect @(public) ::= fn() { return autodetect; };
+
+T.usePrimitiveIds @(private) := false;
+T.setUsePrimitiveIds @(public) ::= fn(Bool v) { if(usePrimitiveIds != v) dirty = true; usePrimitiveIds = v; return this; };
+T.getUsePrimitiveIds @(public) ::= fn() { return usePrimitiveIds; };
 
 T.directions @(private,init) := fn() {
 	return [
@@ -144,7 +148,7 @@ T.pushState @(private) ::= fn() {
 	renderingContext.pushScissor();
 	renderingContext.pushDepthBuffer();
 	renderingContext.pushColorBuffer();
-	for(var i=0; i<6; ++i) renderingContext.pushTexture(i);
+	for(var i=0; i<7; ++i) renderingContext.pushTexture(i);
 	if(debugLevel >= 4) Rendering.startCapture();
 	beginProfile('Total', 1);
 };
@@ -162,7 +166,7 @@ T.popState @(private) ::= fn() {
 	renderingContext.popScissor();
 	renderingContext.popDepthBuffer();
 	renderingContext.popColorBuffer();
-	for(var i=0; i<6; ++i) renderingContext.popTexture(i);
+	for(var i=0; i<7; ++i) renderingContext.popTexture(i);
 	for(var i=0; i<BINDING_OFFSET; ++i) renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, i);
 	renderingContext.unbindBuffer(Rendering.TARGET_UNIFORM_BUFFER, 0);
 	if(debugLevel >= 4) Rendering.endCapture();
@@ -178,6 +182,8 @@ T.initialize @(public) ::= fn() {
 	if(!dirty)
 		return true;
 	dirty = false;
+	if(peelingLayers > 1)
+		usePrimitiveIds = false;
 		
 	beginProfile('Setup', 1);
 	
@@ -193,6 +199,8 @@ T.initialize @(public) ::= fn() {
 	this.rasterizer.setMipMapping(true);
 	if(peelingLayers > 1)
 		this.rasterizer.setPeelLayers(peelingLayers);
+	if(usePrimitiveIds)
+		this.rasterizer.enablePrimitiveIds(true);
 	this.rasterizer.initialize();
 	var layers = this.rasterizer.getTextureLayers();
 	
@@ -210,6 +218,9 @@ T.initialize @(public) ::= fn() {
 	
 	if(geodesic)
 		defines['GEODESIC'] = 1;
+
+	if(usePrimitiveIds)
+		defines['PRIMITIVE_IDS'] = 1;
 	
 	this.voronoi_shader := Rendering.Shader.createGeometryFromFile(__DIR__ + "/../resources/shader/GPUSampler.sfn", merge(defines, {'VORONOI_MODE':1}));
 	this.poisson_shader := Rendering.Shader.createGeometryFromFile(__DIR__ + "/../resources/shader/GPUSampler.sfn", merge(defines, {'POISSON_MODE':1}));
@@ -236,6 +247,7 @@ T.initialize @(public) ::= fn() {
 	this.t_color := void;
 	this.t_position := void;
 	this.t_normal := void;
+	this.t_primitiveId := void;
 		
 	this.t_voronoiDist := Rendering.createDepthTexture(maxResolution, maxResolution, layers);
 	this.t_poissonRad := Rendering.createDepthTexture(maxResolution, maxResolution, layers);
@@ -309,7 +321,7 @@ T.initialize @(public) ::= fn() {
 	// mipmapper
 	this.mipmapper := new Mipmapper;
 	mipmapper.layers = layers;
-	mipmapper.textureCount = 3;
+	mipmapper.textureCount = usePrimitiveIds ? 4 : 3;
 	mipmapper.build();
 	
 	endProfile(1);
@@ -385,7 +397,12 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 	// render scene from multiple directions
 	beginProfile('Render', 1);
 	[t_depth, t_color, t_position, t_normal] = rasterizer.rasterize(node);
-	mipmapper.generate(minLevel, maxLevel, t_position, t_normal, t_color);
+	if(usePrimitiveIds) {
+		t_primitiveId = rasterizer.getPrimitiveIdBuffer();
+		mipmapper.generate(minLevel, maxLevel, t_position, t_normal, t_color, t_primitiveId);
+	} else {
+		mipmapper.generate(minLevel, maxLevel, t_position, t_normal, t_color);
+	}
 	
 	// bind textures
 	rc.setTexture(0, t_position);
@@ -394,6 +411,9 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 	rc.setTexture(3, t_voronoi);
 	rc.setTexture(4, t_voronoiDist);
 	rc.setTexture(5, t_poisson);
+	if(usePrimitiveIds) {
+		rc.setTexture(6, t_primitiveId);
+	}
 		
 	// update fbo
 	rc.setFBO(sampleFBO);
@@ -571,6 +591,9 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 	
 	// surfel mesh
 	var surfelFormat = (new Rendering.VertexDescription).appendPosition3D().appendNormalByte().appendColorRGBAByte();
+	if(usePrimitiveIds) {
+		surfelFormat.appendUnsignedIntAttribute($primitiveId, 1, false);
+	}
 	var surfelMesh = (new Rendering.Mesh(surfelFormat, sampleCount, 0)).setDrawPoints().setUseIndexData(false).allocateGLData().releaseLocalData();
 	rc.bindBuffer(surfelMesh, Rendering.TARGET_SHADER_STORAGE_BUFFER, 2);
 	
@@ -723,6 +746,13 @@ SurfelGUI.registerSamplerGUI(T, fn(sampler) {
 			GUI.TYPE : GUI.TYPE_BOOL,
 			GUI.LABEL : "Geodesic",
 			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('gpusampler.geodesic', false, sampler->sampler.setGeodesic),
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
+		},
+		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
+		{
+			GUI.TYPE : GUI.TYPE_BOOL,
+			GUI.LABEL : "Store Primitive Ids",
+			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('gpusampler.usePrimitiveIds', false, sampler->sampler.setUsePrimitiveIds),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 		},
 		{ GUI.TYPE : GUI.TYPE_NEXT_ROW },
