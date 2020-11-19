@@ -102,7 +102,7 @@ PADrend.SystemUI.init @(override) := fn(){
 	{
 		out("Creating Rendering Context".fillUp(40));
 
-		var validationLayers = systemConfig.getValue('PADrend.Rendering.validationLayers',[]);
+		var validationLayers = systemConfig.getValue('PADrend.Rendering.validationLayers',['VK_LAYER_KHRONOS_validation']);
 		GLOBALS.device = new Rendering.Device(window, validationLayers);
 
 		registerExtension('PADrend_Exit', fn(){
