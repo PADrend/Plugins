@@ -16,6 +16,9 @@ T.fileLocator @(private, init) := fn() { return (new Util.FileLocator).setSearch
       "./build/",
       "./bin/",
       "./lib/",
+      "./build/Release/",
+      "./build/RelWithDebInfo/",
+      "./build/Debug/",
       "/usr/lib/",
       "/usr/local/lib/",
       "C:/Program Files (x86)/PADrendComplete/bin",
@@ -44,6 +47,9 @@ T.addSearchPath ::= fn(path) {
 T.loadLibary ::= fn(name) {
   var fileName = name + osExtension;
   var lib = fileLocator.locateFile(fileName);
+  if(!lib) {
+    lib = fileLocator.locateFile("lib" + fileName);
+  }
   if(!lib) {
     outln("Could not find library: ", fileName);
     return false;
