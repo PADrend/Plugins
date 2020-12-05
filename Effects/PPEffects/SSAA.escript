@@ -30,7 +30,7 @@ Effect._constructor:=fn(){
 	out(fbo.getStatusMessage(renderingContext),"\n");
 	renderingContext.popFBO();
 	
-	this.shader1:=Rendering.Shader.loadShader(getShaderFolder()+"LumaToAlpha.fs",getShaderFolder()+"LumaToAlpha.fs");
+	this.shader1:=Rendering.Shader.loadShader(getShaderFolder()+"Default.vs",getShaderFolder()+"LumaToAlpha.fs");
 	shader1.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]) ;
 //	shader1.setUniform(renderingContext,'TDepth',Rendering.Uniform.INT,[1]) ;
 
