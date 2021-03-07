@@ -389,7 +389,7 @@ SceneManagement.registerLoader := fn(loaderFn, Array extensions) {
 
 SceneManagement.getFileExtensions := fn() {
 	var extensions = new Std.Set;
-	extensions.merge([".minsg", ".dae", ".DAE"]);
+	extensions.merge([".minsg", ".dae", ".DAE", ".gltf", ".glb"]);
 	foreach(registeredLoaders as var entry) {
 		extensions.merge(entry[1]);
 	}
