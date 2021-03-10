@@ -218,8 +218,13 @@ static createEnvState = fn(){
 	var envState = new MinSG.EnvironmentState;
 
 	// create sky dome
+	var vd = new Rendering.VertexDescription;
+	vd.appendPosition3D();
+	vd.appendNormalFloat();
+	vd.appendColorRGBAByte();
+	vd.appendTexCoord();
 	var dome = new MinSG.GeometryNode;
-	dome.setMesh(Rendering.MeshBuilder.createDome(100,40,40,1));
+	dome.setMesh(Rendering.createDome(vd, 100,40,40,1));
 	
 	var s = new MinSG.ScriptedState;
 	s.doEnableState @(override) := fn(node, rp) {

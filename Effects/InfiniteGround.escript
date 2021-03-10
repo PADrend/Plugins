@@ -147,7 +147,12 @@ static getDomeNode = fn(){
 	static dome;
 	if(!dome){
 		dome = new MinSG.GeometryNode;
-		dome.setMesh(Rendering.MeshBuilder.createDome(100,40,40,1));
+		var vd = new Rendering.VertexDescription;
+		vd.appendPosition3D();
+		vd.appendNormalFloat();
+		vd.appendColorRGBAByte();
+		vd.appendTexCoord();
+		dome.setMesh(Rendering.createDome(vd, 100,40,40,1));
 
 		var updatePositionState = new MinSG.ScriptedState;
 		updatePositionState.doEnableState @(override) := fn(node, rp) {
