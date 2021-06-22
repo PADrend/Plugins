@@ -225,6 +225,7 @@ static createEnvState = fn(){
 	vd.appendTexCoord();
 	var dome = new MinSG.GeometryNode;
 	dome.setMesh(Rendering.createDome(vd, 100,40,40,1));
+	dome.setRenderingLayers(0x81); // layers 1 & 7
 	
 	var s = new MinSG.ScriptedState;
 	s.doEnableState @(override) := fn(node, rp) {
@@ -235,6 +236,7 @@ static createEnvState = fn(){
 	};
 	dome += s;
 	envState.setEnvironment(dome);
+	envState.setRenderingLayers(0x81); // layers 1 & 7
 	dome.moveRel(0,-0.2,0); // move a little bit downward to reduce the possibly visible seam on the border to the floot
 
 	var resourcesFolder = __DIR__+"/resources/DynamicSky";
@@ -242,9 +244,11 @@ static createEnvState = fn(){
 	// load textures
 	var tn1 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/dynamic_sky1.bmp"));
 	tn1.setTextureUnit(0);
+	tn1.setRenderingLayers(0x81); // layers 1 & 7
 	dome += tn1;
 	var tn2 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/dynamic_sky_normal.bmp"));
 	tn2.setTextureUnit(1);
+	tn2.setRenderingLayers(0x81); // layers 1 & 7
 	dome += tn2;
 
 	// load Shader
@@ -253,6 +257,7 @@ static createEnvState = fn(){
 	dome += skyShaderState;
 	skyShaderState.setUniform(new Rendering.Uniform('ColorMap',Rendering.Uniform.INT,[0]));
 	skyShaderState.setUniform(new Rendering.Uniform('BumpMap',Rendering.Uniform.INT,[1]));
+	skyShaderState.setRenderingLayers(0x81); // layers 1 & 7
 
 	return envState;
 };
