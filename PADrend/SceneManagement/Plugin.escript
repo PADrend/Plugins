@@ -148,6 +148,7 @@ SceneManagement.ex_Init := fn(...){
 	{  // Create Scene
 		rootNode = new MinSG.ListNode;
 		getRootNode().name := "RootNode";
+		getRootNode().setRenderingLayers(0xff);
 
 		systemConfig.setInfo('PADrend.sun',"Global directional light source.");
 		if(systemConfig.getValue('PADrend.sun.enabled',true)){
