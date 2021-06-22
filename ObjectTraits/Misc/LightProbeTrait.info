@@ -1,0 +1,6 @@
+{
+	"moduleId" : "ObjectTraits/Misc/LightProbeTrait",
+	"aliases" : ["ObjectTraits/LightProbeTrait"],
+	"description" : "Automatically create an environment map for IBL.",
+	"displayName" : "Misc/LightProbe"
+}

@@ -1,0 +1,5 @@
+{
+	"moduleId" : "./LightProbe",
+	"description" : "Node to automatically create an environment map for IBL (layer #2)",
+	"displayName" : "Fx/LightProbe"
+}
