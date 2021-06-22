@@ -1,0 +1,101 @@
+#version 330
+
+/*
+ * This file is part of the open source part of the
+ * Platform for Algorithm Development and Rendering (PADrend).
+ * Web page: http://www.padrend.de/
+ * Copyright (C) 2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * 
+ * PADrend consists of an open source part and a proprietary part.
+ * The open source part of PADrend is subject to the terms of the Mozilla
+ * Public License, v. 2.0. You should have received a copy of the MPL along
+ * with this library; see the file LICENSE. If not, you can obtain one at
+ * http://mozilla.org/MPL/2.0/.
+ */
+
+// ------------------------------------------------------------------------
+// vs
+#ifdef SG_VERTEX_SHADER
+
+struct VertexProperties {
+	vec3 position_cs, normal_cs;
+	float pointSize;
+};
+
+//! \see main.sfn
+void provideLightingVars(in VertexProperties vec){}
+
+#endif
+
+// ------------------------------------------------------------------------
+// fs
+#ifdef SG_FRAGMENT_SHADER
+
+struct CompositeColor {
+	vec4 ambient, diffuse, specular;
+};
+
+struct SurfaceProperties {
+	vec3 position_cs, normal_cs, tangent_cs;
+	vec4 ambient, diffuse, specular, emission;
+	float shininess;
+};
+
+uniform samplerCube sg_irradianceMap;
+uniform samplerCube sg_prefilteredEnvMap;
+uniform sampler2D sg_brdfLUT;
+
+//! \see sgHelper.sfn
+void sg_addLight(in int sgLightNr,in vec3 position_cs, in vec3 normal_cs, in float shininess, inout CompositeColor lightSum);	
+int sg_getLightCount();		//! \see sgHelper.sfn
+
+vec4 sg_cameraToWorld(in vec4 hcs);
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
+}
+
+//! \see main.sfn
+void calcLighting(in SurfaceProperties surface, out CompositeColor color){
+	CompositeColor lightSum;
+	lightSum.ambient = vec4(0.0);
+	lightSum.diffuse = vec4(0.0);
+	lightSum.specular = vec4(0.0);
+
+	int lightCount = sg_getLightCount();
+
+	for(int i = 0; i < 8; i++){
+		if( i >= lightCount )
+			break;
+		sg_addLight(i,surface.position_cs, surface.normal_cs, surface.shininess, lightSum);
+	}
+
+	lightSum.ambient.a = lightSum.diffuse.a = lightSum.specular.a = 1.0;
+
+	vec3 reflected_cs = normalize(reflect(surface.position_cs, surface.normal_cs));
+	vec3 normal_ws = sg_cameraToWorld(vec4(surface.normal_cs, 0.0)).xyz;
+	vec3 reflected_ws = sg_cameraToWorld(vec4(reflected_cs, 0.0)).xyz;
+	float roughness = 1.0 - surface.shininess / 128.0;
+	float metallic = surface.specular.x;
+
+	float NdotV = max(dot(surface.normal_cs, surface.position_cs), 0.0);
+	vec3 F0 = mix(vec3(0.04), surface.diffuse.rgb, metallic);
+	vec3 kS = fresnelSchlickRoughness(NdotV, F0, roughness);
+	vec3 kD = 1.0 - kS;
+	kD *= 1.0 - metallic;
+
+	vec3 irradiance = texture(sg_irradianceMap, normal_ws).rgb;
+	vec3 diffuse = irradiance * surface.diffuse.rgb;
+  
+	const float MAX_REFLECTION_LOD = 4.0;
+	vec3 prefilteredColor = textureLod(sg_prefilteredEnvMap, reflected_ws, roughness * MAX_REFLECTION_LOD).rgb;
+	vec2 envBRDF = texture(sg_brdfLUT, vec2(NdotV, roughness)).rg;
+	vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
+
+	color.diffuse = vec4(diffuse, 0.0) + surface.diffuse * lightSum.diffuse + surface.emission;
+	color.ambient = vec4(kD * diffuse + specular, 1.0) * surface.ambient;
+	color.specular = vec4(specular, 1.0) + surface.specular * lightSum.specular;
+}
+
+#endif
+// ------------------

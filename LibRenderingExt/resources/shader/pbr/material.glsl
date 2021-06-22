@@ -16,78 +16,84 @@
 #include "structs.glsl"
 #include "brdf.glsl"
 
-#define ALPHA_MODE_OPAQUE 0
-#define ALPHA_MODE_MASK 1
-#define ALPHA_MODE_BLEND 2
-
 // The default index of refraction of 1.5 yields a dielectric normal incidence reflectance of 0.04.
 const float ior = 1.5;
 const float f0_ior = 0.04;
 
 uniform vec4 sg_pbrBaseColorFactor;
-uniform bool sg_pbrHasBaseColorTexture;
+#ifdef HAS_BASECOLOR_TEXTURE
 uniform int sg_pbrBaseColorTexCoord;
-uniform bool sg_pbrHasMetallicRoughnessTexture;
-uniform int sg_pbrMetallicRoughnessTexCoord;
+layout(binding=BASECOLOR_TEXUNIT) uniform sampler2D sg_baseColorTexture;
+#endif
+
 uniform float sg_pbrMetallicFactor;
 uniform float sg_pbrRoughnessFactor;
-uniform bool sg_pbrHasNormalTexture;
-uniform int sg_pbrNormalTexCoord;
-uniform float sg_pbrNormalScale;
-uniform bool sg_pbrHasOcclusionTexture;
-uniform int sg_pbrOcclusionTexCoord;
-uniform float sg_pbrOcclusionStrength;
-uniform vec3 sg_pbrEmissiveFactor;
-uniform bool sg_pbrHasEmissiveTexture;
-uniform int sg_pbrEmissiveTexCoord;
-uniform bool sg_pbrDoubleSided;
-uniform int sg_pbrAlphaMode;
-uniform float sg_pbrAlphaCutoff;
+#ifdef HAS_METALLICROUGHNESS_TEXTURE
+uniform int sg_pbrMetallicRoughnessTexCoord;
+layout(binding=METALLICROUGHNESS_TEXUNIT) uniform sampler2D sg_metallicRoughnessTexture;
+#endif
 
-layout(binding=0) uniform sampler2D sg_baseColorTexture;
-layout(binding=1) uniform sampler2D sg_metallicRoughnessTexture;
-layout(binding=2) uniform sampler2D sg_normalTexture;
-layout(binding=3) uniform sampler2D sg_occlusionTexture;
-layout(binding=4) uniform sampler2D sg_emissiveTexture;
+uniform float sg_pbrNormalScale;
+uniform int sg_pbrNormalTexCoord;
+#ifdef HAS_NORMAL_TEXTURE
+layout(binding=NORMAL_TEXUNIT) uniform sampler2D sg_normalTexture;
+#endif
+
+uniform float sg_pbrOcclusionStrength;
+#ifdef HAS_OCCLUSION_TEXTURE
+uniform int sg_pbrOcclusionTexCoord;
+layout(binding=OCCLUSION_TEXUNIT) uniform sampler2D sg_occlusionTexture;
+#endif
+
+uniform vec3 sg_pbrEmissiveFactor;
+#ifdef HAS_EMISSIVE_TEXTURE
+uniform int sg_pbrEmissiveTexCoord;
+layout(binding=EMISSIVE_TEXUNIT) uniform sampler2D sg_emissiveTexture;
+#endif
+
+#ifdef ALPHA_MODE_MASK
+uniform float sg_pbrAlphaCutoff;
+#endif
 
 vec4 getBaseColor(in VertexData vertex) {
 	vec4 baseColor = sg_pbrBaseColorFactor;
-	if(sg_pbrHasBaseColorTexture) {
+	#ifdef HAS_BASECOLOR_TEXTURE
 		vec2 uv = sg_pbrBaseColorTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
 		baseColor *= texture(sg_baseColorTexture, uv);
-	}
+	#endif
 	baseColor *= vertex.color;
 	
-	if(sg_pbrAlphaMode == ALPHA_MODE_OPAQUE) {
+	#ifdef ALPHA_MODE_OPAQUE
 		baseColor.a = 1.0;
-	}
+	#endif
+	
 	return baseColor;
 }
 
 vec2 getMetallicRoughness(in VertexData vertex) {
 	vec2 metallicRoughness = vec2(sg_pbrMetallicFactor, sg_pbrRoughnessFactor);
-	if(sg_pbrHasBaseColorTexture) {
+	#ifdef HAS_METALLICROUGHNESS_TEXTURE
 		vec2 uv = sg_pbrBaseColorTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
 		metallicRoughness *= texture(sg_metallicRoughnessTexture, uv).bg;
-	}
+	#endif
 	return metallicRoughness;
 }
 
 float getOcclusion(in VertexData vertex) {
-	float occlusion = sg_pbrOcclusionStrength;
-	if(sg_pbrHasOcclusionTexture) {
+	float occlusion = 1.0;
+	#ifdef HAS_OCCLUSION_TEXTURE
 		vec2 uv = sg_pbrOcclusionTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
-		occlusion *= texture(sg_occlusionTexture, uv).r;
-	}
+		occlusion = mix(1.0, texture(sg_occlusionTexture, uv).r, sg_pbrOcclusionStrength);
+	#endif
 	return occlusion;
 }
 
 vec3 getEmissive(in VertexData vertex) {
 	vec3 emissive = sg_pbrEmissiveFactor;
-	if(sg_pbrHasEmissiveTexture) {
+	#ifdef HAS_EMISSIVE_TEXTURE
 		vec2 uv = sg_pbrEmissiveTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
 		emissive *= texture(sg_emissiveTexture, uv).rgb;
-	}
+	#endif
 	return emissive;
 }
 

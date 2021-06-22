@@ -60,11 +60,11 @@ LightSample evalLight(in SurfaceSample surface, in sg_LightSourceParameters ligh
 		}
 	}
 	
-	vec3 H = normalize(normalize(-surface.position) + L);
+	vec3 H = normalize(normalize(surface.view) + L);
 	ls.NdotL = clamp(dot(surface.normal, L), 0.0, 1.0);
 	ls.NdotH = clamp(dot(surface.normal, H), 0.0, 1.0);
 	ls.LdotH = clamp(dot(L, H), 0.0, 1.0);
-	ls.VdotH = clamp(dot(-surface.position, H), 0.0, 1.0);
+	ls.VdotH = clamp(dot(surface.view, H), 0.0, 1.0);
 	//ls.intensity = light.ambient + light.diffuse * falloff;
 	ls.intensity = light.diffuse.rgb * falloff;
 	ls.ambient = light.ambient.rgb;

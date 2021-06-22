@@ -252,6 +252,18 @@ m["[ext] Strange renderer"] = new MinSG.StrangeExampleRenderer;
 if(MinSG.isSet($TreeVisualization))
 	m["[ext] TreeVisualization"] = fn() { return new MinSG.TreeVisualization; };
 
+m["[ext] IBL Environment State"] = fn() {
+	var state = new MinSG.IBLEnvironmentState;
+	var defaultFile = PADrend.getSceneManager().getFileLocator().locateFile("texture/autumn_park_4k.hdr");
+	state.loadEnvironmentMapFromHDR(defaultFile);
+	return state;
+};
+
+m["[ext] PBR Material"] = fn() {
+	var state = new MinSG.PbrMaterialState;
+	state.setSearchPaths(PADrend.getSceneManager().getFileLocator());
+	return state;
+};
 
 return m;
 // ---------------------------------------------------------------------------------------------

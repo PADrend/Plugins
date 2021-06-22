@@ -11,9 +11,12 @@
 	with this library; see the file LICENSE. If not, you can obtain one at
 	http://mozilla.org/MPL/2.0/.
 */
+#include "skin.glsl"
 
 uniform mat4 sg_matrix_modelToCamera;
 uniform mat4 sg_matrix_modelToClipping;
+uniform mat4 sg_matrix_cameraToWorld;
+uniform mat4 sg_shadowMatrix;
 
 in vec3 sg_Position;
 in vec3 sg_Normal;
@@ -22,18 +25,24 @@ in vec2 sg_TexCoord0;
 in vec2 sg_TexCoord1;
 
 out VertexInterface {
-	vec3 position;
+	vec4 position;
 	vec3 normal;
 	vec4 color;
 	vec2 texCoord0;
 	vec2 texCoord1;
+	vec4 shadowCoord;
+	vec4 camera;
 } vsOut;
 
 void main() {
-	vsOut.position = (sg_matrix_modelToCamera * vec4(sg_Position, 1.0)).xyz;
-	vsOut.normal = (sg_matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+	vec4 skinnedPos = applySkinning(vec4(sg_Position, 1.0));
+	vec4 skinnedNrm = applySkinning(vec4(sg_Normal, 0.0));
+	vsOut.position = ( sg_matrix_modelToCamera * skinnedPos);
+	vsOut.normal = ( sg_matrix_modelToCamera * skinnedNrm).xyz;
+	vsOut.camera = ( vec4(0.0, 0.0, 0.0, 1.0));
 	vsOut.color = sg_Color;
 	vsOut.texCoord0 = sg_TexCoord0;
 	vsOut.texCoord1 = sg_TexCoord1;
-	gl_Position = sg_matrix_modelToClipping * vec4(sg_Position, 1.0);
+	vsOut.shadowCoord = sg_shadowMatrix * sg_matrix_cameraToWorld * sg_matrix_modelToCamera * skinnedPos;
+	gl_Position = sg_matrix_modelToClipping * skinnedPos;
 }

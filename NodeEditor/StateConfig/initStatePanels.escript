@@ -20,6 +20,8 @@
  **/
 static CONFIG_PREFIX = 'NodeEditor_ObjConfig_';
  
+static RefreshableContainerTrait = Std.module('LibGUIExt/Traits/RefreshableContainerTrait');
+
 static getBaseTypeEntries = fn( obj, baseType=void ){
 	return	gui.createComponents( {	
 		GUI.TYPE 		: 	GUI.TYPE_COMPONENTS, 
@@ -1737,8 +1739,6 @@ gui.register(CONFIG_PREFIX + MinSG.TextureState, fn(MinSG.TextureState state) {
 					texture.createMipmaps(renderingContext);
 				outln(" done (", texture, ").");
 			}
-			//! \see RefreshableContainerTrait
-			@(once) static RefreshableContainerTrait = Std.module('LibGUIExt/Traits/RefreshableContainerTrait');
 			RefreshableContainerTrait.refreshContainer( this );
 		}
 	};
@@ -1888,5 +1888,439 @@ gui.register(CONFIG_PREFIX + MinSG.TwinPartitionsRenderer, fn(MinSG.TwinPartitio
 });
 
 // --------------------------------------------------------------------------
+
+/*! IBLEnvironmentState	*/
+gui.register(CONFIG_PREFIX + MinSG.IBLEnvironmentState, fn(MinSG.IBLEnvironmentState state) {
+	var entries = getBaseTypeEntries(state);
+	entries += "*IBL Environtment State:*";
+	entries += GUI.NEXT_ROW;
+
+	var textureFile = new Std.DataWrapper("");
+	textureFile(state.getHdrFile().toString());
+	textureFile.onDataChanged += [state] => fn(MinSG.TextureState state, data) {
+		state.loadEnvironmentMapFromHDR(new Util.FileName(data));
+	};
+
+	var texture = state.getEnvironmentMap();
+	if(texture) {
+		var irrTexture = state.getIrradianceMap();
+		var preTexture = state.getPrefilteredEnvMap();
+		var brdfTexture = state.getBrdfLUT();
+		entries+='----';
+		entries += GUI.NEXT_ROW;
+		entries += "*Texture info:*";
+		entries += GUI.NEXT_ROW;
+		entries += "File: "+ (texture.getFileName().toString().empty() ? "[embedded]" : texture.getFileName().toString());
+		entries += GUI.NEXT_ROW;
+		entries += {
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Show Environment Map",
+			GUI.ON_CLICK : [texture] => Rendering.showDebugTexture,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 10, 0]
+		};
+		entries += GUI.NEXT_ROW;
+		entries += {
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Show Irradiance Map",
+			GUI.ON_CLICK : [irrTexture] => Rendering.showDebugTexture,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 10, 0]
+		};
+		entries += GUI.NEXT_ROW;
+		entries += {
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Show Prefiltered Env Map",
+			GUI.ON_CLICK : [preTexture] => Rendering.showDebugTexture,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 10, 0]
+		};
+		entries += GUI.NEXT_ROW;
+		entries += {
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "Show BRDF LUT",
+			GUI.ON_CLICK : [brdfTexture] => Rendering.showDebugTexture,
+			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 10, 0]
+		};
+		entries += GUI.NEXT_ROW;
+	}
+	entries+='----';
+	entries += GUI.NEXT_ROW;
+	entries += {
+		GUI.TYPE			:	GUI.TYPE_FILE,
+		GUI.LABEL			:	"Texture file:",
+		GUI.DATA_WRAPPER	:	textureFile,
+		GUI.ENDINGS			:	[".hdr"],
+		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
+	};
+	entries += GUI.NEXT_ROW;
+	entries += {
+		GUI.TYPE : GUI.TYPE_RANGE,
+		GUI.LABEL : "LOD",
+		GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(state->state.getLOD, state->state.setLOD),
+		GUI.RANGE : [0,10],
+		GUI.RANGE_STEP_SIZE : 0.1,
+	};
+	entries += GUI.NEXT_ROW;
+	entries += {
+		GUI.TYPE : GUI.TYPE_BOOL,
+		GUI.LABEL : "display environment map",
+		GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(state->state.isDrawEnvironmentEnabled, state->state.setDrawEnvironment),
+	};
+	entries += GUI.NEXT_ROW;
+	/*entries += {
+		GUI.TYPE : GUI.TYPE_BUTTON,
+		GUI.LABEL : "Generate from scene",
+		GUI.ON_CLICK : [state] => fn(state) {
+			state.generateFromScene(frameContext, PADrend.getRootNode());
+		},
+		GUI.SIZE : [GUI.WIDTH_FILL_ABS, 10, 0]
+	};
+	entries += GUI.NEXT_ROW;*/
+	return entries;
+});
+
+// ----
+
+static createTexturePanel = fn(getTexture, setTexture, getTexCoord, setTexCoord, refreshGroup) {
+
+	var textureFile = new Std.DataWrapper("");
+	if(getTexture()) {
+		var file = getTexture().getFileName().toString();
+		textureFile(file.empty() ? "[embedded]" : file);
+	}
+	textureFile.onDataChanged += [getTexture] => fn(getTexture, data) {
+		if(getTexture()) {
+			getTexture().setFileName(new Util.FileName(data));
+		}
+	};
+
+	var panel = gui.create({
+		GUI.TYPE								: GUI.TYPE_CONTAINER,
+		GUI.LAYOUT							: GUI.LAYOUT_FLOW,
+		GUI.FLAGS								: GUI.RAISED_BORDER,
+		GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_FILL_ABS, 1, 4],
+	});
+
+	panel += {
+		GUI.TYPE								: GUI.TYPE_FILE,
+		GUI.LABEL								: "Texture",
+		GUI.DATA_WRAPPER				: textureFile,
+		GUI.DATA_REFRESH_GROUP	: refreshGroup,
+		GUI.ENDINGS							: [".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".hdr"],
+		GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 1, 16]
+	};
+	panel += GUI.NEXT_ROW;
+	panel += {
+		GUI.TYPE								: GUI.TYPE_BUTTON,
+		GUI.LABEL								: "Show",
+		GUI.ON_CLICK						: [getTexture] => fn(getTexture) { if(getTexture()) Rendering.showDebugTexture(getTexture()); },
+		GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.33, 16]
+	};
+	panel += {
+		GUI.TYPE								: GUI.TYPE_BUTTON,
+		GUI.LABEL								: "Reload",
+		GUI.ON_CLICK						: [setTexture, textureFile] => fn(setTexture, textureFile) { 
+			var fileName = textureFile();
+			if(fileName.empty()) {
+				setTexture(void);
+			} else if(fileName != "[embedded]") {
+				var path = PADrend.getSceneManager().locateFile(fileName);
+				var texture;
+				if(path)
+					texture = Rendering.createTextureFromFile(path, Rendering.Texture.TEXTURE_2D, 1, 4); // always load 4 components for backwards compability
+
+				if(texture) {
+					texture.setFileName(fileName);
+					setTexture(texture);
+					texture.createMipmaps(renderingContext);
+				}
+			}
+			RefreshableContainerTrait.refreshContainer( this );
+		},
+		GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.33, 16]
+	};
+	panel += {
+		GUI.TYPE								: GUI.TYPE_BUTTON,
+		GUI.LABEL								: "Remove",
+		GUI.ON_CLICK						: [textureFile] => fn(textureFile) { textureFile(""); },
+		GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 1, 16]
+	};
+	panel += GUI.NEXT_ROW;
+	panel += {
+			GUI.TYPE								: GUI.TYPE_RANGE,
+			GUI.LABEL								: "Texture Coords",
+			GUI.TOOLTIP							: "Specifies which texture coordinate attribute from the associated mesh should be used.",
+			GUI.RANGE								: [0,1],
+			GUI.RANGE_STEP_SIZE			: 1,
+			GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(getTexCoord, setTexCoord),
+			GUI.DATA_REFRESH_GROUP	: refreshGroup,
+			GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 1, 16]
+	};
+	panel += GUI.NEXT_ROW;
+	return panel;
+};
+
+// PBR material state 
+gui.register(CONFIG_PREFIX + MinSG.PbrMaterialState, fn(MinSG.PbrMaterialState state) {
+	
+	var backgroundShape = new GUI.ShapeProperty(GUI.PROPERTY_COMPONENT_BACKGROUND_SHAPE,gui._createRectShape(new Util.Color4ub(215,215,215,100),new Util.Color4ub(215,215,215,100),true));
+
+	var entries = getBaseTypeEntries(state);
+	entries += "*PBR Material State:*";
+	entries += GUI.NEXT_ROW;
+
+	var refreshGroup = new GUI.RefreshGroup;
+
+	var optionsPanel = gui.create({
+		GUI.TYPE								: GUI.TYPE_CONTAINER,
+		GUI.LAYOUT							: GUI.LAYOUT_FLOW,
+		GUI.FLAGS								: GUI.RAISED_BORDER,
+		GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS, 10, 0],
+	});
+	entries += optionsPanel;
+	entries += GUI.NEXT_ROW;
+
+	optionsPanel += {
+		GUI.TYPE								: GUI.TYPE_BOOL,
+		GUI.LABEL								: "Use IBL",
+		GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getUseIBL, state->state.setUseIBL),
+		GUI.DATA_REFRESH_GROUP	: refreshGroup,
+		GUI.SIZE								: [GUI.WIDTH_REL, 0.48, 0]
+	};
+
+	optionsPanel += {
+		GUI.TYPE								: GUI.TYPE_BOOL,
+		GUI.LABEL								: "Use Skinning",
+		GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getUseSkinning, state->state.setUseSkinning),
+		GUI.DATA_REFRESH_GROUP	: refreshGroup,
+		GUI.SIZE								: [GUI.WIDTH_REL, 0.48, 0]
+	};
+	optionsPanel += GUI.NEXT_ROW;
+
+	optionsPanel += {
+		GUI.TYPE								: GUI.TYPE_BOOL,
+		GUI.LABEL								: "Double Sided",
+		GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getDoubleSided, state->state.setDoubleSided),
+		GUI.DATA_REFRESH_GROUP	: refreshGroup,
+		GUI.SIZE								: [GUI.WIDTH_REL, 0.48, 0]
+	};
+
+	optionsPanel += {
+		GUI.TYPE								: GUI.TYPE_BOOL,
+		GUI.LABEL								: "Receives Shadows",
+		GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getReceiveShadow, state->state.setReceiveShadow),
+		GUI.DATA_REFRESH_GROUP	: refreshGroup,
+		GUI.SIZE								: [GUI.WIDTH_REL, 0.48, 0]
+	};
+	optionsPanel += GUI.NEXT_ROW;
+	
+	optionsPanel += {
+		GUI.TYPE								: GUI.TYPE_SELECT,
+		GUI.LABEL								: "Alpha Mode",
+		GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getAlphaMode, state->state.setAlphaMode),
+		GUI.DATA_REFRESH_GROUP	: refreshGroup,
+		GUI.SIZE								: [GUI.WIDTH_REL, 0.48, 0],
+		GUI.OPTIONS							: [
+			[0, "Opaque"], [1, "Mask"], [2, "Blend"]
+		],
+	};
+	optionsPanel += {
+		GUI.TYPE								: GUI.TYPE_RANGE,
+		GUI.LABEL								: "Alpha Cutoff",
+		GUI.RANGE								: [0,1],
+		GUI.RANGE_STEP_SIZE			: 0.01,
+		GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getAlphaCutoff, state->state.setAlphaCutoff),
+		GUI.DATA_REFRESH_GROUP	: refreshGroup,
+		GUI.SIZE								: [GUI.WIDTH_REL, 0.48, 0]
+	};
+	optionsPanel += GUI.NEXT_ROW;
+	
+	optionsPanel += {
+		GUI.TYPE								: GUI.TYPE_SELECT,
+		GUI.LABEL								: "Shading Model",
+		GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getShadingModel, state->state.setShadingModel),
+		GUI.DATA_REFRESH_GROUP	: refreshGroup,
+		GUI.SIZE								: [GUI.WIDTH_FILL_ABS, 1, 0],
+		GUI.OPTIONS							: [
+			[0, "MetallicRoughness"], [1, "Unlit"],
+		],
+		GUI.ON_DATA_CHANGED			: [optionsPanel] => fn(panel, ...) {
+			RefreshableContainerTrait.refreshContainer( panel );
+		}
+	};
+
+	// ------------
+
+	entries += gui.create({
+		GUI.TYPE								: GUI.TYPE_COLLAPSIBLE_CONTAINER,
+		GUI.LABEL								: "Base Color",
+		GUI.LAYOUT							: GUI.LAYOUT_FLOW,
+		GUI.FLAGS								: GUI.RAISED_BORDER,
+		GUI.PROPERTIES					: [ backgroundShape ],
+		GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS, 10, 4],
+		GUI.CONTENTS						: [state, refreshGroup] => fn(state, refreshGroup) {
+			return [
+				{
+					GUI.TYPE								: GUI.TYPE_COLOR,
+					GUI.LABEL								: "Base Color Factor",
+					GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getBaseColorFactor, state->state.setBaseColorFactor),
+					GUI.DATA_REFRESH_GROUP	: refreshGroup,
+					GUI.FLAGS								: GUI.RAISED_BORDER,
+					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 80]
+				},
+				createTexturePanel(state->state.getBaseColorTexture, state->state.setBaseColorTexture, state->state.getBaseColorTexCoord, state->state.setBaseColorTexCoord, refreshGroup)
+			];
+		},
+	});
+	
+	entries += GUI.NEXT_ROW;
+
+	// ------------
+
+	entries += gui.create({
+		GUI.TYPE								: GUI.TYPE_COLLAPSIBLE_CONTAINER,
+		GUI.LABEL								: "Metallic Roughness",
+		GUI.LAYOUT							: GUI.LAYOUT_FLOW,
+		GUI.FLAGS								: GUI.RAISED_BORDER,
+		GUI.PROPERTIES					: [ backgroundShape ],
+		GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS, 10, 4],
+		GUI.CONTENTS						: [state, refreshGroup] => fn(state, refreshGroup) {
+			return [
+				{
+					GUI.TYPE								: GUI.TYPE_CONTAINER,
+					GUI.LAYOUT							: GUI.LAYOUT_FLOW,
+					GUI.FLAGS								: GUI.RAISED_BORDER,
+					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 58],
+					GUI.CONTENTS						: [
+						{
+							GUI.TYPE								: GUI.TYPE_RANGE,
+							GUI.LABEL								: "Metallic",
+							GUI.RANGE								: [0,1],
+							GUI.RANGE_STEP_SIZE			: 0.01,
+							GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getMetallicFactor, state->state.setMetallicFactor),
+							GUI.DATA_REFRESH_GROUP	: refreshGroup,
+							GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 1, 16]
+						},
+						GUI.NEXT_ROW,
+						{
+							GUI.TYPE								: GUI.TYPE_RANGE,
+							GUI.LABEL								: "Roughness",
+							GUI.RANGE								: [0,1],
+							GUI.RANGE_STEP_SIZE			: 0.01,
+							GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getRoughnessFactor, state->state.setRoughnessFactor),
+							GUI.DATA_REFRESH_GROUP	: refreshGroup,
+							GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 1, 16]
+						}
+					]
+				},
+				createTexturePanel(state->state.getMetallicRoughnessTexture, state->state.setMetallicRoughnessTexture, state->state.getMetallicRoughnessTexCoord, state->state.setMetallicRoughnessTexCoord, refreshGroup)
+			];
+		},
+	});
+	entries += GUI.NEXT_ROW;
+	
+	// ------------
+
+	entries += gui.create({
+		GUI.TYPE								: GUI.TYPE_COLLAPSIBLE_CONTAINER,
+		GUI.LABEL								: "Normal",
+		GUI.LAYOUT							: GUI.LAYOUT_FLOW,
+		GUI.FLAGS								: GUI.RAISED_BORDER,
+		GUI.PROPERTIES					: [ backgroundShape ],
+		GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS, 10, 4],
+		GUI.CONTENTS						: [state, refreshGroup] => fn(state, refreshGroup) {
+			return [
+				{
+					GUI.TYPE								: GUI.TYPE_CONTAINER,
+					GUI.LAYOUT							: GUI.LAYOUT_FLOW,
+					GUI.FLAGS								: GUI.RAISED_BORDER,
+					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 58],
+					GUI.CONTENTS						: [
+						{
+							GUI.TYPE								: GUI.TYPE_RANGE,
+							GUI.LABEL								: "Scale",
+							GUI.RANGE								: [-1,1],
+							GUI.RANGE_STEP_SIZE			: 0.01,
+							GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getNormalScale, state->state.setNormalScale),
+							GUI.DATA_REFRESH_GROUP	: refreshGroup,
+							GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 1, 16]
+						}
+					]
+				},
+				createTexturePanel(state->state.getNormalTexture, state->state.setNormalTexture, state->state.getNormalTexCoord, state->state.setNormalTexCoord, refreshGroup)
+			];
+		},
+	});
+	entries += GUI.NEXT_ROW;
+
+	// ------------
+
+	entries += gui.create({
+		GUI.TYPE								: GUI.TYPE_COLLAPSIBLE_CONTAINER,
+		GUI.LABEL								: "Occlusion",
+		GUI.LAYOUT							: GUI.LAYOUT_FLOW,
+		GUI.FLAGS								: GUI.RAISED_BORDER,
+		GUI.PROPERTIES					: [ backgroundShape ],
+		GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS, 10, 4],
+		GUI.CONTENTS						: [state, refreshGroup] => fn(state, refreshGroup) {
+			return [
+				{
+					GUI.TYPE								: GUI.TYPE_CONTAINER,
+					GUI.LAYOUT							: GUI.LAYOUT_FLOW,
+					GUI.FLAGS								: GUI.RAISED_BORDER,
+					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 58],
+					GUI.CONTENTS						: [
+						{
+							GUI.TYPE								: GUI.TYPE_RANGE,
+							GUI.LABEL								: "Strength",
+							GUI.RANGE								: [0,1],
+							GUI.RANGE_STEP_SIZE			: 0.01,
+							GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getOcclusionStrength, state->state.setOcclusionStrength),
+							GUI.DATA_REFRESH_GROUP	: refreshGroup,
+							GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 1, 16]
+						}
+					]
+				},
+				createTexturePanel(state->state.getOcclusionTexture, state->state.setOcclusionTexture, state->state.getOcclusionTexCoord, state->state.setOcclusionTexCoord, refreshGroup)
+			];
+		},
+	});
+	entries += GUI.NEXT_ROW;
+
+	// ------------
+
+	entries += gui.create({
+		GUI.TYPE								: GUI.TYPE_COLLAPSIBLE_CONTAINER,
+		GUI.LABEL								: "Emissive",
+		GUI.LAYOUT							: GUI.LAYOUT_FLOW,
+		GUI.FLAGS								: GUI.RAISED_BORDER,
+		GUI.PROPERTIES					: [ backgroundShape ],
+		GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_CHILDREN_ABS, 10, 4],
+		GUI.CONTENTS						: [state, refreshGroup] => fn(state, refreshGroup) {
+			return [
+				{
+					GUI.TYPE								: GUI.TYPE_COLOR,
+					GUI.LABEL								: "Emissive Factor",
+					GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->fn() {
+						var v = getEmissiveFactor();
+						return new Util.Color4f(v.x(), v.y(), v.z(), 1.0);
+					}, state->fn(c) {
+						setEmissiveFactor(new Geometry.Vec3(c.r(), c.g(), c.b()));
+					}),
+					GUI.DATA_REFRESH_GROUP	: refreshGroup,
+					GUI.FLAGS								: GUI.RAISED_BORDER,
+					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 80]
+				},
+				createTexturePanel(state->state.getEmissiveTexture, state->state.setEmissiveTexture, state->state.getEmissiveTexCoord, state->state.setEmissiveTexCoord, refreshGroup)
+			];
+		},
+	});
+	
+	entries += GUI.NEXT_ROW;
+
+	// ------------
+
+	return entries;
+});
+
+// ----
 
 return true;

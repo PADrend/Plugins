@@ -19,6 +19,8 @@ struct VertexData {
 	vec4 color;
 	vec2 texCoord0;
 	vec2 texCoord1;
+	vec4 shadowCoord;
+	vec3 camera;
 };
 
 struct SurfaceSample {
@@ -27,6 +29,8 @@ struct SurfaceSample {
 	vec3 normal;
 	vec3 tangent;
 	vec3 bitangent;
+	vec4 shadowCoord;
+	vec3 view;
 	float NdotV;
 };
 

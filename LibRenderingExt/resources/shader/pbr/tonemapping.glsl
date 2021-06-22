@@ -17,7 +17,7 @@ const float GAMMA = 2.2;
 const float INV_GAMMA = 1.0 / GAMMA;
 
 uniform float sg_exposure = 1.0;
-uniform bool sg_toneMapping = true;
+uniform bool sg_toneMapping = false;
 
 // linear to sRGB approximation
 // see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
@@ -46,8 +46,10 @@ vec3 computeToneMapping(vec3 color) {
 	color *= sg_exposure;
 
 	if(sg_toneMapping) {
-		return linearTosRGB(tonemapACESFilm(color));
+		//return linearTosRGB(tonemapACESFilm(color));
+		return tonemapACESFilm(color);
 	} else {
-		return linearTosRGB(color);
+		//return linearTosRGB(color);
+		return color;
 	}
 }
