@@ -13,6 +13,22 @@
 #ifndef RENDERING_SHADER_MATERIALS_GLSL_
 #define RENDERING_SHADER_MATERIALS_GLSL_
 
+#ifndef BASECOLOR_TEXUNIT
+#define BASECOLOR_TEXUNIT 0
+#endif
+#ifndef METALLICROUGHNESS_TEXUNIT
+#define METALLICROUGHNESS_TEXUNIT 1
+#endif
+#ifndef NORMAL_TEXUNIT
+#define NORMAL_TEXUNIT 2
+#endif
+#ifndef OCCLUSION_TEXUNIT
+#define OCCLUSION_TEXUNIT 3
+#endif
+#ifndef EMISSIVE_TEXUNIT
+#define EMISSIVE_TEXUNIT 4
+#endif
+
 #include "structs.glsl"
 #include "brdf.glsl"
 
@@ -73,7 +89,7 @@ vec4 getBaseColor(in VertexData vertex) {
 vec2 getMetallicRoughness(in VertexData vertex) {
 	vec2 metallicRoughness = vec2(sg_pbrMetallicFactor, sg_pbrRoughnessFactor);
 	#ifdef HAS_METALLICROUGHNESS_TEXTURE
-		vec2 uv = sg_pbrBaseColorTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
+		vec2 uv = sg_pbrMetallicRoughnessTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
 		metallicRoughness *= texture(sg_metallicRoughnessTexture, uv).bg;
 	#endif
 	return metallicRoughness;
