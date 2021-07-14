@@ -1677,7 +1677,7 @@ gui.register(CONFIG_PREFIX + MinSG.TextureState, fn(MinSG.TextureState state) {
 		GUI.TYPE			:	GUI.TYPE_FILE,
 		GUI.LABEL			:	"Texture file:",
 		GUI.DATA_WRAPPER	:	textureFile,
-		GUI.ENDINGS			:	[".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff"],
+		GUI.ENDINGS			:	[".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".dds"],
 		GUI.SIZE			:	[GUI.WIDTH_FILL_ABS, 10, 0]
 	};
 	entries += GUI.NEXT_ROW;
@@ -2004,7 +2004,7 @@ static createTexturePanel = fn(getTexture, setTexture, getTexCoord, setTexCoord,
 		GUI.LABEL								: "Texture",
 		GUI.DATA_WRAPPER				: textureFile,
 		GUI.DATA_REFRESH_GROUP	: refreshGroup,
-		GUI.ENDINGS							: [".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".hdr"],
+		GUI.ENDINGS							: [".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".hdr", ".dds"],
 		GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 1, 16]
 	};
 	panel += GUI.NEXT_ROW;
