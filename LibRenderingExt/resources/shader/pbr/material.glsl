@@ -39,6 +39,7 @@ const float f0_ior = 0.04;
 uniform vec4 sg_pbrBaseColorFactor;
 #ifdef HAS_BASECOLOR_TEXTURE
 uniform int sg_pbrBaseColorTexCoord;
+uniform mat3 sg_pbrBaseColorTexTransform;
 layout(binding=BASECOLOR_TEXUNIT) uniform sampler2D sg_baseColorTexture;
 #endif
 
@@ -46,11 +47,13 @@ uniform float sg_pbrMetallicFactor;
 uniform float sg_pbrRoughnessFactor;
 #ifdef HAS_METALLICROUGHNESS_TEXTURE
 uniform int sg_pbrMetallicRoughnessTexCoord;
+uniform mat3 sg_pbrMetallicRoughnessTexTransform;
 layout(binding=METALLICROUGHNESS_TEXUNIT) uniform sampler2D sg_metallicRoughnessTexture;
 #endif
 
 uniform float sg_pbrNormalScale;
 uniform int sg_pbrNormalTexCoord;
+uniform mat3 sg_pbrNormalTexTransform;
 #ifdef HAS_NORMAL_TEXTURE
 layout(binding=NORMAL_TEXUNIT) uniform sampler2D sg_normalTexture;
 #endif
@@ -58,12 +61,14 @@ layout(binding=NORMAL_TEXUNIT) uniform sampler2D sg_normalTexture;
 uniform float sg_pbrOcclusionStrength;
 #ifdef HAS_OCCLUSION_TEXTURE
 uniform int sg_pbrOcclusionTexCoord;
+uniform mat3 sg_pbrOcclusionTexTransform;
 layout(binding=OCCLUSION_TEXUNIT) uniform sampler2D sg_occlusionTexture;
 #endif
 
 uniform vec3 sg_pbrEmissiveFactor;
 #ifdef HAS_EMISSIVE_TEXTURE
 uniform int sg_pbrEmissiveTexCoord;
+uniform mat3 sg_pbrEmissiveTexTransform;
 layout(binding=EMISSIVE_TEXUNIT) uniform sampler2D sg_emissiveTexture;
 #endif
 
@@ -75,6 +80,7 @@ vec4 getBaseColor(in VertexData vertex) {
 	vec4 baseColor = sg_pbrBaseColorFactor;
 	#ifdef HAS_BASECOLOR_TEXTURE
 		vec2 uv = sg_pbrBaseColorTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
+		uv = (sg_pbrBaseColorTexTransform * vec3(uv, 1)).xy;
 		baseColor *= texture(sg_baseColorTexture, uv);
 	#endif
 	baseColor *= vertex.color;
@@ -90,6 +96,7 @@ vec2 getMetallicRoughness(in VertexData vertex) {
 	vec2 metallicRoughness = vec2(sg_pbrMetallicFactor, sg_pbrRoughnessFactor);
 	#ifdef HAS_METALLICROUGHNESS_TEXTURE
 		vec2 uv = sg_pbrMetallicRoughnessTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
+		uv = (sg_pbrMetallicRoughnessTexTransform * vec3(uv, 1)).xy;
 		metallicRoughness *= texture(sg_metallicRoughnessTexture, uv).bg;
 	#endif
 	return metallicRoughness;
@@ -99,6 +106,7 @@ float getOcclusion(in VertexData vertex) {
 	float occlusion = 1.0;
 	#ifdef HAS_OCCLUSION_TEXTURE
 		vec2 uv = sg_pbrOcclusionTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
+		uv = (sg_pbrOcclusionTexTransform * vec3(uv, 1)).xy;
 		occlusion = mix(1.0, texture(sg_occlusionTexture, uv).r, sg_pbrOcclusionStrength);
 	#endif
 	return occlusion;
@@ -108,6 +116,7 @@ vec3 getEmissive(in VertexData vertex) {
 	vec3 emissive = sg_pbrEmissiveFactor;
 	#ifdef HAS_EMISSIVE_TEXTURE
 		vec2 uv = sg_pbrEmissiveTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
+		uv = (sg_pbrEmissiveTexxTransform * vec3(uv, 1)).xy;
 		emissive *= texture(sg_emissiveTexture, uv).rgb;
 	#endif
 	return emissive;

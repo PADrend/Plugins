@@ -38,6 +38,7 @@ SurfaceSample initSurface(in VertexData vertex) {
 	surface.shadowCoord = vertex.shadowCoord;
 	
 	vec2 uv = sg_pbrNormalTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
+	uv = (sg_pbrNormalTexTransform * vec3(uv, 1)).xy;
 	vec3 uv_dx = dFdx(vec3(uv, 0.0));
 	vec3 uv_dy = dFdy(vec3(uv, 0.0));
 

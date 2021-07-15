@@ -1897,9 +1897,9 @@ gui.register(CONFIG_PREFIX + MinSG.IBLEnvironmentState, fn(MinSG.IBLEnvironmentS
 
 	var textureFile = new Std.DataWrapper("");
 	textureFile(state.getHdrFile().toString());
-	textureFile.onDataChanged += [state] => fn(MinSG.TextureState state, data) {
+	/*textureFile.onDataChanged += [state] => fn(state, data) {
 		state.loadEnvironmentMapFromHDR(new Util.FileName(data));
-	};
+	};*/
 
 	var texture = state.getEnvironmentMap();
 	if(texture) {
@@ -1952,6 +1952,29 @@ gui.register(CONFIG_PREFIX + MinSG.IBLEnvironmentState, fn(MinSG.IBLEnvironmentS
 	};
 	entries += GUI.NEXT_ROW;
 	entries += {
+		GUI.TYPE								: GUI.TYPE_BUTTON,
+		GUI.LABEL								: "Reload Environment Map",
+		GUI.ON_CLICK						: [state, textureFile] => fn(state, textureFile) { 
+			var fileName = textureFile();
+			if(fileName.empty()) {
+				state.setEnvironmentMap(void);
+			} else if(fileName != "[embedded]") {
+				var path = PADrend.getSceneManager().locateFile(fileName);
+				var texture;
+				if(path)
+					texture = Rendering.createTextureFromFile(path, Rendering.Texture.TEXTURE_2D, 1, 4); // always load 4 components for backwards compability
+
+				if(texture) {
+					texture.setFileName(fileName);
+					state.loadEnvironmentMapFromHDR(new Util.FileName(fileName));
+				}
+			}
+			RefreshableContainerTrait.refreshContainer( this );
+		},
+		GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.33, 16]
+	};
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "LOD",
 		GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(state->state.getLOD, state->state.setLOD),
@@ -1979,7 +2002,11 @@ gui.register(CONFIG_PREFIX + MinSG.IBLEnvironmentState, fn(MinSG.IBLEnvironmentS
 
 // ----
 
-static createTexturePanel = fn(getTexture, setTexture, getTexCoord, setTexCoord, refreshGroup) {
+static lastTextureDir = void;
+static createTexturePanel = fn(getTexture, setTexture, getTexCoord, setTexCoord, getTexTransform, setTexTransform, refreshGroup) {
+	if(!lastTextureDir) {
+		lastTextureDir = PADrend.getDataPath();
+	}
 
 	var textureFile = new Std.DataWrapper("");
 	if(getTexture()) {
@@ -1990,6 +2017,8 @@ static createTexturePanel = fn(getTexture, setTexture, getTexCoord, setTexCoord,
 		if(getTexture()) {
 			getTexture().setFileName(new Util.FileName(data));
 		}
+		if(!data.empty())
+			lastTextureDir = (new Util.FileName(data)).getDir();
 	};
 
 	var panel = gui.create({
@@ -2002,6 +2031,7 @@ static createTexturePanel = fn(getTexture, setTexture, getTexCoord, setTexCoord,
 	panel += {
 		GUI.TYPE								: GUI.TYPE_FILE,
 		GUI.LABEL								: "Texture",
+		GUI.DIR									: (textureFile().empty() || textureFile() == "[embedded]") ? lastTextureDir : getTexture().getFileName().getDir(),
 		GUI.DATA_WRAPPER				: textureFile,
 		GUI.DATA_REFRESH_GROUP	: refreshGroup,
 		GUI.ENDINGS							: [".bmp", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".hdr", ".dds"],
@@ -2051,6 +2081,22 @@ static createTexturePanel = fn(getTexture, setTexture, getTexCoord, setTexCoord,
 			GUI.RANGE								: [0,1],
 			GUI.RANGE_STEP_SIZE			: 1,
 			GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(getTexCoord, setTexCoord),
+			GUI.DATA_REFRESH_GROUP	: refreshGroup,
+			GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 1, 16]
+	};
+	panel += GUI.NEXT_ROW;
+	panel += {
+			GUI.TYPE								: GUI.TYPE_TEXT,
+			GUI.LABEL								: "Transform",
+			GUI.TOOLTIP							: "Applies a affine transformation (3x3 matrix) on the texture coordinates.",
+			GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(
+				[getTexTransform] => fn(getTexTransform) {
+					return toJSON(getTexTransform().toArray(), false);
+				},
+				[setTexTransform] => fn(setTexTransform, value) {
+					setTexTransform(new Geometry.Matrix3x3(parseJSON(value)));
+				}
+			),
 			GUI.DATA_REFRESH_GROUP	: refreshGroup,
 			GUI.SIZE								: [GUI.WIDTH_FILL_ABS | GUI.HEIGHT_ABS, 1, 16]
 	};
@@ -2166,7 +2212,8 @@ gui.register(CONFIG_PREFIX + MinSG.PbrMaterialState, fn(MinSG.PbrMaterialState s
 					GUI.FLAGS								: GUI.RAISED_BORDER,
 					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 80]
 				},
-				createTexturePanel(state->state.getBaseColorTexture, state->state.setBaseColorTexture, state->state.getBaseColorTexCoord, state->state.setBaseColorTexCoord, refreshGroup)
+				createTexturePanel(state->state.getBaseColorTexture, state->state.setBaseColorTexture, state->state.getBaseColorTexCoord, state->state.setBaseColorTexCoord, 
+					state->state.getBaseColorTexTransform, state->state.setBaseColorTexTransform, refreshGroup)
 			];
 		},
 	});
@@ -2188,7 +2235,7 @@ gui.register(CONFIG_PREFIX + MinSG.PbrMaterialState, fn(MinSG.PbrMaterialState s
 					GUI.TYPE								: GUI.TYPE_CONTAINER,
 					GUI.LAYOUT							: GUI.LAYOUT_FLOW,
 					GUI.FLAGS								: GUI.RAISED_BORDER,
-					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 58],
+					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 80],
 					GUI.CONTENTS						: [
 						{
 							GUI.TYPE								: GUI.TYPE_RANGE,
@@ -2211,7 +2258,8 @@ gui.register(CONFIG_PREFIX + MinSG.PbrMaterialState, fn(MinSG.PbrMaterialState s
 						}
 					]
 				},
-				createTexturePanel(state->state.getMetallicRoughnessTexture, state->state.setMetallicRoughnessTexture, state->state.getMetallicRoughnessTexCoord, state->state.setMetallicRoughnessTexCoord, refreshGroup)
+				createTexturePanel(state->state.getMetallicRoughnessTexture, state->state.setMetallicRoughnessTexture, state->state.getMetallicRoughnessTexCoord, state->state.setMetallicRoughnessTexCoord, 
+					state->state.getMetallicRoughnessTexTransform, state->state.setMetallicRoughnessTexTransform, refreshGroup)
 			];
 		},
 	});
@@ -2232,7 +2280,7 @@ gui.register(CONFIG_PREFIX + MinSG.PbrMaterialState, fn(MinSG.PbrMaterialState s
 					GUI.TYPE								: GUI.TYPE_CONTAINER,
 					GUI.LAYOUT							: GUI.LAYOUT_FLOW,
 					GUI.FLAGS								: GUI.RAISED_BORDER,
-					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 58],
+					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 80],
 					GUI.CONTENTS						: [
 						{
 							GUI.TYPE								: GUI.TYPE_RANGE,
@@ -2245,7 +2293,8 @@ gui.register(CONFIG_PREFIX + MinSG.PbrMaterialState, fn(MinSG.PbrMaterialState s
 						}
 					]
 				},
-				createTexturePanel(state->state.getNormalTexture, state->state.setNormalTexture, state->state.getNormalTexCoord, state->state.setNormalTexCoord, refreshGroup)
+				createTexturePanel(state->state.getNormalTexture, state->state.setNormalTexture, state->state.getNormalTexCoord, state->state.setNormalTexCoord, 
+					state->state.getNormalTexTransform, state->state.setNormalTexTransform, refreshGroup)
 			];
 		},
 	});
@@ -2266,7 +2315,7 @@ gui.register(CONFIG_PREFIX + MinSG.PbrMaterialState, fn(MinSG.PbrMaterialState s
 					GUI.TYPE								: GUI.TYPE_CONTAINER,
 					GUI.LAYOUT							: GUI.LAYOUT_FLOW,
 					GUI.FLAGS								: GUI.RAISED_BORDER,
-					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 58],
+					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 80],
 					GUI.CONTENTS						: [
 						{
 							GUI.TYPE								: GUI.TYPE_RANGE,
@@ -2279,7 +2328,8 @@ gui.register(CONFIG_PREFIX + MinSG.PbrMaterialState, fn(MinSG.PbrMaterialState s
 						}
 					]
 				},
-				createTexturePanel(state->state.getOcclusionTexture, state->state.setOcclusionTexture, state->state.getOcclusionTexCoord, state->state.setOcclusionTexCoord, refreshGroup)
+				createTexturePanel(state->state.getOcclusionTexture, state->state.setOcclusionTexture, state->state.getOcclusionTexCoord, state->state.setOcclusionTexCoord, 
+					state->state.getOcclusionTexTransform, state->state.setOcclusionTexTransform, refreshGroup)
 			];
 		},
 	});
@@ -2309,7 +2359,8 @@ gui.register(CONFIG_PREFIX + MinSG.PbrMaterialState, fn(MinSG.PbrMaterialState s
 					GUI.FLAGS								: GUI.RAISED_BORDER,
 					GUI.SIZE								: [GUI.WIDTH_REL | GUI.HEIGHT_ABS, 0.48, 80]
 				},
-				createTexturePanel(state->state.getEmissiveTexture, state->state.setEmissiveTexture, state->state.getEmissiveTexCoord, state->state.setEmissiveTexCoord, refreshGroup)
+				createTexturePanel(state->state.getEmissiveTexture, state->state.setEmissiveTexture, state->state.getEmissiveTexCoord, state->state.setEmissiveTexCoord, 
+					state->state.getEmissiveTexTransform, state->state.setEmissiveTexTransform, refreshGroup)
 			];
 		},
 	});
