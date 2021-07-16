@@ -2178,6 +2178,16 @@ gui.register(CONFIG_PREFIX + MinSG.PbrMaterialState, fn(MinSG.PbrMaterialState s
 		GUI.SIZE								: [GUI.WIDTH_REL, 0.48, 0]
 	};
 	optionsPanel += GUI.NEXT_ROW;
+	optionsPanel += {
+		GUI.TYPE								: GUI.TYPE_RANGE,
+		GUI.LABEL								: "IOR",
+		GUI.RANGE								: [0,3],
+		GUI.RANGE_STEP_SIZE			: 0.01,
+		GUI.DATA_WRAPPER				: DataWrapper.createFromFunctions(state->state.getIOR, state->state.setIOR),
+		GUI.DATA_REFRESH_GROUP	: refreshGroup,
+		GUI.SIZE								: [GUI.WIDTH_REL, 0.48, 0]
+	};
+	optionsPanel += GUI.NEXT_ROW;
 	
 	optionsPanel += {
 		GUI.TYPE								: GUI.TYPE_SELECT,

@@ -33,8 +33,7 @@
 #include "brdf.glsl"
 
 // The default index of refraction of 1.5 yields a dielectric normal incidence reflectance of 0.04.
-const float ior = 1.5;
-const float f0_ior = 0.04;
+uniform float sg_pbrIOR = 1.5;
 
 uniform vec4 sg_pbrBaseColorFactor;
 #ifdef HAS_BASECOLOR_TEXTURE
@@ -116,7 +115,7 @@ vec3 getEmissive(in VertexData vertex) {
 	vec3 emissive = sg_pbrEmissiveFactor;
 	#ifdef HAS_EMISSIVE_TEXTURE
 		vec2 uv = sg_pbrEmissiveTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
-		uv = (sg_pbrEmissiveTexxTransform * vec3(uv, 1)).xy;
+		uv = (sg_pbrEmissiveTexTransform * vec3(uv, 1)).xy;
 		emissive *= texture(sg_emissiveTexture, uv).rgb;
 	#endif
 	return emissive;
@@ -132,7 +131,8 @@ MaterialSample initMaterial(in VertexData vertex) {
 	material.alphaRoughness = material.roughness * material.roughness;
 	material.occlusion = getOcclusion(vertex);
 
-	vec3 f0 = vec3(f0_ior);
+	const float f0_ior_2 = ((sg_pbrIOR - 1)/(sg_pbrIOR + 1));
+	vec3 f0 = vec3(f0_ior_2 * f0_ior_2);
 	material.diffuse = mix(material.baseColor.rgb * (vec3(1.0) - f0), vec3(0.0), material.metallic);
 	material.specular = mix(f0, material.baseColor.rgb, material.metallic);
 	
