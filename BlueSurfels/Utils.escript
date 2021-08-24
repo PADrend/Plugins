@@ -288,4 +288,22 @@ NS.saveSurfelsToMMF := fn(MinSG.Node node, Util.FileName folder) {
 	});
 };
 
+
+NS.collectSurfelNodes @(public) := fn(Array rootNodes, onlyTopLevel=true) {
+	// Collect nodes
+	var nodeSet = new Set;
+	foreach(rootNodes as var root) {
+		root.traverse([nodeSet, onlyTopLevel] => this->fn(todo, onlyTopLevel, node) {
+			var surfels = NS.locateSurfels(node);
+			if(surfels) {
+				todo += node;
+				return onlyTopLevel ? $BREAK_TRAVERSAL : $CONTINUE_TRAVERSAL;
+			}
+			return $CONTINUE_TRAVERSAL;
+		});
+	}
+	return nodeSet.toArray();
+};
+
+
 return NS;

@@ -177,7 +177,9 @@ void main() {
 		float pointSize = sg_pointSize;
 	#endif
 	vOut.position_cs = matrix_modelToCamera * vec4(sg_Position, 1.0);
-	vOut.normal_cs = normalize(matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+	vec3 normal = (matrix_modelToCamera * vec4(sg_Normal, 0.0)).xyz;
+	float scale = length(normal);
+	vOut.normal_cs = normalize(normal);
 	vec4 position_clipspace = sg_matrix_cameraToClipping * vOut.position_cs;
 	
 	float intensity = float(sg_surfelCount) / 100000.0;
@@ -205,9 +207,9 @@ void main() {
 	#if SURFEL_CULLING > 0
 		// compute surfel count
 		float dist = max(0, -vOut.position_cs.z);
-		const float r = (sg_pointSize * dist * sg_fov_tan) / float(sg_viewport[2]);
+		const float r = (sg_pointSize * dist * sg_fov_tan) / (float(sg_viewport[2]) * scale);
 		uint prefix = uint(sg_surfelPacking / (r * r));
-		bool render = gl_VertexID < prefix && (prefix <= sg_surfelCount + sg_surfelCount/20) && vOut.nDotV < 0;
+		bool render = gl_VertexID < prefix && vOut.nDotV < 0;
 		gl_CullDistance[0] = mix(-1, 1, render);
 	#else
 		gl_CullDistance[0] = mix(-1, 1, vOut.nDotV < 0);

@@ -49,6 +49,7 @@ plugin.init := fn() {
 			GUI.LABEL : "Recompute packing value",
 			GUI.ON_CLICK : fn() {
 				var surfelNodes = MinSG.collectNodesReferencingAttribute(NodeEditor.getSelectedNode(), 'surfels');
+				var Utils = Std.module("BlueSurfels/Utils");
 				foreach(surfelNodes as var node) {
 					if(node.isInstance())
 						node = node.getPrototype();
