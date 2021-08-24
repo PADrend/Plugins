@@ -18,7 +18,6 @@
 #ifdef RECEIVE_SHADOW
 
 layout(binding=6) uniform sampler2D sg_shadowTexture;
-uniform int sg_shadowTextureSize;
 uniform bool sg_shadowEnabled;
 
 uniform vec2 _shadowSamplingPoints[16] = vec2[16](
@@ -40,9 +39,9 @@ uniform vec2 _shadowSamplingPoints[16] = vec2[16](
 	vec2(0.0607513,0.528244)
 );
 
-float getSingleShadowSample(in sampler2D shadowTexture, in vec3 coord, in vec2 offset) {
-	float depth = texture2D(shadowTexture, coord.xy + (offset / sg_shadowTextureSize)).r;
-	return (depth < coord.z) ? 0.0 : 1.0; 
+float getSingleShadowSample(in sampler2D shadowTexture, in vec3 coord, in vec2 offset, in vec2 size) {
+	float depth = texture(shadowTexture, coord.xy + (offset / size)).r;
+	return (depth < coord.z) ? 0.0 : 1.0;
 }
 
 //! smoot_step implementation
@@ -56,24 +55,25 @@ float getShadow(in SurfaceSample surface) {
 	if(!sg_shadowEnabled) 
 		return 1.0;
 	vec3 shadowPersp = surface.shadowCoord.xyz / surface.shadowCoord.w;
+	ivec2 shadowTextureSize = textureSize(sg_shadowTexture, 0);
 	float sum = 0.0;
 	
-	sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, vec2(0.0,0.0));
+	sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, vec2(0.0,0.0), shadowTextureSize);
 	if(sum==1.0) // sample is lit
 		return 1.0;
 	
-	sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, vec2(0.0,4.0));
-	sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, vec2(0.0,-4.0));
-	sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, vec2(4.0,0.0));
-	sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, vec2(-4.0,0.0));
+	sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, vec2(0.0,4.0), shadowTextureSize);
+	sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, vec2(0.0,-4.0), shadowTextureSize);
+	sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, vec2(4.0,0.0), shadowTextureSize);
+	sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, vec2(-4.0,0.0), shadowTextureSize);
 	
-	if(sum<0.01){ // fully inside shadow
+	if(sum<0.01) { // fully inside shadow
 		return 0.0;
 	}
 	// shadow border -> do some sampling to reduce aliasing
 //		color.ambient.g = sum/4.0; // debug, show border
 	for(int i=0;i<16;++i)
-		sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, _shadowSamplingPoints[i]*1.5);
+		sum += getSingleShadowSample(sg_shadowTexture, shadowPersp, _shadowSamplingPoints[i]*1.5, shadowTextureSize);
 
 	// adjust the gradient
 	sum = smooth2(0.0,11.0,sum);

@@ -49,6 +49,7 @@ struct MaterialSample {
 	vec3 specular;
 	vec3 specular_f90;
 	vec3 emissive;
+	vec3 tangentSpaceNormal;
 	float metallic;
 	float roughness;
 	float alphaRoughness;

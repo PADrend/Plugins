@@ -30,42 +30,6 @@ in VertexInterface {
 
 layout(location=0) out vec4 fragColor;
 
-SurfaceSample initSurface(in VertexData vertex) {
-	SurfaceSample surface;
-	surface.position = vertex.position;
-	// get normal, tangent, bitangent
-	surface.geometricNormal = normalize(vertex.normal);
-	surface.shadowCoord = vertex.shadowCoord;
-	
-	vec2 uv = sg_pbrNormalTexCoord < 1 ? vertex.texCoord0 : vertex.texCoord1;
-	uv = (sg_pbrNormalTexTransform * vec3(uv, 1)).xy;
-	vec3 uv_dx = dFdx(vec3(uv, 0.0));
-	vec3 uv_dy = dFdy(vec3(uv, 0.0));
-
-	vec3 t_ = (uv_dy.t * dFdx(surface.position) - uv_dx.t * dFdy(surface.position)) / (uv_dx.s * uv_dy.t - uv_dy.s * uv_dx.t);
-	surface.tangent = normalize(t_ - surface.geometricNormal * dot(surface.geometricNormal, t_));
-	surface.bitangent = cross(surface.geometricNormal, surface.tangent);
-
-	// For a back-facing surface, the tangential basis vectors are negated.
-	if (gl_FrontFacing == false) {
-		surface.tangent *= -1.0;
-		surface.bitangent *= -1.0;
-		surface.geometricNormal *= -1.0;
-	}
-
-	// apply normal map
-	surface.normal = surface.geometricNormal;
-	#ifdef HAS_NORMAL_TEXTURE
-		surface.normal = texture(sg_normalTexture, uv).xyz * 2.0 - vec3(1.0);
-		surface.normal *= vec3(sg_pbrNormalScale, sg_pbrNormalScale, 1.0);
-		surface.normal = mat3(surface.tangent, surface.bitangent, surface.geometricNormal) * normalize(surface.normal);
-	#endif
-
-	surface.view = normalize(vertex.camera - surface.position);
-	surface.NdotV = clamp(dot(surface.normal, surface.view), 0.0, 1.0);
-	return surface;
-}
-
 void main() {
 	VertexData vertex;
 	vertex.position = fsIn.position.xyz / fsIn.position.w;
@@ -75,8 +39,8 @@ void main() {
 	vertex.texCoord1 = fsIn.texCoord1;
 	vertex.shadowCoord = fsIn.shadowCoord;
 	vertex.camera = fsIn.camera.xyz / fsIn.camera.w;
-	SurfaceSample surface = initSurface(vertex);
 	MaterialSample material = initMaterial(vertex);
+	SurfaceSample surface = initSurface(vertex, material);
 
 	float shadow = getShadow(surface);
 	vec3 diffuse = vec3(0.0);
