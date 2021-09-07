@@ -15,6 +15,7 @@
 
 #ifdef USE_IBL
 #include "structs.glsl"
+#include "tonemapping.glsl"
 
 layout(binding=7) uniform samplerCube sg_irradianceMap;
 layout(binding=8) uniform samplerCube sg_prefilteredEnvMap;
@@ -33,7 +34,7 @@ vec3 getIBLSpecular(in SurfaceSample surface, in MaterialSample material) {
 
 	vec2 brdfSamplePoint = clamp(vec2(surface.NdotV, material.roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
 	vec2 f_ab = texture(sg_brdfLUT, brdfSamplePoint).rg;
-	vec3 specularLight = textureLod(sg_prefilteredEnvMap, reflection, lod).rgb;
+	vec3 specularLight = linearTosRGB(textureLod(sg_prefilteredEnvMap, reflection, lod).rgb);
 	
 	vec3 Fr = max(vec3(1.0 - material.roughness), material.specular) - material.specular;
 	vec3 k_S = material.specular + Fr * pow(1.0 - surface.NdotV, 5.0);
@@ -50,7 +51,7 @@ vec3 getIBLDiffuse(in SurfaceSample surface, in MaterialSample material) {
 	vec2 brdfSamplePoint = clamp(vec2(surface.NdotV, material.roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
 	vec2 f_ab = texture(sg_brdfLUT, brdfSamplePoint).rg;
 
-	vec3 irradiance = texture(sg_irradianceMap, worldNormal.xyz).rgb;
+	vec3 irradiance = linearTosRGB(texture(sg_irradianceMap, worldNormal.xyz).rgb);
 
 	vec3 Fr = max(vec3(1.0 - material.roughness), material.specular) - material.specular;
 	vec3 k_S = material.specular + Fr * pow(1.0 - surface.NdotV, 5.0);

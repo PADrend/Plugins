@@ -10,6 +10,8 @@
 	with this library; see the file LICENSE. If not, you can obtain one at
 	http://mozilla.org/MPL/2.0/.
 */
+#ifndef RENDERING_SHADER_TONEMAPPING_GLSL_
+#define RENDERING_SHADER_TONEMAPPING_GLSL_
 
 //#define TONEMAPPING_ENABLED 1
 
@@ -21,13 +23,13 @@ uniform bool sg_toneMapping = false;
 
 // linear to sRGB approximation
 // see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-vec3 sRGBToLinear(vec3 color) {
+vec3 linearTosRGB(vec3 color) {
   return pow(color, vec3(INV_GAMMA));
 }
 
 // sRGB to linear approximation
 // see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-vec3 linearTosRGB(vec3 color) {
+vec3 sRGBToLinear(vec3 color) {
   return pow(color, vec3(GAMMA));
 }
 
@@ -53,3 +55,5 @@ vec3 computeToneMapping(vec3 color) {
 		return color;
 	}
 }
+
+#endif
