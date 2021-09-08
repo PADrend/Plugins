@@ -1983,6 +1983,14 @@ gui.register(CONFIG_PREFIX + MinSG.IBLEnvironmentState, fn(MinSG.IBLEnvironmentS
 	};
 	entries += GUI.NEXT_ROW;
 	entries += {
+		GUI.TYPE : GUI.TYPE_RANGE,
+		GUI.LABEL : "rotation",
+		GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(state->state.getRotationDeg, state->state.setRotationDeg),
+		GUI.RANGE : [0,360],
+		GUI.RANGE_STEP_SIZE : 1,
+	};
+	entries += GUI.NEXT_ROW;
+	entries += {
 		GUI.TYPE : GUI.TYPE_BOOL,
 		GUI.LABEL : "display environment map",
 		GUI.DATA_WRAPPER : DataWrapper.createFromFunctions(state->state.isDrawEnvironmentEnabled, state->state.setDrawEnvironment),

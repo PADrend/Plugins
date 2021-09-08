@@ -23,13 +23,19 @@ layout(binding=9) uniform sampler2D sg_brdfLUT;
 uniform int sg_envMipCount = 5;
 uniform bool sg_envEnabled = false;
 uniform mat4 sg_matrix_cameraToWorld;
+uniform float sg_envRotation = 0.0;
 
 vec3 getIBLSpecular(in SurfaceSample surface, in MaterialSample material) {
 	if(!sg_envEnabled)
 		return vec3(0.0);
+
+	float sr = sin(sg_envRotation);
+	float cr = cos(sg_envRotation);
+	mat4 envRotation = mat4(mat3(cr,0,sr ,0,1,0, -sr,0,cr));
+	
 	float lod = material.roughness * float(sg_envMipCount - 1);
-	vec4 worldView = sg_matrix_cameraToWorld * vec4(surface.view, 0.0);
-	vec4 worldNormal = sg_matrix_cameraToWorld * vec4(surface.normal, 0.0);
+	vec4 worldView = sg_matrix_cameraToWorld * envRotation * vec4(surface.view, 0.0);
+	vec4 worldNormal = sg_matrix_cameraToWorld * envRotation * vec4(surface.normal, 0.0);
 	vec3 reflection = normalize(reflect(-worldView.xyz, worldNormal.xyz));
 
 	vec2 brdfSamplePoint = clamp(vec2(surface.NdotV, material.roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
@@ -46,7 +52,11 @@ vec3 getIBLSpecular(in SurfaceSample surface, in MaterialSample material) {
 vec3 getIBLDiffuse(in SurfaceSample surface, in MaterialSample material) {
 	if(!sg_envEnabled)
 		return vec3(0.0);
-	vec4 worldNormal = sg_matrix_cameraToWorld * vec4(surface.normal, 0.0);
+
+	float sr = sin(sg_envRotation);
+	float cr = cos(sg_envRotation);
+	mat4 envRotation = mat4(mat3(cr,0,sr ,0,1,0, -sr,0,cr));
+	vec4 worldNormal = sg_matrix_cameraToWorld * envRotation * vec4(surface.normal, 0.0);
 
 	vec2 brdfSamplePoint = clamp(vec2(surface.NdotV, material.roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
 	vec2 f_ab = texture(sg_brdfLUT, brdfSamplePoint).rg;
