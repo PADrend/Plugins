@@ -12,18 +12,22 @@
  */
 static T = new Type();
 
-T.fileLocator @(private, init) := fn() { return (new Util.FileLocator).setSearchPaths([
+T.fileLocator @(private, init) := fn() { var locator = (new Util.FileLocator).setSearchPaths([
       "./build/",
       "./bin/",
       "./lib/",
-      "./build/Release/",
-      "./build/RelWithDebInfo/",
-      "./build/Debug/",
       "/usr/lib/",
       "/usr/local/lib/",
       "C:/Program Files (x86)/PADrendComplete/bin",
       "C:/Program Files (x86)/PADrendComplete/lib"
   ]);
+  if(BUILD_TYPE == "debug") {
+    locator.addSearchPath("./build/Debug/");
+  } else {
+    locator.addSearchPath("./build/RelWithDebInfo/");
+    locator.addSearchPath("./build/Release/");
+  }
+  return locator;
 };
 
 T.osExtension @(private, init) := fn() {
