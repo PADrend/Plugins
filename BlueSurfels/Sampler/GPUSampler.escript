@@ -659,7 +659,7 @@ SurfelGUI.registerSamplerGUI(T, fn(sampler) {
 			GUI.LABEL : "Directions",
 			GUI.RANGE : [1,MAX_DIRECTIONS],
 			GUI.RANGE_STEP_SIZE : 1,
-			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('gpusampler.directions', 16, [sampler] => fn(sampler, count) {
+			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('directions', 16, [sampler] => fn(sampler, count) {
 				sampler.setDirections(Utils.createDirections(count));
 			}),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],

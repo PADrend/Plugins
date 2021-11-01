@@ -71,16 +71,12 @@ SurfelGUI.registerSamplerGUI(T, fn(sampler) {
 	var elements = SamplerBase.getCommonGUI(sampler);
 	return elements.append([
 		{
-			GUI.TYPE :	GUI.TYPE_SELECT,
-			GUI.LABEL :	"Directions",
-			GUI.OPTIONS :	{
-				var dirOptions = [];
-				foreach(Utils.getDirectionPresets() as var name, var dirs)
-					dirOptions += [name, name + " ("+dirs.count()+")"];
-				dirOptions;
-			},	
-			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('directions', 'cube', [sampler] => fn(sampler, name) {
-				sampler.setDirections(Utils.getDirectionPresets()[name]);
+			GUI.TYPE : GUI.TYPE_RANGE,
+			GUI.LABEL : "Directions",
+			GUI.RANGE : [1,32],
+			GUI.RANGE_STEP_SIZE : 1,
+			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('directions', 16, [sampler] => fn(sampler, count) {
+				sampler.setDirections(Utils.createDirections(count));
 			}),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],
 		},
