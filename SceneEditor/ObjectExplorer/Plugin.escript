@@ -167,6 +167,7 @@ plugin.initGUI := fn(gui){
 			{
 				GUI.TYPE : GUI.TYPE_MENU,
 				GUI.LABEL : "Add object trait",
+				GUI.MENU_WIDTH : 200,
 				GUI.MENU : [node,refreshCallback] => fn(node,refreshCallback){
 					var enabledTraitNames =  new Set(Std.module('LibMinSGExt/Traits/PersistentNodeTrait').getLocalPersistentNodeTraitNames(node));
 					

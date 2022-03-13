@@ -45,28 +45,30 @@ T.setValueType ::= fn(type, size=0) {
 	}
 };
 
-T.blockSize @(private) := 1024;
+T.blockSize @(private) := 512;
 T.workGroupSize @(private) := 256;
 T.setWorkGroupSize ::= fn(value) { reset(); this.workGroupSize = value; setMaxElements(this.maxElements); };
 
 T.maxElements @(private) := 0;
-T.setMaxElements ::= fn(value) { reset(); this.maxElements = roundUp(value, workGroupSize*4); };
+T.setMaxElements ::= fn(value) { reset(); this.maxElements = roundUp(value, workGroupSize*2); };
+
+T.scanFn @(private) := "a + b";
+T.setScanFn ::= fn(fun) { reset(); this.scanFn = fun; };
 
 T.bindingOffset @(private) := 0;
 T.setBindingOffset ::= fn(value) { reset(); this.bindingOffset = value; };
-T.tmpValueBuffer @(private) := void;
-T.histogramBuffer @(private) := void;
-T.blockSumBuffer @(private) := void;
+T.blockBuffer @(private) := void;
 
 T.build ::= fn() {
 	//outln("Building compaction shader.");
-	blockSize = workGroupSize * 4;
+	blockSize = workGroupSize * 2;
 	var blockCount = (maxElements/blockSize).ceil();
-	var histogramBlocks = (blockCount / blockSize).ceil();
 
 	var defines = {
 		"WORK_GROUP_SIZE": workGroupSize,
+		"STANDALONE": 1,
 		"TYPE": valueType,
+		"SCAN_FN(a, b)": "(" + scanFn + ")",
 		"VALUE_BINDING": this.bindingOffset + 0,
 		"BLOCK_BINDING": this.bindingOffset + 1,
 	};
@@ -74,10 +76,8 @@ T.build ::= fn() {
 	// compile program
 	renderingContext.pushAndSetShader(program);
 	renderingContext.popShader();
-		
-	this.tmpValueBuffer = (new Rendering.BufferObject).allocate(valueSize * maxElements).clear();
-	this.histogramBuffer = (new Rendering.BufferObject).allocate(4 * blockCount).clear();
-	this.blockSumBuffer = (new Rendering.BufferObject).allocate(4+4 * blockCount).clear();
+	
+	this.blockBuffer = (new Rendering.BufferObject).allocate(4 * blockCount).clear();
 		
 	initialized = true;
 };
@@ -89,19 +89,15 @@ T.reset ::= fn() {
 
 T.bind @(private) ::= fn(valueBuffer) {
 	renderingContext.bindBuffer(valueBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+0);
-	renderingContext.bindBuffer(tmpValueBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+1);
-	renderingContext.bindBuffer(histogramBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+2);
-	renderingContext.bindBuffer(blockSumBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+3);
+	renderingContext.bindBuffer(blockBuffer, Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset+1);
 };
 
 T.unbind @(private) ::= fn() {
 	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset + 0);
 	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset + 1);
-	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset + 2);
-	renderingContext.unbindBuffer(Rendering.TARGET_SHADER_STORAGE_BUFFER, this.bindingOffset + 3);
 };
 
-T.compact ::= fn(valueBuffer, elements, offset=0) {
+T.scan ::= fn(valueBuffer, elements, offset=0) {
 	if(elements+offset > maxElements)
 		setMaxElements(elements+offset);
 	if(!initialized)
@@ -115,28 +111,24 @@ T.compact ::= fn(valueBuffer, elements, offset=0) {
 	program.setUniform(renderingContext,'elementRange', Rendering.Uniform.VEC2I, [new Geometry.Vec2(offset, offset+elements)]);
 	program.setUniform(renderingContext,'blockCount', Rendering.Uniform.INT, [blockCount]);
 		
-	// local compact into tmpValueBuffer
-	renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["localCompact"]);
+	// local scan
+	renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["preScan"]);
+	renderingContext.dispatchCompute(blockCount);
+	renderingContext.barrier();
+		
+	// scan blocks
+	renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["scanBlocks"]);
+	renderingContext.dispatchCompute(1);
+	renderingContext.barrier();
+	
+	// sum blocks
+	renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["sumBlocks"]);
 	renderingContext.dispatchCompute(blockCount);
 	renderingContext.barrier();
 	
-	// scan histogram
-	renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["scanHistogram"]);
-	renderingContext.dispatchCompute(1);
-	renderingContext.barrier();
-		
-	// global compact
-	renderingContext.loadUniformSubroutines(Rendering.SHADER_STAGE_COMPUTE, ["compact"]); 
-	renderingContext.dispatchCompute(blockCount);
-	renderingContext.barrier();
-		
 	unbind();
 	renderingContext.popShader();
 	return this;
-};
-
-T.getCount ::= fn() {
-	return blockSumBuffer.download(1, Util.TypeConstant.UINT32)[0];
 };
 
 return T;

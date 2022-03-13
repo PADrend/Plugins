@@ -51,6 +51,8 @@ plugin.pickNode := fn( screenCoordinate, [MinSG.Node,void] rootNode=void, [Numbe
 	screenCoordinate = new Geometry.Vec2(screenCoordinate);
 	if(!rootNode)
 		rootNode = PADrend.getCurrentScene();
+	if(!rootNode)
+		return void;
 
 	@(once) static EventLoop = Util.requirePlugin('PADrend/EventLoop');
 	

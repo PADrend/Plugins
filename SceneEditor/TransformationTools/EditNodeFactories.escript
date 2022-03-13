@@ -20,6 +20,11 @@ static EditNodeTraits = module('./EditNodeTraits');
  
 static EditNodeFactories = new Namespace;
 
+static vd = new Rendering.VertexDescription;
+vd.appendPosition3D();
+vd.appendNormalFloat();
+vd.appendColorRGBAByte();
+
 //---------------------------------------------------------------------------------
 
 /*!	Creates a 3-d-translation node. It provides the following methods:
@@ -223,7 +228,7 @@ EditNodeFactories.createSnapEditNode := fn(){
 	container.onTranslationStart := new MultiProcedure; //fn(){...}
 	container.onTranslationStop := new MultiProcedure; //fn(){Geometry.Vec3}
 
-	var arrow = Rendering.MeshBuilder.createArrow(0.025, 1.0);
+	var arrow = Rendering.createArrow(vd, 0.025, 1.0);
 	var ring = EditNodeFactories.createRingSegmentMesh(0.0,360, 0.3, 0, 0.5);
 
     foreach( [	[arrow,	EditNodeTraits.TranslatableAxisTrait,	new Util.Color4f(1,0,0,0.5),new Geometry.Vec3(0,0,1)],
@@ -319,7 +324,7 @@ EditNodeFactories.createRingSegmentMesh  := fn(startDeg,endDeg,stepSize,minR,max
 
 EditNodeFactories.getArrowMeshToXAxis  := fn(){
 	if(!thisFn.isSet($mesh))
-		thisFn.mesh := Rendering.MeshBuilder.createArrow(0.025, 1.0);
+		thisFn.mesh := Rendering.createArrow(vd, 0.025, 1.0);
 	return thisFn.mesh;
 };
 
@@ -353,7 +358,7 @@ EditNodeFactories.getCubeMesh  := fn(){
 
 EditNodeFactories.getSmallArrowMesh  := fn(){
 	if(!thisFn.isSet($mesh))
-		thisFn.mesh := Rendering.MeshBuilder.createArrow(0.025, 0.25);
+		thisFn.mesh := Rendering.createArrow(vd, 0.025, 0.25);
 	return thisFn.mesh;
 };
 

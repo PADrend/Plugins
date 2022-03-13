@@ -21,7 +21,7 @@
 #endif 
 
 #ifndef SCAN_FN
-#define SCAN_FN(a, b) a + b
+#define SCAN_FN(a, b) (a + b)
 #endif
 
 #ifndef TYPE
@@ -35,6 +35,8 @@
 #ifndef BLOCK_BINDING
 #define BLOCK_BINDING 1
 #endif
+
+// ---------------------------------------------------
 
 const uint n = 2 * WORK_GROUP_SIZE;
 shared TYPE localData[2*WORK_GROUP_SIZE];
@@ -83,6 +85,8 @@ void scan(inout TYPE value1, inout TYPE value2) {
 	value2 = localData[2*lid+1];
 }
 
+
+// ---------------------------------------------------
 #ifdef STANDALONE
 
 layout(local_size_x = WORK_GROUP_SIZE) in;
@@ -91,6 +95,17 @@ subroutine void phase();
 layout(location = 0) subroutine uniform phase executePhase;
 void main() { executePhase(); }
 
+// constants
+const uint globalId = gl_GlobalInvocationID.x;
+const uint localId = gl_LocalInvocationIndex;
+const uint groupId = gl_WorkGroupID.x;
+const uint groupSize = gl_WorkGroupSize.x;
+
+// uniforms
+uniform ivec2 elementRange;
+uniform int blockCount;
+
+// buffers
 layout(std430, binding = VALUE_BINDING) buffer ValueBuffer {
 	TYPE values[];
 };
@@ -99,25 +114,61 @@ layout(std430, binding = BLOCK_BINDING) buffer BlockBuffer {
 	TYPE block[];
 };
 
+// ---------------------------------------------------
+
 layout(index = 0) subroutine(phase)
 void preScan() {
-	const uint id = gl_GlobalInvocationID.x;
-	TYPE value1 = values[2*id];
-	TYPE value2 = values[2*id+1];
+	const uint index = elementRange.x + 2*globalId;
+	if(index > elementRange.y)
+		return;
+	TYPE value1 = values[index];
+	TYPE value2 = values[index+1];
 	TYPE lastValue = value2;
 	scan(value1, value2);
-	values[2*id] = value1;
-	values[2*id+1] = value2;
-	if(gl_LocalInvocationIndex == gl_WorkGroupSize.x-1)
-		block[gl_WorkGroupID.x] = SCAN_FN(value2, lastValue);
+	values[index] = value1;
+	values[index+1] = value2;
+	if(localId == groupSize-1)
+		block[groupId] = SCAN_FN(value2, lastValue);
 }
 
+// ---------------------------------------------------
+
+shared TYPE blockSum;
 layout(index = 1) subroutine(phase)
-void sumBlocks() {
-	const uint id = gl_GlobalInvocationID.x;
-	uint sum = block[gl_WorkGroupID.x];
-	values[2*id] += sum;
-	values[2*id+1] += sum;
+void scanBlocks() {
+	if(globalId == 0)
+		blockSum = 0;
+	
+	for(uint i=globalId*2; i<blockCount; i+=2*WORK_GROUP_SIZE) {
+		memoryBarrierShared();
+		barrier();
+			
+		TYPE value1 = block[i];
+		TYPE value2 = block[i+1];
+		TYPE lastValue = value2;
+		scan(value1, value2);
+		block[i] = value1 + blockSum;
+		block[i+1] = value2 + blockSum;
+
+		memoryBarrierShared();
+		barrier();
+		if(globalId == WORK_GROUP_SIZE-1)
+			blockSum = SCAN_FN(blockSum, SCAN_FN(value2, lastValue));
+	}
 }
+
+// ---------------------------------------------------
+
+layout(index = 2) subroutine(phase)
+void sumBlocks() {
+	const uint index = elementRange.x + 2*globalId;
+	if(index > elementRange.y)
+		return;
+	TYPE sum = block[groupId];
+	values[index] += sum;
+	values[index+1] += sum;
+}
+
+// ---------------------------------------------------
 
 #endif

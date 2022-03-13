@@ -515,7 +515,7 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 		
 		// get maximum radius
 		maxReducer.reduce(sampleMesh, sampleCount, sampleCount);
-		maxRadius = maxReducer.getValue(Util.TypeConstant.FLOAT, 1);
+		maxRadius = maxReducer.getValue(Util.TypeConstant.FLOAT, 4);
 		paramBuffer.upload([radiusFactor*maxRadius], 24, Util.TypeConstant.FLOAT);
 		
 		// remove samples that are smaller than maxRadius * x%
@@ -540,8 +540,8 @@ T.sample @(public) ::= fn(MinSG.Node node) {
 		beginProfile('Sort', 3);
 		sorter.sort(sampleMesh, void, sampleCount, sampleCount);
 		dispatchCompute(compute_shader, 'findInsertCount', sampleCount);
-		insertCount = paramBuffer.download(1, Util.TypeConstant.INT32, 3).front();
-		minRadius = paramBuffer.download(1, Util.TypeConstant.FLOAT, 4).front();
+		insertCount = paramBuffer.download(1, Util.TypeConstant.INT32, 12).front();
+		minRadius = paramBuffer.download(1, Util.TypeConstant.FLOAT, 16).front();
 		endProfile(3);
 		
 		// find minimum radius
@@ -659,7 +659,7 @@ SurfelGUI.registerSamplerGUI(T, fn(sampler) {
 			GUI.LABEL : "Directions",
 			GUI.RANGE : [1,MAX_DIRECTIONS],
 			GUI.RANGE_STEP_SIZE : 1,
-			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('gpusampler.directions', 16, [sampler] => fn(sampler, count) {
+			GUI.DATA_WRAPPER : SurfelGUI.createConfigWrapper('directions', 16, [sampler] => fn(sampler, count) {
 				sampler.setDirections(Utils.createDirections(count));
 			}),
 			GUI.SIZE : [GUI.WIDTH_FILL_ABS, 5, 0],

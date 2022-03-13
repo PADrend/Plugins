@@ -62,7 +62,8 @@ static registerMenus = fn(gui){
 		{
 			GUI.TYPE : GUI.TYPE_MENU,
 			GUI.LABEL : "Environment",
-			GUI.MENU : 'Effects_EnvironmentMenu'
+			GUI.MENU : 'Effects_EnvironmentMenu',
+			GUI.MENU_WIDTH : 150,
 		}
 	]);
 
@@ -121,6 +122,17 @@ static registerMenus = fn(gui){
 			GUI.LABEL : "Skybox 2",
 			GUI.ON_CLICK : fn() {
 			   PADrend.getRootNode().addState(MinSG.createSkybox("./"+PADrend.getDataPath()+"/texture/SKY_Raster_(?).png"));
+			},
+		},
+		{
+			GUI.TYPE : GUI.TYPE_BUTTON,
+			GUI.LABEL : "IBL Environment Map",
+			GUI.TOOLTIP		:	"Attach a global environmap to the root node used by some PBR shaders.",
+			GUI.ON_CLICK : fn() {
+				var state = new MinSG.IBLEnvironmentState;
+				var defaultFile = PADrend.getSceneManager().getFileLocator().locateFile("texture/autumn_park_4k.hdr");
+				state.loadEnvironmentMapFromHDR(defaultFile);
+				PADrend.getRootNode() += state;
 			}
 		}
 	]);

@@ -15,6 +15,26 @@
 	Various extensions to the Rendering library.
  */
 
+static vd = new Rendering.VertexDescription;
+vd.appendPosition3D();
+vd.appendNormalFloat();
+vd.appendColorRGBAByte();
+vd.appendTexCoord();
+
+Rendering.MeshBuilder.createArrow := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createArrow(...) is deprecated! Use Rendering.createArrow(...) instead." ); return Rendering.createArrow(vd, p...); };
+Rendering.MeshBuilder.createCone := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createCone(...) is deprecated! Use Rendering.createCone(...) instead." ); return Rendering.createCone(vd, p...); };
+Rendering.MeshBuilder.createConicalFrustum := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createConicalFrustum(...) is deprecated! Use Rendering.createConicalFrustum(...) instead." ); return Rendering.createConicalFrustum(vd, p...); };
+Rendering.MeshBuilder.createDiscSector := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createDiscSector(...) is deprecated! Use Rendering.createDiscSector(...) instead." ); return Rendering.createDiscSector(vd, p...); };
+Rendering.MeshBuilder.createDome := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createDome(...) is deprecated! Use Rendering.createDome(...) instead." ); return Rendering.createDome(vd, p...); };
+Rendering.MeshBuilder.createRectangle := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createRectangle(...) is deprecated! Use Rendering.createRectangle(...) instead." ); return Rendering.createRectangle(vd, p...); };
+Rendering.MeshBuilder.createRingSector := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createRingSector(...) is deprecated! Use Rendering.createRingSector(...) instead." ); return Rendering.createRingSector(vd, p...); };
+Rendering.MeshBuilder.createSphere := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createSphere(...) is deprecated! Use Rendering.createSphere(...) instead." ); return Rendering.createSphere(vd, p...); };
+Rendering.MeshBuilder.createBox := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createBox(...) is deprecated! Use Rendering.createBox(...) instead." ); return Rendering.createBox(vd, p...); };
+Rendering.MeshBuilder.createMeshFromBitmaps := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createMeshFromBitmaps(...) is deprecated! Use Rendering.createMeshFromBitmaps(...) instead." ); return Rendering.createMeshFromBitmaps(vd, p...); };
+Rendering.MeshBuilder.createHexGrid := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createHexGrid(...) is deprecated! Use Rendering.createHexGrid(...) instead." ); return Rendering.createHexGrid(vd, p...); };
+Rendering.MeshBuilder.createVoxelMesh := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createVoxelMesh(...) is deprecated! Use Rendering.createVoxelMesh(...) instead." ); return Rendering.createVoxelMesh(vd, p...); };
+Rendering.MeshBuilder.createTorus := fn(p...) { Runtime.warn( "Rendering.MeshBuilder.createTorus(...) is deprecated! Use Rendering.createTorus(...) instead." ); return Rendering.createTorus(vd, p...); };
+
 //------------------------------------
 
 //! Show the given texture on the sceen for the given time and swap the frame buffer.

@@ -39,7 +39,6 @@ if(EScript.VERSION<607)
 	Std.module('LibRenderingExt/initRenderingUtils');	
 	Std.module('LibMinSGExt/initMinSGUtils');
 	Std.module('LibMinSGExt/initNodeExtensions');
-	Std.module('LibMinSGExt/initMeshBuilderExtensions');
 
 }
 { // Declare some global variables

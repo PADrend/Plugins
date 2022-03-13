@@ -148,6 +148,7 @@ SceneManagement.ex_Init := fn(...){
 	{  // Create Scene
 		rootNode = new MinSG.ListNode;
 		getRootNode().name := "RootNode";
+		getRootNode().setRenderingLayers(0xff);
 
 		systemConfig.setInfo('PADrend.sun',"Global directional light source.");
 		if(systemConfig.getValue('PADrend.sun.enabled',true)){
@@ -390,7 +391,7 @@ SceneManagement.registerLoader := fn(loaderFn, Array extensions) {
 
 SceneManagement.getFileExtensions := fn() {
 	var extensions = new Std.Set;
-	extensions.merge([".minsg", ".dae", ".DAE"]);
+	extensions.merge([".minsg", ".dae", ".DAE", ".gltf", ".glb"]);
 	foreach(registeredLoaders as var entry) {
 		extensions.merge(entry[1]);
 	}

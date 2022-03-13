@@ -72,35 +72,39 @@ T.setWorkspaceRootPath ::= 	fn([String,false] p){	this.__workspaceRootPath = p;	
 T.loadScene ::= fn(String filename, Number importOptions=0){
 	var start = clock();
 	var sceneRoot = void;
-	if(filename.endsWith(".dae") || filename.endsWith(".DAE")) {
-	    outln("Loading Collada: ",filename);
-
-		sceneRoot = MinSG.SceneManagement.loadCOLLADA(this, filename, importOptions);
+	var nodeArray = void; 
+	var importContext = MinSG.SceneManagement.createImportContext(this,importOptions);
+	var f = new Util.FileName( filename );
+	importContext.addSearchPath( f.getFSName() + "://" + f.getDir() );	
+	foreach(this.__searchPaths as var p)
+		importContext.addSearchPath(p);
+	
+	if(filename.endsWith(".gltf") || filename.endsWith(".glb")) {
+		outln("Loading glTF: ",filename);
+		nodeArray = MinSG.SceneManagement.loadGLTF(importContext, filename);
+	} else if(filename.endsWith(".dae") || filename.endsWith(".DAE")) {
+		outln("Loading Collada: ",filename);
+		var root = MinSG.SceneManagement.loadCOLLADA(this, filename, importOptions);
+		if(root) nodeArray = [root];
 	} else {
-	    Util.info("Loading MinSG: ",filename,"\n");
-	    var importContext = MinSG.SceneManagement.createImportContext(this,importOptions);
-    
-	    var f = new Util.FileName( filename );
-	    importContext.addSearchPath( f.getFSName() + "://" + f.getDir() );
-	    
-	    foreach(this.__searchPaths as var p)
-			importContext.addSearchPath(p);
-	    
-    	var nodeArray = MinSG.SceneManagement.loadMinSGFile(importContext,filename);
-    	if(!nodeArray){
-			Runtime.warn("Could not load scene from file '"+filename+"'");
-    	}else if(nodeArray.count()>1){
-			sceneRoot = new MinSG.ListNode;
-			foreach(nodeArray as var node)
-				sceneRoot += node;
-			outln("Note: The MinSG-file ",filename," contains more than a single top level node. Adding a new toplevel ListNode.");
-    	}else if(nodeArray.size()==1){
-			sceneRoot=nodeArray[0];
-    	}
+		Util.info("Loading MinSG: ",filename,"\n");
+		nodeArray = MinSG.SceneManagement.loadMinSGFile(importContext, filename);
 	}
-    if(!sceneRoot)
-        return false;
-    sceneRoot.filename := filename;
+	
+	if(!nodeArray){
+		Runtime.warn("Could not load scene from file '"+filename+"'");
+	}else if(nodeArray.count()>1){
+		sceneRoot = new MinSG.ListNode;
+		foreach(nodeArray as var node)
+			sceneRoot += node;
+		outln("Note: The scene file ",filename," contains more than a single top level node. Adding a new toplevel ListNode.");
+	}else if(nodeArray.size()==1){
+		sceneRoot=nodeArray[0];
+	}
+	
+	if(!sceneRoot)
+		return false;
+	sceneRoot.filename := filename;
 	Util.info("\nDone. ",(clock()-start)," sek\n");
 	return sceneRoot;
 };

@@ -12,7 +12,7 @@
  */
 static T = new Type();
 
-T.fileLocator @(private, init) := fn() { return (new Util.FileLocator).setSearchPaths([
+T.fileLocator @(private, init) := fn() { var locator = (new Util.FileLocator).setSearchPaths([
       "./build/",
       "./bin/",
       "./lib/",
@@ -21,6 +21,13 @@ T.fileLocator @(private, init) := fn() { return (new Util.FileLocator).setSearch
       "C:/Program Files (x86)/PADrendComplete/bin",
       "C:/Program Files (x86)/PADrendComplete/lib"
   ]);
+  if(BUILD_TYPE == "debug") {
+    locator.addSearchPath("./build/Debug/");
+  } else {
+    locator.addSearchPath("./build/RelWithDebInfo/");
+    locator.addSearchPath("./build/Release/");
+  }
+  return locator;
 };
 
 T.osExtension @(private, init) := fn() {
@@ -44,6 +51,9 @@ T.addSearchPath ::= fn(path) {
 T.loadLibary ::= fn(name) {
   var fileName = name + osExtension;
   var lib = fileLocator.locateFile(fileName);
+  if(!lib) {
+    lib = fileLocator.locateFile("lib" + fileName);
+  }
   if(!lib) {
     outln("Could not find library: ", fileName);
     return false;

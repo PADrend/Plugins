@@ -34,6 +34,7 @@ plugin.init @(override) := fn(){
 	
 	GLOBALS.gui := gui; //! \deprecated
 	gui.windows := new Map; //! \deprecated
+	gui.contentScale := 1.0;
 		
 	Util.registerExtension('PADrend_Init',			fn(){
 		module('LibGUIExt/FileDialog').folderCacheProvider = PADrend.configCache;
@@ -43,22 +44,32 @@ plugin.init @(override) := fn(){
 	Util.registerExtension('PADrend_AfterRendering', fn(...){ renderGUI(); }, Extension.LOW_PRIORITY*2);
 	
 	Util.registerExtension('PADrend_Init', fn(){
+		gui.contentScale = PADrend.SystemUI.getWindow().getContentScale();
 		// register position converters: screen pos <-> gui pos
 		gui.screenPosToGUIPos @(override) := [gui.screenPosToGUIPos] => fn(originalFun, pos){
+			pos = new Geometry.Vec2(pos);
 			if(guiMode()==MODE_DUAL_COMPESSED){
-				pos = new Geometry.Vec2(pos);
 				pos.x( (pos.x()*2) % renderingContext.getWindowWidth() );
 			}else if(guiMode()==MODE_DUAL){
-				pos = new Geometry.Vec2(pos);
 				pos.x( pos.x() % (renderingContext.getWindowWidth()*0.5) );
 			}
+			var guiRect = gui.getScreenRect();
+			var screenRect = renderingContext.getViewport();
+			pos -= screenRect.getPosition();
+			pos.x(pos.x() / screenRect.width() * guiRect.width());
+			pos.y(pos.y() / screenRect.height() * guiRect.height());
 			return originalFun(pos);
 		};
 		gui.guiPosToScreenPos @(override) := [gui.guiPosToScreenPos] => fn(originalFun, pos){
+			pos = new Geometry.Vec2(pos);
 			if(guiMode()==MODE_DUAL_COMPESSED){
-				pos = new Geometry.Vec2(pos);
 				pos.x( pos.x()*0.5 );
 			}
+			var guiRect = gui.getScreenRect();
+			var screenRect = renderingContext.getViewport();
+			pos.x(pos.x() / guiRect.width() * screenRect.width());
+			pos.y(pos.y() / guiRect.height() * screenRect.height());
+			pos += screenRect.getPosition();
 			return originalFun(pos);
 		};
 	});
@@ -78,6 +89,9 @@ plugin.init @(override) := fn(){
 			evt = evt.clone();
 			evt.x = pos.x();
 			evt.y = pos.y();
+		}
+		if(evt.type == Util.UI.EVENT_RESIZE) {
+			gui.contentScale = evt.contentScale;
 		}
 		return gui.handleEvent(evt); 
 	});
@@ -111,22 +125,23 @@ static MODE_DUAL_COMPESSED = 3;
 
 static guiMode = new DataWrapper(MODE_NORMAL);
 
-plugin.guiMode :=  guiMode;
+plugin.guiMode := guiMode;
 
 static gui_FBO;
 static gui_Texture;
 static initGUI_FBO = fn(){
 	gui_FBO = new Rendering.FBO;
 
-		renderingContext.pushAndSetFBO(gui_FBO);
-		gui_Texture = Rendering.createStdTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
-		gui_FBO.attachColorTexture(renderingContext,gui_Texture);
-		outln(gui_FBO.getStatusMessage(renderingContext));
+	renderingContext.pushAndSetFBO(gui_FBO);
+	gui_Texture = Rendering.createStdTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
+	gui_FBO.attachColorTexture(renderingContext,gui_Texture);
+	outln(gui_FBO.getStatusMessage(renderingContext));
 
-		renderingContext.popFBO();
+	renderingContext.popFBO();
 };
 
 static renderGUI = fn(){
+	gui.setScreenSize(renderingContext.getViewport().getSize() / gui.contentScale);
 	switch(guiMode()){
 		case MODE_NORMAL:
 			gui.display();

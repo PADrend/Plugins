@@ -65,6 +65,8 @@ PADrend.SystemUI.init @(override) := fn(){
 		properties.positioned				= true & windowPos;
 		properties.posX						= windowPos ? windowPos[0] : 0;
 		properties.posY						= windowPos ? windowPos[1] : 0;
+		//! The monitor the window starts in (fullscreen only; -1 for default)
+		properties.monitor				= systemConfig.getValue('PADrend.window.monitor', -1); 
 
 		//! The size of the client area of the window.
 		properties.clientAreaWidth			=	windowSize[0];

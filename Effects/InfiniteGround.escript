@@ -147,9 +147,16 @@ static getDomeNode = fn(){
 	static dome;
 	if(!dome){
 		dome = new MinSG.GeometryNode;
-		dome.setMesh(Rendering.MeshBuilder.createDome(100,40,40,1));
+		var vd = new Rendering.VertexDescription;
+		vd.appendPosition3D();
+		vd.appendNormalFloat();
+		vd.appendColorRGBAByte();
+		vd.appendTexCoord();
+		dome.setMesh(Rendering.createDome(vd, 100,40,40,1));
+		dome.setRenderingLayers(0x81); // layers 1 & 7
 
 		var updatePositionState = new MinSG.ScriptedState;
+		updatePositionState.setRenderingLayers(0x81); // layers 1 & 7
 		updatePositionState.doEnableState @(override) := fn(node, rp) {
 			
 			var pos = frameContext.getCamera().getWorldOrigin();
@@ -181,17 +188,21 @@ static getDomeNode = fn(){
 		// load textures
 		var noise = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/DynamicSky/dynamic_sky1.bmp"));
 		noise.setTextureUnit(0);
+		noise.setRenderingLayers(0x81); // layers 1 & 7
 		dome += noise;
 		var meadow1 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/meadow1.bmp"));
 		meadow1.getTexture().createMipmaps(renderingContext);
 		meadow1.setTextureUnit(1);
+		meadow1.setRenderingLayers(0x81); // layers 1 & 7
 		dome += meadow1;
 		var meadow2 = new MinSG.TextureState(Rendering.createTextureFromFile(resourcesFolder+"/InfiniteGround/concrete2.bmp"));
 		meadow2.getTexture().createMipmaps(renderingContext);
 		meadow2.setTextureUnit(2);
+		meadow2.setRenderingLayers(0x81); // layers 1 & 7
 		dome += meadow2;
 
 		dome += getShaderState();
+		getShaderState().setRenderingLayers(0x81); // layers 1 & 7
 		
 	}
 	return dome;
@@ -202,6 +213,7 @@ static getEnvState = fn(){
 		// create ground dome
 		var dome = getDomeNode();
 		envState = new MinSG.EnvironmentState;
+		envState.setRenderingLayers(0x81); // layers 1 & 7
 
 		envState.setEnvironment(dome);
 		dome.moveRel(0,0,0);

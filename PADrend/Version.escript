@@ -13,8 +13,8 @@
 
 var Version = new Namespace;
 
-Version.VERSION := 10100; // major * 10000 + minor * 100 + release
-Version.VERSION_STRING := "PADrend 1.1.0";
+Version.VERSION := 10200; // major * 10000 + minor * 100 + release
+Version.VERSION_STRING := "PADrend 1.2.0";
 Version.VERSION_FULL_STRING := Version.VERSION_STRING + " -- Platform for Algorithm Development and rendering (PADrend.de)";
 
 var build = "";

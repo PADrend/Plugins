@@ -3,6 +3,7 @@
  * Platform for Algorithm Development and Rendering (PADrend).
  * Web page: http://www.padrend.de/
  * Copyright (C) 2012-2013 Claudius Jähn <claudius@uni-paderborn.de>
+ * Copyright (C) 2020 Sascha Brandt <sascha@brandt.graphics>
  * 
  * PADrend consists of an open source part and a proprietary part.
  * The open source part of PADrend is subject to the terms of the Mozilla
@@ -18,24 +19,18 @@
 var Effect = new Type( Std.module('Effects/PPEffect') );
 
 Effect._constructor:=fn() {
+	this.lastViewport := new Geometry.Rect(0,0,0,0);
 
-  this.fbo:=new Rendering.FBO;
-  //renderingContext.pushAndSetFBO(fbo);
-  this.colorTexture_1:=Rendering.createHDRTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
-  fbo.attachColorTexture(renderingContext,colorTexture_1);
-  
-  this.depthTexture:=Rendering.createDepthTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight());
-  fbo.attachDepthTexture(renderingContext,depthTexture);
-  //renderingContext.popFBO();
-  
-  this.shader:=Rendering.Shader.loadShader(getShaderFolder()+"Default.vs",getShaderFolder()+"SSAO.fs");
-  //renderingContext.pushAndSetShader(shader);
-  shader.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]) ;
-  shader.setUniform(renderingContext,'TDepth',Rendering.Uniform.INT,[1]) ;
-  shader.setUniform(renderingContext,'pixelSizeX',Rendering.Uniform.FLOAT,[1.0/renderingContext.getWindowWidth()]) ;
-  shader.setUniform(renderingContext,'pixelSizeY',Rendering.Uniform.FLOAT,[1.0/renderingContext.getWindowHeight()]) ;
-	//renderingContext.popShader();
-
+	this.fbo := new Rendering.FBO;
+	this.colorTexture_1 := void;
+	this.depthTexture := void;
+	this.colorTexture_2 := void;
+	this.depthTexture_2 := void;
+	this.colorTexture_3 := void;
+	this.shader := Rendering.Shader.loadShader(getShaderFolder()+"Default.vs",getShaderFolder()+"SSAO.fs");
+	shader.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]) ;
+	shader.setUniform(renderingContext,'TDepth',Rendering.Uniform.INT,[1]) ;
+	
 	// settings
 	this.settings := {
 		'debugBlend' : new Std.DataWrapper( 0 ),
@@ -51,28 +46,47 @@ Effect._constructor:=fn() {
 	};
 	this.presetManager := new (Std.module('LibGUIExt/PresetManager'))( PADrend.configCache, 'Effects.SSAO', settings );
 
-	// -------
-	// last frame
-  this.depthTexture_2:=Rendering.createDepthTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight());
-  this.colorTexture_2:=Rendering.createHDRTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
-
 	this.renderPassInfo := new Map;
-
-	// -------
-	// ssaa
+	
 	this.shader2:= Rendering.Shader.createShader();
 	shader2.attachVSFile(getShaderFolder()+"AA.sfn");
 	shader2.attachFSFile(getShaderFolder()+"Fxaa3_8_mod.sfn");
 	shader2.attachFSFile(getShaderFolder()+"AA.sfn");
 	shader2.setUniform(renderingContext,'TUnit_1',Rendering.Uniform.INT,[0]);
-	shader2.setUniform(renderingContext,'pixelSizeY',Rendering.Uniform.FLOAT,[1.0/renderingContext.getWindowHeight()]);
-	shader2.setUniform(renderingContext,'pixelSizeX',Rendering.Uniform.FLOAT,[1.0/renderingContext.getWindowWidth()]);
+};
 
-	this.colorTexture_3 := Rendering.createHDRTexture(renderingContext.getWindowWidth(),renderingContext.getWindowHeight(),true);
+Effect.updateResources := fn(viewport) {
+	if(lastViewport.getWidth() == viewport.getWidth() && lastViewport.getHeight() == viewport.getHeight())
+		return;
+	lastViewport = viewport;
+
+	this.colorTexture_1=Rendering.createHDRTexture(viewport.getWidth(), viewport.getHeight(),true);
+	fbo.attachColorTexture(renderingContext,colorTexture_1);
+	
+	this.depthTexture=Rendering.createDepthTexture(viewport.getWidth(), viewport.getHeight());
+	fbo.attachDepthTexture(renderingContext,depthTexture);
+	
+	shader.setUniform(renderingContext,'pixelSizeX',Rendering.Uniform.FLOAT,[1.0/viewport.getWidth()]) ;
+	shader.setUniform(renderingContext,'pixelSizeY',Rendering.Uniform.FLOAT,[1.0/viewport.getHeight()]) ;
+
+
+	// -------
+	// last frame
+	this.depthTexture_2=Rendering.createDepthTexture(viewport.getWidth(),viewport.getHeight());
+	this.colorTexture_2=Rendering.createHDRTexture(viewport.getWidth(),viewport.getHeight(),true);
+
+	// -------
+	// ssaa
+	shader2.setUniform(renderingContext,'pixelSizeY',Rendering.Uniform.FLOAT,[1.0/viewport.getHeight()]);
+	shader2.setUniform(renderingContext,'pixelSizeX',Rendering.Uniform.FLOAT,[1.0/viewport.getWidth()]);
+
+	this.colorTexture_3 = Rendering.createHDRTexture(viewport.getWidth(),viewport.getHeight(),true);
 };
 
 /*! ---|> PPEffect  */
 Effect.begin @(override) := fn(){
+	updateResources(renderingContext.getViewport());
+
 	// swap texture1 and texture 2
 	var t = depthTexture_2;
 	depthTexture_2 = depthTexture;
@@ -82,14 +96,14 @@ Effect.begin @(override) := fn(){
 	colorTexture_1 = t;
 
 	// ------
-  renderingContext.pushAndSetFBO(fbo);
-  fbo.attachColorTexture(renderingContext,colorTexture_1);
-  fbo.attachDepthTexture(renderingContext,depthTexture);
+	renderingContext.pushAndSetFBO(fbo);
+	fbo.attachColorTexture(renderingContext,colorTexture_1);
+	fbo.attachDepthTexture(renderingContext,depthTexture);
 
-  renderingContext.pushAndSetTexture(6, colorTexture_2, Rendering.TexUnitUsageParameter.GENERAL_PURPOSE);
-  renderingContext.pushAndSetTexture(7, depthTexture_2, Rendering.TexUnitUsageParameter.GENERAL_PURPOSE);
-  renderingContext.setGlobalUniform('lastColorBuffer',Rendering.Uniform.INT,[6]);
-  renderingContext.setGlobalUniform('lastDepthBuffer',Rendering.Uniform.INT,[7]);
+	renderingContext.pushAndSetTexture(6, colorTexture_2, Rendering.TexUnitUsageParameter.GENERAL_PURPOSE);
+	renderingContext.pushAndSetTexture(7, depthTexture_2, Rendering.TexUnitUsageParameter.GENERAL_PURPOSE);
+	renderingContext.setGlobalUniform('lastColorBuffer',Rendering.Uniform.INT,[6]);
+	renderingContext.setGlobalUniform('lastDepthBuffer',Rendering.Uniform.INT,[7]);
 
 };
 /*! ---|> PPEffect  */
@@ -132,17 +146,15 @@ Effect.end @(override) ::= fn(){
 		}
 		
 	}
-		
 
-		
+	var viewport = renderingContext.getViewport();
+	var texRect = new Geometry.Rect(0,0,1,1);
 	if( settings['fxaa']() ) {
 		fbo.attachColorTexture(renderingContext,colorTexture_3);
 
-		Rendering.drawTextureToScreen(renderingContext,new Geometry.Rect(0,0,renderingContext.getWindowWidth(),renderingContext.getWindowHeight()) ,
-								[this.colorTexture_1,depthTexture],[new Geometry.Rect(0,0,1,1),new Geometry.Rect(0,0,1,1)]);
+		Rendering.drawTextureToScreen(renderingContext, viewport, [this.colorTexture_1, depthTexture], [texRect, texRect]);
 
 		renderingContext.popShader();
-
 
 		renderingContext.popFBO();
 		
@@ -150,13 +162,11 @@ Effect.end @(override) ::= fn(){
 		// pass 2: Add SSAA
 		
 		renderingContext.pushAndSetShader(shader2);
-		Rendering.drawTextureToScreen(renderingContext,new Geometry.Rect(0,0,renderingContext.getWindowWidth(),renderingContext.getWindowHeight()) ,
-								[this.colorTexture_3,depthTexture],[new Geometry.Rect(0,0,1,1),new Geometry.Rect(0,0,1,1)]);
+		Rendering.drawTextureToScreen(renderingContext, viewport, [this.colorTexture_3, depthTexture], [texRect, texRect]);
 		renderingContext.popShader();
 	} else {
 		renderingContext.popFBO();
-		Rendering.drawTextureToScreen(renderingContext,new Geometry.Rect(0,0,renderingContext.getWindowWidth(),renderingContext.getWindowHeight()) ,
-								[this.colorTexture_1,depthTexture],[new Geometry.Rect(0,0,1,1),new Geometry.Rect(0,0,1,1)]);
+		Rendering.drawTextureToScreen(renderingContext, viewport, [this.colorTexture_1, depthTexture], [texRect, texRect]);
 
 		renderingContext.popShader();
 	
@@ -170,50 +180,50 @@ Effect.beginPass @(override) ::= fn(PADrend.RenderingPass pass){
 //	out("<",pass.getId());
 
 
-  var lastFrameData = this.renderPassInfo[pass.getId()];
-  if(!lastFrameData){
-    lastFrameData = new ExtObject;
-    lastFrameData.lastProjectionMatrix := renderingContext.getMatrix_cameraToClipping();
-    lastFrameData.sg_lastProjectionMatrixInverse := renderingContext.getMatrix_cameraToClipping().inverse();
-    lastFrameData.lastCamMatrix := renderingContext.getMatrix_worldToCamera();
-    	
-    this.renderPassInfo[pass.getId()] = lastFrameData;
-  }
+	var lastFrameData = this.renderPassInfo[pass.getId()];
+	if(!lastFrameData){
+		lastFrameData = new ExtObject;
+		lastFrameData.lastProjectionMatrix := renderingContext.getMatrix_cameraToClipping();
+		lastFrameData.sg_lastProjectionMatrixInverse := renderingContext.getMatrix_cameraToClipping().inverse();
+		lastFrameData.lastCamMatrix := renderingContext.getMatrix_worldToCamera();
+			
+		this.renderPassInfo[pass.getId()] = lastFrameData;
+	}
 
 //	var camera = PADrend.getActiveCamera();
 	var camera = pass.getCamera();
 
 //	out(lastFrameData);
 
-    // ----
-  renderingContext.setGlobalUniform('sg_lastProjectionMatrix',Rendering.Uniform.MATRIX_4X4F,[lastFrameData.lastProjectionMatrix]);
-  renderingContext.setGlobalUniform('sg_lastProjectionMatrixInverse',Rendering.Uniform.MATRIX_4X4F,[lastFrameData.sg_lastProjectionMatrixInverse]);
-  
-  renderingContext.setGlobalUniform('lastCamMatrix',Rendering.Uniform.MATRIX_4X4F,[lastFrameData.lastCamMatrix.clone()]);
-  renderingContext.setGlobalUniform('invLastCamMatrix',Rendering.Uniform.MATRIX_4X4F,[lastFrameData.lastCamMatrix.inverse()]);
-    
+		// ----
+	renderingContext.setGlobalUniform('sg_lastProjectionMatrix',Rendering.Uniform.MATRIX_4X4F,[lastFrameData.lastProjectionMatrix]);
+	renderingContext.setGlobalUniform('sg_lastProjectionMatrixInverse',Rendering.Uniform.MATRIX_4X4F,[lastFrameData.sg_lastProjectionMatrixInverse]);
+	
+	renderingContext.setGlobalUniform('lastCamMatrix',Rendering.Uniform.MATRIX_4X4F,[lastFrameData.lastCamMatrix.clone()]);
+	renderingContext.setGlobalUniform('invLastCamMatrix',Rendering.Uniform.MATRIX_4X4F,[lastFrameData.lastCamMatrix.inverse()]);
+		
 
 	var viewport = camera.getViewport();
 	
-  renderingContext.setGlobalUniform('last_viewportScale',Rendering.Uniform.VEC2F,[
-			new Geometry.Vec2(	viewport.getWidth()/renderingContext.getWindowWidth(),
-							viewport.getHeight()/renderingContext.getWindowHeight())
+	renderingContext.setGlobalUniform('last_viewportScale',Rendering.Uniform.VEC2F,[
+			new Geometry.Vec2(	viewport.getWidth()/viewport.getWidth(),
+							viewport.getHeight()/viewport.getHeight())
 	]);
-  renderingContext.setGlobalUniform('last_viewportOffset',Rendering.Uniform.VEC2F,[
-  		new Geometry.Vec2(	viewport.getX()/renderingContext.getWindowWidth(),
-							viewport.getY()/renderingContext.getWindowHeight())
-  ]);
-    
+	renderingContext.setGlobalUniform('last_viewportOffset',Rendering.Uniform.VEC2F,[
+			new Geometry.Vec2(	viewport.getX()/viewport.getWidth(),
+							viewport.getY()/viewport.getHeight())
+	]);
+		
 //    uniform vec2 last_viewportScale = vec2(1,1);
 //uniform vec2 last_viewportOffset = vec2(0,0);
 
 	// ----------
 	
-  var sg_eyeToLastEye = camera.getWorldToLocalMatrix() * lastFrameData.lastCamMatrix;  // eye to world,  world to last eye
-  lastFrameData.lastCamMatrix = camera.getWorldTransformationMatrix();
+	var sg_eyeToLastEye = camera.getWorldToLocalMatrix() * lastFrameData.lastCamMatrix;  // eye to world,  world to last eye
+	lastFrameData.lastCamMatrix = camera.getWorldTransformationMatrix();
 
-  renderingContext.setGlobalUniform('sg_eyeToLastEye',Rendering.Uniform.MATRIX_4X4F,[sg_eyeToLastEye]);
-  
+	renderingContext.setGlobalUniform('sg_eyeToLastEye',Rendering.Uniform.MATRIX_4X4F,[sg_eyeToLastEye]);
+	
 //  	lastFrameData.lastProjectionMatrix = renderingContext.getMatrix_cameraToClipping().clone();
 	lastFrameData.lastProjectionMatrix = camera.getFrustum().getProjectionMatrix();
 	lastFrameData.sg_lastProjectionMatrixInverse = lastFrameData.lastProjectionMatrix.inverse();
@@ -227,43 +237,43 @@ Effect.endPass @(override) ::= fn(PADrend.RenderingPass pass){
 
 //! ---|> PPEffect
 Effect.getOptionPanel @(override) ::= fn(){
-    var p=gui.createPanel(200,200,GUI.AUTO_MAXIMIZE|GUI.AUTO_LAYOUT);
-    presetManager.createGUI( p );
-    p++;
-    p+='----';
-    p++;
+		var p=gui.createPanel(200,200,GUI.AUTO_MAXIMIZE|GUI.AUTO_LAYOUT);
+		presetManager.createGUI( p );
+		p++;
+		p+='----';
+		p++;
 	p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "numDirections",
 		GUI.RANGE : [ 1.0,12.0 ],
 		GUI.RANGE_STEP_SIZE : 1,
 		GUI.DATA_WRAPPER : settings['numDirections']
-    }; 
-    p++;
-    p+={
+		}; 
+		p++;
+		p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "numSteps",
 		GUI.RANGE : [ 1.0,15.0 ],
 		GUI.RANGE_STEP_SIZE : 1,
 		GUI.DATA_WRAPPER : settings['numSteps']
-    }; 
-    p++;
-    p+={
+		}; 
+		p++;
+		p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "radiusIncrease",
 		GUI.RANGE : [ 1.0,4.0 ],
 		GUI.RANGE_STEP_SIZE : 0.1,
 		GUI.DATA_WRAPPER : settings['radiusIncrease']
-    };
-    p++;   
-    p+={
+		};
+		p++;   
+		p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "initialRadius",
 		GUI.RANGE : [ 0.0,4.0 ],
 		GUI.RANGE_STEP_SIZE : 0.1,
 		GUI.DATA_WRAPPER : settings['initialRadius']
-    };
-    p++;
+		};
+		p++;
 	p+='----';
 	p++;
 	p+={
@@ -272,51 +282,51 @@ Effect.getOptionPanel @(override) ::= fn(){
 		GUI.RANGE : [ 1.0,2.0 ],
 		GUI.RANGE_STEP_SIZE : 0.1,
 		GUI.DATA_WRAPPER : settings['maxBrightness']
-    };
-    p++;
-    p+={
+		};
+		p++;
+		p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "intensityExponent",
 		GUI.RANGE : [ 0.0,3.0 ],
 		GUI.RANGE_STEP_SIZE : 0.1,
 		GUI.DATA_WRAPPER : settings['intensityExponent']
-    };
-    p++;
-    p+={
+		};
+		p++;
+		p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "intensityFactor",
 		GUI.RANGE : [ 0.0,3.0 ],
 		GUI.RANGE_STEP_SIZE : 0.1,
 		GUI.DATA_WRAPPER : settings['intensityFactor']
-    };
+		};
 	p++;
 	p+='----';
 	p++;
-    p+={
+		p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "debugBlend",
 		GUI.RANGE : [ 0.0,1.0 ],
 		GUI.RANGE_STEP_SIZE : 0.1,
 		GUI.DATA_WRAPPER : settings['debugBlend']
-    };
-    p++;
-    p+={
+		};
+		p++;
+		p+={
 		GUI.TYPE : GUI.TYPE_RANGE,
 		GUI.LABEL : "debugBorder",
 		GUI.RANGE : [ 0.0,1.0 ],
 		GUI.RANGE_STEP_SIZE : 0.1,
 		GUI.DATA_WRAPPER : settings['debugBorder']
-    };
-    p++;    
-    p+='----';
-    p++;    
-    p+={
+		};
+		p++;    
+		p+='----';
+		p++;    
+		p+={
 		GUI.TYPE : GUI.TYPE_BOOL,
 		GUI.LABEL : "fxaa",
 		GUI.DATA_WRAPPER : settings['fxaa']
-    };
-    p++;
-    return p;
+		};
+		p++;
+		return p;
 };
 
 return new Effect;
